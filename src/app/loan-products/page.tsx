@@ -2,6 +2,7 @@ import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
+import LoanProductList from './components/LoanProductList';
 
 export const metadata = {
   title: "Loan Products",
@@ -14,6 +15,7 @@ const LoanProducts: React.FC = () => {
       <div className="mx-auto">
         <Breadcrumb pageName="Loan Products" />
       </div>
+      <LoanProductList />
     </DefaultLayout>
   );
 };
