@@ -1,0 +1,13 @@
+Template Routes
+
+/calendar
+/profile
+/forms/form-elements
+/forms/form-layout
+/tables
+/settings
+/chart
+/ui/alerts
+/ui/buttons
+/auth/signin
+/auth/signup
