@@ -3,6 +3,7 @@ import React, { useState, ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import withAuth from '@/hoc/withAuth';
+import { ToastContainer } from 'react-toastify';
 
 interface DefaultLayoutProps {
   children: ReactNode;
@@ -33,6 +34,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           {/* <!-- ===== Main Content End ===== --> */}
         </div>
         {/* <!-- ===== Content Area End ===== --> */}
+        <ToastContainer/>
       </div>
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </>

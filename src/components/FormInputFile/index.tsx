@@ -1,4 +1,5 @@
 import React from 'react';
+import { UseFormRegister } from 'react-hook-form';
 
 interface FileUploadProps {
   id: string;
@@ -7,6 +8,9 @@ interface FileUploadProps {
   subLabel1?: string;
   subLabel2?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  register: UseFormRegister<any>; // Register type from react-hook-form
+  error?: string;
+  required?: boolean;
 }
 
 const FormInputFile: React.FC<FileUploadProps> = ({
@@ -16,6 +20,9 @@ const FormInputFile: React.FC<FileUploadProps> = ({
   subLabel1 = 'SVG, PNG, JPG or GIF',
   subLabel2 = '(max, 800 X 800px)',
   onChange,
+  register,
+  error,
+  required = false,
 }) => {
   return (
     <div
@@ -26,6 +33,8 @@ const FormInputFile: React.FC<FileUploadProps> = ({
         type="file"
         accept={accept}
         className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+        id={id} // Add id attribute
+        {...register('company_logo', { required })} // Register file_upload field with react-hook-form
         onChange={onChange}
       />
       <div className="flex flex-col items-center justify-center space-y-3">
@@ -62,6 +71,7 @@ const FormInputFile: React.FC<FileUploadProps> = ({
         </p>
         <p className="mt-1.5">{subLabel1}</p>
         <p>{subLabel2}</p>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
     </div>
   );

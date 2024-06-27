@@ -33,3 +33,18 @@ export interface DataRowLoanProducts {
   notarial: number;
   addon: number;
 }
+
+export interface DataCompanyFormValues {
+  id?: string;
+  company_name: string;
+  address: string;
+  tin: string;
+  company_email: string;
+  company_website: string;
+  phone_no: string;
+  mobile_no: string;
+  contact_person: string;
+  contact_person_no: string;
+  contact_email: string;
+  company_logo: FileList;
+}

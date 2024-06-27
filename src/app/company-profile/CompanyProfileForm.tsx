@@ -1,32 +1,50 @@
 "use client"
-import React from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
 import { Home, MapPin, Archive, Mail, Globe, Phone, User } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import FormInputFile from '@/components/FormInputFile';
-
-interface FormValues {
-  company_name: string;
-  address: string;
-  tin: string;
-  email: string;
-  website: string;
-  phone_no: string;
-  mobile_no: string;
-  contact_person_name: string;
-  contact_person_co: string;
-  contact_person_email: string;
-};
+import useCompanyProfileForm from '@/hooks/useCompanyProfileForm';
+import Image from 'next/image'; // Import next/image
 
 const CompanyProfileForm: React.FC = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const { register, handleSubmit, errors, onSubmit, companyLogo } = useCompanyProfileForm(undefined);
 
-  const onSubmit: SubmitHandler<FormValues> = data => {
-    console.log(data);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null); // State for image preview
+
+  // Function to handle file change
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Update preview image URL
+      setLogoPreview(URL.createObjectURL(file));
+    }
   };
+
+  useEffect(() => {
+    setLogoPreview(companyLogo)
+    console.log(companyLogo, ' companyLogo')
+  }, [companyLogo]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+
+      <FormInputFile
+        id="file-upload"
+        label="Click to upload Image"
+        subLabel1="SVG, PNG, JPG or GIF"
+        subLabel2="(max, 800 X 800px)"
+        register={register}
+        error={errors.company_logo && "This field is required"}
+        onChange={handleFileChange}
+        required={false}
+      />
+
+      {logoPreview && (
+        <div className="image-preview">
+          <Image src={logoPreview} alt="Preview" width={700} height={300} priority unoptimized={true}/>
+        </div>
+      )}
+
       <FormInput
         label="Company Name"
         id="company_name"
@@ -56,20 +74,20 @@ const CompanyProfileForm: React.FC = () => {
 
       <FormInput
         label="Email"
-        id="email"
+        id="company_email"
         type="text"
         icon={Mail}
-        register={register('email', { required: true })}
-        error={errors.email && "This field is required"}
+        register={register('company_email', { required: true })}
+        error={errors.company_email && "This field is required"}
       />
 
       <FormInput
         label="Website"
-        id="webiste"
+        id="company_website"
         type="text"
         icon={Globe}
-        register={register('website', { required: true })}
-        error={errors.website && "This field is required"}
+        register={register('company_website', { required: true })}
+        error={errors.company_website && "This field is required"}
       />
       
       <FormInput
@@ -92,38 +110,32 @@ const CompanyProfileForm: React.FC = () => {
       
       <FormInput
         label="Contact Person Name."
-        id="contact_person_name"
+        id="contact_person"
         type="text"
         icon={User}
-        register={register('contact_person_name', { required: true })}
-        error={errors.contact_person_name && "This field is required"}
+        register={register('contact_person', { required: true })}
+        error={errors.contact_person && "This field is required"}
       />
       
       <FormInput
         label="Contact Person Contact No."
-        id="contact_person_co"
+        id="contact_person_no"
         type="text"
         icon={Phone}
-        register={register('contact_person_co', { required: true })}
-        error={errors.contact_person_co && "This field is required"}
+        register={register('contact_person_no', { required: true })}
+        error={errors.contact_person_no && "This field is required"}
       />
       
       <FormInput
         label="Contact Person Email."
-        id="contact_person_email"
+        id="contact_email"
         type="text"
         icon={Mail}
-        register={register('contact_person_email', { required: true })}
-        error={errors.contact_person_email && "This field is required"}
+        register={register('contact_email', { required: true })}
+        error={errors.contact_email && "This field is required"}
       />
 
-      <FormInputFile
-        id="file-upload"
-        label="Click to upload Image"
-        subLabel1="SVG, PNG, JPG or GIF"
-        subLabel2="(max, 800 X 800px)"
-        onChange={(e) => console.log(e.target.files)} // Handle file change
-      />
+      
      
       <div className="flex justify-end gap-4.5">
         <button
