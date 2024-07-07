@@ -1,14 +1,14 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { DataRow } from '../../../utils/DataTypes';
+import { DataBranches } from '@/utils/DataTypes';
 import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 
-const branchListCol = (handleRowClick: (row: DataRow) => void): TableColumn<DataRow>[] => [
+const branchListCol = (handleUpdateRowClick: (row: DataBranches) => void, handleSubViewRowClick: (id: number) => void): TableColumn<DataBranches>[] => [
   {
     name: 'Branch',
-    cell: row => row.branch,
+    cell: row => row.name,
     sortable: true,
   },
   {
@@ -31,11 +31,11 @@ const branchListCol = (handleRowClick: (row: DataRow) => void): TableColumn<Data
       return (
         <>
           <Tooltip text="View Sub Branch">
-            <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
+            <Eye onClick={() => handleSubViewRowClick(Number(row.id))} size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
           </Tooltip>
           {` | `}
           <Tooltip text="Edit">
-            <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
+            <Edit3 onClick={() => handleUpdateRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
           </Tooltip>
           {` | `}
           <Tooltip text="Remove">

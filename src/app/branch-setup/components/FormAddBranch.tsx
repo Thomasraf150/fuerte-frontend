@@ -1,22 +1,38 @@
 "use client"
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, MapPin, Archive, Mail, Globe, Phone, User } from 'react-feather';
 import FormInput from '@/components/FormInput';
-
-interface FormValues {
-  name: string;
-};
-
+import useBranches from '@/hooks/useBranches';
+import { DataBranches, DataFormBranch } from '@/utils/DataTypes';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
+  fetchDataList: () => void;
+  initialData?: DataBranches | null;
+  actionLbl: string;
 }
 
-const FormAddBranch: React.FC<ParentFormBr> = ({ setShowForm }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+const FormAddBranch: React.FC<ParentFormBr> = ({ setShowForm, fetchDataList, initialData, actionLbl }) => {
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataFormBranch>();
+  const { onSubmitBranch } = useBranches();
 
-  const onSubmit: SubmitHandler<FormValues> = data => {
-    console.log(data);
+  useEffect(()=>{
+    if (initialData) {
+      if (actionLbl === 'Update Branch') {
+        setValue('id', initialData.id ?? '')
+        setValue('name', initialData.name)
+      } else {
+        reset({
+          id: '',
+          name: ''
+        });
+      }
+    }
+  }, [initialData, setValue, actionLbl])
+
+  const onSubmit: SubmitHandler<DataFormBranch> = data => {
+    onSubmitBranch(data);
+    fetchDataList()
   };
 
   return (

@@ -1,5 +1,5 @@
 import { createStore } from 'zustand';
-import { DataRow } from '../../../utils/DataTypes';
+import { DataRow } from '@/utils/DataTypes';
 
 interface BranchListsState {
   selectedRow: DataRow | null;

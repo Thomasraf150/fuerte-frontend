@@ -3,26 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import branchListCol from './BranchListColumn';
-import { DataRow } from '@/utils/DataTypes';
+import subBranchListCol from './SubBranchListColumn';
+import { DataBranches, DataFormBranch, DataSubBranches } from '@/utils/DataTypes';
 import FormAddBranch from './FormAddBranch';
 import FormAddSubBranch from './FormAddSubBranch';
 import { useBranchListsStore } from '../hooks/store';
-
-const data: DataRow[] = [
-  {
-    id: 1,
-    branch: 'Beetlejuice',
-    user: {name: "Dondon"},
-  },
-  {
-    id: 2,
-    branch: 'Ghostbusters',
-    user: {name: "Pentavia"},
-  },
-  // Add more rows as needed
-];
+import useBranches from '@/hooks/useBranches';
+import { GitBranch, SkipBack } from 'react-feather';
 
 const column = branchListCol;
+const subcolumn = subBranchListCol;
 
 const BranchLists: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -30,10 +20,13 @@ const BranchLists: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   const { selectedRow } = useBranchListsStore.getState();
+  const { dataBranch, dataBranchSub, fetchDataList, fetchSubDataList } = useBranches();
+  const [initialFormData, setInitialFormData] = useState<DataBranches | null>(null);
+  const [initialFormSubData, setInitialFormSubData] = useState<DataSubBranches | null>(null);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
-    setActionLbl(lbl)
+    setActionLbl(lbl);
   }
   
   const handleShowSubForm = (lbl: string, showFrm: boolean) => {
@@ -41,21 +34,32 @@ const BranchLists: React.FC = () => {
     setActionLbl(lbl)
   }
 
-  const handleRowBranch = (row: DataRow) => {
-    console.log(row, ' rowrowrow');
+  const handleUpdateRowClick = (row: DataBranches) => {
     handleShowForm('Update Branch', true)
+    setInitialFormData(row);
   };
- 
-  const handleRowSubBranch = (row: DataRow) => {
-    console.log(row, ' rowrowrow');
-    handleShowSubForm('Update Branch', true)
+  
+  const handleSubViewRowClick = (id: number) => {
+    console.log('View Sub')
+    setShowSubBranch(true);
+    fetchSubDataList('id_desc', id);
   };
+
+  const handleUpdateSubRowClick = (row: DataSubBranches) => {
+    handleShowSubForm('Update Sub Branch', true)
+    // setInitialFormData(row);
+  };
+
+  useEffect(() => {
+    console.log(dataBranchSub, 'dataBranchSub')
+  }, [dataBranch, dataBranchSub, initialFormData])
 
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
+        {!showSubBranch && (
+          <div className={`col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
@@ -63,32 +67,39 @@ const BranchLists: React.FC = () => {
                 </h3>
               </div>
               <div className="p-7">
-                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={() => handleShowForm('Create Branch', true)}>Create</button>
+                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 flex items-center space-x-2" onClick={() => handleShowForm('Create Branch', true)}>
+                  <GitBranch  size={14} /> 
+                  <span>Create</span>
+                </button>
                 <CustomDatatable
                   apiLoading={false}
                   title="Branch List"
-                  columns={column(handleRowBranch)}
-                  data={data}
+                  columns={column(handleUpdateRowClick, handleSubViewRowClick)}
+                  data={dataBranch || []}
                 />
               </div>
             </div>
           </div>
+        )}
 
           {showSubBranch && (
-            <div className="col-span-2">
+            <div className={`col-span-2 ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
-                    Sub Branch
+                    {dataBranchSub && dataBranchSub[0]?.name}
                   </h3>
                 </div>
                 <div className="p-7">
-                  <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={() => handleShowSubForm('Create Branch', true)}>Create</button>
+                  <button className="bg-rose-600 text-white py-2 px-4 rounded hover:bg-rose-800 flex items-center space-x-2" onClick={() => setShowSubBranch(false) }>
+                    <SkipBack size={15} /> 
+                    <span>Back</span>
+                  </button>
                   <CustomDatatable
                     apiLoading={false}
                     title="Branch List"
-                    columns={column(handleRowSubBranch)}
-                    data={data}
+                    columns={subcolumn(handleUpdateSubRowClick)}
+                    data={dataBranchSub || []}
                   />
                 </div>
               </div>
@@ -104,7 +115,7 @@ const BranchLists: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <FormAddBranch setShowForm={setShowForm} />
+                  <FormAddBranch setShowForm={setShowForm} fetchDataList={fetchDataList} initialData={initialFormData} actionLbl={actionLbl} />
                 </div>
               </div>
             </div>
