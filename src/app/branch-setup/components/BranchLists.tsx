@@ -10,6 +10,7 @@ import FormAddSubBranch from './FormAddSubBranch';
 import { useBranchListsStore } from '../hooks/store';
 import useBranches from '@/hooks/useBranches';
 import { GitBranch, SkipBack } from 'react-feather';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
 
 const column = branchListCol;
 const subcolumn = subBranchListCol;
@@ -20,13 +21,14 @@ const BranchLists: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   const { selectedRow } = useBranchListsStore.getState();
-  const { dataBranch, dataBranchSub, fetchDataList, fetchSubDataList } = useBranches();
+  const { dataBranch, dataBranchSub, selectedBranchID, fetchDataList, fetchSubDataList, handleDeleteBranch, handleDeleteSubBranch } = useBranches();
   const [initialFormData, setInitialFormData] = useState<DataBranches | null>(null);
   const [initialFormSubData, setInitialFormSubData] = useState<DataSubBranches | null>(null);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
     setActionLbl(lbl);
+    setShowSubForm(false);
   }
   
   const handleShowSubForm = (lbl: string, showFrm: boolean) => {
@@ -37,6 +39,7 @@ const BranchLists: React.FC = () => {
   const handleUpdateRowClick = (row: DataBranches) => {
     handleShowForm('Update Branch', true)
     setInitialFormData(row);
+    setShowSubForm(false);
   };
   
   const handleSubViewRowClick = (id: number) => {
@@ -47,12 +50,41 @@ const BranchLists: React.FC = () => {
 
   const handleUpdateSubRowClick = (row: DataSubBranches) => {
     handleShowSubForm('Update Sub Branch', true)
-    // setInitialFormData(row);
+    setShowForm(false);
+    setInitialFormSubData(row);
   };
 
+  const handleCreateSubRowClick = () => {
+    handleShowSubForm('Create Sub Branch', true)
+    setShowForm(false);
+  };
+
+  const handleDeleteRow = async (id: number) => {
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You won\'t be able to revert this!',
+      'Yes delete it!',
+    );
+    if (isConfirmed) {
+      handleDeleteBranch(id);
+      fetchDataList();  
+    }
+  }
+  
+  const handleDeleteSubRow = async (row: DataSubBranches) => {
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You won\'t be able to revert this!',
+      'Yes delete it!',
+    );
+    if (isConfirmed) {
+      handleDeleteSubBranch(Number(row?.id));
+      fetchSubDataList('id_desc', row?.branch_id);
+    }
+  }
+
   useEffect(() => {
-    console.log(dataBranchSub, 'dataBranchSub')
-  }, [dataBranch, dataBranchSub, initialFormData])
+  }, [dataBranch, dataBranchSub, initialFormData, selectedBranchID])
 
   return (
     <div>
@@ -74,7 +106,7 @@ const BranchLists: React.FC = () => {
                 <CustomDatatable
                   apiLoading={false}
                   title="Branch List"
-                  columns={column(handleUpdateRowClick, handleSubViewRowClick)}
+                  columns={column(handleUpdateRowClick, handleSubViewRowClick, handleDeleteRow)}
                   data={dataBranch || []}
                 />
               </div>
@@ -91,14 +123,28 @@ const BranchLists: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <button className="bg-rose-600 text-white py-2 px-4 rounded hover:bg-rose-800 flex items-center space-x-2" onClick={() => setShowSubBranch(false) }>
-                    <SkipBack size={15} /> 
-                    <span>Back</span>
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      className="bg-rose-600 text-white py-2 px-4 rounded hover:bg-rose-800 flex items-center space-x-2" onClick={() => 
+                      {
+                        setShowSubBranch(false)
+                        setShowSubForm(false)
+                      } 
+                      }>
+                      <SkipBack size={15} /> 
+                      <span>Back</span>
+                    </button>
+                    <button 
+                      className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 flex items-center space-x-2" 
+                      onClick={() => handleCreateSubRowClick() }>
+                      <GitBranch  size={14} /> 
+                      <span>Create</span>
+                    </button>
+                  </div>
                   <CustomDatatable
                     apiLoading={false}
                     title="Branch List"
-                    columns={subcolumn(handleUpdateSubRowClick)}
+                    columns={subcolumn(handleUpdateSubRowClick, handleDeleteSubRow)}
                     data={dataBranchSub || []}
                   />
                 </div>
@@ -130,7 +176,7 @@ const BranchLists: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <FormAddSubBranch setShowForm={setShowSubForm} />
+                  <FormAddSubBranch setShowForm={setShowSubForm} selectedBranchId={selectedBranchID ?? 0} initialSubData={initialFormSubData} actionLbl={actionLbl} fetchSubDataList={fetchSubDataList}/>
                 </div>
               </div>
             </div>

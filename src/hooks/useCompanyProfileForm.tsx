@@ -85,9 +85,6 @@ const useCompanyProfileForm = (initialValues?: DataCompanyFormValues) => {
     console.log(result);
   };
 
-
-
-
   // Fetch data on component mount if id exists
   useEffect(() => {
     fetchData();

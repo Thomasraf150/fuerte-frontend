@@ -28,6 +28,15 @@ const GET_BRANCH_QUERY: string = `
   }
 `;
 
+const DELETE_BRANCH_MUTATION: string = `
+  mutation DeleteBranch($id: ID!) {
+    deleteBranch(id: $id) {
+      id
+      name
+    }
+  }
+`;
+
 const GET_SUB_BRANCH_QUERY: string = `
   query GetBranchesSub($orderBy: String, $branch_id: Int!) {
     getBranchSub(orderBy: $orderBy, branch_id: $branch_id) {
@@ -41,8 +50,9 @@ const GET_SUB_BRANCH_QUERY: string = `
       head_contact
       head_email
       ref_ctr_year
-      ref_ctr_month
       ref_ctr_day
+      ref_no_length,
+      ref_current_value
       user_id
       is_deleted
       user {
@@ -56,11 +66,69 @@ const GET_SUB_BRANCH_QUERY: string = `
   }
 `;
 
+const SAVE_SUB_BRANCH_MUTATION: string = `
+  mutation CreateBranchSub($input: BranchSubInput!) {
+    createBranchSub(input: $input) {
+      id
+      branch_id
+      code
+      name
+      address
+      contact_no
+      head_name
+      head_contact
+      head_email
+      ref_ctr_year
+      ref_ctr_day,
+      ref_no_length,
+      ref_current_value
+      user_id
+      is_deleted
+    }
+  }
+`;
+
+const UPDATE_SUB_BRANCH_MUTATION: string = `
+  mutation UpdateBranchSub($input: BranchesSubUpdateInput!) {
+    updateBranchSub(input: $input) {
+      id
+      branch_id
+      code
+      name
+      address
+      contact_no
+      head_name
+      head_contact
+      head_email
+      ref_ctr_year
+      ref_ctr_day,
+      ref_no_length,
+      ref_current_value
+      user_id
+      is_deleted
+    }
+  }
+`;
+
+const DELETE_SUB_BRANCH_MUTATION: string = `
+  mutation DeleteSubBranch($id: ID!) {
+    deleteSubBranch(id: $id) {
+      id
+      name
+    }
+  }
+`;
+
+
 const BranchMutations = {
   GET_BRANCH_QUERY,
+  DELETE_BRANCH_MUTATION,
   SAVE_BRANCH_MUTATION,
   UPDATE_BRANCH_MUTATION,
-  GET_SUB_BRANCH_QUERY
+  GET_SUB_BRANCH_QUERY,
+  SAVE_SUB_BRANCH_MUTATION,
+  UPDATE_SUB_BRANCH_MUTATION,
+  DELETE_SUB_BRANCH_MUTATION
 };
 
 export default BranchMutations;

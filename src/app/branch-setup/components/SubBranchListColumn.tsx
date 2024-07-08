@@ -5,7 +5,7 @@ import { DataSubBranches } from '@/utils/DataTypes';
 import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 
-const subBranchListCol = (handleUpdateSubRowClick: (row: DataSubBranches) => void): TableColumn<DataSubBranches>[] => [
+const subBranchListCol = (handleUpdateSubRowClick: (row: DataSubBranches) => void, handleDeleteSubRow: (row: DataSubBranches) => void): TableColumn<DataSubBranches>[] => [
   {
     name: 'Mother Branch',
     cell: row => row.branch.name,
@@ -57,7 +57,7 @@ const subBranchListCol = (handleUpdateSubRowClick: (row: DataSubBranches) => voi
           </Tooltip>
           {` | `}
           <Tooltip text="Remove">
-            <Trash2 size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+            <Trash2 size="16" onClick={() => handleDeleteSubRow(row)} className="text-cyan-400 ml-1 cursor-pointer"/>
           </Tooltip>
         </>
       )

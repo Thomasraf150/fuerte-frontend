@@ -69,13 +69,35 @@ export interface DataSubBranches {
   address: string;
   contact_no: string;
   head_name: string;
-  ref_ctr_year: string;
-  ref_ctr_month: string;
-  ref_ctr_day: string;
+  head_contact: string;
+  head_email: string;
+  ref_ctr_year: number;
+  ref_ctr_month: number;
+  ref_ctr_day: number;
+  ref_no_length: number;
+  ref_current_value: number;
   user_id: number;
   is_deleted: boolean;
   user: User;
   branch: DataBranches;
+}
+export interface DataFormSubBranches {
+  id?: string;
+  branch_id: number;
+  code: string;
+  name: string;
+  address: string;
+  contact_no: string;
+  head_name: string;
+  head_contact: string;
+  head_email: string;
+  ref_ctr_year: number;
+  ref_ctr_month: number;
+  ref_ctr_day: number;
+  ref_no_length: number;
+  ref_current_value: number;
+  user_id: number;
+  is_deleted: boolean;
 }
 export interface DataFormBranch {
   id: string;
