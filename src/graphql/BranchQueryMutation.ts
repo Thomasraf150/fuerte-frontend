@@ -118,9 +118,16 @@ const DELETE_SUB_BRANCH_MUTATION: string = `
     }
   }
 `;
+const GET_ALL_SUB_BRANCH_QUERY: string = `
+  query GetAllBranch($orderBy: String) {
+    getAllBranch(orderBy: $orderBy){
+      id
+      name
+    }
+  }
+`;
 
-
-const BranchMutations = {
+const BranchQueryMutations = {
   GET_BRANCH_QUERY,
   DELETE_BRANCH_MUTATION,
   SAVE_BRANCH_MUTATION,
@@ -128,7 +135,8 @@ const BranchMutations = {
   GET_SUB_BRANCH_QUERY,
   SAVE_SUB_BRANCH_MUTATION,
   UPDATE_SUB_BRANCH_MUTATION,
-  DELETE_SUB_BRANCH_MUTATION
+  DELETE_SUB_BRANCH_MUTATION,
+  GET_ALL_SUB_BRANCH_QUERY
 };
 
-export default BranchMutations;
+export default BranchQueryMutations;

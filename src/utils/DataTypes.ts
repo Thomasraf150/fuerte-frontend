@@ -6,7 +6,6 @@ export interface DataRow {
   };
 }
 
-
 export interface DataRowClientList {
   id: number;
   client_name: string;
@@ -22,6 +21,7 @@ export interface DataRowLoanCodes {
 
 export interface DataRowLoanProducts {
   id: number;
+  loan_code_id: number;
   type: string;
   description: string;
   loan_code_desc: string;
@@ -48,12 +48,12 @@ export interface DataCompanyFormValues {
   contact_email: string;
   company_logo: FileList;
 }
-
 export interface User {
+  id: string;
   name: string;
   email: string;
+  branch_sub_id: number;
 }
-
 export interface DataBranches {
   id?: string;
   name: string;
@@ -104,6 +104,14 @@ export interface DataFormBranch {
   name: string;
   user_id: number;
 }
+export interface DataFormUser {
+  id: string;
+  name: string;
+  email: string;
+  branch_sub_id: number;
+  password: string;
+  confirm_password: string;
+}
 export interface AuthStoreData {
   token: string;
   user: {
@@ -111,4 +119,15 @@ export interface AuthStoreData {
     name: string;
     // Add other fields as needed
   };
+}
+export interface PaginatorInfo {
+  total: number;
+  currentPage: number;
+  lastPage: number;
+  perPage: number;
+  hasMorePages: boolean;
+}
+export interface UserPaginator {
+  data: User[];
+  paginatorInfo: PaginatorInfo;
 }

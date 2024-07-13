@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import BranchMutations from '@/graphql/BranchMutation';
+import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 
 import { DataBranches, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -15,7 +15,7 @@ const useBranches = () => {
     SAVE_SUB_BRANCH_MUTATION, 
     UPDATE_SUB_BRANCH_MUTATION,
     DELETE_BRANCH_MUTATION,
-    DELETE_SUB_BRANCH_MUTATION } = BranchMutations;
+    DELETE_SUB_BRANCH_MUTATION } = BranchQueryMutations;
   const [dataBranch, setDataBranch] = useState<DataBranches[] | undefined>(undefined);
   const [dataBranchSub, setDataBranchSub] = useState<DataSubBranches[] | undefined>(undefined);
   const [selectedBranchID, setSelectedBranchID] = useState<number>();

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import DataTable, { TableColumn, TableStyles } from 'react-data-table-component';
 
 // Define the custom styles
@@ -14,6 +14,11 @@ const customStyles: TableStyles = {
       borderBottomStyle: 'solid',
       borderBottomColor: '#041e3c'
     },
+  },
+  cells: {
+    style: {
+      whiteSpace: 'nowrap',
+    }
   }
 };
 
@@ -29,6 +34,28 @@ interface CustomDatatableProps<T> {
   defaultSortFieldId?: string | number;
 }
 
+// Memoized CustomHeader component
+// eslint-disable-next-line react/display-name
+const CustomHeader: React.FC<{ title: string; renderButton: () => React.ReactNode; searchQuery: string; handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void; }> = React.memo(({ title, renderButton, searchQuery, handleSearch }) => (
+  <div className='border-bottom-0 rounded-top'>
+      <div className='row align-items-center justify-content-between py-1 pr-1'>
+        <div className='col'>
+          <h4 className='m-1'>{title}</h4>
+        </div>
+        <div className='col text-right'>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="form-control"
+          />
+          {renderButton()}
+        </div>
+      </div>
+    </div>
+));
+
 // Define the CustomDatatable component
 const CustomDatatable = <T extends object>({
   data,
@@ -41,25 +68,35 @@ const CustomDatatable = <T extends object>({
   defaultSortFieldId,
 }: CustomDatatableProps<T>): JSX.Element => {
 
-  const CustomHeader: React.FC = () => {
-    return (
-      <div className='border-bottom-0 rounded-top'>
-        <div className='row align-items-center justify-content-between py-1 pr-1'>
-          <div className='col'>
-            <h4 className='m-1'>{title}</h4>
-          </div>
-          <div className='col text-right'>
-            {renderButton()}
-          </div>
-        </div>
-      </div>
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  }, []);
+
+  const filteredData = useMemo(() => {
+    console.log("Filtering data with query:", searchQuery); // Log the filtering action
+    return data.filter((item) => 
+      Object.values(item).some(
+        (value) =>
+          value &&
+          value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
     );
-  };
+  }, [data, searchQuery]);
 
   return (
-    <>
-      {enableCustomHeader && <CustomHeader />}
+    <div style={{ overflowX: 'auto' }}>
+      {enableCustomHeader && (
+        <CustomHeader 
+          title={title}
+          renderButton={renderButton}
+          searchQuery={searchQuery}
+          handleSearch={handleSearch}
+        />
+      )}
       <DataTable
+        keyField="id"
         paginationPerPage={6}
         progressPending={apiLoading}
         defaultSortFieldId={defaultSortFieldId}
@@ -67,7 +104,7 @@ const CustomDatatable = <T extends object>({
         noHeader
         title={title}
         columns={columns}
-        data={data}
+        data={filteredData}
         customStyles={customStyles}
         pagination
         className='rounded'
@@ -76,7 +113,7 @@ const CustomDatatable = <T extends object>({
         fixedHeader
         fixedHeaderScrollHeight="500px"
       />
-    </>
+    </div>
   );
 };
 

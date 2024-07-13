@@ -3,8 +3,9 @@ import { UseFormRegisterReturn } from 'react-hook-form';
 import { Icon } from 'react-feather';
 
 interface Option {
-  value: string;
+  value: string | undefined;
   label: string;
+  hidden?: boolean;
 }
 
 interface FormInputProps {
@@ -34,7 +35,7 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
             {...register}
           >
             {options && options.map(option => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} hidden={option.hidden}>
                 {option.label}
               </option>
             ))}

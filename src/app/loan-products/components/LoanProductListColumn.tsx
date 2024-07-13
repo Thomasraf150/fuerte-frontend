@@ -21,16 +21,19 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
     name: 'Type',
     cell: row => row.type,
     sortable: true,
+    minWidth: '100px',
   },
   {
     name: 'Description',
     cell: row => row.description,
     sortable: true,
+    minWidth: '230px',
   },
   {
     name: 'Loan Description',
     cell: row => row.loan_code_desc,
     sortable: true,
+    minWidth: '375px',
   },
   {
     name: 'Terms',
@@ -73,10 +76,10 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
       
       return (
         <>
-          <Tooltip text="View Sub Branch">
+          {/* <Tooltip text="View Sub Branch">
             <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
           </Tooltip>
-          {` | `}
+          {` | `} */}
           <Tooltip text="Edit">
             <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
           </Tooltip>

@@ -1,23 +1,23 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { DataRow } from '../DataTypes';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { User } from '@/utils/DataTypes';
+import { Key, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 
-const userListCol = (handleRowClick: (row: DataRow) => void): TableColumn<DataRow>[] => [
+const userListCol = (handleRowClick: (row: User) => void, handlePwUpdate: (row: User) => void): TableColumn<User>[] => [
   {
-    name: 'Branch',
-    cell: row => row.branch,
+    name: 'Name',
+    cell: row => row.name,
     sortable: true,
   },
   {
-    name: 'User',
+    name: 'Email',
     cell: row => {
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.user.name}</span>
+                <span className='d-block font-weight-semibold'>{row.email}</span>
             </div>
         </div> 
       )
@@ -30,8 +30,8 @@ const userListCol = (handleRowClick: (row: DataRow) => void): TableColumn<DataRo
       
       return (
         <>
-          <Tooltip text="View Sub Branch">
-            <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
+          <Tooltip text="Update Password">
+            <Key onClick={() => handlePwUpdate(row)} size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
           </Tooltip>
           {` | `}
           <Tooltip text="Edit">
