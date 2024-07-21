@@ -4,29 +4,32 @@ import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import clientListColumn from './ClientListColumn';
 import { DataRowClientList } from '@/utils/DataTypes';
+import useClients from '@/hooks/useClients';
 
-const data: DataRowClientList[] = [
-  {
-    id: 1,
-    client_name: 'TEACHER',
-    penalty: 5,
-  },
-  {
-    id: 2,
-    client_name: 'EPZA',
-    penalty: 6,
-  },
-  {
-    id: 2,
-    client_name: 'SSS PENSIONER',
-    penalty: 6,
-  },
-  // Add more rows as needed
-];
+// const data: DataRowClientList[] = [
+//   {
+//     id: 1,
+//     client_name: 'TEACHER',
+//     penalty: 5,
+//   },
+//   {
+//     id: 2,
+//     client_name: 'EPZA',
+//     penalty: 6,
+//   },
+//   {
+//     id: 2,
+//     client_name: 'SSS PENSIONER',
+//     penalty: 6,
+//   },
+//   // Add more rows as needed
+// ];
 
 const column = clientListColumn;
 
 const ClientsList: React.FC = () => {
+
+  const { data } = useClients();
 
   const handleRowClick = () => {
 
@@ -47,8 +50,9 @@ const ClientsList: React.FC = () => {
                 <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800">Create</button>
                 <CustomDatatable
                   apiLoading={false}
-                  title="Client List"
+                  title={``}
                   columns={column(handleRowClick)}
+                  enableCustomHeader={true} 
                   data={data}
                 />
               </div>

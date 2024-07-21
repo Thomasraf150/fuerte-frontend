@@ -746,6 +746,28 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
+                              href="/area"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/area" &&
+                                "text-white"
+                              }`}
+                            >
+                              Area
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/sub-area"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/sub-area" &&
+                                "text-white"
+                              }`}
+                            >
+                              Sub Area
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
                               href="/banks"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/banks" &&

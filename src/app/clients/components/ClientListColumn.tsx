@@ -8,7 +8,7 @@ import Tooltip from '@/components/Tooltip';
 const clientListColumn = (handleRowClick: (row: DataRowClientList) => void): TableColumn<DataRowClientList>[] => [
   {
     name: 'Client name',
-    cell: row => row.client_name,
+    cell: row => row.name,
     sortable: true,
   },
   {
@@ -17,7 +17,7 @@ const clientListColumn = (handleRowClick: (row: DataRowClientList) => void): Tab
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.penalty}</span>
+                <span className='d-block font-weight-semibold'>{row.penalty_rate}</span>
             </div>
         </div> 
       )

@@ -3,36 +3,30 @@
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import loanCodeListColumn from './LoanCodeListColumn';
+import FormAddLoanCode from './FormAddLoanCode';
 import { DataRowLoanCodes } from '@/utils/DataTypes';
+import useLoanCodes from '@/hooks/useLoanCodes';
 
-const data: DataRowLoanCodes[] = [
-  {
-    id: 1,
-    loan_code: 'TEACHER',
-    description: 'ADDITIONAL LOAN',
-    type_of_loan: 'ADDITIONAL LOAN',
-  },
-  {
-    id: 2,
-    loan_code: 'TEACHER',
-    description: 'NEW LOAN',
-    type_of_loan: 'ADDITIONAL LOAN',
-  },
-  {
-    id: 2,
-    loan_code: 'TEACHER',
-    description: 'RENEWAL LOAN',
-    type_of_loan: 'ADDITIONAL LOAN',
-  },
-  // Add more rows as needed
-];
 
 const column = loanCodeListColumn;
 
 const LoanCodeList: React.FC = () => {
 
-  const handleRowClick = () => {
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [actionLbl, setActionLbl] = useState<string>('');
+  const [singleUserData, setSingleUserData] = useState<DataRowLoanCodes>();
 
+  const { data, fetchLoanCodes } = useLoanCodes();
+
+  const handleRowClick = (row: DataRowLoanCodes) => {
+    setActionLbl('Update Loan Code');
+    setShowForm(true);
+    setSingleUserData(row)
+  }
+
+  const handleCreateLoanCode = (type: string, show: boolean) => {
+    setActionLbl(type);
+    setShowForm(show);
   }
 
   return (
@@ -47,16 +41,32 @@ const LoanCodeList: React.FC = () => {
                 </h3>
               </div>
               <div className="p-7">
-                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800">Create</button>
+                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={()=>{ handleCreateLoanCode('Create Loan Code', true); }}>Create</button>
                 <CustomDatatable
                   apiLoading={false}
-                  title="Client List"
+                  title={``}
                   columns={column(handleRowClick)}
+                  enableCustomHeader={true} 
                   data={data}
                 />
               </div>
             </div>
           </div>
+
+          {showForm && (
+            <div className={`${showForm ? 'fade-in' : 'fade-out'}`}>
+              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                  <h3 className="font-medium text-black dark:text-white">
+                    {actionLbl}
+                  </h3>
+                </div>
+                <div className="p-7">
+                  <FormAddLoanCode setShowForm={setShowForm} actionLbl={actionLbl} singleUserData={singleUserData} fetchLoanCodes={fetchLoanCodes}/>
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

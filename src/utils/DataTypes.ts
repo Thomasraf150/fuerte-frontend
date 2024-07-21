@@ -8,30 +8,65 @@ export interface DataRow {
 
 export interface DataRowClientList {
   id: number;
-  client_name: string;
-  penalty: number;
+  name: string;
+  user_id: number;
+  penalty_rate: number;
+}
+export interface DataRowLoanTypeList {
+  id: number;
+  name: string;
 }
 
 export interface DataRowLoanCodes {
   id: number;
-  loan_code: string;
+  code: string;
   description: string;
-  type_of_loan: string;
+  loan_client_id: number;
+  loan_type_id: number;
+  loan_client: {
+    id: number;
+    name: string;
+  };
+  loan_type: {
+    id: number;
+    name: string
+  }
 }
-
+export interface DataFormLoanCodes {
+  id: number;
+  code: string;
+  description: string;
+  loan_client_id: number;
+  loan_type_id: number;
+}
 export interface DataRowLoanProducts {
   id: number;
   loan_code_id: number;
-  type: string;
   description: string;
-  loan_code_desc: string;
   terms: number;
   interest_rate: number;
-  process: number;
+  processing: number;
   insurance: number;
-  commission: number;
+  collection: number;
   notarial: number;
   addon: number;
+  user_id: number;
+  is_active: number;
+  loan_code: DataRowLoanCodes
+}
+export interface DataFormLoanProducts {
+  id: number;
+  loan_code_id: number;
+  description: string;
+  terms: number;
+  interest_rate: number;
+  processing: number;
+  insurance: number;
+  collection: number;
+  notarial: number;
+  addon: number;
+  user_id: number;
+  is_active: number;
 }
 
 export interface DataCompanyFormValues {
@@ -130,4 +165,109 @@ export interface PaginatorInfo {
 export interface UserPaginator {
   data: User[];
   paginatorInfo: PaginatorInfo;
+}
+
+export interface Reference {
+  occupation: string;
+  name: string;
+  contact_no: string;
+}
+export interface BorrowerInfo {
+  // info
+  id?: string;
+  chief_id: number;
+  amount_applied: number;
+  purpose: string;
+  firstname: string;
+  middlename: string;
+  lastname: string;
+  terms_of_payment: string;
+  residence_address: string;
+  is_rent: boolean
+  other_source_of_inc: string;
+  est_monthly_fam_inc: string;
+  employment_position: string;
+  gender: string;
+  user_id: number;
+
+  //details
+  dob: string;
+  place_of_birth: string;
+  age: number;
+  email: string;
+  contact_no: string;
+  civil_status: string;
+
+  // spouse details
+  work_address: string;
+  occupation: string;
+  fullname: string;
+  company: string;
+  dept_branch: string;
+  length_of_service: string;
+  salary: string;
+  company_contact_person: string;
+  spouse_contact_no: string;
+
+  // work background
+  company_borrower_id: number;
+  employment_number: string;
+  area_id: number;
+  sub_area_id: number;
+  station: string;
+  term_in_service: string;
+  employment_status: string;
+  division: string;
+  monthly_gross: number;
+  monthly_net: number;
+  office_address: string;
+
+  // company information
+  employer: string;
+  company_salary: string;
+  contract_duration: string;
+
+  //reference
+  reference: {
+    occupation: string;
+    name: string;
+    contact_no: string;
+  }[];
+}
+
+export interface DataBorrCompanies {
+  id?: string;
+  user_id: number;
+  name: string;
+  address: string;
+  contact_person: string;
+  contact_no: string;
+  contact_email: string;
+  is_deleted: boolean;
+}
+export interface DataChief {
+  id?: string;
+  user_id: number;
+  name: string;
+  address: string;
+  contact_no: string;
+  email: string;
+  is_active: number;
+  is_deleted: boolean;
+}
+export interface DataArea {
+  id?: string;
+  branch_sub_id: string;
+  user_id: number;
+  name: string;
+  description: string;
+  is_deleted: boolean;
+  sub_area: DataSubArea
+}
+export interface DataSubArea {
+  id?: string;
+  area_id: string;
+  name: string;
+  is_deleted: boolean;
+  area: DataArea
 }

@@ -5,7 +5,7 @@ import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
 
-const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => void): TableColumn<DataRowLoanProducts>[] => [
+const borrowerColumn = (handleRowClick: (row: DataRowLoanProducts) => void): TableColumn<DataRowLoanProducts>[] => [
   {
     name: 'Loan Code',
     cell: row => row.loan_code_id,
@@ -91,4 +91,4 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
   },
 ];
 
-export default loanProductListColumn
+export default borrowerColumn

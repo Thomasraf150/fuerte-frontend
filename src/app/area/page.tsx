@@ -1,24 +1,24 @@
 import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import ChiefList from './components/ChiefList';
+import AreaList from './components/AreaList';
 import './styles.css';
 
 export const metadata = {
-  title: "Chiefs",
+  title: "Areas",
   description: "",
 };
 
-const Chiefs: React.FC = () => {
+const Area: React.FC = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName="Chiefs" />
+        <Breadcrumb pageName="Area" />
       </div>
-      <ChiefList />
+      <AreaList />
     </DefaultLayout>
   );
 };
 
-export default Chiefs;
+export default Area;
   

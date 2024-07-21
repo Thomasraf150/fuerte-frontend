@@ -19,7 +19,12 @@ const customStyles: TableStyles = {
     style: {
       whiteSpace: 'nowrap',
     }
-  }
+  },
+  rows: {
+    style: {
+      cursor: 'pointer', // Add this line to change the cursor to pointer
+    },
+  },
 };
 
 // Define the props for the CustomDatatable component

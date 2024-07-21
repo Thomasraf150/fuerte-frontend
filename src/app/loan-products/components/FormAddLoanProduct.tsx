@@ -4,70 +4,180 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useUsers from '@/hooks/useUsers';
-import { DataBranches, DataFormUser, User, DataRowLoanProducts } from '@/utils/DataTypes';
-
+import { DataBranches, DataFormUser, User, DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
+import useLoanCodes from '@/hooks/useLoanCodes';
+import useLoanProducts from '@/hooks/useLoanProducts';
 interface ParentFormBr {
-  // setShowForm: (value: boolean) => void;
-  // fetchUsers: (first: number, page: number) => void;
-  // actionLbl: string;
-  // singleUserData: DataFormUser | undefined;
+  setShowForm: (value: boolean) => void;
+  fetchLoanProducts: (value: string) => void;
+  actionLbl: string;
+  singleData: DataRowLoanProducts | undefined;
 }
-interface OptionBranch {
+interface OptionLoanCode {
   value: string | undefined;
   label: string;
   hidden?: boolean;
 }
-const FormAddLoanProduct: React.FC<ParentFormBr> = ({ }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataRowLoanProducts>();
-  // const { onSubmitUser, dataSubBranch } = useUsers();
-  const [options, setOptions] = useState<OptionBranch[]>([
-    { value: '', label: 'Select a branch', hidden: true },
+const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProducts, actionLbl, singleData }) => {
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanProducts>();
+  const { onSubmitLoanProduct } = useLoanProducts();
+  const { data: loanCodeData } = useLoanCodes();
+  const [optionsClient, setOptionsClient] = useState<OptionLoanCode[]>([]);
+  const [options, setOptions] = useState<OptionLoanCode[]>([
+    { value: '', label: 'Select a Loan Code', hidden: true },
   ]);
 
    // Watch the password field
   //  const password = watch('password', '');
 
-  const onSubmit: SubmitHandler<DataRowLoanProducts> = data => {
-    // onSubmitUser(data);
-    // setShowForm(false);
-    console.log(data, ' data')
-    // fetchUsers(10, 1);
+  const onSubmit: SubmitHandler<DataFormLoanProducts> = data => {
+    onSubmitLoanProduct(data);
+    setShowForm(false);
+    fetchLoanProducts('id_desc');
   };
 
   useEffect(() => {
-   
-  }, [])
+    if (loanCodeData && Array.isArray(loanCodeData)) {
+      const dynaOpt: OptionLoanCode[] = loanCodeData?.map(dLCodes => ({
+        value: String(dLCodes.id),
+        label: dLCodes.code + ' - ' + dLCodes.description, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsClient([
+        { value: '', label: 'Select a Loan Code', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+    }
+    if (singleData) {
+      setValue('id', singleData.id);
+      setValue('loan_code_id', singleData.loan_code_id);
+      setValue('description', singleData.description);
+      setValue('terms', singleData.terms);
+      setValue('interest_rate', singleData.interest_rate);
+      setValue('processing', singleData.processing);
+      setValue('insurance', singleData.insurance);
+      setValue('collection', singleData.collection);
+      setValue('notarial', singleData.notarial);
+      setValue('addon', singleData.addon);
+      setValue('is_active', singleData.is_active);
+    }
+  }, [loanCodeData, singleData])
 
   return (
 
-
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         {/* First Column */}
         <div>
-          
            <FormInput
-            label="Loan Product"
+            label="Loan Code"
             id="loan_code_id"
             type="select"
             icon={ChevronDown}
-            register={register('loan_code_id', { required: 'Branch is required' })}
+            register={register('loan_code_id', { required: 'Loan Code is required' })}
             error={errors.loan_code_id?.message}
-            options={options}
+            options={optionsClient}
           />
         </div>
-
-        {/* Second Column */}
         <div>
-          {/* Add more FormInput components as needed */}
-          
+          <FormInput
+            label="* Processing (%)"
+            id="processing"
+            type="text"
+            icon={Home}
+            register={register('processing', { required: true })}
+            error={errors.processing && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Description"
+            id="description"
+            type="text"
+            icon={Home}
+            register={register('description', { required: true })}
+            error={errors.description && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Collection (%)"
+            id="collection"
+            type="text"
+            icon={Home}
+            register={register('collection', { required: true })}
+            error={errors.collection && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* No. of Months"
+            id="terms"
+            type="text"
+            icon={Home}
+            register={register('terms', { required: true })}
+            error={errors.terms && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Addon (%)"
+            id="addon"
+            type="text"
+            icon={Home}
+            register={register('addon', { required: true })}
+            error={errors.addon && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Interest Rate (%)"
+            id="interest_rate"
+            type="text"
+            icon={Home}
+            register={register('interest_rate', { required: true })}
+            error={errors.interest_rate && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Notarial"
+            id="notarial"
+            type="text"
+            icon={Home}
+            register={register('notarial', { required: true })}
+            error={errors.notarial && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Insurance Rate (%)"
+            id="insurance"
+            type="text"
+            icon={Home}
+            register={register('insurance', { required: true })}
+            error={errors.insurance && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Active"
+            id="is_active"
+            type="checkbox"
+            icon={Home} // icon is not used for checkbox, can be omitted or replaced
+            register={register('is_active')}
+          />
+        </div>
+        
+        <div></div>
+
+        <div>
           <div className="flex justify-end gap-4.5">
             <button
               className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
               type="button"
-              onClick={()=>{}}
+              onClick={()=>{ setShowForm(false) }}
             >
-              Cancel
+              Back
             </button>
             <button
               className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
@@ -84,55 +194,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ }) => {
         
       </form>
     </div>
-
-
-    // <form onSubmit={handleSubmit(onSubmit)}>
-     
-      // <FormInput
-      //   label="Branch"
-      //   id="branch_id"
-      //   type="select"
-      //   icon={ChevronDown}
-      //   register={register('branch_sub_id', { required: 'Branch is required' })}
-      //   error={errors.branch_sub_id?.message}
-      //   options={options}
-      // />
-
-    //   <FormInput
-    //     label="Email"
-    //     id="name"
-    //     type="text"
-    //     icon={Home}
-    //     register={register('email', { required: true })}
-    //     error={errors.email && "This field is required"}
-    //   />
-
-    //   <FormInput
-    //     label="Name"
-    //     id="name"
-    //     type="text"
-    //     icon={Home}
-    //     register={register('name', { required: true })}
-    //     error={errors.name && "This field is required"}
-    //   />
-
-     
-      // <div className="flex justify-end gap-4.5">
-      //   <button
-      //     className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-      //     type="button"
-      //     onClick={() => { setShowForm(false) }}
-      //   >
-      //     Cancel
-      //   </button>
-      //   <button
-      //     className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
-      //     type="submit"
-      //   >
-      //     Save
-      //   </button>
-      // </div>
-    // </form>
   );
 };
 

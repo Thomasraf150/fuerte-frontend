@@ -348,6 +348,11 @@ const config: Config = {
         line2: "line-revert 8s infinite linear",
         line3: "line 7s infinite linear",
       },
+      borderRadius: {
+        'custom-sm': '4px',
+        'custom-md': '8px',
+        'custom-lg': '17px',
+      },
     },
   },
   plugins: [],

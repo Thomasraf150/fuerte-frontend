@@ -12,7 +12,7 @@ import Tooltip from '@/components/Tooltip';
 const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): TableColumn<DataRowLoanCodes>[] => [
   {
     name: 'Loan Code',
-    cell: row => row.loan_code,
+    cell: row => row.code,
     sortable: true,
   },
   {
@@ -26,7 +26,7 @@ const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): Ta
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.type_of_loan}</span>
+                <span className='d-block font-weight-semibold'>{row.loan_type.name}</span>
             </div>
         </div> 
       )
@@ -39,10 +39,10 @@ const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): Ta
       
       return (
         <>
-          <Tooltip text="View Sub Branch">
+          {/* <Tooltip text="View Sub Branch">
             <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
           </Tooltip>
-          {` | `}
+          {` | `} */}
           <Tooltip text="Edit">
             <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
           </Tooltip>

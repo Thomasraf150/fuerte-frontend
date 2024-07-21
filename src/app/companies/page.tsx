@@ -1,6 +1,7 @@
 import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
+import BorrowerCompaniesList from './components/BorrowerCompaniesList';
 import './styles.css';
 
 export const metadata = {
@@ -14,6 +15,7 @@ const Companies: React.FC = () => {
       <div className="mx-auto">
         <Breadcrumb pageName="Companies" />
       </div>
+      <BorrowerCompaniesList />
     </DefaultLayout>
   );
 };
