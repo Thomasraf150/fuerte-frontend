@@ -4,34 +4,32 @@ import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import borrowerColumn from './BorrowerColumn';
 import BorrowerInfo from './BorrowerInfo';
-import { DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
+import { DataRowLoanProducts, DataFormLoanProducts, BorrowerRowInfo } from '@/utils/DataTypes';
 // import FormAddLoanProduct from './FormAddLoanProduct';
-import useLoanProducts from '@/hooks/useLoanProducts';
+import useBorrower from '@/hooks/useBorrower';
 
 const column = borrowerColumn;
 
 const BorrowerList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
-  const [singleData, setSingleData] = useState<DataRowLoanProducts>();
-  const { data, loading, fetchLoanProducts } = useLoanProducts();
+  const [singleData, setSingleData] = useState<BorrowerRowInfo>();
+  const { dataBorrower, borrowerLoading, fetchDataBorrower } = useBorrower();
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
-    setActionLbl('Create Loan Product');
+    setSingleData(undefined);
+    setActionLbl('Create Borrower');
   }
 
-  const handleRowClick = (data: DataRowLoanProducts) => {
-    console.log(data);
+  const handleRowClick = (data: BorrowerRowInfo) => {
     setShowForm(true);
     setSingleData(data);
+    setActionLbl('Update Borrower');
   }
 
-  const [activeTab, setActiveTab] = useState<string>('tab1');
-
-  const handleTabClick = (tabName: string) => {
-    setActiveTab(tabName);
-  };
+  useEffect(() => {
+  }, [dataBorrower])
 
   return (
     <div>
@@ -40,8 +38,7 @@ const BorrowerList: React.FC = () => {
           <div className="">
 
             {showForm === false ? (
-              <>
-                {/* <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                   <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                     <h3 className="font-medium text-black dark:text-white">
                       Borrowers
@@ -50,32 +47,17 @@ const BorrowerList: React.FC = () => {
                   <div className="p-7">
                     <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
                     <CustomDatatable
-                      apiLoading={loading}
+                      apiLoading={borrowerLoading}
                       columns={column(handleRowClick)}
-                      data={data}
+                      data={dataBorrower}
                       enableCustomHeader={true} 
                       title={''}  
                     />
                   </div>
-                </div> */}
-              </>
+                </div>
             ) : (
-              <></>
-            )
-              // <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              //   <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-              //     <h3 className="font-medium text-black dark:text-white">
-              //       {actionLbl}
-              //     </h3>
-              //   </div>
-              //   <div className="p-7">
-              //     <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={fetchLoanProducts} singleData={singleData} actionLbl={actionLbl}/>
-              //   </div>
-              // </div>
-            }
-
-            <BorrowerInfo />
-
+              <BorrowerInfo setShowForm={setShowForm} singleData={singleData} fetchDataBorrower={fetchDataBorrower}/>
+            )}
 
           </div>
         </div>

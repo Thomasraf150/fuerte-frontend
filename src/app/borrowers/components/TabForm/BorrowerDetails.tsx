@@ -6,9 +6,15 @@ import Link from "next/link";
 import { Camera, Home } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
-import { BorrowerInfo, DataSubArea } from '@/utils/DataTypes';
+import { BorrowerInfo, DataSubArea, BorrowerRowInfo } from '@/utils/DataTypes';
 import { useEffect, useState } from "react";
 import useBorrower from '@/hooks/useBorrower';
+
+interface BorrInfoProps {
+  singleData: BorrowerRowInfo | undefined;
+  setShowForm: (v: boolean) => void;
+  fetchDataBorrower: (v1: number, v2: number) => void;
+}
 
 interface OptionProps {
   value: string | undefined;
@@ -16,7 +22,7 @@ interface OptionProps {
   hidden?: boolean;
 }
 
-const BorrowerDetails = () => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fetchDataBorrower }) => {
   const defaultValues: BorrowerInfo = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -31,7 +37,7 @@ const BorrowerDetails = () => {
     lastname: "",
     terms_of_payment: "",
     residence_address: "",
-    is_rent: false,
+    is_rent: 0,
     other_source_of_inc: "",
     est_monthly_fam_inc: "",
     employment_position: "",
@@ -54,8 +60,8 @@ const BorrowerDetails = () => {
     spouse_contact_no: "",
     company_borrower_id: 0,
     employment_number: "",
-    area_id: 0,
-    sub_area_id: 0,
+    area_id: '',
+    sub_area_id: '',
     station: "",
     term_in_service: "",
     employment_status: "",
@@ -65,7 +71,8 @@ const BorrowerDetails = () => {
     office_address: "",
     employer: "",
     company_salary: "",
-    contract_duration: ""
+    contract_duration: "",
+    photo: ""
   };
   
   const { register, control, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrowerInfo>({
@@ -76,15 +83,52 @@ const BorrowerDetails = () => {
     control,
     name: "reference"
   });
-  
-  const onSubmit = (data: BorrowerInfo) => {
-    console.log(data);
-  }
-    
-  const { dataChief, dataArea } = useBorrower();
+   
+  const { dataChief, dataArea, dataSubArea, fetchDataSubArea, dataBorrCompany, onSubmitBorrower } = useBorrower();
+ 
   const [optionsChief, setOptionsChief] = useState<OptionProps[]>([]);
   const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
   const [optionsSubArea, setOptionsSubArea] = useState<OptionProps[]>([]);
+  const [optionsBorrComp, setOptionsBorrComp] = useState<OptionProps[]>([]);
+
+  const handleOnChangeArea = (value: any) => {
+    fetchDataSubArea(value.target.value);
+  }
+
+  useEffect(() => {
+    if (dataSubArea && Array.isArray(dataSubArea)) {
+      const dynaOpt: OptionProps[] = dataSubArea?.map(aSub => ({
+        value: String(aSub.id),
+        label: aSub.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsSubArea([
+        { value: '', label: 'Select a Sub Area', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+    }
+  }, [dataSubArea, optionsSubArea, fetchDataSubArea])
+
+  const onSubmit = (data: BorrowerInfo) => {
+    onSubmitBorrower(data);
+    setShowForm(false);
+    fetchDataBorrower(100, 1);
+  }
+
+  // const [imageSrc, setImageSrc] = useState('/images/user/user-06.png'); // Default image
+  const [logoPreview, setLogoPreview] = useState('/images/user/user-06.png'); // State for image preview
+
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setLogoPreview(base64String);
+        setValue('photo', base64String); // Set the Base64 string as the value
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     if (dataChief && Array.isArray(dataChief)) {
@@ -97,6 +141,10 @@ const BorrowerDetails = () => {
         ...dynaOpt,
       ]);
     }
+  }, [dataChief])
+
+  
+  useEffect(() => {
     if (dataArea && Array.isArray(dataArea)) {
       const dynaOpt: OptionProps[] = dataArea?.map(aSub => ({
         value: String(aSub.id),
@@ -106,23 +154,108 @@ const BorrowerDetails = () => {
         { value: '', label: 'Select a Area', hidden: true }, // retain the default "Select a branch" option
         ...dynaOpt,
       ]);
+
+      if (singleData && optionsArea) {
+        const subArea = dataArea?.find(item => item.id === String(singleData.borrower_work_background.area_id));
+        if (subArea && Array.isArray(subArea?.sub_area)) {
+          const dynaOptSub: OptionProps[] = subArea?.sub_area?.map(sSub => ({
+            value: String(sSub.id),
+            label: sSub.name, // assuming `name` is the key you want to use as label
+          }));
+          setOptionsSubArea([
+            { value: '', label: 'Select a Sub Area', hidden: true }, // retain the default "Select a branch" option
+            ...dynaOptSub,
+          ]);
+          setValue('sub_area_id', singleData.borrower_work_background.sub_area_id);
+        }
+      }
     }
-  }, [dataChief, dataArea])
+  }, [dataArea])
 
-  const handleOnChangeArea = (id: any) => {
-    console.log(data.target.value, ' data')
-    // if (data && Array.isArray(data)) {
-    //   const dynaOpt: OptionProps[] = data?.map(aSub => ({
-    //     value: String(aSub.id),
-    //     label: aSub.name, // assuming `name` is the key you want to use as label
-    //   }));
-    //   setOptionsSubArea([
-    //     { value: '', label: 'Select a Sub Area', hidden: true }, // retain the default "Select a branch" option
-    //     ...dynaOpt,
-    //   ]);
-    // }
-  }
+  // Watch the area_id field
+  // const areaId = watch('area_id');
 
+  useEffect(() => {
+    if (dataBorrCompany && Array.isArray(dataBorrCompany)) {
+      const dynaOpt: OptionProps[] = dataBorrCompany?.map(aSub => ({
+        value: String(aSub.id),
+        label: aSub.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsBorrComp([
+        { value: '', label: 'Select a Company', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+    }
+    if (singleData) {
+      // Assuming singleData has the structure matching BorrowerInfo
+      Object.keys(singleData).forEach((key) => {
+        if (key === "borrower_reference") {
+          singleData.borrower_reference.forEach((ref, index) => {
+            // console.log(ref, 'ref');
+            setValue(`reference.${index}.occupation`, ref.occupation);
+            setValue(`reference.${index}.name`, ref.name);
+            setValue(`reference.${index}.contact_no`, ref.contact_no);
+          });
+        } else {
+          // setValue(key as keyof BorrowerInfo, singleData[key]);
+          setValue('id', singleData.id);
+          setValue('chief_id', singleData.chief_id);
+          setValue('amount_applied', Number(singleData.amount_applied));
+          setValue('purpose', singleData.purpose);
+          setValue('firstname', singleData.firstname);
+          setValue('middlename', singleData.middlename);
+          setValue('lastname', singleData.lastname);
+          setValue('terms_of_payment', singleData.terms_of_payment);
+          setValue('residence_address', singleData.residence_address);
+          setValue('is_rent', (singleData.is_rent !== '0' ? 1 : 0));
+          setValue('other_source_of_inc', singleData.other_source_of_inc);
+          setValue('est_monthly_fam_inc', singleData.est_monthly_fam_inc);
+          setValue('employment_position', singleData.employment_position);
+          setValue('gender', singleData.gender);
+          // setValue('photo', singleData.photo);
+          setValue('user_id', singleData.user_id);
+          setValue('dob', singleData.borrower_details.dob);
+          setValue('place_of_birth', singleData.borrower_details.place_of_birth);
+          setValue('age', Number(singleData.borrower_details.age));
+          setValue('email', singleData.borrower_details.email);
+          setValue('contact_no', singleData.borrower_details.contact_no);
+          setValue('civil_status', singleData.borrower_details.civil_status);
+          setValue('work_address', singleData.borrower_spouse_details.work_address);
+          setValue('occupation', singleData.borrower_spouse_details.occupation);
+          setValue('fullname', singleData.borrower_spouse_details.fullname);
+          setValue('company', singleData.borrower_spouse_details.company);
+          setValue('dept_branch', singleData.borrower_spouse_details.dept_branch);
+          setValue('length_of_service', singleData.borrower_spouse_details.length_of_service);
+          setValue('salary', singleData.borrower_spouse_details.salary);
+          setValue('company_contact_person', singleData.borrower_spouse_details.company_contact_person);
+          setValue('spouse_contact_no', singleData.borrower_spouse_details.contact_no);
+          setValue('company_borrower_id', Number(singleData.borrower_work_background.company_borrower_id));
+          setValue('employment_number', singleData.borrower_work_background.employment_number);
+          setValue('area_id', singleData.borrower_work_background.area_id);
+          
+          // setValue('sub_area_id', singleData.borrower_work_background.sub_area_id);
+          setValue('station', singleData.borrower_work_background.station);
+          setValue('term_in_service', singleData.borrower_work_background.term_in_service);
+          setValue('employment_status', singleData.borrower_work_background.employment_status);
+          setValue('division', singleData.borrower_work_background.division);
+          setValue('monthly_gross', Number(singleData.borrower_work_background.monthly_gross));
+          setValue('monthly_net', Number(singleData.borrower_work_background.monthly_net));
+          setValue('office_address', singleData.borrower_work_background.office_address);
+          setValue('employer', singleData.borrower_company_info.employer);
+          setValue('company_salary', singleData.borrower_company_info.salary);
+          setValue('contract_duration', singleData.borrower_company_info.contract_duration);
+          
+          setLogoPreview(`${process.env.NEXT_PUBLIC_BASE_URL}/storage/` + singleData.photo);
+          
+        }
+      });
+    } else {
+      reset({
+        firstname: '',
+      });
+    }
+  }, [dataBorrCompany, singleData])
+  
   return (
       <div className="">
         {/* <div className="px-4 pb-6 text-center pt-25 lg:pb-8 xl:pb-11.5">
@@ -138,26 +271,22 @@ const BorrowerDetails = () => {
         <div className="grid grid-cols-4 gap-4">
           <div className="flex justify-center items-start">
             <div className="relative drop-shadow-2">
-              <Image
-                src={"/images/user/user-06.png"}
-                width={160}
-                height={160}
-                style={{
-                  width: "auto",
-                  height: "auto",
-                }}
+              <img
+                src={logoPreview}
                 alt="profile"
+                className="w-50 h-50 rounded-full object-cover"
               />
               <label
-                htmlFor="profile"
+                htmlFor="photo"
                 className="absolute bottom-0 right-0 flex h-8.5 w-8.5 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2"
               >
                 <Camera size="14" />
                 <input
+                  id="photo"
                   type="file"
-                  name="profile"
-                  id="profile"
+                  // register={register('photo')}
                   className="sr-only"
+                  onChange={(e: any) => { return onFileChange(e); } }
                 />
               </label>
             </div>
@@ -548,11 +677,7 @@ const BorrowerDetails = () => {
                       icon={Home}
                       register={register('company_borrower_id', { required: 'Loan Code is required' })}
                       error={errors.company_borrower_id?.message}
-                      options={[
-                        { value: '', label: 'Select Company', hidden: true },
-                        { value: '1', label: 'Company 1' },
-                        { value: '2', label: 'Company 2' },
-                      ]}
+                      options={optionsBorrComp}
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -584,7 +709,7 @@ const BorrowerDetails = () => {
                       id="area_id"
                       type="select"
                       icon={Home}
-                      register={register('area_id', { required: 'Loan Code is required' })}
+                      register={register('area_id', { required: 'Area is required' })}
                       error={errors.area_id?.message}
                       options={optionsArea}
                       onChange={(e: any) => { return handleOnChangeArea(e); } }
@@ -607,13 +732,9 @@ const BorrowerDetails = () => {
                       id="sub_area_id"
                       type="select"
                       icon={Home}
-                      register={register('sub_area_id', { required: 'Loan Code is required' })}
+                      register={register('sub_area_id', { required: 'Sub Area is required' })}
                       error={errors.sub_area_id?.message}
-                      options={[
-                        { value: '', label: 'Select Sub Area', hidden: true },
-                        { value: '1', label: 'Sub Area 1' },
-                        { value: '2', label: 'Sub Area 2' },
-                      ]}
+                      options={optionsSubArea}
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -825,6 +946,7 @@ const BorrowerDetails = () => {
               <button
                 className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
                 type="button"
+                onClick={() => setShowForm(false)}
               >
                 Back
               </button>

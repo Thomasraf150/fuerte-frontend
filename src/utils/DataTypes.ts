@@ -183,11 +183,12 @@ export interface BorrowerInfo {
   lastname: string;
   terms_of_payment: string;
   residence_address: string;
-  is_rent: boolean
+  is_rent: number;
   other_source_of_inc: string;
   est_monthly_fam_inc: string;
   employment_position: string;
   gender: string;
+  photo: string | File | null;
   user_id: number;
 
   //details
@@ -212,8 +213,8 @@ export interface BorrowerInfo {
   // work background
   company_borrower_id: number;
   employment_number: string;
-  area_id: number;
-  sub_area_id: number;
+  area_id: string;
+  sub_area_id: string;
   station: string;
   term_in_service: string;
   employment_status: string;
@@ -264,10 +265,96 @@ export interface DataArea {
   is_deleted: boolean;
   sub_area: DataSubArea
 }
+
 export interface DataSubArea {
   id?: string;
   area_id: string;
   name: string;
   is_deleted: boolean;
   area: DataArea
+}
+
+
+export interface BorrowerRowInfo {
+  id?: string;
+  user_id: number;
+  chief_id: number;
+  amount_applied: string;
+  purpose: string;
+  firstname: string;
+  middlename: string;
+  lastname: string;
+  terms_of_payment: string;
+  residence_address: string;
+  is_rent: string;
+  other_source_of_inc: string;
+  est_monthly_fam_inc: string;
+  employment_position: string;
+  gender: string;
+  photo: string;
+  is_deleted: string;
+  borrower_details: BorrowerDetails;
+  borrower_spouse_details: BorrowerSpouseDetails;
+  borrower_work_background: BorrowerWorkBackground
+  borrower_company_info: BorrowerCompanyInfo;
+  borrower_reference: BorrowerReference;
+  chief: DataChief
+}
+
+export interface BorrowerDetails {
+  id?: string;
+  dob: string;
+  place_of_birth: string;
+  age: string;
+  email: string;
+  contact_no: string;
+  civil_status: string;
+}
+export interface BorrowerSpouseDetails {
+  id?: string;
+  work_address: string;
+  occupation: string;
+  fullname: string;
+  company: string;
+  dept_branch: string;
+  length_of_service: string;
+  salary: string;
+  company_contact_person: string;
+  contact_no: string;
+}
+export interface BorrowerWorkBackground {
+  id?: string;
+  company_borrower_id: string;
+  employment_number: string;
+  area_id: string;
+  sub_area_id: string;
+  station: string;
+  term_in_service: string;
+  employment_status: string;
+  division: string;
+  monthly_gross: string;
+  monthly_net: string;
+  office_address: string;
+}
+export interface BorrowerCompanyInfo {
+  id?: string;
+  employer: string;
+  salary: string;
+  contract_duration: string;
+}
+export interface BorrowerReference {
+  forEach(arg0: (ref: any, index: any) => void): unknown;
+  id?: string;
+  occupation: string;
+  name: string;
+  contact_no: string;
+}
+export interface BorrowerDataAttachments {
+  id?: string;
+  borrower_id: string;
+  user_id: string;
+  name: string;
+  file_type: string;
+  file_path: string;
+  is_deleted: string;
 }

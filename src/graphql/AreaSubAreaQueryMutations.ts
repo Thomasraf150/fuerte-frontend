@@ -47,6 +47,15 @@ const GET_SUB_AREA_QUERY: string = `
     }
 `;
 
+const GET_SINGLE_SUB_AREA_QUERY: string = `
+    query GetOneSubArea($area_id: Int!){
+      getOneSubArea(area_id: $area_id) {
+        id
+        name
+      }
+    }
+`;
+
 const SAVE_AREA_MUTATION: string = `
     mutation SaveArea($input: AreaInput!){
       saveArea(input: $input) {
@@ -104,6 +113,7 @@ const DELETE_SUB_AREA_MUTATION: string = `
 const AreaSubAreaQueryMutations = {
   GET_AREA_QUERY,
   GET_SUB_AREA_QUERY,
+  GET_SINGLE_SUB_AREA_QUERY,
   SAVE_AREA_MUTATION,
   SAVE_SUB_AREA_MUTATION,
   UPDATE_AREA_MUTATION,

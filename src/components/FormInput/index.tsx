@@ -11,7 +11,7 @@ interface Option {
 interface FormInputProps {
   label: string;
   id: string;
-  type: 'text' | 'password' | 'email' | 'select' | 'checkbox';
+  type: 'text' | 'password' | 'email' | 'select' | 'checkbox' | 'file';
   icon: Icon;
   register: UseFormRegisterReturn;
   error?: string;
@@ -19,12 +19,18 @@ interface FormInputProps {
   placeholder?: string;
   disabled?: boolean;
   defaultValue?: string;
-  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => void;
+  className?: string;
 }
 
-const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, error, options, placeholder, disabled, defaultValue, onChange }) => {
+const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, error, options, placeholder, disabled, defaultValue, onChange, className }) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
+    if (onChange) {
+      onChange(event);
+    }
+  };
   return (
-    <div className={`${type === 'checkbox' ? 'flex items-center' : ''}`}>
+    <div className={`${type === 'checkbox' ? 'flex items-center' : ''} ${className}`}>
       <label
         className={`mb-3 block text-sm font-medium text-black dark:text-white ${type === 'checkbox' ? 'mr-2' : ''}`}
         htmlFor={id}
@@ -54,16 +60,21 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
           </select>
         ) : (
           <input
-            className="w-full mb-4 rounded-custom-lg border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className={`w-full ${type === 'file' ? '' : 'mb-4'} rounded-custom-lg border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
             type={type}
             id={id}
             placeholder={placeholder}
             disabled={disabled}
             defaultValue={defaultValue}
             {...register}
+            onChange={(e) => {
+              if (e.target instanceof HTMLInputElement) {
+                handleChange(e as React.ChangeEvent<HTMLInputElement>);
+              }
+            }}
           />
         )}
-        {type !== 'checkbox' && (
+        {type !== 'checkbox' && type !== 'file' && (
           <span className="absolute left-4.5 top-4">
             <IconComponent size="18" />
           </span>

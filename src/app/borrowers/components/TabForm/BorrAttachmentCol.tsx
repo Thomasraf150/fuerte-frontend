@@ -3,12 +3,12 @@
 import { TableColumn } from 'react-data-table-component';
 import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
-import { BorrowerRowInfo } from '@/utils/DataTypes';
+import { BorrowerDataAttachments } from '@/utils/DataTypes';
 
-const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableColumn<BorrowerRowInfo>[] => [
+const borrAttachmentCol = (handleRowClick: (row: BorrowerDataAttachments) => void): TableColumn<BorrowerDataAttachments>[] => [
   {
-    name: 'First Name',
-    cell: row => row.firstname,
+    name: 'File Name',
+    cell: row => row.name,
     sortable: true,
     style: {
       minWidth: '150px',
@@ -16,8 +16,8 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableCo
     width: '150px'
   },
   {
-    name: 'Middle Name',
-    cell: row => row.middlename,
+    name: 'File Type',
+    cell: row => row.file_type,
     sortable: true,
     style: {
       minWidth: '230px',
@@ -25,28 +25,13 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableCo
     width: '230px'
   },
   {
-    name: 'Last Name',
-    cell: row => row.lastname,
+    name: 'File Path',
+    cell: row => row.file_path,
     sortable: true,
     style: {
       minWidth: '220px',
     },
     width: '220px'
-  },
-  {
-    name: 'Residence Address',
-    cell: row => row.residence_address,
-    sortable: true,
-  },
-  {
-    name: 'Chief',
-    cell: row => row.chief.name,
-    sortable: true,
-  },
-  {
-    name: 'Date of Birth',
-    cell: row => row.borrower_details.dob,
-    sortable: true,
   },
   {
     name: 'Action',
@@ -71,4 +56,4 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableCo
   },
 ];
 
-export default borrowerColumn
+export default borrAttachmentCol

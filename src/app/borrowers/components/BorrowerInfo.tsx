@@ -7,9 +7,18 @@
 import React, { useState } from 'react';
 import { CornerUpLeft } from 'react-feather';
 import BorrowerDetails from './TabForm/BorrowerDetails'
+import BorrowerAttachments from './TabForm/BorrowerAttachments'
+import FormAttachments from './TabForm/FormAttachments'
+import { BorrowerRowInfo } from '@/utils/DataTypes'
+interface BorrInfoProps {
+  setShowForm: (v: boolean) => void;
+  singleData?: BorrowerRowInfo | undefined;
+  fetchDataBorrower: (v1: number, v2: number) => void;
+}
 
-const BorrowerInfo: React.FC = () => {
+const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchDataBorrower }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
+  const [showBorrAttForm, setShowBorrAttForm] = useState<boolean>(false);
 
   const handleTabClick = (tabName: string) => {
     setActiveTab(tabName);
@@ -20,15 +29,16 @@ const BorrowerInfo: React.FC = () => {
         <button
           className="flex justify-center rounded border bg-white border-stroke px-6 py-4 mb-4 space-x-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
+          onClick={() => { setShowForm(false) }}
         >
          <CornerUpLeft size={15} /> 
         </button>
         <div className="max-w-12xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-4">
+          {/* <div className="p-4">
             <h5 className="text-lg font-medium text-black dark:text-white">
               Task title
             </h5>
-          </div>
+          </div> */}
           <div className="flex justify-around border-b">
             <button
               className={`p-4 focus:outline-none border-b-2 ${
@@ -83,31 +93,39 @@ const BorrowerInfo: React.FC = () => {
           <div className="p-4">
             {activeTab === 'tab1' && (
               <div id="content1">
-                <BorrowerDetails />
+                <BorrowerDetails singleData={singleData} setShowForm={setShowForm} fetchDataBorrower={fetchDataBorrower} />
               </div>
             )}
             {activeTab === 'tab2' && (
               <div id="content2">
-                <h2 className="text-xl font-semibold text-gray-800">Content for Tab 2</h2>
-                <p className="mt-2 text-gray-600">This is the content of the second tab. Feel free to customize it as needed.</p>
+                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
+                {/* <p className="mt-2 text-gray-600">This is the content of the second tab. Feel free to customize it as needed.</p> */}
               </div>
             )}
             {activeTab === 'tab3' && (
               <div id="content3">
-                <h2 className="text-xl font-semibold text-gray-800">Content for Tab 3</h2>
-                <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p>
+                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
+                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
               </div>
             )}
             {activeTab === 'tab4' && (
               <div id="content3">
-                <h2 className="text-xl font-semibold text-gray-800">Content for Tab 3</h2>
-                <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p>
+                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
+                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
               </div>
             )}
             {activeTab === 'tab5' && (
               <div id="content3">
-                <h2 className="text-xl font-semibold text-gray-800">Content for Tab 3</h2>
-                <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p>
+                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
+                <BorrowerAttachments />
+                <FormAttachments />
+
+              </div>
+            )}
+            {activeTab === 'tab6' && (
+              <div id="content3">
+                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
+                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
               </div>
             )}
           </div>

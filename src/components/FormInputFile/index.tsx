@@ -15,7 +15,7 @@ interface FileUploadProps {
 
 const FormInputFile: React.FC<FileUploadProps> = ({
   id,
-  accept = 'image/*',
+  accept = '*',
   label = 'Click to upload image',
   subLabel1 = 'SVG, PNG, JPG or GIF',
   subLabel2 = '(max, 800 X 800px)',
