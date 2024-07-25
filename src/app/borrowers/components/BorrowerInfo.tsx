@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import { CornerUpLeft } from 'react-feather';
 import BorrowerDetails from './TabForm/BorrowerDetails'
 import BorrowerAttachments from './TabForm/BorrowerAttachments'
-import FormAttachments from './TabForm/FormAttachments'
 import { BorrowerRowInfo } from '@/utils/DataTypes'
 interface BorrInfoProps {
   setShowForm: (v: boolean) => void;
@@ -117,9 +116,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchD
             {activeTab === 'tab5' && (
               <div id="content3">
                 {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
-                <BorrowerAttachments />
-                <FormAttachments />
-
+                <BorrowerAttachments singleData={singleData} />
               </div>
             )}
             {activeTab === 'tab6' && (

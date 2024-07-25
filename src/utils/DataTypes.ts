@@ -349,9 +349,19 @@ export interface BorrowerReference {
   name: string;
   contact_no: string;
 }
-export interface BorrowerDataAttachments {
+export interface BorrAttachmentsFormValues {
   id?: string;
-  borrower_id: string;
+  borrower_id: number;
+  user_id: string;
+  name: string;
+  file_type: string;
+  file_path: string;
+  is_deleted: string;
+  file: FileList;
+}
+export interface BorrAttachmentsRowData {
+  id?: string;
+  borrower_id: number;
   user_id: string;
   name: string;
   file_type: string;

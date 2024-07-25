@@ -83,8 +83,8 @@ const GET_BORROWER_QUERY: string = `
 `;
 
 const GET_BORROWER_ATTACHMENTS_QUERY: string = `
-    query GetBorrAttachments($first: Int!, $page: Int!, $orderBy: [OrderByClause!]){
-        getBorrAttachments(first: $first, page: $page, orderBy: $orderBy){
+    query GetBorrAttachments($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $borrower_id: Int){
+        getBorrAttachments(first: $first, page: $page, orderBy: $orderBy, borrower_id: $borrower_id){
         data {
           id
           borrower_id
@@ -101,6 +101,30 @@ const GET_BORROWER_ATTACHMENTS_QUERY: string = `
           perPage
           hasMorePages
         } 	
+      }
+    }
+`;
+
+const SAVE_BORROWER_ATTACHMENTS_QUERY: string = `
+    mutation SaveBorrAttachment($input: BorrowerAttachmentInput!, $file: Upload){
+      saveBorrAttachment(input: $input, file: $file){
+        success
+        message
+        attachment {
+            id
+            file_type
+            file_path
+            name
+        }
+      }
+    }
+`;
+
+const UPDATE_BORROWER_ATTACHMENTS_QUERY: string = `
+    mutation UpdateBorrAttachment($input: BorrowerAttachmentInput){
+      updateBorrAttachment(input: $input) {
+        id
+        name
       }
     }
 `;
@@ -133,7 +157,9 @@ const SAVE_BORROWER_MUTATION: string = `
 const BorrowerQueryMutations = {
   GET_BORROWER_QUERY,
   GET_BORROWER_ATTACHMENTS_QUERY,
-  SAVE_BORROWER_MUTATION
+  SAVE_BORROWER_MUTATION,
+  SAVE_BORROWER_ATTACHMENTS_QUERY,
+  UPDATE_BORROWER_ATTACHMENTS_QUERY
 };
 
 export default BorrowerQueryMutations;

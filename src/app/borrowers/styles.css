@@ -1,0 +1,4 @@
+.lightbox-container {
+  z-index: 999999999;
+  position: relative;
+}

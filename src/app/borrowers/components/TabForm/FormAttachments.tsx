@@ -4,31 +4,31 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useUsers from '@/hooks/useUsers';
-import { BorrowerDataAttachments } from '@/utils/DataTypes';
+import { BorrowerRowInfo, BorrAttachmentsFormValues } from '@/utils/DataTypes';
 import useLoanCodes from '@/hooks/useLoanCodes';
-import useLoanProducts from '@/hooks/useLoanProducts';
+import useBorrowerAttachments from '@/hooks/useBorrowerAttachments';
 import FormInputFile from '@/components/FormInputFile';
+import FormLabel from '@/components/FormLabel';
+import Image from 'next/image'; // Import next/image
 
 interface ParentFormBr {
-  // setShowForm: (value: boolean) => void;
+  createAttachments: (value: boolean) => void;
+  singleData: BorrowerRowInfo | undefined;
   // fetchLoanProducts: (value: string) => void;
   // actionLbl: string;
-  // singleData: BorrowerDataAttachments | undefined;
+  // singleData: BorrAttachmentsFormValues | undefined;
 }
 
-const FormAttachments: React.FC<ParentFormBr> = ({ }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrowerDataAttachments>();
+const FormAttachments: React.FC<ParentFormBr> = ({ createAttachments, singleData: BorrowerData }) => {
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrAttachmentsFormValues>();
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null); // State for image preview
+  const { onSubmitBorrAttm } = useBorrowerAttachments();
 
-   // Watch the password field
-  //  const password = watch('password', '');
-
-  const onSubmit: SubmitHandler<BorrowerDataAttachments> = data => {
-    console.log(data, 'data')
-    // onSubmitLoanProduct(data);
-    // setShowForm(false);
-    // fetchLoanProducts('id_desc');
+  const onSubmit: SubmitHandler<BorrAttachmentsFormValues> = data => {
+    data.borrower_id = Number(BorrowerData?.id);
+    onSubmitBorrAttm(data);
+    createAttachments(false);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,15 +46,21 @@ const FormAttachments: React.FC<ParentFormBr> = ({ }) => {
   return (
 
     <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-black border-b mb-3 border-stroke px-6.5 py-4 dark:border-strokedark">
+        <h3 className="font-medium text-whiter dark:text-white">
+          Create Attachments
+        </h3>
+      </div>
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         {/* First Column */}
         <div>
-           <FormInput
-            label="File Type"
+          <FormLabel title={`File Type`}/>
+          <FormInput
+            label=""
             id="file_type"
             type="select"
             icon={ChevronDown}
-            register={register('file_type', { required: 'Loan Code is required' })}
+            register={register('file_type', { required: 'Fily type is required' })}
             error={errors.file_type?.message}
             options={[
               { value: '', label: 'Select a Loan Code', hidden: true },
@@ -72,25 +78,29 @@ const FormAttachments: React.FC<ParentFormBr> = ({ }) => {
           />
         </div>
         <div>
+          <FormLabel title={`Image`}/>
           <FormInput
-            label=" File"
-            id="file_path"
+            label=""
+            id="collection"
             type="file"
             icon={Home}
-            register={register('file_path', { required: true })}
-            error={errors.file_path && "This field is required"}
+            register={register('file', { required: true })}
+            error={errors.file && "This field is required"}
+            onChange={(e: any) => handleFileChange(e) }
           />
+          {logoPreview && (
+            <div className="image-preview">
+              <Image src={logoPreview} alt="Preview" width={700} height={300} priority unoptimized={true}/>
+            </div>
+          )}
         </div>
-      
-        
         <div></div>
-
         <div>
           <div className="flex justify-end gap-4.5">
             <button
               className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
               type="button"
-              // onClick={()=>{ setShowForm(false) }}
+              onClick={()=>{ createAttachments(true) }}
             >
               Back
             </button>
