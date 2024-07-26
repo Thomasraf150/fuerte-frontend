@@ -11,7 +11,7 @@ interface Option {
 interface FormInputProps {
   label: string;
   id: string;
-  type: 'text' | 'password' | 'email' | 'select' | 'checkbox' | 'file';
+  type: 'text' | 'password' | 'email' | 'select' | 'checkbox' | 'file' | 'date';
   icon: Icon;
   register: UseFormRegisterReturn;
   error?: string;

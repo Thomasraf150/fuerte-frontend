@@ -368,3 +368,28 @@ export interface BorrAttachmentsRowData {
   file_path: string;
   is_deleted: string;
 }
+
+export interface BorrCoMakerFormValues {
+  id?: string;
+  borrower_id: number;
+  user_id: number;
+  name: string;
+  relationship: string;
+  marital_status: string;
+  address: string;
+  birthdate: string;
+  contact_no: string;
+  is_deleted: string;
+}
+export interface BorrCoMakerRowData {
+  id?: string;
+  borrower_id: number;
+  user_id: number;
+  name: string;
+  relationship: string;
+  marital_status: string;
+  address: string;
+  birthdate: string;
+  contact_no: string;
+  is_deleted: string;
+}

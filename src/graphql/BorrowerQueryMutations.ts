@@ -152,14 +152,66 @@ const SAVE_BORROWER_MUTATION: string = `
     }
 `;
 
+const GET_BORROWER_CO_MAKER: string = `
+  query GetBorrCoMaker($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int){
+    getBorrCoMaker(first: $first,
+                    page: $page,
+                    orderBy: $orderBy,
+                    borrower_id: $borrower_id){
+        data {
+          id
+          name
+          relationship
+          marital_status
+          address
+          birthdate
+          contact_no
+          borrower_id
+          user_id
+        }
+        paginatorInfo {
+          total
+          currentPage
+          lastPage
+          perPage
+          hasMorePages
+        } 	
+    }
+  }
+`;
 
+const SAVE_BORROWER_CO_MAKER: string = `
+  mutation SaveBorrCoMaker($input: BorrowerComakerInput){
+    saveBorrCoMaker(input: $input){
+        id
+        name
+        relationship
+        marital_status
+        address
+        birthdate
+        contact_no
+    }
+  }
+`;
+
+const DELETE_BORROWER_CO_MAKER: string = `
+  mutation deleteBorrCoMaker($input: BorrowerComakerInputDelete){
+    deleteBorrCoMaker(input: $input){
+      id
+      name
+    }
+  }
+`;
 
 const BorrowerQueryMutations = {
   GET_BORROWER_QUERY,
   GET_BORROWER_ATTACHMENTS_QUERY,
   SAVE_BORROWER_MUTATION,
   SAVE_BORROWER_ATTACHMENTS_QUERY,
-  UPDATE_BORROWER_ATTACHMENTS_QUERY
+  UPDATE_BORROWER_ATTACHMENTS_QUERY,
+  GET_BORROWER_CO_MAKER,
+  SAVE_BORROWER_CO_MAKER,
+  DELETE_BORROWER_CO_MAKER
 };
 
 export default BorrowerQueryMutations;
