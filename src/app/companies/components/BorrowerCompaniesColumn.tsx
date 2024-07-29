@@ -15,6 +15,10 @@ const borrowerCompaniesCol = (handleUpdateRowClick: (row: DataBorrCompanies) => 
     name: 'Address',
     cell: row => row.address,
     sortable: true,
+    style: {
+      minWidth: '300px',
+    },
+    width: '300px'
   },
   {
     name: 'Contact No.',

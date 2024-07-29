@@ -473,7 +473,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
                     <FormInput
                       label="* Date of Birth"
                       id="dob"
-                      type="text"
+                      type="date"
                       icon={Home}
                       register={register('dob', { required: true })}
                       error={errors.dob && "This field is required"}
