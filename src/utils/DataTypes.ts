@@ -305,7 +305,7 @@ export interface BorrowerDetails {
   id?: string;
   dob: string;
   place_of_birth: string;
-  age: string;
+  age: number;
   email: string;
   contact_no: string;
   civil_status: string;
