@@ -111,7 +111,7 @@ const useBorrower = () => {
       }),
     });
     const result = await response.json();
-    toast.success("Borrower is Saved!");
+    toast.success(result.data.saveBorrower.message);
   };
 
   const fetchDataChief = async (first: number, page: number) => {

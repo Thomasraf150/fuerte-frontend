@@ -90,6 +90,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
   const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
   const [optionsSubArea, setOptionsSubArea] = useState<OptionProps[]>([]);
   const [optionsBorrComp, setOptionsBorrComp] = useState<OptionProps[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleOnChangeArea = (value: any) => {
     fetchDataSubArea(value.target.value);
@@ -109,6 +110,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
   }, [dataSubArea, optionsSubArea, fetchDataSubArea])
 
   const onSubmit = (data: BorrowerInfo) => {
+    data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
     onSubmitBorrower(data);
     setShowForm(false);
     fetchDataBorrower(100, 1);
@@ -258,14 +260,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
   
   return (
       <div className="">
-        {/* <div className="px-4 pb-6 text-center pt-25 lg:pb-8 xl:pb-11.5">
-          <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
-            
-          </div>
-          <div className="mt-4">=
-          </div>
-        </div> */}
-
       <form onSubmit={handleSubmit(onSubmit)}>
 
         <div className="grid grid-cols-4 gap-4">
@@ -286,7 +280,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
                   type="file"
                   // register={register('photo')}
                   className="sr-only"
-                  onChange={(e: any) => { return onFileChange(e); } }
+                  onChange={onFileChange}
                 />
               </label>
             </div>

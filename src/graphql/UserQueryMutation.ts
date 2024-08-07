@@ -6,6 +6,7 @@ const GET_USER_QUERY: string = `
           name
           email
           branch_sub_id
+          role_id
         }
         paginatorInfo {
           total
@@ -43,10 +44,20 @@ const GET_SINGLE_USER_QUERY: string = `
         name
         email
         branch_sub_id
+        role_id
         branchSub {
           id
           name
         }
+      }
+    }
+`;
+const GET_ROLE_QUERY: string = `
+    query {
+      role {
+        id
+        name
+        code
       }
     }
 `;
@@ -55,7 +66,8 @@ const UserQueryMutations = {
   GET_USER_QUERY,
   CREATE_USER_MUTATION,
   GET_SINGLE_USER_QUERY,
-  UPDATE_USER_MUTATION
+  UPDATE_USER_MUTATION,
+  GET_ROLE_QUERY
 };
 
 export default UserQueryMutations;

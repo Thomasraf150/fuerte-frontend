@@ -12,15 +12,18 @@ interface ParentFormBr {
   actionLbl: string;
   singleUserData: DataFormUser | undefined;
 }
-interface OptionBranch {
+interface OptionProps {
   value: string | undefined;
   label: string;
   hidden?: boolean;
 }
 const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUsers, singleUserData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormUser>();
-  const { onSubmitUser, dataSubBranch } = useUsers();
-  const [options, setOptions] = useState<OptionBranch[]>([
+  const { onSubmitUser, dataSubBranch, dataRole } = useUsers();
+  const [options, setOptions] = useState<OptionProps[]>([
+    { value: '', label: 'Select a branch', hidden: true },
+  ]);
+  const [optionsRole, setOptionsRole] = useState<OptionProps[]>([
     { value: '', label: 'Select a branch', hidden: true },
   ]);
 
@@ -35,7 +38,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
 
   useEffect(() => {
     if (dataSubBranch && Array.isArray(dataSubBranch)) {
-      const dynamicOptions: OptionBranch[] = dataSubBranch?.map(subBranch => ({
+      const dynamicOptions: OptionProps[] = dataSubBranch?.map(subBranch => ({
         value: subBranch.id,
         label: subBranch.name, // assuming `name` is the key you want to use as label
       }));
@@ -44,6 +47,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         ...dynamicOptions,
       ]);
     }
+    
     if (actionLbl === 'Create User') {
       reset({
         id: '',
@@ -57,9 +61,23 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         setValue('name', singleUserData.name);
         setValue('email', singleUserData.email);
         setValue('branch_sub_id', singleUserData.branch_sub_id);
+        setValue('role_id', singleUserData.role_id);
       }
     }
   }, [dataSubBranch, singleUserData, actionLbl])
+
+  useEffect(() => {
+    if (dataRole && Array.isArray(dataRole)) {
+      const dynamicOptions: OptionProps[] = dataRole?.map(item => ({
+        value: item.id,
+        label: item.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsRole([
+        { value: '', label: 'Select a Role', hidden: true }, // retain the default "Select a branch" option
+        ...dynamicOptions,
+      ]);
+    }
+  }, [dataRole])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -73,6 +91,16 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             register={register('branch_sub_id', { required: 'Branch is required' })}
             error={errors.branch_sub_id?.message}
             options={options}
+          />
+          
+          <FormInput
+            label="Roles"
+            id="role_id"
+            type="select"
+            icon={ChevronDown}
+            register={register('role_id', { required: 'Role is required' })}
+            error={errors.role_id?.message}
+            options={optionsRole}
           />
 
           <FormInput

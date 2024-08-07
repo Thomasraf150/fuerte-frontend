@@ -9,6 +9,7 @@ import { CornerUpLeft } from 'react-feather';
 import BorrowerDetails from './TabForm/BorrowerDetails'
 import BorrowerAttachments from './TabForm/BorrowerAttachments'
 import BorrowerCoMaker from './TabForm/BorrowerCoMaker'
+import BorrowerLoans from './TabForm/BorrowerLoans'
 import { BorrowerRowInfo } from '@/utils/DataTypes'
 interface BorrInfoProps {
   setShowForm: (v: boolean) => void;
@@ -54,7 +55,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchD
               }`}
               onClick={() => handleTabClick('tab2')}
             >
-              Status
+              Loans
             </button>
             <button
               className={`p-4 focus:outline-none border-b-2 ${
@@ -86,7 +87,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchD
               }`}
               onClick={() => handleTabClick('tab6')}
             >
-              Loans
+              Status
             </button>
           </div>
 
@@ -98,8 +99,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchD
             )}
             {activeTab === 'tab2' && (
               <div id="content2">
-                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
-                {/* <p className="mt-2 text-gray-600">This is the content of the second tab. Feel free to customize it as needed.</p> */}
+                <BorrowerLoans singleData={singleData} />
               </div>
             )}
             {activeTab === 'tab3' && (

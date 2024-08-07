@@ -18,6 +18,7 @@ interface OptionLoanCode {
   label: string;
   hidden?: boolean;
 }
+
 const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProducts, actionLbl, singleData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanProducts>();
   const { onSubmitLoanProduct } = useLoanProducts();
@@ -36,6 +37,21 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
     fetchLoanProducts('id_desc');
   };
 
+  const handleComputeUdi = () => {
+    const interest_rate = watch('interest_rate');
+    const terms = watch('terms');
+    const processing = watch('processing');
+    const collection = watch('collection');
+    const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100))) * 100;
+    console.log(udi, 'udi')
+
+    if (!isNaN(udi)) {
+      setValue('udi', parseFloat(udi.toFixed(2)));
+    } else {
+      setValue('udi', ''); // or handle the invalid number case as needed
+    }
+  }
+
   useEffect(() => {
     if (loanCodeData && Array.isArray(loanCodeData)) {
       const dynaOpt: OptionLoanCode[] = loanCodeData?.map(dLCodes => ({
@@ -53,21 +69,36 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
       setValue('description', singleData.description);
       setValue('terms', singleData.terms);
       setValue('interest_rate', singleData.interest_rate);
+      setValue('udi', singleData.udi);
       setValue('processing', singleData.processing);
       setValue('insurance', singleData.insurance);
       setValue('collection', singleData.collection);
       setValue('notarial', singleData.notarial);
       setValue('addon', singleData.addon);
       setValue('is_active', singleData.is_active);
+    } else {
+      reset({
+        id: '',
+        loan_code_id: '',
+        description: '',
+        terms: '',
+        interest_rate: '',
+        processing: '',
+        insurance: '',
+        collection: '',
+        notarial: '',
+        addon: '',
+        is_active: ''
+      })
     }
   }, [loanCodeData, singleData])
 
   return (
 
-    <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         {/* First Column */}
-        <div>
+        <div className="col-span-2">
            <FormInput
             label="Loan Code"
             id="loan_code_id"
@@ -78,54 +109,14 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             options={optionsClient}
           />
         </div>
-        <div>
-          <FormInput
-            label="* Processing (%)"
-            id="processing"
-            type="text"
-            icon={Home}
-            register={register('processing', { required: true })}
-            error={errors.processing && "This field is required"}
-          />
-        </div>
-        <div>
+        <div className="col-span-2">
           <FormInput
             label="* Description"
             id="description"
             type="text"
             icon={Home}
-            register={register('description', { required: true })}
-            error={errors.description && "This field is required"}
-          />
-        </div>
-        <div>
-          <FormInput
-            label="* Collection (%)"
-            id="collection"
-            type="text"
-            icon={Home}
-            register={register('collection', { required: true })}
-            error={errors.collection && "This field is required"}
-          />
-        </div>
-        <div>
-          <FormInput
-            label="* No. of Months"
-            id="terms"
-            type="text"
-            icon={Home}
-            register={register('terms', { required: true })}
-            error={errors.terms && "This field is required"}
-          />
-        </div>
-        <div>
-          <FormInput
-            label="* Addon (%)"
-            id="addon"
-            type="text"
-            icon={Home}
-            register={register('addon', { required: true })}
-            error={errors.addon && "This field is required"}
+            register={register('description', { required: 'Loan Code is required' })}
+            error={errors.description ? "This field is required" : undefined}
           />
         </div>
         <div>
@@ -140,21 +131,84 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         </div>
         <div>
           <FormInput
-            label="* Notarial"
+            label="* Terms / No of Mos."
+            id="terms"
+            type="text"
+            icon={Home}
+            register={register('terms', { required: true })}
+            error={errors.terms && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Processing (%)"
+            id="processing"
+            type="text"
+            icon={Home}
+            register={register('processing')}
+            error={errors.processing && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Collection (%)"
+            id="collection"
+            type="text"
+            icon={Home}
+            register={register('collection')}
+            error={errors.collection && "This field is required"}
+          />
+        </div>
+        <div className='relative col-span-2'>
+          <div className="absolute bottom-0 right-1 z-10 xsm:bottom-0 xsm:right-0">
+            <label
+              htmlFor="cover"
+              onClick={handleComputeUdi}
+              className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
+            >
+              <span>Compute UDI</span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <FormInput
+            label="* UDI (%)"
+            id="udi"
+            type="text"
+            icon={Home}
+            readOnly={true}
+            register={register('udi', { required: true })}
+            error={errors.udi && "This field is required"}
+          />
+        </div>
+        
+        <div>
+          <FormInput
+            label="Addon (%)"
+            id="addon"
+            type="text"
+            icon={Home}
+            register={register('addon')}
+            error={errors.addon && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Notarial"
             id="notarial"
             type="text"
             icon={Home}
-            register={register('notarial', { required: true })}
+            register={register('notarial')}
             error={errors.notarial && "This field is required"}
           />
         </div>
         <div>
           <FormInput
-            label="* Insurance Rate (%)"
+            label="Insurance Rate (%)"
             id="insurance"
             type="text"
             icon={Home}
-            register={register('insurance', { required: true })}
+            register={register('insurance')}
             error={errors.insurance && "This field is required"}
           />
         </div>
@@ -168,7 +222,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
           />
         </div>
         
-        <div></div>
 
         <div>
           <div className="flex justify-end gap-4.5">

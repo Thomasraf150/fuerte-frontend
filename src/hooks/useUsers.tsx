@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import UserQueryMutations from '@/graphql/UserQueryMutation';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
-import { User, UserPaginator, DataFormUser, DataSubBranches } from '@/utils/DataTypes';
+import { User, UserPaginator, DataFormUser, DataSubBranches, DataRoles } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 
@@ -12,13 +12,15 @@ const useUsers = () => {
   const { GET_USER_QUERY, 
           CREATE_USER_MUTATION, 
           GET_SINGLE_USER_QUERY, 
-          UPDATE_USER_MUTATION } = UserQueryMutations;
+          UPDATE_USER_MUTATION, 
+          GET_ROLE_QUERY } = UserQueryMutations;
   const { GET_ALL_SUB_BRANCH_QUERY } = BranchQueryMutations;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [data, setData] = useState<User[]>([]);
   const [dataSubBranch, setDataSubBranch] = useState<DataSubBranches[]>([]);
+  const [dataRole, setDataRole] = useState<DataRoles[]>([]);
   const [singleUserData, setSingleUserData] = useState<DataFormUser | undefined>(undefined);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -45,6 +47,29 @@ const useUsers = () => {
       const usersData: UserPaginator = result.data.users;
       setData(usersData.data);
       setTotalRows(usersData.paginatorInfo.total);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchRoles = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_ROLE_QUERY,
+          variables: {},
+        }),
+      });
+
+      const result = await response.json();
+      setDataRole(result.data.role);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -105,6 +130,7 @@ const useUsers = () => {
         name: data.name,
         email: data.email,
         branch_sub_id: Number(data.branch_sub_id),
+        role_id: Number(data.role_id)
       },
     };
     if (data.id) {
@@ -143,6 +169,7 @@ const useUsers = () => {
   useEffect(() => {
     fetchUsers(rowsPerPage, currentPage);
     fetchSubBranch("id_desc");
+    fetchRoles();
   }, [currentPage]);
 
   return {
@@ -154,7 +181,8 @@ const useUsers = () => {
     dataSubBranch,
     fetchUsers,
     fetchSingleUser,
-    singleUserData
+    singleUserData,
+    dataRole
   };
 };
 

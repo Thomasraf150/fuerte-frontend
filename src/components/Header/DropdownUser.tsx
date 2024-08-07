@@ -4,6 +4,14 @@ import Image from "next/image";
 import useLogin from '@/hooks/useLogin';
 
 const DropdownUser = () => {
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      setUserData(JSON.parse(storedAuthStore)['state']);
+    }
+  }, []);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef<any>(null);
@@ -51,9 +59,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {userData?.user?.name?.toUpperCase()}
           </span>
-          <span className="block text-xs">UX Designer</span>
+          <span className="block text-xs">{userData?.user?.branch_sub?.name?.toUpperCase()}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">

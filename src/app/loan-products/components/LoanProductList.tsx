@@ -17,11 +17,12 @@ const LoanProductList: React.FC = () => {
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
+    setSingleData(undefined);
     setActionLbl('Create Loan Product');
   }
 
   const handleRowClick = (data: DataRowLoanProducts) => {
-    console.log(data);
+    setActionLbl('Update Loan Product');
     setShowForm(true);
     setSingleData(data);
   }
@@ -32,30 +33,35 @@ const LoanProductList: React.FC = () => {
 
   return (
     <div>
-      <div className="max-w-12xl">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="">
-
-            {showForm === false ? (
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Loan Product
-                </h3>
-              </div>
-              <div className="p-7">
-                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
-                <CustomDatatable
-                  apiLoading={loading}
-                  columns={column(handleRowClick)}
-                  data={data}
-                  enableCustomHeader={true} 
-                  onRowClicked={handleWholeRowClick}
-                  title={''}  
-                />
+      {showForm === false ? (
+        <div className="max-w-12xl">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="">
+              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                  <h3 className="font-medium text-black dark:text-white">
+                    Loan Product
+                  </h3>
+                </div>
+                <div className="p-7">
+                  <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
+                  <CustomDatatable
+                    apiLoading={loading}
+                    columns={column(handleRowClick)}
+                    data={data}
+                    enableCustomHeader={true} 
+                    onRowClicked={handleWholeRowClick}
+                    title={''}  
+                  />
+                </div>
               </div>
             </div>
-            ) : (
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-3xl">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -66,13 +72,10 @@ const LoanProductList: React.FC = () => {
                   <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={fetchLoanProducts} singleData={singleData} actionLbl={actionLbl}/>
                 </div>
               </div>
-            )}
-
+            </div>
           </div>
         </div>
-      </div>
-
-        
+      )}
     </div>
   );
 };

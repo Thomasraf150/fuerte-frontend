@@ -18,13 +18,14 @@ export default function RootLayout({
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
-  }, []);
+  }, [loading]);
 
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <div className="dark:bg-boxdark-2 dark:text-bodydark">
-          {loading ? <Loader /> : children}
+          {loading ? <Loader /> : ''}
+          {children}
         </div>
       </body>
     </html>

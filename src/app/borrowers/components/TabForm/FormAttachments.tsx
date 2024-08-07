@@ -10,6 +10,7 @@ import useBorrowerAttachments from '@/hooks/useBorrowerAttachments';
 import FormInputFile from '@/components/FormInputFile';
 import FormLabel from '@/components/FormLabel';
 import Image from 'next/image'; // Import next/image
+// import ReactSelect from '@/components/ReactSelect';
 
 interface ParentFormBr {
   createAttachments: (value: boolean) => void;
@@ -39,6 +40,16 @@ const FormAttachments: React.FC<ParentFormBr> = ({ createAttachments, singleData
     }
   };
 
+  // const options = [
+  //   { value: '1', label: 'Option 1' },
+  //   { value: '2', label: 'Option 2' },
+  //   { value: '3', label: 'Option 3' },
+  // ];
+  
+  // const handleChange = (selectedOption: any) => {
+  //   console.log(selectedOption);
+  // };
+
   useEffect(() => {
     
   }, [])
@@ -51,6 +62,13 @@ const FormAttachments: React.FC<ParentFormBr> = ({ createAttachments, singleData
           Create Attachments
         </h3>
       </div>
+
+      {/* <ReactSelect
+        options={options}
+        onChange={handleChange}
+        value={null}
+      /> */}
+
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         {/* First Column */}
         <div>

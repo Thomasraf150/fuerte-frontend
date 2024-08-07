@@ -69,6 +69,15 @@ const GET_BORROWER_QUERY: string = `
             name
             contact_no
           }
+          user {
+            id
+            name
+            branchSub {
+              id
+             	name
+              branch_id
+            }
+          } 
            
         }
         paginatorInfo {

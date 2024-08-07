@@ -3,15 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
-import { DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
+import { DataRowLoanProducts, BorrLoanComputationValues } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
+import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 
-const useLoanProducts = () => {
+const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
+  const { PROCESS_BORROWER_LOAN_MUTATION } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
-  const [data, setData] = useState<DataRowLoanProducts[]>([]);
+  const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
+  const [dataComputedLoans, setDataComputedLoans] = useState<[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
@@ -30,53 +33,43 @@ const useLoanProducts = () => {
     });
 
     const result = await response.json();
-    setData(result.data.getLoanProducts);
+    setLoanProduct(result.data.getLoanProducts);
     setLoading(false);
   };
 
-  const onSubmitLoanProduct = async (data: DataFormLoanProducts) => {
+  const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
+    let variables: { input: any, process_type: string } = {
       input: {
-        loan_code_id: Number(data.loan_code_id),
-        description: data.description, 
-        terms: Number(data.terms),
-        interest_rate: Number(data.interest_rate),
-        udi: Number(data.udi),
-        processing: Number(data.processing),
-        insurance: Number(data.insurance),
-        collection: Number(data.collection),
-        notarial: Number(data.notarial),
-        addon: Number(data.addon),
-        is_active: data.is_active,
-        user_id: userData?.user?.id
+        loan_proceeds: data.loan_proceeds,
+        branch_sub_id: data.branch_sub_id,
+        loan_product_id: data.loan_product_id,
+        ob: data.ob,
+        penalty: data.penalty,
+        rebates: data.rebates
       },
+      process_type
     };
-    if (data.id) {
-        mutation = UPDATE_LOAN_PRODUCT_QUERY;
-        variables.input.id = data.id;
-    } else {
-      mutation = SAVE_LOAN_PRODUCT_QUERY;
-    }
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        query: mutation,
+        query: PROCESS_BORROWER_LOAN_MUTATION,
         variables,
       }),
     });
     const result = await response.json();
-    if (result.errors) {
-      toast.error(result.errors[0].message);
-    } else {
-      toast.success('Loan Product Saved!');
-    }
+    console.log(result, ' result')
+    setDataComputedLoans(result.data.processALoan);
+    // if (result.errors) {
+    //   toast.error(result.errors[0].message);
+    // } else {
+    //   toast.success('Loan Product Saved!');
+    // }
   };
 
    // Fetch data on component mount if id exists
@@ -85,11 +78,10 @@ const useLoanProducts = () => {
   }, []);
 
   return {
-    data,
-    onSubmitLoanProduct,
-    fetchLoanProducts,
-    loading
+    onSubmitLoanComp,
+    loanProduct,
+    dataComputedLoans
   };
 };
 
-export default useLoanProducts;
+export default useLoans;

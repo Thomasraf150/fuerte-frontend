@@ -7,6 +7,7 @@ const GET_LOAN_PRODUCT_QUERY: string = `
       description
       terms
       interest_rate
+      udi
       processing
       insurance
       commission
@@ -29,6 +30,7 @@ const SAVE_LOAN_PRODUCT_QUERY: string = `
       description
       terms
       interest_rate
+      udi
       processing
       insurance
       collection
@@ -46,6 +48,7 @@ const UPDATE_LOAN_PRODUCT_QUERY: string = `
       description
       terms
       interest_rate
+      udi
       processing
       insurance
       collection

@@ -45,6 +45,7 @@ export interface DataRowLoanProducts {
   description: string;
   terms: number;
   interest_rate: number;
+  udi: number;
   processing: number;
   insurance: number;
   collection: number;
@@ -55,18 +56,19 @@ export interface DataRowLoanProducts {
   loan_code: DataRowLoanCodes
 }
 export interface DataFormLoanProducts {
-  id: number;
-  loan_code_id: number;
+  id: number | '';
+  loan_code_id: number | '';
   description: string;
-  terms: number;
-  interest_rate: number;
-  processing: number;
-  insurance: number;
-  collection: number;
-  notarial: number;
-  addon: number;
-  user_id: number;
-  is_active: number;
+  terms: number | '';
+  interest_rate: number | '';
+  udi: number | '';
+  processing: number | '';
+  insurance: number | '';
+  collection: number | '';
+  notarial: number | '';
+  addon: number | '';
+  user_id: number | '';
+  is_active: number | '';
 }
 
 export interface DataCompanyFormValues {
@@ -88,6 +90,8 @@ export interface User {
   name: string;
   email: string;
   branch_sub_id: number;
+  role_id: number;
+  branchSub: DataSubBranches
 }
 export interface DataBranches {
   id?: string;
@@ -115,6 +119,12 @@ export interface DataSubBranches {
   is_deleted: boolean;
   user: User;
   branch: DataBranches;
+}
+export interface DataRoles {
+  id?: string;
+  user_id: number;
+  code: string;
+  name: string;
 }
 export interface DataFormSubBranches {
   id?: string;
@@ -144,6 +154,7 @@ export interface DataFormUser {
   name: string;
   email: string;
   branch_sub_id: number;
+  role_id: number;
   password: string;
   confirm_password: string;
 }
@@ -299,6 +310,7 @@ export interface BorrowerRowInfo {
   borrower_company_info: BorrowerCompanyInfo;
   borrower_reference: BorrowerReference;
   chief: DataChief
+  user: User
 }
 
 export interface BorrowerDetails {
@@ -392,4 +404,57 @@ export interface BorrCoMakerRowData {
   birthdate: string;
   contact_no: string;
   is_deleted: string;
+}
+
+export interface BorrLoanFormValues {
+  id: string;
+  branch_sub_id: number;
+  borrower_id: number;
+  user_id: number;
+  loan_product_id: number; 
+  term: string;
+  pn_amount: string;
+  loan_proceeds: string;
+  pn_balance: string;
+  udi_balance: string;
+  is_deleted: number;
+  ob: string;
+  penalty: string;
+  rebates: string;
+}
+
+export interface BorrLoanComputationValues {
+  loan_proceeds: string;
+  branch_sub_id: string;
+  loan_product_id: string;
+  ob: string;
+  penalty: string;
+  rebates: string;
+}
+
+export interface ObjDeductions {
+  udi: string;
+  processing: string;
+  collection: string;
+  notarial: string;
+}
+
+export interface ObjDeductionsRate {
+  udi: string;
+  processing: string;
+  collection: string;
+}
+
+export interface BorrLoanComputationRes {
+  deductions: ObjDeductions;
+  deduction_rate: ObjDeductionsRate;
+  total_deductions: string;
+  loan_proceeds: string;
+  terms: string;
+  pn: string;
+  monthly_amort: string;
+  ob: string;
+  rebates: string;
+  penalty: string;
+  new_loan_proceeds: string;
 }

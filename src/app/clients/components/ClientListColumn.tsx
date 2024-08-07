@@ -24,27 +24,27 @@ const clientListColumn = (handleRowClick: (row: DataRowClientList) => void): Tab
     },
     sortable: true,
   },
-  {
-    name: 'Action',
-    cell: row => {
+  // {
+  //   name: 'Action',
+  //   cell: row => {
       
-      return (
-        <>
-          <Tooltip text="View Sub Branch">
-            <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `}
-          <Tooltip text="Edit">
-            <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `}
-          <Tooltip text="Remove">
-            <Trash2 size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
-          </Tooltip>
-        </>
-      )
-    },
-  },
+  //     return (
+  //       <>
+  //         <Tooltip text="View Sub Branch">
+  //           <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
+  //         </Tooltip>
+  //         {` | `}
+  //         <Tooltip text="Edit">
+  //           <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
+  //         </Tooltip>
+  //         {` | `}
+  //         <Tooltip text="Remove">
+  //           <Trash2 size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+  //         </Tooltip>
+  //       </>
+  //     )
+  //   },
+  // },
 ];
 
 export default clientListColumn

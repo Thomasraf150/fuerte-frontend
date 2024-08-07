@@ -165,7 +165,11 @@ const useBranches = () => {
       }),
     });
     const result = await response.json();
-    toast.success("Branches Sub Saved!");
+    if (result.errors) {
+      toast.error(result.errors[0].message);
+    } else {
+      toast.success("Branches Sub Saved!");
+    }
   };
 
    // Fetch data on component mount if id exists

@@ -47,7 +47,7 @@ const ClientsList: React.FC = () => {
                 </h3>
               </div>
               <div className="p-7">
-                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800">Create</button>
+                {/* <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800">Create</button> */}
                 <CustomDatatable
                   apiLoading={false}
                   title={``}

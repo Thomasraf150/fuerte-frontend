@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FocusEvent } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
 import { Icon } from 'react-feather';
 
@@ -21,9 +21,11 @@ interface FormInputProps {
   defaultValue?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => void;
   className?: string;
+  readOnly?: boolean;
+  value?: string;
 }
 
-const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, error, options, placeholder, disabled, defaultValue, onChange, className }) => {
+const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, error, options, placeholder, disabled, defaultValue, onChange, className, readOnly, value }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
     if (onChange) {
       onChange(event);
@@ -40,14 +42,14 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
       <div className="relative">
         {type === 'checkbox' ? (
           <input
-            className="rounded-custom-lg border border-stroke bg-gray text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className="h-10 text-sm border border-stroke text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
             type={type}
             id={id}
             {...register}
           />
         ) : type === 'select' ? (
           <select
-            className="w-full rounded-custom-lg border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className="h-10 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
             id={id}
             {...register}
             onChange={onChange}
@@ -60,22 +62,20 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
           </select>
         ) : (
           <input
-            className={`w-full ${type === 'file' ? '' : 'mb-4'} rounded-custom-lg border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
+            className={`w-full ${type === 'file' ? '' : 'mb-4'} h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
             type={type}
             id={id}
             placeholder={placeholder}
             disabled={disabled}
             defaultValue={defaultValue}
             {...register}
-            onChange={(e) => {
-              if (e.target instanceof HTMLInputElement) {
-                handleChange(e as React.ChangeEvent<HTMLInputElement>);
-              }
-            }}
+            onChange={handleChange}
+            readOnly={readOnly}
+            value={value}
           />
         )}
         {type !== 'checkbox' && type !== 'file' && (
-          <span className="absolute left-4.5 top-4">
+          <span className="absolute left-4.5 top-3">
             <IconComponent size="18" />
           </span>
         )}
