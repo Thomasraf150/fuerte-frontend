@@ -3,21 +3,42 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
-import { DataRowLoanProducts, BorrLoanComputationValues } from '@/utils/DataTypes';
+import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
-  const { PROCESS_BORROWER_LOAN_MUTATION } = LoansQueryMutation;
+  const { BORROWER_LOAN_QUERY, PROCESS_BORROWER_LOAN_MUTATION } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
+  const [loanData, setLoanData] = useState<BorrLoanRowData[]>([]);
   const [dataComputedLoans, setDataComputedLoans] = useState<[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
+  
+  const fetchLoans = async (first: number, page: number, borrower_id: number) => {
+    setLoading(true);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: BORROWER_LOAN_QUERY,
+        variables: { first, page, orderBy: [
+          { column: "id", order: 'DESC' }
+        ], borrower_id}
+      }),
+    });
+
+    const result = await response.json();
+    setLoanData(result.data.getLoans.data);
+    setLoading(false);
+  };
   
   const fetchLoanProducts = async (orderBy = 'id_desc') => {
     setLoading(true);
@@ -43,6 +64,8 @@ const useLoans = () => {
 
     let variables: { input: any, process_type: string } = {
       input: {
+        borrower_id: data.borrower_id,
+        user_id: userData?.user?.id,
         loan_proceeds: data.loan_proceeds,
         branch_sub_id: data.branch_sub_id,
         loan_product_id: data.loan_product_id,
@@ -64,12 +87,15 @@ const useLoans = () => {
     });
     const result = await response.json();
     console.log(result, ' result')
-    setDataComputedLoans(result.data.processALoan);
-    // if (result.errors) {
-    //   toast.error(result.errors[0].message);
-    // } else {
-    //   toast.success('Loan Product Saved!');
-    // }
+    if (process_type === 'Compute') {
+      setDataComputedLoans(result.data.processALoan);
+    } else {
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+      } else {
+        toast.success('Loan Entry Saved!');
+      }
+    }
   };
 
    // Fetch data on component mount if id exists
@@ -80,7 +106,9 @@ const useLoans = () => {
   return {
     onSubmitLoanComp,
     loanProduct,
-    dataComputedLoans
+    dataComputedLoans,
+    fetchLoans,
+    loanData
   };
 };
 

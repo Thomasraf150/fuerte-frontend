@@ -406,6 +406,38 @@ export interface BorrCoMakerRowData {
   is_deleted: string;
 }
 
+export interface DataRowLoanDetails {
+  id: string;
+  user_id: string;
+  loan_id: string;
+  description: string;
+  debit: string;
+  credit: string;
+  account_id: string;
+}
+export interface BorrLoanRowData {
+  id: string;
+  branch_sub_id: number;
+  borrower_id: number;
+  user_id: number;
+  loan_product_id: number; 
+  loan_ref: string;
+  term: string;
+  monthly: string;
+  status: number;
+  pn_amount: string;
+  loan_proceeds: string;
+  pn_balance: string;
+  udi_balance: string;
+  is_deleted: number;
+  created_at: string;
+  approved_date: string;
+  released_date: string;
+  loan_product: DataRowLoanProducts;
+  loan_details: DataRowLoanDetails[];
+  borrower: BorrowerRowInfo;
+}
+
 export interface BorrLoanFormValues {
   id: string;
   branch_sub_id: number;
@@ -424,6 +456,7 @@ export interface BorrLoanFormValues {
 }
 
 export interface BorrLoanComputationValues {
+  borrower_id: number;
   loan_proceeds: string;
   branch_sub_id: string;
   loan_product_id: string;

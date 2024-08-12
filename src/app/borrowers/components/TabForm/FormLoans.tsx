@@ -27,6 +27,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   const { dataComputedLoans, onSubmitLoanComp, loanProduct } = useLoans();
 
   const dataLoanComp = {
+    'borrower_id': Number(BorrowerData?.id),
     'loan_proceeds': watch('loan_proceeds'),
     'branch_sub_id': String(watch('branch_sub_id')),
     'loan_product_id': String(watch('loan_product_id')),
@@ -36,7 +37,6 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   };
 
   const onSubmit: SubmitHandler<BorrLoanFormValues> = async (data) => {
-    console.log(data, 'data');
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You won\'t be able to revert this!',
@@ -45,7 +45,6 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     if (isConfirmed) {
       onSubmitLoanComp(dataLoanComp, "Create");
     }
-    // onSubmitLoanComp(data);
   };
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
@@ -179,7 +178,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                 <button
                   className="flex justify-center rounded border border-stroke px-4 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
                   type="button"
-                  onClick={()=>{ createLoans(true) }}
+                  onClick={()=>{ createLoans(false) }}
                 >
                   Back
                 </button>
