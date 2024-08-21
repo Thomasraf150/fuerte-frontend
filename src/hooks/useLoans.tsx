@@ -7,14 +7,16 @@ import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData } from 
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
-  const { BORROWER_LOAN_QUERY, PROCESS_BORROWER_LOAN_MUTATION } = LoansQueryMutation;
+  const { BORROWER_LOAN_QUERY, PROCESS_BORROWER_LOAN_MUTATION, APPROVE_LOAN_BY_SCHEDULE, BORROWER_SINGLE_LOAN_QUERY } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
   const [loanData, setLoanData] = useState<BorrLoanRowData[]>([]);
+  const [loanSingleData, setLoanSingleData] = useState<BorrLoanRowData>();
   const [dataComputedLoans, setDataComputedLoans] = useState<[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
@@ -37,6 +39,24 @@ const useLoans = () => {
 
     const result = await response.json();
     setLoanData(result.data.getLoans.data);
+    setLoading(false);
+  };
+  
+  const fetchSingLoans = async (loan_id: number) => {
+    setLoading(true);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: BORROWER_SINGLE_LOAN_QUERY,
+        variables: { loan_id }
+      }),
+    });
+
+    const result = await response.json();
+    setLoanSingleData(result.data.getLoan);
     setLoading(false);
   };
   
@@ -97,6 +117,49 @@ const useLoans = () => {
       }
     }
   };
+  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, submitApproveRelease: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    console.log(data, ' data');
+    console.log(status, ' status');
+    console.log(selectedDate, ' selectedDate');
+    let variables: { input: any, selectedDate: string[], interest: string[], monthly: string[], status: number } = {
+      input: {
+        user_id: userData?.user?.id,
+        loan_id: data?.id,
+      },
+      selectedDate,
+      interest,
+      monthly,
+      status
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You won\'t be able to revert this!',
+      'Yes delete it!',
+    );
+    if (isConfirmed) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: APPROVE_LOAN_BY_SCHEDULE,
+          variables,
+        }),
+      });
+      const result = await response.json();
+      console.log(result, ' result')
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+      } else {
+        toast.success('Loan Schedule Saved!');
+        submitApproveRelease()
+      }
+    }
+    
+  };
 
    // Fetch data on component mount if id exists
   useEffect(() => {
@@ -108,7 +171,11 @@ const useLoans = () => {
     loanProduct,
     dataComputedLoans,
     fetchLoans,
-    loanData
+    loanData,
+    submitApproveRelease,
+    fetchSingLoans,
+    loanSingleData,
+    loading
   };
 };
 

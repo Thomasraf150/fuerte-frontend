@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { CheckCircle } from 'react-feather';
 import DatePicker from 'react-datepicker';
 import { format, startOfMonth, addMonths, getDay, startOfWeek, setDate, differenceInDays } from 'date-fns';
-
 import "react-datepicker/dist/react-datepicker.css";
 
 interface OMProps {
   term: number;
-  selectedData: (v: any) => void;
+  selectedData: (v: any, p: number) => void;
+  handleApproveRelease: (status: number) => void;
 }
 
-const OnceAMonth: React.FC<OMProps> = ({ term, selectedData }) => {
+const OnceAMonth: React.FC<OMProps> = ({ term, selectedData, handleApproveRelease }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
 
   const handleDateChange = (date: Date | null) => {
     if (!date) return;
@@ -42,8 +43,8 @@ const OnceAMonth: React.FC<OMProps> = ({ term, selectedData }) => {
     }
 
     setSelectedDate(start);
-    selectedData(result);
-  
+    selectedData(result, term);
+    setAppBtnDisable(false);
   };
 
   return (
@@ -57,12 +58,15 @@ const OnceAMonth: React.FC<OMProps> = ({ term, selectedData }) => {
           placeholderText="Select start date"
           id="startDate"
         />
-        <button className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm">
+        <button 
+          className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
+          onClick={() => { return handleApproveRelease(1); }}
+          disabled={appBtnDisable}>
           <span className="mr-1">
             <CheckCircle size={16}/>
           </span>
           <span>
-          Approve
+            Approve
           </span>
         </button>
     </div>

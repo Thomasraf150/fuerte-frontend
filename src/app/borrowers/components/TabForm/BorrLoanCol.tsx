@@ -29,7 +29,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
     },
     width: '270px'
   },
-  {
+  { 
     name: 'Loan Ref#',
     cell: row => row.loan_ref,
     sortable: true,

@@ -415,6 +415,22 @@ export interface DataRowLoanDetails {
   credit: string;
   account_id: string;
 }
+export interface DataRowLoanSchedules {
+  id: string;
+  user_id: string;
+  loan_id: string;
+  amount: string;
+  due_date: string;
+  is_deleted: string;
+}
+export interface DataRowLoanUdiSchedules {
+  id: string;
+  user_id: string;
+  loan_id: string;
+  amount: string;
+  due_date: string;
+  is_deleted: string;
+}
 export interface BorrLoanRowData {
   id: string;
   branch_sub_id: number;
@@ -425,6 +441,7 @@ export interface BorrLoanRowData {
   term: string;
   monthly: string;
   status: number;
+  is_pn_signed: number;
   pn_amount: string;
   loan_proceeds: string;
   pn_balance: string;
@@ -435,6 +452,8 @@ export interface BorrLoanRowData {
   released_date: string;
   loan_product: DataRowLoanProducts;
   loan_details: DataRowLoanDetails[];
+  loan_schedules: DataRowLoanSchedules[];
+  loan_udi_schedules: DataRowLoanUdiSchedules[];
   borrower: BorrowerRowInfo;
 }
 
