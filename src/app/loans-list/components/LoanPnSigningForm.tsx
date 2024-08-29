@@ -6,6 +6,10 @@ import { BorrLoanRowData } from '@/utils/DataTypes';
 import LoanDetails from './TabForm/LoanDetails';
 import SetEffectivityMaturity from './Tabs/SetEffectivityMaturity';
 import useLoans from '@/hooks/useLoans';
+import PNSigning from './Tabs/PNSigning';
+import BankDetailsEntry from './Tabs/BankDetailsEntry';
+import ReleaseLoans from './Tabs/ReleaseLoans';
+
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
   handleShowForm: (v: boolean) => void;
@@ -58,7 +62,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
               } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={loanSingleData?.status === 1 ? false : true}
+              disabled={false}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>PN Signing</span>
             </button>
@@ -69,7 +73,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
               } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={false}
+              disabled={loanSingleData?.status > 0 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Bank Details Entry</span>
             </button>
@@ -80,7 +84,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
               } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={loanSingleData?.status === 2 ? false : true}
+              disabled={loanSingleData?.status > 1 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Approve and Release</span>
             </button>
@@ -98,21 +102,24 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
         )}
         {activeTab === 2 && (
           <div>
-            <h2 className="text-xl font-semibold">PN Signing</h2>
-            <p>This is the content for PN Signing.</p>
+            {loanSingleData && (
+              <PNSigning loanSingleData={loanSingleData} handleRefetchData={handleRefetchData} />
+            )}
           </div>
         )}
         {activeTab === 3 && (
           <div>
-            <h2 className="text-xl font-semibold">Bank Details Entry</h2>
-            <p>This is the content for Bank Details Entry.</p>
+            {loanSingleData && (
+              <BankDetailsEntry loanSingleData={loanSingleData} handleRefetchData={handleRefetchData} />
+            )}
           </div>
         )}
         {activeTab === 4 && (
-          <div>
-            <h2 className="text-xl font-semibold">Approve and Release</h2>
-            <p>This is the content for Approve and Release.</p>
-          </div>
+           <div>
+           {loanSingleData && (
+             <ReleaseLoans loanSingleData={loanSingleData} handleRefetchData={handleRefetchData} />
+           )}
+         </div>
         )}
       </div>
     </div>

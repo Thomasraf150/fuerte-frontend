@@ -269,12 +269,32 @@ export interface DataChief {
 }
 export interface DataArea {
   id?: string;
-  branch_sub_id: string;
+  branch_sub_id: number;
   user_id: number;
   name: string;
   description: string;
   is_deleted: boolean;
   sub_area: DataSubArea
+}
+export interface DataBank {
+  id?: string;
+  branch_sub_id: string;
+  name: string;
+  address: string;
+  phone: string;
+  contact_person: string;
+  mobile: string;
+  email: string
+}
+export interface DataBank {
+  id?: string;
+  branch_sub_id: string;
+  name: string;
+  address: string;
+  phone: string;
+  contact_person: string;
+  mobile: string;
+  email: string
 }
 
 export interface DataSubArea {
@@ -431,6 +451,26 @@ export interface DataRowLoanUdiSchedules {
   due_date: string;
   is_deleted: string;
 }
+export interface DataRowLoanUdiSchedules {
+  id: string;
+  user_id: string;
+  loan_id: string;
+  amount: string;
+  due_date: string;
+  is_deleted: string;
+}
+export interface LoanBankFormValues {
+  id?: number;
+  loan_id: number;
+  account_name: string;
+  surrendered_bank_id: number;
+  issued_bank_id: number;
+  surrendered_acct_no: string;
+  issued_acct_no: string;
+  surrendered_pin: string;
+  issued_pin: string;
+  is_deleted: number;
+}
 export interface BorrLoanRowData {
   id: string;
   branch_sub_id: number;
@@ -450,10 +490,13 @@ export interface BorrLoanRowData {
   created_at: string;
   approved_date: string;
   released_date: string;
+  bank_id: string;
+  check_no: string;
   loan_product: DataRowLoanProducts;
   loan_details: DataRowLoanDetails[];
   loan_schedules: DataRowLoanSchedules[];
   loan_udi_schedules: DataRowLoanUdiSchedules[];
+  loan_bank_details: LoanBankFormValues;
   borrower: BorrowerRowInfo;
 }
 
@@ -509,4 +552,10 @@ export interface BorrLoanComputationRes {
   rebates: string;
   penalty: string;
   new_loan_proceeds: string;
+}
+export interface LoanReleaseFormValues {
+  id?: string;
+  bank_id: string;
+  released_date: Date | undefined;
+  check_no: string;
 }

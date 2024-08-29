@@ -3,15 +3,24 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
-import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData } from '@/utils/DataTypes';
+import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData, LoanBankFormValues, LoanReleaseFormValues } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { fetchWithRecache } from '@/utils/helper';
 
+
+console.log(fetchWithRecache, 'fetchWithRecache');
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
-  const { BORROWER_LOAN_QUERY, PROCESS_BORROWER_LOAN_MUTATION, APPROVE_LOAN_BY_SCHEDULE, BORROWER_SINGLE_LOAN_QUERY } = LoansQueryMutation;
+  const { BORROWER_LOAN_QUERY, 
+          PROCESS_BORROWER_LOAN_MUTATION, 
+          APPROVE_LOAN_BY_SCHEDULE, 
+          BORROWER_SINGLE_LOAN_QUERY, 
+          LOAN_PN_SIGNING, 
+          SAVE_LOAN_BANK_DETAILS,
+          SAVE_LOAN_RELEASE } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
@@ -24,7 +33,7 @@ const useLoans = () => {
   
   const fetchLoans = async (first: number, page: number, borrower_id: number) => {
     setLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,14 +46,14 @@ const useLoans = () => {
       }),
     });
 
-    const result = await response.json();
-    setLoanData(result.data.getLoans.data);
+    // const result = await response.json();
+    setLoanData(response.data.getLoans.data);
     setLoading(false);
   };
   
   const fetchSingLoans = async (loan_id: number) => {
     setLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -55,14 +64,14 @@ const useLoans = () => {
       }),
     });
 
-    const result = await response.json();
-    setLoanSingleData(result.data.getLoan);
+    // const result = await response.json();
+    setLoanSingleData(response.data.getLoan);
     setLoading(false);
   };
   
   const fetchLoanProducts = async (orderBy = 'id_desc') => {
     setLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,8 +82,8 @@ const useLoans = () => {
       }),
     });
 
-    const result = await response.json();
-    setLoanProduct(result.data.getLoanProducts);
+    // const result = await response.json();
+    setLoanProduct(response.data.getLoanProducts);
     setLoading(false);
   };
 
@@ -95,7 +104,7 @@ const useLoans = () => {
       },
       process_type
     };
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -105,19 +114,19 @@ const useLoans = () => {
         variables,
       }),
     });
-    const result = await response.json();
-    console.log(result, ' result')
+    // const result = await response.json();
+    // console.log(result, ' result')
     if (process_type === 'Compute') {
-      setDataComputedLoans(result.data.processALoan);
+      setDataComputedLoans(response.data.processALoan);
     } else {
-      if (result.errors) {
-        toast.error(result.errors[0].message);
+      if (response.errors) {
+        toast.error(response.errors[0].message);
       } else {
         toast.success('Loan Entry Saved!');
       }
     }
   };
-  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, submitApproveRelease: () => void) => {
+  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
     console.log(data, ' data');
@@ -136,10 +145,10 @@ const useLoans = () => {
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You won\'t be able to revert this!',
-      'Yes delete it!',
+      'Yes it is!',
     );
     if (isConfirmed) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -149,13 +158,132 @@ const useLoans = () => {
           variables,
         }),
       });
-      const result = await response.json();
-      console.log(result, ' result')
-      if (result.errors) {
-        toast.error(result.errors[0].message);
+      // const result = await response.json();
+      // console.log(result, ' result')
+      if (response.errors) {
+        toast.error(response.errors[0].message);
       } else {
         toast.success('Loan Schedule Saved!');
-        submitApproveRelease()
+        handleRefetchLoanData()
+      }
+    }
+    
+  };
+  
+  const submitPNSigned = async (data: BorrLoanRowData | undefined, handleRefetchLoanData: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let variables: { input: any } = {
+      input: {
+        loan_id: data?.id,
+        is_pn_signed: 1
+      }
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure for PN Signed?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: LOAN_PN_SIGNING,
+          variables,
+        }),
+      });
+      // const result = await response.json();
+      // console.log(result, ' result')
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        toast.success('PN is already been signed!');
+        handleRefetchLoanData()
+      }
+    }
+    
+  };
+  
+  const onSubmitLoanBankDetails = async (data: LoanBankFormValues | undefined, handleRefetchLoanData: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let variables: { input: any } = {
+      input: {
+        loan_id: data?.loan_id,
+        account_name: data?.account_name,
+        surrendered_bank_id: data?.surrendered_bank_id,
+        issued_bank_id: data?.issued_bank_id,
+        surrendered_acct_no: data?.surrendered_acct_no,
+        issued_acct_no: data?.issued_acct_no,
+        surrendered_pin: data?.surrendered_pin,
+        issued_pin: data?.issued_pin,
+      }
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure the bank details is correct?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: SAVE_LOAN_BANK_DETAILS,
+          variables,
+        }),
+      });
+      // const result = await response.json();
+      // console.log(result, ' result')
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        toast.success('Bank Entry Saved!');
+        handleRefetchLoanData()
+      }
+    }
+    
+  };
+
+  const onSubmitLoanRelease = async (data: LoanReleaseFormValues | undefined, handleRefetchLoanData: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let variables: { input: any } = {
+      input: {
+        id: data?.id,
+        released_date: data?.released_date,
+        bank_id: data?.bank_id,
+        check_no: data?.check_no,
+      }
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure you want to released?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: SAVE_LOAN_RELEASE,
+          variables,
+        }),
+      });
+      // const result = await response.json();
+      // console.log(result, ' result')
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        toast.success('Loan Successfully Released!');
+        handleRefetchLoanData()
       }
     }
     
@@ -175,7 +303,10 @@ const useLoans = () => {
     submitApproveRelease,
     fetchSingLoans,
     loanSingleData,
-    loading
+    submitPNSigned,
+    loading,
+    onSubmitLoanBankDetails,
+    onSubmitLoanRelease
   };
 };
 

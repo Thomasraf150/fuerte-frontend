@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
+import { loanStatus } from '@/utils/helper';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -36,7 +37,7 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
               </tr>
               <tr>
               <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Status</td>
-                <td className="px-4 py-2 text-gray-900">{ loanSingleData?.status === 0 ? 'For Approval' : loanSingleData?.status === 1 ? 'Approved' : 'Released' }</td>
+                <td className="px-4 py-2 text-gray-900">{ loanStatus(loanSingleData?.status) }</td>
               </tr>
               <tr>
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Monthly</td>

@@ -18,6 +18,8 @@ const BORROWER_LOAN_QUERY: string = `
           approved_date
           released_date
           is_pn_signed
+          bank_id
+          check_no
           loan_product {
             id 
             description
@@ -43,6 +45,16 @@ const BORROWER_LOAN_QUERY: string = `
             middlename
             lastname
           }
+          loan_bank_details {
+            account_name
+            issued_acct_no
+            issued_bank_id
+            issued_pin
+            loan_id
+            surrendered_acct_no
+            surrendered_bank_id
+            surrendered_pin
+          }
         }
     }
   }
@@ -63,6 +75,8 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
       approved_date
       released_date
       is_pn_signed
+      bank_id
+      check_no
       loan_product {
         id 
         description
@@ -97,6 +111,16 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         firstname
         middlename
         lastname
+      }
+      loan_bank_details {
+        account_name
+        issued_acct_no
+        issued_bank_id
+        issued_pin
+        loan_id
+        surrendered_acct_no
+        surrendered_bank_id
+        surrendered_pin
       }
     }
   }
@@ -145,12 +169,47 @@ const APPROVE_LOAN_BY_SCHEDULE: string = `
     }
   }
 `;
+const LOAN_PN_SIGNING: string = `
+  mutation SignPNLoan($input: InputPNSigning){
+    signPNLoan(input: $input){
+      success
+      message
+    }
+  }
+`;
+const SAVE_LOAN_BANK_DETAILS: string = `
+  mutation SaveLoanBankDetails($input: InputLoanBankDetails){
+    saveLoanBankDetails(input: $input){
+      success
+      message
+      data {
+        loan_bank_details {
+          account_name
+        }
+      }
+    }
+  }
+`;
+const SAVE_LOAN_RELEASE: string = `
+  mutation SaveReleaseLoan($input: InputLoanRelease){
+    saveReleaseLoan(input: $input){
+      success
+      message
+      data {
+        released_date
+      }
+    }
+  }
+`;
 
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
   PROCESS_BORROWER_LOAN_MUTATION,
   APPROVE_LOAN_BY_SCHEDULE,
-  BORROWER_SINGLE_LOAN_QUERY
+  BORROWER_SINGLE_LOAN_QUERY,
+  LOAN_PN_SIGNING,
+  SAVE_LOAN_BANK_DETAILS,
+  SAVE_LOAN_RELEASE
 };
 
 export default LoanProductsQueryMutations;
