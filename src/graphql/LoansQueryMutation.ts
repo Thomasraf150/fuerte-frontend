@@ -6,6 +6,7 @@ const BORROWER_LOAN_QUERY: string = `
         borrower_id: $borrower_id){
         data {
           id
+          loan_ref
           loan_proceeds
           pn_amount
           monthly
@@ -63,6 +64,7 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
   query GetLoan($loan_id: Int){
     getLoan(loan_id: $loan_id){
       id
+      loan_ref
       loan_proceeds
       pn_amount
       monthly
@@ -201,6 +203,11 @@ const SAVE_LOAN_RELEASE: string = `
     }
   }
 `;
+const PRINT_LOAN_DETAILS: string = `
+    mutation PrintLoanDetails($input: LoanDetailsInput!){
+      printLoanDetails(input: $input)
+    }
+`;
 
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
@@ -209,7 +216,8 @@ const LoanProductsQueryMutations = {
   BORROWER_SINGLE_LOAN_QUERY,
   LOAN_PN_SIGNING,
   SAVE_LOAN_BANK_DETAILS,
-  SAVE_LOAN_RELEASE
+  SAVE_LOAN_RELEASE,
+  PRINT_LOAN_DETAILS
 };
 
 export default LoanProductsQueryMutations;

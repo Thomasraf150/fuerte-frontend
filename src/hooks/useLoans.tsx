@@ -20,7 +20,8 @@ const useLoans = () => {
           BORROWER_SINGLE_LOAN_QUERY, 
           LOAN_PN_SIGNING, 
           SAVE_LOAN_BANK_DETAILS,
-          SAVE_LOAN_RELEASE } = LoansQueryMutation;
+          SAVE_LOAN_RELEASE,
+          PRINT_LOAN_DETAILS } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
@@ -85,6 +86,35 @@ const useLoans = () => {
     // const result = await response.json();
     setLoanProduct(response.data.getLoanProducts);
     setLoading(false);
+  };
+
+  const printLoanDetails = async (loan_id: string) => {
+    try {
+      setLoading(true);
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: PRINT_LOAN_DETAILS,
+          variables: {
+            input: { loan_id },
+          },
+        }),
+      });
+  
+      const pdfUrl = response.data.printLoanDetails;
+  
+      // Open the generated PDF in a new tab
+      window.open(process.env.NEXT_PUBLIC_BASE_URL + pdfUrl, '_blank');
+  
+      setLoading(false);
+    } catch (error) {
+      console.error("Error printing loan details:", error);
+      toast.error("Failed to print loan details.");
+      setLoading(false);
+    }
   };
 
   const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
@@ -306,7 +336,8 @@ const useLoans = () => {
     submitPNSigned,
     loading,
     onSubmitLoanBankDetails,
-    onSubmitLoanRelease
+    onSubmitLoanRelease,
+    printLoanDetails
   };
 };
 

@@ -3,19 +3,22 @@ import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
+import { Printer } from 'react-feather';
+import useLoans from '@/hooks/useLoans';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
+  printLoanDetails: (v: string) => void;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
+const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) => {
 
   const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
                         Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
                         Number(loanSingleData?.loan_details[4]?.credit ?? 0)
                         Number(loanSingleData?.loan_details[5]?.credit ?? 0)
                         Number(loanSingleData?.loan_details[6]?.credit ?? 0);
-                  
+
   return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-200 p-4 rounded">
@@ -90,6 +93,18 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div className="bg-gray-200 p-4 rounded">
+          <button
+            className="flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            type="button"
+            onClick={() => { return printLoanDetails(String(loanSingleData?.id)); }}
+          >
+            <span className="mt-1 mr-1">
+              <Printer size={17} /> 
+            </span>
+            <span>Print Loan Details</span>
+          </button>
         </div>
         {/* Add more grid items as needed */}
       </div>

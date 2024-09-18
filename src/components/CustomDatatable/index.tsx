@@ -43,22 +43,22 @@ interface CustomDatatableProps<T> {
 // eslint-disable-next-line react/display-name
 const CustomHeader: React.FC<{ title: string; renderButton: () => React.ReactNode; searchQuery: string; handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void; }> = React.memo(({ title, renderButton, searchQuery, handleSearch }) => (
   <div className='border-bottom-0 rounded-top'>
-      <div className='row align-items-center justify-content-between py-1 pr-1'>
-        <div className='col'>
-          <h4 className='m-1'>{title}</h4>
-        </div>
-        <div className='col text-right'>
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="form-control"
-          />
-          {renderButton()}
-        </div>
+    <div className='row align-items-center justify-content-between py-1 pr-1'>
+      <div className='col'>
+        <h4 className='m-1'>{title}</h4>
+      </div>
+      <div className='col text-right border-solid'>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className="form-control border border-x-blue-900 rounded-md px-4 py-1 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        />
+        {renderButton()}
       </div>
     </div>
+  </div>
 ));
 
 // Define the CustomDatatable component

@@ -13,6 +13,7 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   handleRefetchData: () => void;
+  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => void;
 }
 
 interface Option {
@@ -21,12 +22,12 @@ interface Option {
   hidden?: boolean;
 }
 
-const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData }) => {
+const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
 
   const [bankOptions1, setBankOptions1] = useState<Option[]>([]);
   const [bankOptions2, setBankOptions2] = useState<Option[]>([]);
-  const { onSubmitLoanRelease } = useLoans();
+  // const { onSubmitLoanRelease } = useLoans();
   const { dataBank } = useBank();
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);

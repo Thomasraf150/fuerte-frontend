@@ -18,7 +18,7 @@ interface BorrInfoProps {
 const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm }) => {
   const [activeTab, setActiveTab] = useState<number>();
 
-  const { loanSingleData, fetchSingLoans } = useLoans();
+  const { loanSingleData, fetchSingLoans, onSubmitLoanRelease, printLoanDetails } = useLoans();
 
   const handleTabClick = (tabIndex: number) => {
     setActiveTab(tabIndex);
@@ -42,7 +42,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
       </div>
       {loanSingleData && (
         <>
-          <LoanDetails loanSingleData={loanSingleData} />
+          <LoanDetails loanSingleData={loanSingleData} printLoanDetails={printLoanDetails} />
           <div className="flex flex-col md:flex-row border-b mt-3">
             <button
               onClick={() => handleTabClick(1)}
@@ -117,7 +117,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
         {activeTab === 4 && (
            <div>
            {loanSingleData && (
-             <ReleaseLoans loanSingleData={loanSingleData} handleRefetchData={handleRefetchData} />
+             <ReleaseLoans loanSingleData={loanSingleData} handleRefetchData={handleRefetchData} onSubmitLoanRelease={onSubmitLoanRelease} />
            )}
          </div>
         )}
