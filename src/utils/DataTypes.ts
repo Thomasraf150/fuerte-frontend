@@ -435,12 +435,20 @@ export interface DataRowLoanDetails {
   credit: string;
   account_id: string;
 }
+
+export interface DataRowLoanPayments {
+  id: string;
+  description: string;
+  amount: number;
+}
+
 export interface DataRowLoanSchedules {
   id: string;
   user_id: string;
   loan_id: string;
-  amount: string;
+  amount: number;
   due_date: string;
+  loan_payments: DataRowLoanPayments[];
   is_deleted: string;
 }
 export interface DataRowLoanUdiSchedules {
@@ -558,4 +566,16 @@ export interface LoanReleaseFormValues {
   bank_id: string;
   released_date: Date | undefined;
   check_no: string;
+}
+export interface CollectionFormValues {
+  loan_schedule_id: string;
+  loan_udi_schedule_id: string;
+  collection: string;
+  penalty: string;
+  bank_charge: string;
+  ap_refund: string;
+  interest: string;
+  ua_sp: string;
+  collection_date: string;
+  user_id: string;
 }

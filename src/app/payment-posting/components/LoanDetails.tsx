@@ -1,16 +1,22 @@
-import React, { useEffect } from 'react';
-import { BorrLoanRowData } from '@/utils/DataTypes';
+import React, { useEffect, useState } from 'react';
+import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
-import { Printer, CreditCard } from 'react-feather';
+import { CheckCircle, CreditCard } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
+import PaymentCollectionForm from './Form/PaymentCollectionForm';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
+  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
+const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment }) => {
+
+
+  const [selectedMoSched, setSelectedMoSched] = useState<BorrLoanRowData>();
+  const [selectedUdiSched, setSelectedUdiSched] = useState<BorrLoanRowData>();
 
   const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
                         Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
@@ -18,8 +24,12 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
                         Number(loanSingleData?.loan_details[5]?.credit ?? 0)
                         Number(loanSingleData?.loan_details[6]?.credit ?? 0);
 
+  const handleProceedToPay = (amortData: any, udiData: any) => {
+    setSelectedMoSched(amortData);
+    setSelectedUdiSched(udiData);
+  }
+
   useEffect(() => {
-    console.log(loanSingleData, ' loanSingleData');
   }, [])
 
   return (
@@ -36,7 +46,7 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
             <tbody>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Borrower</td>
-                <td className="px-4 py-2 text-gray-900">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</td>
+                <td className="px-4 py-2 text-gray-900 uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</td>
               </tr>
               <tr className="">
               <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">PN Amount</td>
@@ -125,140 +135,65 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
             </div>
 
             {loanSingleData?.loan_schedules?.map((item, i) => (
-              <>
                 <div
                     className="grid grid-cols-7 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6"
-                  >
-                  <div className="col-span-2 flex items-center">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                      <p className="text-sm text-black dark:text-white">
-                        {item?.due_date}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="col-span-2 hidden items-center sm:flex">
+                  key={i}
+                >
+                <div className="col-span-2 flex items-center">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <p className="text-sm text-black dark:text-white">
-                      {item?.amount}
+                      {item?.due_date}
                     </p>
                   </div>
-                  <div className="col-span-1 flex items-center">
-                    <p className="text-sm text-black dark:text-white">
-                      {Number(loanSingleData?.loan_udi_schedules[i]?.amount).toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="col-span-2 flex items-center">
+                </div>
+                <div className="col-span-2 hidden items-center sm:flex">
+                  <p className="text-sm text-black dark:text-white">
+                    {item?.amount}
+                  </p>
+                </div>
+                <div className="col-span-1 flex items-center">
+                  <p className="text-sm text-black dark:text-white">
+                    {Number(loanSingleData?.loan_udi_schedules[i]?.amount).toFixed(2)}
+                  </p>
+                </div>
+                <div className="col-span-2 flex items-center">
+                  {item?.amount > 0 ? (
                     <button
                       className="w-full flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                       type="button"
+                      onClick={() => {handleProceedToPay(item, loanSingleData?.loan_udi_schedules[i])}}
                     >
                       <span className="mr-1">
                         <CreditCard size={17} /> 
                       </span>
                       <span>Proceed to pay</span>
                     </button>
-                  </div>
+                  ) : (
+                    <button
+                      className="w-full flex justify-between items-center focus:outline-none text-white bg-blue-400 hover:bg-blue-300 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                      type="button"
+                      disabled
+                    >
+                      <span className="mr-1">
+                        <CheckCircle size={17} /> 
+                      </span>
+                      <span>Paid</span>
+                    </button>
+                  )}
                 </div>
-              </>
+              </div>
             ))}
 
           </div>
         </div>
-
-        <div className="bg-gray-200 p-4 rounded">
-          <div className="px-4 py-4 border border-stroke bg-gradient-to-r from-cyan-500 to-blue-500 md:px-3 xl:px-6">
-            <h5 className="text-m text-lime-50 dark:text-white">
-              <span className="font-semibold">Process Payment</span>
-            </h5>
-          </div>
-          <table className="min-w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="">
-                <td className="px-4 py-4 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Remaining Due: </td>
-                <td className="px-4 py-2 text-gray-900 text-center">0.00</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-4 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Interest: </td>
-                <td className="px-4 py-2 text-gray-900 text-center">0.00</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="check_no"
-                    placeholder="0.00"
-                  />
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Penalty</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="check_no"
-                    placeholder="0.00"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Bank Charges</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="check_no"
-                    placeholder="0.00"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">AP Refund</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="check_no"
-                    placeholder="0.00"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection Date</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="check_no"
-                    placeholder="mm/dd/YYYY"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2"></td>
-                <td className="px-4 py-2 text-gray-900">
-                  <button
-                    className="float-right mr-0 flex justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    type="button"
-                  >
-                    <span className="mr-1">
-                      <CreditCard size={17} /> 
-                    </span>
-                    <span>Pay Now</span>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div>
+          {selectedMoSched && (
+            <div className={`${selectedMoSched && 'fade-in'}`}>
+              <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment}/>
+            </div>
+          )}
         </div>
-
+        
 
 
       </div>

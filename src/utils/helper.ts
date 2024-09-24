@@ -38,3 +38,12 @@ export const fetchWithRecache = async (
     throw error;
   }
 };
+
+
+export const formatToTwoDecimalPlaces = (value: string) => {
+  const num = parseFloat(value);
+  if (!isNaN(num)) {
+    return num.toFixed(2);
+  }
+  return '';
+};
