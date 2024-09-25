@@ -251,3 +251,20 @@ input[type="search"]::-webkit-search-cancel-button {
 button {
     border-radius: 0 !important;
 }
+
+/* In a global CSS file */
+.nextui-calendar {
+  background-color: white !important; /* Set background to white */
+  color: black !important; /* Ensure text is visible */
+}
+
+.nextui-calendar .calendar-cell {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Other styles for buttons, headers, etc. */
+.nextui-calendar button {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
