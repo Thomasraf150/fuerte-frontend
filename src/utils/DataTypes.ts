@@ -579,3 +579,6 @@ export interface CollectionFormValues {
   collection_date: string;
   user_id: string;
 }
+export interface SummaryTicketValues {
+  
+}

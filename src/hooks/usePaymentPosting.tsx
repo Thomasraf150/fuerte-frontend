@@ -10,7 +10,7 @@ import PaymentPostingQueryMutation from '@/graphql/PaymentPostingQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
 
-const useLoans = () => {
+const usePaymentPosting = () => {
   const { LOANS_LIST_QUERY, GET_LOAN_SCHEDULE, PROCESS_COLLECTION_PAYMENT } = PaymentPostingQueryMutation;
 
   const [loanData, setLoanData] = useState<BorrLoanRowData[]>([]);
@@ -112,4 +112,4 @@ const useLoans = () => {
   };
 };
 
-export default useLoans;
+export default usePaymentPosting;

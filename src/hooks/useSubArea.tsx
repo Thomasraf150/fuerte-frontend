@@ -6,7 +6,7 @@ import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 
 import { DataArea, DataSubArea } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-const useArea = () => {
+const useSubArea = () => {
 
   const { GET_AREA_QUERY, 
           GET_SUB_AREA_QUERY,
@@ -126,4 +126,4 @@ const useArea = () => {
   };
 };
 
-export default useArea;
+export default useSubArea;
