@@ -29,9 +29,18 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     setShowForm(b);
     setShowDetails(false);
   }
+  
+  const renewALoan = (b: boolean) => {
+    setShowForm(b);
+    setShowDetails(false);
+  }
 
   // remove attachments
   const handleRowClick = async (row: BorrLoanRowData) => {
+  }
+
+  const handleCheckboxChange = async (row: BorrLoanRowData, isChecked: boolean) => {
+    console.log(isChecked, ' isChecked')
   }
 
   const handleWholeRowClick = (row: BorrLoanRowData) => {
@@ -54,9 +63,10 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
         {showForm === false ? (
           <div className="py-1">
             <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={() => { createLoans(true) }}>Add Loans</button>
+            <button disabled={true} className="bg-green-500 text-white py-2 px-2 mx-1 rounded hover:bg-green-400" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
             <CustomDatatable
               apiLoading={loading}
-              columns={column(handleRowClick)}
+              columns={column(handleRowClick, handleCheckboxChange)}
               data={loanData}
               enableCustomHeader={true} 
               onRowClicked={handleWholeRowClick}

@@ -5,21 +5,23 @@ import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
+import { loanStatus } from '@/utils/helper';
 
-const borrStatus = (status: number) => {
-  if (status === 0) {
-    return 'For Approval';
-  }
-  if (status === 1) {
-    return 'Approved';
-  }
-  if (status === 2) {
-    return 'Released';
-  }
-  return '';
-};
-
-const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn<BorrLoanRowData>[] => [
+const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheckboxChange: (row: BorrLoanRowData, isChecked: boolean) => void): TableColumn<BorrLoanRowData>[] => [
+  {
+    name: '',
+    cell: row => (
+      <input
+        type="checkbox"
+        onChange={(e) => handleCheckboxChange(row, e.target.checked)}
+        className="cursor-pointer"
+      />
+    ),
+    width: '50px',
+    style: {
+      justifyContent: 'center',
+    },
+  },
   {
     name: 'Loan Product',
     cell: row => row.loan_product.description,
@@ -50,15 +52,17 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
           row.status === 0
-            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+            ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
             : row.status === 1
-            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+            ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-red'
             : row.status === 2
             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+            : row.status === 3
+            ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
             : ''
         }`}
       >
-        {borrStatus(row.status)}
+        {loanStatus(row.status)}
       </span>
     ),
     sortable: true,
