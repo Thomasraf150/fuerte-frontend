@@ -579,6 +579,19 @@ export interface CollectionFormValues {
   collection_date: string;
   user_id: string;
 }
-export interface SummaryTicketValues {
-  
+export interface CustomerLedgerData {
+  loan_id: string;
+  loan_schedule_id: string;
+  due_date: string;
+  date_paid: string;
+  debit: string;
+  credit: string;
+  running_balance: string;
+  ap_refund: string;
+  ua_sp: string;
+  bank_charge: string;
+  penalty: string;
+  udi: string;
+  payment_ua_sp: string;
+  advance_payment: string;
 }

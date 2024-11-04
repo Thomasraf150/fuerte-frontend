@@ -2,18 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import loansListColumn from './LoansListColumn';
+import soaListColumn from './SoaListColumn';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
-import usePaymentPosting from '@/hooks/usePaymentPosting';
-// import LoanPnSigningForm from './LoanPnSigningForm';
-import PaymentScheduleForm from './PaymentScheduleForm';
+import useLoans from '@/hooks/useLoans';
+import SoaDetails from './SoaDetails';
 
-const column = loansListColumn;
+const column = soaListColumn;
 
-const LoansLists: React.FC = () => {
+const SoaList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoanSchedule, loanScheduleList, fetchLoans, loading, onSubmitCollectionPayment } = usePaymentPosting();
+  const { loanData, fetchLoans, loading } = useLoans();
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -22,7 +21,7 @@ const LoansLists: React.FC = () => {
  
   const handleWholeRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
-    fetchLoanSchedule(data?.id);
+    setSingleData(data);
   }
 
   const handleShowForm = (d: boolean) => {
@@ -32,18 +31,19 @@ const LoansLists: React.FC = () => {
 
   useEffect(() => {
     fetchLoans(1000, 1, 0);
-  }, [loanScheduleList])
+  }, [])
 
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
+
             {showForm === false ? (
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
-                    Loans List
+                    Statement of Account
                   </h3>
                 </div>
                 <div className="p-7">
@@ -58,9 +58,9 @@ const LoansLists: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <PaymentScheduleForm singleData={loanScheduleList} handleShowForm={handleShowForm} onSubmitCollectionPayment={onSubmitCollectionPayment} />
-              </div>
+                <>
+                  <SoaDetails setShowForm={setShowForm} singleData={singleData}/>
+                </>
             )}
             
           </div>
@@ -70,4 +70,4 @@ const LoansLists: React.FC = () => {
   );
 };
 
-export default LoansLists;
+export default SoaList;

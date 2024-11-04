@@ -35,7 +35,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
         console.log('false')
       }
       if (value !== '') {
-        const computedUdi = String((selectedUdiSched?.amount * ((parseFloat(value) / selectedMoSched?.amount) * 100 / 100)).toFixed(2));
+        const computedUdi = String((selectedUdiSched?.amount * (((parseFloat(value) - parseFloat(watch('ap_refund'))) / selectedMoSched?.amount) * 100 / 100)).toFixed(2));
         setValue('interest', computedUdi);
       }
     }

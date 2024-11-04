@@ -452,9 +452,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/forms/form-elements"
+                              href="/statement-of-account"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/notes-receivable" &&
+                                pathname === "/statement-of-account" &&
                                 "text-white"
                               }`}
                             >

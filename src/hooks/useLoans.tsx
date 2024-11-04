@@ -10,8 +10,6 @@ import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
 
-
-console.log(fetchWithRecache, 'fetchWithRecache');
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
   const { BORROWER_LOAN_QUERY, 
