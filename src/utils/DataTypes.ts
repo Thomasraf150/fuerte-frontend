@@ -533,6 +533,7 @@ export interface BorrLoanComputationValues {
   ob: string;
   penalty: string;
   rebates: string;
+  renewal_loan_id: string;
 }
 
 export interface ObjDeductions {

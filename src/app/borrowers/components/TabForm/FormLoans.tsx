@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { DollarSign, Layout, Save } from 'react-feather';
 import FormInput from '@/components/FormInput';
-import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches } from '@/utils/DataTypes';
+import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
 import FormLoanComputation from './FormLoanComputation';
@@ -14,6 +14,7 @@ interface ParentFormBr {
   createLoans: (value: boolean) => void;
   singleData: BorrowerRowInfo | undefined;
   dataBranchSub: DataSubBranches[] | undefined;
+  dataLoanRenewal: BorrLoanRowData | undefined;
 }
 
 interface Option {
@@ -22,7 +23,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub }) => {
+const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub, dataLoanRenewal }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
   const { dataComputedLoans, onSubmitLoanComp, loanProduct } = useLoans();
 
@@ -33,7 +34,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     'loan_product_id': String(watch('loan_product_id')),
     'ob': String(watch('ob') ?? "0.00"),
     'penalty': String(watch('penalty') ?? "0.00"),
-    'rebates': String(watch('rebates') ?? "0.00")
+    'rebates': String(watch('rebates') ?? "0.00"),
+    'renewal_loan_id': String(dataLoanRenewal?.id)
   };
 
   const onSubmit: SubmitHandler<BorrLoanFormValues> = async (data) => {
@@ -209,7 +211,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
           {showComputation && (
             <div className={`${showComputation ? 'fade-in' : 'fade-out'}`}>
-              <FormLoanComputation setValue={setValue} register={register} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans}/>
+              <FormLoanComputation setValue={setValue} register={register} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} />
             </div>
           )}
 

@@ -11,11 +11,13 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
   {
     name: '',
     cell: row => (
-      <input
-        type="checkbox"
-        onChange={(e) => handleCheckboxChange(row, e.target.checked)}
-        className="cursor-pointer"
-      />
+      row.status === 3 && (
+        <input
+          type="checkbox"
+          onChange={(e) => handleCheckboxChange(row, e.target.checked)}
+          className="cursor-pointer"
+        />
+      )
     ),
     width: '50px',
     style: {

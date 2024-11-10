@@ -23,7 +23,9 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   const { loanData, fetchLoans, loading } = useLoans();
   const [showForm, setShowForm] = useState<boolean>(false);
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [btnRenewal, setBtnRenewal] = useState<boolean>(true);
   const [dataLoanComputed, setDataLoanComputed] = useState<BorrLoanRowData>();
+  const [dataLoanRenewal, setDataLoanRenewal] = useState<BorrLoanRowData>();
 
   const createLoans = (b: boolean) => {
     setShowForm(b);
@@ -40,7 +42,12 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   }
 
   const handleCheckboxChange = async (row: BorrLoanRowData, isChecked: boolean) => {
-    console.log(isChecked, ' isChecked')
+    // console.log(isChecked, ' isChecked')
+    // console.log(row, 'oowa ');
+    if (isChecked) {
+      setBtnRenewal(false);
+      setDataLoanRenewal(row);
+    }
   }
 
   const handleWholeRowClick = (row: BorrLoanRowData) => {
@@ -63,7 +70,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
         {showForm === false ? (
           <div className="py-1">
             <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={() => { createLoans(true) }}>Add Loans</button>
-            <button disabled={true} className="bg-green-500 text-white py-2 px-2 mx-1 rounded hover:bg-green-400" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
+            <button disabled={btnRenewal} className="bg-green-500 text-white py-2 px-2 mx-1 rounded hover:bg-green-400" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
             <CustomDatatable
               apiLoading={loading}
               columns={column(handleRowClick, handleCheckboxChange)}
@@ -74,7 +81,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
             />
           </div>
         ) : (
-          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub}/>
+          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} dataLoanRenewal={dataLoanRenewal}/>
         )}
       </div>
       {showDetails && (

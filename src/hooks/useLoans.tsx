@@ -128,7 +128,8 @@ const useLoans = () => {
         loan_product_id: data.loan_product_id,
         ob: data.ob,
         penalty: data.penalty,
-        rebates: data.rebates
+        rebates: data.rebates,
+        renewal_loan_id: data.renewal_loan_id
       },
       process_type
     };

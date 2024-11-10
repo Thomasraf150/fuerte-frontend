@@ -10,8 +10,8 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
 
   const totalDeduction = Number(dataComputedLoans?.loan_details[2]?.credit ?? 0) + 
                           Number(dataComputedLoans?.loan_details[3]?.credit ?? 0) + 
-                          Number(dataComputedLoans?.loan_details[4]?.credit ?? 0)
-                          Number(dataComputedLoans?.loan_details[5]?.credit ?? 0)
+                          Number(dataComputedLoans?.loan_details[4]?.credit ?? 0) + 
+                          Number(dataComputedLoans?.loan_details[5]?.credit ?? 0) +
                           Number(dataComputedLoans?.loan_details[6]?.credit ?? 0);
 
   useEffect(() => {

@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 
 import React, { useState } from 'react';
@@ -55,7 +51,7 @@ const SoaInfo: React.FC<BorrInfoProps> = ({ setShowForm }) => {
               }`}
               onClick={() => handleTabClick('tab2')}
             >
-              Customer Ledger
+              Customer
             </button>
           </div>
 

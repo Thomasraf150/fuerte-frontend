@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { BorrLoanComputationRes } from '@/utils/DataTypes';
+import { BorrLoanComputationRes, BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 
 interface ParentFormBr {
   setValue: any;
   register: any;
   handleCompTblDecimal: (e: any, name: string) => void;
-  dataComputedLoans: any
+  dataComputedLoans: any;
 }
 
 const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDecimal, register, dataComputedLoans }) => {
@@ -16,7 +16,6 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
   //   const formattedValue = formatToTwoDecimalPlaces(value);
   //   setValue(name, formattedValue);
   // }
-
   useEffect(() => {
     if (dataComputedLoans) {
       setValue('ob', dataComputedLoans?.ob);
