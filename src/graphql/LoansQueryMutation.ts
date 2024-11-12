@@ -32,7 +32,6 @@ const BORROWER_LOAN_QUERY: string = `
             commission
             collection
             notarial
-            addon
           }
           loan_details {
             id
@@ -90,7 +89,6 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         commission
         collection
         notarial
-        addon
       }
       loan_details {
         id
@@ -151,6 +149,11 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
       ob
       rebates
       penalty
+      addon_terms
+      addon_udi_rate
+      addon_amount
+      addon_udi
+      addon_total
       new_loan_proceeds
     }
   }

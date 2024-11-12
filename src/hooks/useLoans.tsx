@@ -123,7 +123,7 @@ const useLoans = () => {
       input: {
         borrower_id: data.borrower_id,
         user_id: userData?.user?.id,
-        loan_proceeds: data.loan_proceeds,
+        loan_amount: data.loan_amount,
         branch_sub_id: data.branch_sub_id,
         loan_product_id: data.loan_product_id,
         ob: data.ob,

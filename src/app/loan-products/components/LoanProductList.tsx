@@ -31,6 +31,10 @@ const LoanProductList: React.FC = () => {
     console.log(data, ' whole row click tr');
   }
 
+  useEffect(() => {
+    fetchLoanProducts()
+  }, [])
+
   return (
     <div>
       {showForm === false ? (

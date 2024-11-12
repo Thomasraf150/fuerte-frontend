@@ -50,7 +50,10 @@ export interface DataRowLoanProducts {
   insurance: number;
   collection: number;
   notarial: number;
-  addon: number;
+  // addon: number;
+  base_deduction: number;
+  addon_terms: number;
+  addon_udi_rate: number;
   user_id: number;
   is_active: number;
   loan_code: DataRowLoanCodes
@@ -66,8 +69,11 @@ export interface DataFormLoanProducts {
   insurance: number | '';
   collection: number | '';
   notarial: number | '';
-  addon: number | '';
+  // addon: number | '';
   user_id: number | '';
+  base_deduction: number | '';
+  addon_terms: number | '';
+  addon_udi_rate: number | '';
   is_active: number | '';
 }
 
@@ -516,7 +522,7 @@ export interface BorrLoanFormValues {
   loan_product_id: number; 
   term: string;
   pn_amount: string;
-  loan_proceeds: string;
+  loan_amount: string;
   pn_balance: string;
   udi_balance: string;
   is_deleted: number;
@@ -527,7 +533,7 @@ export interface BorrLoanFormValues {
 
 export interface BorrLoanComputationValues {
   borrower_id: number;
-  loan_proceeds: string;
+  loan_amount: string;
   branch_sub_id: string;
   loan_product_id: string;
   ob: string;

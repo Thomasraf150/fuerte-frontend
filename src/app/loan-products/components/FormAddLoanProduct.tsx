@@ -24,9 +24,17 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   const { onSubmitLoanProduct } = useLoanProducts();
   const { data: loanCodeData } = useLoanCodes();
   const [optionsClient, setOptionsClient] = useState<OptionLoanCode[]>([]);
-  const [options, setOptions] = useState<OptionLoanCode[]>([
-    { value: '', label: 'Select a Loan Code', hidden: true },
+  const [selectedOptIsAuto, setSelectedOptIsAuto] = useState<string>();
+  const [baseCompOptions, setBaseCompOptions] = useState<OptionLoanCode[]>([
+    { value: '', label: 'Select Base Deduction', hidden: true },
+    { value: '0', label: 'Loan Proceeds' },
+    { value: '1', label: 'PN' },
   ]);
+  // const [isAutoOptions, setIsAutoOptions] = useState<OptionLoanCode[]>([
+  //   { value: '', label: 'Select Is Auto compute', hidden: true },
+  //   { value: '0', label: 'Yes' },
+  //   { value: '1', label: 'No' },
+  // ]);
 
    // Watch the password field
   //  const password = watch('password', '');
@@ -74,7 +82,9 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
       setValue('insurance', singleData.insurance);
       setValue('collection', singleData.collection);
       setValue('notarial', singleData.notarial);
-      setValue('addon', singleData.addon);
+      setValue('base_deduction', singleData.base_deduction);
+      setValue('addon_terms', singleData.addon_terms);
+      setValue('addon_udi_rate', singleData.addon_udi_rate);
       setValue('is_active', singleData.is_active);
     } else {
       reset({
@@ -87,17 +97,38 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         insurance: '',
         collection: '',
         notarial: '',
-        addon: '',
+        base_deduction: '',
+        addon_terms: '',
+        addon_udi_rate: '',
         is_active: ''
       })
     }
   }, [loanCodeData, singleData])
+
+  const handleOnChangeAutoCompute = (e: any) => {
+    setSelectedOptIsAuto(e.target.value);
+  }
+
+  useEffect(() => {
+    console.log(selectedOptIsAuto, ' selectedOptIsAuto')
+  }, [selectedOptIsAuto])
 
   return (
 
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         {/* First Column */}
+        <div className="col-span-2">
+           <FormInput
+            label="Base Deduction"
+            id="base_deduction"
+            type="select"
+            icon={ChevronDown}
+            register={register('base_deduction', { required: 'Base Deduction is required' })}
+            error={errors.base_deduction?.message}
+            options={baseCompOptions}
+          />
+        </div>
         <div className="col-span-2">
            <FormInput
             label="Loan Code"
@@ -159,30 +190,30 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             error={errors.collection && "This field is required"}
           />
         </div>
-        <div className='relative col-span-2'>
-          <div className="absolute bottom-0 right-1 z-10 xsm:bottom-0 xsm:right-0">
-            <label
-              htmlFor="cover"
-              onClick={handleComputeUdi}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
-            >
-              <span>Compute UDI</span>
-            </label>
+        {/* {selectedOptIsAuto === '0' ? (
+          <div className='relative col-span-2'>
+            <div className="absolute bottom-0 right-1 z-10 xsm:bottom-0 xsm:right-0">
+              <label
+                htmlFor="cover"
+                onClick={handleComputeUdi}
+                className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
+              >
+                <span>Compute UDI</span>
+              </label>
+            </div>
           </div>
-        </div>
+        ) : (<></>)} */}
         <div>
           <FormInput
             label="* UDI (%)"
             id="udi"
             type="text"
             icon={Home}
-            readOnly={true}
             register={register('udi', { required: true })}
             error={errors.udi && "This field is required"}
           />
         </div>
-        
-        <div>
+        {/* <div>
           <FormInput
             label="Addon (%)"
             id="addon"
@@ -190,6 +221,26 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('addon')}
             error={errors.addon && "This field is required"}
+          />
+        </div> */}
+        <div>
+          <FormInput
+            label="* Addon Terms."
+            id="terms"
+            type="text"
+            icon={Home}
+            register={register('addon_terms', { required: true })}
+            error={errors.terms && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="* Addon UDI Rate (%)"
+            id="terms"
+            type="text"
+            icon={Home}
+            register={register('addon_udi_rate', { required: true })}
+            error={errors.terms && "This field is required"}
           />
         </div>
         <div>

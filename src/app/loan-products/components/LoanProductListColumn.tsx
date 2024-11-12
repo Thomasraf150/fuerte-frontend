@@ -20,19 +20,19 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
     cell: row => row.description,
     sortable: true,
     style: {
-      minWidth: '230px',
+      minWidth: '520px',
     },
-    width: '230px'
+    width: '520px'
   },
-  {
-    name: 'Loan Description',
-    cell: row => row.description,
-    sortable: true,
-    style: {
-      minWidth: '220px',
-    },
-    width: '220px'
-  },
+  // {
+  //   name: 'Loan Description',
+  //   cell: row => row.description,
+  //   sortable: true,
+  //   style: {
+  //     minWidth: '220px',
+  //   },
+  //   width: '220px'
+  // },
   {
     name: 'Terms',
     cell: row => row.terms,
@@ -61,11 +61,6 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
   {
     name: 'Notarial',
     cell: row => row.notarial,
-    sortable: true,
-  },
-  {
-    name: 'Addon',
-    cell: row => row.addon,
     sortable: true,
   },
   {

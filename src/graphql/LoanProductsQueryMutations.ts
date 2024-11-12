@@ -13,7 +13,9 @@ const GET_LOAN_PRODUCT_QUERY: string = `
       commission
       collection
       notarial
-      addon
+      base_deduction
+      addon_terms
+      addon_udi_rate
       is_active
      	loan_code {
         id
@@ -35,7 +37,6 @@ const SAVE_LOAN_PRODUCT_QUERY: string = `
       insurance
       collection
       notarial
-      addon
       is_active
     }
   }
@@ -53,7 +54,9 @@ const UPDATE_LOAN_PRODUCT_QUERY: string = `
       insurance
       collection
       notarial
-      addon
+      base_deduction
+      addon_terms
+      addon_udi_rate
       is_active
     }
   }

@@ -29,7 +29,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
   const dataLoanComp = {
     'borrower_id': Number(BorrowerData?.id),
-    'loan_proceeds': watch('loan_proceeds'),
+    'loan_amount': watch('loan_amount'),
     'branch_sub_id': String(watch('branch_sub_id')),
     'loan_product_id': String(watch('loan_product_id')),
     'ob': String(watch('ob') ?? "0.00"),
@@ -159,19 +159,19 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
               {errors.loan_product_id && <p className="mt-2 text-sm text-red-600">{errors.loan_product_id.message}</p>}
             </div>
             <div>
-              <FormLabel title={`Loan Proceeds`}/>
+              <FormLabel title={`Loan Amount`}/>
               <div className="relative">
                 <input
                   className={`w-full h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
                   type="text"
-                  id="loan_proceeds"
-                  {...register('loan_proceeds', { required: "Loan Proceeds is required!" })}
-                  onBlur={(e: any) => { return handleDecimal(e, 'loan_proceeds'); }}
+                  id="loan_amount"
+                  {...register('loan_amount', { required: "Loan Amount is required!" })}
+                  onBlur={(e: any) => { return handleDecimal(e, 'loan_amount'); }}
                 />
                 <span className="absolute left-4.5 top-3">
                   <DollarSign size="18" />
                 </span>
-                {errors.loan_proceeds && <p className="mt-2 text-sm text-red-600">{errors.loan_proceeds.message}</p>}
+                {errors.loan_amount && <p className="mt-2 text-sm text-red-600">{errors.loan_amount.message}</p>}
               </div>
             </div>
 

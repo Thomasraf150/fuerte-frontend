@@ -49,7 +49,7 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
           />
         ) : type === 'select' ? (
           <select
-            className="h-10 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className="h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
             id={id}
             {...register}
             onChange={onChange}

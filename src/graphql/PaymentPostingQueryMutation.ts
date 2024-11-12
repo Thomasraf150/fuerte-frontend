@@ -32,7 +32,6 @@ const LOANS_LIST_QUERY: string = `
             commission
             collection
             notarial
-            addon
           }
           loan_details {
             id
@@ -105,7 +104,6 @@ const GET_LOAN_SCHEDULE: string = `
       commission
       collection
       notarial
-      addon
     }
     loan_details {
       id

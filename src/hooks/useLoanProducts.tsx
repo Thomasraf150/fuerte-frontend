@@ -50,7 +50,10 @@ const useLoanProducts = () => {
         insurance: Number(data.insurance),
         collection: Number(data.collection),
         notarial: Number(data.notarial),
-        addon: Number(data.addon),
+        // addon: Number(data.addon),
+        base_deduction: Number(data.base_deduction),
+        addon_terms: Number(data.addon_terms),
+        addon_udi_rate: Number(data.addon_udi_rate),
         is_active: data.is_active,
         user_id: userData?.user?.id
       },
@@ -81,7 +84,7 @@ const useLoanProducts = () => {
 
    // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchLoanProducts()
+    // fetchLoanProducts()
   }, []);
 
   return {
