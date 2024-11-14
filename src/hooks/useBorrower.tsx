@@ -231,10 +231,11 @@ const useBorrower = () => {
 
    // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchDataChief(100, 1);
-    fetchDataArea(100, 1);
-    fetchDataBorrCompany(100, 1);
-    fetchDataBorrower(100, 1);
+    // fetchDataChief(100, 1);
+    // fetchDataArea(100, 1);
+    // fetchDataBorrCompany(100, 1);
+    // fetchDataBorrower(100, 1);
+
     // fetchDataArea(100, 1);
     // fetchDataSubArea(10, 1);
   }, []);
@@ -248,7 +249,10 @@ const useBorrower = () => {
     onSubmitBorrower,
     dataBorrower,
     borrowerLoading,
-    fetchDataBorrower
+    fetchDataBorrower,
+    fetchDataChief,
+    fetchDataArea,
+    fetchDataBorrCompany
     // fetchDataArea,
     // dataArea,
     // fetchDataSubArea,

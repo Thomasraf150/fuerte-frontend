@@ -194,7 +194,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                 </li>
                 <li className="flex items-center gap-4 border p-2">
                   <div className="flex flex-1 items-center justify-start gap-1">
-                    <h3 className="text-sm text-strokedark">Addon UDI ({`${Number(dataComputedLoans?.addon_terms)}%`}).</h3>
+                    <h3 className="text-sm text-strokedark">Addon UDI ({`${Number(dataComputedLoans?.addon_udi_rate)}%`}).</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
                     <h3 className="text-sm text-strokedark"><span>- </span>{formatNumber(Number(dataComputedLoans?.addon_udi))}</h3>

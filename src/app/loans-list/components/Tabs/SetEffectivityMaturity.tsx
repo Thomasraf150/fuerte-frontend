@@ -236,7 +236,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       {selectedOption === 'once_a_month' && (
         <>
           <div>
-              <OnceAMonth term={Number(loanSingleData?.term)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval}/>
+              <OnceAMonth term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval}/>
           </div>
           <div className="col-span-2">
             <div className="flow-root  border border-gray-100 py-3 shadow-sm">
@@ -267,7 +267,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       {selectedOption === 'twice_a_month' && (
         <>
           <div>
-              <TwiceAMonth term={Number(loanSingleData?.term)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
+              <TwiceAMonth term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
           </div>
           <div className="col-span-2">
             <div className="flow-root  border border-gray-100 py-3 shadow-sm">
@@ -298,7 +298,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       {selectedOption === 'day_of_the_week' && (
         <>
           <div>
-              <DayOfTheWeek term={Number(loanSingleData?.term)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
+              <DayOfTheWeek term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
           </div>
           <div className="col-span-2">
             <div className="flow-root  border border-gray-100 py-3 shadow-sm">
@@ -329,7 +329,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       {selectedOption === 'manual_date' && (
         <>
           <div>
-              <ManualDate term={Number(loanSingleData?.term)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
+              <ManualDate term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
           </div>
           <div className="col-span-2">
             <div className="flow-root  border border-gray-100 py-3 shadow-sm">

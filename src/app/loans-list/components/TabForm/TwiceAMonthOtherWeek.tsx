@@ -7,11 +7,12 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface OMProps {
   term: number;
+  addon_term: number;
   selectedData: (v: any, p: number) => void;
   handleApproveRelease: (status: number) => void;
 }
 
-const TwiceAMonthOtherWeek: React.FC<OMProps> = ({ term, selectedData, handleApproveRelease }) => {
+const TwiceAMonthOtherWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
 
@@ -21,7 +22,7 @@ const TwiceAMonthOtherWeek: React.FC<OMProps> = ({ term, selectedData, handleApp
     const start = new Date(date);
     const result: string[] = [];
 
-    for (let i = 0; i < term; i++) {
+    for (let i = 0; i < (term + addon_term); i++) {
       // First date based on the selected date
       const firstDate = addMonths(start, i);
       result.push(format(firstDate, 'MM/dd/yyyy'));

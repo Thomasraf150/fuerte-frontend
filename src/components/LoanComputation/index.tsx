@@ -160,6 +160,30 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[8]?.credit))}</h3>
                   </div>
                 </li>
+                <li className="flex items-center gap-4 border p-2">
+                  <div className="flex flex-1 items-center justify-start gap-1">
+                    <h3 className="text-sm text-strokedark">Addon Amount</h3>
+                  </div>
+                  <div className="flex flex-2 items-center justify-end gap-1">
+                    <h3 className="text-sm text-strokedark">{formatNumber(Number(dataComputedLoans?.loan_details[10]?.debit))}</h3>
+                  </div>
+                </li>
+                <li className="flex items-center gap-4 border p-2">
+                  <div className="flex flex-1 items-center justify-start gap-1">
+                    <h3 className="text-sm text-strokedark">Addon UDI</h3>
+                  </div>
+                  <div className="flex flex-2 items-center justify-end gap-1">
+                    <h3 className="text-sm text-strokedark"><span>- </span>{formatNumber(Number(dataComputedLoans?.loan_details[11]?.credit))}</h3>
+                  </div>
+                </li>
+                <li className="flex items-center gap-4 border p-2">
+                  <div className="flex flex-1 items-center justify-start gap-1">
+                    <h3 className="text-sm text-strokedark">Addon Total.</h3>
+                  </div>
+                  <div className="flex flex-2 items-center justify-end gap-1">
+                    <h3 className="text-sm text-strokedark">{formatNumber(Number(dataComputedLoans?.loan_details[12]?.credit))}</h3>
+                  </div>
+                </li>
                 <li>
                   <span className="flex items-center">
                     <span className="h-px flex-1 bg-black"></span>

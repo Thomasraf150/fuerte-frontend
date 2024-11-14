@@ -14,7 +14,19 @@ const BorrowerList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
   const [singleData, setSingleData] = useState<BorrowerRowInfo>();
-  const { dataBorrower, borrowerLoading, fetchDataBorrower } = useBorrower();
+  const { 
+      dataBorrower, 
+      dataChief,
+      dataArea,
+      dataSubArea,
+      dataBorrCompany,
+      onSubmitBorrower,
+      borrowerLoading, 
+      fetchDataBorrower,
+      fetchDataChief,
+      fetchDataArea,
+      fetchDataBorrCompany,
+      fetchDataSubArea } = useBorrower();
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
@@ -29,7 +41,8 @@ const BorrowerList: React.FC = () => {
   }
 
   useEffect(() => {
-  }, [dataBorrower])
+    fetchDataBorrower(100, 1);
+  }, [])
 
   return (
     <div>
@@ -56,7 +69,20 @@ const BorrowerList: React.FC = () => {
                   </div>
                 </div>
             ) : (
-              <BorrowerInfo setShowForm={setShowForm} singleData={singleData} fetchDataBorrower={fetchDataBorrower}/>
+              <BorrowerInfo 
+                setShowForm={setShowForm} 
+                singleData={singleData} 
+                dataChief={dataChief}
+                dataArea={dataArea}
+                dataSubArea={dataSubArea}
+                dataBorrCompany={dataBorrCompany}
+                onSubmitBorrower={onSubmitBorrower}
+                fetchDataBorrower={fetchDataBorrower}
+                fetchDataChief={fetchDataChief}
+                fetchDataArea={fetchDataArea}
+                fetchDataSubArea={fetchDataSubArea}
+                fetchDataBorrCompany={fetchDataBorrCompany}
+              />
             )}
 
           </div>

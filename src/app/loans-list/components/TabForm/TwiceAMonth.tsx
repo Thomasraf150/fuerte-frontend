@@ -7,11 +7,12 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface OMProps {
   term: number;
+  addon_term: number;
   selectedData: (v: any, p: number) => void;
   handleApproveRelease: (status: number) => void;
 }
 
-const TwiceAMonth: React.FC<OMProps> = ({ term, selectedData, handleApproveRelease }) => {
+const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
 
@@ -22,7 +23,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, selectedData, handleApproveRelea
     const result: string[] = [];
   
     // Calculate first and second dates for the current month
-    for (let i = 0; i < term; i++) {
+    for (let i = 0; i < (term + addon_term); i++) {
       const firstOfMonth = startOfMonth(addMonths(start, i));
   
       // First date is based on the day of the selected start date

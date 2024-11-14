@@ -7,11 +7,12 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface OMProps {
   term: number;
+  addon_term: number;
   selectedData: (v: any, p: number) => void;
   handleApproveRelease: (status: number) => void;
 }
 
-const DayOfTheWeek: React.FC<OMProps> = ({ term, selectedData, handleApproveRelease }) => {
+const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
 
@@ -21,7 +22,7 @@ const DayOfTheWeek: React.FC<OMProps> = ({ term, selectedData, handleApproveRele
     const start = new Date(date);
     const result: string[] = [];
 
-    for (let i = 0; i < term * 4; i++) {  // term * 4 assumes 4 weeks per month
+    for (let i = 0; i < (term + addon_term) * 4; i++) {  // term * 4 assumes 4 weeks per month
       const weeklyDate = addWeeks(start, i);
       result.push(format(weeklyDate, 'MM/dd/yyyy'));
     }
@@ -29,6 +30,8 @@ const DayOfTheWeek: React.FC<OMProps> = ({ term, selectedData, handleApproveRele
     setSelectedDate(start);
     selectedData(result, result.length);
     setAppBtnDisable(false);
+
+    console.log(addon_term, ' addon_term')
   };
 
   return (

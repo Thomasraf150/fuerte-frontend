@@ -6,11 +6,12 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface OMProps {
   term: number;
+  addon_term: number;
   selectedData: (v: any, p: number) => void;
   handleApproveRelease: (status: number) => void;
 }
 
-const OnceAMonth: React.FC<OMProps> = ({ term, selectedData, handleApproveRelease }) => {
+const OnceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
 
@@ -31,7 +32,7 @@ const OnceAMonth: React.FC<OMProps> = ({ term, selectedData, handleApproveReleas
   
     result.push(format(initialDate, 'MM/dd/yyyy'));
   
-    for (let i = 1; i < term; i++) {
+    for (let i = 1; i < (term + addon_term); i++) {
       // Calculate the first day of the next month
       const firstOfMonth = startOfMonth(addMonths(start, i));
   
@@ -43,7 +44,7 @@ const OnceAMonth: React.FC<OMProps> = ({ term, selectedData, handleApproveReleas
     }
 
     setSelectedDate(start);
-    selectedData(result, term);
+    selectedData(result, (term + addon_term));
     setAppBtnDisable(false);
   };
 

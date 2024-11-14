@@ -6,14 +6,23 @@ import Link from "next/link";
 import { Camera, Home } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
-import { BorrowerInfo, DataSubArea, BorrowerRowInfo } from '@/utils/DataTypes';
+import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies } from '@/utils/DataTypes';
 import { useEffect, useState } from "react";
 import useBorrower from '@/hooks/useBorrower';
 
 interface BorrInfoProps {
+  dataChief?: DataChief[] | undefined;
+  dataArea?: DataArea[] | undefined;
+  dataSubArea?: DataSubArea[] | undefined;
+  dataBorrCompany?: DataBorrCompanies[] | undefined;
+  onSubmitBorrower: (d: any) => void;
   singleData: BorrowerRowInfo | undefined;
   setShowForm: (v: boolean) => void;
   fetchDataBorrower: (v1: number, v2: number) => void;
+  fetchDataChief: (v1: number, v2: number) => void;
+  fetchDataArea: (v1: number, v2: number) => void;
+  fetchDataSubArea: (v1: number) => void;
+  fetchDataBorrCompany: (v1: number, v2: number) => void;
 }
 
 interface OptionProps {
@@ -22,8 +31,8 @@ interface OptionProps {
   hidden?: boolean;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fetchDataBorrower }) => {
-  const defaultValues: BorrowerInfo = {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany }) => {
+  const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
       { occupation: 'Administrative Officer/Master Teacher/Head Teacher', name: '', contact_no: '' },
@@ -83,8 +92,20 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
     control,
     name: "reference"
   });
-   
-  const { dataChief, dataArea, dataSubArea, fetchDataSubArea, dataBorrCompany, onSubmitBorrower } = useBorrower();
+    
+  useEffect(() => {
+    fetchDataChief(100, 1); 
+    fetchDataArea(100, 1);
+    fetchDataBorrCompany(100, 1);
+  }, []);
+
+  // const { 
+  //     dataChief, 
+  //     dataArea, 
+  //     dataSubArea, 
+  //     fetchDataSubArea, 
+  //     dataBorrCompany, 
+  //     onSubmitBorrower } = useBorrower();
  
   const [optionsChief, setOptionsChief] = useState<OptionProps[]>([]);
   const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
@@ -107,6 +128,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ singleData, setShowForm, fet
         ...dynaOpt,
       ]);
     }
+    // fetchDataChief(100, 1);
+    // fetchDataArea(100, 1);
+    // fetchDataBorrCompany(100, 1);
   }, [dataSubArea, optionsSubArea, fetchDataSubArea])
 
   const onSubmit = (data: BorrowerInfo) => {

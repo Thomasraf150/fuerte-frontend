@@ -21,6 +21,10 @@ const BORROWER_LOAN_QUERY: string = `
           is_pn_signed
           bank_id
           check_no
+          addon_terms
+          addon_amount
+          addon_udi
+          addon_total
           loan_product {
             id 
             description
@@ -78,6 +82,10 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
       is_pn_signed
       bank_id
       check_no
+      addon_terms
+      addon_amount
+      addon_udi
+      addon_total
       loan_product {
         id 
         description

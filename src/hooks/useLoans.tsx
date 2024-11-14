@@ -118,7 +118,6 @@ const useLoans = () => {
   const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
-
     let variables: { input: any, process_type: string } = {
       input: {
         borrower_id: data.borrower_id,
@@ -129,10 +128,11 @@ const useLoans = () => {
         ob: data.ob,
         penalty: data.penalty,
         rebates: data.rebates,
-        renewal_loan_id: data.renewal_loan_id
+        ...(data.renewal_loan_id !== 'undefined' ? { renewal_loan_id: data.renewal_loan_id } : {}),
       },
       process_type
     };
+
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {

@@ -500,6 +500,10 @@ export interface BorrLoanRowData {
   loan_proceeds: string;
   pn_balance: string;
   udi_balance: string;
+  addon_terms: string;
+  addon_amount: string;
+  addon_udi: string;
+  addon_total: string;
   is_deleted: number;
   created_at: string;
   approved_date: string;

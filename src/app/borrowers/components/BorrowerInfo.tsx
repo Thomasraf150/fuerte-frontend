@@ -10,14 +10,23 @@ import BorrowerDetails from './TabForm/BorrowerDetails'
 import BorrowerAttachments from './TabForm/BorrowerAttachments'
 import BorrowerCoMaker from './TabForm/BorrowerCoMaker'
 import BorrowerLoans from './TabForm/BorrowerLoans'
-import { BorrowerRowInfo } from '@/utils/DataTypes'
+import { BorrowerRowInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } from '@/utils/DataTypes'
 interface BorrInfoProps {
   setShowForm: (v: boolean) => void;
+  dataChief?: DataChief[] | undefined;
+  dataArea?: DataArea[] | undefined;
+  dataSubArea?: DataSubArea[] | undefined;
+  dataBorrCompany?: DataBorrCompanies[] | undefined;
+  onSubmitBorrower: (d: any) => void;
   singleData?: BorrowerRowInfo | undefined;
   fetchDataBorrower: (v1: number, v2: number) => void;
+  fetchDataChief: (v1: number, v2: number) => void;
+  fetchDataArea: (v1: number, v2: number) => void;
+  fetchDataSubArea: (v1: number) => void;
+  fetchDataBorrCompany: (v1: number, v2: number) => void;
 }
 
-const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchDataBorrower }) => {
+const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, setShowForm, singleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
   const [showBorrAttForm, setShowBorrAttForm] = useState<boolean>(false);
 
@@ -94,7 +103,20 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ setShowForm, singleData, fetchD
           <div className="p-4">
             {activeTab === 'tab1' && (
               <div id="content1">
-                <BorrowerDetails singleData={singleData} setShowForm={setShowForm} fetchDataBorrower={fetchDataBorrower} />
+                <BorrowerDetails  
+                  dataChief={dataChief}
+                  dataArea={dataArea}
+                  dataSubArea={dataSubArea}
+                  dataBorrCompany={dataBorrCompany}
+                  onSubmitBorrower={onSubmitBorrower}
+                  singleData={singleData} 
+                  setShowForm={setShowForm} 
+                  fetchDataBorrower={fetchDataBorrower}
+                  fetchDataChief={fetchDataChief}
+                  fetchDataArea={fetchDataArea}
+                  fetchDataSubArea={fetchDataSubArea}
+                  fetchDataBorrCompany={fetchDataBorrCompany}
+                />
               </div>
             )}
             {activeTab === 'tab2' && (
