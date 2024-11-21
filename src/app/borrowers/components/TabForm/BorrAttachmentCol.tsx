@@ -1,11 +1,11 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { Eye, Edit3, Trash2, Download } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrAttachmentsRowData } from '@/utils/DataTypes';
 
-const borrAttachmentCol = (handleRowClick: (row: BorrAttachmentsRowData) => void): TableColumn<BorrAttachmentsRowData>[] => [
+const borrAttachmentCol = (handleRowClick: (row: BorrAttachmentsRowData) => void, handleRowDownload: (row: BorrAttachmentsRowData) => void): TableColumn<BorrAttachmentsRowData>[] => [
   {
     name: 'File Name',
     cell: row => row.name,
@@ -27,6 +27,9 @@ const borrAttachmentCol = (handleRowClick: (row: BorrAttachmentsRowData) => void
       
       return (
         <>
+          <Tooltip text="Download">
+            <Download onClick={() => handleRowDownload(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+          </Tooltip>
           <Tooltip text="Remove">
             <Trash2 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
           </Tooltip>
