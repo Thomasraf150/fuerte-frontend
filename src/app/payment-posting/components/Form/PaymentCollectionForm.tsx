@@ -149,6 +149,18 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                 </td>
               </tr>
               <tr>
+                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Commission</td>
+                <td className="px-4 py-2 text-gray-900">
+                  <input
+                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                    type="text"
+                    id="commission_fee"
+                    placeholder="0.00"
+                    {...register('commission_fee')}
+                  />
+                </td>
+              </tr>
+              <tr>
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection Date</td>
                 <td className="px-4 py-2 text-gray-900">
                   <input

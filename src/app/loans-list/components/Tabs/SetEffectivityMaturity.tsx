@@ -360,7 +360,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       {selectedOption === 'twice_a_month_oth_week' && (
         <>
           <div>
-              <TwiceAMonthOtherWeek term={Number(loanSingleData?.term)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
+              <TwiceAMonthOtherWeek term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
           </div>
           <div className="col-span-2">
             <div className="flow-root  border border-gray-100 py-3 shadow-sm">

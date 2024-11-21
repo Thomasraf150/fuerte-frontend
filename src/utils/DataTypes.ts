@@ -587,6 +587,7 @@ export interface CollectionFormValues {
   ap_refund: string;
   interest: string;
   ua_sp: string;
+  commission_fee: string;
   collection_date: string;
   user_id: string;
 }

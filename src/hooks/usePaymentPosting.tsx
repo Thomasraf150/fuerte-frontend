@@ -77,6 +77,7 @@ const usePaymentPosting = () => {
         ap_refund: data.ap_refund,
         interest: data.interest,
         ua_sp: data.ua_sp,
+        commission_fee: data.commission_fee,
         collection_date: data.collection_date,
       }
     };
