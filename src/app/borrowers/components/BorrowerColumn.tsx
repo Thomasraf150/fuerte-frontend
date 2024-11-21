@@ -37,6 +37,10 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableCo
     name: 'Residence Address',
     cell: row => row.residence_address,
     sortable: true,
+    style: {
+      minWidth: '500px',
+    },
+    width: '500px'
   },
   {
     name: 'Chief',

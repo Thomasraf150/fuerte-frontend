@@ -14,11 +14,19 @@ const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): Ta
     name: 'Loan Code',
     cell: row => row.code,
     sortable: true,
+    style: {
+      minWidth: '270px',
+    },
+    width: '270px'
   },
   {
     name: 'Description',
     cell: row => row.description,
     sortable: true,
+    style: {
+      minWidth: '400px',
+    },
+    width: '400px'
   },
   {
     name: 'Type of Loan',
