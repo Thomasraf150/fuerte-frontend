@@ -197,7 +197,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/forms/form-elements"
+                              href="/notes-receivable"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/notes-receivable" &&
                                 "text-white"
@@ -208,13 +208,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/forms/form-elements"
+                              href="/commission-schedule"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/notes-receivable" &&
                                 "text-white"
                               }`}
                             >
-                              Commision Schedule
+                              Commission Schedule
                             </Link>
                           </li>
                         </ul>
@@ -356,7 +356,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 "text-white"
                               }`}
                             >
-                              Commision Schedule
+                              Commission Schedule
                             </Link>
                           </li>
                         </ul>
