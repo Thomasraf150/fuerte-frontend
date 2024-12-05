@@ -34,7 +34,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
       const secondDate = addDays(firstDate, 15);
       result.push(format(secondDate, 'MM/dd/yyyy'));
     }
-
+    console.log(term + addon_term, ' term + addon_term')
     setSelectedDate(start);
     selectedData(result, result.length);
     setAppBtnDisable(false);
