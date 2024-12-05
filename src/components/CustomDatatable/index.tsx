@@ -81,12 +81,33 @@ const CustomDatatable = <T extends object>({
 
   const filteredData = useMemo(() => {
     console.log("Filtering data with query:", searchQuery); // Log the filtering action
-    return data.filter((item) => 
-      Object.values(item).some(
-        (value) =>
+    // return data.filter((item) => 
+    //   Object.values(item).some(
+    //     (value) =>
+    //       value &&
+    //       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    //   )
+    // );
+    const searchValue = searchQuery.toLowerCase();
+
+    return data.filter((item) =>
+      Object.keys(item).some((key) => {
+        const value = item[key as keyof T];
+        
+        // Handle nested objects safely
+        if (typeof value === 'object' && value !== null) {
+          return Object.values(value).some((nestedValue) =>
+            nestedValue &&
+            nestedValue.toString().toLowerCase().includes(searchValue)
+          );
+        }
+
+        // Handle primitive values
+        return (
           value &&
-          value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-      )
+          value.toString().toLowerCase().includes(searchValue)
+        );
+      })
     );
   }, [data, searchQuery]);
 
