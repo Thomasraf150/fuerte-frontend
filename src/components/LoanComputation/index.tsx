@@ -162,6 +162,14 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                 </li>
                 <li className="flex items-center gap-4 border p-2">
                   <div className="flex flex-1 items-center justify-start gap-1">
+                    <h3 className="text-sm text-strokedark">Addon Terms</h3>
+                  </div>
+                  <div className="flex flex-2 items-center justify-end gap-1">
+                    <h3 className="text-sm text-strokedark">{dataComputedLoans?.addon_terms}</h3>
+                  </div>
+                </li>
+                <li className="flex items-center gap-4 border p-2">
+                  <div className="flex flex-1 items-center justify-start gap-1">
                     <h3 className="text-sm text-strokedark">Addon Amount</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">

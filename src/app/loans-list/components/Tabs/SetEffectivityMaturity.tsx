@@ -39,7 +39,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
     setPaycount(pc);
     data.forEach((element: any) => {
       interest.push(formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / pc));
-      monthly.push(formatNumber(Number(loanSingleData?.pn_amount) / pc));
+      monthly.push(formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / pc));
     });
     setUdiComputedList(interest);
     setNewMonthlyList(monthly);
