@@ -101,7 +101,7 @@ const BorrNrSchedList: React.FC = () => {
                   <table className="min-w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600" rowSpan={2}>Name</th>
+                        <th className="border border-gray-300 px-4 py-2 text-left font-medium w-[250px] min-w-[250px] text-gray-600" rowSpan={2}>Name</th>
                         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600" rowSpan={2}>Loan Ref</th>
                         <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Notes Receivable</th>
                         {dataNotesReceivable && dataNotesReceivable?.months?.map(
