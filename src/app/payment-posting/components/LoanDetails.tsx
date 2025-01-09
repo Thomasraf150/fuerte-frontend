@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
+import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
 import { CheckCircle, CreditCard } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
 import PaymentCollectionForm from './Form/PaymentCollectionForm';
+import OtherPaymentForm from './Form/OtherPaymentForm';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
+  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment }) => {
+const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment }) => {
 
 
   const [selectedMoSched, setSelectedMoSched] = useState<BorrLoanRowData>();
+  const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
   const [selectedUdiSched, setSelectedUdiSched] = useState<BorrLoanRowData>();
 
   const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
@@ -25,7 +28,14 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                         Number(loanSingleData?.loan_details[6]?.credit ?? 0);
 
   const handleProceedToPay = (amortData: any, udiData: any) => {
+    setSelectedMoSchedOthPay(undefined);
     setSelectedMoSched(amortData);
+    setSelectedUdiSched(udiData);
+  }
+  
+  const handleProceedToOtherPay = (amortData: any, udiData: any) => {
+    setSelectedMoSched(undefined);
+    setSelectedMoSchedOthPay(amortData);
     setSelectedUdiSched(udiData);
   }
 
@@ -120,14 +130,17 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
             </div>
 
             <div className="grid grid-cols-7 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6">
-              <div className="col-span-2 flex items-center">
+              <div className="col-span-1 flex items-center">
                 <p className="font-small">Due Date</p>
               </div>
-              <div className="col-span-2 hidden items-center sm:flex">
+              <div className="col-span-1 hidden items-center sm:flex">
                 <p className="font-small">Amortization</p>
               </div>
               <div className="col-span-1 flex items-center">
                 <p className="font-small">Interest</p>
+              </div>
+              <div className="col-span-2 flex items-center">
+                <p className="font-small"></p>
               </div>
               <div className="col-span-2 flex items-center">
                 <p className="font-small"></p>
@@ -139,14 +152,14 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                     className="grid grid-cols-7 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6"
                   key={i}
                 >
-                <div className="col-span-2 flex items-center">
+                <div className="col-span-1 flex items-center">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <p className="text-sm text-black dark:text-white">
                       {item?.due_date}
                     </p>
                   </div>
                 </div>
-                <div className="col-span-2 hidden items-center sm:flex">
+                <div className="col-span-1 hidden items-center sm:flex">
                   <p className="text-sm text-black dark:text-white">
                     {item?.amount}
                   </p>
@@ -155,6 +168,18 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                   <p className="text-sm text-black dark:text-white">
                     {Number(loanSingleData?.loan_udi_schedules[i]?.amount).toFixed(2)}
                   </p>
+                </div>
+                <div className="col-span-2 flex items-center">
+                    <button
+                      className="w-full flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                      type="button"
+                      onClick={() => {handleProceedToOtherPay(item, loanSingleData?.loan_udi_schedules[i])}}
+                    >
+                      <span className="mr-1">
+                        <CreditCard size={17} /> 
+                      </span>
+                      <span>Other payment</span>
+                    </button>
                 </div>
                 <div className="col-span-2 flex items-center">
                   {item?.amount > 0 ? (
@@ -188,8 +213,13 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
         </div>
         <div>
           {selectedMoSched && (
-            <div className={`${selectedMoSched && 'fade-in'}`}>
+            <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
               <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment}/>
+            </div>
+          )}
+          {selectedMoSchedOthPay && (
+            <div className={`${selectedMoSchedOthPay ? 'fade-in' : 'fade-out'}`}>
+              <OtherPaymentForm selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}/>
             </div>
           )}
         </div>

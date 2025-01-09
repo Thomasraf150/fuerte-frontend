@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import CustomDatatable from '@/components/CustomDatatable';
-// import loansListColumn from './LoansListColumn';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
 // import LoanPnSigningForm from './LoanPnSigningForm';
 import CollectionListInfo from './CollectionListInfo';
 
-// const column = loansListColumn;
 
 const CollectionList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);

@@ -13,7 +13,7 @@ const column = loansListColumn;
 const LoansLists: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoanSchedule, loanScheduleList, fetchLoans, loading, onSubmitCollectionPayment } = usePaymentPosting();
+  const { loanData, fetchLoanSchedule, loanScheduleList, fetchLoans, loading, onSubmitCollectionPayment, onSubmitOthCollectionPayment } = usePaymentPosting();
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -59,7 +59,7 @@ const LoansLists: React.FC = () => {
               </div>
             ) : (
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <PaymentScheduleForm singleData={loanScheduleList} handleShowForm={handleShowForm} onSubmitCollectionPayment={onSubmitCollectionPayment} />
+                <PaymentScheduleForm singleData={loanScheduleList} handleShowForm={handleShowForm} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
               </div>
             )}
             

@@ -149,17 +149,27 @@ const GET_LOAN_SCHEDULE: string = `
 
 const PROCESS_COLLECTION_PAYMENT: string = `
   mutation PaymentPosting($input: PaymentPostingInput){
-  paymentPosting(input: $input){
-    message
-    status
+    paymentPosting(input: $input){
+      message
+      status
+    }
   }
-}
+`;
+
+const PROCESS_COLLECTION_OTHER_PAYMENT: string = `
+  mutation OtherPaymentPosting($input: OtherPaymentPostingInput){
+    otherPaymentPosting(input: $input){
+      message
+      status
+    }
+  }
 `;
 
 const PaymentPostingQueryMutation = {
   LOANS_LIST_QUERY,
   GET_LOAN_SCHEDULE,
-  PROCESS_COLLECTION_PAYMENT
+  PROCESS_COLLECTION_PAYMENT,
+  PROCESS_COLLECTION_OTHER_PAYMENT
 };
 
 export default PaymentPostingQueryMutation;

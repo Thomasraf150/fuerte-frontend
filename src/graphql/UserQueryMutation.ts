@@ -7,6 +7,11 @@ const GET_USER_QUERY: string = `
           email
           branch_sub_id
           role_id
+          role {
+            id
+            name
+            code
+          }
         }
         paginatorInfo {
           total

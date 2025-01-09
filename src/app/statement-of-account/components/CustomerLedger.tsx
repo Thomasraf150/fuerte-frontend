@@ -22,6 +22,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
   const totalBankCharge = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.bank_charge || 0)), 0) : 0;
   const totalApRefund = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.ap_refund || 0)), 0) : 0;
   const totalPaymentUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.payment_ua_sp || 0)), 0) : 0;
+  const totalPenaltyUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.penalty_ua_sp || 0)), 0) : 0;
   const totalUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.ua_sp || 0)), 0) : 0;
   const totalAdvancePayment = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.advance_payment || 0)), 0) : 0;
 
@@ -45,6 +46,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Other Charge</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">AP or Refund</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Payment UA/SP</th>
+                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Penalty UA/SP</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">UA/SP</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Advanced Payment</th>
               </tr>
@@ -68,6 +70,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                   <td className="px-4 py-4 text-center"></td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.ap_refund)}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.payment_ua_sp)}</td>
+                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.penalty_ua_sp)}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.ua_sp)}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.advance_payment)}</td>
                 </tr>
@@ -87,6 +90,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                 <td className="px-4 py-3 text-center"></td>
                 <td className="px-4 py-3 text-center">{totalApRefund}</td>
                 <td className="px-4 py-3 text-center">{totalPaymentUaSp}</td>
+                <td className="px-4 py-3 text-center">{totalPenaltyUaSp}</td>
                 <td className="px-4 py-3 text-center">{totalUaSp}</td>
                 <td className="px-4 py-3 text-center">{totalAdvancePayment}</td>
               </tr>

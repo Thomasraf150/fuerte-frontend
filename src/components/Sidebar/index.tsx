@@ -461,7 +461,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Statement of Account
                             </Link>
                           </li>
-                          <li>
+                          {/* <li>
                             <Link
                               href="/forms/form-elements"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
@@ -482,7 +482,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             >
                               Advanced Payment
                             </Link>
-                          </li>
+                          </li> */}
                           <li>
                             <Link
                               href="/forms/form-elements"

@@ -2,16 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { Edit3, X } from 'react-feather';
-import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
+import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
 import LoanDetails from './LoanDetails';
 
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
   handleShowForm: (v: boolean) => void;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
+  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
 }
 
-const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm, onSubmitCollectionPayment }) => {
+const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm, onSubmitCollectionPayment, onSubmitOthCollectionPayment }) => {
   const [activeTab, setActiveTab] = useState<number>();
 
   useEffect(() => {
@@ -28,7 +29,7 @@ const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowFo
       </div>
       {singleData && (
         <>
-          <LoanDetails loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} />
+          <LoanDetails loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
         </>
       )}
     </div>

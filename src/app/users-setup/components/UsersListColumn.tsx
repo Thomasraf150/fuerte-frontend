@@ -12,6 +12,11 @@ const userListCol = (handleRowClick: (row: User) => void, handlePwUpdate: (row: 
     sortable: true,
   },
   {
+    name: 'Role',
+    cell: row => row.role.name,
+    sortable: true,
+  },
+  {
     name: 'Email',
     cell: row => {
       return (

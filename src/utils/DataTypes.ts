@@ -98,6 +98,12 @@ export interface User {
   branch_sub_id: number;
   role_id: number;
   branchSub: DataSubBranches
+  role: Role;
+}
+export interface Role {
+  id?: string;
+  name: string;
+  code: number;
 }
 export interface DataBranches {
   id?: string;
@@ -591,6 +597,21 @@ export interface CollectionFormValues {
   collection_date: string;
   user_id: string;
 }
+export interface OtherCollectionFormValues {
+  loan_schedule_id: string;
+  loan_udi_schedule_id: string;
+  collection: string;
+  penalty: string;
+  bank_charge: string;
+  ap_refund: string;
+  interest: string;
+  commission_fee: string;
+  collection_date: string;
+  payment_ua_sp: string;
+  penalty_ua_sp: string;
+  advanced_payment: string;
+  user_id: string;
+}
 export interface CustomerLedgerData {
   loan_id: string;
   loan_schedule_id: string;
@@ -605,5 +626,20 @@ export interface CustomerLedgerData {
   penalty: string;
   udi: string;
   payment_ua_sp: string;
+  penalty_ua_sp: string;
   advance_payment: string;
+}
+export interface DataRowCollectionList {
+  date_paid: string;
+  action: string;
+  refno: string;
+  borrower: string;
+  monthly: string;
+  collection: string;
+  rebates: string;
+  ua_sp: string;
+  payment_ua_sp: string;
+  advance_payment: string;
+  bank_charge: string;
+  ap_or_refund: string;
 }
