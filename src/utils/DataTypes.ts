@@ -516,6 +516,7 @@ export interface BorrLoanRowData {
   released_date: string;
   bank_id: string;
   check_no: string;
+  is_closed: string;
   loan_product: DataRowLoanProducts;
   loan_details: DataRowLoanDetails[];
   loan_schedules: DataRowLoanSchedules[];

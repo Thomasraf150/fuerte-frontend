@@ -21,6 +21,7 @@ const LOANS_LIST_QUERY: string = `
           is_pn_signed
           bank_id
           check_no
+          is_closed
           loan_product {
             id 
             description
@@ -164,12 +165,21 @@ const PROCESS_COLLECTION_OTHER_PAYMENT: string = `
     }
   }
 `;
+const PROCESS_REMOVE_POSTED_PAYMENT: string = `
+  mutation DeletePostedPayment($input: DeletePostedPaymentInput){
+    deletePostedPayment(input: $input) {
+      message
+      status
+    }
+  }
+`;
 
 const PaymentPostingQueryMutation = {
   LOANS_LIST_QUERY,
   GET_LOAN_SCHEDULE,
   PROCESS_COLLECTION_PAYMENT,
-  PROCESS_COLLECTION_OTHER_PAYMENT
+  PROCESS_COLLECTION_OTHER_PAYMENT,
+  PROCESS_REMOVE_POSTED_PAYMENT
 };
 
 export default PaymentPostingQueryMutation;

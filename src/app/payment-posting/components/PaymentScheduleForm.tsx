@@ -10,9 +10,10 @@ interface BorrInfoProps {
   handleShowForm: (v: boolean) => void;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
   onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
+  fnReversePayment: (d: any, l: string) => void;
 }
 
-const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm, onSubmitCollectionPayment, onSubmitOthCollectionPayment }) => {
+const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment }) => {
   const [activeTab, setActiveTab] = useState<number>();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowFo
       </div>
       {singleData && (
         <>
-          <LoanDetails loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
+          <LoanDetails fnReversePayment={fnReversePayment} loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
         </>
       )}
     </div>

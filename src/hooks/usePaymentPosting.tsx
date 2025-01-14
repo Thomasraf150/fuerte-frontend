@@ -11,7 +11,7 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
 
 const usePaymentPosting = () => {
-  const { LOANS_LIST_QUERY, GET_LOAN_SCHEDULE, PROCESS_COLLECTION_PAYMENT, PROCESS_COLLECTION_OTHER_PAYMENT } = PaymentPostingQueryMutation;
+  const { LOANS_LIST_QUERY, GET_LOAN_SCHEDULE, PROCESS_COLLECTION_PAYMENT, PROCESS_COLLECTION_OTHER_PAYMENT, PROCESS_REMOVE_POSTED_PAYMENT } = PaymentPostingQueryMutation;
 
   const [loanData, setLoanData] = useState<BorrLoanRowData[]>([]);
   const [loanScheduleList, setLoanScheduleList] = useState<BorrLoanRowData>();
@@ -99,6 +99,43 @@ const usePaymentPosting = () => {
     }
   };
   
+  const fnReversePayment = async (data: any, loan_id: string) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+
+    let variables: { input: any } = {
+      input: {
+        user_id: String(userData?.user?.id),
+        loan_schedule_id: String(data.id)
+      }
+    };
+
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure to reverse this payment?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: PROCESS_REMOVE_POSTED_PAYMENT,
+          variables,
+        }),
+      });
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        toast.success('Payment Successfully Reversed!');
+        fetchLoanSchedule(loan_id);
+      }
+    }
+  };
+  
   const onSubmitOthCollectionPayment = async (data: OtherCollectionFormValues, loan_id: string) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
@@ -149,7 +186,8 @@ const usePaymentPosting = () => {
     onSubmitCollectionPayment,
     fetchLoanSchedule,
     loanScheduleList,
-    onSubmitOthCollectionPayment
+    onSubmitOthCollectionPayment,
+    fnReversePayment
   };
 };
 

@@ -24,18 +24,17 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     if (type === 'collection') {
       if (parseFloat(value) > selectedMoSched?.amount) {
         setValue('ap_refund', String(((parseFloat(value) || 0) - 
-                              parseFloat(selectedMoSched?.amount) + 
+                              parseFloat(selectedMoSched?.amount) -
                               (parseFloat(watch('bank_charge')) || 0)).toFixed(2)))
       } else {
         setValue('ap_refund', "0.00");
       }
       if(selectedMoSched?.amount >= parseFloat(value)){
         setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) - 
-                          (parseFloat(value) || 0) +
+                          (parseFloat(value) || 0) -
                           (parseFloat(watch('bank_charge')) || 0))).toFixed(2)));
       } else {
         setValue('ua_sp', "0.00");
-        console.log('false')
       }
       if (value !== '' && parseFloat(value) > selectedMoSched?.amount) {
         const computedUdi = String((parseFloat(selectedUdiSched?.amount)).toFixed(2));
@@ -52,14 +51,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     if (type === 'bank_charge') {
       if (parseFloat(watch('collection')) > selectedMoSched?.amount) {
         setValue('ap_refund', String((parseFloat(watch('collection')) - 
-                              parseFloat(selectedMoSched?.amount) + 
+                              parseFloat(selectedMoSched?.amount) -
                               (parseFloat(watch('bank_charge')) || 0)).toFixed(2)))
       } else {
         setValue('ap_refund', "0.00");
       }
       if (parseFloat(watch('collection')) <= parseFloat(selectedMoSched?.amount)) {
         setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) - 
-                          (parseFloat(watch('collection')) || 0) +
+                          (parseFloat(watch('collection')) || 0) -
                           (parseFloat(watch('bank_charge')) || 0))).toFixed(2)));
       }
       if (value !== '' && (parseFloat(watch('collection')) || 0) > selectedMoSched?.amount) {
@@ -189,6 +188,19 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                     id="commission_fee"
                     placeholder="0.00"
                     {...register('commission_fee')}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">UA/SP</td>
+                <td className="px-4 py-2 text-gray-900">
+                  <input
+                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                    type="text"
+                    id="ua_sp"
+                    placeholder="0.00"
+                    readOnly={true}
+                    {...register('ua_sp')}
                   />
                 </td>
               </tr>

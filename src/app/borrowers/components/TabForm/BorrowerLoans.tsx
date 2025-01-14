@@ -25,7 +25,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [btnRenewal, setBtnRenewal] = useState<boolean>(true);
   const [dataLoanComputed, setDataLoanComputed] = useState<BorrLoanRowData>();
-  const [dataLoanRenewal, setDataLoanRenewal] = useState<BorrLoanRowData>();
+  const [dataLoanRenewal, setDataLoanRenewal] = useState<string[]>([]);
 
   const createLoans = (b: boolean) => {
     setShowForm(b);
@@ -42,13 +42,20 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   }
 
   const handleCheckboxChange = async (row: BorrLoanRowData, isChecked: boolean) => {
-    // console.log(isChecked, ' isChecked')
-    // console.log(row, 'oowa ');
     if (isChecked) {
-      setBtnRenewal(false);
-      setDataLoanRenewal(row);
+      // Add the ID if checked
+      setDataLoanRenewal((prevArray) => [...prevArray, row?.id]);
+    } else {
+      // Remove the ID if unchecked
+      setDataLoanRenewal((prevArray) => prevArray.filter((id) => id !== row?.id));
     }
   }
+
+  useEffect(() => {
+    if (dataLoanRenewal.length > 0) {
+      setBtnRenewal(false);
+    }
+  }, [dataLoanRenewal]);
 
   const handleWholeRowClick = (row: BorrLoanRowData) => {
     setDataLoanComputed(row);

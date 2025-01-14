@@ -3,19 +3,19 @@ import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
-import { CheckCircle, CreditCard } from 'react-feather';
+import { CheckCircle, CreditCard, RefreshCcw } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
 import PaymentCollectionForm from './Form/PaymentCollectionForm';
 import OtherPaymentForm from './Form/OtherPaymentForm';
-
+import usePaymentPosting from '@/hooks/usePaymentPosting';
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
   onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
+  fnReversePayment: (d: any, l: string) => void;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment }) => {
-
+const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment }) => {
 
   const [selectedMoSched, setSelectedMoSched] = useState<BorrLoanRowData>();
   const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
@@ -37,6 +37,10 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
     setSelectedMoSched(undefined);
     setSelectedMoSchedOthPay(amortData);
     setSelectedUdiSched(udiData);
+  }
+
+  const handleReversePayment = (row: any) => {
+    fnReversePayment(row, String(loanSingleData?.id));
   }
 
   useEffect(() => {
@@ -120,112 +124,103 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
         </div>
         {/* Add more grid items as needed */}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="bg-gray-200 p-4 rounded">
-          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-            <div className="px-4 py-4 md:px-3 xl:px-6">
-              <h5 className="text-m text-black dark:text-white">
-                <span className="font-semibold">Loan Ref :</span> {loanSingleData?.loan_ref}
-              </h5>
-            </div>
 
-            <div className="grid grid-cols-7 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6">
-              <div className="col-span-1 flex items-center">
-                <p className="font-small">Due Date</p>
+        <div className="flex gap-4">
+          {/* First Column - 60% Width */}
+          <div className="basis-full lg:basis-[55%] bg-gray-200 rounded">
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="px-4 py-4 md:px-3 xl:px-6">
+                <h5 className="text-m text-black dark:text-white">
+                  <span className="font-semibold">Loan Ref:</span> {loanSingleData?.loan_ref}
+                </h5>
               </div>
-              <div className="col-span-1 hidden items-center sm:flex">
-                <p className="font-small">Amortization</p>
-              </div>
-              <div className="col-span-1 flex items-center">
-                <p className="font-small">Interest</p>
-              </div>
-              <div className="col-span-2 flex items-center">
-                <p className="font-small"></p>
-              </div>
-              <div className="col-span-2 flex items-center">
-                <p className="font-small"></p>
-              </div>
-            </div>
 
-            {loanSingleData?.loan_schedules?.map((item, i) => (
+              <div className="grid grid-cols-7 gap-4 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6">
+                <div className="flex items-center">
+                  <p className="font-small">Due Date</p>
+                </div>
+                <div className="hidden sm:flex items-center">
+                  <p className="font-small">Amortization</p>
+                </div>
+                <div className="flex items-center">
+                  <p className="font-small">Interest</p>
+                </div>
+                <div className="col-span-4"></div> {/* Placeholder columns */}
+              </div>
+
+              {loanSingleData?.loan_schedules?.map((item, i) => (
                 <div
-                    className="grid grid-cols-7 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6"
+                  className="grid grid-cols-7 gap-4 border-t border-stroke px-4 py-2 dark:border-strokedark sm:grid-cols-7 md:px-6"
                   key={i}
                 >
-                <div className="col-span-1 flex items-center">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="flex items-center">
+                    <p className="text-sm text-black dark:text-white">{item?.due_date}</p>
+                  </div>
+                  <div className="hidden sm:flex items-center">
+                    <p className="text-sm text-black dark:text-white">{item?.amount}</p>
+                  </div>
+                  <div className="flex items-center">
                     <p className="text-sm text-black dark:text-white">
-                      {item?.due_date}
+                      {Number(loanSingleData?.loan_udi_schedules[i]?.amount).toFixed(2)}
                     </p>
                   </div>
-                </div>
-                <div className="col-span-1 hidden items-center sm:flex">
-                  <p className="text-sm text-black dark:text-white">
-                    {item?.amount}
-                  </p>
-                </div>
-                <div className="col-span-1 flex items-center">
-                  <p className="text-sm text-black dark:text-white">
-                    {Number(loanSingleData?.loan_udi_schedules[i]?.amount).toFixed(2)}
-                  </p>
-                </div>
-                <div className="col-span-2 flex items-center">
-                    <button
-                      className="w-full flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                      type="button"
-                      onClick={() => {handleProceedToOtherPay(item, loanSingleData?.loan_udi_schedules[i])}}
-                    >
-                      <span className="mr-1">
-                        <CreditCard size={17} /> 
-                      </span>
-                      <span>Other payment</span>
-                    </button>
-                </div>
-                <div className="col-span-2 flex items-center">
-                  {item?.amount > 0 ? (
-                    <button
-                      className="w-full flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                      type="button"
-                      onClick={() => {handleProceedToPay(item, loanSingleData?.loan_udi_schedules[i])}}
-                    >
-                      <span className="mr-1">
-                        <CreditCard size={17} /> 
-                      </span>
-                      <span>Proceed to pay</span>
-                    </button>
-                  ) : (
-                    <button
-                      className="w-full flex justify-between items-center focus:outline-none text-white bg-blue-400 hover:bg-blue-300 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                      type="button"
-                      disabled
-                    >
-                      <span className="mr-1">
-                        <CheckCircle size={17} /> 
-                      </span>
-                      <span>Paid</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
 
+                  {/* Button Group */}
+                  <div className="col-span-4 flex flex-wrap gap-2">
+                    <button
+                      className="min-w-max flex items-center text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                      onClick={() => handleProceedToOtherPay(item, loanSingleData?.loan_udi_schedules[i])}
+                    >
+                      <CreditCard size={17} className="mr-1" />
+                      Other Payments
+                    </button>
+
+                    {item?.amount > 0 ? (
+                      <button
+                        className="min-w-max flex items-center text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                        onClick={() => handleProceedToPay(item, loanSingleData?.loan_udi_schedules[i])}
+                      >
+                        <CreditCard size={17} className="mr-1" />
+                        Proceed to Pay
+                      </button>
+                    ) : (
+                      <button
+                        className="min-w-max flex items-center text-white bg-blue-400 cursor-not-allowed font-medium rounded-lg text-sm px-4 py-2"
+                        disabled
+                      >
+                        <CheckCircle size={17} className="mr-1" />
+                        Paid
+                      </button>
+                    )}
+
+                    <button
+                      className="min-w-max flex items-center text-white bg-orange-700 hover:bg-orange-400 focus:ring-4 focus:ring-orange-600 font-medium rounded-lg text-sm px-4 py-2 dark:bg-orange-300 dark:hover:bg-orange-700 dark:focus:ring-orange-400"
+                      onClick={() => handleReversePayment(item)}
+                    >
+                      <RefreshCcw size={17} className="mr-1" />
+                      Reverse
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        {/* Second Column - 40% Width */}
+        <div className="basis-[40%] bg-gray-200 rounded">
+          <div className="basis-[40%] bg-gray-200 rounded">
+            {selectedMoSched && (
+              <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
+                <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment}/>
+              </div>
+            )}
+            {selectedMoSchedOthPay && (
+              <div className={`${selectedMoSchedOthPay ? 'fade-in' : 'fade-out'}`}>
+                <OtherPaymentForm selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}/>
+              </div>
+            )}
           </div>
         </div>
-        <div>
-          {selectedMoSched && (
-            <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
-              <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment}/>
-            </div>
-          )}
-          {selectedMoSchedOthPay && (
-            <div className={`${selectedMoSchedOthPay ? 'fade-in' : 'fade-out'}`}>
-              <OtherPaymentForm selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}/>
-            </div>
-          )}
-        </div>
-        
-
-
       </div>
     </>
   );

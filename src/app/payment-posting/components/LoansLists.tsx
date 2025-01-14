@@ -7,13 +7,14 @@ import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 // import LoanPnSigningForm from './LoanPnSigningForm';
 import PaymentScheduleForm from './PaymentScheduleForm';
+import { toast } from "react-toastify";
 
 const column = loansListColumn;
 
 const LoansLists: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoanSchedule, loanScheduleList, fetchLoans, loading, onSubmitCollectionPayment, onSubmitOthCollectionPayment } = usePaymentPosting();
+  const { loanData, fetchLoanSchedule, loanScheduleList, fetchLoans, loading, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment } = usePaymentPosting();
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -21,8 +22,12 @@ const LoansLists: React.FC = () => {
   }
  
   const handleWholeRowClick = (data: BorrLoanRowData) => {
-    setShowForm(true);
-    fetchLoanSchedule(data?.id);
+    if (data?.is_closed === '1') {
+      toast.error('This loan is already been closed!');
+    } else {
+      setShowForm(true);
+      fetchLoanSchedule(data?.id);
+    }
   }
 
   const handleShowForm = (d: boolean) => {
@@ -59,7 +64,12 @@ const LoansLists: React.FC = () => {
               </div>
             ) : (
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <PaymentScheduleForm singleData={loanScheduleList} handleShowForm={handleShowForm} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
+                <PaymentScheduleForm 
+                  fnReversePayment={fnReversePayment} 
+                  singleData={loanScheduleList} 
+                  handleShowForm={handleShowForm} 
+                  onSubmitCollectionPayment={onSubmitCollectionPayment} 
+                  onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
               </div>
             )}
             

@@ -128,7 +128,7 @@ const useLoans = () => {
         ob: data.ob,
         penalty: data.penalty,
         rebates: data.rebates,
-        ...(data.renewal_loan_id !== 'undefined' ? { renewal_loan_id: data.renewal_loan_id } : {}),
+        ...(data.renewal_loan_id !== '' ? { renewal_loan_id: data.renewal_loan_id } : {}),
       },
       process_type
     };

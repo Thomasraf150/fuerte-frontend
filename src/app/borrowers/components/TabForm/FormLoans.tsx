@@ -14,7 +14,7 @@ interface ParentFormBr {
   createLoans: (value: boolean) => void;
   singleData: BorrowerRowInfo | undefined;
   dataBranchSub: DataSubBranches[] | undefined;
-  dataLoanRenewal: BorrLoanRowData | undefined;
+  dataLoanRenewal: string[] | [];
 }
 
 interface Option {
@@ -35,7 +35,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     'ob': String(watch('ob') ?? "0.00"),
     'penalty': String(watch('penalty') ?? "0.00"),
     'rebates': String(watch('rebates') ?? "0.00"),
-    'renewal_loan_id': String(dataLoanRenewal?.id)
+    'renewal_loan_id': dataLoanRenewal?.join(',')
   };
 
   const onSubmit: SubmitHandler<BorrLoanFormValues> = async (data) => {
