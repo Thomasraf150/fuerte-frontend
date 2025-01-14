@@ -64,7 +64,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                   <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.debit)}</th>
                   <td className="px-4 py-4 text-left whitespace-nowrap sticky left-32 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.credit)}</td>
                   <td className="px-4 py-4 text-left whitespace-nowrap sticky left-64 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.running_balance)}</td>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-64">{item.due_date}</td>
+                  <td className="px-4 py-4 text-left whitespace-nowrap left-64">{item.due_date}</td>
                   <td className="px-4 py-4 text-left">{item.date_paid}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.collection)}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.penalty)}</td>
@@ -85,7 +85,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                 <th scope="row" className="px-4 py-3 text-base sticky left-0 bg-teal-50 dark:bg-gray-700"></th>
                 <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-gray-700"></td>
                 <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-gray-700"></td>
-                <td className="px-4 py-3 text-left sticky left-64">Total</td>
+                <td className="px-4 py-3 text-left left-64">Total</td>
                 <td className="px-4 py-3 text-center"></td>
                 <td className="px-4 py-3 text-center">{totalCollection}</td>
                 <td className="px-4 py-3 text-center">{totalPenalty}</td>
