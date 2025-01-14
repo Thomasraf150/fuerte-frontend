@@ -11,16 +11,27 @@ interface DefaultLayoutProps {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       setUserData(JSON.parse(storedAuthStore)['state']);
+      setIsLoading(false);
     }
   }, []);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <>
       {/* <!-- ===== Page Wrapper Start ===== --> */}

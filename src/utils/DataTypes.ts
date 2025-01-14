@@ -620,6 +620,7 @@ export interface CustomerLedgerData {
   debit: string;
   credit: string;
   running_balance: string;
+  collection: string;
   ap_refund: string;
   ua_sp: string;
   bank_charge: string;

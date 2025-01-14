@@ -11,6 +11,7 @@ const GET_CUSTOMER_LEDGER: string = `
         debit
         credit
         running_balance
+        collection
         ap_refund
         ua_sp
         bank_charge

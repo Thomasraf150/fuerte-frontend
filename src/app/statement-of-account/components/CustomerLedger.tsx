@@ -19,6 +19,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
 
   const totalPenalty = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.penalty || 0)), 0) : 0;
   const totalPrincipal = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.running_balance || 0)), 0) : 0;
+  const totalCollection = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.collection || 0)), 0) : 0;
   const totalBankCharge = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.bank_charge || 0)), 0) : 0;
   const totalApRefund = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.ap_refund || 0)), 0) : 0;
   const totalPaymentUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.payment_ua_sp || 0)), 0) : 0;
@@ -40,6 +41,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                 <th scope="col" className="px-4 py-3 w-36 text-left whitespace-nowrap sticky left-64 bg-teal-50 dark:bg-gray-700">Running Balance</th>
                 <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap">Due Date</th>
                 <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap">Date Paid</th>
+                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Collection</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Penalty</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Principal</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Bank Charge</th>
@@ -64,6 +66,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                   <td className="px-4 py-4 text-left whitespace-nowrap sticky left-64 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.running_balance)}</td>
                   <td className="px-4 py-4 text-left">{item.due_date}</td>
                   <td className="px-4 py-4 text-left">{item.date_paid}</td>
+                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.collection)}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.penalty)}</td>
                   <td className="px-4 py-4 text-center"></td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.bank_charge)}</td>
@@ -84,6 +87,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                 <td className="px-4 py-3 text-left sticky left-64 bg-teal-50 dark:bg-gray-700"></td>
                 <td className="px-4 py-3 text-left">Total</td>
                 <td className="px-4 py-3 text-center"></td>
+                <td className="px-4 py-3 text-center">{totalCollection}</td>
                 <td className="px-4 py-3 text-center">{totalPenalty}</td>
                 <td className="px-4 py-3 text-center"></td>
                 <td className="px-4 py-3 text-center">{totalBankCharge}</td>

@@ -7,7 +7,7 @@ import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
 import { Printer, CreditCard } from 'react-feather';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
-
+import { toast } from "react-toastify";
 interface OMProps {
   selectedMoSchedOthPay: any;
   selectedUdiSched: any;
@@ -17,7 +17,6 @@ interface OMProps {
 
 const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSelectedMoSchedOthPay, selectedUdiSched, onSubmitOthCollectionPayment }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<OtherCollectionFormValues>();
-
   const fnComputeUdi = (amountSched: any, udiSched: any) => {
     // if (amount !== '' && parseFloat(amount) > amountSched?.amount) {
     //   const computedUdi = String((parseFloat(udiSched?.amount)).toFixed(2));
@@ -28,14 +27,27 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // else {
     //   setValue('interest', "0.00");
     // }
-    if ((parseFloat(watch('advanced_payment')) || 0) > 0) {
-      const computedUdi = String((udiSched?.amount * (((parseFloat(watch('advanced_payment')) || 0) / amountSched?.amount) * 100 / 100)).toFixed(2));
-      setValue('interest', computedUdi);
-    }
-    if ((parseFloat(watch('payment_ua_sp')) || 0) > 0) {
-      const computedUdi = String((udiSched?.amount * (((parseFloat(watch('payment_ua_sp')) || 0) / amountSched?.amount) * 100 / 100)).toFixed(2));
-      setValue('interest', computedUdi);
-    }
+    // if ((parseFloat(watch('advanced_payment')) || 0) > 0) {
+      
+      const computedUdi = String((udiSched?.amount * ((((parseFloat(watch('advanced_payment')) || 0 ) + (parseFloat(watch('payment_ua_sp')) || 0)) / amountSched?.amount) * 100 / 100)).toFixed(2));
+      if (parseFloat(computedUdi) > parseFloat(selectedUdiSched?.amount)) {
+        toast.error("Your amount paying is exeeding a total remaining due. Please input a right remain amount");
+
+        setTimeout(function(){
+          setValue('payment_ua_sp', '0');
+          setValue('advanced_payment', '0');
+          console.log(computedUdi, ' computedUdi')
+          console.log(selectedUdiSched?.amount, ' selectedUdiSched?.amount')
+        }, 1000);
+      } else {
+        setValue('interest', computedUdi);
+      }
+      
+    // }
+    // if ((parseFloat(watch('payment_ua_sp')) || 0) > 0) {
+    //   const computedUdi = String((udiSched?.amount * (((parseFloat(watch('payment_ua_sp')) || 0) / amountSched?.amount) * 100 / 100)).toFixed(2));
+    //   setValue('interest', computedUdi);
+    // }
   }
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
@@ -252,7 +264,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2"></td>
                 <td className="px-4 py-2 text-gray-900">
                   <button
-                    className="float-right mr-0 flex justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    className="float-right mr-0 flex 
+                    justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 
+                    focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     type="submit"
                   >
                     <span className="mr-1">
