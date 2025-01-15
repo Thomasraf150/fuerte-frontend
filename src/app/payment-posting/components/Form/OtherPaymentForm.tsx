@@ -37,7 +37,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
           setValue('payment_ua_sp', '0');
           setValue('advanced_payment', '0');
           console.log(parseFloat(computedUdi).toFixed(2), ' computedUdi')
-          console.log(selectedUdiSched?.amount, ' selectedUdiSched?.amount')
+          console.log(parseFloat(selectedUdiSched?.amount).toFixed(2), ' selectedUdiSched?.amount')
         }, 1000);
       } else {
         setValue('interest', computedUdi);
