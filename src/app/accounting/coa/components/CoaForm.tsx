@@ -18,7 +18,7 @@ interface OptionSubBranch {
   hidden?: boolean;
 }
 
-const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialData, actionLbl }) => {
+const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataArea>();
   const { onSubmitArea, branchSubData } = useArea();
 
@@ -109,4 +109,4 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
   );
 };
 
-export default AreaForm;
+export default CoaForm;

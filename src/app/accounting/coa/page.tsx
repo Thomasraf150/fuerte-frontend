@@ -2,7 +2,7 @@ import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
-// import BorrCommSchedList from './components/BorrCommSchedList';
+import ChartofAcctList from './components/ChartofAcctList';
 
 export const metadata = {
   title: "Loan Products",
@@ -15,7 +15,7 @@ const SOA: React.FC = () => {
       <div className="mx-auto">
         <Breadcrumb pageName="Chart of Accounts" />
       </div>
-      {/* <BorrCommSchedList /> */}
+      <ChartofAcctList />
     </DefaultLayout>
   );
 };

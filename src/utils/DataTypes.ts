@@ -645,3 +645,11 @@ export interface DataRowCollectionList {
   bank_charge: string;
   ap_or_refund: string;
 }
+export interface DataChartOfAccountList {
+  id: string;
+  account_name: string;
+  description: string;
+  balance: string;
+  is_debit: string;
+  subAccounts: DataChartOfAccountList[];
+}
