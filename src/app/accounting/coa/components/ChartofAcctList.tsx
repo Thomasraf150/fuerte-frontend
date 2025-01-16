@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import { DataArea, DataChartOfAccountList } from '@/utils/DataTypes';
+import { DataChartOfAccountList } from '@/utils/DataTypes';
 import CoaForm from './CoaForm';
 import useCoa from '@/hooks/useCoa';
 import { GitBranch, SkipBack } from 'react-feather';
@@ -13,6 +13,13 @@ const ChartofAcctList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
+  const [initialFormData, setInitialFormData] = useState<DataChartOfAccountList | null>(null);
+
+  const handleShowForm = (lbl: string, showFrm: boolean) => {
+    setShowForm(showFrm);
+    setActionLbl(lbl);
+  }
+  
 
   useEffect(() => {
     fetchCoaDataTable();
@@ -44,6 +51,10 @@ const ChartofAcctList: React.FC = () => {
                 </h3>
               </div>
               <div className="overflow-x-auto shadow-md sm:rounded-lg p-5">
+                <button className="bg-purple-700 text-white py-2 px-4 mb-4 rounded hover:bg-purple-800 flex items-center space-x-2" onClick={() => handleShowForm('Create Account', true)}>
+                  <GitBranch  size={14} /> 
+                  <span>Create Account</span>
+                </button>
                 <table className="w-full text-sm text-left text-black">
                   <thead className="text-xs text-black uppercase bg-gray-3">
                     <tr>
@@ -59,7 +70,7 @@ const ChartofAcctList: React.FC = () => {
             </div>
           </div>
 
-          {/* {showForm && (
+          {showForm && (
             <div className="fade-in">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
@@ -68,11 +79,11 @@ const ChartofAcctList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <CoaForm setShowForm={setShowForm} fetchDataArea={fetchDataArea} initialData={initialFormData} actionLbl={actionLbl} />
+                  <CoaForm setShowForm={setShowForm} fetchCoaDataTable={fetchCoaDataTable} initialData={initialFormData} actionLbl={actionLbl} />
                 </div>
               </div>
             </div>
-          )} */}
+          )}
 
         </div>
       </div>

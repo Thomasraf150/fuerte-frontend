@@ -1,14 +1,14 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown } from 'react-feather';
+import { Home, Edit3, ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput';
-import useArea from '@/hooks/useArea';
-import { DataArea, DataSubBranches } from '@/utils/DataTypes';
+import useCoa from '@/hooks/useCoa';
+import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
-  fetchDataArea: (f: number, p: number) => void;
-  initialData?: DataArea | null;
+  fetchCoaDataTable: () => void;
+  initialData?: DataChartOfAccountList | null;
   actionLbl: string;
 }
 
@@ -18,9 +18,9 @@ interface OptionSubBranch {
   hidden?: boolean;
 }
 
-const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialData, actionLbl }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataArea>();
-  const { onSubmitArea, branchSubData } = useArea();
+const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initialData, actionLbl }) => {
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChartOfAccountList>();
+  const { onSubmitCoa, branchSubData } = useCoa();
 
   const [optionsSubBranch, setOptionsSubBranch] = useState<OptionSubBranch[]>([]);
 
@@ -37,27 +37,34 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialDa
     }
 
     if (initialData) {
-      if (actionLbl === 'Update Area') {
-        setValue('id', initialData.id ?? '')
-        setValue('branch_sub_id', initialData.branch_sub_id)
-        setValue('name', initialData.name)
-        setValue('description', initialData.description)
+      if (actionLbl === 'Update Coa') {
+        // setValue('id', initialData.id ?? '')
+        // setValue('branch_sub_id', initialData.branch_sub_id)
+        // setValue('name', initialData.name)
+        // setValue('description', initialData.description)
       } else {
-        reset({
-          id: '',
-          branch_sub_id: 0,
-          name: '',
-          description: ''
-        });
+        // reset({
+        //   id: '',
+        //   branch_sub_id: 0,
+        //   name: '',
+        //   description: ''
+        // });
       }
     }
 
     console.log(initialData, ' initialData');
   }, [initialData, setValue, actionLbl, branchSubData])
 
-  const onSubmit: SubmitHandler<DataArea> = data => {
-    onSubmitArea(data);
-    fetchDataArea(10, 1)
+  const [selectedPlacement, setSelectedPlacement] = useState<string>("");
+
+  const handleChangePlacement = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedPlacement(event.target.value);
+  };
+
+
+  const onSubmit: SubmitHandler<DataChartOfAccountList> = data => {
+    onSubmitCoa(data);
+    fetchCoaDataTable()
   };
 
   return (
@@ -70,24 +77,61 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialDa
         register={register('branch_sub_id', { required: 'Branch Sub is required' })}
         error={errors.branch_sub_id?.message}
         options={optionsSubBranch}
+        className='mb-4'
       />
 
       <FormInput
-        label="Name"
-        id="name"
+        label="Account Name"
+        id="account_name"
         type="text"
-        icon={Home}
-        register={register('name', { required: true })}
-        error={errors.name && "This field is required"}
+        icon={Edit3}
+        register={register('account_name', { required: true })}
+        error={errors.account_name && "This field is required"}
       />
+
+      <div className="space-y-2">
+        <label
+              className={`block text-sm font-medium text-black dark:text-white mr-2`}
+        >
+          Placement
+        </label>
+        <div className="flex items-center space-x-6">
+          
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              {...register("is_debit", { required: "Please select Placement" })}
+              value="1"
+              checked={selectedPlacement === "1"}
+              onChange={handleChangePlacement}
+              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            />
+            <span className="text-gray-700">Debit</span>
+          </label>
+
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              {...register("is_debit", { required: "Please select Placement" })}
+              name="option"
+              value="0"
+              checked={selectedPlacement === "0"}
+              onChange={handleChangePlacement}
+              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            />
+            <span className="text-gray-700">Credit</span>
+          </label>
+        </div>
+      </div>
       
       <FormInput
         label="Description"
         id="description"
         type="text"
-        icon={Home}
+        icon={Edit3}
         register={register('description', { required: true })}
         error={errors.description && "This field is required"}
+        className='mt-2'
       />
 
       <div className="flex justify-end gap-4.5">

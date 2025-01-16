@@ -647,7 +647,10 @@ export interface DataRowCollectionList {
 }
 export interface DataChartOfAccountList {
   id: string;
+  user_id: string;
+  branch_sub_id: string;
   account_name: string;
+  number: string;
   description: string;
   balance: string;
   is_debit: string;
