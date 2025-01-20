@@ -10,6 +10,10 @@ const COA_TABLE_QUERY: string = `
           balance
           is_debit
           parent_account_id
+          branch_sub {
+            id
+            name
+          }
           subAccounts {
             id
             user_id
@@ -20,6 +24,10 @@ const COA_TABLE_QUERY: string = `
             balance
             is_debit
             parent_account_id
+            branch_sub {
+              id
+              name
+            }
             subAccounts {
               id
               user_id
@@ -30,6 +38,10 @@ const COA_TABLE_QUERY: string = `
               balance
               is_debit
               parent_account_id
+              branch_sub {
+                id
+                name
+              }
               subAccounts {
                 id
                 user_id
@@ -40,6 +52,10 @@ const COA_TABLE_QUERY: string = `
                 balance
                 is_debit
                 parent_account_id
+                branch_sub {
+                  id
+                  name
+                }
                 subAccounts {
                   id
                   user_id
@@ -50,6 +66,10 @@ const COA_TABLE_QUERY: string = `
                   balance
                   is_debit
                   parent_account_id
+                  branch_sub {
+                    id
+                    name
+                  }
                   
                 }
               }

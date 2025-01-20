@@ -29,6 +29,7 @@ const ChartofAcctList: React.FC = () => {
         <tr className="bg-white border-b hover:bg-gray-3 cursor-pointer">
           <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.account_name}</td>
           <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.number}</td>
+          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account?.branch_sub.name}</td>
           <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
           <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.balance}</td>
         </tr>
@@ -42,7 +43,7 @@ const ChartofAcctList: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-3 gap-4">
           <div className={`col-span-2`}>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 overflow-y-auto min-h-[300px]">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-boxdark dark:text-boxdark">
                   Chart of Accounts
@@ -58,6 +59,7 @@ const ChartofAcctList: React.FC = () => {
                     <tr>
                       <th scope="col" className="px-6 py-3">Account Name</th>
                       <th scope="col" className="px-6 py-3">Account #</th>
+                      <th scope="col" className="px-6 py-3">Branch</th>
                       <th scope="col" className="px-6 py-3 text-center">Is Debit</th>
                       <th scope="col" className="px-6 py-3 text-center">Balance</th>
                     </tr>
