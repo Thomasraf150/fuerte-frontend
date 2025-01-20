@@ -32,10 +32,26 @@ const COA_TABLE_QUERY: string = `
               parent_account_id
               subAccounts {
                 id
+                user_id
+                branch_sub_id
                 account_name
+                number
                 description
                 balance
                 is_debit
+                parent_account_id
+                subAccounts {
+                  id
+                  user_id
+                  branch_sub_id
+                  account_name
+                  number
+                  description
+                  balance
+                  is_debit
+                  parent_account_id
+                  
+                }
               }
             }
           }
