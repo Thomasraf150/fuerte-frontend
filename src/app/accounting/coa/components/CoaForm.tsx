@@ -97,7 +97,7 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
   const onSubmit: SubmitHandler<DataChartOfAccountList> = data => {
     onSubmitCoa(data);
     fetchCoaDataTable();
-    console.log(data, ' oowa');
+    setShowForm(false);
   };
 
   return (
