@@ -55,7 +55,7 @@ const ChartofAcctList: React.FC = () => {
                   <span>Create Account</span>
                 </button>
               </div>
-              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[400px]">
+              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[600px]">
                 <table className="w-full text-sm text-left text-black">
                   <thead className="text-xs text-black uppercase bg-gray-3">
                     <tr>
