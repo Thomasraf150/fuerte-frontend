@@ -15,6 +15,10 @@ const subBranchListCol = (handleUpdateSubRowClick: (row: DataSubBranches) => voi
     name: 'Branch',
     cell: row => row.name,
     sortable: true,
+    style: {
+      minWidth: '200px',
+    },
+    width: '200px'
   },
   {
     name: 'Address',
@@ -22,12 +26,16 @@ const subBranchListCol = (handleUpdateSubRowClick: (row: DataSubBranches) => voi
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.address}</span>
+                <span className='d-block font-weight-semibold'>{`${row.address.slice(0, 50)}...`}</span>
             </div>
         </div> 
       )
     },
     sortable: true,
+    style: {
+      minWidth: '400px',
+    },
+    width: '400px'
   },
   {
     name: 'User',
