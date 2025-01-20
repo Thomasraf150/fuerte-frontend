@@ -62,7 +62,7 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
           </select>
         ) : (
           <input
-            className={`w-full ${type === 'file' ? '' : 'mb-4'} h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
+            className={`w-full ${type === 'file' ? '' : 'mb-0'} h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
             type={type}
             id={id}
             placeholder={placeholder}

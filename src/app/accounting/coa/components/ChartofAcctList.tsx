@@ -13,13 +13,11 @@ const ChartofAcctList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
-  const [initialFormData, setInitialFormData] = useState<DataChartOfAccountList | null>(null);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
     setActionLbl(lbl);
   }
-  
 
   useEffect(() => {
     fetchCoaDataTable();
@@ -30,8 +28,8 @@ const ChartofAcctList: React.FC = () => {
       <React.Fragment key={account.id}>
         <tr className="bg-white border-b hover:bg-gray-3 cursor-pointer">
           <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.account_name}</td>
+          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.number}</td>
           <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
-          <td className="px-6 py-4 text-sm text-form-strokedark">{account.description}</td>
           <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.balance}</td>
         </tr>
         {account.subAccounts && renderAccounts(account.subAccounts, level + 1)}
@@ -59,8 +57,8 @@ const ChartofAcctList: React.FC = () => {
                   <thead className="text-xs text-black uppercase bg-gray-3">
                     <tr>
                       <th scope="col" className="px-6 py-3">Account Name</th>
+                      <th scope="col" className="px-6 py-3">Account #</th>
                       <th scope="col" className="px-6 py-3 text-center">Is Debit</th>
-                      <th scope="col" className="px-6 py-3">Description</th>
                       <th scope="col" className="px-6 py-3 text-center">Balance</th>
                     </tr>
                   </thead>
@@ -79,7 +77,7 @@ const ChartofAcctList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <CoaForm setShowForm={setShowForm} fetchCoaDataTable={fetchCoaDataTable} initialData={initialFormData} actionLbl={actionLbl} />
+                  <CoaForm setShowForm={setShowForm} fetchCoaDataTable={fetchCoaDataTable} actionLbl={actionLbl} coaDataAccount={coaDataAccount || []} />
                 </div>
               </div>
             </div>

@@ -654,5 +654,6 @@ export interface DataChartOfAccountList {
   description: string;
   balance: string;
   is_debit: string;
+  parent_account_id: string;
   subAccounts: DataChartOfAccountList[];
 }

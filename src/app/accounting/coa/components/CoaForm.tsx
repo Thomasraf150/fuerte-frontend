@@ -8,8 +8,8 @@ import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
   fetchCoaDataTable: () => void;
-  initialData?: DataChartOfAccountList | null;
   actionLbl: string;
+  coaDataAccount: DataChartOfAccountList[];
 }
 
 interface OptionSubBranch {
@@ -18,13 +18,45 @@ interface OptionSubBranch {
   hidden?: boolean;
 }
 
-const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initialData, actionLbl }) => {
+const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actionLbl, coaDataAccount }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChartOfAccountList>();
   const { onSubmitCoa, branchSubData } = useCoa();
 
   const [optionsSubBranch, setOptionsSubBranch] = useState<OptionSubBranch[]>([]);
 
+  const flattenAccountsToOptions = (
+    accounts: DataChartOfAccountList[],
+    level: number = 1
+  ): { label: string; value: string }[] => {
+    // Initialize an empty array for options
+    let options: { label: string; value: string }[] = [];
+  
+    accounts.forEach((account) => {
+      // Add the current account with indentation based on level
+      options.push({
+        label: `${'—'.repeat(level - 1)} ${account.account_name}`,
+        value: account.id.toString(),
+      });
+  
+      // Recursively process sub-accounts
+      if (account.subAccounts) {
+        options = options.concat(flattenAccountsToOptions(account.subAccounts, level + 1));
+      }
+    });
+  
+    return options;
+  };
+
+  // Add the default empty option only once at the top
+  const getAccountOptions = (accounts: DataChartOfAccountList[]): { label: string; value: string }[] => {
+    const flattenedOptions = flattenAccountsToOptions(accounts);
+    return [{ label: "Select a Parent account", value: "" }, ...flattenedOptions];
+  };
+
+  const optionsCoaData = getAccountOptions(coaDataAccount);
+
   useEffect(()=>{
+    console.log(coaDataAccount, 'coaData');
     if (branchSubData && Array.isArray(branchSubData)) {
       const dynaOpt: OptionSubBranch[] = branchSubData?.map(bSub => ({
         value: String(bSub.id),
@@ -36,7 +68,7 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initi
       ]);
     }
 
-    if (initialData) {
+    if (coaDataAccount) {
       if (actionLbl === 'Update Coa') {
         // setValue('id', initialData.id ?? '')
         // setValue('branch_sub_id', initialData.branch_sub_id)
@@ -52,8 +84,8 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initi
       }
     }
 
-    console.log(initialData, ' initialData');
-  }, [initialData, setValue, actionLbl, branchSubData])
+    console.log(coaDataAccount, ' initialData');
+  }, [coaDataAccount, setValue, actionLbl, branchSubData])
 
   const [selectedPlacement, setSelectedPlacement] = useState<string>("");
 
@@ -64,7 +96,8 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initi
 
   const onSubmit: SubmitHandler<DataChartOfAccountList> = data => {
     onSubmitCoa(data);
-    fetchCoaDataTable()
+    fetchCoaDataTable();
+    console.log(data, ' oowa');
   };
 
   return (
@@ -86,10 +119,10 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initi
         type="text"
         icon={Edit3}
         register={register('account_name', { required: true })}
-        error={errors.account_name && "This field is required"}
+        error={errors.account_name && "Account name is required"}
       />
 
-      <div className="space-y-2">
+      <div className="space-y-2 mt-4">
         <label
               className={`block text-sm font-medium text-black dark:text-white mr-2`}
         >
@@ -122,6 +155,7 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initi
             <span className="text-gray-700">Credit</span>
           </label>
         </div>
+        {errors && <p className="mt-2 text-sm text-red-600">{errors.is_debit && "Placement is required!"}</p>}
       </div>
       
       <FormInput
@@ -130,8 +164,29 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, initi
         type="text"
         icon={Edit3}
         register={register('description', { required: true })}
-        error={errors.description && "This field is required"}
+        error={errors.description && "Description is required"}
         className='mt-2'
+      />
+
+      <FormInput
+        label="Balance"
+        id="balance"
+        type="text"
+        icon={Edit3}
+        register={register('balance', { required: true })}
+        error={errors.balance && "Balance is required"}
+        className='mt-2'
+      />
+
+      <FormInput
+        label="Parent Account"
+        id="parent_account_id"
+        type="select"
+        icon={ChevronDown}
+        register={register('parent_account_id')}
+        error={errors.parent_account_id?.message}
+        options={optionsCoaData}
+        className='mb-4 mt-4'
       />
 
       <div className="flex justify-end gap-4.5">
