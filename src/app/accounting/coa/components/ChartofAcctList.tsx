@@ -43,17 +43,19 @@ const ChartofAcctList: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-3 gap-4">
           <div className={`col-span-2`}>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 overflow-y-auto min-h-[300px]">
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-boxdark dark:text-boxdark">
                   Chart of Accounts
                 </h3>
               </div>
-              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5">
+              <div className="p-5">
                 <button className="bg-purple-700 text-white py-2 px-4 mb-4 rounded hover:bg-purple-800 flex items-center space-x-2" onClick={() => handleShowForm('Create Account', true)}>
                   <GitBranch  size={14} /> 
                   <span>Create Account</span>
                 </button>
+              </div>
+              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[400px]">
                 <table className="w-full text-sm text-left text-black">
                   <thead className="text-xs text-black uppercase bg-gray-3">
                     <tr>
