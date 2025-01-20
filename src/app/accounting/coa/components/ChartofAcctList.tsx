@@ -29,7 +29,7 @@ const ChartofAcctList: React.FC = () => {
         <tr className="bg-white border-b hover:bg-gray-3 cursor-pointer">
           <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.account_name}</td>
           <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.number}</td>
-          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account?.branch_sub.name}</td>
+          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account?.branch_sub?.name}</td>
           <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
           <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.balance}</td>
         </tr>
