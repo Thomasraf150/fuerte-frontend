@@ -43,7 +43,7 @@ const BranchLists: React.FC = () => {
   };
   
   const handleSubViewRowClick = (id: number) => {
-    console.log('View Sub')
+    console.log('View Subs');
     setShowSubBranch(true);
     fetchSubDataList('id_desc', id);
   };
@@ -84,6 +84,7 @@ const BranchLists: React.FC = () => {
   }
 
   useEffect(() => {
+    console.log(dataBranchSub, ' dataBranchSub');
   }, [dataBranch, dataBranchSub, initialFormData, selectedBranchID])
 
   return (
@@ -119,7 +120,7 @@ const BranchLists: React.FC = () => {
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
-                    {dataBranchSub && dataBranchSub[0]?.name}
+                    {dataBranchSub && dataBranchSub[0]?.branch?.name}
                   </h3>
                 </div>
                 <div className="p-7">
