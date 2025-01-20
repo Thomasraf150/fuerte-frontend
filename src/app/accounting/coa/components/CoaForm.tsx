@@ -146,7 +146,6 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
             <input
               type="radio"
               {...register("is_debit", { required: "Please select Placement" })}
-              name="option"
               value="0"
               checked={selectedPlacement === "0"}
               onChange={handleChangePlacement}

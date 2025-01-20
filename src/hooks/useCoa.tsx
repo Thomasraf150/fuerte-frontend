@@ -73,7 +73,7 @@ const useCoa = () => {
   const onSubmitCoa: SubmitHandler<DataChartOfAccountList> = async (data) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
-
+    
     let mutation;
     let variables: { input: any } = {
       input: {
