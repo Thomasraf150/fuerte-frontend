@@ -30,14 +30,13 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // if ((parseFloat(watch('advanced_payment')) || 0) > 0) {
       
       const computedUdi = String((udiSched?.amount * ((((parseFloat(watch('advanced_payment')) || 0 ) + (parseFloat(watch('payment_ua_sp')) || 0)) / amountSched?.amount) * 100 / 100)).toFixed(2));
-      if (parseFloat(computedUdi).toFixed(2) > parseFloat(selectedUdiSched?.amount).toFixed(2)) {
+      if (parseFloat(parseFloat(computedUdi).toFixed(2)) > parseFloat(parseFloat(selectedUdiSched?.amount).toFixed(2))) {
         toast.error("Your amount paying is exeeding a total remaining due. Please input a right remain amount");
-
         setTimeout(function(){
           setValue('payment_ua_sp', '0');
           setValue('advanced_payment', '0');
-          console.log(parseFloat(computedUdi).toFixed(2), ' computedUdi')
-          console.log(parseFloat(selectedUdiSched?.amount).toFixed(2), ' selectedUdiSched?.amount')
+          // console.log(parseFloat(parseFloat(computedUdi).toFixed(2)), ' computedUdi')
+          // console.log(parseFloat(parseFloat(selectedUdiSched?.amount).toFixed(2)), ' selectedUdiSched?.amount')
         }, 1000);
       } else {
         setValue('interest', computedUdi);
