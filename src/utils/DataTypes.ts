@@ -47,6 +47,7 @@ export interface DataRowLoanProducts {
   interest_rate: number;
   udi: number;
   processing: number;
+  agent_fee: number;
   insurance: number;
   collection: number;
   notarial: number;
@@ -66,6 +67,7 @@ export interface DataFormLoanProducts {
   interest_rate: number | '';
   udi: number | '';
   processing: number | '';
+  agent_fee: number | '';
   insurance: number | '';
   collection: number | '';
   notarial: number | '';
@@ -556,6 +558,7 @@ export interface BorrLoanComputationValues {
 export interface ObjDeductions {
   udi: string;
   processing: string;
+  agent_fee: string;
   collection: string;
   notarial: string;
 }
@@ -563,6 +566,7 @@ export interface ObjDeductions {
 export interface ObjDeductionsRate {
   udi: string;
   processing: string;
+  agent_fee: string;
   collection: string;
 }
 

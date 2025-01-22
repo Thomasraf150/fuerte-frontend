@@ -32,6 +32,7 @@ const BORROWER_LOAN_QUERY: string = `
             interest_rate
             udi
             processing
+            agent_fee
             insurance
             commission
             collection
@@ -93,6 +94,7 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         interest_rate
         udi
         processing
+        agent_fee
         insurance
         commission
         collection
@@ -139,6 +141,7 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
       deductions {
         udi
         processing
+        agent_fee
         collection
         insurance
         notarial
@@ -146,6 +149,7 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
       deduction_rate {
         udi
         processing
+        agent_fee
         collection
         insurance
       }

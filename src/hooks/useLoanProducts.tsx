@@ -47,6 +47,7 @@ const useLoanProducts = () => {
         interest_rate: Number(data.interest_rate),
         udi: Number(data.udi),
         processing: Number(data.processing),
+        agent_fee: Number(data.agent_fee),
         insurance: Number(data.insurance),
         collection: Number(data.collection),
         notarial: Number(data.notarial),

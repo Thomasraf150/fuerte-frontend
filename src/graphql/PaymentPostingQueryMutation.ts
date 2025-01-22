@@ -29,6 +29,7 @@ const LOANS_LIST_QUERY: string = `
             interest_rate
             udi
             processing
+            agent_fee
             insurance
             commission
             collection
@@ -101,6 +102,7 @@ const GET_LOAN_SCHEDULE: string = `
       interest_rate
       udi
       processing
+      agent_fee
       insurance
       commission
       collection

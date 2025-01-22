@@ -49,8 +49,9 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
     const interest_rate = watch('interest_rate');
     const terms = watch('terms');
     const processing = watch('processing');
+    const agent_fee = watch('agent_fee');
     const collection = watch('collection');
-    const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100))) * 100;
+    const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100) + (Number(agent_fee) / 100))) * 100;
     console.log(udi, 'udi')
 
     if (!isNaN(udi)) {
@@ -79,6 +80,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
       setValue('interest_rate', singleData.interest_rate);
       setValue('udi', singleData.udi);
       setValue('processing', singleData.processing);
+      setValue('agent_fee', singleData.agent_fee);
       setValue('insurance', singleData.insurance);
       setValue('collection', singleData.collection);
       setValue('notarial', singleData.notarial);
@@ -94,6 +96,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         terms: '',
         interest_rate: '',
         processing: '',
+        agent_fee: '',
         insurance: '',
         collection: '',
         notarial: '',
@@ -178,6 +181,26 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('processing')}
             error={errors.processing && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Agent Fee (%)"
+            id="agent_fee"
+            type="text"
+            icon={Home}
+            register={register('agent_fee')}
+            error={errors.agent_fee && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Agent Fee (%)"
+            id="agent_fee"
+            type="text"
+            icon={Home}
+            register={register('agent_fee')}
+            error={errors.agent_fee && "This field is required"}
           />
         </div>
         <div>

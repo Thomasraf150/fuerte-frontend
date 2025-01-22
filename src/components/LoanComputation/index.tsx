@@ -83,6 +83,14 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                 </li>
                 <li className="flex items-center gap-4 border p-2">
                   <div>
+                    <h3 className="text-sm text-strokedark">Agent Fee {`(${dataComputedLoans?.loan_product?.agent_fee}%)`}</h3>
+                  </div>
+                  <div className="flex flex-1 items-center justify-end gap-2">
+                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[13]?.credit))}</h3>
+                  </div>
+                </li>
+                <li className="flex items-center gap-4 border p-2">
+                  <div>
                     <h3 className="text-sm text-strokedark">Collection Fee {`(${dataComputedLoans?.loan_product?.collection}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">

@@ -9,6 +9,7 @@ const GET_LOAN_PRODUCT_QUERY: string = `
       interest_rate
       udi
       processing
+      agent_fee
       insurance
       commission
       collection
@@ -34,6 +35,7 @@ const SAVE_LOAN_PRODUCT_QUERY: string = `
       interest_rate
       udi
       processing
+      agent_fee
       insurance
       collection
       notarial
@@ -51,6 +53,7 @@ const UPDATE_LOAN_PRODUCT_QUERY: string = `
       interest_rate
       udi
       processing
+      agent_fee
       insurance
       collection
       notarial
