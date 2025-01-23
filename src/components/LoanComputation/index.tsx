@@ -15,7 +15,6 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                           Number(dataComputedLoans?.loan_details[6]?.credit ?? 0);
 
   useEffect(() => {
-    console.log(dataComputedLoans, ' dataComputedLoans');
   }, [dataComputedLoans]);
 
   return (
@@ -86,7 +85,7 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Agent Fee {`(${dataComputedLoans?.loan_product?.agent_fee}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[13]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[13] !== undefined ? dataComputedLoans?.loan_details[13]?.credit : 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">

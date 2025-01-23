@@ -31,11 +31,6 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     setShowForm(b);
     setShowDetails(false);
   }
-  
-  const renewALoan = (b: boolean) => {
-    setShowForm(b);
-    setShowDetails(false);
-  }
 
   // remove attachments
   const handleRowClick = async (row: BorrLoanRowData) => {
@@ -49,6 +44,12 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
       // Remove the ID if unchecked
       setDataLoanRenewal((prevArray) => prevArray.filter((id) => id !== row?.id));
     }
+  }
+
+  const renewALoan = (b: boolean) => {
+    setShowForm(b);
+    console.log(dataLoanRenewal, ' dataLoanRenewal');
+    setShowDetails(false);
   }
 
   useEffect(() => {

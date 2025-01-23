@@ -7,6 +7,7 @@ import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanCompu
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
 import FormLoanComputation from './FormLoanComputation';
+import RenewalAmntForm from './RenewalAmntForm';
 import useLoans from '@/hooks/useLoans';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 
@@ -85,6 +86,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
         ...dynaOpt,
       ]);
     }
+    console.log(dataLoanRenewal, 'dataLoanRenewal');
   }, [dataBranchSub]);
   
   useEffect(() => {
@@ -116,6 +118,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 gap-4 m-5">
         <div className="border-2 border-emerald-200 p-4"> {/* column 1 */}
           <form onSubmit={handleSubmit(onSubmit)} >
+            {/* Renewal Form */}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal}/>}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller

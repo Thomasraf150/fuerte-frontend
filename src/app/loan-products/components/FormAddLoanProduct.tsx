@@ -195,16 +195,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         </div>
         <div>
           <FormInput
-            label="Agent Fee (%)"
-            id="agent_fee"
-            type="text"
-            icon={Home}
-            register={register('agent_fee')}
-            error={errors.agent_fee && "This field is required"}
-          />
-        </div>
-        <div>
-          <FormInput
             label="Collection (%)"
             id="collection"
             type="text"
