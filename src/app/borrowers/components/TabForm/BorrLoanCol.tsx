@@ -11,12 +11,27 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
   {
     name: '',
     cell: row => (
-      row.status === 3 && (
-        <input
-          type="checkbox"
-          onChange={(e) => handleCheckboxChange(row, e.target.checked)}
-          className="cursor-pointer"
-        />
+      // row.status === 3 && (
+      //   <input
+      //     type="checkbox"
+      //     onChange={(e) => handleCheckboxChange(row, e.target.checked)}
+      //     className="cursor-pointer"
+      //   />
+      // )
+      (
+        row.is_closed === '1'
+        ? (<></>)
+        : (
+          (
+            row.status === 3 && (
+              <input
+                type="checkbox"
+                onChange={(e) => handleCheckboxChange(row, e.target.checked)}
+                className="cursor-pointer"
+              />
+            )
+          )
+        )
       )
     ),
     width: '50px',
@@ -53,7 +68,8 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
     cell: row => (
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
-          row.status === 0
+          row.is_closed === '1' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
+          (row.status === 0
             ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
             : row.status === 1
             ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-red'
@@ -61,10 +77,13 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
             : row.status === 3
             ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
-            : ''
+            : '')
         }`}
       >
-        {loanStatus(row.status)}
+        {`${
+          row.is_closed === '1' ? 'Closed' :
+          loanStatus(row.status)
+        }`}
       </span>
     ),
     sortable: true,

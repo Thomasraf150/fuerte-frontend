@@ -21,6 +21,7 @@ const BORROWER_LOAN_QUERY: string = `
           is_pn_signed
           bank_id
           check_no
+          is_closed
           addon_terms
           addon_amount
           addon_udi
