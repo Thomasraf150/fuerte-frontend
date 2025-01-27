@@ -168,6 +168,7 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
       addon_udi
       addon_total
       new_loan_proceeds
+      
     }
   }
 `;
@@ -224,6 +225,26 @@ const PRINT_LOAN_DETAILS: string = `
       printLoanDetails(input: $input)
     }
 `;
+const GET_LOAN_RENEWAL: string = `
+   query GetRenewalBalance($input: RenewalBalanceInp){
+    getRenewalBalance(input: $input){
+      loan_ref
+      pn_amount
+      loan_schedules {
+        ua_sp {
+          amount
+          due_date
+          loan_schedule_id
+        }
+        ob {
+          amount
+          due_date
+          loan_schedule_id
+        }
+      }
+    }
+  }
+`;
 
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
@@ -233,7 +254,8 @@ const LoanProductsQueryMutations = {
   LOAN_PN_SIGNING,
   SAVE_LOAN_BANK_DETAILS,
   SAVE_LOAN_RELEASE,
-  PRINT_LOAN_DETAILS
+  PRINT_LOAN_DETAILS,
+  GET_LOAN_RENEWAL
 };
 
 export default LoanProductsQueryMutations;

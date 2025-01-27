@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
-import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData, LoanBankFormValues, LoanReleaseFormValues } from '@/utils/DataTypes';
+import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData, LoanBankFormValues, LoanReleaseFormValues, DataRenewalData } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
@@ -19,13 +19,15 @@ const useLoans = () => {
           LOAN_PN_SIGNING, 
           SAVE_LOAN_BANK_DETAILS,
           SAVE_LOAN_RELEASE,
-          PRINT_LOAN_DETAILS } = LoansQueryMutation;
+          PRINT_LOAN_DETAILS,
+          GET_LOAN_RENEWAL } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
   const [loanData, setLoanData] = useState<BorrLoanRowData[]>([]);
   const [loanSingleData, setLoanSingleData] = useState<BorrLoanRowData>();
   const [dataComputedLoans, setDataComputedLoans] = useState<[]>([]);
+  const [dataComputedRenewal, setDataComputedRenewal] = useState<DataRenewalData>();
   const [loading, setLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
@@ -65,6 +67,26 @@ const useLoans = () => {
 
     // const result = await response.json();
     setLoanSingleData(response.data.getLoan);
+    setLoading(false);
+  };
+ 
+  const fetchRerewalLoan = async (renewal_id: string[]) => {
+    setLoading(true);
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GET_LOAN_RENEWAL,
+        variables: {
+          input: { renewal_id },
+        }
+      }),
+    });
+
+    // const result = await response.json();
+    setDataComputedRenewal(response.data.getRenewalBalance);
     setLoading(false);
   };
   
@@ -129,6 +151,7 @@ const useLoans = () => {
         penalty: data.penalty,
         rebates: data.rebates,
         ...(data.renewal_loan_id !== '' ? { renewal_loan_id: data.renewal_loan_id } : {}),
+        renewal_details: data.renewal_details
       },
       process_type
     };
@@ -336,7 +359,9 @@ const useLoans = () => {
     loading,
     onSubmitLoanBankDetails,
     onSubmitLoanRelease,
-    printLoanDetails
+    printLoanDetails,
+    fetchRerewalLoan,
+    dataComputedRenewal
   };
 };
 

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { DollarSign, Layout, Save } from 'react-feather';
 import FormInput from '@/components/FormInput';
-import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData } from '@/utils/DataTypes';
+import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
 import FormLoanComputation from './FormLoanComputation';
@@ -16,6 +16,7 @@ interface ParentFormBr {
   singleData: BorrowerRowInfo | undefined;
   dataBranchSub: DataSubBranches[] | undefined;
   dataLoanRenewal: string[] | [];
+  dataComputedRenewal: DataRenewalData | undefined;
 }
 
 interface Option {
@@ -24,7 +25,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub, dataLoanRenewal }) => {
+const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub, dataLoanRenewal, dataComputedRenewal }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
   const { dataComputedLoans, onSubmitLoanComp, loanProduct } = useLoans();
 
@@ -36,7 +37,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     'ob': String(watch('ob') ?? "0.00"),
     'penalty': String(watch('penalty') ?? "0.00"),
     'rebates': String(watch('rebates') ?? "0.00"),
-    'renewal_loan_id': dataLoanRenewal?.join(',')
+    'renewal_loan_id': dataLoanRenewal?.join(','),
+    'renewal_details': watch('renewal_details')
   };
 
   const onSubmit: SubmitHandler<BorrLoanFormValues> = async (data) => {
@@ -119,7 +121,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
         <div className="border-2 border-emerald-200 p-4"> {/* column 1 */}
           <form onSubmit={handleSubmit(onSubmit)} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal}/>}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal}/>}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller

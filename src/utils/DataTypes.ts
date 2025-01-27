@@ -542,6 +542,7 @@ export interface BorrLoanFormValues {
   ob: string;
   penalty: string;
   rebates: string;
+  renewal_details: DataRenewalReqData[]
 }
 
 export interface BorrLoanComputationValues {
@@ -553,6 +554,7 @@ export interface BorrLoanComputationValues {
   penalty: string;
   rebates: string;
   renewal_loan_id: string;
+  renewal_details: DataRenewalReqData[]
 }
 
 export interface ObjDeductions {
@@ -661,4 +663,25 @@ export interface DataChartOfAccountList {
   parent_account_id: string;
   branch_sub: DataSubBranches;
   subAccounts: DataChartOfAccountList[];
+}
+export interface DataReLsRenewal {
+  ua_sp: DataReLsRenewalDetails[];
+  ob: DataReLsRenewalDetails[];
+}
+export interface DataReLsRenewalDetails {
+  amount: String;
+  due_date: String;
+  loan_schedule_id: String;
+}
+export interface DataRenewalData {
+  [x: string]: any;
+  loan_ref: string;
+  pn_balance: string;
+  loan_schedules: DataReLsRenewal[];
+}
+export interface DataRenewalReqData {
+  amount: string;
+  dueDate: string;
+  loan_ref: string;
+  loan_schedule_id: string;
 }

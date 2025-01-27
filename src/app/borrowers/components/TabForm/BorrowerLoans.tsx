@@ -20,7 +20,7 @@ const column = borrLoanCol;
 
 const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => {
   const { fetchSubDataList, dataBranchSub } = useBranches();
-  const { loanData, fetchLoans, loading } = useLoans();
+  const { loanData, fetchLoans, loading, fetchRerewalLoan, dataComputedRenewal } = useLoans();
   const [showForm, setShowForm] = useState<boolean>(false);
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [btnRenewal, setBtnRenewal] = useState<boolean>(true);
@@ -30,6 +30,9 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   const createLoans = (b: boolean) => {
     setShowForm(b);
     setShowDetails(false);
+    if (b === false) {
+      setDataLoanRenewal([]);
+    }
   }
 
   // remove attachments
@@ -37,18 +40,22 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   }
 
   const handleCheckboxChange = async (row: BorrLoanRowData, isChecked: boolean) => {
-    if (isChecked) {
-      // Add the ID if checked
-      setDataLoanRenewal((prevArray) => [...prevArray, row?.id]);
-    } else {
-      // Remove the ID if unchecked
-      setDataLoanRenewal((prevArray) => prevArray.filter((id) => id !== row?.id));
-    }
+    setDataLoanRenewal((prevArray) => {
+      if (isChecked) {
+        // Add the ID only if it doesn't already exist in the array
+        return prevArray.includes(row?.id) ? prevArray : [...prevArray, row?.id];
+      } else {
+        // Remove the ID if unchecked
+        return prevArray.filter((id) => id !== row?.id);
+      }
+    });
   }
 
   const renewALoan = (b: boolean) => {
     setShowForm(b);
-    console.log(dataLoanRenewal, ' dataLoanRenewal');
+    // console.log(dataLoanRenewal, ' dataLoanRenewal');
+    fetchRerewalLoan(dataLoanRenewal);
+
     setShowDetails(false);
   }
 
@@ -56,7 +63,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     if (dataLoanRenewal.length > 0) {
       setBtnRenewal(false);
     }
-  }, [dataLoanRenewal]);
+  }, [dataLoanRenewal, dataComputedRenewal]);
 
   const handleWholeRowClick = (row: BorrLoanRowData) => {
     setDataLoanComputed(row);
@@ -89,7 +96,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
             />
           </div>
         ) : (
-          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} dataLoanRenewal={dataLoanRenewal}/>
+          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} dataLoanRenewal={dataLoanRenewal} dataComputedRenewal={dataComputedRenewal}/>
         )}
       </div>
       {showDetails && (
