@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput'
@@ -20,6 +20,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
 
   // Initialize the state to hold the selected values with loan_ref
   const [selectedValues, setSelectedValues] = useState<Array<{ loan_ref: string; loan_schedule_id: string; amount: string; dueDate: string }>>([]);
+  const [selectedValuesOb, setSelectedValuesOb] = useState<Array<{ loan_ref: string; amount: string; dueDate: string }>>([]);
 
   const toggleRow = (index: number) => {
     setOpenRows(prevState => {
@@ -34,26 +35,49 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
   };
 
   const handleRadioChange = (loan_ref: string, value: { amount: string; loan_schedule_id: string; dueDate: string }) => {
-    // Check if the loan_ref already exists in the state
     setSelectedValues((prevSelected) => {
-      // If the loan_ref already exists, update its values, otherwise add a new entry
-      const existingIndex = prevSelected.findIndex(item => item.loan_ref === loan_ref);
-      
+      return [...prevSelected, { loan_ref, ...value }];
+    });
+    setSelectedValuesOb((prevSelected) => 
+      prevSelected.filter((item) => item.loan_ref !== loan_ref)
+    );
+  };
+
+  const handleCheckChangeOb = (loan_ref: string, value: { amount: string; dueDate: string }) => {
+    setSelectedValuesOb((prevSelected) => {
+      const existingIndex = prevSelected.findIndex(
+        (item) => item.loan_ref === loan_ref && item.amount === value.amount && item.dueDate === value.dueDate
+      );
+  
       if (existingIndex >= 0) {
-        // If found, update the existing entry with the new values
-        const updatedValues = [...prevSelected];
-        updatedValues[existingIndex] = { loan_ref, ...value };
-        return updatedValues;
+        // If the entry already exists, remove it (uncheck logic)
+        return prevSelected.filter((_, index) => index !== existingIndex);
       } else {
-        // If not found, push the new value
+        // If the entry does not exist, add it (check logic)
         return [...prevSelected, { loan_ref, ...value }];
       }
     });
+    setSelectedValues((prevSelected) => 
+      prevSelected.filter((item) => item.loan_ref !== loan_ref)
+    );
   };
 
+  // Create a unified array
+  const unifiedSelectedValues = useMemo(() => {
+    return [
+      ...selectedValues,
+      ...selectedValuesOb.map((item) => ({
+        ...item,
+        loan_schedule_id: "", // Add a default value for `loan_schedule_id` if it's missing
+      })),
+    ];
+  }, [selectedValues, selectedValuesOb]);
+
+  console.log(unifiedSelectedValues);
+
   useEffect(() => {
-    setValue('renewal_details', selectedValues);
-  }, [selectedValues, renewalIDs])
+    setValue('renewal_details', unifiedSelectedValues);
+  }, [unifiedSelectedValues, renewalIDs])
 
   return (
 
@@ -103,7 +127,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                 <td className="text-center">
                                   <div className="flex justify-center items-center">
                                     <input
-                                      name={`ua_sp_ob${v.loan_ref}`}
+                                      name={`ua_sp_ob${row.loan_schedule_id}`}
                                       type="radio"
                                       value={JSON.stringify([row?.amount, row?.due_date])}
                                       checked={selectedValues.some(item => item.loan_ref === v.loan_ref && item.amount === row?.amount && item.dueDate === row?.due_date)}
@@ -137,11 +161,10 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                 <td className="text-center">
                                   <div className="flex justify-center items-center">
                                     <input 
-                                      name={`ua_sp_ob${v.loan_ref}`}
-                                      type="radio"
+                                      type="checkbox"
                                       value={JSON.stringify([fOb, ''])}
-                                      onChange={() => handleRadioChange(v.loan_ref, { amount: fOb.toFixed(2), loan_schedule_id: '', dueDate: '' })}
-                                      checked={selectedValues.some(item => item.loan_ref === v.loan_ref && item.amount === fOb.toFixed(2) && item.dueDate === '')}
+                                      onChange={() => handleCheckChangeOb(v.loan_ref, { amount: fOb.toFixed(2), dueDate: '' })}
+                                      checked={selectedValuesOb.some(item => item.loan_ref === v.loan_ref && item.amount === fOb.toFixed(2) && item.dueDate === '')}
                                       className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                   </div>
@@ -174,7 +197,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
               <th className="text-left">Total</th>
               <th className="text-right">
                 {(() => {
-                  const renewalTotal = selectedValues.reduce(
+                  const renewalTotal = unifiedSelectedValues.reduce(
                     (total: number, row: any) => (row?.amount > 0 ? total + parseFloat(row?.amount) : total),
                     0
                   );
@@ -187,7 +210,13 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
             <tr>
               <td className="text-left"></td>
               <td className="text-right">
-                <button type="button" className="bg-blue-500 text-white px-2 py-1 text-sm rounded hover:bg-blue-600 focus:outline-none" onClick={() => setSelectedValues([]) }>Reset</button>
+                <button type="button" className="bg-blue-500 text-white px-2 py-1 text-sm rounded hover:bg-blue-600 focus:outline-none" 
+                  onClick={() => 
+                    {
+                      setSelectedValues([]);
+                      setSelectedValuesOb([]);
+                    } 
+                  }>Reset</button>
               </td>
             </tr>
           </tbody>
