@@ -2,22 +2,22 @@ import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
-import ChartofAcctList from './components/ChartofAcctList';
+import LoanProceedSettingsList from './components/LoanProceedSettingsList';
 
 export const metadata = {
-  title: "Chart of Accounts",
+  title: "Loan Proceed Settings",
   description: "",
 };
 
-const COA: React.FC = () => {
+const LoanProceedSettings: React.FC = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName="Chart of Accounts" />
+        <Breadcrumb pageName="Loan Proceed Settings" />
       </div>
-      <ChartofAcctList />
+      <LoanProceedSettingsList />
     </DefaultLayout>
   );
 };
 
-export default COA;
+export default LoanProceedSettings;

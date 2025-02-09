@@ -1,7 +1,9 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown } from 'react-feather';
+import ReactSelect from '@/components/ReactSelect';
+import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import useCoa from '@/hooks/useCoa';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
@@ -12,17 +14,17 @@ interface ParentFormBr {
   coaDataAccount: DataChartOfAccountList[];
 }
 
-interface OptionSubBranch {
-  value: string | undefined;
+interface Option {
+  value: string;
   label: string;
   hidden?: boolean;
 }
 
-const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actionLbl, coaDataAccount }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChartOfAccountList>();
+const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actionLbl, coaDataAccount }) => {
+  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataChartOfAccountList>();
   const { onSubmitCoa, branchSubData } = useCoa();
 
-  const [optionsSubBranch, setOptionsSubBranch] = useState<OptionSubBranch[]>([]);
+  const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
   const flattenAccountsToOptions = (
     accounts: DataChartOfAccountList[],
@@ -35,7 +37,7 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
       // Add the current account with indentation based on level
       options.push({
         label: `${'—'.repeat(level - 1)} ${account.account_name}`,
-        value: account.id.toString(),
+        value: account?.id?.toString(),
       });
   
       // Recursively process sub-accounts
@@ -56,9 +58,8 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
   const optionsCoaData = getAccountOptions(coaDataAccount);
 
   useEffect(()=>{
-    console.log(coaDataAccount, 'coaData');
     if (branchSubData && Array.isArray(branchSubData)) {
-      const dynaOpt: OptionSubBranch[] = branchSubData?.map(bSub => ({
+      const dynaOpt: Option[] = branchSubData?.map(bSub => ({
         value: String(bSub.id),
         label: bSub.name, // assuming `name` is the key you want to use as label
       }));
@@ -66,22 +67,6 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
         { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
         ...dynaOpt,
       ]);
-    }
-
-    if (coaDataAccount) {
-      if (actionLbl === 'Update Coa') {
-        // setValue('id', initialData.id ?? '')
-        // setValue('branch_sub_id', initialData.branch_sub_id)
-        // setValue('name', initialData.name)
-        // setValue('description', initialData.description)
-      } else {
-        // reset({
-        //   id: '',
-        //   branch_sub_id: 0,
-        //   name: '',
-        //   description: ''
-        // });
-      }
     }
 
     console.log(coaDataAccount, ' initialData');
@@ -102,7 +87,28 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FormInput
+      <div className="mb-3">
+        <FormLabel title={`Branch`}/>
+        <Controller
+          name="branch_sub_id"
+          control={control}
+          rules={{ required: 'Branch is required' }} 
+          render={({ field }) => (
+            <ReactSelect
+              {...field}
+              options={optionsSubBranch}
+              placeholder="Select a branch..."
+              onChange={(selectedOption) => {
+                field.onChange(selectedOption?.value);
+              }}
+              value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+            />
+          )}
+        />
+        {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
+      </div>
+
+      {/* <FormInput
         label="Branch Sub"
         id="branch_sub_id"
         type="select"
@@ -111,7 +117,7 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
         error={errors.branch_sub_id?.message}
         options={optionsSubBranch}
         className='mb-4'
-      />
+      /> */}
 
       <FormInput
         label="Account Name"
@@ -207,4 +213,4 @@ const CoaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actio
   );
 };
 
-export default CoaForm;
+export default LoanProcSettingsForm;

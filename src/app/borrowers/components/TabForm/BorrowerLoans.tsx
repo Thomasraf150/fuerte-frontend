@@ -77,6 +77,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     if (!showForm) {
       fetchLoans(1000, 1, Number(BorrowerData?.id));
     }
+    console.log(BorrowerData, ' BorrowerData')
   }, [BorrowerData, showForm]);
 
   return (

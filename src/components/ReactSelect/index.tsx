@@ -14,6 +14,7 @@ interface ReactSelectComponentProps {
   styles?: StylesConfig<Option, false>;
   menuPortalTarget?: HTMLElement | null;
   menuPosition?: 'fixed' | 'absolute';
+  isDisabled?: boolean;
 }
 
 const ReactSelect: FC<ReactSelectComponentProps> = ({
@@ -23,7 +24,8 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
   placeholder = 'Select an option...',
   styles,
   menuPortalTarget, 
-  menuPosition
+  menuPosition,
+  isDisabled
 }) => {
   return (
     <Select
@@ -36,6 +38,7 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
       styles={styles}
       menuPortalTarget={menuPortalTarget}
       menuPosition={menuPosition}
+      isDisabled={isDisabled}
     />
   );
 };

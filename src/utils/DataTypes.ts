@@ -685,3 +685,29 @@ export interface DataRenewalReqData {
   loan_ref: string;
   loan_schedule_id: string;
 }
+export interface DataLoanProceedAcctData {
+  user_id: string;
+  branch_sub_id: string;
+  account_id: string;
+  description: string;
+  is_deleted: string;
+  branch_sub: DataSubBranches;
+  account: DataChartOfAccountList;
+}
+export interface DataLoanProceedList {
+  user_id: string;
+  branch_sub_id: string;
+  description: string;
+  nr_id: string;
+  ob_id: string;
+  udi_id: string;
+  proc_id: string;
+  ins_id: string;
+  col_id: string;
+  not_id: string;
+  reb_id: string;
+  pen_id: string;
+  addon_id: string;
+  addon_udi_id: string;
+  cib_id: string;
+}
