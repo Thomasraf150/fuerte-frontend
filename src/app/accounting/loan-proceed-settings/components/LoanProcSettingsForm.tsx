@@ -25,12 +25,13 @@ interface Option {
 const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
   const { onSubmitLoanProSettings } = useLoanProceedAccount();
+  const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     if (actionLbl === 'Create Account') {
       reset();
     } else {
-      console.log(actionLbl, ' actionLbl');
+      setBranchSubIdDisabled(true);
       lpsSingleData?.map(item => {
         if (item?.description === 'notes receivable') {
           setValue('branch_sub_id', item?.branch_sub_id);
@@ -129,8 +130,6 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
     // setShowForm(false);
   };
 
-  const branchSubId = watch("branch_sub_id");
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-3 gap-4">
@@ -149,7 +148,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
                   field.onChange(selectedOption?.value);
                 }}
                 value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
-                isDisabled={!!branchSubId}
+                isDisabled={!!branchSubIdDisabled}
               />
             )}
           />

@@ -99,7 +99,7 @@ const useLoanProceedAccount = () => {
       body: JSON.stringify({
         query: mutation,
         variables,
-      }),
+      }), 
     });
     const result = await response.json();
     toast.success("Loan Proceed Settings is Saved!");

@@ -37,9 +37,9 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
             <thead className="text-xs text-gray-700 uppercase bg-teal-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
                 <th scope="col" className="px-4 py-3 w-32 whitespace-nowrap sticky left-0 bg-teal-50 dark:bg-gray-700">Debit</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-32 bg-teal-50 dark:bg-gray-700">Credit</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-64 bg-teal-50 dark:bg-gray-700">Running Balance</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-64 bg-teal-50 dark:bg-gray-700">Due Date</th>
+                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-24 bg-teal-50 dark:bg-gray-700">Credit</th>
+                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-44 bg-teal-50 dark:bg-gray-700">Running Balance</th>
+                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap bg-teal-50 dark:bg-gray-700">Due Date</th>
                 <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap">Date Paid</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Collection</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Penalty</th>
@@ -62,8 +62,8 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
               custLedgerData && custLedgerData.map((item, i) => (
                 <tr key={i} className="bg-white dark:bg-gray-800">
                   <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.debit)}</th>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-32 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.credit)}</td>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-64 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.running_balance)}</td>
+                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-24 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.credit)}</td>
+                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-44 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.running_balance)}</td>
                   <td className="px-4 py-4 text-left whitespace-nowrap left-64">{item.due_date}</td>
                   <td className="px-4 py-4 text-left">{item.date_paid}</td>
                   <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.collection)}</td>

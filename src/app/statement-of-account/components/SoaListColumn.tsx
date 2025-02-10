@@ -13,9 +13,9 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
     cell: row => row.loan_product.description,
     sortable: true,
     style: {
-      minWidth: '270px',
+      minWidth: '350px',
     },
-    width: '270px'
+    width: '350px'
   },
   {
     name: 'Borrower',
