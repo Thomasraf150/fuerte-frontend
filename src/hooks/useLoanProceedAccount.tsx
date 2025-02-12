@@ -59,7 +59,7 @@ const useLoanProceedAccount = () => {
     setLoading(false);
   };
 
-  const onSubmitLoanProSettings: SubmitHandler<DataLoanProceedList> = async (data) => {
+  const onSubmitLoanProSettings = async (data: DataLoanProceedList, handleRefetchData: () => void) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
     
@@ -68,6 +68,7 @@ const useLoanProceedAccount = () => {
       input: {
         user_id: String(userData?.user?.id),
         branch_sub_id: data?.branch_sub_id,
+        loan_ref: data?.loan_ref,
         description: data?.description,
         nr_id: data?.nr_id,
         ob_id: data?.ob_id,
@@ -102,7 +103,8 @@ const useLoanProceedAccount = () => {
       }), 
     });
     const result = await response.json();
-    toast.success("Loan Proceed Settings is Saved!");
+    toast.success(result?.data?.createLoanProceedSettings?.message);
+    handleRefetchData();
     console.log(result, ' result');
   };
   

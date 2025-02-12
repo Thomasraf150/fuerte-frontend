@@ -13,6 +13,7 @@ export const loanStatus = (status: number | undefined) => {
       return 'Released';
       break;
     default:
+      
       break;
   }
 };

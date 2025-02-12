@@ -1,19 +1,20 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, Edit3, ChevronDown } from 'react-feather';
+import { Home, Edit3, ChevronDown, CheckSquare } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
-import useCoa from '@/hooks/useCoa';
 import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
-import { DataChartOfAccountList, DataSubBranches, DataLoanProceedList, DataLoanProceedAcctData } from '@/utils/DataTypes';
+import { DataChartOfAccountList, DataSubBranches, DataLoanProceedList, DataLoanProceedAcctData, BorrLoanRowData } from '@/utils/DataTypes';
+
 interface ParentFormBr {
-  setShowForm: (value: boolean) => void;
-  actionLbl: string;
   branchSubData: DataSubBranches[] | undefined;
-  lpsSingleData: DataLoanProceedAcctData[] | undefined;
+  // lpsSingleData: DataLoanProceedAcctData[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
+  loanSingleData: BorrLoanRowData | undefined;
+  setShowAcctgEntry: (b: boolean) => void;
+  handleRefetchData: () => void;
 }
 
 interface Option {
@@ -22,60 +23,17 @@ interface Option {
   hidden?: boolean;
 }
 
-const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData }) => {
+const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData, loanSingleData, setShowAcctgEntry, handleRefetchData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
   const { onSubmitLoanProSettings } = useLoanProceedAccount();
   const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (actionLbl === 'Create Account') {
-      reset();
-    } else {
-      setBranchSubIdDisabled(true);
-      lpsSingleData?.map(item => {
-        if (item?.description === 'notes receivable') {
-          setValue('branch_sub_id', item?.branch_sub_id);
-          setValue('nr_id', item?.account_id);
-        }
-        if (item?.description === 'outstanding balance') {
-          setValue('ob_id', item?.account_id);
-        }
-        if (item?.description === 'udi') {
-          setValue('udi_id', item?.account_id);
-        }
-        if (item?.description === 'processing') {
-          setValue('proc_id', item?.account_id);
-        }
-        if (item?.description === 'insurance') {
-          setValue('ins_id', item?.account_id);
-        }
-        if (item?.description === 'collection') {
-          setValue('col_id', item?.account_id);
-        }
-        if (item?.description === 'notarial') {
-          setValue('not_id', item?.account_id);
-        }
-        if (item?.description === 'rebates') {
-          setValue('reb_id', item?.account_id);
-        }
-        if (item?.description === 'penalty') {
-          setValue('pen_id', item?.account_id);
-        }
-        if (item?.description === 'addon amount') {
-          setValue('addon_id', item?.account_id);
-        }
-        if (item?.description === 'addon udi') {
-          setValue('addon_udi_id', item?.account_id);
-        }
-        if (item?.description === 'cash in bank') {
-          setValue('cib_id', item?.account_id);
-        }
-      });
-    }
-  }, [lpsSingleData, actionLbl])
+    setValue('loan_ref', String(loanSingleData?.loan_ref));
+    setValue('branch_sub_id', String(loanSingleData?.user?.branch_sub_id));
+  }, [loanSingleData])
 
   useEffect(()=>{
-    console.log(coaDataAccount, 'coaData');
     if (branchSubData && Array.isArray(branchSubData)) {
       const dynaOpt: Option[] = branchSubData?.map(bSub => ({
         value: String(bSub.id),
@@ -85,10 +43,10 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
         ...dynaOpt,
       ]);
+      
     }
-
-    console.log(coaDataAccount, ' coaDataAccount');
-  }, [coaDataAccount, setValue, actionLbl, branchSubData])
+    
+  }, [coaDataAccount, setValue, branchSubData])
 
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
@@ -103,7 +61,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
       // Add the current account with indentation based on level
       options.push({
         label: `${'—'.repeat(level - 1)} ${account.account_name}`,
-        value: account?.id?.toString(),
+        value: account?.number?.toString(),
       });
   
       // Recursively process sub-accounts
@@ -124,10 +82,11 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
   const optionsCoaData = getAccountOptions(coaDataAccount);
 
   const onSubmit: SubmitHandler<DataLoanProceedList> = data => {
-    // onSubmitLoanProSettings(data);
+    onSubmitLoanProSettings(data, handleRefetchData);
     console.log(data, 'data');
     // fetchCoaDataTable();
     // setShowForm(false);
+    setShowAcctgEntry(false);
   };
 
   return (
@@ -252,6 +211,17 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           options={optionsCoaData}
           className='mb-4 mt-4'
         />
+
+        <FormInput
+          label="Agent Fee"
+          id="reb_id"
+          type="select"
+          icon={ChevronDown}
+          register={register('agent_id')}
+          error={errors.agent_id?.message}
+          options={optionsCoaData}
+          className='mb-4 mt-4'
+        />
         
         <FormInput
           label="Penalty"
@@ -301,17 +271,13 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
       <div className="w-full flex justify-end mt-6">
         <div className="flex gap-4">
           <button
-            className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-            type="button"
-            onClick={() => { setShowForm(false) }}
-          >
-            Back
-          </button>
-          <button
             className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
             type="submit"
           >
-            Save
+            <span className="mt-1 mr-1">
+              <CheckSquare size={17} /> 
+            </span>
+            Post
           </button>
         </div>
       </div>
@@ -319,4 +285,4 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
   );
 };
 
-export default LoanProcSettingsForm;
+export default AcctgEntryForm;

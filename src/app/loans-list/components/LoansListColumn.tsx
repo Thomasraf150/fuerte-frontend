@@ -7,7 +7,7 @@ import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { loanStatus } from '@/utils/helper';
 
-const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn<BorrLoanRowData>[] => [
+const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewWholeLoan: (row: BorrLoanRowData) => void): TableColumn<BorrLoanRowData>[] => [
   {
     name: 'Loan Product',
     cell: row => row.loan_product.description,
@@ -47,7 +47,8 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
     cell: row => (
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
-          row.is_closed === '1' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
+          row?.acctg_entry !== null ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+          (row.is_closed === '1' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
           (row.status === 0
             ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
             : row.status === 1
@@ -56,12 +57,12 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
             : row.status === 3
             ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
-            : '')
+            : ''))
         }`}
       >
         {`${
-          row.is_closed === '1' ? 'Closed' :
-          loanStatus(row.status)
+          row?.acctg_entry !== null ? 'Posted' : (row.is_closed === '1' ? 'Closed' :
+          loanStatus(row.status))
         }`}
       </span>
     ),
@@ -73,8 +74,8 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
       
       return (
         <>
-          <Tooltip text="Remove">
-            <Trash2 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+          <Tooltip text="View">
+            <Eye onClick={() => handleViewWholeLoan(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
           </Tooltip>
         </>
       )

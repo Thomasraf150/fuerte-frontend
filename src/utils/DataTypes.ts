@@ -318,12 +318,11 @@ export interface DataSubArea {
   is_deleted: boolean;
   area: DataArea
 }
-
-
 export interface BorrowerRowInfo {
   id?: string;
   user_id: number;
   chief_id: number;
+  branch_sub_id: string;
   amount_applied: string;
   purpose: string;
   firstname: string;
@@ -345,6 +344,24 @@ export interface BorrowerRowInfo {
   borrower_reference: BorrowerReference;
   chief: DataChief
   user: User
+}
+export interface AcctgEntryRowData {
+  id: string;
+  journal_no: string;
+  journal_name: string;
+  journal_ref: string;
+  journal_invoice: string;
+  journal_date: string;
+  posted_date: string;
+  document_no: string;
+  reference_no: string;
+  journal_desc: string;
+  amount: string;
+  user_id_posted_by: string;
+  user_id_cancelled_by: string;
+  is_posted: string;
+  is_cancelled: string;
+  is_deleted: string;
 }
 
 export interface BorrowerDetails {
@@ -525,6 +542,8 @@ export interface BorrLoanRowData {
   loan_udi_schedules: DataRowLoanUdiSchedules[];
   loan_bank_details: LoanBankFormValues;
   borrower: BorrowerRowInfo;
+  acctg_entry: AcctgEntryRowData;
+  user: User;
 }
 
 export interface BorrLoanFormValues {
@@ -694,14 +713,24 @@ export interface DataLoanProceedAcctData {
   branch_sub: DataSubBranches;
   account: DataChartOfAccountList;
 }
+export interface DataAccBalanceSheet {
+  assets: DataChartOfAccountList[];
+  liabilities: DataChartOfAccountList[];
+  equity: DataChartOfAccountList[];
+  total_assets: number;
+  total_liabilities: number;
+  total_equity: number;
+}
 export interface DataLoanProceedList {
   user_id: string;
   branch_sub_id: string;
+  loan_ref: string;
   description: string;
   nr_id: string;
   ob_id: string;
   udi_id: string;
   proc_id: string;
+  agent_id: string;
   ins_id: string;
   col_id: string;
   not_id: string;

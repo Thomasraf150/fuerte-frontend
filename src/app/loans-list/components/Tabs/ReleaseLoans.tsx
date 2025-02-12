@@ -1,29 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Hash, CreditCard, Save, Calendar } from 'react-feather';
+import { Hash, CreditCard, Save, Calendar, List } from 'react-feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import "react-datepicker/dist/react-datepicker.css";
-import { LoanReleaseFormValues, BorrLoanRowData } from '@/utils/DataTypes';
+import { LoanReleaseFormValues, BorrLoanRowData, DataSubBranches, DataChartOfAccountList } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import useLoans from '@/hooks/useLoans';
 import useBank from '@/hooks/useBank';
 import DatePicker from 'react-datepicker';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import AcctgEntryForm from './AcctgEntryForm';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   handleRefetchData: () => void;
   onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => void;
+  fetchCoaDataTable: () => void;
+  branchSubData: DataSubBranches[] | undefined;
+  coaDataAccount: DataChartOfAccountList[];
 }
-
 interface Option {
   value: string;
   label: string;
   hidden?: boolean;
 }
 
-const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease }) => {
+const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
+  // const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
 
   const [bankOptions1, setBankOptions1] = useState<Option[]>([]);
   const [bankOptions2, setBankOptions2] = useState<Option[]>([]);
@@ -31,6 +35,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const { dataBank } = useBank();
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);
+  const [showAcctgEntry, setShowAcctgEntry] = useState<boolean>(false);
 
   const toggleShowPin1 = () => {
     setShowPin1(!showPin1);
@@ -47,6 +52,10 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   // const handleLoanBank = (data: LoanBankFormValues | undefined) => {
   //   // submitPNSigned(data, handleRefetchData);
   // }
+
+  useEffect(() => {
+    fetchCoaDataTable();
+  }, [])
 
   useEffect(() => {
     if (dataBank) {
@@ -70,6 +79,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
       setValue('bank_id', loanSingleData?.bank_id);
       setValue('check_no', loanSingleData?.check_no);
     }
+    console.log(loanSingleData, ' loanSingleData')
   }, [loanSingleData, setValue]);
 
   return (
@@ -151,20 +161,47 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
 
         </div>
         <div>
-        <button
-          className="bg-purple-700 flex justify-between float-right items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
-          type="submit"
-          disabled={loanSingleData?.status === 3 ? true : false}
-        >
-          <span className="mt-1 mr-1">
-            <Save size={17} /> 
-          </span>
-          <span>Release</span>
-        </button>
+          <button
+            className="bg-purple-700 flex justify-between float-right items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
+            type="submit"
+            disabled={loanSingleData?.status === 3 ? true : false}
+          >
+            <span className="mt-1 mr-1">
+              <Save size={17} /> 
+            </span>
+            <span>Release</span>
+          </button>
+          {loanSingleData?.acctg_entry === null && (
+            <button
+              className="bg-yellow-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-yellow-400 text-sm"
+              type="button"
+              onClick={() => setShowAcctgEntry(true)}
+            >
+              <span className="mt-1 mr-1">
+                <List size={17} /> 
+              </span>
+              <span>Post Accounting</span>
+            </button>
+          )}
         </div>
       </div>
       </form>
     </div>
+    {showAcctgEntry && (
+      <>
+        <hr className="mb-4"/>
+        <div className="w-full">
+          <FormLabel title={`Create Proper Account`}/>
+          <AcctgEntryForm 
+            branchSubData={branchSubData} 
+            loanSingleData={loanSingleData} 
+            coaDataAccount={coaDataAccount || []} 
+            setShowAcctgEntry={setShowAcctgEntry}
+            handleRefetchData={handleRefetchData}/>
+        </div>
+      </>
+    )}
+  
     </>
   )
 }

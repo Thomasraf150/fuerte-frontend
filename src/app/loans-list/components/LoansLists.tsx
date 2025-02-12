@@ -19,7 +19,7 @@ const LoansLists: React.FC = () => {
     setSingleData(data);
   }
  
-  const handleWholeRowClick = (data: BorrLoanRowData) => {
+  const handleViewWholeLoan = (data: BorrLoanRowData) => {
     setShowForm(true);
     setSingleData(data);
     console.log(data, ' data');
@@ -50,8 +50,8 @@ const LoansLists: React.FC = () => {
                 <div className="p-7">
                   <CustomDatatable
                     apiLoading={loading}
-                    columns={column(handleRowClick)}
-                    onRowClicked={handleWholeRowClick}
+                    columns={column(handleRowClick, handleViewWholeLoan)}
+                    // onRowClicked={handleViewWholeLoan}
                     data={loanData}
                     enableCustomHeader={true} 
                     title={''}  

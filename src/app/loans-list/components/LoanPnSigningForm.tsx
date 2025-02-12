@@ -9,6 +9,7 @@ import useLoans from '@/hooks/useLoans';
 import PNSigning from './Tabs/PNSigning';
 import BankDetailsEntry from './Tabs/BankDetailsEntry';
 import ReleaseLoans from './Tabs/ReleaseLoans';
+import useCoa from '@/hooks/useCoa';
 
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
@@ -17,7 +18,7 @@ interface BorrInfoProps {
 
 const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm }) => {
   const [activeTab, setActiveTab] = useState<number>();
-
+  const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
   const { loanSingleData, fetchSingLoans, onSubmitLoanRelease, printLoanDetails } = useLoans();
 
   const handleTabClick = (tabIndex: number) => {
@@ -115,11 +116,17 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
           </div>
         )}
         {activeTab === 4 && (
-           <div>
-           {loanSingleData && (
-             <ReleaseLoans loanSingleData={loanSingleData} handleRefetchData={handleRefetchData} onSubmitLoanRelease={onSubmitLoanRelease} />
-           )}
-         </div>
+          <div>
+            {loanSingleData && (
+              <ReleaseLoans 
+                coaDataAccount={coaDataAccount || []} 
+                branchSubData={branchSubData} 
+                fetchCoaDataTable={fetchCoaDataTable} 
+                loanSingleData={loanSingleData} 
+                handleRefetchData={handleRefetchData} 
+                onSubmitLoanRelease={onSubmitLoanRelease} />
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -61,6 +61,12 @@ const BORROWER_LOAN_QUERY: string = `
             surrendered_bank_id
             surrendered_pin
           }
+          acctg_entry {
+            journal_no
+          }
+          user {
+            branch_sub_id
+          }
         }
     }
   }
@@ -132,6 +138,13 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         surrendered_acct_no
         surrendered_bank_id
         surrendered_pin
+      }
+      acctg_entry {
+        id
+        reference_no
+      }
+      user {
+        branch_sub_id
       }
     }
   }
