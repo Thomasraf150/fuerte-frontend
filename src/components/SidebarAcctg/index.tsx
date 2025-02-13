@@ -116,7 +116,18 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Reports Item Settings --> */}
               <SidebarLinkGroup
                   activeCondition={
-                    pathname === "/accounting/coa" || pathname.includes("accounting/coa")
+                    pathname === "/accounting/unadjusted-trial-balance" ||
+                    pathname === "/accounting/adjusting-entries" ||
+                    pathname === "/accounting/adjusted-trial-balance" ||
+                    pathname === "/accounting/balance-sheet" ||
+                    pathname === "/accounting/income-statement" ||
+                    pathname === "/accounting/cash-flow" ||
+                    pathname === "/accounting/cash-position" ||
+                    pathname === "/accounting/aging" ||
+                    pathname === "/accounting/closing-entries" ||
+                    pathname === "/accounting/refund-schedule" ||
+                    pathname === "/accounting/udi-schedule" ||
+                    pathname === "/accounting/commission-schedule"
                   }
                 >
                 {(handleClick, open) => {
@@ -126,11 +137,19 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <Link
                         href="#"
                         className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          (pathname === "/accounting/coa" 
-                            // ||
-                            // pathname === '/pending-release-loans' ||
-                            // pathname.includes("dashboard") || 
-                            //   pathname.includes("pending-release-loans")
+                          (
+                            pathname === "/accounting/unadjusted-trial-balance" ||
+                            pathname === "/accounting/adjusting-entries" ||
+                            pathname === "/accounting/adjusted-trial-balance" ||
+                            pathname === "/accounting/balance-sheet" ||
+                            pathname === "/accounting/income-statement" ||
+                            pathname === "/accounting/cash-flow" ||
+                            pathname === "/accounting/cash-position" ||
+                            pathname === "/accounting/aging" ||
+                            pathname === "/accounting/closing-entries" ||
+                            pathname === "/accounting/refund-schedule" ||
+                            pathname === "/accounting/udi-schedule" ||
+                            pathname === "/accounting/commission-schedule"
                             ) && "bg-graydark dark:bg-meta-4"
                         }`}
                         onClick={(e) => {
@@ -169,9 +188,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/unadjusted-trial-balance"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/unadjusted-trial-balance" && "text-white"
                               }`}
                             >
                               Unadjusted Trial Balance
@@ -179,9 +198,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/adjusting-entries"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/adjusting-entries" && "text-white"
                               }`}
                             >
                               Adjusting Entries
@@ -189,9 +208,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/adjusted-trial-balance"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/adjusted-trial-balance" && "text-white"
                               }`}
                             >
                               Adjusted Trial Balance
@@ -201,7 +220,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <Link
                               href="/accounting/balance-sheet"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/balance-sheet" && "text-white"
                               }`}
                             >
                               Balance Sheet
@@ -211,7 +230,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <Link
                               href="/accounting/income-statement"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/income-statement" && "text-white"
                               }`}
                             >
                               Income Statement
@@ -219,9 +238,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/cash-flow"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/cash-flow" && "text-white"
                               }`}
                             >
                               Cash Flow
@@ -229,9 +248,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/cash-position"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/cash-position" && "text-white"
                               }`}
                             >
                               Cash Position
@@ -239,9 +258,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/aging"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/aging" && "text-white"
                               }`}
                             >
                               Aging
@@ -249,9 +268,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/closing-entries"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/closing-entries" && "text-white"
                               }`}
                             >
                               Closing Entries
@@ -259,9 +278,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/refund-schedule"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/refund-schedule" && "text-white"
                               }`}
                             >
                               Refund Schedule
@@ -269,9 +288,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/udi-schedule"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/udi-schedule" && "text-white"
                               }`}
                             >
                               UDI Schedule
@@ -279,9 +298,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/commission-schedule"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/commission-schedule" && "text-white"
                               }`}
                             >
                               Commission Schedule
@@ -299,7 +318,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Voucher Item Settings --> */}
               <SidebarLinkGroup
                   activeCondition={
-                    pathname === "/accounting/coa" || pathname.includes("accounting/coa")
+                    pathname === "/accounting/general-voucher" ||
+                    pathname === '/accounting/debit-memo' ||
+                    pathname === "/accounting/credit-memo"
                   }
                 >
                 {(handleClick, open) => {
@@ -309,11 +330,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <Link
                         href="#"
                         className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          (pathname === "/accounting/coa" 
-                            // ||
-                            // pathname === '/pending-release-loans' ||
-                            // pathname.includes("dashboard") || 
-                            //   pathname.includes("pending-release-loans")
+                          (pathname === "/accounting/general-voucher" ||
+                            pathname === '/accounting/debit-memo' ||
+                            pathname === "/accounting/credit-memo"
                             ) && "bg-graydark dark:bg-meta-4"
                         }`}
                         onClick={(e) => {
@@ -352,9 +371,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/general-voucher"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/general-voucher" && "text-white"
                               }`}
                             >
                               General Voucher
@@ -362,9 +381,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/debit-memo"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/debit-memo" && "text-white"
                               }`}
                             >
                               Debit Memo
@@ -372,9 +391,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/credit-memo"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/credit-memo" && "text-white"
                               }`}
                             >
                               Credit Memo
@@ -393,7 +412,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Voucher Item Settings --> */}
               <SidebarLinkGroup
                   activeCondition={
-                    pathname === "/accounting/coa" || pathname.includes("accounting/coa")
+                    pathname === "/accounting/general-journal" ||
+                    pathname === '/accounting/cdj' ||
+                    pathname === "/accounting/crj"
                   }
                 >
                 {(handleClick, open) => {
@@ -403,11 +424,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <Link
                         href="#"
                         className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          (pathname === "/accounting/coa" 
-                            // ||
-                            // pathname === '/pending-release-loans' ||
-                            // pathname.includes("dashboard") || 
-                            //   pathname.includes("pending-release-loans")
+                          (pathname === "/accounting/general-journal" ||
+                            pathname === '/accounting/cdj' ||
+                            pathname === "/accounting/crj"
                             ) && "bg-graydark dark:bg-meta-4"
                         }`}
                         onClick={(e) => {
@@ -446,9 +465,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/general-journal"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/general-journal" && "text-white"
                               }`}
                             >
                               General Journal
@@ -456,9 +475,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/cdj"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/cdj" && "text-white"
                               }`}
                             >
                               Cash Disbursements Journal
@@ -466,9 +485,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
-                              href="/accounting/coa"
+                              href="/accounting/crj"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/crj" && "text-white"
                               }`}
                             >
                               Cash Receipts Journal

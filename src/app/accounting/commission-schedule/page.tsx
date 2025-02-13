@@ -2,22 +2,22 @@ import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
-import IncomeStatementList from './components/IncomeStatementList';
+import CommissionScheduleList from './components/CommissionScheduleList';
 
 export const metadata = {
-  title: "Income Statement",
+  title: "Commission Schedule",
   description: "",
 };
 
-const IncomeStatement: React.FC = () => {
+const ComSchedule: React.FC = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName="Income Statement" />
+        <Breadcrumb pageName="Commission Schedule" />
       </div>
-      <IncomeStatementList />
+      <CommissionScheduleList />
     </DefaultLayout>
   );
 };
 
-export default IncomeStatement;
+export default ComSchedule;

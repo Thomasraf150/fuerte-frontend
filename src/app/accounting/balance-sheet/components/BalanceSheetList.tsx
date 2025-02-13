@@ -20,6 +20,8 @@ const BalanceSheetList: React.FC = () => {
   useEffect(() => {
 
     console.log(balanceSheetData, ' balanceSheetData');
+
+    
   }, [balanceSheetData])
 
   return (
@@ -38,7 +40,7 @@ const BalanceSheetList: React.FC = () => {
                     <div className="bg-white p-6 rounded-lg shadow">
                         <h2 className="text-xl font-semibold text-gray-700">Assets</h2>
                         <ul>
-                            { balanceSheetData?.assets?.map((item: any) => (
+                            { balanceSheetData && balanceSheetData?.assets?.map((item: any) => (
                                 <li key={item.number} className="ml-4 border-l-4 pl-2">
                                     <strong>{item.account_name}:</strong> ₱{item.balance.toFixed(2)}
                                     {item.children && (
@@ -109,19 +111,19 @@ const BalanceSheetList: React.FC = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h4 className="text-sm font-semibold text-gray-700">Total Assets</h4>
                   <ul>
-                    <li className="ml-4 border-l-4 pl-2">{balanceSheetData && parseFloat(balanceSheetData?.total_assets).toFixed(2)}</li>
+                    <li className="ml-4 border-l-4 pl-2">{balanceSheetData && parseFloat(String(balanceSheetData?.total_assets)).toFixed(2)}</li>
                   </ul>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h4 className="text-sm font-semibold text-gray-700">Total Liabilities</h4>
                   <ul>
-                    <li className="ml-4 border-l-4 pl-2">{balanceSheetData && parseFloat(balanceSheetData?.total_liabilities).toFixed(2)}</li>
+                    <li className="ml-4 border-l-4 pl-2">{balanceSheetData && parseFloat(String(balanceSheetData?.total_liabilities)).toFixed(2)}</li>
                   </ul>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h4 className="text-sm font-semibold text-gray-700">Total Equity</h4>
                   <ul>
-                    <li className="ml-4 border-l-4 pl-2">{balanceSheetData && parseFloat(balanceSheetData?.total_equity).toFixed(2)}</li>
+                    <li className="ml-4 border-l-4 pl-2">{balanceSheetData && parseFloat(String(balanceSheetData?.total_equity)).toFixed(2)}</li>
                   </ul>
                 </div>
               </div>

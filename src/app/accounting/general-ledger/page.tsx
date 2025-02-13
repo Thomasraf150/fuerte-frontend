@@ -2,10 +2,10 @@ import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
-// import LoanProceedSettingsList from './components/LoanProceedSettingsList';
+import GeneralLedgerList from './components/GeneralLedgerList';
 
 export const metadata = {
-  title: "Loan Proceed Settings",
+  title: "General Ledger",
   description: "",
 };
 
@@ -15,7 +15,7 @@ const GeneralLedger: React.FC = () => {
       <div className="mx-auto">
         <Breadcrumb pageName="General Ledger" />
       </div>
-      {/* <LoanProceedSettingsList /> */}
+      <GeneralLedgerList />
     </DefaultLayout>
   );
 };

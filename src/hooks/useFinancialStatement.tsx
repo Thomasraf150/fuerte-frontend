@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
+import { DataLoanProceedList, DataAccBalanceSheet, DataAccIncomeStatement } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import FinancialStatementQueryMutations from '@/graphql/FinancialStatementQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
@@ -10,8 +10,8 @@ import { fetchWithRecache } from '@/utils/helper';
 const useFinancialStatement = () => {
   const { GET_BALANCE_SHEET, GET_INCOME_STATEMENT } = FinancialStatementQueryMutations;
 
-  const [balanceSheetData, setBalanceSheetData] = useState<DataAccBalanceSheet[]>();
-  const [incomeStatementData, setIncomeStatementData] = useState<DataAccBalanceSheet[]>();
+  const [balanceSheetData, setBalanceSheetData] = useState<DataAccBalanceSheet>();
+  const [incomeStatementData, setIncomeStatementData] = useState<DataAccIncomeStatement>();
   const [loading, setLoading] = useState<boolean>(false);
  
   const fetchBalanceSheetData = async () => {

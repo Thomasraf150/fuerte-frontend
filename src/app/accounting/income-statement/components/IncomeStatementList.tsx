@@ -85,19 +85,19 @@ const IncomeStatementList: React.FC = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h4 className="text-sm font-semibold text-gray-700">Total Revenue</h4>
                   <ul>
-                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(incomeStatementData?.total_revenue).toFixed(2)}</li>
+                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.total_revenue)).toFixed(2)}</li>
                   </ul>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h4 className="text-sm font-semibold text-gray-700">Total Expense</h4>
                   <ul>
-                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(incomeStatementData?.total_expense).toFixed(2)}</li>
+                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.total_expense)).toFixed(2)}</li>
                   </ul>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h4 className="text-sm font-semibold text-gray-700">Total Income</h4>
                   <ul>
-                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(incomeStatementData?.net_income).toFixed(2)}</li>
+                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.net_income)).toFixed(2)}</li>
                   </ul>
                 </div>
               </div>

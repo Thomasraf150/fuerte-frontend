@@ -2,22 +2,22 @@ import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
-import IncomeStatementList from './components/IncomeStatementList';
+import DebitMemoList from './components/DebitMemoList';
 
 export const metadata = {
-  title: "Income Statement",
+  title: "Debit Memo",
   description: "",
 };
 
-const IncomeStatement: React.FC = () => {
+const DebitMemo: React.FC = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName="Income Statement" />
+        <Breadcrumb pageName="Debit Memo" />
       </div>
-      <IncomeStatementList />
+      <DebitMemoList />
     </DefaultLayout>
   );
 };
 
-export default IncomeStatement;
+export default DebitMemo;

@@ -721,6 +721,13 @@ export interface DataAccBalanceSheet {
   total_liabilities: number;
   total_equity: number;
 }
+export interface DataAccIncomeStatement {
+  revenues: DataChartOfAccountList[];
+  expenses: DataChartOfAccountList[];
+  total_revenue: number;
+  total_expense: number;
+  net_income: number;
+}
 export interface DataLoanProceedList {
   user_id: string;
   branch_sub_id: string;
