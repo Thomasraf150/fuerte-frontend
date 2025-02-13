@@ -254,7 +254,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
                   return (
                     <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
                       <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber(Number(loanSingleData?.pn_amount) / paycount)}</dd>
+                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
                       <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
                     </div>
                   )
@@ -316,7 +316,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
                   return (
                     <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
                       <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber(Number(loanSingleData?.pn_amount) / paycount)}</dd>
+                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
                       <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
                     </div>
                   )
@@ -347,7 +347,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
                   return (
                     <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
                       <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber(Number(loanSingleData?.pn_amount) / paycount)}</dd>
+                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
                       <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
                     </div>
                   )
@@ -378,7 +378,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
                   return (
                     <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
                       <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber(Number(loanSingleData?.pn_amount) / paycount)}</dd>
+                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
                       <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
                     </div>
                   )
