@@ -20,8 +20,6 @@ const BalanceSheetList: React.FC = () => {
   useEffect(() => {
 
     console.log(balanceSheetData, ' balanceSheetData');
-
-    
   }, [balanceSheetData])
 
   return (

@@ -747,3 +747,14 @@ export interface DataLoanProceedList {
   addon_udi_id: string;
   cib_id: string;
 }
+export interface RowAcctgDetails {
+  accountCode: string;
+  debit: string;
+  credit: string;
+}
+export interface RowAcctgEntry {
+  journal_date: string;
+  check_no: string;
+  journal_desc: string;
+  acctg_detals: RowAcctgDetails[];
+}

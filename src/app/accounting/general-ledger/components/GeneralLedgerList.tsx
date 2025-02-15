@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import GJForm from './GJForm';
+import GLForm from './GLForm';
 import useFinancialStatement from '@/hooks/useFinancialStatement';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
@@ -56,7 +56,7 @@ const GeneralLedgerList: React.FC = () => {
           {showForm && (
             <div className={`col-span-2`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <GJForm />
+                <GLForm />
               </div>
             </div>
           )}

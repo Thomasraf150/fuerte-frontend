@@ -5,26 +5,32 @@ import { Home, Edit3, ChevronDown } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
+import VoucherDetailsTbl from './VoucherDetailsTbl';
 import useCoa from '@/hooks/useCoa';
-import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
+import { RowAcctgEntry, DataSubBranches, RowAcctgDetails } from '@/utils/DataTypes';
 
 interface ParentFormBr {
-
+  setShowForm: (b: boolean) => void;
 }
 
-const GVForm: React.FC<ParentFormBr> = ({ }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataChartOfAccountList>();
+const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
+  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
+  const [rows, setRows] = useState<RowAcctgDetails[]>([{ accountCode: "", debit: "", credit: "" }]);
 
-  const onSubmit: SubmitHandler<DataChartOfAccountList> = data => {
+  const onSubmit: SubmitHandler<RowAcctgEntry> = data => {
     
   };
 
+  useEffect(() => {
+    setValue('acctg_detals', rows);
+  }, [rows])
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 mb-5">
         <div className='mt-2'>
           <FormInput
-            label="Account Name"
+            label="Date"
             id="account_name"
             type="text"
             icon={Edit3}
@@ -35,7 +41,7 @@ const GVForm: React.FC<ParentFormBr> = ({ }) => {
 
         <div>
           <FormInput
-            label="Description"
+            label="Check #"
             id="description"
             type="text"
             icon={Edit3}
@@ -47,7 +53,7 @@ const GVForm: React.FC<ParentFormBr> = ({ }) => {
 
         <div>
           <FormInput
-            label="Balance"
+            label="Payee"
             id="balance"
             type="text"
             icon={Edit3}
@@ -56,7 +62,7 @@ const GVForm: React.FC<ParentFormBr> = ({ }) => {
             className='mt-2'
           />
         </div>
-        <div className='col-span-2'>
+        <div className='col-span-3'>
           <FormInput
             label="Particulars"
             id="balance"
@@ -69,15 +75,22 @@ const GVForm: React.FC<ParentFormBr> = ({ }) => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 gap-4 mb-5">
+        <div>
+          <VoucherDetailsTbl rows={rows} setRows={setRows} />
+        </div>
+      </div>
+
       <div className="flex justify-end gap-4.5">
         <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
           type="button"
+          onClick={() => setShowForm(false)}
         >
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm"
           type="submit"
         >
           Save

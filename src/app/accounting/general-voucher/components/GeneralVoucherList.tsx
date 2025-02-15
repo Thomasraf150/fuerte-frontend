@@ -28,7 +28,7 @@ const GeneralVoucherList: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-2 gap-4">
           {!showForm && (
-            <div className={`col-span-2`}>
+            <div className={`col-span-2 ${!showForm ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-boxdark dark:text-boxdark">
@@ -54,9 +54,9 @@ const GeneralVoucherList: React.FC = () => {
             </div>
           )}
           {showForm && (
-            <div className={`col-span-2`}>
+            <div className={`col-span-2 ${showForm ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <GVForm />
+                <GVForm setShowForm={setShowForm}/>
               </div>
             </div>
           )}

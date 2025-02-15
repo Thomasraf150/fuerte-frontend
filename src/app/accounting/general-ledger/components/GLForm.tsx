@@ -12,7 +12,7 @@ interface ParentFormBr {
 
 }
 
-const GVForm: React.FC<ParentFormBr> = ({ }) => {
+const GLForm: React.FC<ParentFormBr> = ({ }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataChartOfAccountList>();
 
   const onSubmit: SubmitHandler<DataChartOfAccountList> = data => {
@@ -24,7 +24,7 @@ const GVForm: React.FC<ParentFormBr> = ({ }) => {
       <div className="grid grid-cols-3 gap-4">
         <div className='mt-2'>
           <FormInput
-            label="Account Name"
+            label="Area"
             id="account_name"
             type="text"
             icon={Edit3}
@@ -87,4 +87,4 @@ const GVForm: React.FC<ParentFormBr> = ({ }) => {
   );
 };
 
-export default GVForm;
+export default GLForm;
