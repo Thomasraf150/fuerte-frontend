@@ -36,8 +36,17 @@ const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
             icon={Edit3}
             register={register('account_name', { required: true })}
             error={errors.account_name && "Account name is required"}
-          />
+          /> 
         </div>
+        
+        {/* <div className='mt-2'>
+          <button
+            className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
+            type="button"
+          >
+            ...
+          </button>
+        </div> */}
 
         <div>
           <FormInput
@@ -52,15 +61,28 @@ const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
         </div>
 
         <div>
-          <FormInput
-            label="Payee"
-            id="balance"
-            type="text"
-            icon={Edit3}
-            register={register('balance', { required: true })}
-            error={errors.balance && "Balance is required"}
-            className='mt-2'
-          />
+          <div className="grid grid-cols-4 gap-2">
+            <div className="col-span-3">
+              <FormInput
+                label="Payee"
+                id="balance"
+                type="text"
+                icon={Edit3}
+                register={register('balance', { required: true })}
+                error={errors.balance && "Balance is required"}
+                className='mt-2'
+                readOnly
+              />
+            </div>
+            <div>
+              <button
+                className="flex justify-center mt-10 bg-orange-300 rounded border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
+                type="button"
+              >
+                Select
+              </button>
+            </div>
+          </div>
         </div>
         <div className='col-span-3'>
           <FormInput
