@@ -31,11 +31,11 @@ const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
         <div className='mt-2'>
           <FormInput
             label="Date"
-            id="account_name"
+            id="journal_date"
             type="text"
             icon={Edit3}
-            register={register('account_name', { required: true })}
-            error={errors.account_name && "Account name is required"}
+            register={register('journal_date', { required: true })}
+            error={errors.journal_date && "Account name is required"}
           /> 
         </div>
         
@@ -51,11 +51,11 @@ const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
         <div>
           <FormInput
             label="Check #"
-            id="description"
+            id="check_no"
             type="text"
             icon={Edit3}
-            register={register('description', { required: true })}
-            error={errors.description && "Description is required"}
+            register={register('check_no', { required: true })}
+            error={errors.check_no && "check no is required"}
             className='mt-2'
           />
         </div>
@@ -65,11 +65,11 @@ const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
             <div className="col-span-3">
               <FormInput
                 label="Payee"
-                id="balance"
+                id="journal_desc"
                 type="text"
                 icon={Edit3}
-                register={register('balance', { required: true })}
-                error={errors.balance && "Balance is required"}
+                register={register('journal_desc', { required: true })}
+                error={errors.journal_desc && "journal desc is required"}
                 className='mt-2'
                 readOnly
               />
@@ -87,11 +87,11 @@ const GVForm: React.FC<ParentFormBr> = ({ setShowForm }) => {
         <div className='col-span-3'>
           <FormInput
             label="Particulars"
-            id="balance"
+            id="journal_desc"
             type="text"
             icon={Edit3}
-            register={register('balance', { required: true })}
-            error={errors.balance && "Balance is required"}
+            register={register('journal_desc', { required: true })}
+            error={errors.journal_desc && "journal_desc is required"}
             className='mt-2'
           />
         </div>

@@ -758,3 +758,37 @@ export interface RowAcctgEntry {
   journal_desc: string;
   acctg_detals: RowAcctgDetails[];
 }
+export interface RowVendorTypeData {
+  id?: string;
+  name: string;
+  code: string;
+}
+export interface RowCustCatData {
+  id?: string;
+  name: string;
+}
+export interface RowSupCatData {
+  id?: string;
+  name: string;
+}
+export interface RowVendorsData {
+  id?: string;
+  vendor_type_id: string;
+  customer_category_id: string;
+  supplier_category_id: string;
+  department_id: string;
+  name: string;
+  employee_no: string;
+  employee_position: string;
+  tin: string;
+  address: string;
+  tax_excempty_date: string;
+  remarks: string;
+  bill_address: string;
+  office_no: string;
+  credit_limit: string;
+  is_allow_excess_limit: string;
+  vendor_type: RowVendorTypeData;
+  customer_category: RowCustCatData;
+  supplier_category: RowSupCatData;
+}

@@ -581,6 +581,16 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
                           <li>
                             <Link
+                              href="/accounting/vendors"
+                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/coa" && "text-white"
+                              }`}
+                            >
+                              Vendors
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
                               href="/accounting/coa"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/coa" && "text-white"
