@@ -13,7 +13,7 @@ interface FormInputProps {
   id: string;
   type: 'text' | 'password' | 'email' | 'select' | 'checkbox' | 'file' | 'date';
   icon: Icon;
-  register: UseFormRegisterReturn;
+  register?: UseFormRegisterReturn;
   error?: string;
   options?: Option[];
   placeholder?: string;

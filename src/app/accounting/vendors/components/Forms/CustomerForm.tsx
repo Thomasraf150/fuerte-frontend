@@ -6,15 +6,15 @@ import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import useVendor from '@/hooks/useVendor';
-import { RowVendorsData, RowSupCatData } from '@/utils/DataTypes';
+import { RowVendorsData, RowCustCatData, RowSupCatData } from '@/utils/DataTypes';
 
 interface ParentFormBr {
   setShowForm: (v: boolean) => void;
   fetchVendors: (v: string) => void;
   createVendor: (d: RowVendorsData) => void;
   vendorTypeId: string;
-  dataSupplierCat: RowSupCatData[] | undefined;
   loading: boolean;
+  dataCustCat: RowCustCatData[] | undefined;
   singleData: RowVendorsData | undefined;
 }
 
@@ -24,18 +24,19 @@ interface Option {
   hidden?: boolean;
 }
 
-const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, dataSupplierCat, loading, singleData }) => {
+const CustomerForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, loading, dataCustCat, singleData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
+  // const { createVendor, dataCustCat, loading } = useVendor();
 
-  const [optionsSubCat, setOptionsSubCat] = useState<Option[]>([]);
+  const [optionsCustCat, setOptionsCustCat] = useState<Option[]>([]);
 
   useEffect(() => {
-    if (dataSupplierCat && Array.isArray(dataSupplierCat)) {
-      const dynaOpt: Option[] = dataSupplierCat?.map(bSub => ({
+    if (dataCustCat && Array.isArray(dataCustCat)) {
+      const dynaOpt: Option[] = dataCustCat?.map(bSub => ({
         value: String(bSub.id),
         label: bSub.name, // assuming `name` is the key you want to use as label
       }));
-      setOptionsSubCat([
+      setOptionsCustCat([
         { value: '', label: 'Select a Category', hidden: true }, // retain the default "Select a branch" option
         ...dynaOpt,
       ]);
@@ -45,10 +46,12 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
     setValue('name', singleData?.name ?? '');
     setValue('tin', singleData?.tin ?? '');
     setValue('address', singleData?.address ?? '');
-    setValue('supplier_category_id', singleData?.supplier_category_id ?? '');
-    setValue('tax_excempty_date', singleData?.tax_excempty_date ?? '');
+    setValue('bill_address', singleData?.bill_address ?? '');
+    setValue('customer_category_id', singleData?.customer_category_id ?? '');
+    setValue('credit_limit', singleData?.credit_limit ?? '');
+    setValue('is_allow_excess_limit', singleData?.is_allow_excess_limit ?? false);
     setValue('remarks', singleData?.remarks ?? '');
-  }, [dataSupplierCat, vendorTypeId, singleData]);
+  }, [dataCustCat, vendorTypeId, singleData]);
 
   const onSubmit: SubmitHandler<RowVendorsData> = data => {
     console.log(data, ' data');
@@ -63,7 +66,7 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
       <div className="grid grid-cols-3 gap-4">
         <div className='mt-2'>
           <FormInput
-            label="Supplier Name"
+            label="Name"
             id="name"
             type="text"
             icon={Edit3}
@@ -98,26 +101,50 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
 
         <div>
           <FormInput
-            label="Supplier Category"
-            id="supplier_category_id"
-            type="select"
-            icon={ChevronDown}
-            register={register('supplier_category_id')}
-            error={errors.supplier_category_id?.message}
-            options={optionsSubCat}
+            label="Bill Address"
+            id="bill_address"
+            type="text"
+            icon={Edit3}
+            register={register('bill_address', { required: true })}
+            error={errors.bill_address && "bill address is required"}
             className='mt-2'
           />
         </div>
 
-        <div className=''>
+        <div>
           <FormInput
-            label="Tax Excempt Date"
-            id="tax_excempty_date"
-            type="date"
-            icon={Edit3}
-            register={register('tax_excempty_date')}
-            error={errors.tax_excempty_date && "tax excempty date is required"}
+            label="Category"
+            id="customer_category_id"
+            type="select"
+            icon={ChevronDown}
+            register={register('customer_category_id')}
+            error={errors.customer_category_id?.message}
+            options={optionsCustCat}
             className='mt-2'
+          />
+        </div>
+
+        <div>
+          <FormInput
+            label="Credit Limit"
+            id="credit_limit"
+            type="text"
+            icon={Edit3}
+            register={register('credit_limit', { required: true })}
+            error={errors.credit_limit && "credit limit is required"}
+            className='mt-2'
+          />
+        </div>
+
+        <div className='col-span-1'>
+          <FormInput
+            label="Allow Excess Limit"
+            id="is_allow_excess_limit"
+            type="checkbox"
+            icon={Edit3}
+            register={register('is_allow_excess_limit')}
+            error={errors.is_allow_excess_limit && "is allow excess limit is required"}
+            className='mt-10'
           />
         </div>
 
@@ -153,4 +180,4 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
   );
 };
 
-export default SupplierForm;
+export default CustomerForm;

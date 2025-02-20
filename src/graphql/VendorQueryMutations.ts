@@ -19,6 +19,7 @@ const GET_VENDOR_LIST_QUERY: string = `
       department_id
       name
       employee_no
+      contact_no
       employee_position
       tin
       address
@@ -58,6 +59,24 @@ const GET_SUPPLIER_CAT_QUERY: string = `
   }
 `;
 
+const GET_CUSTOMER_CAT_QUERY: string = `
+  query GetCustomerCategory($input: VendorTypeInp){
+    getCustomerCategory(input: $input) {
+      id
+      name
+    }
+  }
+`;
+
+const GET_DEPARTMENT_QUERY: string = `
+  query GetDepartment($input: VendorTypeInp){
+    getDepartment(input: $input) {
+      id
+      name
+    }
+  }
+`;
+
 const CREATE_VENDOR_QUERY: string = `
   mutation CreateVendors($input: VendorsInp){
     createVendors(input: $input){
@@ -71,6 +90,8 @@ const VendorQueryMutations = {
   GET_VENDOR_TYPE_QUERY,
   GET_VENDOR_LIST_QUERY,
   GET_SUPPLIER_CAT_QUERY,
+  GET_CUSTOMER_CAT_QUERY,
+  GET_DEPARTMENT_QUERY,
   CREATE_VENDOR_QUERY
 };
 

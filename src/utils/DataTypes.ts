@@ -748,15 +748,20 @@ export interface DataLoanProceedList {
   cib_id: string;
 }
 export interface RowAcctgDetails {
-  accountCode: string;
+  accountLabel: string;
+  acctnumber: string;
   debit: string;
   credit: string;
 }
 export interface RowAcctgEntry {
+  id?: String;
+  user_id: string;
   journal_date: string;
+  vendor_id: string;
+  journal_name: string;
   check_no: string;
   journal_desc: string;
-  acctg_detals: RowAcctgDetails[];
+  acctg_details: RowAcctgDetails[];
 }
 export interface RowVendorTypeData {
   id?: string;
@@ -771,6 +776,10 @@ export interface RowSupCatData {
   id?: string;
   name: string;
 }
+export interface RowDepartmentsData {
+  id?: string;
+  name: string;
+}
 export interface RowVendorsData {
   id?: string;
   vendor_type_id: string;
@@ -779,6 +788,7 @@ export interface RowVendorsData {
   department_id: string;
   name: string;
   employee_no: string;
+  contact_no: string;
   employee_position: string;
   tin: string;
   address: string;
@@ -787,7 +797,7 @@ export interface RowVendorsData {
   bill_address: string;
   office_no: string;
   credit_limit: string;
-  is_allow_excess_limit: string;
+  is_allow_excess_limit: boolean;
   vendor_type: RowVendorTypeData;
   customer_category: RowCustCatData;
   supplier_category: RowSupCatData;

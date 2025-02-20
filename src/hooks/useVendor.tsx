@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import VendorQueryMutations from '@/graphql/VendorQueryMutations';
-import { RowVendorTypeData, RowVendorsData, RowSupCatData } from '@/utils/DataTypes';
+import { RowVendorTypeData, RowVendorsData, RowSupCatData, RowCustCatData, RowDepartmentsData } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
 
@@ -12,12 +12,16 @@ const useVendor = () => {
   const { 
     GET_VENDOR_TYPE_QUERY, 
     GET_VENDOR_LIST_QUERY, 
-    GET_SUPPLIER_CAT_QUERY, 
+    GET_SUPPLIER_CAT_QUERY,
+    GET_CUSTOMER_CAT_QUERY, 
+    GET_DEPARTMENT_QUERY,
     CREATE_VENDOR_QUERY } = VendorQueryMutations;
   
   const [dataVendorType, setDataVendorType] = useState<RowVendorTypeData>();
   const [dataVendors, setDataVendors] = useState<RowVendorsData[]>();
   const [dataSupplierCat, setDataSupplierCat] = useState<RowSupCatData[]>();
+  const [dataCustCat, setDataCustCat] = useState<RowCustCatData[]>();
+  const [dataDepartments, setDataDepartments] = useState<RowDepartmentsData[]>();
   const [loading, setLoading] = useState<boolean>(false);
   // Function to fetchdata
 
@@ -77,6 +81,62 @@ const useVendor = () => {
     setLoading(false);
   };
 
+  const fetchCustomerCategory = async () => {
+    // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    // const userData = JSON.parse(storedAuthStore)['state'];
+    let mutation;
+    let variables: { input: any } = {
+      input: {
+        code: ""
+      },
+    };
+
+    mutation = GET_CUSTOMER_CAT_QUERY;
+    setLoading(true);
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables,
+      }),
+    });
+    const result = await response.json();
+    setDataCustCat(result?.data.getCustomerCategory);
+    setLoading(false);
+  };
+
+  const fetchDepartments = async () => {
+    // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    // const userData = JSON.parse(storedAuthStore)['state'];
+    let mutation;
+    let variables: { input: any } = {
+      input: {
+        code: ""
+      },
+    };
+
+    mutation = GET_DEPARTMENT_QUERY;
+    setLoading(true);
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables,
+      }),
+    });
+    const result = await response.json();
+    setDataDepartments(result?.data.getDepartment);
+    setLoading(false);
+  };
+
   const fetchVendors = async (vendor_type_id: string) => {
     // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     // const userData = JSON.parse(storedAuthStore)['state'];
@@ -118,6 +178,7 @@ const useVendor = () => {
         department_id: row?.department_id,
         name: row?.name,
         employee_no: row?.employee_no,
+        contact_no: row?.contact_no,
         employee_position: row?.employee_position,
         tin: row?.tin,
         address: row?.address,
@@ -152,6 +213,8 @@ const useVendor = () => {
   useEffect(() => {
     fetchVendorType();
     fetchSupplierCategory();
+    fetchCustomerCategory();
+    fetchDepartments();
   }, []);
 
   return {
@@ -159,7 +222,9 @@ const useVendor = () => {
     createVendor,
     dataVendorType,
     dataSupplierCat,
+    dataCustCat,
     dataVendors,
+    dataDepartments,
     loading
   };
 };

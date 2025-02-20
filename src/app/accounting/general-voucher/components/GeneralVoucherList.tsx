@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import GVForm from './GVForm';
+import CVForm from './CVForm';
 import useFinancialStatement from '@/hooks/useFinancialStatement';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
@@ -41,7 +41,7 @@ const GeneralVoucherList: React.FC = () => {
                     className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowForm('Create GV', true) }>
                       <Plus size={14} /> 
-                      <span>New GV</span>
+                      <span>New CV</span>
                   </button>
                   <button 
                     type="button" 
@@ -56,7 +56,7 @@ const GeneralVoucherList: React.FC = () => {
           {showForm && (
             <div className={`col-span-2 ${showForm ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <GVForm setShowForm={setShowForm}/>
+                <CVForm setShowForm={setShowForm}/>
               </div>
             </div>
           )}

@@ -6,14 +6,13 @@ import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import useVendor from '@/hooks/useVendor';
-import { RowVendorsData, RowSupCatData } from '@/utils/DataTypes';
+import { RowVendorsData, DataSubBranches, RowSupCatData } from '@/utils/DataTypes';
 
 interface ParentFormBr {
   setShowForm: (v: boolean) => void;
   fetchVendors: (v: string) => void;
   createVendor: (d: RowVendorsData) => void;
   vendorTypeId: string;
-  dataSupplierCat: RowSupCatData[] | undefined;
   loading: boolean;
   singleData: RowVendorsData | undefined;
 }
@@ -24,31 +23,17 @@ interface Option {
   hidden?: boolean;
 }
 
-const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, dataSupplierCat, loading, singleData }) => {
+const OfficerForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, loading, createVendor, singleData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
 
-  const [optionsSubCat, setOptionsSubCat] = useState<Option[]>([]);
-
   useEffect(() => {
-    if (dataSupplierCat && Array.isArray(dataSupplierCat)) {
-      const dynaOpt: Option[] = dataSupplierCat?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsSubCat([
-        { value: '', label: 'Select a Category', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-    }
     setValue('vendor_type_id', vendorTypeId);
     setValue('id', singleData?.id ?? '');
     setValue('name', singleData?.name ?? '');
     setValue('tin', singleData?.tin ?? '');
-    setValue('address', singleData?.address ?? '');
-    setValue('supplier_category_id', singleData?.supplier_category_id ?? '');
-    setValue('tax_excempty_date', singleData?.tax_excempty_date ?? '');
-    setValue('remarks', singleData?.remarks ?? '');
-  }, [dataSupplierCat, vendorTypeId, singleData]);
+    setValue('office_no', singleData?.office_no ?? '');
+    setValue('employee_position', singleData?.employee_position ?? '');
+  }, [singleData])
 
   const onSubmit: SubmitHandler<RowVendorsData> = data => {
     console.log(data, ' data');
@@ -63,7 +48,7 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
       <div className="grid grid-cols-3 gap-4">
         <div className='mt-2'>
           <FormInput
-            label="Supplier Name"
+            label="Office Name"
             id="name"
             type="text"
             icon={Edit3}
@@ -86,52 +71,28 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
 
         <div>
           <FormInput
-            label="Address"
-            id="address"
+            label="Office No."
+            id="office_no"
             type="text"
             icon={Edit3}
-            register={register('address', { required: true })}
-            error={errors.address && "address is required"}
+            register={register('office_no', { required: true })}
+            error={errors.office_no && "office no is required"}
             className='mt-2'
           />
         </div>
 
         <div>
           <FormInput
-            label="Supplier Category"
-            id="supplier_category_id"
-            type="select"
-            icon={ChevronDown}
-            register={register('supplier_category_id')}
-            error={errors.supplier_category_id?.message}
-            options={optionsSubCat}
-            className='mt-2'
-          />
-        </div>
-
-        <div className=''>
-          <FormInput
-            label="Tax Excempt Date"
-            id="tax_excempty_date"
-            type="date"
-            icon={Edit3}
-            register={register('tax_excempty_date')}
-            error={errors.tax_excempty_date && "tax excempty date is required"}
-            className='mt-2'
-          />
-        </div>
-
-        <div className=''>
-          <FormInput
-            label="Remarks"
-            id="remarks"
+            label="Position"
+            id="employee_position"
             type="text"
             icon={Edit3}
-            register={register('remarks')}
-            error={errors.remarks && "remarks is required"}
+            register={register('employee_position', { required: true })}
+            error={errors.employee_position && "employee position is required"}
             className='mt-2'
           />
         </div>
+
       </div>
 
       <div className="flex justify-end gap-4.5 mt-5">
@@ -153,4 +114,4 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
   );
 };
 
-export default SupplierForm;
+export default OfficerForm;

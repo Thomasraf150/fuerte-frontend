@@ -5,6 +5,11 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import CustomDatatable from '@/components/CustomDatatable';
 import VendorsForm from './Forms/VendorsForm';
 import SupplierForm from './Forms/SupplierForm';
+import NontradeForm from './Forms/NontradeForm';
+import CustomerForm from './Forms/CustomerForm';
+import EmployeeForm from './Forms/EmployeeForm';
+import OfficerForm from './Forms/OfficerForm';
+import AffiliateForm from './Forms/AffiliateForm';
 import vendorsTblColumn from './VendorsTblColumn';
 import ReactSelect from '@/components/ReactSelect';
 import useVendor from '@/hooks/useVendor';
@@ -22,11 +27,22 @@ interface Option {
 const column = vendorsTblColumn;
 
 const VendorsList: React.FC = () => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
+  const { control: SelectControl } = useForm<any>();
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<RowVendorsData>();
   const [actionLbl, setActionLbl] = useState<string>('');
-  const [showForm, setShowForm] = useState<string>('');
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [formType, setFormType] = useState<string>('');
+  const [singleData, setSingleData] = useState<RowVendorsData | undefined>();
   const [vendorTypeId, setVendorTypeId] = useState<string>('');
-  const { dataVendorType, fetchVendors, dataVendors } = useVendor();
+  const { 
+      dataVendorType, 
+      fetchVendors, 
+      dataVendors, 
+      createVendor, 
+      loading, 
+      dataCustCat,
+      dataSupplierCat,
+      dataDepartments } = useVendor();
   const [vendorTypeOptions, setVendorTypeOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -42,15 +58,23 @@ const VendorsList: React.FC = () => {
   }, [dataVendorType, actionLbl, dataVendors]);
 
   const onChangeVendorType = (row: any) => {
-    console.log(row, ' row');
+    setShowForm(false);
     setActionLbl(row?.label);
-    fetchVendors(row?.value)
-    setVendorTypeId(row?.value)
+    fetchVendors(row?.value);
+    setVendorTypeId(row?.value);
+    setFormType(row?.label);
+    setSingleData(undefined);
   }
 
   const handleWholeRowClick = (row: any) => {
-    console.log(row, ' row');
-    setShowForm(row?.vendor_type?.code);
+    setFormType(row?.vendor_type?.name);
+    setShowForm(true);
+    setSingleData(row);
+  }
+
+  const handleCreateVendor = (b: boolean) => {
+    setShowForm(b);
+    setSingleData(undefined);
   }
 
   return (
@@ -61,7 +85,7 @@ const VendorsList: React.FC = () => {
             <div className="">
               <Controller
                 name="code"
-                control={control}
+                control={SelectControl}
                 rules={{ required: 'Vendor is required' }} 
                 render={({ field }) => (
                   <ReactSelect
@@ -84,13 +108,21 @@ const VendorsList: React.FC = () => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {showForm === '' && (
-            <div className={`col-span-2 ${showForm === '' ? 'fade-in' : 'fade-out'}`}>
+          {!showForm && (
+            <div className={`col-span-2 ${!showForm ? 'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-boxdark dark:text-boxdark">
                     {actionLbl}
                   </h3>
+                </div>
+                <div className="p-5">
+                  <button 
+                    className="bg-purple-700 text-white py-2 px-4 mb-4 rounded hover:bg-purple-800 flex items-center space-x-2"
+                    onClick={() => handleCreateVendor(true)}>
+                    <GitBranch  size={14} /> 
+                    <span>Create</span>
+                  </button>
                 </div>
                 <div className="px-4">
                   <CustomDatatable
@@ -106,13 +138,104 @@ const VendorsList: React.FC = () => {
           )}
 
 
-          {showForm === 'SUP' && (
-            <div className={`col-span-2 ${showForm === 'SUP' ? 'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <SupplierForm setShowForm={setShowForm} vendorTypeId={vendorTypeId} />
-                {/* <VendorsForm setShowForm={setShowForm}/> */}
+          {formType === 'Supplier' && (
+            showForm && (
+              <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
+                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                  <SupplierForm 
+                    setShowForm={setShowForm}
+                    vendorTypeId={vendorTypeId}
+                    fetchVendors={fetchVendors}
+                    loading={loading}
+                    singleData={singleData}
+                    createVendor={createVendor} 
+                    dataSupplierCat={dataSupplierCat} />
+                  {/* <VendorsForm setShowForm={setShowForm}/> */}
+                </div>
               </div>
-            </div>
+            )
+          )}
+          {formType === 'Nontrade' && (
+            showForm && (
+              <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
+                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                  <NontradeForm 
+                    setShowForm={setShowForm} 
+                    vendorTypeId={vendorTypeId} 
+                    fetchVendors={fetchVendors}
+                    loading={loading}
+                    singleData={singleData} 
+                    createVendor={createVendor} />
+                  {/* <VendorsForm setShowForm={setShowForm}/> */}
+                </div>
+              </div>
+            )
+          )}
+          {formType === 'Customer' && (
+            showForm && (
+              <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
+                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                  <CustomerForm 
+                    setShowForm={setShowForm} 
+                    vendorTypeId={vendorTypeId} 
+                    fetchVendors={fetchVendors}
+                    loading={loading}
+                    singleData={singleData} 
+                    createVendor={createVendor}
+                    dataCustCat={dataCustCat} />
+                  {/* <VendorsForm setShowForm={setShowForm}/> */}
+                </div>
+              </div>
+            )
+          )}
+          {formType === 'Employee' && (
+            showForm && (
+              <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
+                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                  <EmployeeForm 
+                    setShowForm={setShowForm} 
+                    vendorTypeId={vendorTypeId} 
+                    fetchVendors={fetchVendors}
+                    loading={loading}
+                    singleData={singleData} 
+                    createVendor={createVendor}
+                    dataDepartments={dataDepartments} />
+                  {/* <VendorsForm setShowForm={setShowForm}/> */}
+                </div>
+              </div>
+            )
+          )}
+          {formType === 'Officer' && (
+            showForm && (
+              <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
+                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                  <OfficerForm 
+                    setShowForm={setShowForm} 
+                    vendorTypeId={vendorTypeId} 
+                    fetchVendors={fetchVendors}
+                    loading={loading}
+                    singleData={singleData} 
+                    createVendor={createVendor} />
+                  {/* <VendorsForm setShowForm={setShowForm}/> */}
+                </div>
+              </div>
+            )
+          )}
+          {formType === 'Affiliate' && (
+            showForm && (
+              <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
+                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                  <AffiliateForm 
+                    setShowForm={setShowForm} 
+                    vendorTypeId={vendorTypeId} 
+                    fetchVendors={fetchVendors} 
+                    loading={loading}
+                    singleData={singleData} 
+                    createVendor={createVendor} />
+                  {/* <VendorsForm setShowForm={setShowForm}/> */}
+                </div>
+              </div>
+            )
           )}
 
           

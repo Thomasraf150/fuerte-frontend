@@ -13,12 +13,14 @@ const vendorsTblColumn = (): TableColumn<RowVendorsData>[] => [
     style: {
       minWidth: '150px',
     },
-    width: '150px'
+    width: '350px'
+
   },
   {
     name: 'Employee #',
     cell: row => row?.employee_no,
     sortable: true,
+    width: '250px'
   },
   {
     name: 'Address',
@@ -26,8 +28,8 @@ const vendorsTblColumn = (): TableColumn<RowVendorsData>[] => [
     sortable: true,
   },
   {
-    name: 'Account Code',
-    cell: row => row?.address,
+    name: 'TIN',
+    cell: row => row?.tin,
     sortable: true,
   }
 
