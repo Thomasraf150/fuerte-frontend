@@ -9,6 +9,7 @@ import PayeeView from './PayeeView';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData } from '@/utils/DataTypes';
 interface ParentFormBr {
@@ -20,7 +21,7 @@ interface ParentFormBr {
   loading: boolean;
 }
 
-const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, loading }) => {
+const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, loading }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -30,7 +31,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
   useEffect(() => {
     fetchCoaDataTable();
-    setValue('journal_name', 'Check Voucher');
+    setValue('journal_name', 'Journal Voucher');
     if (singleData !== undefined) {
       setValue('id', singleData?.id ?? '');
       setValue('vendor_id', singleData?.vendor_id ?? '');
@@ -301,4 +302,4 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   );
 };
 
-export default CVForm;
+export default JVForm;

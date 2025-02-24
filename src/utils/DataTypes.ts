@@ -748,6 +748,7 @@ export interface DataLoanProceedList {
   cib_id: string;
 }
 export interface RowAcctgDetails {
+  acctg_entries_id: string;
   accountLabel: string;
   acctnumber: string;
   debit: string;
@@ -758,10 +759,13 @@ export interface RowAcctgEntry {
   user_id: string;
   journal_date: string;
   vendor_id: string;
+  journal_ref: string;
+  amount: string;
   journal_name: string;
   check_no: string;
   journal_desc: string;
   acctg_details: RowAcctgDetails[];
+  vendor: RowVendorsData;
 }
 export interface RowVendorTypeData {
   id?: string;

@@ -1,14 +1,52 @@
-const CREATE_CV_MUTATION: string = `
-  mutation CreateCvEntry($input: CvAcctgEntriesInp){
-    createCvEntry(input: $input) {
+const CREATE_GV_MUTATION: string = `
+  mutation CreateGvEntry($input: CvAcctgEntriesInp){
+    createGvEntry(input: $input) {
       message
       status
     }
   }
 `;
 
+const GET_GV_QUERY: string = `
+  query GetCheckVoucher($input: CvSearchInp){
+    getCheckVoucher(input: $input) {
+      id
+      loan_id
+      vendor_id
+      journal_no
+      journal_name
+      journal_ref
+      journal_invoice
+      journal_date
+      posted_date
+      check_no
+      document_no
+      reference_no
+      journal_desc
+      amount
+      user_id
+      user_id_posted_by
+      user_id_cancelled_by
+      is_posted
+      is_cancelled
+      acctg_details {
+        id
+        acctg_entries_id
+        acctnumber
+        debit
+        credit
+      }
+      vendor {
+        id
+        name
+      }
+    }
+  }
+`;
+
 const GeneralVoucherQueryMutations = {
-  CREATE_CV_MUTATION
+  CREATE_GV_MUTATION,
+  GET_GV_QUERY
 };
 
 export default GeneralVoucherQueryMutations;

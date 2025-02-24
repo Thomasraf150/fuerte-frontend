@@ -9,23 +9,25 @@ import moment from 'moment';
 
 const useGeneralVoucher = () => {
 
-  const { CREATE_CV_MUTATION } = GeneralVoucherQueryMutations;
+  const { CREATE_GV_MUTATION, GET_GV_QUERY } = GeneralVoucherQueryMutations;
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [dataAcctgEntry, setDataAcctgEntry] = useState<RowAcctgEntry>();
+  const [dataGV, setDataGV] = useState<RowAcctgEntry[]>();
   // Function to fetchdata
 
-  const fetchAcctgEntries = async (vendor_type_id: string) => {
+  const fetchGV = async (branch_sub_id: string, startDate: string, endDate: string) => {
     // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     // const userData = JSON.parse(storedAuthStore)['state'];
     let mutation;
     let variables: { input: any } = {
       input: {
-        vendor_type_id
+        branch_sub_id,
+        startDate,
+        endDate
       },
     };
 
-    // mutation = GET_VENDOR_LIST_QUERY;
+    mutation = GET_GV_QUERY;
     setLoading(true);
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -39,7 +41,7 @@ const useGeneralVoucher = () => {
       }),
     });
     const result = await response.json();
-    // setDataAcctgEntry(result?.data.getDataAcctgEntry);
+    setDataGV(result?.data.getCheckVoucher);
     setLoading(false);
   };
 
@@ -60,7 +62,7 @@ const useGeneralVoucher = () => {
       },
     };
 
-    mutation = CREATE_CV_MUTATION;
+    mutation = CREATE_GV_MUTATION;
     setLoading(true);
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -74,16 +76,19 @@ const useGeneralVoucher = () => {
       }),
     });
     const result = await response.json();
-    toast.success(result?.data.createCvEntry?.message);
+    toast.success(result?.data.createGvEntry?.message);
     setLoading(false);
   };
 
    // Fetch data on component mount if id exists
   useEffect(() => {
+    fetchGV("","","");
   }, []);
 
   return {
     createGV,
+    fetchGV,
+    dataGV,
     loading
   };
 };
