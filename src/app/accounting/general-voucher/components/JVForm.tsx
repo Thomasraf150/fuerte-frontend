@@ -9,6 +9,7 @@ import PayeeView from './PayeeView';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { toast } from "react-toastify";
 
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData } from '@/utils/DataTypes';
@@ -108,6 +109,12 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   }, [rows])
 
   const onSubmit: SubmitHandler<RowAcctgEntry> = async (data) => {
+    const totalDebit = rows.reduce((sum, row) => sum + (parseFloat(row.debit) || 0), 0);
+    const totalCredit = rows.reduce((sum, row) => sum + (parseFloat(row.credit) || 0), 0);
+    if (totalDebit !== totalCredit) {
+      toast.error('debit and credit are not equal!');
+      return;
+    }
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You won\'t be able to revert this!',
