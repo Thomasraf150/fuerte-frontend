@@ -29,7 +29,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // }
     // if ((parseFloat(watch('advanced_payment')) || 0) > 0) {
       
-      const computedUdi = String((udiSched?.amount * ((((parseFloat(watch('advanced_payment')) || 0 ) + (parseFloat(watch('payment_ua_sp')) || 0)) / amountSched?.amount) * 100 / 100)).toFixed(2));
+      const computedUdi = String((Number(udiSched?.amount) * ((((parseFloat(watch('advanced_payment')) || 0 ) + (parseFloat(watch('payment_ua_sp')) || 0)) / Number(amountSched?.amount)) * 100 / 100)).toFixed(2));
       if (parseFloat(parseFloat(computedUdi).toFixed(2)) > parseFloat(parseFloat(selectedUdiSched?.amount).toFixed(2))) {
         toast.error("Your amount paying is exeeding a total remaining due. Please input a right remain amount");
         setTimeout(function(){
@@ -39,9 +39,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
           // console.log(parseFloat(parseFloat(selectedUdiSched?.amount).toFixed(2)), ' selectedUdiSched?.amount')
         }, 1000);
       } else {
+        // setValue('interest', isNaN(Number(computedUdi)) ? "0.00" : computedUdi);
         setValue('interest', computedUdi);
       }
-      
     // }
     // if ((parseFloat(watch('payment_ua_sp')) || 0) > 0) {
     //   const computedUdi = String((udiSched?.amount * (((parseFloat(watch('payment_ua_sp')) || 0) / amountSched?.amount) * 100 / 100)).toFixed(2));
@@ -81,6 +81,8 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                             (parseFloat(watch('bank_charge')) || 0) - 
                             (parseFloat(watch('penalty_ua_sp')) || 0) -
                             (parseFloat(watch('advanced_payment')) || 0)).toFixed(2)));
+      console.log(selectedMoSchedOthPay, 'selectedMoSchedOthPay');
+      console.log(selectedUdiSched, 'selectedUdiSched');
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'penalty_ua_sp') {
