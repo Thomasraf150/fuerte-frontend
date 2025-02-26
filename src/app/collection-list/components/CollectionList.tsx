@@ -1,69 +1,73 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
-import useLoans from '@/hooks/useLoans';
+import { DataColListRow, BorrLoanRowData } from '@/utils/DataTypes';
+import useCollectionList from '@/hooks/useCollectionList';
 // import LoanPnSigningForm from './LoanPnSigningForm';
-import CollectionListInfo from './CollectionListInfo';
+import collectionListCol from './CollectionListCol';
+import CustomDatatable from '@/components/CustomDatatable';
 
+const column = collectionListCol;
 
 const CollectionList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
-  const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoans, loading } = useLoans();
+  // const [singleData, setSingleData] = useState<BorrLoanRowData>();
+  const { fetchCollectionList, dataColListData, loading } = useCollectionList();
 
-  const handleRowClick = (data: BorrLoanRowData) => {
+  const handleRowClick = (data: DataColListRow) => {
     setShowForm(true);
-    setSingleData(data);
-  }
- 
-  const handleWholeRowClick = (data: BorrLoanRowData) => {
-    setShowForm(true);
-    setSingleData(data);
+    // setSingleData(data);
     console.log(data, ' data');
   }
+ 
+  // const handleWholeRowClick = (data: BorrLoanRowData) => {
+  //   setShowForm(true);
+  //   setSingleData(data);
+  //   console.log(data, ' data');
+  // }
 
   const handleShowForm = (d: boolean) => {
-    setShowForm(d);
-    fetchLoans(1000, 1, 0);
+    // setShowForm(d);
+    // fetchLoans(1000, 1, 0);
   }
 
   useEffect(() => {
-    fetchLoans(1000, 1, 0);
+    fetchCollectionList(1000, 1, 0);
   }, [])
 
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="">
-
-            {showForm === false ? (
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+        <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <div>
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
                     Collection List
                   </h3>
                 </div>
                 <div className="p-4">
-                  <CollectionListInfo setShowForm={setShowForm} />
-                  {/* <CustomDatatable
+                  {/* <CollectionListInfo setShowForm={setShowForm} /> */}
+                  <CustomDatatable
                     apiLoading={loading}
-                    columns={column(handleRowClick)}
-                    onRowClicked={handleWholeRowClick}
-                    data={loanData}
+                    columns={column()}
+                    onRowClicked={handleRowClick}
+                    data={dataColListData || []}
                     enableCustomHeader={true} 
                     title={''}  
-                  /> */}
+                  />
                 </div>
               </div>
-            ) : (
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                {/* <LoanPnSigningForm singleData={singleData} handleShowForm={handleShowForm} /> */}
+            </div>
+            {showForm && (
+              <div className={`${showForm ? 'fade-in' : 'fade-out'} rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2`}>
+                <div className="w-full">
+                  <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
+                    asdasd
+                  </div>
+                </div>
               </div>
             )}
-            
-          </div>
         </div>
       </div>
     </div>

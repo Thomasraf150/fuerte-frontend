@@ -806,3 +806,10 @@ export interface RowVendorsData {
   customer_category: RowCustCatData;
   supplier_category: RowSupCatData;
 }
+export interface DataColListRow {
+  loan_id: string;
+  description: string;
+  due_date: string;
+  trans_date: string;
+  loan_ref: string;
+}
