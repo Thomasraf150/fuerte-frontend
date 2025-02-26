@@ -63,7 +63,7 @@ const CollectionList: React.FC = () => {
               <div className={`${showForm ? 'fade-in' : 'fade-out'} rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2`}>
                 <div className="w-full">
                   <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
-                    asdasd
+                    Subsidiary
                   </div>
                 </div>
               </div>

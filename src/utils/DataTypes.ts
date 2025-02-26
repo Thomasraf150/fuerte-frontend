@@ -809,6 +809,7 @@ export interface RowVendorsData {
 export interface DataColListRow {
   loan_id: string;
   description: string;
+  loan_schedule_id: string;
   due_date: string;
   trans_date: string;
   loan_ref: string;

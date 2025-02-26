@@ -7,6 +7,7 @@ const GET_DATA_COLLECTION_LIST: string = `
       data {
         loan_id
         description
+        loan_schedule_id
         due_date
         trans_date
         loan_ref
