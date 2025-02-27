@@ -820,3 +820,9 @@ export interface DataColListRow {
   trans_date: string;
   loan_ref: string;
 }
+
+export interface DataColEntries {
+  interest_income: string;
+  bank_charge: string;
+  penalty: string;
+}

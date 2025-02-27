@@ -51,8 +51,8 @@ const CollectionList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-1 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+        <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div>
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -78,7 +78,7 @@ const CollectionList: React.FC = () => {
                   <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
                     Subsidiary
                   </div>
-                  <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
+                  <div className="border-b flex justify-between items-center border-stroke px-3 py-2 dark:border-strokedark">
                     <ColAcctgEntryForm dataColEntry={dataColEntry || []} coaDataAccount={coaDataAccount || []} />
                   </div>
                 </div>

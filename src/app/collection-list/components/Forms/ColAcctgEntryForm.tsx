@@ -6,7 +6,8 @@ import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import useCoa from '@/hooks/useCoa';
-import { DataChartOfAccountList, DataSubBranches, RowAcctgDetails, DataRowLoanPayments } from '@/utils/DataTypes';
+import useCollectionList from '@/hooks/useCollectionList';
+import { DataChartOfAccountList, DataColEntries, DataRowLoanPayments } from '@/utils/DataTypes';
 
 interface ParentFormBr {
   dataColEntry: DataRowLoanPayments[];
@@ -14,9 +15,8 @@ interface ParentFormBr {
 }
 
 const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<any>();
-  const [rows, setRows] = useState<any[]>([{ description: "", accountLabel: "", acctnumber: "", amount: "", is_debit: "" }]);
-
+  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataColEntries>();
+  const { postCollectionEntries } = useCollectionList();
   const flattenAccountsToOptions = (
       accounts: DataChartOfAccountList[],
       level: number = 1
@@ -49,33 +49,21 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
     const optionsCoaData = getAccountOptions(coaDataAccount ?? []);
   
 
-  const handleChange = (index: number, field: keyof any, value: string, label: string) => {
-    const newRows = [...rows];
-    newRows[index][field] = value;
-    newRows[index].accountLabel = label;
-    setRows(newRows);
-  };
-
-  const handleChangeIsDebit = (index: number, field: keyof any, value: string) => {
-    const newRows = [...rows];
-    newRows[index][field] = value;
-    setRows(newRows);
-  };
-
   useEffect(() => {
     
   }, [dataColEntry])
 
-  const onSubmit: SubmitHandler<any> = data => {
-    console.log(data, 'rows');
+  const onSubmit: SubmitHandler<DataColEntries> = data => {
+    console.log(data, 'data');
+    postCollectionEntries(dataColEntry, data);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-2 gap-1">
-        <div className='mt-2 col-span-2'>
+      <div className="grid grid-cols-3 gap-1">
+        <div className='mt-2 col-span-2 w-100'>
           <label
-              className={`block text-sm font-medium text-black dark:text-white mr-2`}
+              className={`block text-sm font-medium text-black dark:text-white mr-2 mb-2`}
           >
             Interest Income
           </label>
@@ -97,9 +85,9 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
             }}
           />
         </div>
-        <div className='mt-2 col-span-2'>
+        <div className='mt-2 col-span-2 w-100'>
           <label
-              className={`block text-sm font-medium text-black dark:text-white mr-2`}
+              className={`block text-sm font-medium text-black dark:text-white mr-2 mb-2`}
           >
             Bank Charge
           </label>
@@ -121,9 +109,9 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
             }}
           />
         </div>
-        <div className='mt-2 col-span-2'>
+        <div className='mt-2 col-span-2 w-100'>
           <label
-              className={`block text-sm font-medium text-black dark:text-white mr-2`}
+              className={`block text-sm font-medium text-black dark:text-white mb-2`}
           >
             Penalty
           </label>
@@ -149,7 +137,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
         
       </div>
 
-      <div className="flex justify-end gap-4.5">
+      <div className="flex justify-end gap-4.5 mt-4">
         <button
           className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
@@ -160,7 +148,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
           className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
           type="submit"
         >
-          Save
+          Post
         </button>
       </div>
     </form>

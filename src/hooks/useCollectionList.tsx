@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { DataColListRow, DataRowLoanPayments } from '@/utils/DataTypes';
+import { DataColListRow, DataRowLoanPayments, DataColEntries } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import CollectionListQueryMutations from '@/graphql/CollectionListQueryMutations';
@@ -61,6 +61,29 @@ const useCollectionList = () => {
     setDataColEntry(response.data.getCollectionEntry);
   };
 
+  const postCollectionEntries = async (loan_payments: DataRowLoanPayments[], subsidiaries: DataColEntries) => {
+
+    let variables: { loan_payments: any, subsidiaries: any } = {
+      loan_payments,
+      subsidiaries
+    };
+
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GET_COLLECTION_ENTRY,
+        variables
+      }),
+    });
+
+    // const result = await response.json();
+    // setDataColListData(response.data.getLoans.data);
+    setDataColEntry(response.data.getCollectionEntry);
+  };
+
    // Fetch data on component mount if id exists
   useEffect(() => {
   }, []);
@@ -70,7 +93,8 @@ const useCollectionList = () => {
     fetchCollectionEntry,
     dataColListData,
     dataColEntry,
-    loading
+    loading,
+    postCollectionEntries
   };
 };
 
