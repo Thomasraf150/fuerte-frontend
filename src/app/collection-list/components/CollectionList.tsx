@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { DataColListRow, BorrLoanRowData } from '@/utils/DataTypes';
 import useCollectionList from '@/hooks/useCollectionList';
+import useCoa from '@/hooks/useCoa';
 // import LoanPnSigningForm from './LoanPnSigningForm';
 import collectionListCol from './CollectionListCol';
+import ColAcctgEntryForm from './Forms/ColAcctgEntryForm';
 import CustomDatatable from '@/components/CustomDatatable';
 import { ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput';
@@ -15,9 +17,11 @@ const CollectionList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   // const [singleData, setSingleData] = useState<BorrLoanRowData>();
   const { fetchCollectionList, dataColListData, fetchCollectionEntry, dataColEntry, loading } = useCollectionList();
+  const { coaDataAccount, fetchCoaDataTable } = useCoa();
 
   useEffect(() => {
     fetchCollectionList(1000, 1, 0);
+    fetchCoaDataTable();
   }, [])
 
   const handleRowClick = (data: DataColListRow) => {
@@ -47,8 +51,8 @@ const CollectionList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+        <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-1 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div>
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -75,58 +79,7 @@ const CollectionList: React.FC = () => {
                     Subsidiary
                   </div>
                   <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
-                  <table className="w-full">
-                    <thead>
-                      <tr>
-                        <th>Type</th>
-                        <th>Placement</th>
-                        <th>Account</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                          <td className="text-left"></td>
-                          <td className="text-right">
-                          <FormInput
-                            label=""
-                            id="placement"
-                            type="select"
-                            icon={ChevronDown}
-                            options={[
-                              {
-                                value: 'debit',
-                                label: 'Debit'
-                              },
-                              {
-                                value: 'credit',
-                                label: 'Credit'
-                              }
-                            ]}
-                            className='mb-4'
-                          />
-                          </td>
-                          <td className="text-right">
-                          <FormInput
-                            label=""
-                            id="placement"
-                            type="select"
-                            icon={ChevronDown}
-                            options={[
-                              {
-                                value: 'debit',
-                                label: 'Debit'
-                              },
-                              {
-                                value: 'credit',
-                                label: 'Credit'
-                              }
-                            ]}
-                            className='mb-4'
-                          />
-                          </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                    <ColAcctgEntryForm dataColEntry={dataColEntry || []} coaDataAccount={coaDataAccount || []} />
                   </div>
                 </div>
               </div>
