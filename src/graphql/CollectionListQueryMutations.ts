@@ -15,9 +15,24 @@ const GET_DATA_COLLECTION_LIST: string = `
   }
 }
 `;
+const GET_COLLECTION_ENTRY: string = `
+  query getCollectionEntry($input: InpGetColtdPymnt){
+    getCollectionEntry(input: $input){
+      loan_schedule_id
+      loan_udi_schedule_id
+      description
+      amount
+      trans_date
+      journal_ref
+      account_id
+      is_deleted
+    }
+  }
+`;
 
 const CollectionListQueryMutations = {
-  GET_DATA_COLLECTION_LIST
+  GET_DATA_COLLECTION_LIST,
+  GET_COLLECTION_ENTRY
 };
 
 export default CollectionListQueryMutations;

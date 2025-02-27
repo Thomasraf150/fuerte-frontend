@@ -471,6 +471,12 @@ export interface DataRowLoanPayments {
   id: string;
   description: string;
   amount: number;
+  loan_schedule_id: string;
+  loan_udi_schedule_id: string;
+  trans_date: string;
+  journal_ref: string;
+  account_id: string;
+  is_deleted: string;
 }
 
 export interface DataRowLoanSchedules {

@@ -6,19 +6,30 @@ import useCollectionList from '@/hooks/useCollectionList';
 // import LoanPnSigningForm from './LoanPnSigningForm';
 import collectionListCol from './CollectionListCol';
 import CustomDatatable from '@/components/CustomDatatable';
+import { ChevronDown } from 'react-feather';
+import FormInput from '@/components/FormInput';
 
 const column = collectionListCol;
 
 const CollectionList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   // const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { fetchCollectionList, dataColListData, loading } = useCollectionList();
+  const { fetchCollectionList, dataColListData, fetchCollectionEntry, dataColEntry, loading } = useCollectionList();
+
+  useEffect(() => {
+    fetchCollectionList(1000, 1, 0);
+  }, [])
 
   const handleRowClick = (data: DataColListRow) => {
     setShowForm(true);
     // setSingleData(data);
-    console.log(data, ' data');
+    fetchCollectionEntry(data?.loan_schedule_id, data?.trans_date);
+
   }
+
+  useEffect(() => {
+    console.log(dataColEntry, ' dataColEntry');
+  }, [dataColEntry])
  
   // const handleWholeRowClick = (data: BorrLoanRowData) => {
   //   setShowForm(true);
@@ -31,9 +42,7 @@ const CollectionList: React.FC = () => {
     // fetchLoans(1000, 1, 0);
   }
 
-  useEffect(() => {
-    fetchCollectionList(1000, 1, 0);
-  }, [])
+  
 
   return (
     <div>
@@ -64,6 +73,60 @@ const CollectionList: React.FC = () => {
                 <div className="w-full">
                   <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
                     Subsidiary
+                  </div>
+                  <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Placement</th>
+                        <th>Account</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                          <td className="text-left"></td>
+                          <td className="text-right">
+                          <FormInput
+                            label=""
+                            id="placement"
+                            type="select"
+                            icon={ChevronDown}
+                            options={[
+                              {
+                                value: 'debit',
+                                label: 'Debit'
+                              },
+                              {
+                                value: 'credit',
+                                label: 'Credit'
+                              }
+                            ]}
+                            className='mb-4'
+                          />
+                          </td>
+                          <td className="text-right">
+                          <FormInput
+                            label=""
+                            id="placement"
+                            type="select"
+                            icon={ChevronDown}
+                            options={[
+                              {
+                                value: 'debit',
+                                label: 'Debit'
+                              },
+                              {
+                                value: 'credit',
+                                label: 'Credit'
+                              }
+                            ]}
+                            className='mb-4'
+                          />
+                          </td>
+                      </tr>
+                    </tbody>
+                  </table>
                   </div>
                 </div>
               </div>
