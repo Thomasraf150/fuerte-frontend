@@ -58,7 +58,25 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
               </tr>
-              <tr>
+              {sumTixData?.summary_tix.map((item: any, i: number) => (
+                <tr key={i}>
+                  <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                    {item.description}
+                  </td>
+                  <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                    {'\u20B1'} {item.debit}
+                  </td>
+                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                    {'\u20B1'} {item.credit}
+                  </td>
+                  <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  </td>
+                </tr>
+              ))}
+              
+
+
+              {/* <tr>
                 <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
                   Principal
                 </td>
@@ -95,7 +113,6 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {/* {'\u20B1'} {sumTixData?.summary_tix[4]?.credit} */}
                 </td>
               </tr>
               <tr>
@@ -182,20 +199,6 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   {'\u20B1'} {sumTixData?.summary_tix[3]?.credit}
                 </td>
               </tr>
-              {/* <tr>
-                <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
-                  Agent Fee
-                </td>
-                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
-                  
-                </td>
-                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
-                  
-                </td>
-                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[9]?.credit}
-                </td>
-              </tr> */}
               <tr>
                 <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
                   Exceeding Amount
@@ -264,7 +267,6 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
                   {'\u20B1'} 
-                  {/* {sumTixData?.summary_tix[6]?.credit} */}
                 </td>
               </tr>
               <tr>
@@ -308,7 +310,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
                   {'\u20B1'} {sumTixData?.summary_tix[11]?.credit}
                 </td>
-              </tr>
+              </tr> */}
               <tr>
                 <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11 text-lime-50 bg-yellow-500">
                   CONTROL TOTALS
