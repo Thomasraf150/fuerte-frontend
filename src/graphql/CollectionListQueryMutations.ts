@@ -30,9 +30,19 @@ const GET_COLLECTION_ENTRY: string = `
   }
 `;
 
+const SAVE_COLLECTION_ENTRY: string = `
+  mutation PostCollectionEntries($loan_payments: [InpColLoanPymnt!]!, $subsidiaries: InpSubsidiariesColEty!){
+    postCollectionEntries(loan_payments: $loan_payments, subsidiaries: $subsidiaries) {
+      status
+      message
+    }
+  }
+`;
+
 const CollectionListQueryMutations = {
   GET_DATA_COLLECTION_LIST,
-  GET_COLLECTION_ENTRY
+  GET_COLLECTION_ENTRY,
+  SAVE_COLLECTION_ENTRY
 };
 
 export default CollectionListQueryMutations;

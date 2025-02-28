@@ -16,7 +16,8 @@ const column = collectionListCol;
 const CollectionList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   // const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { fetchCollectionList, dataColListData, fetchCollectionEntry, dataColEntry, loading } = useCollectionList();
+  
+  const { fetchCollectionList, postCollectionEntries, dataColListData, fetchCollectionEntry, dataColEntry, loading } = useCollectionList();
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
 
   useEffect(() => {
@@ -79,7 +80,13 @@ const CollectionList: React.FC = () => {
                     Subsidiary
                   </div>
                   <div className="border-b flex justify-between items-center border-stroke px-3 py-2 dark:border-strokedark">
-                    <ColAcctgEntryForm dataColEntry={dataColEntry || []} coaDataAccount={coaDataAccount || []} />
+                    <ColAcctgEntryForm 
+                      dataColEntry={dataColEntry || []} 
+                      coaDataAccount={coaDataAccount || []} 
+                      fetchCollectionList={fetchCollectionList} 
+                      postCollectionEntries={postCollectionEntries} 
+                      loading={loading}
+                      setShowForm={setShowForm}/>
                   </div>
                 </div>
               </div>

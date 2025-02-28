@@ -825,4 +825,5 @@ export interface DataColEntries {
   interest_income: string;
   bank_charge: string;
   penalty: string;
+  user_id: number;
 }

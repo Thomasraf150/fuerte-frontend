@@ -6,17 +6,21 @@ import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import useCoa from '@/hooks/useCoa';
-import useCollectionList from '@/hooks/useCollectionList';
 import { DataChartOfAccountList, DataColEntries, DataRowLoanPayments } from '@/utils/DataTypes';
-
+import useCollectionList from '@/hooks/useCollectionList';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
 interface ParentFormBr {
   dataColEntry: DataRowLoanPayments[];
   coaDataAccount: DataChartOfAccountList[];
+  fetchCollectionList: (a: number, b: number, c: number) => void;
+  postCollectionEntries: (a: DataRowLoanPayments[], b: DataColEntries) => void;
+  loading: boolean;
+  setShowForm: (b: boolean) => void;
 }
 
-const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount }) => {
+const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, postCollectionEntries, loading, setShowForm }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataColEntries>();
-  const { postCollectionEntries } = useCollectionList();
+  // const { postCollectionEntries, fetchCollectionList, loading } = useCollectionList();
   const flattenAccountsToOptions = (
       accounts: DataChartOfAccountList[],
       level: number = 1
@@ -53,9 +57,20 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
     
   }, [dataColEntry])
 
-  const onSubmit: SubmitHandler<DataColEntries> = data => {
-    console.log(data, 'data');
-    postCollectionEntries(dataColEntry, data);
+  const onSubmit: SubmitHandler<DataColEntries> = async (data) => {
+    // console.log(data, 'data');
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      postCollectionEntries(dataColEntry, data);
+      if (!loading) {
+        fetchCollectionList(1000, 1, 0);
+        setShowForm(false);
+      }
+    }
   };
 
   return (
@@ -141,6 +156,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
         <button
           className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
+          onClick={() => { setShowForm(false); }}
         >
           Cancel
         </button>

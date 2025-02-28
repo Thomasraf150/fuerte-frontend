@@ -9,7 +9,7 @@ import CollectionListQueryMutations from '@/graphql/CollectionListQueryMutations
 import { fetchWithRecache } from '@/utils/helper';
 
 const useCollectionList = () => {
-  const { GET_DATA_COLLECTION_LIST, GET_COLLECTION_ENTRY } = CollectionListQueryMutations;
+  const { GET_DATA_COLLECTION_LIST, GET_COLLECTION_ENTRY, SAVE_COLLECTION_ENTRY } = CollectionListQueryMutations;
 
   // const [loanSingleData, setLoanSingleData] = useState<BorrLoanRowData>();
   const [dataColListData, setDataColListData] = useState<DataColListRow[]>();
@@ -62,7 +62,10 @@ const useCollectionList = () => {
   };
 
   const postCollectionEntries = async (loan_payments: DataRowLoanPayments[], subsidiaries: DataColEntries) => {
-
+    setLoading(true);
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    subsidiaries.user_id = userData?.user?.id
     let variables: { loan_payments: any, subsidiaries: any } = {
       loan_payments,
       subsidiaries
@@ -74,14 +77,19 @@ const useCollectionList = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: GET_COLLECTION_ENTRY,
+        query: SAVE_COLLECTION_ENTRY,
         variables
       }),
     });
-
     // const result = await response.json();
     // setDataColListData(response.data.getLoans.data);
-    setDataColEntry(response.data.getCollectionEntry);
+    if (response.data.postCollectionEntries?.status === false) {
+      toast.error(response.data.postCollectionEntries?.message);
+    } else {
+      toast.success(response.data.postCollectionEntries?.message);
+    }
+    setLoading(false);
+    
   };
 
    // Fetch data on component mount if id exists
