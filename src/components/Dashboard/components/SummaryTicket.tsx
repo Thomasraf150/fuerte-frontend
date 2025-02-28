@@ -51,7 +51,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   No of Transaction
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {sumTixData?.summary_tix[0]?.ccount}
+                  {sumTixData && sumTixData?.summary_tix[0]?.ccount}
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
@@ -66,7 +66,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[0]?.debit}
+                  {'\u20B1'} {sumTixData?.summary_tix[5]?.debit}
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
@@ -79,7 +79,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[5]?.debit}
+                  {'\u20B1'} {sumTixData?.summary_tix[8]?.debit}
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
@@ -95,7 +95,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[4]?.credit}
+                  {/* {'\u20B1'} {sumTixData?.summary_tix[4]?.credit} */}
                 </td>
               </tr>
               <tr>
@@ -109,7 +109,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[7]?.credit}
+                  {'\u20B1'} {sumTixData?.summary_tix[9]?.credit}
                 </td>
               </tr>
               <tr>
@@ -123,7 +123,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} 0
+                  {'\u20B1'} {sumTixData?.summary_tix[4]?.credit}
                 </td>
               </tr>
               <tr>
@@ -137,7 +137,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[3]?.credit}
+                  {'\u20B1'} {sumTixData?.summary_tix[2]?.credit}
                 </td>
               </tr>
               <tr>
@@ -151,7 +151,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[2]?.credit}
+                  {'\u20B1'} {sumTixData?.summary_tix[10]?.credit}
                 </td>
               </tr>
               <tr>
@@ -165,7 +165,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[9]?.credit}
+                  {'\u20B1'} {sumTixData?.summary_tix[0]?.credit}
                 </td>
               </tr>
               {/* <tr>
