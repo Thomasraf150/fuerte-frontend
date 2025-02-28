@@ -263,7 +263,50 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[6]?.credit}
+                  {'\u20B1'} 
+                  {/* {sumTixData?.summary_tix[6]?.credit} */}
+                </td>
+              </tr>
+              <tr>
+                <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                  Addon Amount
+                </td>
+                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  
+                </td>
+                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  
+                </td>
+                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                  {'\u20B1'} {sumTixData?.summary_tix[6]?.Debit}
+                </td>
+              </tr>
+              <tr>
+                <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                  Addon UDI
+                </td>
+                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  
+                </td>
+                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  
+                </td>
+                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                  {'\u20B1'} {sumTixData?.summary_tix[12]?.credit}
+                </td>
+              </tr>
+              <tr>
+                <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                  Cash-Out
+                </td>
+                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  
+                </td>
+                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                  
+                </td>
+                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                  {'\u20B1'} {sumTixData?.summary_tix[11]?.credit}
                 </td>
               </tr>
               <tr>
