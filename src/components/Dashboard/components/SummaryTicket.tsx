@@ -66,7 +66,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[5]?.debit}
+                  {'\u20B1'} {sumTixData?.summary_tix[0]?.debit}
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
@@ -179,7 +179,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   
                 </td>
                 <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {'\u20B1'} {sumTixData?.summary_tix[0]?.credit}
+                  {'\u20B1'} {sumTixData?.summary_tix[3]?.credit}
                 </td>
               </tr>
               {/* <tr>
