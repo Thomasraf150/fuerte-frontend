@@ -827,3 +827,9 @@ export interface DataColEntries {
   penalty: string;
   user_id: number;
 }
+export interface DataGLRow {
+  account_name: string;
+  number: string;
+  debit: string;
+  credit: number;
+}

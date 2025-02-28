@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import GLForm from './GLForm';
 import useFinancialStatement from '@/hooks/useFinancialStatement';
+import useGeneralLedger from '@/hooks/useGeneralLedger';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
@@ -11,7 +12,7 @@ import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 const GeneralLedgerList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { incomeStatementData } = useFinancialStatement();
+  const { fetchGL, dataGl } = useGeneralLedger();
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -19,9 +20,9 @@ const GeneralLedgerList: React.FC = () => {
   }
 
   useEffect(() => {
-
-    console.log(incomeStatementData, ' incomeStatementData');
-  }, [incomeStatementData])
+    fetchGL("", "");
+    console.log(dataGl, ' dataGl')
+  }, [])
 
   return (
     <div>
@@ -36,27 +37,47 @@ const GeneralLedgerList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
-                  <button 
-                    type="button" 
-                    className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                    onClick={ () => handleShowForm('Create GV', true) }>
-                      <Plus size={14} /> 
-                      <span>New GV</span>
-                  </button>
-                  <button 
-                    type="button" 
-                    className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                      <Plus size={14} /> 
-                      <span>New JV</span>
-                  </button>
+                  <div className="w-full mx-auto">
+                    <div className="border rounded-lg shadow-md overflow-hidden">
+                      <div className="h-96 w-full overflow-auto">
+                        <table className="min-w-full border-collapse">
+                          {/* Table Header */}
+                          <thead className="bg-gray-200 text-gray-700 text-sm sticky top-0">
+                            <tr>
+                              <th className="px-4 py-2 border bg-slate-50">Account Name</th>
+                              <th className="px-4 py-2 border bg-slate-50">Account Number</th>
+                              <th className="px-4 py-2 border bg-slate-50">Debit</th>
+                              <th className="px-4 py-2 border bg-slate-50">Credit</th>
+                            </tr>
+                          </thead>
+                          {/* Table Body */}
+                          <tbody className="text-sm">
+                            {dataGl && dataGl.map((item, i) => (
+                              <tr key={i} className="even:bg-gray-50 hover:bg-gray-100">
+                                <td className="px-4 py-2 border">{item?.account_name}</td> 
+                                <td className="px-4 py-2 border text-center">{item?.number}</td>
+                                <td className="px-4 py-2 border text-right">{item?.debit}</td>
+                                <td className="px-4 py-2 border text-right">{item?.credit}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          {/* Table Footer - Totals */}
+                          <tfoot className="bg-gray-200 text-gray-700 text-sm sticky bottom-0">
+                            <tr className="bg-gray-100 font-semibold">
+                              <td className="px-4 py-2 border text-right bg-slate-50" colSpan={2}>Total:</td>
+                              <td className="px-4 py-2 border text-right bg-slate-50">
+                                {dataGl?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0).toFixed(2)}
+                              </td>
+                              <td className="px-4 py-2 border text-right bg-slate-50">
+                                {dataGl?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0).toFixed(2)}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
-          {showForm && (
-            <div className={`col-span-2`}>
-              <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <GLForm />
               </div>
             </div>
           )}
