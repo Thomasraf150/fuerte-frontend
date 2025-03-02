@@ -6,6 +6,7 @@ import { DataLoanProceedList, DataAccBalanceSheet, DataAccIncomeStatement } from
 import { toast } from "react-toastify";
 import FinancialStatementQueryMutations from '@/graphql/FinancialStatementQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
+import moment from 'moment';
 
 const useFinancialStatement = () => {
   const { GET_BALANCE_SHEET, GET_INCOME_STATEMENT } = FinancialStatementQueryMutations;
@@ -18,7 +19,7 @@ const useFinancialStatement = () => {
     setLoading(true);
 
     let variables: { date: string } = {
-      date : "2025-02-27"
+      date : moment(new Date()).format('YYYY-MM-DD')
     };
 
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -39,8 +40,8 @@ const useFinancialStatement = () => {
     setLoading(true);
 
     let variables: { startDate: string, endDate: string } = {
-      startDate : "2025-01-27",
-      endDate: "2025-02-27"
+      startDate : "2024-01-01",
+      endDate: moment(new Date()).format('YYYY-MM-DD')
     };
 
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
