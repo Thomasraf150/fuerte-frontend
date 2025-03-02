@@ -31,8 +31,15 @@ const GET_SUMMARY_TICKET_REPORTS: string = `
   }
 `;
 
+const PRINT_SUMMARY_TIX: string = `
+    mutation PrintSummaryDetails($input: SummaryTixInput!){
+      printSummaryDetails(input: $input)
+    }
+`;
+
 const SummaryTicketReports = {
-  GET_SUMMARY_TICKET_REPORTS
+  GET_SUMMARY_TICKET_REPORTS,
+  PRINT_SUMMARY_TIX
 };
 
 export default SummaryTicketReports;
