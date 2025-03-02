@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import CardDataStats from "@/components/CardDataStats";
-import { formatToTwoDecimalPlaces } from '@/utils/helper';
+import { formatToTwoDecimalPlaces, formatNumberComma } from '@/utils/helper';
 import moment from 'moment';
 import { FileText } from "react-feather";
 
@@ -37,13 +37,13 @@ const LoanByLoanType: React.FC<SumProps> = ({sumTixData, startDate, endDate}) =>
                 <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white">
                   COUNT
                 </th>
-                <th className="text-left min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
                   PRINCIPAL
                 </th>
-                <th className="text-left min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
                   CASH-OUT
                 </th>
-                <th className="text-left min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
                   UDI
                 </th>
               </tr>
@@ -58,14 +58,14 @@ const LoanByLoanType: React.FC<SumProps> = ({sumTixData, startDate, endDate}) =>
                   <td className="border-b border-[#eee] px-3 py-4 dark:border-strokedark">
                     {item.loan_count}
                   </td>
-                  <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {item.pn_amount}
+                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                    {formatNumberComma(parseFloat(item.pn_amount))}
                   </td>
-                  <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {item.loan_proceeds}
+                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                    {formatNumberComma(parseFloat(item.loan_proceeds))}
                   </td>
-                  <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {item.udi_balance}
+                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                    {formatNumberComma(parseFloat(item.udi_balance))}
                   </td>
                 </tr>
               </>
