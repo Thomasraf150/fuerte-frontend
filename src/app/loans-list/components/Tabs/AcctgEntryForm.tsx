@@ -93,7 +93,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-1 mb-4 mt-4">
-        <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Branch</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Branch</label>
           <Controller
             name="branch_sub_id"
             control={control}

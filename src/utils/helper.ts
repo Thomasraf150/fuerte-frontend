@@ -48,3 +48,13 @@ export const formatToTwoDecimalPlaces = (value: string) => {
   }
   return '';
 };
+
+export const toCamelCase = (str: string) => {
+  return str
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+export const formatNumberComma = (num: number) => {
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};

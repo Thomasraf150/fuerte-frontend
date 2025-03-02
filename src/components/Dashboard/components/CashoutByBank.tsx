@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import CardDataStats from "@/components/CardDataStats";
-import { formatToTwoDecimalPlaces } from '@/utils/helper';
+import { formatNumberComma } from '@/utils/helper';
 import moment from 'moment';
 import { FileText } from "react-feather";
 
@@ -16,6 +16,7 @@ interface SumProps {
 const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
 
   useEffect(() => {
+    console.log(sumTixData, 'CashoutByBank');
   }, [sumTixData]);
 
   return (
@@ -67,10 +68,10 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
                       {item.loan_count}
                     </td>
                     <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                      {formatToTwoDecimalPlaces(String(parseFloat(item.total_pn_balance) - parseFloat(item.total_collection)))}
+                      {formatNumberComma(parseFloat(item.total_pn_balance) - parseFloat(item.total_collection))}
                     </td>
                     <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                      {item.total_net_cashout}
+                      {formatNumberComma(parseFloat(item.total_net_cashout))}
                     </td>
                   </tr>
                 </>

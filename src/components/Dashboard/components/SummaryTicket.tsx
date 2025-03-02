@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { formatToTwoDecimalPlaces } from '@/utils/helper';
+import { toCamelCase, formatNumberComma } from '@/utils/helper';
 
 interface SumProps {
   sumTixData: any;
@@ -31,8 +32,13 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
 
       setTotals(calculatedTotals);
     }
-
+    console.log(SummaryTicket, 'sumTixData');
   }, [sumTixData]);
+
+  const customOrder = ['notes receivable', 'udi', 'processing', 
+                      'agent fee', 'collection', 'insurance', 'notarial', 
+                      'outstanding balance', 'penalty', 'rebates', 'addon amount', 
+                      'addon udi', 'addon total', 'cash in bank']; 
 
   return (
     <div>
@@ -58,20 +64,23 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
               </tr>
-              {sumTixData?.summary_tix.map((item: any, i: number) => (
-                <tr key={i}>
-                  <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
-                    {item.description}
-                  </td>
-                  <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {'\u20B1'} {item.debit}
-                  </td>
-                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {'\u20B1'} {item.credit}
-                  </td>
-                  <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
-                  </td>
-                </tr>
+              {sumTixData?.summary_tix
+                  ?.sort((a: any, b: any) => customOrder.indexOf(a.description) - customOrder.indexOf(b.description))
+                  .map((item: any, i: number) => (
+                  <tr key={i}>
+                    <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                      {item.description === 'cash in bank' ? 'Cash Out' : toCamelCase(item.description)}
+                    </td>
+                    <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                      {'\u20B1'} {formatNumberComma(Number(item.debit))}
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
+                      {'\u20B1'} {formatNumberComma(Number(item.credit))}
+                    </td>
+                  
+                  </tr>
               ))}
               
 

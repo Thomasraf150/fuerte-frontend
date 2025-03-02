@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import ReactSelect from '@/components/ReactSelect';
 import ChartOne from "../Charts/ChartOne";
 import ChartThree from "../Charts/ChartThree";
 import ChartTwo from "../Charts/ChartTwo";
@@ -17,8 +19,17 @@ import NetMovements from './components/NetMovements';
 import CashoutByBank from './components/CashoutByBank';
 import LoanByLoanType from './components/LoanByLoanType';
 import useSummaryTicket from '@/hooks/useSummaryTicket';
+import useCoa from '@/hooks/useCoa';
+
+interface Option {
+  value: string;
+  label: string;
+  hidden?: boolean;
+}
 
 const DefaultPage: React.FC = () => {
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
+  const { onSubmitCoa, branchSubData } = useCoa();
 
   // Use undefined instead of null for initial state
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -40,21 +51,42 @@ const DefaultPage: React.FC = () => {
 
   const handleEndDateChange = (date: Date | null) => {
     setEndDate(date || undefined);
-    fetchSummaryTixReport(startDate, endDate);
+    // fetchSummaryTixReport(startDate, endDate);
+  };
+  
+  const handleBranchSubChange = (branch_sub_id: string) => {
+    fetchSummaryTixReport(startDate, endDate, branch_sub_id);
   };
 
   useEffect(() => {
     console.log(dataSummaryTicket, ' dataSummaryTicket')
   }, [endDate, dataSummaryTicket])
 
+  const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
+
+  useEffect(()=>{
+    if (branchSubData && Array.isArray(branchSubData)) {
+      const dynaOpt: Option[] = branchSubData?.map(bSub => ({
+        value: String(bSub.id),
+        label: bSub.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsSubBranch([
+        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+      
+    }
+    
+  }, [branchSubData])
+
   return (
     <>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-1 lg:gap-8">
+      <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
         <div className="rounded-lg bg-gray-200">
           <label className="mb-2">Select Date Range:</label>
-          <div className="flex space-x-4">
+          <div className="flex space-x-2">
             <DatePicker
               selected={startDate}
               onChange={handleStartDateChange}
@@ -74,8 +106,32 @@ const DefaultPage: React.FC = () => {
               placeholderText="End Date"
               className="border rounded px-4 py-2"
             />
+            <div className="w-75">
+              <Controller
+                name="branch_sub_id"
+                control={control}
+                rules={{ required: 'Branch is required' }} 
+                render={({ field }) => (
+                  <ReactSelect
+                    {...field}
+                    options={optionsSubBranch}
+                    placeholder="Select a branch..."
+                    onChange={(selectedOption) => {
+                      field.onChange(selectedOption?.value);
+                      handleBranchSubChange(selectedOption?.value ?? '');
+                    }}
+                    value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                  />
+                )}
+              />
+            </div>
+          </div>
+          <div className="flex space-x-1">
+            
           </div>
         </div>
+        
+        
         
         {dataSummaryTicket !== undefined ? (
           <>

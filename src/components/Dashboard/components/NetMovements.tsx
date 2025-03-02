@@ -5,6 +5,7 @@ import CardDataStats from "@/components/CardDataStats";
 import { formatToTwoDecimalPlaces } from '@/utils/helper';
 import moment from 'moment';
 import { FileText } from "react-feather";
+import { toCamelCase, formatNumberComma } from '@/utils/helper';
 
 interface SumProps {
   sumTixData: any;
@@ -13,8 +14,29 @@ interface SumProps {
 }
 
 const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
-
+  const [releasingIncome, setReleasingIncome] = useState<number[]>([]);
+  const [totalReleasingIncome, setTotalReleasingIncome] = useState<number>(0);
   useEffect(() => {
+    if (!sumTixData) return;
+
+    console.log(sumTixData, 'NetMovements');
+
+    // Extract credit values for specific descriptions
+    const newIncome = sumTixData.summary_tix
+      .filter((item: any) =>
+        ['processing', 'notarial', 'insurance'].includes(item.description)
+      )
+      .map((item: any) => Number(item.credit) || 0); // Convert to number and handle NaN
+
+    setReleasingIncome(newIncome);
+
+    // Sum the values
+    const total = newIncome.reduce((acc: any, value: any) => acc + value, 0);
+    setTotalReleasingIncome(total);
+
+    console.log(newIncome, 'newIncome');
+    console.log(total, 'totalReleasingIncome');
+    
   }, [sumTixData]);
 
   return (
@@ -31,13 +53,13 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-2 lg:gap-2 md:gap-2">
         
         <div>
-          <CardDataStats title="On Record Financed" total={`₱ ${formatToTwoDecimalPlaces(sumTixData?.summary_tix_net_movement[1]?.amount || 0)}`} rate="" levelUp>
+          <CardDataStats title="On Record Financed" total={`₱ ${formatNumberComma((sumTixData?.summary_tix_net_movement[1]?.amount || 0) - (sumTixData?.summary_tix_net_movement[5]?.amount || 0) - (sumTixData?.summary_tix_net_movement[6]?.amount || 0) + totalReleasingIncome)}`} rate="" levelUp>
             <FileText />
           </CardDataStats>
         </div>
 
         <div>
-          <CardDataStats title="On UDI" total={`₱ ${formatToTwoDecimalPlaces(sumTixData?.summary_tix_net_movement[4]?.amount || 0)}`} rate="" levelUp>
+          <CardDataStats title="On UDI" total={`₱ ${formatNumberComma(Number(sumTixData?.summary_tix_net_movement[3]?.amount || 0))}`} rate="" levelUp>
             <FileText />
           </CardDataStats>
         </div>

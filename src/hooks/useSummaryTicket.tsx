@@ -15,14 +15,15 @@ const useSummaryTicket = () => {
   const [sumTixLoading, setSumTixLoading] = useState<boolean>(false);
   // Function to fetchdata
 
-  const fetchSummaryTixReport = async (startDate: Date | undefined, endDate: Date | undefined) => {
+  const fetchSummaryTixReport = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
     let mutation;
     let variables: { input: any } = {
       input: {
         startDate: moment(startDate).format('YYYY-MM-DD'),
-        endDate: moment(endDate).format('YYYY-MM-DD')
+        endDate: moment(endDate).format('YYYY-MM-DD'),
+        branch_sub_id
       },
     };
 

@@ -16,7 +16,7 @@ interface SumProps {
 const LoanByLoanType: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
 
   useEffect(() => {
-    console.log(sumTixData, ' sumTixData');
+    console.log(sumTixData, ' LoanByLoanType');
   }, [sumTixData]);
 
   return (
