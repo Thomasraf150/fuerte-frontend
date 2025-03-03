@@ -41,7 +41,7 @@ const BorrowerList: React.FC = () => {
   }
 
   useEffect(() => {
-    fetchDataBorrower(100, 1);
+    fetchDataBorrower(3000, 1);
   }, [])
 
   return (
