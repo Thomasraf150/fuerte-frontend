@@ -104,7 +104,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
                 options={optionsSubBranch}
                 placeholder="Select a branch..."
                 onChange={(selectedOption) => {
-                  field.onChange(selectedOption?.value);
+                  field.onChange(selectedOption?.value || "");
                 }}
                 value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
                 isDisabled={!!branchSubIdDisabled}
@@ -113,159 +113,280 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
           />
           {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
         </div>
-        
-        {/* <FormInput
-          label="Description"
-          id="description"
-          type="text"
-          icon={Edit3}
-          register={register('description', { required: true })}
-          error={errors.description && "Description is required"}
-          className='mt-4 mb-4'
-        /> */}
 
-        <FormInput
-          label="Notes Receivale"
-          id="nr_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('nr_id')}
-          error={errors.nr_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notes Receivale</label>
+          <Controller
+            name="nr_id"
+            control={control}
+            rules={{ required: 'Notes Receivale is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a NR..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.nr_id && <p className="mt-2 text-sm text-red-600">{errors.nr_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="Outstanding Balance"
-          id="ob_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('ob_id')}
-          error={errors.ob_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Outstanding Balance</label>
+          <Controller
+            name="ob_id"
+            control={control}
+            rules={{ required: 'Outstanding Balance is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a OB..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.ob_id && <p className="mt-2 text-sm text-red-600">{errors.ob_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="UDI"
-          id="udi_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('udi_id')}
-          error={errors.udi_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>UDI</label>
+          <Controller
+            name="udi_id"
+            control={control}
+            rules={{ required: 'UDI is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a UDI..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.udi_id && <p className="mt-2 text-sm text-red-600">{errors.udi_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="Processing"
-          id="proc_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('proc_id')}
-          error={errors.proc_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Processing</label>
+          <Controller
+            name="proc_id"
+            control={control}
+            rules={{ required: 'Processing is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Processing..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.proc_id && <p className="mt-2 text-sm text-red-600">{errors.proc_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="Insurance"
-          id="ins_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('ins_id')}
-          error={errors.ins_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance</label>
+          <Controller
+            name="ins_id"
+            control={control}
+            rules={{ required: 'Insurance is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Insurance..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.ins_id && <p className="mt-2 text-sm text-red-600">{errors.ins_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="Collection Fee"
-          id="col_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('col_id')}
-          error={errors.col_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
-        
-        <FormInput
-          label="Notarial"
-          id="not_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('not_id')}
-          error={errors.not_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
-        
-        <FormInput
-          label="Rebates"
-          id="reb_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('reb_id')}
-          error={errors.reb_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Collection</label>
+          <Controller
+            name="col_id"
+            control={control}
+            rules={{ required: 'Collection is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Collection..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.col_id && <p className="mt-2 text-sm text-red-600">{errors.col_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="Agent Fee"
-          id="reb_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('agent_id')}
-          error={errors.agent_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
-        
-        <FormInput
-          label="Penalty"
-          id="pen_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('pen_id')}
-          error={errors.pen_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
-        
-        <FormInput
-          label="Addon Amount"
-          id="addon_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('addon_id')}
-          error={errors.addon_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
-        
-        <FormInput
-          label="Addon UDI"
-          id="addon_udi_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('addon_udi_id')}
-          error={errors.addon_udi_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notarial</label>
+          <Controller
+            name="not_id"
+            control={control}
+            rules={{ required: 'Notarial is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Notarial..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.not_id && <p className="mt-2 text-sm text-red-600">{errors.not_id.message}</p>}
+        </div>
 
-        <FormInput
-          label="Cash in Bank"
-          id="cib_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('cib_id')}
-          error={errors.cib_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-        />
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Rebates</label>
+          <Controller
+            name="reb_id"
+            control={control}
+            rules={{ required: 'Rebates is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Rebates..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.reb_id && <p className="mt-2 text-sm text-red-600">{errors.reb_id.message}</p>}
+        </div>
+
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Agent Fee</label>
+          <Controller
+            name="reb_id"
+            control={control}
+            rules={{ required: 'Agent Fee is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Agent Fee..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.reb_id && <p className="mt-2 text-sm text-red-600">{errors.reb_id.message}</p>}
+        </div>
+
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Penalty</label>
+          <Controller
+            name="pen_id"
+            control={control}
+            rules={{ required: 'Penalty is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Penalty..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.pen_id && <p className="mt-2 text-sm text-red-600">{errors.pen_id.message}</p>}
+        </div>
+
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon Amount</label>
+          <Controller
+            name="addon_id"
+            control={control}
+            rules={{ required: 'Addon Amount is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Addon Amount..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.addon_id && <p className="mt-2 text-sm text-red-600">{errors.addon_id.message}</p>}
+        </div>
+
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon UDI</label>
+          <Controller
+            name="addon_udi_id"
+            control={control}
+            rules={{ required: 'Addon UDI is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Addon UDI..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.addon_udi_id && <p className="mt-2 text-sm text-red-600">{errors.addon_udi_id.message}</p>}
+        </div>
+
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Cash in Bank</label>
+          <Controller
+            name="cib_id"
+            control={control}
+            rules={{ required: 'Cash in Bank is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Cash in Bank..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.cib_id && <p className="mt-2 text-sm text-red-600">{errors.cib_id.message}</p>}
+        </div>
+
       </div>
 
       <div className="w-full flex justify-end mt-6">
