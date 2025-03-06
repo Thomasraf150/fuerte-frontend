@@ -140,6 +140,7 @@ const useLoans = () => {
   const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
+    setLoading(true);
     let variables: { input: any, process_type: string } = {
       input: {
         borrower_id: data.borrower_id,
@@ -170,12 +171,14 @@ const useLoans = () => {
     // console.log(result, ' result')
     if (process_type === 'Compute') {
       setDataComputedLoans(response.data.processALoan);
+      setLoading(false);
     } else {
       if (response.errors) {
         toast.error(response.errors[0].message);
       } else {
         toast.success('Loan Entry Saved!');
       }
+      setLoading(false);
     }
   };
   const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {

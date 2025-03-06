@@ -27,7 +27,7 @@ interface Option {
 
 const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub, dataLoanRenewal, dataComputedRenewal }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
-  const { dataComputedLoans, onSubmitLoanComp, loanProduct } = useLoans();
+  const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading } = useLoans();
 
   const dataLoanComp = {
     'borrower_id': Number(BorrowerData?.id),
@@ -49,6 +49,9 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     );
     if (isConfirmed) {
       onSubmitLoanComp(dataLoanComp, "Create");
+      if (!loading) {
+        createLoans(false)
+      }
     }
   };
 
@@ -203,11 +206,20 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                 <button
                   className="flex justify-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90"
                   type="submit"
+                  disabled={loading}
                 >
-                  <span className="mt-1 mr-1">
-                    <Save size={17} /> 
-                  </span>
-                  <span>Save</span>
+                  {loading ? (
+                    <>
+                      Please wait..
+                    </>
+                  ) : (
+                    <>
+                      <span className="mt-1 mr-1">
+                        <Save size={17} /> 
+                      </span>
+                      <span>Save</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
