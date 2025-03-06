@@ -261,7 +261,7 @@ const GJForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, lo
               type="button"
               onClick={() => setShowForm(false)}
             >
-              Cancel
+              Back
             </button>
           </div>
         </form>

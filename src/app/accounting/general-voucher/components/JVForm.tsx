@@ -128,6 +128,21 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     }
   };
 
+  const handleCancelEntry = async (data: RowAcctgEntry) => {
+    console.log(data, ' RowAcctgEntry');
+    const isConfirmed = await showConfirmationModal(
+      '<p style="line-height: 1.4"> Are you sure you want  to cancel this entry? </p>',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      createGV(data);
+      if (!loading) {
+        fetchGV("","","");
+      }
+    }
+  }
+
   return (
     <>
       {showPayee && (
@@ -296,12 +311,23 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
             >
               Cancel
             </button>
-            <button
-              className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm"
-              type="submit"
-            >
-              Save
-            </button>
+            {singleData !== undefined && (
+              <button
+                className="flex justify-center rounded border bg-danger border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-rose-400 dark:text-white"
+                type="button"
+                onClick={() => { return handleCancelEntry(singleData); }}
+              >
+                Cancel Entry
+              </button>
+            )}
+            {singleData === undefined && (
+              <button
+                className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm"
+                type="submit"
+              >
+                Save
+              </button>
+            )}
           </div>
         </form>
       </div>
