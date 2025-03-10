@@ -41,10 +41,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                               <th className="px-4 py-2 border bg-slate-50">Account Number</th>
                               <th className="px-4 py-2 border bg-green-200">Debit</th>
                               <th className="px-4 py-2 border bg-green-200">Credit</th>
-                              <th className="px-4 py-2 border bg-green-800 text-whiter">Adjusting Debit</th>
-                              <th className="px-4 py-2 border bg-green-800 text-whiter">Adjusting Credit</th>
-                              <th className="px-4 py-2 border bg-green-500 text-whiter">Adjusted Debit</th>
-                              <th className="px-4 py-2 border bg-green-500 text-whiter">Adjusted Credit</th>
+                              <th className="px-4 py-2 border bg-green-600 text-whiter">Adjusting Debit</th>
+                              <th className="px-4 py-2 border bg-green-600 text-whiter">Adjusting Credit</th>
+                              <th className="px-4 py-2 border bg-green-800 text-whiter">Adjusted Debit</th>
+                              <th className="px-4 py-2 border bg-green-800 text-whiter">Adjusted Credit</th>
                             </tr>
                           </thead>
                           {/* Table Body */}
@@ -60,10 +60,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                       <td className="px-4 py-2 border text-center">{item?.number}</td>
                                       <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_debit)}</td>
                                       <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_credit)}</td>
-                                      <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
-                                      <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
-                                      <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
-                                      <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
+                                      <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
+                                      <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
+                                      <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
+                                      <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
                                     </tr>
                                 ) : (
                                   <tr className="even:bg-gray-50 hover:bg-gray-100">
@@ -101,10 +101,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                     <td className="px-4 py-2 border text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{item?.total_debit}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{item?.total_credit}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{item?.adj_debit}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{item?.adj_credit}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{item?.total_debit - item?.adj_debit}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{item?.total_credit - item?.adj_credit}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{item?.adj_debit}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{item?.adj_credit}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{item?.total_debit - item?.adj_debit}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{item?.total_credit - item?.adj_credit}</td>
                                   </tr>
                                 ) : (
                                   <tr className="even:bg-gray-50 hover:bg-gray-100">
@@ -142,10 +142,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                     <td className="px-4 py-2 border text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_credit)}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
                                   </tr>
                                 ) : (
                                   <tr className="even:bg-gray-50 hover:bg-gray-100">
@@ -183,10 +183,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                     <td className="px-4 py-2 border text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_credit)}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
                                   </tr>
                                 ) : (
                                   <tr className="even:bg-gray-50 hover:bg-gray-100">
@@ -224,10 +224,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                     <td className="px-4 py-2 border text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border bg-green-200 text-right">{formatNumberComma(item?.total_credit)}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
-                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
-                                    <td className="px-4 py-2 border bg-green-500 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_debit)}</td>
+                                    <td className="px-4 py-2 border bg-green-600 text-whiter text-right">{formatNumberComma(item?.adj_credit)}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
+                                    <td className="px-4 py-2 border bg-green-800 text-whiter text-right">{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
                                   </tr>
                                 ) : (
                                   <tr className="even:bg-gray-50 hover:bg-gray-100">
