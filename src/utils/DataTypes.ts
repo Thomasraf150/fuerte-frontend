@@ -765,6 +765,7 @@ export interface RowAcctgEntry {
   user_id: string;
   journal_date: string;
   vendor_id: string;
+  reference_no: string;
   journal_ref: string;
   amount: string;
   journal_name: string;
@@ -832,4 +833,11 @@ export interface DataGLRow {
   number: string;
   debit: string;
   credit: number;
+}
+export interface DataTbRow {
+  assets: any;
+  liabilities: any;
+  capital: any;
+  revenue: any;
+  expenses: any;
 }

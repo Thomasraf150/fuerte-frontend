@@ -38,7 +38,7 @@ const GeneralLedgerList: React.FC = () => {
                 </div>
                 <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
                   <div className="w-full mx-auto">
-                    <div className="border rounded-lg shadow-md overflow-hidden">
+                    <div className="shadow-md overflow-hidden">
                       <div className="h-96 w-full overflow-auto">
                         <table className="min-w-full border-collapse">
                           {/* Table Header */}

@@ -3,32 +3,49 @@
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import AEForm from './AEForm';
-import useFinancialStatement from '@/hooks/useFinancialStatement';
+import useAdjustingEntries from '@/hooks/useAdjustingEntries';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
+import { DataLoanProceedList, DataAccBalanceSheet, RowAcctgEntry } from '@/utils/DataTypes';
+import aETblColumn from './AETblColumn';
+
+const column = aETblColumn;
 
 const AdjustingEntriesList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { incomeStatementData } = useFinancialStatement();
+  const { dataAe, createAe, fetchAe, loading } = useAdjustingEntries();
+    const [singleData, setSingleData] = useState<RowAcctgEntry>();
+    const [showFormAe, setShowFormAe] = useState<boolean>(false);
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
     setActionLbl(lbl);
   }
 
+  const handleShowFormAe = (lbl: string, showFrm: boolean) => {
+    setShowFormAe(showFrm);
+    setActionLbl(lbl);
+    setSingleData(undefined);
+  }
+
+  const handleWholeRowClick = (row: RowAcctgEntry) => {
+    console.log(row, ' row');
+    setSingleData(row);
+    setShowFormAe(true);
+    setActionLbl('View Adjusting Entries');
+  }
+
   useEffect(() => {
 
-    console.log(incomeStatementData, ' incomeStatementData');
-  }, [incomeStatementData])
+  }, [])
 
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-2 gap-4">
-          {!showForm && (
-            <div className={`col-span-2`}>
+          {!showFormAe && (
+            <div className={`col-span-2 ${!showFormAe ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-boxdark dark:text-boxdark">
@@ -39,24 +56,34 @@ const AdjustingEntriesList: React.FC = () => {
                   <button 
                     type="button" 
                     className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                    onClick={ () => handleShowForm('Create GV', true) }>
+                    onClick={ () => handleShowFormAe('Create Adjusting Entries', true) }>
                       <Plus size={14} /> 
-                      <span>New GV</span>
+                      <span>New Adjusting Entry</span>
                   </button>
-                  <button 
-                    type="button" 
-                    className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                      <Plus size={14} /> 
-                      <span>New JV</span>
-                  </button>
+                </div>
+                <div className="px-4">
+                  <CustomDatatable
+                    apiLoading={false}
+                    title="AE List"
+                    onRowClicked={handleWholeRowClick}
+                    columns={column()}
+                    data={dataAe || []}
+                  />
                 </div>
               </div>
             </div>
           )}
-          {showForm && (
-            <div className={`col-span-2`}>
+          {showFormAe && (
+            <div className={`col-span-2 ${showFormAe ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <AEForm />
+                <AEForm 
+                  setShowForm={setShowFormAe} 
+                  actionLbl={actionLbl} 
+                  singleData={singleData} 
+                  createAe={createAe}
+                  fetchAe={fetchAe}
+                  loading={loading}
+                />
               </div>
             </div>
           )}
