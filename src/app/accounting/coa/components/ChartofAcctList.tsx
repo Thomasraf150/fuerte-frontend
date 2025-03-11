@@ -5,7 +5,8 @@ import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList } from '@/utils/DataTypes';
 import CoaForm from './CoaForm';
 import useCoa from '@/hooks/useCoa';
-import { GitBranch, SkipBack } from 'react-feather';
+import exportToExcel from '@/hooks/usePrintExcel';
+import { GitBranch, Printer } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 
 
@@ -21,6 +22,8 @@ const ChartofAcctList: React.FC = () => {
 
   useEffect(() => {
     fetchCoaDataTable();
+
+    console.log(coaDataAccount, 'coaDataAccount');
   }, [])
 
   const renderAccounts = (accounts: DataChartOfAccountList[], level: number = 1) => {
@@ -49,10 +52,14 @@ const ChartofAcctList: React.FC = () => {
                   Chart of Accounts
                 </h3>
               </div>
-              <div className="p-5">
+              <div className="p-5 flex">
                 <button className="bg-purple-700 text-white py-2 px-4 mb-4 rounded hover:bg-purple-800 flex items-center space-x-2" onClick={() => handleShowForm('Create Account', true)}>
                   <GitBranch  size={14} /> 
                   <span>Create Account</span>
+                </button>
+                <button className="bg-green-500 text-white py-2 px-4 mb-4 rounded hover:bg-green-700 flex items-center space-x-2" onClick={() => exportToExcel(coaDataAccount || [], "User_Data")}>
+                  <Printer size={14} /> 
+                  <span>Print COA</span>
                 </button>
               </div>
               <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[600px]">
