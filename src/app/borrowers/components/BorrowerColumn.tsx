@@ -7,6 +7,15 @@ import { BorrowerRowInfo } from '@/utils/DataTypes';
 
 const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableColumn<BorrowerRowInfo>[] => [
   {
+    name: 'Branch',
+    cell: row => row.user?.branchSub?.name,
+    sortable: true,
+    style: {
+      minWidth: '150px',
+    },
+    width: '150px'
+  },
+  {
     name: 'First Name',
     cell: row => row.firstname,
     sortable: true,
