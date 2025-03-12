@@ -56,6 +56,16 @@ const GET_BORROWER_QUERY: string = `
             monthly_gross
             monthly_net
             office_address
+            area {
+              id
+              name
+              branch_sub_id
+              branch_sub {
+                id
+                branch_id
+                name
+              }
+            }
           }
           borrower_company_info {
             id
@@ -77,8 +87,7 @@ const GET_BORROWER_QUERY: string = `
              	name
               branch_id
             }
-          } 
-           
+          }
         }
         paginatorInfo {
           total

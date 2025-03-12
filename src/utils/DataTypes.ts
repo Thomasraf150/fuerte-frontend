@@ -289,6 +289,7 @@ export interface DataArea {
   description: string;
   is_deleted: boolean;
   sub_area: DataSubArea
+  branch_sub: DataSubBranches
 }
 export interface DataBank {
   id?: string;
@@ -398,6 +399,7 @@ export interface BorrowerWorkBackground {
   monthly_gross: string;
   monthly_net: string;
   office_address: string;
+  area: DataArea
 }
 export interface BorrowerCompanyInfo {
   id?: string;

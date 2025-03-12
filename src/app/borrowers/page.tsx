@@ -5,7 +5,7 @@ import './styles.css';
 import BorrowerList from './components/BorrowerList';
 
 export const metadata = {
-  title: "Loan Products",
+  title: "Borrowers",
   description: "",
 };
 
