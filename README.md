@@ -5,6 +5,14 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 First, run the development server:
 
 ```bash
+# Add .env file
+variables in .env file
+NEXT_PUBLIC_API_URL= "http://localhost:8000/api"
+NEXT_PUBLIC_API_GRAPHQL= "http://localhost:8000/fuerte-api"
+NEXT_PUBLIC_BASE_URL= "http://localhost:8000"
+NEXT_PUBLIC_ROUTER_BASEROUTE= "fuerte-web"
+
+# install and build
 npm install
 then
 npm run dev
@@ -12,9 +20,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-# Add .env file
+```bash
 
-# NEXT_PUBLIC_API_URL= "http://localhost:8000/api"
-# NEXT_PUBLIC_API_GRAPHQL= "http://localhost:8000/fuerte-api"
-# NEXT_PUBLIC_BASE_URL= "http://localhost:8000"
-# NEXT_PUBLIC_ROUTER_BASEROUTE= "fuerte-web"
+```
