@@ -13,9 +13,9 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
     cell: row => row.loan_product.description,
     sortable: true,
     style: {
-      minWidth: '270px',
+      minWidth: '370px',
     },
-    width: '270px'
+    width: '370px'
   },
   {
     name: 'Borrower',
@@ -25,6 +25,15 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
       minWidth: '270px',
     },
     width: '270px'
+  },
+  {
+    name: 'Terms',
+    cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
+    sortable: true,
+    style: {
+      minWidth: '100px',
+    },
+    width: '100px'
   },
   {
     name: 'Loan Ref#',

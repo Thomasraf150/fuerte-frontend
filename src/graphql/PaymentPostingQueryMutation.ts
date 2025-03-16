@@ -34,6 +34,10 @@ const LOANS_LIST_QUERY: string = `
             commission
             collection
             notarial
+            base_deduction
+            addon_terms
+            addon_udi_rate
+            is_active
           }
           loan_details {
             id

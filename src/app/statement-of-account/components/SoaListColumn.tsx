@@ -18,6 +18,15 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
     width: '350px'
   },
   {
+    name: 'Terms',
+    cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
+    sortable: true,
+    style: {
+      minWidth: '100px',
+    },
+    width: '100px'
+  },
+  {
     name: 'Borrower',
     cell: row => row?.borrower.lastname + ', ' + row.borrower.firstname,
     sortable: true,
