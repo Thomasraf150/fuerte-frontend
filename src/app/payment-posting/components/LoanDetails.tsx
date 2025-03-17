@@ -74,6 +74,10 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Monthly</td>
                 <td className="px-4 py-2 text-gray-900">{formatNumber(Number(loanSingleData?.monthly))}</td>
               </tr>
+              <tr>
+                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Loan Ref #:</td>
+                <td className="px-4 py-2 text-gray-900">{loanSingleData?.loan_ref}</td>
+              </tr>
             </tbody>
           </table>
         </div>
