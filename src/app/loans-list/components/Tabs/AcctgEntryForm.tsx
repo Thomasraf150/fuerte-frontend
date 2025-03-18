@@ -285,7 +285,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         <div className="col-span-1 mb-4 mt-4">
           <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Agent Fee</label>
           <Controller
-            name="reb_id"
+            name="agent_id"
             control={control}
             rules={{ required: 'Agent Fee is required' }} 
             render={({ field }) => (
@@ -300,7 +300,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.reb_id && <p className="mt-2 text-sm text-red-600">{errors.reb_id.message}</p>}
+          {errors.agent_id && <p className="mt-2 text-sm text-red-600">{errors.agent_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
