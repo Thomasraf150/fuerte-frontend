@@ -78,6 +78,7 @@ const GeneralVoucherList: React.FC = () => {
                     apiLoading={false}
                     title="GV List"
                     onRowClicked={handleWholeRowClick}
+                    enableCustomHeader={true} 
                     columns={column()}
                     data={dataGV || []}
                   />
