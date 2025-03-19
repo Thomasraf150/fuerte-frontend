@@ -773,6 +773,7 @@ export interface RowAcctgEntry {
   journal_name: string;
   check_no: string;
   journal_desc: string;
+  is_cancelled: number;
   acctg_details: RowAcctgDetails[];
   vendor: RowVendorsData;
 }

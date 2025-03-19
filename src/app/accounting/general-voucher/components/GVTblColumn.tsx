@@ -33,6 +33,23 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     sortable: true,
   },
   {
+    name: 'Status',
+    cell: row => (
+          <span
+            className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
+            row?.is_cancelled === 1 ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' 
+            : 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
+          }`}
+          >
+            {`${
+              row?.is_cancelled === 1 ? 'Cancelled' :
+              'Active'
+            }`}
+          </span>
+        ),
+    sortable: true,
+  },
+  {
     name: 'Journal Date',
     cell: row => row?.journal_date,
     sortable: true,
