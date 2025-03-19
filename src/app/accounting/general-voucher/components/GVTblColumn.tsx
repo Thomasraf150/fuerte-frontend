@@ -45,6 +45,7 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
               row?.is_cancelled === 1 ? 'Cancelled' :
               'Active'
             }`}
+            {row?.is_cancelled}
           </span>
         ),
     sortable: true,
