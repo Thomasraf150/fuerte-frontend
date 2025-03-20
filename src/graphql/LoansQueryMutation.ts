@@ -50,6 +50,48 @@ const BORROWER_LOAN_QUERY: string = `
             firstname
             middlename
             lastname
+            borrower_details {
+              dob
+              place_of_birth
+              age
+              email
+              contact_no
+              civil_status
+            }
+            borrower_spouse_details {
+              work_address
+              occupation
+              fullname
+              company
+              dept_branch
+              length_of_service
+              salary
+              company_contact_person
+              contact_no
+            }
+            borrower_work_background {
+              company_borrower_id
+              employment_number
+              area_id
+              sub_area_id
+              station
+              term_in_service
+              employment_status
+              division
+              monthly_gross
+              monthly_net
+              office_address
+            }
+            borrower_company_info {
+              employer
+              salary
+              contract_duration
+            }
+            borrower_reference {
+              occupation
+              name
+              contact_no
+            }
           }
           loan_bank_details {
             account_name
@@ -63,9 +105,11 @@ const BORROWER_LOAN_QUERY: string = `
           }
           acctg_entry {
             journal_no
+            journal_ref
           }
           user {
             branch_sub_id
+            name
           }
         }
     }
