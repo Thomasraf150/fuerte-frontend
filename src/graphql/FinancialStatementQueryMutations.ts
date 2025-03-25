@@ -1,6 +1,6 @@
 const GET_BALANCE_SHEET: string = `
-  query GetBalanceSheet($date: String){
-    getBalanceSheet(date: $date) {
+  query GetBalanceSheet($startDate: String, $endDate: String, $branch_sub_id: String){
+    getBalanceSheet(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id) {
         assets {
             number
             account_name
@@ -20,11 +20,31 @@ const GET_BALANCE_SHEET: string = `
             number
             account_name
             balance
+            subAccounts {
+                number
+                account_name
+                balance
+                subAccounts {
+                    number
+                    account_name
+                    balance
+                }
+            }
         }
         equity {
             number
             account_name
             balance
+            subAccounts {
+                number
+                account_name
+                balance
+                subAccounts {
+                    number
+                    account_name
+                    balance
+                }
+            }
         }
         total_assets
         total_liabilities
@@ -34,8 +54,8 @@ const GET_BALANCE_SHEET: string = `
 `;
 
 const GET_INCOME_STATEMENT: string = `
-  query GetIncomeStatement($startDate: String, $endDate: String){
-    getIncomeStatement(startDate: $startDate, endDate: $endDate) {
+  query GetIncomeStatement($startDate: String, $endDate: String, $branch_sub_id: String){
+    getIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id) {
         revenues {
             number
             account_name

@@ -23,3 +23,19 @@
     opacity: 0;
   }
 }
+
+.bg-content1 {
+  background-color: white !important;
+}
+
+td[aria-selected="true"] {
+  background-color: #8441e7 !important;
+  border: 0 solid #e5e7eb !important;
+  color: #f0f0f0;
+  border-radius: 32px;
+  height: 32px;
+}
+
+td[aria-selected="false"] {
+  background-color: transparent; /* Set background to transparent when not selected */
+}

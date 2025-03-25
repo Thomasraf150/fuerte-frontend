@@ -15,11 +15,13 @@ const useFinancialStatement = () => {
   const [incomeStatementData, setIncomeStatementData] = useState<DataAccIncomeStatement>();
   const [loading, setLoading] = useState<boolean>(false);
  
-  const fetchBalanceSheetData = async () => {
+  const fetchBalanceSheetData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
     setLoading(true);
 
-    let variables: { date: string } = {
-      date : moment(new Date()).format('YYYY-MM-DD')
+    let variables: { startDate: string, endDate: string, branch_sub_id: string } = {
+      startDate : moment(startDate).format('YYYY-MM-DD'),
+      endDate : moment(endDate).format('YYYY-MM-DD'),
+      branch_sub_id
     };
 
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -36,12 +38,13 @@ const useFinancialStatement = () => {
     setLoading(false);
   };
   
-  const fetchStatementData = async () => {
+  const fetchStatementData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
     setLoading(true);
 
-    let variables: { startDate: string, endDate: string } = {
-      startDate : "2024-01-01",
-      endDate: moment(new Date()).format('YYYY-MM-DD')
+    let variables: { startDate: string, endDate: string, branch_sub_id: string } = {
+      startDate : moment(startDate).format('YYYY-MM-DD'),
+      endDate: moment(endDate).format('YYYY-MM-DD'),
+      branch_sub_id
     };
 
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -59,8 +62,8 @@ const useFinancialStatement = () => {
   };
 
   useEffect(() => {
-    fetchBalanceSheetData();
-    fetchStatementData();
+    // fetchBalanceSheetData();
+    // fetchStatementData();
   }, []);
 
   return {
