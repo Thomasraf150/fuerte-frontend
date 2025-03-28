@@ -41,9 +41,9 @@ const branchListCol = (
             <Edit3 onClick={() => handleUpdateRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
           </Tooltip>
           {` | `}
-          <Tooltip text="Remove">
+          {/* <Tooltip text="Remove">
             <Trash2 onClick={() => handleDeleteRow(Number(row.id))} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
-          </Tooltip>
+          </Tooltip> */}
         </>
       )
     },

@@ -1,7 +1,8 @@
 "use client"
-import React, { useEffect } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, ChevronDown } from 'react-feather';
+import ReactSelect from '@/components/ReactSelect';
 import FormInput from '@/components/FormInput';
 import FormLabel from '@/components/FormLabel';
 import { DataFormSubBranches, DataSubBranches } from '@/utils/DataTypes';
@@ -15,9 +16,15 @@ interface ParentFormBr {
   initialSubData?: DataSubBranches | null; 
 }
 
+interface Option {
+  value: string;
+  label: string;
+  hidden?: boolean;
+}
+
 const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchId, actionLbl, fetchSubDataList, initialSubData }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataFormSubBranches>();
-  const { onSubmitSubBranch } = useBranches();
+  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataFormSubBranches>();
+  const { onSubmitSubBranch, dataBranch } = useBranches();
 
   useEffect(() => {
       if (initialSubData) {
@@ -51,8 +58,24 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
       }
   }, [selectedBranchId, actionLbl, initialSubData]);
 
+  const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
+
+  useEffect(()=>{
+    if (dataBranch && Array.isArray(dataBranch)) {
+      const dynaOpt: Option[] = dataBranch?.map(bSub => ({
+        value: String(bSub.id),
+        label: bSub.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsSubBranch([
+        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+      
+    }
+  }, [dataBranch])
+
   const onSubmit: SubmitHandler<DataFormSubBranches> = data => {
-    data.branch_id = selectedBranchId;
+    // data.branch_id = selectedBranchId;
     onSubmitSubBranch(data);
     fetchSubDataList('id_desc', selectedBranchId);
   };
@@ -73,8 +96,26 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
           { value: 'guest', label: 'Branch 3' }
         ]}
       /> */}
-        
       <FormLabel title={`Branch Info`}/>
+      <div className="w-75">
+        <Controller
+          name="branch_id"
+          control={control}
+          rules={{ required: 'Branch is required' }} 
+          render={({ field }) => (
+            <ReactSelect
+              {...field}
+              options={optionsSubBranch}
+              placeholder="Select a branch..."
+              onChange={(selectedOption) => {
+                field.onChange(selectedOption?.value);
+                // handleBranchSubChange(selectedOption?.value ?? '');
+              }}
+              value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+            />
+          )}
+        />
+      </div>
       <FormInput
         label="Code"
         id="code"
