@@ -45,7 +45,7 @@ const ChartofAcctList: React.FC = () => {
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-3 gap-4">
-          <div className={`col-span-2`}>
+          <div className={showForm ? `col-span-2` : `col-span-3`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-boxdark dark:text-boxdark">
