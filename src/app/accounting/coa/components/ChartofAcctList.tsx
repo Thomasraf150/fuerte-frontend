@@ -30,11 +30,11 @@ const ChartofAcctList: React.FC = () => {
     return accounts.map((account) => (
       <React.Fragment key={account.id}>
         <tr className="bg-white border-b hover:bg-gray-3 cursor-pointer">
-          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.account_name}</td>
-          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.number}</td>
-          <td className="px-6 py-4 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account?.branch_sub?.name}</td>
-          <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
-          <td className="px-6 py-4 text-sm text-center text-form-strokedark">{account.balance}</td>
+          <td className="px-6 py-2 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.account_name}</td>
+          <td className="px-6 py-2 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account.number}</td>
+          <td className="px-6 py-2 text-sm font-medium text-form-strokedark" style={{ paddingLeft: `${level * 20}px` }}>{account?.branch_sub?.name}</td>
+          <td className="px-6 py-2 text-sm text-center text-form-strokedark">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
+          <td className="px-6 py-2 text-sm text-center text-form-strokedark">{account.balance}</td>
         </tr>
         {account.subAccounts && renderAccounts(account.subAccounts, level + 1)}
       </React.Fragment>
