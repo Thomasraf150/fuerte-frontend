@@ -24,7 +24,7 @@ const IncomeStatementList: React.FC = () => {
   const { onSubmitCoa, branchSubData } = useCoa();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { incomeStatementData, fetchStatementData } = useFinancialStatement();
+  const { incomeStatementData, months, fetchStatementData } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
@@ -60,7 +60,8 @@ const IncomeStatementList: React.FC = () => {
   useEffect(() => {
 
     console.log(incomeStatementData, ' incomeStatementData');
-  }, [incomeStatementData])
+    console.log(months, ' months');
+  }, [incomeStatementData, months])
 
     useEffect(()=>{
       if (branchSubData && Array.isArray(branchSubData)) {
@@ -137,6 +138,38 @@ const IncomeStatementList: React.FC = () => {
                 </h3>
               </div>
               <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[600px]">
+                <table className="table-auto w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-200">
+                      <th className="border p-2">Account Name</th>
+                      <th className="border p-2">Account Number</th>
+                      {months !== undefined && months.map((month) => (
+                        <th key={month} className="border p-2">{month}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {incomeStatementData !== undefined && incomeStatementData?.map((item: any, index: number) => (
+                      <tr key={index} className="border">
+                        <td className="border p-2">{item.account_name}</td>
+                        <td className="border p-2">{item.account_number}</td>
+                        {months.map((month) => {
+                          const monthlyValue = item.monthly_values.find(
+                            (mv: any) => mv.month === month
+                          );
+                          return (
+                            <td key={month} className="border p-2">
+                              {monthlyValue ? monthlyValue.value : "-"}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[600px]">
                 {incomeStatementData!== undefined ? (
                     <div className="bg-white p-6 rounded-lg shadow">
                         <h2 className="text-xl font-semibold text-gray-700">Revenue</h2>
@@ -219,7 +252,7 @@ const IncomeStatementList: React.FC = () => {
                     <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.net_income)).toFixed(2)}</li>
                   </ul>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
