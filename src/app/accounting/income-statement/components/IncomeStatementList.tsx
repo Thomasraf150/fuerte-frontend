@@ -12,6 +12,8 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
 import useCoa from '@/hooks/useCoa';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface Option {
   value: string;
@@ -24,7 +26,7 @@ const IncomeStatementList: React.FC = () => {
   const { onSubmitCoa, branchSubData } = useCoa();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { incomeStatementData, months, fetchStatementData } = useFinancialStatement();
+  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, fetchStatementData } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
@@ -57,26 +59,156 @@ const IncomeStatementList: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-
-    console.log(incomeStatementData, ' incomeStatementData');
-    console.log(months, ' months');
-  }, [incomeStatementData, months])
-
-    useEffect(()=>{
-      if (branchSubData && Array.isArray(branchSubData)) {
-        const dynaOpt: Option[] = branchSubData?.map(bSub => ({
-          value: String(bSub.id),
-          label: bSub.name, // assuming `name` is the key you want to use as label
-        }));
-        setOptionsSubBranch([
-          { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
-          ...dynaOpt,
-        ]);
-        
-      }
+  useEffect(()=>{
+    if (branchSubData && Array.isArray(branchSubData)) {
+      const dynaOpt: Option[] = branchSubData?.map(bSub => ({
+        value: String(bSub.id),
+        label: bSub.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsSubBranch([
+        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
       
-    }, [branchSubData])
+    }
+    
+  }, [branchSubData])
+
+  useEffect(() => {
+    console.log(isInterestIncomeData, ' isInterestIncomeData');
+  }, [isInterestIncomeData])
+
+  // Collect all unique keys that look like months
+  const monthKeysSet = new Set<string>();
+
+  isInterestIncomeData && isInterestIncomeData.forEach((row: any) => {
+    Object.keys(row).forEach((key) => {
+      if (
+        !["row_count", "AccountName", "acctnumber", "variance"].includes(key)
+      ) {
+        monthKeysSet.add(key);
+      }
+    });
+  });
+
+  // Optional: sort the month keys chronologically
+  const monthKeys = Array.from(monthKeysSet).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  );
+
+  const parseAmount = (val: any) =>
+    parseFloat(val?.toString().replace(/,/g, '')) || 0;
+
+  // interest income
+  const totalsIntInc = monthKeys.reduce((acc, month) => {
+    acc[month] = (isInterestIncomeData ?? []).reduce(
+      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
+      0
+    );
+    return acc;
+  }, {} as Record<string, number>);
+
+  // other  revenue
+  const totalsOthRevenue = monthKeys.reduce((acc, month) => {
+    acc[month] = (isInterestIncomeData ?? []).reduce(
+      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
+      0
+    );
+    return acc;
+  }, {} as Record<string, number>);
+
+  // direct financing
+  const totalsDirectFin = monthKeys.reduce((acc, month) => {
+    acc[month] = (directFinancingData ?? []).reduce(
+      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
+      0
+    );
+    return acc;
+  }, {} as Record<string, number>);
+
+  // less expense
+  const totalsLessExpense = monthKeys.reduce((acc, month) => {
+    acc[month] = (lessExpenseData ?? []).reduce(
+      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
+      0
+    );
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // other income expense
+  const totalsOthIncExpense = monthKeys.reduce((acc, month) => {
+    acc[month] = (otherIncomeExpenseData ?? []).reduce(
+      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
+      0
+    );
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // interest income variance
+  const totalVarianceIntInc = (isInterestIncomeData ?? []).reduce(
+    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
+    0
+  );
+
+  // other  revenue variance
+  const totalVarianceOthRev = (isOtherRevenueData ?? []).reduce(
+    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
+    0
+  );
+ 
+  // direct financing variance
+  const totalVarianceDirectFin = (directFinancingData ?? []).reduce(
+    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
+    0
+  );
+  
+  // direct financing variance
+  const totalVarianceOthIncExp = (otherIncomeExpenseData ?? []).reduce(
+    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
+    0
+  );
+ 
+  // interest expense
+  const totalVarianceLessExp = (lessExpenseData ?? []).reduce(
+    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
+    0
+  );
+
+  useEffect(() => {
+    console.log(monthKeys, 'monthKeys');
+  }, [monthKeys]);
+
+  // const monthKeys = incomeStatementData || incomeStatementData.length > 0 ? incomeStatementData.length > 0
+  //   ? Object.keys(incomeStatementData[0]).filter(
+  //       (key) => !["row_count", "AccountName", "acctnumber", "variance"].includes(key)
+  //     )
+  //   : [] : [];
+
+  const tableRef = React.useRef<HTMLDivElement>(null);
+
+  const handlePrintPDF = async () => {
+    if (!tableRef.current) return;
+  
+    const canvas = await html2canvas(tableRef.current, {
+      scale: 2,
+      useCORS: true,
+    });
+  
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('portrait', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();  // ~210mm
+    const pageHeight = pdf.internal.pageSize.getHeight(); // ~297mm
+    const imgProps = pdf.getImageProperties(imgData);
+
+    const margin = 10;
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    // pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    pdf.save('IncomeStatement.pdf');
+      // Remove class after export
+  };
 
   return (
     <div>
@@ -127,8 +259,13 @@ const IncomeStatementList: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="flex space-x-1">
-                  
+                <div className="flex justify-end px-7 py-2">
+                  {/* <button
+                    onClick={handlePrintPDF}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Print as PDF
+                  </button> */}
                 </div>
               </div>
 
@@ -137,122 +274,329 @@ const IncomeStatementList: React.FC = () => {
                   Income Statement
                 </h3>
               </div>
-              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[600px]">
-                <table className="table-auto w-full border-collapse border border-gray-300">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="border p-2">Account Name</th>
-                      <th className="border p-2">Account Number</th>
-                      {months !== undefined && months.map((month) => (
-                        <th key={month} className="border p-2">{month}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {incomeStatementData !== undefined && incomeStatementData?.map((item: any, index: number) => (
-                      <tr key={index} className="border">
-                        <td className="border p-2">{item.account_name}</td>
-                        <td className="border p-2">{item.account_number}</td>
-                        {months.map((month) => {
-                          const monthlyValue = item.monthly_values.find(
-                            (mv: any) => mv.month === month
-                          );
-                          return (
-                            <td key={month} className="border p-2">
-                              {monthlyValue ? monthlyValue.value : "-"}
-                            </td>
-                          );
-                        })}
-                      </tr>
+              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[1000px] h-[1600px]" ref={tableRef}>
+              
+              
+              {/** 
+               * Interest Income
+              */}
+              <table className="table-auto border border-gray-300 w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border text-left" style={{"width": "430px"}}>Account Name</th>
+                    {monthKeys.map((month: any) => (
+                      <th key={month} className="border text-right" style={{"width": "140px"}}>
+                        {month}
+                      </th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                    <th className="border text-right">Variance</th>
+                  </tr>
+                </thead>
+                {isInterestIncomeData && isInterestIncomeData.length > 0 ? (
+                  <>
+                    <tbody>
+                      {isInterestIncomeData.map((row: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border">{row.AccountName}</td>
+                          {monthKeys.map((month) => (
+                            <td key={month} className="border text-right">
+                              {row[month] ?? "-"}
+                            </td>
+                          ))}
+                          <td className="border text-right">{row.variance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
 
-              {/* <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] h-[600px]">
-                {incomeStatementData!== undefined ? (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold text-gray-700">Revenue</h2>
-                        <ul>
-                          {incomeStatementData?.revenues?.map((item: any) => (
-                            <li key={item.number} className="ml-4 border-l-4 pl-2">
-                              <strong>{item.account_name}:</strong> ₱{Number(item.balance).toFixed(2)}
-                              {item.subAccounts?.length > 0 && (
-                                <ul className="ml-4">
-                                  {item.subAccounts.map((child: any) => (
-                                    <li key={child.number} className="ml-4">
-                                      <strong>{child.account_name}:</strong> ₱{Number(child.balance).toFixed(2)}
-                                      {child.subAccounts?.length > 0 && (
-                                        <ul className="ml-4">
-                                          {child.subAccounts.map((grandChild: any) => (
-                                            <li key={grandChild.number} className="ml-4">
-                                              {grandChild.account_name}: ₱{Number(grandChild.balance).toFixed(2)}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                    </div>
+                    <tfoot>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">Total Interest Income</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {totalsIntInc[month].toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {totalVarianceIntInc.toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </>
                 ) : (
-                    <p className="text-gray-500"></p>
+                  <tbody>
+                    <tr>
+                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  </tbody>
                 )}
-                   {incomeStatementData!== undefined ? (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold text-gray-700">Expense</h2>
-                        <ul>
-                        {incomeStatementData?.expenses?.map((item: any) => (
-                            <li key={item.number} className="ml-4 border-l-4 pl-2">
-                              <strong>{item.account_name}:</strong> ₱{Number(item.balance).toFixed(2)}
-                              {item.subAccounts?.length > 0 && (
-                                <ul className="ml-4">
-                                  {item.subAccounts.map((child: any) => (
-                                    <li key={child.number} className="ml-4">
-                                      <strong>{child.account_name}:</strong> ₱{Number(child.balance).toFixed(2)}
-                                      {child.subAccounts?.length > 0 && (
-                                        <ul className="ml-4">
-                                          {child.subAccounts.map((grandChild: any) => (
-                                            <li key={grandChild.number} className="ml-4">
-                                              {grandChild.account_name}: ₱{Number(grandChild.balance).toFixed(2)}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </li>
+              </table>
+              {/** 
+               * Interest Income end
+              */}
+
+
+              {/** 
+               * Other Revenue
+              */}
+              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border text-left" style={{"width": "430px"}}></th>
+                    {monthKeys.map((month: any) => (
+                      <th key={month} className="border text-right" style={{"width": "140px"}}>
+                        {/* {month} */}
+                      </th>
+                    ))}
+                    <th className="border text-right"></th>
+                  </tr>
+                </thead>
+                {isOtherRevenueData && isOtherRevenueData.length > 0 ? (
+                  <>
+                    <tbody>
+                      {isOtherRevenueData.map((row: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border">{row.AccountName}</td>
+                          {monthKeys.map((month) => (
+                            <td key={month} className="border text-right">
+                              {row[month] ?? "-"}
+                            </td>
                           ))}
-                        </ul>
-                    </div>
+                          <td className="border text-right">{row.variance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+
+                    <tfoot>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">Total Other Revenue</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {totalsOthRevenue[month].toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {totalVarianceOthRev.toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">Total Income</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {(totalsIntInc[month] + totalsOthRevenue[month]).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {(totalVarianceIntInc + totalVarianceOthRev).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </>
                 ) : (
-                    <p className="text-gray-500"></p>
+                  <tbody>
+                    <tr>
+                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  </tbody>
                 )}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h4 className="text-sm font-semibold text-gray-700">Total Revenue</h4>
-                  <ul>
-                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.total_revenue)).toFixed(2)}</li>
-                  </ul>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h4 className="text-sm font-semibold text-gray-700">Total Expense</h4>
-                  <ul>
-                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.total_expense)).toFixed(2)}</li>
-                  </ul>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h4 className="text-sm font-semibold text-gray-700">Total Income</h4>
-                  <ul>
-                    <li className="ml-4 border-l-4 pl-2">{incomeStatementData && parseFloat(String(incomeStatementData?.net_income)).toFixed(2)}</li>
-                  </ul>
-                </div>
-              </div> */}
+              </table>
+              {/** 
+               * Other Revenue end
+              */}
+
+              {/** 
+               * Other Income Expense
+              */}
+              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border text-left" style={{"width": "430px"}}></th>
+                    {monthKeys.map((month: any) => (
+                      <th key={month} className="border text-right" style={{"width": "140px"}}>
+                        {/* {month} */}
+                      </th>
+                    ))}
+                    <th className="border text-right"></th>
+                  </tr>
+                </thead>
+                {lessExpenseData && lessExpenseData.length > 0 ? (
+                  <>
+                    <tbody>
+                      {lessExpenseData.map((row: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border">{row.AccountName}</td>
+                          {monthKeys.map((month) => (
+                            <td key={month} className="border text-right">
+                              {row[month] ?? "-"}
+                            </td>
+                          ))}
+                          <td className="border text-right">{row.variance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">TOTAL EXPENSE</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {(totalsLessExpense[month]).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {(totalVarianceLessExp).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </>
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  </tbody>
+                )}
+              </table>
+              {/** 
+               * Other Income Expense end
+              */}
+                
+
+               {/** 
+               * Direct Financing Cost
+              */}
+              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border text-left" style={{"width": "430px"}}></th>
+                    {monthKeys.map((month: any) => (
+                      <th key={month} className="border text-right" style={{"width": "140px"}}>
+                        {/* {month} */}
+                      </th>
+                    ))}
+                    <th className="border text-right"></th>
+                  </tr>
+                </thead>
+                {directFinancingData && directFinancingData.length > 0 ? (
+                  <>
+                    <tbody>
+                      {directFinancingData.map((row: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border">{row.AccountName}</td>
+                          {monthKeys.map((month) => (
+                            <td key={month} className="border text-right">
+                              {row[month] ?? "-"}
+                            </td>
+                          ))}
+                          <td className="border text-right">{row.variance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">NET INCOME BEFORE OTHER INCOME</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </>
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  </tbody>
+                )}
+              </table>
+              {/** 
+               * Direct Financing Cost end
+              */}
+               
+               
+               {/** 
+               * Other Income Expense
+              */}
+              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border text-left" style={{"width": "430px"}}></th>
+                    {monthKeys.map((month: any) => (
+                      <th key={month} className="border text-right" style={{"width": "140px"}}>
+                        {/* {month} */}
+                      </th>
+                    ))}
+                    <th className="border text-right"></th>
+                  </tr>
+                </thead>
+                {otherIncomeExpenseData && otherIncomeExpenseData.length > 0 ? (
+                  <>
+                    <tbody>
+                      {otherIncomeExpenseData.map((row: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border">{row.AccountName}</td>
+                          {monthKeys.map((month) => (
+                            <td key={month} className="border text-right">
+                              {row[month] ?? "-"}
+                            </td>
+                          ))}
+                          <td className="border text-right">{row.variance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">Total</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {(totalsOthIncExpense[month]).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {(totalVarianceOthIncExp).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">NET INCOME BEFORE INCOME TAX</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - (totalsLessExpense[month]) - (totalsOthIncExpense[month])).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - (totalVarianceLessExp) - (totalVarianceOthIncExp)).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </>
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  </tbody>
+                )}
+              </table>
+              {/** 
+               * Other Income Expense end
+              */}
+
+              
+
+              </div>
             </div>
           </div>
 
