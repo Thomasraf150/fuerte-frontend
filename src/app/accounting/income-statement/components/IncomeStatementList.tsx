@@ -26,7 +26,7 @@ const IncomeStatementList: React.FC = () => {
   const { onSubmitCoa, branchSubData } = useCoa();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, fetchStatementData } = useFinancialStatement();
+  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
@@ -144,6 +144,15 @@ const IncomeStatementList: React.FC = () => {
     return acc;
   }, {} as Record<string, number>);
   
+  // prov income tax
+  const totalsincomeTax = monthKeys.reduce((acc, month) => {
+    acc[month] = (incomeTaxData ?? []).reduce(
+      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
+      0
+    );
+    return acc;
+  }, {} as Record<string, number>);
+  
   // interest income variance
   const totalVarianceIntInc = (isInterestIncomeData ?? []).reduce(
     (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
@@ -168,8 +177,14 @@ const IncomeStatementList: React.FC = () => {
     0
   );
  
-  // interest expense
+  // interest expense variance
   const totalVarianceLessExp = (lessExpenseData ?? []).reduce(
+    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
+    0
+  );
+  
+  // Prov Income Tax variance
+  const totalVarianceIncTax = (incomeTaxData ?? []).reduce(
     (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
     0
   );
@@ -571,13 +586,82 @@ const IncomeStatementList: React.FC = () => {
                         <td className="border text-left">NET INCOME BEFORE INCOME TAX</td>
                         {monthKeys.map((month) => (
                           <td key={month} className="border text-right">
+                            {((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month])).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp)).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </>
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  </tbody>
+                )}
+              </table>
+              {/** 
+               * Other Income Expense end
+              */}
+               
+               {/** 
+               * Prov Income Income
+              */}
+              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border text-left" style={{"width": "430px"}}></th>
+                    {monthKeys.map((month: any) => (
+                      <th key={month} className="border text-right" style={{"width": "140px"}}>
+                        {/* {month} */}
+                      </th>
+                    ))}
+                    <th className="border text-right"></th>
+                  </tr>
+                </thead>
+                {incomeTaxData && incomeTaxData.length > 0 ? (
+                  <>
+                    <tbody>
+                      {incomeTaxData.map((row: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border">{row.AccountName}</td>
+                          {monthKeys.map((month) => (
+                            <td key={month} className="border text-right">
+                              {row[month] ?? "-"}
+                            </td>
+                          ))}
+                          <td className="border text-right">{row.variance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">NET INCOME AFTER TAX</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
+                            {(((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month]) - totalsincomeTax[month])).toFixed(2)}
+                          </td>
+                        ))}
+                        <td className="border text-right">
+                          {((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp) - totalVarianceIncTax).toFixed(2)}
+                        </td>
+                      </tr>
+                      {/* <tr className="bg-gray-100 font-bold">
+                        <td className="border text-left">NET INCOME BEFORE INCOME TAX</td>
+                        {monthKeys.map((month) => (
+                          <td key={month} className="border text-right">
                             {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - (totalsLessExpense[month]) - (totalsOthIncExpense[month])).toFixed(2)}
                           </td>
                         ))}
                         <td className="border text-right">
                           {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - (totalVarianceLessExp) - (totalVarianceOthIncExp)).toFixed(2)}
                         </td>
-                      </tr>
+                      </tr> */}
                     </tfoot>
                   </>
                 ) : (

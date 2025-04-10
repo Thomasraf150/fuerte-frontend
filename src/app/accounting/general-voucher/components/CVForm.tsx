@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, Edit3, ChevronDown, Plus, Trash2 } from 'react-feather';
+import { Printer, Edit3, ChevronDown, Plus, Trash2 } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -145,6 +145,15 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
           <h3 className="font-medium text-boxdark dark:text-boxdark">
             {actionLbl} {singleData && (<>- <span className="font-bold text-orange-500"> {singleData?.journal_ref}</span></>)} 
           </h3>
+        </div>
+        <div className="border-b border-stroke py-4 dark:border-strokedark">
+          <button
+            className="flex justify-center rounded bg-success border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-light dark:text-white"
+            type="button"
+            onClick={() => setShowForm(false)}
+          >
+            <Printer size={19} className="pt-1 mr-1" /> Print CV
+          </button>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-3 gap-4 mb-5">

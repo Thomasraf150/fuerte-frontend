@@ -17,6 +17,7 @@ const useFinancialStatement = () => {
   const [directFinancingData, setDirectFinancingData] = useState<any>();
   const [otherIncomeExpenseData, setOtherIncomeExpenseData] = useState<any>();
   const [lessExpenseData, setLessExpenseData] = useState<any>();
+  const [incomeTaxData, setIncomeTaxData] = useState<any>();
   const [months, setMonths] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
  
@@ -68,7 +69,7 @@ const useFinancialStatement = () => {
     setDirectFinancingData(pivotData[2]);
     setOtherIncomeExpenseData(pivotData[3]);
     setLessExpenseData(pivotData[4]);
-    // setIncomeTaxData(pivotData[5]);
+    setIncomeTaxData(pivotData[5]);
     // setIncomeStatementData([
       // ...pivotData.pivotAccountInterestIncome,
       // ...pivotData.pivotAccountOtherRevenues,
@@ -132,6 +133,7 @@ const useFinancialStatement = () => {
     directFinancingData,
     otherIncomeExpenseData,
     lessExpenseData,
+    incomeTaxData,
     loading,
   };
 };
