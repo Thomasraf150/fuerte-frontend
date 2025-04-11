@@ -83,6 +83,7 @@ const useCollectionList = () => {
     });
     // const result = await response.json();
     // setDataColListData(response.data.getLoans.data);
+    console.log(response.data.postCollectionEntries, 'response.data.postCollectionEntries');
     if (response.data.postCollectionEntries?.status === false) {
       toast.error(response.data.postCollectionEntries?.message);
     } else {

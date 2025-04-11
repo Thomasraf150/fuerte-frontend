@@ -44,9 +44,16 @@ const GET_GV_QUERY: string = `
   }
 `;
 
+const PRINT_CV_MUTATION: string = `
+  mutation PrintAcctgEntries($input: AcctgEntryInput!){
+    printAcctgEntries(input: $input)
+  }
+`;
+
 const GeneralVoucherQueryMutations = {
   CREATE_GV_MUTATION,
-  GET_GV_QUERY
+  GET_GV_QUERY,
+  PRINT_CV_MUTATION
 };
 
 export default GeneralVoucherQueryMutations;

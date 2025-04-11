@@ -17,7 +17,7 @@ const GeneralVoucherList: React.FC = () => {
   const [showFormCv, setShowFormCv] = useState<boolean>(false);
   const [showFormJv, setShowFormJv] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<RowAcctgEntry>();
-  const { dataGV, createGV, fetchGV, loading } = useGeneralVoucher();
+  const { dataGV, createGV, fetchGV, printSummaryTicketDetails, loading } = useGeneralVoucher();
   
   const handleShowFormCv = (lbl: string, showFrm: boolean) => {
     setShowFormCv(showFrm);
@@ -76,7 +76,7 @@ const GeneralVoucherList: React.FC = () => {
                 <div className="px-4">
                   <CustomDatatable
                     apiLoading={false}
-                    title="GV List"
+                    title=""
                     onRowClicked={handleWholeRowClick}
                     enableCustomHeader={true} 
                     columns={column()}
@@ -95,7 +95,8 @@ const GeneralVoucherList: React.FC = () => {
                   singleData={singleData} 
                   createGV={createGV}
                   fetchGV={fetchGV}
-                  loading={loading} />
+                  loading={loading}
+                  printSummaryTicketDetails={printSummaryTicketDetails} />
               </div>
             </div>
           )}
@@ -108,7 +109,8 @@ const GeneralVoucherList: React.FC = () => {
                   singleData={singleData} 
                   createGV={createGV}
                   fetchGV={fetchGV}
-                  loading={loading} />
+                  loading={loading}
+                  printSummaryTicketDetails={printSummaryTicketDetails} />
               </div>
             </div>
           )}

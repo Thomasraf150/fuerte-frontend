@@ -6,10 +6,11 @@ import GeneralVoucherQueryMutations from '@/graphql/GeneralVoucherQueryMutations
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { fetchWithRecache } from '@/utils/helper';
 
 const useGeneralVoucher = () => {
 
-  const { CREATE_GV_MUTATION, GET_GV_QUERY } = GeneralVoucherQueryMutations;
+  const { CREATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION } = GeneralVoucherQueryMutations;
 
   const [loading, setLoading] = useState<boolean>(false);
   const [dataGV, setDataGV] = useState<RowAcctgEntry[]>();
@@ -80,6 +81,37 @@ const useGeneralVoucher = () => {
     setLoading(false);
   };
 
+  const printSummaryTicketDetails = async (journal_ref: string) => {
+    try {
+      // setSumTixLoading(true);
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: PRINT_CV_MUTATION,
+          variables: {
+            input: { 
+              journal_ref
+            },
+          },
+        }),
+      });
+  
+      const pdfUrl = response.data.printAcctgEntries;
+  
+      // Open the generated PDF in a new tab
+      window.open(process.env.NEXT_PUBLIC_BASE_URL + pdfUrl, '_blank');
+  
+      // setSumTixLoading(false);
+    } catch (error) {
+      console.error("Error printing loan details:", error);
+      toast.error("Failed to print loan details.");
+      // setSumTixLoading(false);
+    }
+  };
+
    // Fetch data on component mount if id exists
   useEffect(() => {
     fetchGV("","","");
@@ -89,6 +121,7 @@ const useGeneralVoucher = () => {
     createGV,
     fetchGV,
     dataGV,
+    printSummaryTicketDetails,
     loading
   };
 };

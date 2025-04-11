@@ -17,10 +17,11 @@ interface ParentFormBr {
   singleData: RowAcctgEntry | undefined;
   createGV: (row: RowAcctgEntry) => void;
   fetchGV: (a: string, b: string, c: string) => void;
+  printSummaryTicketDetails: (a: string) => void;
   loading: boolean;
 }
 
-const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, loading }) => {
+const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, printSummaryTicketDetails, loading }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -146,15 +147,19 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
             {actionLbl} {singleData && (<>- <span className="font-bold text-orange-500"> {singleData?.journal_ref}</span></>)} 
           </h3>
         </div>
-        <div className="border-b border-stroke py-4 dark:border-strokedark">
-          <button
-            className="flex justify-center rounded bg-success border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-light dark:text-white"
-            type="button"
-            onClick={() => setShowForm(false)}
-          >
-            <Printer size={19} className="pt-1 mr-1" /> Print CV
-          </button>
-        </div>
+        {singleData !== undefined ? (
+          <div className="border-b border-stroke py-4 dark:border-strokedark">
+            <button
+              className="flex justify-center rounded bg-success border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-light dark:text-white"
+              type="button"
+              onClick={() => printSummaryTicketDetails(singleData?.journal_ref)}
+            >
+              <Printer size={19} className="pt-1 mr-1" /> Print CV
+            </button>
+          </div>
+        ) : (
+          <></>
+        )}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-3 gap-4 mb-5">
             <div className='mt-2'>

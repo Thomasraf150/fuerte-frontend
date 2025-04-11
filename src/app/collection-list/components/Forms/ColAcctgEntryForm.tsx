@@ -67,7 +67,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
     if (isConfirmed) {
       postCollectionEntries(dataColEntry, data);
       if (!loading) {
-        fetchCollectionList(1000, 1, 0);
+        fetchCollectionList(2000, 1, 0);
         setShowForm(false);
       }
     }
