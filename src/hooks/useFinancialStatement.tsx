@@ -70,52 +70,6 @@ const useFinancialStatement = () => {
     setOtherIncomeExpenseData(pivotData[3]);
     setLessExpenseData(pivotData[4]);
     setIncomeTaxData(pivotData[5]);
-    // setIncomeStatementData([
-      // ...pivotData.pivotAccountInterestIncome,
-      // ...pivotData.pivotAccountOtherRevenues,
-      // ...pivotData.pivotAccountDirectFinCost,
-      // ...pivotData.pivotAccountLessExpense,
-      // ...pivotData.pivotAccountOtherIncomeExp,
-      // ...pivotData.pivotAccountProvForIncomeTax,
-    // ]);
-
-    // pivotData.pivotAccountInterestIncome.forEach((item: any) => {
-    //   console.log('Interest Income monthly_values:', item.monthly_values);
-    // });
-    // pivotData.pivotAccountOtherRevenues.forEach((item: any) => {
-    //   console.log('Other Revenues monthly_values:', item.monthly_values);
-    // });
-    // pivotData.pivotAccountDirectFinCost.forEach((item: any) => {
-    //   console.log('Direct Fin Cost monthly_values:', item.monthly_values);
-    // });
-
-    // const uniqueMonths = Array.from(
-    //   new Set(
-    //     [
-    //       ...pivotData.pivotAccountInterestIncome.flatMap((item: any) =>
-    //         item.monthly_values ? item.monthly_values.map((mv: any) => mv.month) : []
-    //       ),
-    //       ...pivotData.pivotAccountOtherRevenues.flatMap((item: any) =>
-    //         item.monthly_values ? item.monthly_values.map((mv: any) => mv.month) : []
-    //       ),
-    //       ...pivotData.pivotAccountDirectFinCost.flatMap((item: any) =>
-    //         item.monthly_values ? item.monthly_values.map((mv: any) => mv.month) : []
-    //       ),
-    //       ...pivotData.pivotAccountLessExpense.flatMap((item: any) =>
-    //         item.monthly_values ? item.monthly_values.map((mv: any) => mv.month) : []
-    //       ),
-    //       ...pivotData.pivotAccountOtherIncomeExp.flatMap((item: any) =>
-    //         item.monthly_values ? item.monthly_values.map((mv: any) => mv.month) : []
-    //       ),
-    //       ...pivotData.pivotAccountProvForIncomeTax.flatMap((item: any) =>
-    //         item.monthly_values ? item.monthly_values.map((mv: any) => mv.month) : []
-    //       ),
-    //     ]
-    //   )
-    // );
-    // console.log(uniqueMonths, ' uniqueMonths')
-    // setMonths(uniqueMonths);
-    // setIncomeStatementData(response.data.getIncomeStatement);
     setLoading(false);
   };
 

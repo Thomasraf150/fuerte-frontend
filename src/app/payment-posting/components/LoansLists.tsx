@@ -32,11 +32,11 @@ const LoansLists: React.FC = () => {
 
   const handleShowForm = (d: boolean) => {
     setShowForm(d);
-    fetchLoans(1000, 1, 0);
+    fetchLoans(2000, 1, 0);
   }
 
   useEffect(() => {
-    fetchLoans(1000, 1, 0);
+    fetchLoans(2000, 1, 0);
   }, [loanScheduleList])
 
   return (
