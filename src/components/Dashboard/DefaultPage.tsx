@@ -19,7 +19,8 @@ import NetMovements from './components/NetMovements';
 import CashoutByBank from './components/CashoutByBank';
 import LoanByLoanType from './components/LoanByLoanType';
 import useSummaryTicket from '@/hooks/useSummaryTicket';
-import useCoa from '@/hooks/useCoa';
+// import useCoa from '@/hooks/useCoa';
+import useBranches from '@/hooks/useBranches';
 
 interface Option {
   value: string;
@@ -29,9 +30,9 @@ interface Option {
 
 const DefaultPage: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
-  const { onSubmitCoa, branchSubData } = useCoa();
+  // const { onSubmitCoa, branchSubData } = useCoa();
   const { printSummaryTicketDetails } = useSummaryTicket();
-
+  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
   // Use undefined instead of null for initial state
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -61,15 +62,36 @@ const DefaultPage: React.FC = () => {
     setBranchSubId(branch_sub_id);
   };
 
+  const handleBranchChange = (branch_id: string) => {
+    // fetchSummaryTixReport(startDate, endDate, branch_id);
+    // setBranchSubId(branch_id);
+    fetchSubDataList('id_desc', Number(branch_id));
+  };
+
   useEffect(() => {
-    console.log(dataSummaryTicket, ' dataSummaryTicket')
+    // console.log(dataSummaryTicket, ' dataSummaryTicket')
   }, [endDate, dataSummaryTicket])
 
+  const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
   useEffect(()=>{
-    if (branchSubData && Array.isArray(branchSubData)) {
-      const dynaOpt: Option[] = branchSubData?.map(bSub => ({
+    if (dataBranch && Array.isArray(dataBranch)) {
+      const dynaOpt: Option[] = dataBranch?.map(b => ({
+        value: String(b.id),
+        label: b.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsBranch([
+        { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+      
+    }
+  }, [dataBranch])
+
+  useEffect(()=>{
+    if (dataBranchSub && Array.isArray(dataBranchSub)) {
+      const dynaOpt: Option[] = dataBranchSub?.map(bSub => ({
         value: String(bSub.id),
         label: bSub.name, // assuming `name` is the key you want to use as label
       }));
@@ -79,18 +101,22 @@ const DefaultPage: React.FC = () => {
       ]);
       
     }
-    
-  }, [branchSubData])
+  }, [dataBranchSub])
 
   return (
     <>
 
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
-        <div className="rounded-lg bg-gray-200">
-          <label className="mb-2">Select Date Range:</label>
-          <div className="flex space-x-2">
+      <div className="rounded-lg bg-gray-200 p-4">
+        <div className="flex flex-wrap items-end space-x-4">
+          {/* Start Date */}
+          <div className="flex flex-col">
+            <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
+              Start Date:
+            </label>
             <DatePicker
+              id="startDate"
               selected={startDate}
               onChange={handleStartDateChange}
               selectsStart
@@ -99,52 +125,87 @@ const DefaultPage: React.FC = () => {
               placeholderText="Start Date"
               className="border rounded px-4 py-2"
             />
+          </div>
+
+          {/* End Date */}
+          <div className="flex flex-col">
+            <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700">
+              End Date:
+            </label>
             <DatePicker
+              id="endDate"
               selected={endDate}
               onChange={handleEndDateChange}
               selectsEnd
               startDate={startDate}
               endDate={endDate}
-              minDate={startDate} // Prevent selecting an end date before start date
+              minDate={startDate}
               placeholderText="End Date"
               className="border rounded px-4 py-2"
             />
-            <div className="w-75">
-              <Controller
-                name="branch_sub_id"
-                control={control}
-                rules={{ required: 'Branch is required' }} 
-                render={({ field }) => (
-                  <ReactSelect
-                    {...field}
-                    options={optionsSubBranch}
-                    placeholder="Select a branch..."
-                    onChange={(selectedOption) => {
-                      field.onChange(selectedOption?.value);
-                      handleBranchSubChange(selectedOption?.value ?? '');
-                    }}
-                    value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
-                  />
-                )}
-              />
-            </div>
-            <div className="w-75">
-              <button
-                className="flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                type="button"
-                onClick={() => { return printSummaryTicketDetails(startDate, endDate, branchSubId); }}
-              >
-                <span className="mt-1 mr-1">
-                  <Printer size={17} /> 
-                </span>
-                <span>Print Loan Details</span>
-              </button>
-            </div>
           </div>
-          <div className="flex space-x-1">
-            
+
+          {/* Branch Select */}
+          <div className="flex flex-col min-w-[200px]">
+            <label className="mb-1 text-sm font-medium text-gray-700">
+              Branch:
+            </label>
+            <Controller
+              name="branch_sub_id"
+              control={control}
+              rules={{ required: 'Branch is required' }}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={optionsBranch}
+                  placeholder="Select a branch..."
+                  onChange={(selectedOption) => {
+                    field.onChange(selectedOption?.value);
+                    handleBranchChange(selectedOption?.value ?? '');
+                  }}
+                  value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                />
+              )}
+            />
+          </div>
+
+          {/* Confirm Branch Select */}
+          <div className="flex flex-col min-w-[200px]">
+            <label className="mb-1 text-sm font-medium text-gray-700">
+              Sub Branch:
+            </label>
+            <Controller
+              name="branch_sub_id"
+              control={control}
+              rules={{ required: 'Branch is required' }}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={optionsSubBranch}
+                  placeholder="Select a sub branch..."
+                  onChange={(selectedOption) => {
+                    field.onChange(selectedOption?.value);
+                    handleBranchSubChange(selectedOption?.value ?? '');
+                  }}
+                  value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                />
+              )}
+            />
+          </div>
+
+          {/* Button */}
+          <div className="flex items-end">
+            <button
+              className="flex items-center gap-2 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5"
+              type="button"
+              onClick={() => printSummaryTicketDetails(startDate, endDate, branchSubId)}
+            >
+              <Printer size={17} />
+              <span>Print Loan Details</span>
+            </button>
           </div>
         </div>
+      </div>
         
         
         

@@ -136,8 +136,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const onSubmit = (data: BorrowerInfo) => {
     data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
     onSubmitBorrower(data);
-    setShowForm(false);
-    fetchDataBorrower(100, 1);
+    // setShowForm(false);
+    // fetchDataBorrower(100, 1);
   }
 
   // const [imageSrc, setImageSrc] = useState('/images/user/user-06.png'); // Default image

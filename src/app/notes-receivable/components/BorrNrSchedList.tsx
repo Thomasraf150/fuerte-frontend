@@ -49,6 +49,8 @@ const BorrNrSchedList: React.FC = () => {
     fetchNotesReceivableList(startDate, endDate);
   };
 
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
+
   useEffect(() => {
     fetchNotesReceivableList(moment('2024-01-01').toDate(), moment('2025-01-15').toDate());
   }, [])
@@ -65,7 +67,7 @@ const BorrNrSchedList: React.FC = () => {
 
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
+                  <h3 className="text-sm text-black dark:text-white">
                     Notes Receivable
                   </h3>
                 </div>
@@ -97,26 +99,26 @@ const BorrNrSchedList: React.FC = () => {
                   </div>
                 </div>
     
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto overflow-h-auto h-[600px]">
                   <table className="min-w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="border border-gray-300 px-4 py-2 text-left font-medium w-[250px] min-w-[250px] text-gray-600" rowSpan={2}>Name</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600" rowSpan={2}>Loan Ref</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Notes Receivable</th>
+                        <th className="border border-gray-300 px-4 py-2 text-left text-sm w-[100px] min-w-[320px] text-gray-600" rowSpan={2}>Name</th>
+                        <th className="border border-gray-300 px-4 py-2 text-left text-sm text-gray-600" rowSpan={2}>Loan Ref</th>
+                        <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Notes Receivable</th>
                         {dataNotesReceivable && dataNotesReceivable?.months?.map(
                           (month) => (
                             <th
                               key={month}
-                              className="border border-gray-300 px-4 py-2 text-center font-medium text-gray-600"
+                              className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600"
                               colSpan={10}
                             >
                               {month}
                             </th>
                           )
                         )}
-                        <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Total Collected</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Balance</th>
+                        <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Total Collected</th>
+                        <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Balance</th>
                       </tr>
                       <tr>
                         {Array(dataNotesReceivable?.months?.length)
@@ -136,7 +138,7 @@ const BorrNrSchedList: React.FC = () => {
                             ].map((field, idx1) => (
                               <th
                                 key={`${field}-${idx1}`}
-                                className="border border-gray-300 px-2 py-1 text-center text-xs font-medium text-gray-500 w-[150px] min-w-[150px]"
+                                className="border border-gray-300 px-2 py-1 text-center text-xs text-gray-500 w-[150px] min-w-[150px]"
                               >
                                 {field}
                               </th>
@@ -147,32 +149,30 @@ const BorrNrSchedList: React.FC = () => {
                     <tbody>
                       {dataNotesReceivable &&
                         dataNotesReceivable.data?.map((item: any, index: number) => {
-                          // Calculate Total Collected
+                          const isSelected = selectedRow === index;
+
                           const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                            const collection = parseFloat(value.actual_collection) || 0; // Ensure value is a number
+                            const collection = parseFloat(value.actual_collection) || 0;
                             return sum + collection;
                           }, 0);
 
-                          // Calculate Balance
-                          const pnAmount = parseFloat(item.pn_amount) || 0; // Ensure Notes Receivable is a number
+                          const pnAmount = parseFloat(item.pn_amount) || 0;
                           const balance = pnAmount - totalCollected;
 
                           return (
-                            <tr key={index}>
-                              {/* Name */}
-                              <td className="border border-gray-300 px-4 py-2">
+                            <tr
+                              key={index}
+                              onClick={() => setSelectedRow(index)}
+                              className={`${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'} cursor-pointer`}
+                            >
+                              <td className="border border-gray-300 text-sm px-4 py-2">
                                 {item?.lastname}, {item?.firstname} {item?.middlename}
                               </td>
-
-                              {/* Loan Reference */}
-                              <td className="border border-gray-300 px-4 py-2">{item?.loan_ref}</td>
-
-                              {/* Notes Receivable */}
-                              <td className="border border-gray-300 px-4 py-2 text-right">
+                              <td className="border border-gray-300 text-sm px-4 py-2">{item?.loan_ref}</td>
+                              <td className="border border-gray-300 text-sm px-4 py-2 text-right">
                                 {pnAmount.toFixed(2)}
                               </td>
 
-                              {/* Monthly Data */}
                               {dataNotesReceivable?.months?.map((month: any, monthIndex: number) => {
                                 const monthlyData = item.trans_per_month.find(
                                   (value: any) => value.month === month
@@ -199,25 +199,20 @@ const BorrNrSchedList: React.FC = () => {
                                     </td>
                                   ))
                                 ) : (
-                                  Array(10)
-                                    .fill(null)
-                                    .map((_, emptyIndex) => (
-                                      <td
-                                        key={`${monthIndex}-empty-${emptyIndex}`}
-                                        className="border border-gray-300 px-2 py-1 text-right text-sm"
-                                      >
-                                        --
-                                      </td>
-                                    ))
+                                  Array(10).fill(null).map((_, emptyIndex) => (
+                                    <td
+                                      key={`${monthIndex}-empty-${emptyIndex}`}
+                                      className="border border-gray-300 px-2 py-1 text-right text-sm"
+                                    >
+                                      --
+                                    </td>
+                                  ))
                                 );
                               })}
 
-                              {/* Total Collected */}
                               <td className="border border-gray-300 px-4 py-2 text-right">
                                 {totalCollected.toFixed(2)}
                               </td>
-
-                              {/* Balance */}
                               <td className="border border-gray-300 px-4 py-2 text-right">
                                 {balance.toFixed(2)}
                               </td>
