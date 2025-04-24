@@ -21,7 +21,7 @@ const CollectionList: React.FC = () => {
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
 
   useEffect(() => {
-    fetchCollectionList(1000, 1, 0);
+    fetchCollectionList(4000, 1, 0);
     fetchCoaDataTable();
   }, [])
 
