@@ -21,6 +21,7 @@ const flattenAccounts = (
       "Account Name": fullName,
       Number: account.number,
       Description: account.description,
+      Branch: account.branch_sub?.name,
       Balance: account.balance,
       "Is Debit": account.is_debit ? "Yes" : "No",
       Level: level,
