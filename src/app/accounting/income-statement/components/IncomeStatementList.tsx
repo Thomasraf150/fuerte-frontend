@@ -11,10 +11,11 @@ import ReactSelect from '@/components/ReactSelect';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
-import useCoa from '@/hooks/useCoa';
+// import useCoa from '@/hooks/useCoa';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
+import moment from 'moment';
+import useBranches from '@/hooks/useBranches';
 interface Option {
   value: string;
   label: string;
@@ -23,13 +24,16 @@ interface Option {
 
 const IncomeStatementList: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
-  const { onSubmitCoa, branchSubData } = useCoa();
+  // const { onSubmitCoa, branchSubData } = useCoa();
+  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
+
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
   const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
+  const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
@@ -60,8 +64,23 @@ const IncomeStatementList: React.FC = () => {
   };
 
   useEffect(()=>{
-    if (branchSubData && Array.isArray(branchSubData)) {
-      const dynaOpt: Option[] = branchSubData?.map(bSub => ({
+    if (dataBranch && Array.isArray(dataBranch)) {
+      const dynaOpt: Option[] = dataBranch?.map(b => ({
+        value: String(b.id),
+        label: b.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsBranch([
+        { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+      
+    }
+    console.log(dataBranch, ' dataBranch')
+  }, [dataBranch])
+
+  useEffect(()=>{
+    if (dataBranchSub && Array.isArray(dataBranchSub)) {
+      const dynaOpt: Option[] = dataBranchSub?.map(bSub => ({
         value: String(bSub.id),
         label: bSub.name, // assuming `name` is the key you want to use as label
       }));
@@ -72,7 +91,7 @@ const IncomeStatementList: React.FC = () => {
       
     }
     
-  }, [branchSubData])
+  }, [dataBranchSub])
 
   useEffect(() => {
     console.log(isInterestIncomeData, ' isInterestIncomeData');
@@ -225,6 +244,12 @@ const IncomeStatementList: React.FC = () => {
       // Remove class after export
   };
 
+  const handleBranchChange = (branch_id: string) => {
+    // fetchSummaryTixReport(startDate, endDate, branch_id);
+    // setBranchSubId(branch_id);
+    fetchSubDataList('id_desc', Number(branch_id));
+  };
+
   return (
     <div>
       <div className="max-w-12xl">
@@ -232,9 +257,12 @@ const IncomeStatementList: React.FC = () => {
           <div className={`col-span-2`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
              
-              <div className="rounded-lg bg-gray-200 p-5">
-                <label className="mb-2">Select Date Range:</label>
-                <div className="flex space-x-2">
+            <div className="rounded-lg bg-gray-200 p-5">
+              <div className="mb-2 font-medium">Select Date Range:</div>
+              <div className="flex flex-wrap gap-4">
+                {/* Start Date */}
+                <div className="flex flex-col ">
+                  <label className="mb-1 text-sm font-medium text-gray-700">Start Date:</label>
                   <DatePicker
                     selected={startDate}
                     onChange={handleStartDateChange}
@@ -242,47 +270,81 @@ const IncomeStatementList: React.FC = () => {
                     startDate={startDate}
                     endDate={endDate}
                     placeholderText="Start Date"
-                    className="border rounded px-4 py-2"
+                    className="border rounded px-4 py-2 w-60"
                   />
+                </div>
+
+                {/* End Date */}
+                <div className="flex flex-col ">
+                  <label className="mb-1 text-sm font-medium text-gray-700">End Date:</label>
                   <DatePicker
                     selected={endDate}
                     onChange={handleEndDateChange}
                     selectsEnd
                     startDate={startDate}
                     endDate={endDate}
-                    minDate={startDate} // Prevent selecting an end date before start date
+                    minDate={startDate}
                     placeholderText="End Date"
-                    className="border rounded px-4 py-2"
+                    className="border rounded px-4 py-2 w-60"
                   />
-                  <div className="w-75">
-                    <Controller
-                      name="branch_sub_id"
-                      control={control}
-                      rules={{ required: 'Branch is required' }} 
-                      render={({ field }) => (
-                        <ReactSelect
-                          {...field}
-                          options={optionsSubBranch}
-                          placeholder="Select a branch..."
-                          onChange={(selectedOption) => {
-                            field.onChange(selectedOption?.value);
-                            handleBranchSubChange(selectedOption?.value ?? '');
-                          }}
-                          value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
-                        />
-                      )}
-                    />
-                  </div>
                 </div>
-                <div className="flex justify-end px-7 py-2">
-                  {/* <button
-                    onClick={handlePrintPDF}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Print as PDF
-                  </button> */}
+
+                {/* Branch Select */}
+                <div className="flex flex-col min-w-[200px]">
+                  <label className="mb-1 text-sm font-medium text-gray-700">Branch:</label>
+                  <Controller
+                    name="branch_id"
+                    control={control}
+                    rules={{ required: 'Branch is required' }}
+                    render={({ field }) => (
+                      <ReactSelect
+                        {...field}
+                        options={optionsBranch}
+                        placeholder="Select a branch..."
+                        onChange={(selectedOption) => {
+                          field.onChange(selectedOption?.value);
+                          handleBranchChange(selectedOption?.value ?? '');
+                        }}
+                        value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Sub Branch Select */}
+                <div className="flex flex-col min-w-[200px]">
+                  <label className="mb-1 text-sm font-medium text-gray-700">Sub Branch:</label>
+                  <Controller
+                    name="branch_sub_id"
+                    control={control}
+                    rules={{ required: 'Sub Branch is required' }}
+                    render={({ field }) => (
+                      <ReactSelect
+                        {...field}
+                        options={optionsSubBranch}
+                        placeholder="Select a sub branch..."
+                        onChange={(selectedOption) => {
+                          field.onChange(selectedOption?.value);
+                          handleBranchSubChange(selectedOption?.value ?? '');
+                        }}
+                        value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                      />
+                    )}
+                  />
                 </div>
               </div>
+
+              <div className="flex justify-end px-7 py-2">
+                {/* Uncomment if you want the button */}
+                {/* <button
+                  onClick={handlePrintPDF}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Print as PDF
+                </button> */}
+              </div>
+            </div>
+
 
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-boxdark dark:text-boxdark">
@@ -301,7 +363,7 @@ const IncomeStatementList: React.FC = () => {
                     <th className="border text-left" style={{"width": "430px"}}>Account Name</th>
                     {monthKeys.map((month: any) => (
                       <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {month}
+                        {moment(month, 'YYYY-MM').format('MMMM YYYY')}
                       </th>
                     ))}
                     <th className="border text-right">Variance</th>
@@ -516,11 +578,11 @@ const IncomeStatementList: React.FC = () => {
                         <td className="border text-left">NET INCOME BEFORE OTHER INCOME</td>
                         {monthKeys.map((month) => (
                           <td key={month} className="border text-right">
-                            {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]).toFixed(2)}
+                            {Math.abs((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]).toFixed(2)}
                           </td>
                         ))}
                         <td className="border text-right">
-                          {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp).toFixed(2)}
+                          {Math.abs((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp).toFixed(2)}
                         </td>
                       </tr>
                     </tfoot>
@@ -586,11 +648,11 @@ const IncomeStatementList: React.FC = () => {
                         <td className="border text-left">NET INCOME BEFORE INCOME TAX</td>
                         {monthKeys.map((month) => (
                           <td key={month} className="border text-right">
-                            {((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month])).toFixed(2)}
+                            {Math.abs((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month])).toFixed(2)}
                           </td>
                         ))}
                         <td className="border text-right">
-                          {((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp)).toFixed(2)}
+                          {Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp)).toFixed(2)}
                         </td>
                       </tr>
                     </tfoot>
@@ -644,11 +706,11 @@ const IncomeStatementList: React.FC = () => {
                         <td className="border text-left">NET INCOME AFTER TAX</td>
                         {monthKeys.map((month) => (
                           <td key={month} className="border text-right">
-                            {(((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month]) - totalsincomeTax[month])).toFixed(2)}
+                            {Math.abs(((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month]) - totalsincomeTax[month])).toFixed(2)}
                           </td>
                         ))}
                         <td className="border text-right">
-                          {((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp) - totalVarianceIncTax).toFixed(2)}
+                          {Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp) - totalVarianceIncTax).toFixed(2)}
                         </td>
                       </tr>
                       {/* <tr className="bg-gray-100 font-bold">

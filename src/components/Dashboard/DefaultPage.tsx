@@ -31,14 +31,12 @@ interface Option {
 const DefaultPage: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   // const { onSubmitCoa, branchSubData } = useCoa();
-  const { printSummaryTicketDetails } = useSummaryTicket();
   const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
+  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket, printSummaryTicketDetails } = useSummaryTicket();
   // Use undefined instead of null for initial state
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
-
-  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket } = useSummaryTicket();
 
   const handleStartDateChange = (date: Date | null) => {
     if (date) {

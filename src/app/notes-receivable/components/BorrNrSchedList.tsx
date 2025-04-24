@@ -1,21 +1,39 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import ReactSelect from '@/components/ReactSelect';
 import CustomDatatable from '@/components/CustomDatatable';
 // import soaListColumn from './SoaListColumn';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import useNotesReceivable from '@/hooks/useNotesReceivable';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import useSummaryTicket from '@/hooks/useSummaryTicket';
+import useBranches from '@/hooks/useBranches';
 
 // const column = soaListColumn;
+interface Option {
+  value: string;
+  label: string;
+  hidden?: boolean;
+}
 
 const BorrNrSchedList: React.FC = () => {
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   const [showForm, setShowForm] = useState<boolean>(false);
+  const [loanRef, setLoanRef] = useState<any>('');
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
   const { fetchNotesReceivableList, dataNotesReceivable, nrLoading } = useNotesReceivable();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket } = useSummaryTicket();
+  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
+  const [branchSubId, setBranchSubId] = useState<string>('');
+
+  const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
+  const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -49,7 +67,50 @@ const BorrNrSchedList: React.FC = () => {
     fetchNotesReceivableList(startDate, endDate);
   };
 
+  const handleBranchChange = (branch_id: string) => {
+    // fetchSummaryTixReport(startDate, endDate, branch_id);
+    // setBranchSubId(branch_id);
+    fetchSubDataList('id_desc', Number(branch_id));
+  };
+
+  const handleBranchSubChange = (branch_sub_id: string) => {
+    fetchSummaryTixReport(startDate, endDate, branch_sub_id);
+    setBranchSubId(branch_sub_id);
+  };
+
+  const handleSearch = () => {
+
+  }
+
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
+
+  useEffect(()=>{
+    if (dataBranch && Array.isArray(dataBranch)) {
+      const dynaOpt: Option[] = dataBranch?.map(b => ({
+        value: String(b.id),
+        label: b.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsBranch([
+        { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+      
+    }
+  }, [dataBranch])
+
+  useEffect(()=>{
+    if (dataBranchSub && Array.isArray(dataBranchSub)) {
+      const dynaOpt: Option[] = dataBranchSub?.map(bSub => ({
+        value: String(bSub.id),
+        label: bSub.name, // assuming `name` is the key you want to use as label
+      }));
+      setOptionsSubBranch([
+        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        ...dynaOpt,
+      ]);
+      
+    }
+  }, [dataBranchSub])
 
   useEffect(() => {
     fetchNotesReceivableList(moment('2024-01-01').toDate(), moment('2025-01-15').toDate());
@@ -74,30 +135,121 @@ const BorrNrSchedList: React.FC = () => {
                 <div className="p-7">
 
 
-                <div className="rounded-lg bg-gray-200 mb-4">
-                  <label className="mb-2">Select Date Range:</label>
-                  <div className="flex space-x-4">
-                    <DatePicker
-                      selected={startDate}
-                      onChange={handleStartDateChange}
-                      selectsStart
-                      startDate={startDate}
-                      endDate={endDate}
-                      placeholderText="Start Date"
-                      className="border rounded px-4 py-2"
-                    />
-                    <DatePicker
-                      selected={endDate}
-                      onChange={handleEndDateChange}
-                      selectsEnd
-                      startDate={startDate}
-                      endDate={endDate}
-                      minDate={startDate} // Prevent selecting an end date before start date
-                      placeholderText="End Date"
-                      className="border rounded px-4 py-2"
-                    />
+                <div className="rounded-lg bg-gray-200 mb-4 p-4">
+                  <label className="mb-4 block font-semibold text-gray-800">Select Date Range and Filters:</label>
+                  
+                  <div className="flex flex-wrap gap-4 items-end">
+                    {/* Start Date */}
+                    <div className="flex flex-col">
+                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
+                        Start Date:
+                      </label>
+                      <DatePicker
+                        id="startDate"
+                        selected={startDate}
+                        onChange={handleStartDateChange}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        placeholderText="Start Date"
+                        className="border rounded px-4 py-2"
+                      />
+                    </div>
+
+                    {/* End Date */}
+                    <div className="flex flex-col">
+                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700">
+                        End Date:
+                      </label>
+                      <DatePicker
+                        id="endDate"
+                        selected={endDate}
+                        onChange={handleEndDateChange}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate}
+                        placeholderText="End Date"
+                        className="border rounded px-4 py-2"
+                      />
+                    </div>
+
+                    {/* Loan Ref Input */}
+                    <div className="flex flex-col">
+                      <label htmlFor="loanRef" className="mb-1 text-sm font-medium text-gray-700">
+                        Loan Ref:
+                      </label>
+                      <input
+                        id="loanRef"
+                        type="text"
+                        placeholder="Loan Ref"
+                        value={loanRef}
+                        onChange={(e) => setLoanRef(e.target.value)}
+                        className="border rounded px-4 py-2 w-40"
+                      />
+                    </div>
+
+                    {/* Branch Select */}
+                    <div className="flex flex-col min-w-[200px]">
+                      <label htmlFor="branchSelect" className="mb-1 text-sm font-medium text-gray-700">
+                        Branch:
+                      </label>
+                      <Controller
+                        name="branch_id"
+                        control={control}
+                        rules={{ required: 'Branch is required' }}
+                        render={({ field }) => (
+                          <ReactSelect
+                            {...field}
+                            options={optionsBranch}
+                            placeholder="Select a branch..."
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption?.value);
+                              handleBranchChange(selectedOption?.value ?? '');
+                            }}
+                            value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    {/* Sub Branch Select */}
+                    <div className="flex flex-col min-w-[200px]">
+                      <label htmlFor="subBranchSelect" className="mb-1 text-sm font-medium text-gray-700">
+                        Sub Branch:
+                      </label>
+                      <Controller
+                        name="branch_sub_id"
+                        control={control}
+                        rules={{ required: 'Sub branch is required' }}
+                        render={({ field }) => (
+                          <ReactSelect
+                            {...field}
+                            options={optionsSubBranch}
+                            placeholder="Select a sub branch..."
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption?.value);
+                              handleBranchSubChange(selectedOption?.value ?? '');
+                            }}
+                            value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    {/* Search Button */}
+                    <div className="flex flex-col">
+                      <label className="mb-1 text-sm font-medium text-transparent select-none">Search</label>
+                      <button
+                        onClick={handleSearch}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                      >
+                        Search
+                      </button>
+                    </div>
                   </div>
                 </div>
+
     
                 <div className="overflow-x-auto overflow-h-auto h-[600px]">
                   <table className="min-w-full border-collapse border border-gray-300">
