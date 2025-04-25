@@ -74,7 +74,6 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Loan Proceeds</td>
                 <td className="px-4 py-2 text-gray-900">{formatNumber(Number(loanSingleData?.loan_proceeds))}</td>
               </tr>
-            
             </tbody>
           </table>
         </div>
@@ -90,6 +89,10 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Transaction Date</td>
                 <td className="px-4 py-2 text-gray-900">{formatDate(String(loanSingleData?.created_at))}</td>
+              </tr>
+              <tr className="">
+                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Loan Ref</td>
+                <td className="px-4 py-2 text-gray-900">{loanSingleData?.loan_ref}</td>
               </tr>
             </tbody>
           </table>
