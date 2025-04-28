@@ -121,6 +121,7 @@ const IncomeStatementList: React.FC = () => {
   // interest income
   const totalsIntInc = monthKeys.reduce((acc, month) => {
     console.log(month, 'month');
+    console.log(acc, 'acc');
     acc[month] = (isInterestIncomeData ?? []).reduce(
       (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
       0
