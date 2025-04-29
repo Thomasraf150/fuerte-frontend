@@ -20,7 +20,9 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
 
   useEffect(() => {
     if (sumTixData?.summary_tix) {
-      const calculatedTotals = sumTixData.summary_tix.reduce(
+      const calculatedTotals = sumTixData.summary_tix
+        ?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')
+        .reduce(
         (acc: any, item: any) => {
           return {
             totalDebit: parseFloat(acc.totalDebit) + parseFloat((item.debit || 0)),
@@ -57,14 +59,14 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                   No of Transaction
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
-                  {sumTixData && sumTixData?.summary_tix[0]?.ccount}
+                  {sumTixData && sumTixData?.summary_tix[4]?.ccount}
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
                 <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark">
                 </td>
               </tr>
-              {sumTixData?.summary_tix
+              {sumTixData?.summary_tix?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')
                   ?.sort((a: any, b: any) => customOrder.indexOf(a.description) - customOrder.indexOf(b.description))
                   .map((item: any, i: number) => (
                   <tr key={i}>
@@ -79,21 +81,20 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                     <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
                       {'\u20B1'} {formatNumberComma(Number(item.credit))}
                     </td>
-                  
                   </tr>
               ))}
               <tr>
-                <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11 text-lime-50 bg-yellow-500">
+                <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11 text-strokedark bg-yellow-500">
                   CONTROL TOTALS
                 </td>
-                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark text-lime-50 bg-yellow-500">
+                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark text-strokedark bg-yellow-500">
                   
                 </td>
-                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark text-lime-50 bg-yellow-500">
-                  {'\u20B1'} {formatToTwoDecimalPlaces(String(totals?.totalDebit))}
+                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark text-strokedark bg-yellow-500">
+                  {'\u20B1'} {formatNumberComma(totals?.totalDebit)}
                 </td>
-                <td className="border-b text-center border-[#eee] px-3 py-4 dark:border-strokedark text-lime-50 bg-yellow-500">
-                  {'\u20B1'} {formatToTwoDecimalPlaces(String(totals?.totalCredit))}
+                <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark text-strokedark bg-yellow-500">
+                  {'\u20B1'} {formatNumberComma(totals?.totalCredit)}
                 </td>
               </tr>
             </tbody>
