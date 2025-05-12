@@ -580,11 +580,11 @@ const IncomeStatementList: React.FC = () => {
                         <td className="border text-left">NET INCOME BEFORE OTHER INCOME</td>
                         {monthKeys.map((month) => (
                           <td key={month} className="border text-right">
-                            {Math.abs((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]).toFixed(2)}
+                            {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]).toFixed(2)}
                           </td>
                         ))}
                         <td className="border text-right">
-                          {Math.abs((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp).toFixed(2)}
+                          {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp).toFixed(2)}
                         </td>
                       </tr>
                     </tfoot>
