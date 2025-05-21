@@ -114,7 +114,7 @@ const useBorrower = () => {
     const result = await response.json();
     if (result) {
       toast.success(result.data.saveBorrower.message);
-      setBorrowerLoading(false); 
+      setBorrowerLoading(false);
     }
   };
 
