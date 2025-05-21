@@ -17,6 +17,7 @@ interface BorrInfoProps {
   dataBorrCompany?: DataBorrCompanies[] | undefined;
   onSubmitBorrower: (d: any) => void;
   singleData: BorrowerRowInfo | undefined;
+  borrowerLoading: boolean;
   setShowForm: (v: boolean) => void;
   fetchDataBorrower: (v1: number, v2: number) => void;
   fetchDataChief: (v1: number, v2: number) => void;
@@ -31,7 +32,7 @@ interface OptionProps {
   hidden?: boolean;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany }) => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
   const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -411,7 +412,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="is_rent"
                       type="select"
                       icon={Home}
-                      register={register('is_rent', { required: 'Loan Code is required' })}
+                      register={register('is_rent', { required: 'Type of Residency is required' })}
                       error={errors.is_rent?.message}
                       options={[
                         { value: '', label: 'Type of Residency', hidden: true },
@@ -450,7 +451,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="chief_id"
                       type="select"
                       icon={Home}
-                      register={register('chief_id', { required: 'Loan Code is required' })}
+                      register={register('chief_id', { required: 'Chief is required' })}
                       error={errors.chief_id?.message}
                       options={optionsChief}
                     />
@@ -461,7 +462,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="gender"
                       type="select"
                       icon={Home}
-                      register={register('gender', { required: 'Loan Code is required' })}
+                      register={register('gender', { required: 'Gender is required' })}
                       error={errors.gender?.message}
                       options={[
                         { value: '', label: 'Select Gender', hidden: true },
@@ -693,7 +694,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="company_borrower_id"
                       type="select"
                       icon={Home}
-                      register={register('company_borrower_id', { required: 'Loan Code is required' })}
+                      register={register('company_borrower_id', { required: 'Office is required' })}
                       error={errors.company_borrower_id?.message}
                       options={optionsBorrComp}
                     />
@@ -796,7 +797,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="employment_status"
                       type="select"
                       icon={Home}
-                      register={register('employment_status', { required: 'Loan Code is required' })}
+                      register={register('employment_status', { required: 'Employee Status is required' })}
                       error={errors.employment_status?.message}
                       options={[
                         { value: '', label: 'Select Area', hidden: true },
@@ -971,6 +972,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               <button
                 className="flex justify-center rounded bg-black px-6 py-2 font-medium text-gray hover:bg-opacity-90"
                 type="submit"
+                disabled={borrowerLoading}
               >
                 Save
               </button>

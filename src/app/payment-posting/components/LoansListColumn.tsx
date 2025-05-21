@@ -52,6 +52,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
   },
   {
     name: 'Status',
+    selector: row => row.custom_status ?? '',
     cell: row => (
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${

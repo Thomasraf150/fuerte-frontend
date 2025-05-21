@@ -552,6 +552,7 @@ export interface BorrLoanRowData {
   borrower: BorrowerRowInfo;
   acctg_entry: AcctgEntryRowData;
   user: User;
+  custom_status: string;
 }
 
 export interface BorrLoanFormValues {

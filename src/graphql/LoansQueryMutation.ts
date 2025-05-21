@@ -111,6 +111,7 @@ const BORROWER_LOAN_QUERY: string = `
             branch_sub_id
             name
           }
+          custom_status
         }
     }
   }
@@ -303,6 +304,15 @@ const GET_LOAN_RENEWAL: string = `
   }
 `;
 
+const DELETE_LOANS: string = `
+   query RemoveLoans($input: LoanIdDeleteInp){
+    removeLoans(input: $input) {
+      status
+      message
+    }
+  }
+`;
+
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
   PROCESS_BORROWER_LOAN_MUTATION,
@@ -312,7 +322,8 @@ const LoanProductsQueryMutations = {
   SAVE_LOAN_BANK_DETAILS,
   SAVE_LOAN_RELEASE,
   PRINT_LOAN_DETAILS,
-  GET_LOAN_RENEWAL
+  GET_LOAN_RENEWAL,
+  DELETE_LOANS
 };
 
 export default LoanProductsQueryMutations;

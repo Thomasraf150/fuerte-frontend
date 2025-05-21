@@ -77,6 +77,7 @@ const BorrowerList: React.FC = () => {
                 dataSubArea={dataSubArea}
                 dataBorrCompany={dataBorrCompany}
                 onSubmitBorrower={onSubmitBorrower}
+                borrowerLoading={borrowerLoading}
                 fetchDataBorrower={fetchDataBorrower}
                 fetchDataChief={fetchDataChief}
                 fetchDataArea={fetchDataArea}

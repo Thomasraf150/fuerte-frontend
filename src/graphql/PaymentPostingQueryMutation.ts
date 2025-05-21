@@ -75,6 +75,7 @@ const LOANS_LIST_QUERY: string = `
             amount
             due_date
           }
+          custom_status
         }
     }
   }

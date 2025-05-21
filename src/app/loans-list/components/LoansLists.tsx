@@ -6,17 +6,18 @@ import loansListColumn from './LoansListColumn';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
 import LoanPnSigningForm from './LoanPnSigningForm';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
 
 const column = loansListColumn;
 
 const LoansLists: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoans, loading } = useLoans();
+  const { loanData, fetchLoans, handleDeleteLoans, loading } = useLoans();
 
-  const handleRowClick = (data: BorrLoanRowData) => {
-    setShowForm(true);
+  const handleRowClick = async (data: BorrLoanRowData) => {
     setSingleData(data);
+    handleDeleteLoans(String(data.id), 'rm_loans', fetchLoans);
   }
  
   const handleViewWholeLoan = (data: BorrLoanRowData) => {
@@ -27,11 +28,11 @@ const LoansLists: React.FC = () => {
 
   const handleShowForm = (d: boolean) => {
     setShowForm(d);
-    fetchLoans(1000, 1, 0);
+    fetchLoans(100000, 1, 0);
   }
 
   useEffect(() => {
-    fetchLoans(1000, 1, 0);
+    fetchLoans(100000, 1, 0);
   }, [])
 
   return (

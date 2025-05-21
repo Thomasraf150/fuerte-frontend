@@ -8,6 +8,7 @@ import ManualDate from '../TabForm/ManualDate';
 import { formatNumber } from '@/utils/formatNumber';
 import useLoans from '@/hooks/useLoans';
 import { BorrLoanRowData } from '@/utils/DataTypes';
+import { Calendar } from 'react-feather';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -22,7 +23,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   const [newMonthlyList, setNewMonthlyList] = useState<string[]>();
   const [udiComputedList, setUdiComputedList] = useState<string[]>();
   const [selectedOption, setSelectedOption] = useState<string>();
-  const { submitApproveRelease } = useLoans();
+  const { submitApproveRelease, handleUpdateMaturity, fetchLoans } = useLoans();
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOption(event.target.value);
@@ -48,46 +49,62 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
 
   if (loanSingleData?.loan_schedules && loanSingleData.loan_schedules.length > 0) {
     return (
-      <div className="grid grid-cols-3">
-        <div className="flow-root  border border-gray-100 py-3 shadow-sm mr-3">
-          <dl className="-my-3 divide-y divide-gray-100 text-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-              <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Monthly Amortization</dt>
-              {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-            </div>
-            <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
-              <dt className="font-medium text-center text-gray-900">Date</dt>
-              <dt className="font-medium text-center text-gray-900">Monthly</dt>
-            </div>
-            {loanSingleData.loan_schedules && loanSingleData.loan_schedules.map((item, i) => {
-            return (
-              <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
-                <dd className="text-gray-700 text-center">{item.due_date}</dd>
-                <dt className="font-medium text-center text-gray-900">{formatNumber(Number(item.amount))}</dt>
-              </div>
-            )
-          })}
-          </dl>
+      <div>
+        <div className="grid grid-cols-7 mb-2">
+          {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
+          <button
+              className="bg-green-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-green-600 text-sm"
+              type="button"
+              onClick={() => handleUpdateMaturity(loanSingleData?.id, 'change_effectivity', handleRefetchData)}
+            >
+              <span className="mt-1 mr-1">
+                <Calendar size={17} /> 
+              </span>
+              <span>Update Maturity</span>
+            </button>
+          ) : ('')}
         </div>
-        <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-          <dl className="-my-3 divide-y divide-gray-100 text-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-              <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">UDI Schedule</dt>
-              {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-            </div>
-            <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
-              <dt className="font-medium text-center text-gray-900">Date</dt>
-              <dt className="font-medium text-center text-gray-900">Monthly</dt>
-            </div>
-            {loanSingleData.loan_udi_schedules && loanSingleData.loan_udi_schedules.map((item, i) => {
-            return (
-              <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
-                <dd className="text-gray-700 text-center">{item.due_date}</dd>
-                <dt className="font-medium text-center text-gray-900">{formatNumber(Number(item.amount))}</dt>
+        <div className="grid grid-cols-3">
+          <div className="flow-root  border border-gray-100 py-3 shadow-sm mr-3">
+            <dl className="-my-3 divide-y divide-gray-100 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
+                <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Monthly Amortization</dt>
+                {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
               </div>
-            )
-          })}
-          </dl>
+              <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
+                <dt className="font-medium text-center text-gray-900">Date</dt>
+                <dt className="font-medium text-center text-gray-900">Monthly</dt>
+              </div>
+              {loanSingleData.loan_schedules && loanSingleData.loan_schedules.map((item, i) => {
+              return (
+                <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
+                  <dd className="text-gray-700 text-center">{item.due_date}</dd>
+                  <dt className="font-medium text-center text-gray-900">{formatNumber(Number(item.amount))}</dt>
+                </div>
+              )
+            })}
+            </dl>
+          </div>
+          <div className="flow-root  border border-gray-100 py-3 shadow-sm">
+            <dl className="-my-3 divide-y divide-gray-100 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
+                <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">UDI Schedule</dt>
+                {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
+              </div>
+              <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
+                <dt className="font-medium text-center text-gray-900">Date</dt>
+                <dt className="font-medium text-center text-gray-900">Monthly</dt>
+              </div>
+              {loanSingleData.loan_udi_schedules && loanSingleData.loan_udi_schedules.map((item, i) => {
+              return (
+                <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
+                  <dd className="text-gray-700 text-center">{item.due_date}</dd>
+                  <dt className="font-medium text-center text-gray-900">{formatNumber(Number(item.amount))}</dt>
+                </div>
+              )
+            })}
+            </dl>
+          </div>
         </div>
       </div>
 
@@ -389,7 +406,6 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
         </>
       )}
       </div>
-    
     </div>
   );
 };

@@ -20,7 +20,8 @@ const useLoans = () => {
           SAVE_LOAN_BANK_DETAILS,
           SAVE_LOAN_RELEASE,
           PRINT_LOAN_DETAILS,
-          GET_LOAN_RENEWAL } = LoansQueryMutation;
+          GET_LOAN_RENEWAL, 
+          DELETE_LOANS } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
@@ -343,6 +344,74 @@ const useLoans = () => {
     }
     
   };
+  
+  const handleDeleteLoans = async (loan_id: String, type: String, fetchLoans: (a: number, b: number, c: number) => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let variables: { input: any } = {
+      input: {
+        loan_id,
+        type
+      }
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: DELETE_LOANS,
+          variables,
+        }),
+      });
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        toast.success(response?.data?.removeLoans?.message);
+        fetchLoans(100000, 1, 0);
+      }
+    }
+  };
+  
+  const handleUpdateMaturity = async (loan_id: String, type: String, handleRefetchLoanData: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let variables: { input: any } = {
+      input: {
+        loan_id,
+        type
+      }
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'This loan is already released, once you confirm it will go back to for approval status',
+      'Confirm',
+    );
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: DELETE_LOANS,
+          variables,
+        }),
+      });
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        toast.success(response?.data?.removeLoans?.message);
+        handleRefetchLoanData();
+      }
+    }
+  };
 
    // Fetch data on component mount if id exists
   useEffect(() => {
@@ -364,7 +433,9 @@ const useLoans = () => {
     onSubmitLoanRelease,
     printLoanDetails,
     fetchRerewalLoan,
-    dataComputedRenewal
+    dataComputedRenewal,
+    handleDeleteLoans,
+    handleUpdateMaturity
   };
 };
 

@@ -56,20 +56,6 @@ const CollectionListInfo: React.FC<CollectionListProps> = ({ setShowForm }) => {
           <div className="p-4">
             {activeTab === 'tab1' && (
               <div id="content1">
-                {/* <BorrowerDetails  
-                  dataChief={dataChief}
-                  dataArea={dataArea}
-                  dataSubArea={dataSubArea}
-                  dataBorrCompany={dataBorrCompany}
-                  onSubmitBorrower={onSubmitBorrower}
-                  singleData={singleData} 
-                  setShowForm={setShowForm} 
-                  fetchDataBorrower={fetchDataBorrower}
-                  fetchDataChief={fetchDataChief}
-                  fetchDataArea={fetchDataArea}
-                  fetchDataSubArea={fetchDataSubArea}
-                  fetchDataBorrCompany={fetchDataBorrCompany}
-                /> */}
               </div>
             )}
             {activeTab === 'tab2' && (

@@ -88,11 +88,12 @@ const useBorrower = () => {
   });
 
   const onSubmitBorrower: SubmitHandler<BorrowerInfo> = async (data) => {
+    setBorrowerLoading(true);
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
     let mutation;
     const variables = createBorrVariables(data, Number(userData?.user?.id));
-
+    
     if (data.id) {
       mutation = SAVE_BORROWER_MUTATION;
       variables.inputBorrInfo.id = data.id;
@@ -111,7 +112,10 @@ const useBorrower = () => {
       }),
     });
     const result = await response.json();
-    toast.success(result.data.saveBorrower.message);
+    if (result) {
+      toast.success(result.data.saveBorrower.message);
+      setBorrowerLoading(false); 
+    }
   };
 
   const fetchDataChief = async (first: number, page: number) => {

@@ -54,6 +54,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   },
   {
     name: 'Loan Status',
+    selector: row => row.custom_status ?? '',
     cell: row => (
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
@@ -85,8 +86,24 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
       return (
         <>
           <Tooltip text="View">
-            <Eye onClick={() => handleViewWholeLoan(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+            <Eye onClick={() => handleViewWholeLoan(row)} size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
           </Tooltip>
+          {
+          row?.acctg_entry !== null ? ('') :
+          (row.is_closed === '1' ? (
+            ''
+          ) :
+          (row.status < 3
+            ? (
+              <>
+                {` | `}
+                <Tooltip text="Remove">
+                  <Trash2 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+                </Tooltip>
+              </>
+            ) : ('')))
+          }
+          
         </>
       )
     },

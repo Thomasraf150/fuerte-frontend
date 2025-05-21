@@ -171,7 +171,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             </span>
             <span>Release</span>
           </button>
-          {loanSingleData?.acctg_entry === null && (
+          {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
             <button
               className="bg-yellow-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-yellow-400 text-sm"
               type="button"
@@ -182,7 +182,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
               </span>
               <span>Post Accounting</span>
             </button>
-          )}
+          ) : ('')}
         </div>
       </div>
       </form>
