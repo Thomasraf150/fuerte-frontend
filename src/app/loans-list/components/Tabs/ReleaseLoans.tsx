@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Hash, CreditCard, Save, Calendar, List } from 'react-feather';
+import { Hash, Calendar, Save, List } from 'react-feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,6 +18,7 @@ interface OMProps {
   fetchCoaDataTable: () => void;
   branchSubData: DataSubBranches[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
+  handleChangeReleasedDate: (l: string, rd: string, fn: () => void) => void;
 }
 interface Option {
   value: string;
@@ -25,7 +26,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount }) => {
+const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
   // const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
 
@@ -172,16 +173,28 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             <span>Release</span>
           </button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
-            <button
-              className="bg-yellow-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-yellow-400 text-sm"
-              type="button"
-              onClick={() => setShowAcctgEntry(true)}
-            >
-              <span className="mt-1 mr-1">
-                <List size={17} /> 
-              </span>
-              <span>Post Accounting</span>
-            </button>
+            <>
+              <button
+                className="bg-green-600 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-green-500 text-sm"
+                type="button"
+                onClick={() => handleChangeReleasedDate(String(loanSingleData?.id), String(watch('released_date')), handleRefetchData)}
+              >
+                <span className="mt-1 mr-1">
+                  <Calendar size={17} /> 
+                </span>
+                <span>Update Released Date</span>
+              </button>
+              <button
+                className="bg-yellow-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-yellow-400 text-sm"
+                type="button"
+                onClick={() => setShowAcctgEntry(true)}
+              >
+                <span className="mt-1 mr-1">
+                  <List size={17} /> 
+                </span>
+                <span>Post Accounting</span>
+              </button>
+            </>
           ) : ('')}
         </div>
       </div>

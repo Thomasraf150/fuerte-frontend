@@ -8,13 +8,57 @@ interface ParentFormBr {
 
 const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
 
-  const totalDeduction = Number(dataComputedLoans?.loan_details[2]?.credit ?? 0) + 
-                          Number(dataComputedLoans?.loan_details[3]?.credit ?? 0) + 
-                          Number(dataComputedLoans?.loan_details[4]?.credit ?? 0) + 
-                          Number(dataComputedLoans?.loan_details[5]?.credit ?? 0) +
-                          Number(dataComputedLoans?.loan_details[6]?.credit ?? 0);
+  // {formatNumber(
+  //   Number(
+  //     dataComputedLoans?.loan_details?.find((entry) =>
+  //       entry.description.toLowerCase().includes('collection')
+  //     )?.credit || 0 // <-- access credit here
+  //   )
+  // )}
+
+  const totalDeduction = Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('udi')
+                            )?.credit || 0 // <-- access credit here
+                          ) + 
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('insurance')
+                            )?.credit || 0 // <-- access credit here
+                          ) + 
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('addon udi')
+                            )?.credit || 0 // <-- access credit here
+                          ) +
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('agent fee')
+                            )?.credit || 0 // <-- access credit here
+                          ) + 
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('processing')
+                            )?.credit || 0 // <-- access credit here
+                          ) + 
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('collection')
+                            )?.credit || 0 // <-- access credit here
+                          ) + 
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('notarial')
+                            )?.credit || 0 // <-- access credit here
+                          ) + 
+                          Number(
+                            dataComputedLoans?.loan_details?.find((entry) =>
+                              entry.description.toLowerCase().includes('penalty')
+                            )?.credit || 0 // <-- access credit here
+                          );
 
   useEffect(() => {
+    console.log(dataComputedLoans?.loan_details, 'dataComputedLoans?.loan_details');
   }, [dataComputedLoans]);
 
   return (
@@ -69,7 +113,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">U.D.I {`(${dataComputedLoans?.loan_product?.udi}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[2]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                            Number(
+                                                              dataComputedLoans?.loan_details?.find((entry) =>
+                                                                entry.description.toLowerCase().includes('udi')
+                                                              )?.credit || 0 // <-- access credit here
+                                                            )
+                                                          )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -77,7 +127,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Processing Fee {`(${dataComputedLoans?.loan_product?.processing}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[3]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                            Number(
+                                                              dataComputedLoans?.loan_details?.find((entry) =>
+                                                                entry.description.toLowerCase().includes('processing')
+                                                              )?.credit || 0 // <-- access credit here
+                                                            )
+                                                          )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -85,7 +141,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Agent Fee {`(${dataComputedLoans?.loan_product?.agent_fee}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[13] !== undefined ? dataComputedLoans?.loan_details[13]?.credit : 0))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                            Number(
+                                                              dataComputedLoans?.loan_details?.find((entry) =>
+                                                                entry.description.toLowerCase().includes('agent fee')
+                                                              )?.credit || 0 // <-- access credit here
+                                                            )
+                                                          )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -93,7 +155,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Collection Fee {`(${dataComputedLoans?.loan_product?.collection}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[4]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                            Number(
+                                                              dataComputedLoans?.loan_details?.find((entry) =>
+                                                                entry.description.toLowerCase().includes('collection')
+                                                              )?.credit || 0 // <-- access credit here
+                                                            )
+                                                          )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -101,7 +169,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Insurance Fee {`(${dataComputedLoans?.loan_product?.insurance}%)`}</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[5]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                            Number(
+                                                              dataComputedLoans?.loan_details?.find((entry) =>
+                                                                entry.description.toLowerCase().includes('insurance')
+                                                              )?.credit || 0 // <-- access credit here
+                                                            )
+                                                          )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -109,7 +183,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Notarial Fee</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[6]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                            Number(
+                                                              dataComputedLoans?.loan_details?.find((entry) =>
+                                                                entry.description.toLowerCase().includes('notarial')
+                                                              )?.credit || 0 // <-- access credit here
+                                                            )
+                                                          )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -140,7 +220,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Outstanding Balance.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[1]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                              Number(
+                                                                dataComputedLoans?.loan_details?.find((entry) =>
+                                                                  entry.description.toLowerCase().includes('outstanding balance')
+                                                                )?.credit || 0 // <-- access credit here
+                                                              )
+                                                            )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -148,7 +234,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Penalty</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[9]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                              Number(
+                                                                dataComputedLoans?.loan_details?.find((entry) =>
+                                                                  entry.description.toLowerCase().includes('penalty')
+                                                                )?.credit || 0 // <-- access credit here
+                                                              )
+                                                            )}</h3>
                   </div>
                 </li>
                 
@@ -164,7 +256,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Rebates.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.loan_details[8]?.credit))}</h3>
+                    <h3 className="text-sm text-gray-900">{formatNumber(
+                                                              Number(
+                                                                dataComputedLoans?.loan_details?.find((entry) =>
+                                                                  entry.description.toLowerCase().includes('rebates')
+                                                                )?.debit || 0 // <-- access credit here
+                                                              )
+                                                            )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -180,7 +278,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Addon Amount</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <h3 className="text-sm text-strokedark">{formatNumber(Number(dataComputedLoans?.loan_details[10]?.debit))}</h3>
+                    <h3 className="text-sm text-strokedark">{formatNumber(
+                                                              Number(
+                                                                dataComputedLoans?.loan_details?.find((entry) =>
+                                                                  entry.description.toLowerCase().includes('addon amount')
+                                                                )?.debit || 0 // <-- access credit here
+                                                              )
+                                                            )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -188,7 +292,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Addon UDI</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <h3 className="text-sm text-strokedark"><span>- </span>{formatNumber(Number(dataComputedLoans?.loan_details[11]?.credit))}</h3>
+                    <h3 className="text-sm text-strokedark"><span>- </span>{formatNumber(
+                                                              Number(
+                                                                dataComputedLoans?.loan_details?.find((entry) =>
+                                                                  entry.description.toLowerCase().includes('addon amount')
+                                                                )?.credit || 0 // <-- access credit here
+                                                              )
+                                                            )}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -196,7 +306,13 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark">Addon Total.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <h3 className="text-sm text-strokedark">{formatNumber(Number(dataComputedLoans?.loan_details[12]?.credit))}</h3>
+                    <h3 className="text-sm text-strokedark">{formatNumber(
+                                                              Number(
+                                                                dataComputedLoans?.loan_details?.find((entry) =>
+                                                                  entry.description.toLowerCase().includes('addon total')
+                                                                )?.credit || 0 // <-- access credit here
+                                                              )
+                                                            )}</h3>
                   </div>
                 </li>
                 <li>

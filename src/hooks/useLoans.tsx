@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
+import moment from 'moment';
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
@@ -21,7 +22,8 @@ const useLoans = () => {
           SAVE_LOAN_RELEASE,
           PRINT_LOAN_DETAILS,
           GET_LOAN_RENEWAL, 
-          DELETE_LOANS } = LoansQueryMutation;
+          DELETE_LOANS,
+          UPDATE_LOAN_RELEASED } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
@@ -407,7 +409,48 @@ const useLoans = () => {
       if (response.errors) {
         toast.error(response.errors[0].message);
       } else {
-        toast.success(response?.data?.removeLoans?.message);
+        if (response?.data?.removeLoans?.status === false) {
+          toast.error(response?.data?.removeLoans?.message);
+        } else {
+          toast.success(response?.data?.removeLoans?.message);
+        }
+        handleRefetchLoanData();
+      }
+    }
+  };
+  const handleChangeReleasedDate = async (loan_id: String, released_date: String, handleRefetchLoanData: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let variables: { input: any } = {
+      input: {
+        loan_id,
+        released_date: moment(String(released_date)).format('YYYY-MM-DD')
+      }
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You are about to update the released date',
+      'Confirm',
+    );
+    if (isConfirmed) {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: UPDATE_LOAN_RELEASED,
+          variables,
+        }),
+      });
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        if (response?.data?.updateLoanReleasedDate?.status === false) {
+          toast.error(response?.data?.updateLoanReleasedDate?.message);
+        } else {
+          toast.success(response?.data?.updateLoanReleasedDate?.message);
+        }
         handleRefetchLoanData();
       }
     }
@@ -435,7 +478,8 @@ const useLoans = () => {
     fetchRerewalLoan,
     dataComputedRenewal,
     handleDeleteLoans,
-    handleUpdateMaturity
+    handleUpdateMaturity,
+    handleChangeReleasedDate
   };
 };
 

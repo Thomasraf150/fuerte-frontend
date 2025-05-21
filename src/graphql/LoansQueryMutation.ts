@@ -313,6 +313,15 @@ const DELETE_LOANS: string = `
   }
 `;
 
+const UPDATE_LOAN_RELEASED: string = `
+  query UpdateLoanReleasedDate($input: LoanUpReleasedDateInp){
+    updateLoanReleasedDate(input: $input) {
+      status
+      message
+    }
+  }
+`;
+
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
   PROCESS_BORROWER_LOAN_MUTATION,
@@ -323,7 +332,8 @@ const LoanProductsQueryMutations = {
   SAVE_LOAN_RELEASE,
   PRINT_LOAN_DETAILS,
   GET_LOAN_RENEWAL,
-  DELETE_LOANS
+  DELETE_LOANS,
+  UPDATE_LOAN_RELEASED
 };
 
 export default LoanProductsQueryMutations;
