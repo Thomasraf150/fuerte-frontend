@@ -28,11 +28,6 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                           ) + 
                           Number(
                             dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('addon udi')
-                            )?.credit || 0 // <-- access credit here
-                          ) +
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
                               entry.description.toLowerCase().includes('agent fee')
                             )?.credit || 0 // <-- access credit here
                           ) + 
@@ -295,7 +290,7 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
                     <h3 className="text-sm text-strokedark"><span>- </span>{formatNumber(
                                                               Number(
                                                                 dataComputedLoans?.loan_details?.find((entry) =>
-                                                                  entry.description.toLowerCase().includes('addon amount')
+                                                                  entry.description.toLowerCase().includes('addon udi')
                                                                 )?.credit || 0 // <-- access credit here
                                                               )
                                                             )}</h3>
