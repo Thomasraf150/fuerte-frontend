@@ -172,18 +172,18 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             </span>
             <span>Release</span>
           </button>
+          <button
+            className="bg-green-600 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-green-500 text-sm"
+            type="button"
+            onClick={() => handleChangeReleasedDate(String(loanSingleData?.id), String(watch('released_date')), handleRefetchData)}
+          >
+            <span className="mt-1 mr-1">
+              <Calendar size={17} /> 
+            </span>
+            <span>Update Released Date</span>
+          </button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
             <>
-              <button
-                className="bg-green-600 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-green-500 text-sm"
-                type="button"
-                onClick={() => handleChangeReleasedDate(String(loanSingleData?.id), String(watch('released_date')), handleRefetchData)}
-              >
-                <span className="mt-1 mr-1">
-                  <Calendar size={17} /> 
-                </span>
-                <span>Update Released Date</span>
-              </button>
               <button
                 className="bg-yellow-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-yellow-400 text-sm"
                 type="button"
