@@ -95,9 +95,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   });
     
   useEffect(() => {
-    fetchDataChief(100, 1); 
-    fetchDataArea(100, 1);
-    fetchDataBorrCompany(100, 1);
+    fetchDataChief(1000, 1); 
+    fetchDataArea(1000, 1);
+    fetchDataBorrCompany(1000, 1);
   }, []);
 
   // const { 
