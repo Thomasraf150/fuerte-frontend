@@ -328,6 +328,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       placeholder="0.00"
                       register={register('amount_applied', { required: true })}
                       error={errors.amount_applied && "This field is required"}
+                      onChange={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        const filteredValue = input.value.replace(/[^0-9,.]/g, '');
+                        input.value = filteredValue;
+                      }}
                     />
                   </div>
                   <div>
@@ -827,6 +832,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('monthly_gross', { required: true })}
                       error={errors.monthly_gross && "This field is required"}
+                      onChange={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        const filteredValue = input.value.replace(/[^0-9,.]/g, '');
+                        input.value = filteredValue;
+                      }}
                     />
                   </div>
                   <div>
@@ -837,6 +847,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('monthly_net', { required: true })}
                       error={errors.monthly_net && "This field is required"}
+                      onChange={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        const filteredValue = input.value.replace(/[^0-9,.]/g, '');
+                        input.value = filteredValue;
+                      }}
                     />
                   </div>
                 </div>
