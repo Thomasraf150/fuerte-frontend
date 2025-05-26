@@ -40,6 +40,13 @@ const BorrowerList: React.FC = () => {
     setActionLbl('Update Borrower');
   }
 
+  const handleRowRmBorrClick = (data: BorrowerRowInfo) => {
+    // setShowForm(true);
+    setSingleData(data);
+    console.log(data, 'data 222, ');
+    // setActionLbl('Update Borrower');
+  }
+
   useEffect(() => {
     fetchDataBorrower(3000, 1);
   }, [])
@@ -61,7 +68,7 @@ const BorrowerList: React.FC = () => {
                     <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
                     <CustomDatatable
                       apiLoading={borrowerLoading}
-                      columns={column(handleRowClick)}
+                      columns={column(handleRowClick, handleRowRmBorrClick)}
                       data={dataBorrower}
                       enableCustomHeader={true} 
                       title={''}  

@@ -5,7 +5,7 @@ import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 
-const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableColumn<BorrowerRowInfo>[] => [
+const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void, handleRowRmBorrClick: (row: BorrowerRowInfo) => void): TableColumn<BorrowerRowInfo>[] => [
   {
     name: 'Branch',
     cell: row => row.borrower_work_background?.area?.branch_sub?.name,
@@ -76,7 +76,7 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void): TableCo
           </Tooltip>
           {` | `}
           <Tooltip text="Remove">
-            <Trash2 size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+            <Trash2 onClick={() => handleRowRmBorrClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
           </Tooltip>
         </>
       )
