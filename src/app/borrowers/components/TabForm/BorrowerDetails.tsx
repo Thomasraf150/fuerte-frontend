@@ -17,6 +17,7 @@ interface BorrInfoProps {
   dataBorrCompany?: DataBorrCompanies[] | undefined;
   onSubmitBorrower: (d: any) => void;
   singleData: BorrowerRowInfo | undefined;
+  setSingleData: (d: BorrowerRowInfo | undefined) => void;
   borrowerLoading: boolean;
   setShowForm: (v: boolean) => void;
   fetchDataBorrower: (v1: number, v2: number) => void;
@@ -32,7 +33,7 @@ interface OptionProps {
   hidden?: boolean;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
   const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -136,8 +137,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
 
   const onSubmit = (data: BorrowerInfo) => {
     data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
+    
     onSubmitBorrower(data);
-    // setShowForm(false);
+    // setSingleData(data);
+    setShowForm(false);
     // fetchDataBorrower(100, 1);
   }
 
@@ -225,6 +228,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           });
         } else {
           // setValue(key as keyof BorrowerInfo, singleData[key]);
+
+          console.log(singleData, 'singleData');
           setValue('id', singleData.id);
           setValue('chief_id', singleData.chief_id);
           setValue('amount_applied', Number(singleData.amount_applied));
@@ -989,7 +994,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 type="submit"
                 disabled={borrowerLoading}
               >
-                Save
+                {borrowerLoading ? 'Please wait..' : 'Save'}
               </button>
             </div>
           </div>

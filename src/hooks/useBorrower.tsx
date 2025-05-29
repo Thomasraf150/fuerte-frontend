@@ -6,18 +6,20 @@ import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { useAuthStore } from "@/store";
 
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, BorrowerRowInfo } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 const useBorrower = () => {
 
-  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY } = BorrowerQueryMutations;
+  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY } = BorrowerQueryMutations;
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
   
   const [borrowerLoading, setBorrowerLoading] = useState<boolean>(false);
+  const [borrCrudLoading, setBorrCrudLoading] = useState<boolean>(false);
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
@@ -111,10 +113,11 @@ const useBorrower = () => {
         variables,
       }),
     });
+    setBorrowerLoading(false);
     const result = await response.json();
     if (result) {
       toast.success(result.data.saveBorrower.message);
-      setBorrowerLoading(false);
+      fetchDataBorrower(3000, 1);
     }
   };
 
@@ -212,6 +215,38 @@ const useBorrower = () => {
     setDataBorrCompany(result.data.getBorrCompanies.data);
   };
 
+  const handleRmBorrower = async (data: any) => {
+    let variables: { input: any } = {
+      input: {
+        id: data.id,
+        is_deleted: 1,
+      },
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You are deleting this borrower',
+      'Confirm',
+    );
+    if (isConfirmed) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: DELETE_BORROWER_QUERY,
+          variables
+        }),
+      });
+      const result = await response.json();
+      if (result) {
+        fetchDataBorrower(3000, 1);
+        toast.success(result.data?.deleteBorrowerData?.message);
+      }
+    }
+    
+  };
+
   const handleDeleteSubArea = async (data: any) => {
     let variables: { input: any } = {
       input: {
@@ -256,7 +291,9 @@ const useBorrower = () => {
     fetchDataBorrower,
     fetchDataChief,
     fetchDataArea,
-    fetchDataBorrCompany
+    fetchDataBorrCompany,
+    handleRmBorrower,
+    borrCrudLoading
     // fetchDataArea,
     // dataArea,
     // fetchDataSubArea,

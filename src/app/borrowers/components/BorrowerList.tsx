@@ -26,7 +26,9 @@ const BorrowerList: React.FC = () => {
       fetchDataChief,
       fetchDataArea,
       fetchDataBorrCompany,
-      fetchDataSubArea } = useBorrower();
+      fetchDataSubArea, 
+      handleRmBorrower,
+      borrCrudLoading } = useBorrower();
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
@@ -43,7 +45,7 @@ const BorrowerList: React.FC = () => {
   const handleRowRmBorrClick = (data: BorrowerRowInfo) => {
     // setShowForm(true);
     setSingleData(data);
-    console.log(data, 'data 222, ');
+    handleRmBorrower(data);
     // setActionLbl('Update Borrower');
   }
 
@@ -84,6 +86,7 @@ const BorrowerList: React.FC = () => {
                 dataSubArea={dataSubArea}
                 dataBorrCompany={dataBorrCompany}
                 onSubmitBorrower={onSubmitBorrower}
+                setSingleData={setSingleData}
                 borrowerLoading={borrowerLoading}
                 fetchDataBorrower={fetchDataBorrower}
                 fetchDataChief={fetchDataChief}

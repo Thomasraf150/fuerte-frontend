@@ -221,6 +221,15 @@ const DELETE_BORROWER_CO_MAKER: string = `
   }
 `;
 
+const DELETE_BORROWER_QUERY: string = `
+  query deleteBorrowerData($input: DeleteBorrowerInp){
+    deleteBorrowerData(input: $input){
+      status
+      message
+    }
+  }
+`;
+
 const BorrowerQueryMutations = {
   GET_BORROWER_QUERY,
   GET_BORROWER_ATTACHMENTS_QUERY,
@@ -229,7 +238,8 @@ const BorrowerQueryMutations = {
   UPDATE_BORROWER_ATTACHMENTS_QUERY,
   GET_BORROWER_CO_MAKER,
   SAVE_BORROWER_CO_MAKER,
-  DELETE_BORROWER_CO_MAKER
+  DELETE_BORROWER_CO_MAKER,
+  DELETE_BORROWER_QUERY
 };
 
 export default BorrowerQueryMutations;

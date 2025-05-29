@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 
 import React, { useState } from 'react';
@@ -20,6 +16,7 @@ interface BorrInfoProps {
   onSubmitBorrower: (d: any) => void;
   borrowerLoading: boolean;
   singleData?: BorrowerRowInfo | undefined;
+  setSingleData: (d: BorrowerRowInfo | undefined) => void;
   fetchDataBorrower: (v1: number, v2: number) => void;
   fetchDataChief: (v1: number, v2: number) => void;
   fetchDataArea: (v1: number, v2: number) => void;
@@ -27,7 +24,7 @@ interface BorrInfoProps {
   fetchDataBorrCompany: (v1: number, v2: number) => void;
 }
 
-const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, setShowForm, singleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
+const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
   const [showBorrAttForm, setShowBorrAttForm] = useState<boolean>(false);
 
@@ -112,6 +109,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
                   onSubmitBorrower={onSubmitBorrower}
                   borrowerLoading={borrowerLoading}
                   singleData={singleData} 
+                  setSingleData={setSingleData}
                   setShowForm={setShowForm} 
                   fetchDataBorrower={fetchDataBorrower}
                   fetchDataChief={fetchDataChief}
