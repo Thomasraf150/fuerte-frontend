@@ -73,10 +73,11 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
     ];
   }, [selectedValues, selectedValuesOb]);
 
-  console.log(unifiedSelectedValues);
+  // console.log(unifiedSelectedValues);
 
   useEffect(() => {
     setValue('renewal_details', unifiedSelectedValues);
+    console.log(dataComputedRenewal, ' dataComputedRenewal');
   }, [unifiedSelectedValues, renewalIDs])
 
   return (
@@ -154,7 +155,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                               console.warn("No OB schedules found");
                             }
 
-                            let fOb = Math.round((obTotal * 100) / 100);
+                            let fOb = ((obTotal * 100) / 100);
 
                             return obTotal > 0 ? (
                               <tr key="ob-total">
