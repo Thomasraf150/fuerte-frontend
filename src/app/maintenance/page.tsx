@@ -39,7 +39,7 @@ const Maintenance: React.FC = () => {
             Our system is currently under maintenance. We{`'`}re working hard to bring it back online as soon as possible.
             Please check back later.
           </p>
-          {userData?.user?.email === 'admin@gmail.com' && (
+          {userData?.user?.email === 'donsuperadmin@gmail.com' && (
             <button 
               type="button" 
               className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
