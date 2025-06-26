@@ -49,6 +49,8 @@ export default function RootLayout({
       console.log("Maintenance event received!", data);
       if (data.maintenance === true && pathname !== "/maintenance") {
         router.push("/maintenance");
+      } else {
+        router.push("/");
       }
     });
 
