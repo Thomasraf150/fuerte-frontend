@@ -50,9 +50,6 @@ export default function RootLayout({
       if (data.maintenance === true && pathname !== "/maintenance") {
         router.push("/maintenance");
       }
-      if (data.maintenance === false && pathname === "/maintenance") {
-        router.push("/");
-      }
     });
 
     return () => {
