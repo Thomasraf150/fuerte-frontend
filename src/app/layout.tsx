@@ -7,6 +7,10 @@ import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import './styles.css'; // Include your global styles
 import { Poppins } from 'next/font/google';
+import Pusher from "pusher-js";
+import { useRouter, usePathname } from "next/navigation";
+import useMaintenanceRedirect from '@/hooks/useMaintenanceRedirect';
+
 
 const poppins = Poppins({
   subsets: ['latin'], // Include subsets you need
@@ -26,9 +30,35 @@ export default function RootLayout({
 
   // const pathname = usePathname();
 
+  useMaintenanceRedirect();
+
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
   }, [loading]);
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+    });
+
+    const channel = pusher.subscribe("system");
+    channel.bind("MaintenanceModeChanged", (data: any) => {
+      console.log("Maintenance event received!", data);
+      if (data.maintenance === true && pathname !== "/maintenance") {
+        router.push("/maintenance");
+      } else {
+        router.push("/");
+      }
+    });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
+  }, [pathname, router]);
 
   return (
     <html lang="en">
