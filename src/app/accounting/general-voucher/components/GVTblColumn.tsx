@@ -13,14 +13,21 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     style: {
       minWidth: '150px',
     },
-    width: '350px'
+    width: '150px'
 
   },
   {
     name: 'Ref #',
     cell: row => row?.journal_ref,
     sortable: true,
-    width: '250px'
+    width: '150px'
+  },
+  {
+    name: 'Payee',
+    selector: row => row?.borrower_full_name === '' ? row?.vendor_full_name : row?.borrower_full_name,
+    cell: row => row?.borrower_full_name === '' ? row?.vendor_full_name : row?.borrower_full_name,
+    sortable: true,
+    width: '290px'
   },
   {
     name: 'Check #',

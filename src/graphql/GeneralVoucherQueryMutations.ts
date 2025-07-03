@@ -40,6 +40,16 @@ const GET_GV_QUERY: string = `
         id
         name
       }
+      loan {
+        id
+        borrower {
+          lastname
+          firstname
+          middlename
+        }
+      }
+      borrower_full_name
+      vendor_full_name
     }
   }
 `;

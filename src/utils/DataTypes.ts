@@ -777,6 +777,9 @@ export interface RowAcctgEntry {
   is_cancelled: boolean;
   acctg_details: RowAcctgDetails[];
   vendor: RowVendorsData;
+  loan: BorrLoanRowData
+  borrower_full_name: string;
+  vendor_full_name: string;
 }
 export interface RowVendorTypeData {
   id?: string;
