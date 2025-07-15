@@ -23,9 +23,10 @@ interface FormInputProps {
   className?: string;
   readOnly?: boolean;
   value?: string;
+  maxLength?: number;
 }
 
-const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, error, options, placeholder, disabled, defaultValue, onChange, className, readOnly, value }) => {
+const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, maxLength, error, options, placeholder, disabled, defaultValue, onChange, className, readOnly, value }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
     if (onChange) {
       onChange(event);
@@ -72,6 +73,7 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
             onChange={handleChange}
             readOnly={readOnly}
             value={value}
+            maxLength={maxLength}
           />
         )}
         {type !== 'checkbox' && type !== 'file' && (

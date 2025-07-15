@@ -196,8 +196,19 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
         id="ref_ctr_year"
         type="text"
         icon={Home}
-        register={register('ref_ctr_year', { required: true })}
+        register={register('ref_ctr_year', { 
+          required: true,
+          maxLength: {
+            value: 2,
+            message: "Only 2 digits allowed",
+          },
+          pattern: {
+            value: /^[0-9]{1,2}$/,
+            message: "Only numeric values are allowed",
+          },
+        })}
         error={errors.ref_ctr_year && "This field is required"}
+        maxLength={2}
       />
 
       <div className="flex justify-end gap-4.5">
