@@ -91,7 +91,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
           (row.is_closed === '1' ? (
             ''
           ) :
-          (row.status < 3
+          (row.status <= 3
             ? (
               <>
                 {` | `}
