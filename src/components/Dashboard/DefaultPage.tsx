@@ -149,7 +149,7 @@ const DefaultPage: React.FC = () => {
               Branch:
             </label>
             <Controller
-              name="branch_sub_id"
+              name="branch_id"
               control={control}
               rules={{ required: 'Branch is required' }}
               render={({ field }) => (
