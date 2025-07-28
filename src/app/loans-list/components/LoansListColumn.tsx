@@ -58,23 +58,21 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
     cell: row => (
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
-          row?.acctg_entry !== null ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-          (row.is_closed === '1' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
-          (row.status === 0
+          row.custom_status === 'Closed' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
+          (row.custom_status === 'For Approval'
             ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
-            : row.status === 1
+            : row.custom_status === 'Approved'
             ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-red'
-            : row.status === 2
+            : row.custom_status === 'For Releasing'
             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-            : row.status === 3
+            : row.custom_status === 'Released'
             ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
-            : ''))
+            : row.custom_status === 'Posted'
+            ? 'bg-amber-200 text-graydark dark:bg-green-900 dark:text-green-300'
+            : '')
         }`}
       >
-        {`${
-          row?.acctg_entry !== null ? 'Posted' : (row.is_closed === '1' ? 'Closed' :
-          loanStatus(row.status))
-        }`}
+      {row.custom_status}
       </span>
     ),
     sortable: true,

@@ -26,11 +26,11 @@ const SoaList: React.FC = () => {
 
   const handleShowForm = (d: boolean) => {
     setShowForm(d);
-    fetchLoans(1000, 1, 0);
+    fetchLoans(100000, 1, 0);
   }
 
   useEffect(() => {
-    fetchLoans(1000, 1, 0);
+    fetchLoans(100000, 1, 0);
   }, [])
 
   return (

@@ -190,7 +190,7 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
         icon={Home}
         register={register('ref_no_length', { required: true })}
         error={errors.ref_no_length && "This field is required"}
-      />
+      /> 
       <FormInput
         label="Year Today (last 2 digit)"
         id="ref_ctr_year"
