@@ -31,7 +31,7 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
         if (actionLbl === 'Update Sub Branch') {
           setValue('id', initialSubData.id ?? '')
           setValue('code', initialSubData?.code);
-          setValue('branch_id', initialSubData?.branch_id);
+          setValue('branch_id', selectedBranchId);
           setValue('name', initialSubData?.name);
           setValue('address', initialSubData?.address);
           setValue('contact_no', initialSubData?.contact_no);
@@ -54,8 +54,24 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
             ref_current_value: 0,
             ref_no_length: 0
           });
+          setValue('branch_id', selectedBranchId);
         }
+      } else {
+          reset({
+            code: '',
+            name: '',
+            address: '',
+            contact_no: '',
+            head_contact: '',
+            head_email: '',
+            head_name: '',
+            ref_ctr_year: 0,
+            ref_current_value: 0,
+            ref_no_length: 0
+          });
+          setValue('branch_id', selectedBranchId);
       }
+      console.log(initialSubData, ' initialSubData');
   }, [selectedBranchId, actionLbl, initialSubData]);
 
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
@@ -166,50 +182,54 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
         error={errors.head_contact && "This field is required"}
       />
       <FormInput
-        label="Head Email."
+        label={`Head Email`}
         id="head_email"
         type="text"
         icon={Home}
         register={register('head_email', { required: true })}
         error={errors.head_email && "This field is required"}
       />
+      {initialSubData?.id === undefined && (
+          <>
+            <FormLabel title={`Reference Number`}/>
+              <FormInput
+                label="Current Value"
+                id="ref_current_value"
+                type="text"
+                icon={Home}
+                register={register('ref_current_value', { required: true })}
+                error={errors.ref_current_value && "This field is required"}
+              />
+              <FormInput
+                label="Reference No. Length"
+                id="ref_no_length"
+                type="text"
+                icon={Home}
+                register={register('ref_no_length', { required: true })}
+                error={errors.ref_no_length && "This field is required"}
+              /> 
+              <FormInput
+                label="Year Today (last 2 digit)"
+                id="ref_ctr_year"
+                type="text"
+                icon={Home}
+                register={register('ref_ctr_year', { 
+                  required: true,
+                  maxLength: {
+                    value: 2,
+                    message: "Only 2 digits allowed",
+                  },
+                  pattern: {
+                    value: /^[0-9]{1,2}$/,
+                    message: "Only numeric values are allowed",
+                  },
+                })}
+                error={errors.ref_ctr_year && "This field is required"}
+                maxLength={2}
+              />
+          </>
+      )}
       
-      <FormLabel title={`Reference Number`}/>
-      <FormInput
-        label="Current Value"
-        id="ref_current_value"
-        type="text"
-        icon={Home}
-        register={register('ref_current_value', { required: true })}
-        error={errors.ref_current_value && "This field is required"}
-      />
-      <FormInput
-        label="Reference No. Length"
-        id="ref_no_length"
-        type="text"
-        icon={Home}
-        register={register('ref_no_length', { required: true })}
-        error={errors.ref_no_length && "This field is required"}
-      /> 
-      <FormInput
-        label="Year Today (last 2 digit)"
-        id="ref_ctr_year"
-        type="text"
-        icon={Home}
-        register={register('ref_ctr_year', { 
-          required: true,
-          maxLength: {
-            value: 2,
-            message: "Only 2 digits allowed",
-          },
-          pattern: {
-            value: /^[0-9]{1,2}$/,
-            message: "Only numeric values are allowed",
-          },
-        })}
-        error={errors.ref_ctr_year && "This field is required"}
-        maxLength={2}
-      />
 
       <div className="flex justify-end gap-4.5">
         <button

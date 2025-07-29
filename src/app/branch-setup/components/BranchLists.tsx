@@ -56,6 +56,7 @@ const BranchLists: React.FC = () => {
 
   const handleCreateSubRowClick = () => {
     handleShowSubForm('Create Sub Branch', true)
+    setInitialFormSubData(null);
     setShowForm(false);
   };
 
@@ -84,7 +85,6 @@ const BranchLists: React.FC = () => {
   }
 
   useEffect(() => {
-    console.log(dataBranchSub, ' dataBranchSub');
   }, [dataBranch, dataBranchSub, initialFormData, selectedBranchID])
 
   return (
