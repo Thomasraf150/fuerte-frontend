@@ -195,7 +195,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                     icon={Edit3}
                     error={errors.vendor_id && "journal desc is required"}
                     className='mt-2'
-                    value={singleData?.borrower_full_name === '' ? dataPayee?.name : singleData?.borrower_full_name}
+                    value={singleData === undefined ? dataPayee?.name : singleData?.borrower_full_name}
                     readOnly
                   />
                 </div>
