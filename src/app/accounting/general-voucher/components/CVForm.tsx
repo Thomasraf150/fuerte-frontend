@@ -16,13 +16,14 @@ interface ParentFormBr {
   actionLbl: string;
   singleData: RowAcctgEntry | undefined;
   createGV: (row: RowAcctgEntry) => void;
+  updateGV: (row: RowAcctgEntry, jd: string) => void;
   fetchGV: (a: string, b: string, c: string) => void;
   printSummaryTicketDetails: (a: string) => void;
   loading: boolean;
 }
 
-const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, printSummaryTicketDetails, loading }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
+const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading }) => {
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
   // const { createGV, fetchGV, loading } = useGeneralVoucher();
@@ -124,12 +125,27 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   const handleCancelEntry = async (data: RowAcctgEntry) => {
     console.log(data, ' RowAcctgEntry');
     const isConfirmed = await showConfirmationModal(
-      '<p style="line-height: 1.4"> Are you sure you want  to cancel this entry? </p>',
+      '<p style="line-height: 1.4"> Are you sure you want to cancel this entry? </p>',
       'You won\'t be able to revert this!',
       'Yes it is!',
     );
     if (isConfirmed) {
       createGV(data);
+      if (!loading) {
+        fetchGV("","","");
+      }
+    }
+  }
+
+  const handleUpdateJournalDate = async (data: RowAcctgEntry) => {
+    const journal_date = watch('journal_date');
+    const isConfirmed = await showConfirmationModal(
+      '<p style="line-height: 1.4"> Are you sure you want to update date? </p>',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
+      updateGV(data, journal_date);
       if (!loading) {
         fetchGV("","","");
       }
@@ -324,6 +340,15 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                 onClick={() => { return handleCancelEntry(singleData); }}
               >
                 Cancel Entry
+              </button>
+            )}
+            {singleData !== undefined && (
+              <button
+                className="flex justify-center rounded border bg-blue-400 border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-rose-400 dark:text-white"
+                type="button"
+                onClick={() => { return handleUpdateJournalDate(singleData); }}
+              >
+                Update Date
               </button>
             )}
             {singleData === undefined && (

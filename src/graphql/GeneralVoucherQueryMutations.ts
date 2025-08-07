@@ -7,6 +7,15 @@ const CREATE_GV_MUTATION: string = `
   }
 `;
 
+const UPDATE_GV_MUTATION: string = `
+  mutation UpdateGvEntry($input: CvAcctgEntriesInp){
+    updateGvEntry(input: $input) {
+      message
+      status
+    }
+  }
+`;
+
 const GET_GV_QUERY: string = `
   query GetCheckVoucher($input: CvSearchInp){
     getCheckVoucher(input: $input) {
@@ -62,6 +71,7 @@ const PRINT_CV_MUTATION: string = `
 
 const GeneralVoucherQueryMutations = {
   CREATE_GV_MUTATION,
+  UPDATE_GV_MUTATION,
   GET_GV_QUERY,
   PRINT_CV_MUTATION
 };

@@ -10,7 +10,7 @@ import { fetchWithRecache } from '@/utils/helper';
 
 const useGeneralVoucher = () => {
 
-  const { CREATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION } = GeneralVoucherQueryMutations;
+  const { CREATE_GV_MUTATION, UPDATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION } = GeneralVoucherQueryMutations;
 
   const [loading, setLoading] = useState<boolean>(false);
   const [dataGV, setDataGV] = useState<RowAcctgEntry[]>();
@@ -80,6 +80,35 @@ const useGeneralVoucher = () => {
     toast.success(result?.data.createGvEntry?.message);
     setLoading(false);
   };
+  
+  const updateGV = async (row: RowAcctgEntry, journal_date: string) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    let mutation;
+    let variables: { input: any } = {
+      input: {
+        id: row?.id,
+        journal_date,
+      },
+    };
+
+    mutation = UPDATE_GV_MUTATION;
+    setLoading(true);
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables,
+      }),
+    });
+    const result = await response.json();
+    toast.success(result?.data.updateGvEntry?.message);
+    setLoading(false);
+  };
 
   const printSummaryTicketDetails = async (journal_ref: string) => {
     try {
@@ -119,6 +148,7 @@ const useGeneralVoucher = () => {
 
   return {
     createGV,
+    updateGV,
     fetchGV,
     dataGV,
     printSummaryTicketDetails,

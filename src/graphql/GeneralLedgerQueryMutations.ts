@@ -1,12 +1,3 @@
-// const CREATE_GV_MUTATION: string = `
-//   mutation CreateGvEntry($input: CvAcctgEntriesInp){
-//     createGvEntry(input: $input) {
-//       message
-//       status
-//     }
-//   }
-// `;
-
 const GET_GL_QUERY: string = `
   query GetGL($input: GLSearchInp){
     getGL(input: $input){
@@ -19,7 +10,6 @@ const GET_GL_QUERY: string = `
 `;
 
 const GeneralLedgerQueryMutations = {
-  // CREATE_GV_MUTATION,
   GET_GL_QUERY
 };
 

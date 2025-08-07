@@ -1,12 +1,3 @@
-// const CREATE_GV_MUTATION: string = `
-//   mutation CreateGvEntry($input: CvAcctgEntriesInp){
-//     createGvEntry(input: $input) {
-//       message
-//       status
-//     }
-//   }
-// `;
-
 const GET_GJ_QUERY: string = `
   query getJournal($input: JvSearchInp){
     getJournal(input: $input) {
@@ -45,7 +36,6 @@ const GET_GJ_QUERY: string = `
 `;
 
 const GeneralJournalQueryMutations = {
-  // CREATE_GV_MUTATION,
   GET_GJ_QUERY
 };
 
