@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import GVForm from './GVForm';
-import useFinancialStatement from '@/hooks/useFinancialStatement';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
@@ -11,7 +10,6 @@ import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 const GeneralVoucherList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { incomeStatementData } = useFinancialStatement();
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -19,9 +17,7 @@ const GeneralVoucherList: React.FC = () => {
   }
 
   useEffect(() => {
-
-    console.log(incomeStatementData, ' incomeStatementData');
-  }, [incomeStatementData])
+  }, [])
 
   return (
     <div>

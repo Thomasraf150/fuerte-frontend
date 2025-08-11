@@ -23,6 +23,12 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     width: '150px'
   },
   {
+    name: 'Loan Ref #',
+    cell: row => row?.reference_no,
+    sortable: true,
+    width: '150px'
+  },
+  {
     name: 'Payee',
     selector: row => row?.borrower_full_name === '' ? row?.vendor_full_name : row?.borrower_full_name,
     cell: row => row?.borrower_full_name === '' ? row?.vendor_full_name : row?.borrower_full_name,

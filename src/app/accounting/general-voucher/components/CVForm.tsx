@@ -133,6 +133,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       createGV(data);
       if (!loading) {
         fetchGV("","","");
+        setShowForm(false);
       }
     }
   }
@@ -211,7 +212,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                     icon={Edit3}
                     error={errors.vendor_id && "journal desc is required"}
                     className='mt-2'
-                    value={singleData === undefined ? dataPayee?.name : singleData?.borrower_full_name}
+                    value={dataPayee?.name || singleData?.borrower_full_name}
                     readOnly
                   />
                 </div>
@@ -333,13 +334,13 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
             >
               Back
             </button>
-            {singleData !== undefined && (
+            {singleData !== undefined && singleData?.is_cancelled === false && (
               <button
                 className="flex justify-center rounded border bg-danger border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-rose-400 dark:text-white"
                 type="button"
                 onClick={() => { return handleCancelEntry(singleData); }}
               >
-                Cancel Entry
+                 Cancel Entry
               </button>
             )}
             {singleData !== undefined && (
