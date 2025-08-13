@@ -7,6 +7,7 @@ import { RowAcctgEntry } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
 import { fetchWithRecache } from '@/utils/helper';
+import { useAuthStore } from "@/store";
 
 const useGeneralVoucher = () => {
 
@@ -82,8 +83,7 @@ const useGeneralVoucher = () => {
   };
   
   const updateGV = async (row: RowAcctgEntry, journal_date: string) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    const { GET_AUTH_TOKEN } = useAuthStore.getState();
     let mutation;
     let variables: { input: any } = {
       input: {
@@ -99,6 +99,7 @@ const useGeneralVoucher = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GET_AUTH_TOKEN()}`,
       },
       body: JSON.stringify({
         query: mutation,

@@ -149,6 +149,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       updateGV(data, journal_date);
       if (!loading) {
         fetchGV("","","");
+        setShowForm(false);
       }
     }
   }

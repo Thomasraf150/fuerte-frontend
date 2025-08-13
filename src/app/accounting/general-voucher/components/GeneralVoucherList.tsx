@@ -75,7 +75,7 @@ const GeneralVoucherList: React.FC = () => {
                 </div>
                 <div className="px-4">
                   <CustomDatatable
-                    apiLoading={false}
+                    apiLoading={loading}
                     title=""
                     onRowClicked={handleWholeRowClick}
                     enableCustomHeader={true} 
