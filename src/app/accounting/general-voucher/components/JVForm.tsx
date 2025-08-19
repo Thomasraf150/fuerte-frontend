@@ -85,6 +85,14 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     setRows([...rows, { acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   };
 
+  const formatNumber = (numStr: string) => {
+    if (!numStr) return '';
+    // Add commas for thousands separator
+    const parts = numStr.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  };
+
   const removeRow = (index: number) => {
     if (rows.length > 1) {
       setRows(rows.filter((_, i) => i !== index));
@@ -93,7 +101,23 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
   const handleChange = (index: number, field: keyof RowAcctgDetails, value: string, label: string) => {
     const newRows = [...rows];
-    newRows[index][field] = value;
+    if (field === 'debit' || field === 'credit') {
+      const unformattedValue = value.replace(/,/g, '');
+      // Allow numbers and up to 2 decimal places
+      if (/^\d*\.?\d{0,2}$/.test(unformattedValue)) {
+        newRows[index][field] = unformattedValue;
+        // When a value is entered in one, clear the other
+        if (unformattedValue && parseFloat(unformattedValue) > 0) {
+          if (field === 'debit') {
+            newRows[index].credit = '';
+          } else {
+            newRows[index].debit = '';
+          }
+        }
+      }
+    } else {
+      newRows[index][field] = value;
+    }
     newRows[index].accountLabel = label;
     if (singleData !== undefined) {
       newRows[index].acctg_entries_id = String(singleData?.id);
@@ -102,8 +126,8 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   };
 
   const calculateTotal = (field: "debit" | "credit") =>
-    rows.reduce((sum, row) => sum + (parseFloat(row[field]) || 0), 0).toFixed(2);
-
+    rows.reduce((sum, row) => sum + (parseFloat(row[field]) || 0), 0)
+      .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   useEffect(() => {
     setValue('acctg_details', rows);
@@ -272,16 +296,18 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                         <input
                           type="text"
                           className="w-full p-1 border rounded text-right"
-                          value={row.debit}
+                          value={formatNumber(row.debit)}
                           onChange={(e) => handleChange(index, "debit", e.target.value, '')}
+                          disabled={!!row.credit}
                         />
                       </td>
                       <td className="p-2 border w-[30%]">
                         <input
                           type="text"
                           className="w-full p-1 border rounded text-right"
-                          value={row.credit}
+                          value={formatNumber(row.credit)}
                           onChange={(e) => handleChange(index, "credit", e.target.value, '')}
+                          disabled={!!row.debit}
                         />
                       </td>
                       <td className="p-2 border text-center flex gap-3 justify-center w-[100%]">

@@ -195,7 +195,9 @@ const SoaList: React.FC = () => {
 
                               {/* Total Collected */}
                               <td className="border border-gray-300 px-4 py-2 text-right">
-                                {totalCollected.toFixed(2)}
+                                {totalCollected.toLocaleString('en-US', {
+                                  minimumFractionDigits: 2, maximumFractionDigits: 2
+                                })}
                               </td>
 
                               {/* Balance */}

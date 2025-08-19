@@ -153,7 +153,8 @@ const useGeneralVoucher = () => {
     fetchGV,
     dataGV,
     printSummaryTicketDetails,
-    loading
+    loading,
+    setLoading
   };
 };
 
