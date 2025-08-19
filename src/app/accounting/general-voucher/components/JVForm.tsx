@@ -21,9 +21,10 @@ interface ParentFormBr {
   fetchGV: (a: string, b: string, c: string) => void;
   printSummaryTicketDetails: (a: string) => void;
   loading: boolean;
+  pubSubBrId: string;
 }
 
-const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, printSummaryTicketDetails, loading }) => {
+const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, printSummaryTicketDetails, loading, pubSubBrId }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -148,7 +149,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     if (isConfirmed) {
       createGV(data);
       if (!loading) {
-        fetchGV("","","");
+        fetchGV(pubSubBrId,"","");
       }
     }
   };
@@ -163,7 +164,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     if (isConfirmed) {
       createGV(data);
       if (!loading) {
-        fetchGV("","","");
+        fetchGV(pubSubBrId,"","");
       }
     }
   }

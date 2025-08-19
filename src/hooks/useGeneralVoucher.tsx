@@ -15,6 +15,9 @@ const useGeneralVoucher = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [dataGV, setDataGV] = useState<RowAcctgEntry[]>();
+  const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+  const userData = JSON.parse(storedAuthStore)['state'];
+
   // Function to fetchdata
 
   const fetchGV = async (branch_sub_id: string, startDate: string, endDate: string) => {
@@ -144,7 +147,7 @@ const useGeneralVoucher = () => {
 
    // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchGV("","","");
+    fetchGV(String(userData?.user?.branch_sub_id),"","");
   }, []);
 
   return {
@@ -154,7 +157,8 @@ const useGeneralVoucher = () => {
     dataGV,
     printSummaryTicketDetails,
     loading,
-    setLoading
+    setLoading,
+    pubSubBrId: String(userData?.user?.branch_sub_id)
   };
 };
 

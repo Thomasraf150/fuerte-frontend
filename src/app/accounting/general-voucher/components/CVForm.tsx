@@ -21,9 +21,10 @@ interface ParentFormBr {
   fetchGV: (a: string, b: string, c: string) => void;
   printSummaryTicketDetails: (a: string) => void;
   loading: boolean;
+  pubSubBrId: string;
 }
 
-const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading }) => {
+const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, pubSubBrId }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -151,7 +152,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     );
     if (isConfirmed) {
       await createGV(data);
-      fetchGV("", "", "");
+      fetchGV(pubSubBrId, "", "");
     }
   };
 
@@ -166,7 +167,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       // Assuming createGV can also handle cancellation logic.
       // If not, a dedicated cancelGV function would be better.
       await createGV(data);
-      fetchGV("", "", "");
+      fetchGV(pubSubBrId, "", "");
       setShowForm(false);
     }
   }
@@ -180,7 +181,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     );
     if (isConfirmed) {
       await updateGV(data, journal_date);
-      fetchGV("", "", "");
+      fetchGV(pubSubBrId, "", "");
       setShowForm(false);
     }
   }

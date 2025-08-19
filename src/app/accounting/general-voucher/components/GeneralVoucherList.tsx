@@ -17,7 +17,7 @@ const GeneralVoucherList: React.FC = () => {
   const [showFormCv, setShowFormCv] = useState<boolean>(false);
   const [showFormJv, setShowFormJv] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<RowAcctgEntry>();
-  const { dataGV, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, setLoading } = useGeneralVoucher();
+  const { dataGV, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, setLoading, pubSubBrId } = useGeneralVoucher();
   
   const handleShowFormCv = (lbl: string, showFrm: boolean) => {
     setShowFormCv(showFrm);
@@ -97,6 +97,7 @@ const GeneralVoucherList: React.FC = () => {
                   updateGV={updateGV}
                   fetchGV={fetchGV}
                   loading={loading}
+                  pubSubBrId={pubSubBrId}
                   printSummaryTicketDetails={printSummaryTicketDetails} />
               </div>
             </div>
@@ -111,6 +112,7 @@ const GeneralVoucherList: React.FC = () => {
                   createGV={createGV}
                   fetchGV={fetchGV}
                   loading={loading}
+                  pubSubBrId={pubSubBrId}
                   printSummaryTicketDetails={printSummaryTicketDetails} />
               </div>
             </div>
