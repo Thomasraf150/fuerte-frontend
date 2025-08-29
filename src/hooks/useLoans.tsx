@@ -421,6 +421,8 @@ const useLoans = () => {
   const handleChangeReleasedDate = async (loan_id: String, released_date: String, handleRefetchLoanData: () => void) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
+    const { GET_AUTH_TOKEN } = useAuthStore.getState();
+
     let variables: { input: any } = {
       input: {
         loan_id,
@@ -436,7 +438,8 @@ const useLoans = () => {
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
         },
         body: JSON.stringify({
           query: UPDATE_LOAN_RELEASED,
