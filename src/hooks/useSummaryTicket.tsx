@@ -46,7 +46,7 @@ const useSummaryTicket = () => {
     setSumTixLoading(false);
   };
 
-  const printSummaryTicketDetails = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
+  const printSummaryTicketDetails = async (startDate?: string, endDate?: string, branch_sub_id?: string) => {
       try {
         setSumTixLoading(true);
         const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
