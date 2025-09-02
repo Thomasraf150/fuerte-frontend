@@ -12,6 +12,8 @@ import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 const GeneralLedgerList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const { fetchGL, dataGl } = useGeneralLedger();
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
@@ -19,10 +21,20 @@ const GeneralLedgerList: React.FC = () => {
     setActionLbl(lbl);
   }
 
+  const handleRowClick = (item: any) => {
+    // If the clicked item is already selected, deselect it. Otherwise, select it.
+    setSelectedItem((prevSelectedItem: { number: any; }) => (prevSelectedItem?.number === item.number ? null : item));
+  };
+
   useEffect(() => {
     fetchGL("", "");
-    console.log(dataGl, ' dataGl')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const filteredData = dataGl?.filter(item =>
+    item.account_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.number?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -36,7 +48,16 @@ const GeneralLedgerList: React.FC = () => {
                     General Ledger
                   </h3>
                 </div>
-                <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
+                <div className="p-5">
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search by Account Name or Number..."
+                      className="w-full rounded-md border border-stroke p-2 dark:bg-form-input dark:border-strokedark"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                   <div className="w-full mx-auto">
                     <div className="shadow-md overflow-hidden">
                       <div className="h-96 w-full overflow-auto">
@@ -52,8 +73,14 @@ const GeneralLedgerList: React.FC = () => {
                           </thead>
                           {/* Table Body */}
                           <tbody className="text-sm">
-                            {dataGl && dataGl.map((item, i) => (
-                              <tr key={i} className="even:bg-gray-50 hover:bg-gray-100">
+                            {filteredData && filteredData.map((item, i) => (
+                              <tr
+                                key={i}
+                                className={`hover:bg-gray-100 cursor-pointer ${
+                                  selectedItem?.number === item.number ? 'bg-blue-200 dark:bg-blue-700' : 'even:bg-gray-50'
+                                }`}
+                                onClick={() => handleRowClick(item)}
+                              >
                                 <td className="px-4 py-2 border">{item?.account_name}</td> 
                                 <td className="px-4 py-2 border text-center">{item?.number}</td>
                                 <td className="px-4 py-2 border text-right">{item?.debit}</td>
@@ -66,10 +93,10 @@ const GeneralLedgerList: React.FC = () => {
                             <tr className="bg-gray-100 font-semibold">
                               <td className="px-4 py-2 border text-right bg-slate-50" colSpan={2}>Total:</td>
                               <td className="px-4 py-2 border text-right bg-slate-50">
-                                {dataGl?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0).toFixed(2)}
+                                {filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0).toFixed(2)}
                               </td>
                               <td className="px-4 py-2 border text-right bg-slate-50">
-                                {dataGl?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0).toFixed(2)}
+                                {filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0).toFixed(2)}
                               </td>
                             </tr>
                           </tfoot>

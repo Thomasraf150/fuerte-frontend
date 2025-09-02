@@ -836,6 +836,7 @@ export interface DataColEntries {
   user_id: number;
 }
 export interface DataGLRow {
+  account_number: string;
   account_name: string;
   number: string;
   debit: string;
