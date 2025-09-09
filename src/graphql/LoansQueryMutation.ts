@@ -203,6 +203,7 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
         agent_fee
         collection
         insurance
+        insurance_fee
         notarial
       }
       deduction_rate {

@@ -59,6 +59,11 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
     sortable: true,
   },
   {
+    name: 'Insurance MFee',
+    cell: row => row.insurance_fee,
+    sortable: true,
+  },
+  {
     name: 'Collection',
     cell: row => row.collection,
     sortable: true,

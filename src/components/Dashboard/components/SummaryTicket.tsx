@@ -38,7 +38,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
   }, [sumTixData]);
 
   const customOrder = ['notes receivable', 'udi', 'processing', 
-                      'agent fee', 'collection', 'insurance', 'notarial', 
+                      'agent fee', 'collection', 'insurance', 'insurance mfee', 'notarial', 
                       'outstanding balance', 'penalty', 'rebates', 'addon amount', 
                       'addon udi', 'addon total', 'cash in bank']; 
 

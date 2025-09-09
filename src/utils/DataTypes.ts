@@ -49,6 +49,7 @@ export interface DataRowLoanProducts {
   processing: number;
   agent_fee: number;
   insurance: number;
+  insurance_fee: number;
   collection: number;
   notarial: number;
   // addon: number;
@@ -69,6 +70,7 @@ export interface DataFormLoanProducts {
   processing: number | '';
   agent_fee: number | '';
   insurance: number | '';
+  insurance_fee: number | '';
   collection: number | '';
   notarial: number | '';
   // addon: number | '';
@@ -591,6 +593,7 @@ export interface ObjDeductions {
   agent_fee: string;
   collection: string;
   notarial: string;
+  insurance_fee: string;
 }
 
 export interface ObjDeductionsRate {

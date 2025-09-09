@@ -52,7 +52,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
     const agent_fee = watch('agent_fee');
     const collection = watch('collection');
     const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100) + (Number(agent_fee) / 100))) * 100;
-    console.log(udi, 'udi')
 
     if (!isNaN(udi)) {
       setValue('udi', parseFloat(udi.toFixed(2)));
@@ -82,6 +81,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
       setValue('processing', singleData.processing);
       setValue('agent_fee', singleData.agent_fee);
       setValue('insurance', singleData.insurance);
+      setValue('insurance_fee', singleData.insurance_fee);
       setValue('collection', singleData.collection);
       setValue('notarial', singleData.notarial);
       setValue('base_deduction', singleData.base_deduction);
@@ -98,6 +98,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         processing: '',
         agent_fee: '',
         insurance: '',
+        insurance_fee: '',
         collection: '',
         notarial: '',
         base_deduction: '',
@@ -108,12 +109,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
     }
   }, [loanCodeData, singleData])
 
-  const handleOnChangeAutoCompute = (e: any) => {
-    setSelectedOptIsAuto(e.target.value);
-  }
-
   useEffect(() => {
-    console.log(selectedOptIsAuto, ' selectedOptIsAuto')
   }, [selectedOptIsAuto])
 
   return (
@@ -203,19 +199,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             error={errors.collection && "This field is required"}
           />
         </div>
-        {/* {selectedOptIsAuto === '0' ? (
-          <div className='relative col-span-2'>
-            <div className="absolute bottom-0 right-1 z-10 xsm:bottom-0 xsm:right-0">
-              <label
-                htmlFor="cover"
-                onClick={handleComputeUdi}
-                className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
-              >
-                <span>Compute UDI</span>
-              </label>
-            </div>
-          </div>
-        ) : (<></>)} */}
         <div>
           <FormInput
             label="* UDI (%)"
@@ -226,16 +209,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             error={errors.udi && "This field is required"}
           />
         </div>
-        {/* <div>
-          <FormInput
-            label="Addon (%)"
-            id="addon"
-            type="text"
-            icon={Home}
-            register={register('addon')}
-            error={errors.addon && "This field is required"}
-          />
-        </div> */}
         <div>
           <FormInput
             label="* Addon Terms."
@@ -274,6 +247,16 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('insurance')}
             error={errors.insurance && "This field is required"}
+          />
+        </div>
+        <div>
+          <FormInput
+            label="Insurance Manual Fee"
+            id="insurance_fee"
+            type="text"
+            icon={Home}
+            register={register('insurance_fee')}
+            error={errors.insurance_fee && "This field is required"}
           />
         </div>
         <div>

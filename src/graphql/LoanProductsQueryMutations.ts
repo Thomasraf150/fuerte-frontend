@@ -11,6 +11,7 @@ const GET_LOAN_PRODUCT_QUERY: string = `
       processing
       agent_fee
       insurance
+      insurance_fee
       commission
       collection
       notarial
@@ -37,6 +38,7 @@ const SAVE_LOAN_PRODUCT_QUERY: string = `
       processing
       agent_fee
       insurance
+      insurance_fee
       collection
       notarial
       is_active
@@ -55,6 +57,7 @@ const UPDATE_LOAN_PRODUCT_QUERY: string = `
       processing
       agent_fee
       insurance
+      insurance_fee
       collection
       notarial
       base_deduction

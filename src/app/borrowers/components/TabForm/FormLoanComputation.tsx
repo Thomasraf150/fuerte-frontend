@@ -113,6 +113,14 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                 </li>
                 <li className="flex items-center gap-4 border p-2">
                   <div>
+                    <h3 className="text-sm text-strokedark">Insurance MFee</h3>
+                  </div>
+                  <div className="flex flex-1 items-center justify-end gap-2">
+                    <h3 className="text-sm text-gray-900">{formatNumber(Number(dataComputedLoans?.deductions?.insurance_fee))}</h3>
+                  </div>
+                </li>
+                <li className="flex items-center gap-4 border p-2">
+                  <div>
                     <h3 className="text-sm text-strokedark">Notarial Fee</h3>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-2">
