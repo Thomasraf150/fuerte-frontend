@@ -49,6 +49,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         if (item?.description === 'insurance') {
           setValue('ins_id', item?.account_id);
         }
+        if (item?.description === 'insurance mfee') {
+          setValue('ins_mfee_id', item?.account_id);
+        }
         if (item?.description === 'collection') {
           setValue('col_id', item?.account_id);
         }
@@ -216,6 +219,17 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           icon={ChevronDown}
           register={register('ins_id')}
           error={errors.ins_id?.message}
+          options={optionsCoaData}
+          className='mb-4 mt-4'
+        />
+        
+        <FormInput
+          label="Insurance Mfee"
+          id="ins_mfee_id"
+          type="select"
+          icon={ChevronDown}
+          register={register('ins_mfee_id')}
+          error={errors.ins_mfee_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
         />

@@ -75,6 +75,7 @@ const useLoanProceedAccount = () => {
         udi_id: data?.udi_id,
         proc_id: data?.proc_id,
         ins_id: data?.ins_id,
+        ins_mfee_id: data?.ins_mfee_id,
         col_id: data?.col_id,
         not_id: data?.not_id,
         reb_id: data?.reb_id,

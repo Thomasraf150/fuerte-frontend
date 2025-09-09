@@ -751,6 +751,7 @@ export interface DataLoanProceedList {
   proc_id: string;
   agent_id: string;
   ins_id: string;
+  ins_mfee_id: string;
   col_id: string;
   not_id: string;
   reb_id: string;

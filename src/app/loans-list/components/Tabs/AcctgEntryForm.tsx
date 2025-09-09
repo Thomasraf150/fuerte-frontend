@@ -218,6 +218,27 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
           />
           {errors.ins_id && <p className="mt-2 text-sm text-red-600">{errors.ins_id.message}</p>}
         </div>
+        
+        <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance Manual Fee</label>
+          <Controller
+            name="ins_mfee_id"
+            control={control}
+            rules={{ required: 'Insurance Mfee is required' }} 
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Insurance Mfee..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.ins_mfee_id && <p className="mt-2 text-sm text-red-600">{errors.ins_mfee_id.message}</p>}
+        </div>
 
         <div className="col-span-1 mb-4 mt-4">
           <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Collection</label>
