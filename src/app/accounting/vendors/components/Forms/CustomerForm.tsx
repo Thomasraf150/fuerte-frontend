@@ -133,6 +133,7 @@ const CustomerForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
             register={register('credit_limit', { required: true })}
             error={errors.credit_limit && "credit limit is required"}
             className='mt-2'
+            enableNumberFormatting={true}
           />
         </div>
 

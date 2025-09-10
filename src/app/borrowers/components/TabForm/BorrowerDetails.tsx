@@ -333,11 +333,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       placeholder="0.00"
                       register={register('amount_applied', { required: true })}
                       error={errors.amount_applied && "This field is required"}
-                      onChange={(e) => {
-                        const input = e.target as HTMLInputElement;
-                        const filteredValue = input.value.replace(/[^0-9,.]/g, '');
-                        input.value = filteredValue;
-                      }}
+                      enableNumberFormatting={true}
                     />
                   </div>
                   <div>
@@ -441,6 +437,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('est_monthly_fam_inc', { required: true })}
                       error={errors.est_monthly_fam_inc && "This field is required"}
+                      enableNumberFormatting={true}
                     />
                   </div>
                   <div>
@@ -656,6 +653,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     icon={Home}
                     register={register('salary', { required: true })}
                     error={errors.salary && "This field is required"}
+                    enableNumberFormatting={true}
                   />
                 </div>
                 <div>
@@ -837,11 +835,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('monthly_gross', { required: true })}
                       error={errors.monthly_gross && "This field is required"}
-                      onChange={(e) => {
-                        const input = e.target as HTMLInputElement;
-                        const filteredValue = input.value.replace(/[^0-9,.]/g, '');
-                        input.value = filteredValue;
-                      }}
+                      enableNumberFormatting={true}
                     />
                   </div>
                   <div>
@@ -852,11 +846,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('monthly_net', { required: true })}
                       error={errors.monthly_net && "This field is required"}
-                      onChange={(e) => {
-                        const input = e.target as HTMLInputElement;
-                        const filteredValue = input.value.replace(/[^0-9,.]/g, '');
-                        input.value = filteredValue;
-                      }}
+                      enableNumberFormatting={true}
                     />
                   </div>
                 </div>
@@ -961,6 +951,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     icon={Home}
                     register={register('company_salary', { required: true })}
                     error={errors.salary && "This field is required"}
+                    enableNumberFormatting={true}
                   />
                 </div>
                 <div>

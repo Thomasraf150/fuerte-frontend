@@ -54,6 +54,7 @@ const VendorsForm: React.FC<ParentFormBr> = ({ }) => {
             register={register('balance', { required: true })}
             error={errors.balance && "Balance is required"}
             className='mt-2'
+            enableNumberFormatting={true}
           />
         </div>
         <div className='col-span-2'>

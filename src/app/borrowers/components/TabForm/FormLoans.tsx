@@ -55,26 +55,13 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     }
   };
 
-  const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
-    const { value } = event.target;
-    const formattedValue = formatToTwoDecimalPlaces(value);
-    setValue(type, formattedValue);
-  };
-  
   const handleCompTblDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
-    const formattedValue = formatToTwoDecimalPlaces(value);
+    const num = parseFloat(value);
+    const formattedValue = !isNaN(num) ? num.toFixed(2) : '';
     setValue(type, formattedValue);
 
     onSubmitLoanComp(dataLoanComp, "Compute");
-  };
-
-  const formatToTwoDecimalPlaces = (value: string) => {
-    const num = parseFloat(value);
-    if (!isNaN(num)) {
-      return num.toFixed(2);
-    }
-    return '';
   };
 
   const [branchOptions, setBranchOptions] = useState<Option[]>([]);
@@ -168,20 +155,16 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
               {errors.loan_product_id && <p className="mt-2 text-sm text-red-600">{errors.loan_product_id.message}</p>}
             </div>
             <div>
-              <FormLabel title={`Loan Amount`}/>
-              <div className="relative">
-                <input
-                  className={`w-full h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
-                  type="text"
-                  id="loan_amount"
-                  {...register('loan_amount', { required: "Loan Amount is required!" })}
-                  onBlur={(e: any) => { return handleDecimal(e, 'loan_amount'); }}
-                />
-                <span className="absolute left-4.5 top-3">
-                  <DollarSign size="18" />
-                </span>
-                {errors.loan_amount && <p className="mt-2 text-sm text-red-600">{errors.loan_amount.message}</p>}
-              </div>
+              <FormInput
+                label="Loan Amount"
+                id="loan_amount"
+                type="text"
+                icon={DollarSign}
+                register={register('loan_amount', { required: "Loan Amount is required!" })}
+                error={errors.loan_amount?.message}
+                placeholder="Enter loan amount"
+                enableNumberFormatting={true}
+              />
             </div>
 
             <div>

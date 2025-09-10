@@ -1,10 +1,20 @@
 import React, { useEffect } from "react";
-import ChartOne from "@/components/Charts/ChartOne";
-import ChartThree from "@/components/Charts/ChartThree";
-import ChartTwo from "@/components/Charts/ChartTwo";
+import dynamic from "next/dynamic";
 import ChatCard from "@/components/Chat/ChatCard";
 import TableOne from "@/components/Tables/TableOne";
 import CardDataStats from "@/components/CardDataStats";
+
+const ChartOne = dynamic(() => import("@/components/Charts/ChartOne"), {
+  ssr: false,
+});
+
+const ChartTwo = dynamic(() => import("@/components/Charts/ChartTwo"), {
+  ssr: false,
+});
+
+const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
+  ssr: false,
+});
 
 const AcctDefaultPage: React.FC = () => {
   useEffect(() => {
