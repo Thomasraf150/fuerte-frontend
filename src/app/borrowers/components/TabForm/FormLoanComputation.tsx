@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BorrLoanComputationRes, BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
+import FormInput from '@/components/FormInput';
 
 interface ParentFormBr {
   setValue: any;
@@ -155,12 +156,14 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm text-strokedark">Outstanding Balance.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <input
+                    <FormInput
+                      id="ob"
                       type="text"
-                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      {...register('ob')}
+                      register={register('ob')}
+                      enableNumberFormatting={true}
                       onBlur={(e) => { return handleCompTblDecimal(e, 'ob'); }}
                       placeholder="Enter amount"
+                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                     />
                   </div>
                 </li>
@@ -169,12 +172,14 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm text-strokedark">Penalty</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <input
+                    <FormInput
+                      id="penalty"
                       type="text"
-                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      {...register('penalty')}
+                      register={register('penalty')}
+                      enableNumberFormatting={true}
                       onBlur={(e) => { return handleCompTblDecimal(e, 'penalty'); }}
                       placeholder="Enter amount"
+                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                     />
                   </div>
                 </li>
@@ -191,12 +196,14 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm text-strokedark">Rebates.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    <input
+                    <FormInput
+                      id="rebates"
                       type="text"
-                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      {...register('rebates')}
+                      register={register('rebates')}
+                      enableNumberFormatting={true}
                       onBlur={(e) => { return handleCompTblDecimal(e, 'rebates'); }}
                       placeholder="Enter amount"
+                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                     />
                   </div>
                 </li>
