@@ -13,7 +13,20 @@ const column = loansListColumn;
 const LoansLists: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoans, handleDeleteLoans, loading } = useLoans();
+  const { 
+    loanData, 
+    allLoansData,
+    fetchLoans, 
+    handleDeleteLoans, 
+    loading, 
+    currentPage, 
+    totalPages, 
+    totalRecords,
+    hasNextPage,
+    prefetching,
+    navigateToPage,
+    refreshLoans
+  } = useLoans();
 
   const handleRowClick = async (data: BorrLoanRowData) => {
     setSingleData(data);
@@ -28,12 +41,8 @@ const LoansLists: React.FC = () => {
 
   const handleShowForm = (d: boolean) => {
     setShowForm(d);
-    fetchLoans(100000, 1, 0);
+    refreshLoans(); // Use smart pagination refresh
   }
-
-  useEffect(() => {
-    fetchLoans(100000, 1, 0);
-  }, [])
 
   return (
     <div>
@@ -52,10 +61,15 @@ const LoansLists: React.FC = () => {
                   <CustomDatatable
                     apiLoading={loading}
                     columns={column(handleRowClick, handleViewWholeLoan)}
-                    // onRowClicked={handleViewWholeLoan}
-                    data={loanData}
+                    data={allLoansData}
                     enableCustomHeader={true} 
-                    title={''}  
+                    title={''}
+                    smartPagination={{
+                      hasNextPage,
+                      totalRecords,
+                      onLoadMore: () => navigateToPage(currentPage + 1),
+                      isLoadingMore: prefetching
+                    }}
                   />
                 </div>
               </div>

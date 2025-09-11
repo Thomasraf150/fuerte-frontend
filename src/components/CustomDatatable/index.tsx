@@ -37,6 +37,15 @@ interface CustomDatatableProps<T> {
   onRowClicked?: (row: T, event: React.MouseEvent) => void;
   apiLoading?: boolean;
   defaultSortFieldId?: string | number;
+  // Smart pagination props
+  smartPagination?: {
+    hasNextPage: boolean;
+    totalRecords: number;
+    onLoadMore: () => void;
+    onSearch?: (query: string) => void; // For global search across all records
+    isLoadingMore?: boolean; // Loading state for next batch
+    onPerPageChange?: (perPage: number) => void; // Handle rows per page changes
+  };
 }
 
 // Memoized CustomHeader component
@@ -71,26 +80,56 @@ const CustomDatatable = <T extends object>({
   onRowClicked,
   apiLoading = false,
   defaultSortFieldId,
+  smartPagination,
 }: CustomDatatableProps<T>): JSX.Element => {
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentRowsPerPage, setCurrentRowsPerPage] = useState(10);
 
   const handleSearch = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-  }, []);
+    const query = event.target.value;
+    setSearchQuery(query);
+    
+    // Use global search if available for comprehensive search across all records
+    if (smartPagination?.onSearch && query.trim()) {
+      smartPagination.onSearch(query);
+    }
+  }, [smartPagination]);
+
+  // Handle rows per page change
+  const handleChangeRowsPerPage = useCallback((currentRowsPerPage: number, currentPage: number) => {
+    setCurrentRowsPerPage(currentRowsPerPage);
+    
+    // Call the setPerPage callback if provided for smart pagination
+    if (smartPagination?.onPerPageChange) {
+      smartPagination.onPerPageChange(currentRowsPerPage);
+    }
+    
+    // When user changes rows per page, we should always load more data if available
+    // This ensures navigation buttons stay enabled when there's server-side data available
+    if (smartPagination && smartPagination.hasNextPage) {
+      smartPagination.onLoadMore();
+    }
+  }, [smartPagination]);
+
+  // Smart pagination handler - load more data when nearing the end
+  const handleChangePage = useCallback((page: number, totalRows: number) => {
+    if (smartPagination) {
+      // Calculate if we're at the last page with current data
+      const totalPagesWithCurrentData = Math.ceil(data.length / currentRowsPerPage);
+      
+      // Load more data if we're on the last page and there's more data available
+      if (page >= totalPagesWithCurrentData && smartPagination.hasNextPage) {
+        smartPagination.onLoadMore();
+      }
+    }
+  }, [smartPagination, data.length, currentRowsPerPage]);
 
   const filteredData = useMemo(() => {
     console.log("Filtering data with query:", searchQuery); // Log the filtering action
-    // return data.filter((item) => 
-    //   Object.values(item).some(
-    //     (value) =>
-    //       value &&
-    //       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    //   )
-    // );
     const searchValue = searchQuery.toLowerCase();
 
-    return data.filter((item) =>
+    let filtered = data.filter((item) =>
       Object.keys(item).some((key) => {
         const value = item[key as keyof T];
         
@@ -109,7 +148,19 @@ const CustomDatatable = <T extends object>({
         );
       })
     );
-  }, [data, searchQuery]);
+
+    // HACK: If there's more data available on the server, add a placeholder item
+    // to force the DataTable to show navigation buttons
+    if (smartPagination?.hasNextPage && filtered.length <= currentRowsPerPage) {
+      // Add a placeholder item that won't be displayed due to pagination
+      filtered = [...filtered, {} as T];
+    }
+
+    return filtered;
+  }, [data, searchQuery, smartPagination?.hasNextPage, currentRowsPerPage]);
+
+  // Always render the table to show loading state
+  const shouldShowTable = true;
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -121,24 +172,39 @@ const CustomDatatable = <T extends object>({
           handleSearch={handleSearch}
         />
       )}
-      <DataTable
-        keyField="id"
-        paginationPerPage={6}
-        progressPending={apiLoading}
-        defaultSortFieldId={defaultSortFieldId}
-        onRowClicked={onRowClicked}
-        noHeader
-        title={title}
-        columns={columns}
-        data={filteredData}
-        customStyles={customStyles}
-        pagination
-        className='rounded'
-        highlightOnHover
-        responsive
-        fixedHeader
-        fixedHeaderScrollHeight="500px"
-      />
+      {shouldShowTable && (
+        <DataTable
+          keyField="id"
+          paginationPerPage={10}
+          paginationRowsPerPageOptions={[10, 20, 30, 50]}
+          progressPending={apiLoading}
+          defaultSortFieldId={defaultSortFieldId}
+          onRowClicked={onRowClicked}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+          noHeader
+          title={title}
+          columns={columns}
+          data={filteredData}
+          customStyles={customStyles}
+          pagination
+          className='rounded'
+          highlightOnHover
+          responsive
+          fixedHeader
+          fixedHeaderScrollHeight="500px"
+        />
+      )}
+      
+      {/* Loading indicator for next batch */}
+      {smartPagination?.isLoadingMore && (
+        <div className="flex items-center justify-center py-4 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center space-x-3 text-gray-600">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+            <span className="text-sm font-medium">Loading more records...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

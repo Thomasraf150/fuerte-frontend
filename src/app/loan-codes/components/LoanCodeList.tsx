@@ -16,7 +16,19 @@ const LoanCodeList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [singleUserData, setSingleUserData] = useState<DataRowLoanCodes>();
 
-  const { data, fetchLoanCodes } = useLoanCodes();
+  const { 
+    data, 
+    allLoanCodesData, 
+    currentPage, 
+    totalPages, 
+    totalRecords, 
+    hasNextPage, 
+    loading, 
+    prefetching, 
+    navigateToPage, 
+    refresh, 
+    fetchLoanCodes 
+  } = useLoanCodes();
 
   const handleRowClick = (row: DataRowLoanCodes) => {
     setActionLbl('Update Loan Code');
@@ -43,11 +55,17 @@ const LoanCodeList: React.FC = () => {
               <div className="p-7">
                 <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={()=>{ handleCreateLoanCode('Create Loan Code', true); }}>Create</button>
                 <CustomDatatable
-                  apiLoading={false}
+                  apiLoading={loading}
                   title={``}
                   columns={column(handleRowClick)}
                   enableCustomHeader={true} 
-                  data={data}
+                  data={allLoanCodesData}
+                  smartPagination={{
+                    hasNextPage,
+                    totalRecords,
+                    onLoadMore: () => navigateToPage(currentPage + 1),
+                    isLoadingMore: prefetching
+                  }}
                 />
               </div>
             </div>
@@ -62,7 +80,7 @@ const LoanCodeList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <FormAddLoanCode setShowForm={setShowForm} actionLbl={actionLbl} singleUserData={singleUserData} fetchLoanCodes={fetchLoanCodes}/>
+                  <FormAddLoanCode setShowForm={setShowForm} actionLbl={actionLbl} singleUserData={singleUserData} fetchLoanCodes={refresh}/>
                 </div>
               </div>
             </div>

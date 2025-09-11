@@ -8,12 +8,27 @@ import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { useAuthStore } from "@/store";
+import { useSmartPagination } from './useSmartPagination';
 
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, BorrowerRowInfo } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
+
+interface BatchData<T> {
+  data: T[];
+  pagination: {
+    currentBatch: number;
+    totalBatches: number;
+    batchStartPage: number;
+    batchEndPage: number;
+    totalRecords: number;
+    hasNextBatch: boolean;
+  };
+  loadedAt?: number;
+}
+
 const useBorrower = () => {
 
-  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY } = BorrowerQueryMutations;
+  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY, GET_BORROWERS_BATCH_QUERY } = BorrowerQueryMutations;
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
@@ -24,8 +39,53 @@ const useBorrower = () => {
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
   const [dataBorrCompany, setDataBorrCompany] = useState<DataBorrCompanies[] | undefined>(undefined);
-  const [dataBorrower, setDataBorrower] = useState<BorrowerRowInfo[]>([]);
-  // Function to fetchdata
+  
+  // Smart pagination fetch function for borrowers with proper error handling
+  const fetchBorrowersBatch = async (page: number, perPage: number, pagesPerBatch: number): Promise<BatchData<BorrowerRowInfo>> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_BORROWERS_BATCH_QUERY,
+          variables: { 
+            page,
+            perPage,
+            pagesPerBatch,
+            orderBy: [{ column: "id", order: 'DESC' }]
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.errors && result.errors.length > 0) {
+        throw new Error(`GraphQL Error: ${result.errors[0].message}`);
+      }
+
+      if (!result.data?.getBorrowersBatch) {
+        throw new Error('Invalid response structure from server');
+      }
+
+      return result.data.getBorrowersBatch;
+    } catch (error) {
+      console.error('Error fetching borrowers batch:', error);
+      throw error;
+    }
+  };
+
+  // Use smart pagination for borrowers
+  const borrowersPagination = useSmartPagination(fetchBorrowersBatch, {
+    perPage: 20,
+    pagesPerBatch: 1,
+    maxCachedBatches: 3
+  });
 
 
   const createBorrVariables = (data: BorrowerInfo, user_id: number) => ({
@@ -117,7 +177,7 @@ const useBorrower = () => {
     const result = await response.json();
     if (result) {
       toast.success(result.data.saveBorrower.message);
-      fetchDataBorrower(3000, 1);
+      borrowersPagination.refresh(); // Use smart pagination refresh instead
     }
   };
 
@@ -158,7 +218,9 @@ const useBorrower = () => {
 
     const result = await response.json();
     setBorrowerLoading(false);
-    setDataBorrower(result.data.getBorrowers.data);
+    // Note: With smart pagination, data is managed by borrowersPagination.data
+    // This legacy function is kept for backwards compatibility but doesn't update state
+    return result.data.getBorrowers.data;
   };
   
   const fetchDataArea = async (first: number, page: number) => {
@@ -240,7 +302,7 @@ const useBorrower = () => {
       });
       const result = await response.json();
       if (result) {
-        fetchDataBorrower(3000, 1);
+        borrowersPagination.refresh(); // Use smart pagination refresh instead
         toast.success(result.data?.deleteBorrowerData?.message);
       }
     }
@@ -280,26 +342,28 @@ const useBorrower = () => {
   }, []);
 
   return {
+    dataBorrower: borrowersPagination.data,
+    allBorrowerData: borrowersPagination.allLoadedData,
+    currentPage: borrowersPagination.currentPage,
+    totalPages: borrowersPagination.totalPages,
+    totalRecords: borrowersPagination.totalRecords,
+    hasNextPage: borrowersPagination.hasNextPage,
+    borrowerLoading: borrowersPagination.loading || borrowerLoading,
+    prefetching: borrowersPagination.prefetching,
+    navigateToPage: borrowersPagination.navigateToPage,
+    refreshBorrowers: borrowersPagination.refresh,
     dataChief,
     dataArea,
     dataSubArea,
     fetchDataSubArea,
     dataBorrCompany,
     onSubmitBorrower,
-    dataBorrower,
-    borrowerLoading,
-    fetchDataBorrower,
+    fetchDataBorrower, // Legacy function for backward compatibility
     fetchDataChief,
     fetchDataArea,
     fetchDataBorrCompany,
     handleRmBorrower,
     borrCrudLoading
-    // fetchDataArea,
-    // dataArea,
-    // fetchDataSubArea,
-    // dataSubArea,
-    // onSubmitBorrower,
-    // handleDeleteSubArea
   };
 };
 

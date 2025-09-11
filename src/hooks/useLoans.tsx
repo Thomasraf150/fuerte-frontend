@@ -10,6 +10,20 @@ import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';
+import { useSmartPagination } from './useSmartPagination';
+
+interface BatchData<T> {
+  data: T[];
+  pagination: {
+    currentBatch: number;
+    totalBatches: number;
+    batchStartPage: number;
+    batchEndPage: number;
+    totalRecords: number;
+    hasNextBatch: boolean;
+  };
+  loadedAt?: number;
+}
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
@@ -32,10 +46,64 @@ const useLoans = () => {
   const [dataComputedLoans, setDataComputedLoans] = useState<[]>([]);
   const [dataComputedRenewal, setDataComputedRenewal] = useState<DataRenewalData>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
   const rowsPerPage = 10;
+
+  // Smart pagination fetch function for loans
+  const fetchLoansBatch = async (page: number, perPage: number, pagesPerBatch: number): Promise<BatchData<BorrLoanRowData>> => {
+    try {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: BORROWER_LOAN_QUERY,
+          variables: { 
+            first: perPage * pagesPerBatch,
+            page,
+            orderBy: [{ column: "id", order: 'DESC' }],
+            borrower_id: 0
+          },
+        }),
+      });
+
+      if (!response || !response.data?.getLoans) {
+        throw new Error('Invalid response structure from loans API');
+      }
+
+      const loansData = response.data.getLoans;
+      const paginatorInfo = loansData.paginatorInfo;
+
+      return {
+        data: loansData.data || [],
+        pagination: {
+          currentBatch: page,
+          totalBatches: paginatorInfo?.lastPage || 1,
+          batchStartPage: page,
+          batchEndPage: page,
+          totalRecords: paginatorInfo?.total || 0,
+          hasNextBatch: paginatorInfo?.hasMorePages || false,
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching loans batch:', error);
+      throw error;
+    }
+  };
+
+  // Use smart pagination for loans
+  const loansPagination = useSmartPagination(fetchLoansBatch, {
+    perPage: 20,
+    pagesPerBatch: 1,
+    maxCachedBatches: 3
+  });
+
   // Function to fetchdata
   
-  const fetchLoans = async (first: number, page: number, borrower_id: number) => {
+  const fetchLoans = async (first: number = 20, page: number = 1, borrower_id: number = 0) => {
     setLoading(true);
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
@@ -52,6 +120,11 @@ const useLoans = () => {
 
     // const result = await response.json();
     setLoanData(response.data.getLoans.data);
+    setCurrentPage(page);
+    if (response.data.getLoans.paginatorInfo) {
+      setTotalPages(response.data.getLoans.paginatorInfo.lastPage || 0);
+      setTotalRecords(response.data.getLoans.paginatorInfo.total || 0);
+    }
     setLoading(false);
   };
   
@@ -94,21 +167,31 @@ const useLoans = () => {
   };
   
   const fetchLoanProducts = async (orderBy = 'id_desc') => {
-    setLoading(true);
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_PRODUCT_QUERY,
-        variables: { orderBy },
-      }),
-    });
+    try {
+      setLoading(true);
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_LOAN_PRODUCT_QUERY,
+          variables: { orderBy },
+        }),
+      });
 
-    // const result = await response.json();
-    setLoanProduct(response.data.getLoanProducts);
-    setLoading(false);
+      if (!response || !response.data?.getLoanProducts) {
+        throw new Error('Invalid response structure from loan products API');
+      }
+
+      // const result = await response.json();
+      setLoanProduct(response.data.getLoanProducts);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching loan products:', error);
+      setLoanProduct([]);
+      setLoading(false);
+    }
   };
 
   const printLoanDetails = async (loan_id: string) => {
@@ -376,7 +459,7 @@ const useLoans = () => {
         toast.error(response.errors[0].message);
       } else {
         toast.success(response?.data?.removeLoans?.message);
-        fetchLoans(100000, 1, 0);
+        fetchLoans(20, 1, 0);
       }
     }
   };
@@ -468,13 +551,21 @@ const useLoans = () => {
     onSubmitLoanComp,
     loanProduct,
     dataComputedLoans,
-    fetchLoans,
-    loanData,
+    fetchLoans, // Legacy function for backward compatibility
+    loanData: loansPagination.data, // Current page data from smart pagination
+    allLoansData: loansPagination.allLoadedData, // All loaded data from smart pagination
+    currentPage: loansPagination.currentPage,
+    totalPages: loansPagination.totalPages,
+    totalRecords: loansPagination.totalRecords,
+    hasNextPage: loansPagination.hasNextPage,
+    prefetching: loansPagination.prefetching,
+    navigateToPage: loansPagination.navigateToPage,
+    refreshLoans: loansPagination.refresh,
     submitApproveRelease,
     fetchSingLoans,
     loanSingleData,
     submitPNSigned,
-    loading,
+    loading: loansPagination.loading || loading,
     onSubmitLoanBankDetails,
     onSubmitLoanRelease,
     printLoanDetails,

@@ -111,7 +111,16 @@ const BORROWER_LOAN_QUERY: string = `
             branch_sub_id
             name
           }
-          custom_status
+        }
+        paginatorInfo {
+          count
+          currentPage
+          firstItem
+          hasMorePages
+          lastItem
+          lastPage
+          perPage
+          total
         }
     }
   }
