@@ -8,7 +8,7 @@ import { BorrowerRowInfo } from '@/utils/DataTypes';
 const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void, handleRowRmBorrClick: (row: BorrowerRowInfo) => void): TableColumn<BorrowerRowInfo>[] => [
   {
     name: 'Branch',
-    cell: row => row.borrower_work_background?.area?.branch_sub?.name,
+    cell: row => row.borrower_work_background?.area?.branch_sub?.name || 'N/A',
     sortable: true,
     style: {
       minWidth: '150px',
@@ -53,12 +53,12 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void, handleRo
   },
   {
     name: 'Chief',
-    cell: row => row.chief.name,
+    cell: row => row.chief?.name || 'N/A',
     sortable: true,
   },
   {
     name: 'Date of Birth',
-    cell: row => row.borrower_details.dob,
+    cell: row => row.borrower_details?.dob || 'N/A',
     sortable: true,
   },
   {
