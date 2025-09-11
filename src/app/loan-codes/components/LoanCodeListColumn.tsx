@@ -34,7 +34,7 @@ const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): Ta
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.loan_type.name}</span>
+                <span className='d-block font-weight-semibold'>{row.loan_type?.name || 'N/A'}</span>
             </div>
         </div> 
       )
