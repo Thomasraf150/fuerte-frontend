@@ -10,7 +10,7 @@ import { loanStatus } from '@/utils/helper';
 const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewWholeLoan: (row: BorrLoanRowData) => void): TableColumn<BorrLoanRowData>[] => [
   {
     name: 'Loan Product',
-    cell: row => row.loan_product?.description || 'N/A',
+    cell: row => row.loan_product.description,
     style: {
       minWidth: '370px',
     },
@@ -19,7 +19,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   },
   {
     name: 'Borrower',
-    cell: row => row?.borrower ? (row.borrower.lastname + ', ' + row.borrower.firstname) : 'N/A',
+    cell: row => row?.borrower.lastname + ', ' + row.borrower.firstname,
     style: {
       minWidth: '270px',
     },
@@ -29,7 +29,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   },
   {
     name: 'Terms',
-    cell: row => parseInt(String(row.loan_product?.terms || 0)) + parseInt(String(row.loan_product?.addon_terms || 0)),
+    cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
     style: {
       minWidth: '100px',
     },
