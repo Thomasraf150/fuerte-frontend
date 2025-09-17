@@ -157,7 +157,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('interest_rate', { required: true })}
             error={errors.interest_rate && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -178,7 +177,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('processing')}
             error={errors.processing && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -189,7 +187,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('agent_fee')}
             error={errors.agent_fee && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -200,7 +197,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('collection')}
             error={errors.collection && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -211,7 +207,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('udi', { required: true })}
             error={errors.udi && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -232,7 +227,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('addon_udi_rate', { required: true })}
             error={errors.terms && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -243,7 +237,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('notarial')}
             error={errors.notarial && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -254,7 +247,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('insurance')}
             error={errors.insurance && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>
@@ -265,7 +257,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('insurance_fee')}
             error={errors.insurance_fee && "This field is required"}
-            enableNumberFormatting={true}
           />
         </div>
         <div>

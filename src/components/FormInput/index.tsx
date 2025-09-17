@@ -1,7 +1,6 @@
-import React, { FocusEvent, useState, useEffect } from 'react';
+import React, { FocusEvent } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
 import { Icon } from 'react-feather';
-import { handleNumberInputChange } from '@/utils/numberFormatting';
 
 interface Option {
   value: string | undefined;
@@ -25,67 +24,12 @@ interface FormInputProps {
   readOnly?: boolean;
   value?: string;
   maxLength?: number;
-  enableNumberFormatting?: boolean;
-  onValueChange?: (rawValue: string, displayValue: string) => void;
 }
 
-const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, maxLength, error, options, placeholder, disabled, defaultValue, onChange, className, readOnly, value, enableNumberFormatting = false, onValueChange }) => {
-  const [displayValue, setDisplayValue] = useState('');
-  const [isNumberFormatted, setIsNumberFormatted] = useState(false);
-
-  // Initialize display value for number formatting
-  useEffect(() => {
-    if (enableNumberFormatting && type === 'text') {
-      setIsNumberFormatted(true);
-      if (defaultValue || value) {
-        const initialValue = value || defaultValue || '';
-        const { display } = handleNumberInputChange(initialValue);
-        setDisplayValue(display);
-      }
-    }
-  }, [enableNumberFormatting, type, defaultValue, value]);
-
+const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, maxLength, error, options, placeholder, disabled, defaultValue, onChange, className, readOnly, value }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
-    if (enableNumberFormatting && type === 'text' && 'value' in event.target) {
-      const inputValue = event.target.value;
-      const { display, raw } = handleNumberInputChange(inputValue);
-      
-      setDisplayValue(display);
-      
-      // Update the form value with raw number
-      if (register?.onChange) {
-        const syntheticEvent = {
-          ...event,
-          target: {
-            ...event.target,
-            value: raw,
-            name: event.target.name || id
-          }
-        };
-        register.onChange(syntheticEvent);
-      }
-      
-      // Call custom onChange if provided
-      if (onValueChange) {
-        onValueChange(raw, display);
-      }
-      
-      // Call standard onChange if provided
-      if (onChange) {
-        const modifiedEvent = {
-          ...event,
-          target: {
-            ...event.target,
-            value: raw
-          }
-        };
-        onChange(modifiedEvent as React.ChangeEvent<HTMLInputElement>);
-      }
-    } else {
-      // Standard handling for non-number inputs
-      if (onChange) {
-        onChange(event);
-      }
+    if (onChange) {
+      onChange(event);
     }
   };
   return (
@@ -124,11 +68,11 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
             id={id}
             placeholder={placeholder}
             disabled={disabled}
-            defaultValue={isNumberFormatted ? undefined : defaultValue}
-            {...(isNumberFormatted ? { name: register?.name } : register)}
+            defaultValue={defaultValue}
+            {...register}
             onChange={handleChange}
             readOnly={readOnly}
-            value={isNumberFormatted ? displayValue : value}
+            value={value}
             maxLength={maxLength}
           />
         )}
