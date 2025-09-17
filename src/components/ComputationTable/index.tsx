@@ -1,12 +1,6 @@
 import React from 'react';
-import FormInput from '@/components/FormInput';
 
-interface ComputationTableProps {
-  register?: any;
-  handleCompTblDecimal?: (e: any, name: string) => void;
-}
-
-const ComputationTable: React.FC<ComputationTableProps> = ({ register, handleCompTblDecimal }) => {
+const ComputationTable: React.FC = () => {
   return (
 
     <div className="">
@@ -114,23 +108,11 @@ const ComputationTable: React.FC<ComputationTableProps> = ({ register, handleCom
                     <h3 className="text-sm text-strokedark">Outstanding Bal.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    {register ? (
-                      <FormInput
-                        id="outstanding_balance"
-                        type="text"
-                        register={register('outstanding_balance')}
-                        enableNumberFormatting={true}
-                        onBlur={handleCompTblDecimal ? (e) => handleCompTblDecimal(e, 'outstanding_balance') : undefined}
-                        placeholder="Enter amount"
-                        className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                        placeholder="Enter amount"
-                      />
-                    )}
+                    <input
+                      type="text"
+                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                      placeholder="Enter amount"
+                    />
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -138,23 +120,11 @@ const ComputationTable: React.FC<ComputationTableProps> = ({ register, handleCom
                     <h3 className="text-sm text-strokedark">Penalty</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    {register ? (
-                      <FormInput
-                        id="penalty"
-                        type="text"
-                        register={register('penalty')}
-                        enableNumberFormatting={true}
-                        onBlur={handleCompTblDecimal ? (e) => handleCompTblDecimal(e, 'penalty') : undefined}
-                        placeholder="Enter amount"
-                        className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                        placeholder="Enter amount"
-                      />
-                    )}
+                    <input
+                      type="text"
+                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                      placeholder="Enter amount"
+                    />
                   </div>
                 </li>
                 <li className="flex items-center gap-4 border p-2">
@@ -177,23 +147,11 @@ const ComputationTable: React.FC<ComputationTableProps> = ({ register, handleCom
                     <h3 className="text-sm text-strokedark">Rebates.</h3>
                   </div>
                   <div className="flex flex-2 items-center justify-end gap-1">
-                    {register ? (
-                      <FormInput
-                        id="rebates"
-                        type="text"
-                        register={register('rebates')}
-                        enableNumberFormatting={true}
-                        onBlur={handleCompTblDecimal ? (e) => handleCompTblDecimal(e, 'rebates') : undefined}
-                        placeholder="Enter amount"
-                        className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                        placeholder="Enter amount"
-                      />
-                    )}
+                    <input
+                      type="text"
+                      className="block w-full text-right border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                      placeholder="Enter amount"
+                    />
                   </div>
                 </li>
                 <li>
