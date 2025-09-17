@@ -13,20 +13,7 @@ const LoanProductList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
   const [singleData, setSingleData] = useState<DataRowLoanProducts>();
-  const { 
-    data, 
-    allLoanProductsData, 
-    currentPage, 
-    totalPages, 
-    totalRecords, 
-    hasNextPage, 
-    loading, 
-    prefetching, 
-    navigateToPage, 
-    refresh, 
-    setPerPage,
-    fetchLoanProducts 
-  } = useLoanProducts();
+  const { data, loading, fetchLoanProducts } = useLoanProducts();
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
@@ -44,7 +31,9 @@ const LoanProductList: React.FC = () => {
     console.log(data, ' whole row click tr');
   }
 
-  // useEffect removed - smart pagination handles initial loading automatically
+  useEffect(() => {
+    fetchLoanProducts()
+  }, [])
 
   return (
     <div>
@@ -63,17 +52,10 @@ const LoanProductList: React.FC = () => {
                   <CustomDatatable
                     apiLoading={loading}
                     columns={column(handleRowClick)}
-                    data={allLoanProductsData}
+                    data={data}
                     enableCustomHeader={true} 
                     onRowClicked={handleWholeRowClick}
-                    title={''}
-                    smartPagination={{
-                      hasNextPage,
-                      totalRecords,
-                      onLoadMore: () => navigateToPage(currentPage + 1),
-                      isLoadingMore: prefetching,
-                      onPerPageChange: setPerPage
-                    }}
+                    title={''}  
                   />
                 </div>
               </div>
@@ -91,7 +73,7 @@ const LoanProductList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={refresh} singleData={singleData} actionLbl={actionLbl}/>
+                  <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={fetchLoanProducts} singleData={singleData} actionLbl={actionLbl}/>
                 </div>
               </div>
             </div>

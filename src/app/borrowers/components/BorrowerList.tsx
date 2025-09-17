@@ -14,22 +14,14 @@ const BorrowerList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
   const [singleData, setSingleData] = useState<BorrowerRowInfo>();
-  const [legacyBorrowerData, setLegacyBorrowerData] = useState<BorrowerRowInfo[]>([]);
   const { 
       dataBorrower, 
-      allBorrowerData,
-      currentPage,
-      totalPages,
-      totalRecords,
-      hasNextPage,
-      navigateToPage,
-      borrowerLoading,
-      prefetching,
       dataChief,
       dataArea,
       dataSubArea,
       dataBorrCompany,
       onSubmitBorrower,
+      borrowerLoading, 
       fetchDataBorrower,
       fetchDataChief,
       fetchDataArea,
@@ -57,19 +49,8 @@ const BorrowerList: React.FC = () => {
     // setActionLbl('Update Borrower');
   }
 
-  // Temporary: Re-enable legacy fetch to test pagination UI (will be removed once connection is fixed)
   useEffect(() => {
-    const loadLegacyData = async () => {
-      try {
-        const data = await fetchDataBorrower(3000, 1);
-        if (data) {
-          setLegacyBorrowerData(data);
-        }
-      } catch (error) {
-        console.error('Legacy data fetch failed:', error);
-      }
-    };
-    loadLegacyData();
+    fetchDataBorrower(3000, 1);
   }, [])
 
   return (
@@ -90,15 +71,9 @@ const BorrowerList: React.FC = () => {
                     <CustomDatatable
                       apiLoading={borrowerLoading}
                       columns={column(handleRowClick, handleRowRmBorrClick)}
-                      data={allBorrowerData.length > 0 ? allBorrowerData : legacyBorrowerData}
+                      data={dataBorrower}
                       enableCustomHeader={true} 
-                      title={''}
-                      smartPagination={{
-                        hasNextPage,
-                        totalRecords,
-                        onLoadMore: () => navigateToPage(currentPage + 1),
-                        isLoadingMore: prefetching
-                      }}
+                      title={''}  
                     />
                   </div>
                 </div>
