@@ -208,19 +208,27 @@ const CdjForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, l
                         />
                       </td>
                       <td className="p-2 border w-[30%]">
-                        <input
+                        <FormInput
+                          label=""
+                          id={`debit_${index}`}
                           type="text"
-                          className="w-full p-1 border rounded text-right"
+                          icon={Edit3}
+                          formatType="number"
                           value={row.debit}
                           onChange={(e) => handleChange(index, "debit", e.target.value, '')}
+                          className="mb-0"
                         />
                       </td>
                       <td className="p-2 border w-[30%]">
-                        <input
+                        <FormInput
+                          label=""
+                          id={`credit_${index}`}
                           type="text"
-                          className="w-full p-1 border rounded text-right"
+                          icon={Edit3}
+                          formatType="number"
                           value={row.credit}
                           onChange={(e) => handleChange(index, "credit", e.target.value, '')}
+                          className="mb-0"
                         />
                       </td>
                       <td className="p-2 border text-center flex gap-3 justify-center w-[100%]">

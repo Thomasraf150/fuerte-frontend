@@ -257,6 +257,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             icon={Home}
             register={register('insurance_fee')}
             error={errors.insurance_fee && "This field is required"}
+            formatType="number"
           />
         </div>
         <div>
