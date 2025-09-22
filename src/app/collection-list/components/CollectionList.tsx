@@ -17,13 +17,25 @@ const CollectionList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   // const [singleData, setSingleData] = useState<BorrLoanRowData>();
   
-  const { fetchCollectionList, postCollectionEntries, dataColListData, fetchCollectionEntry, dataColEntry, loading } = useCollectionList();
+  const {
+    dataColListData,
+    collectionListLoading,
+    collectionListError,
+    serverSidePaginationProps,
+    refresh,
+    fetchCollectionList,
+    postCollectionEntries,
+    fetchCollectionEntry,
+    dataColEntry,
+    loading
+  } = useCollectionList();
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
 
   useEffect(() => {
-    fetchCollectionList(4000, 1, 0);
     fetchCoaDataTable();
   }, [])
+
+  // Note: Collection list data loading is now handled automatically by usePagination hook
 
   const handleRowClick = (data: DataColListRow) => {
     setShowForm(true);
@@ -61,14 +73,26 @@ const CollectionList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-4">
+                  {collectionListError && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                      Error loading collection list: {collectionListError}
+                      <button
+                        onClick={refresh}
+                        className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
                   {/* <CollectionListInfo setShowForm={setShowForm} /> */}
                   <CustomDatatable
-                    apiLoading={loading}
+                    apiLoading={collectionListLoading}
                     columns={column()}
                     onRowClicked={handleRowClick}
                     data={dataColListData || []}
-                    enableCustomHeader={true} 
-                    title={''}  
+                    enableCustomHeader={true}
+                    title={''}
+                    serverSidePagination={serverSidePaginationProps}
                   />
                 </div>
               </div>

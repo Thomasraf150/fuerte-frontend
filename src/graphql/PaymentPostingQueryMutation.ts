@@ -1,9 +1,10 @@
 const LOANS_LIST_QUERY: string = `
-  query GetLoanListPymntPosting($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int){
+  query GetLoanListPymntPosting($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int, $search: String){
     getLoanListPymntPosting(first: $first,
         page: $page,
         orderBy: $orderBy,
-        borrower_id: $borrower_id){
+        borrower_id: $borrower_id,
+        search: $search){
         data {
           id
           loan_ref
@@ -23,7 +24,7 @@ const LOANS_LIST_QUERY: string = `
           check_no
           is_closed
           loan_product {
-            id 
+            id
             description
             terms
             interest_rate
@@ -76,6 +77,12 @@ const LOANS_LIST_QUERY: string = `
             due_date
           }
           custom_status
+        }
+        paginatorInfo {
+          total
+          currentPage
+          lastPage
+          hasMorePages
         }
     }
   }

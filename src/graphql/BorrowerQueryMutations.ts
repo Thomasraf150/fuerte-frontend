@@ -1,6 +1,6 @@
 const GET_BORROWER_QUERY: string = `
-    query GetBorrowers($first: Int!, $page: Int!, $orderBy: [OrderByClause!]){
-      getBorrowers(first: $first, page: $page, orderBy: $orderBy) {
+    query GetBorrowers($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String){
+      getBorrowers(first: $first, page: $page, orderBy: $orderBy, search: $search) {
         data {
           id
           user_id

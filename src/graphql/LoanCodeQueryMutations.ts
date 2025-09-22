@@ -1,18 +1,26 @@
 const GET_LOAN_CODE_QUERY: string = `
-  query GetLoanCodes($orderBy: String!){
-    getLoanCodes(orderBy: $orderBy){
-      id
-      code
-      description
-      user_id
-      is_deleted
-      loan_client_id
-      loan_type_id
-      loan_client {
-        name
+  query GetLoanCodes($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String){
+    getLoanCodes(first: $first, page: $page, orderBy: $orderBy, search: $search){
+      data {
+        id
+        code
+        description
+        user_id
+        is_deleted
+        loan_client_id
+        loan_type_id
+        loan_client {
+          name
+        }
+        loan_type {
+          name
+        }
       }
-      loan_type {
-        name
+      paginatorInfo {
+        total
+        currentPage
+        lastPage
+        hasMorePages
       }
     }
   }
