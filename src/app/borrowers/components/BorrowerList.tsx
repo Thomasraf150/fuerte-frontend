@@ -14,21 +14,25 @@ const BorrowerList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
   const [singleData, setSingleData] = useState<BorrowerRowInfo>();
-  const { 
-      dataBorrower, 
+  const {
+      dataBorrower,
       dataChief,
       dataArea,
       dataSubArea,
       dataBorrCompany,
       onSubmitBorrower,
-      borrowerLoading, 
+      borrowerLoading,
       fetchDataBorrower,
       fetchDataChief,
       fetchDataArea,
       fetchDataBorrCompany,
-      fetchDataSubArea, 
+      fetchDataSubArea,
       handleRmBorrower,
-      borrCrudLoading } = useBorrower();
+      borrCrudLoading,
+      // New pagination functionality
+      serverSidePaginationProps,
+      borrowerError,
+      refresh } = useBorrower();
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
@@ -49,9 +53,8 @@ const BorrowerList: React.FC = () => {
     // setActionLbl('Update Borrower');
   }
 
-  useEffect(() => {
-    fetchDataBorrower(3000, 1);
-  }, [])
+  // Note: Pagination hook automatically handles initial data loading
+  // No manual useEffect needed for fetching data
 
   return (
     <div>
@@ -68,12 +71,24 @@ const BorrowerList: React.FC = () => {
                   </div>
                   <div className="p-7">
                     <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
+                    {borrowerError && (
+                      <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                        Error loading borrowers: {borrowerError}
+                        <button
+                          onClick={refresh}
+                          className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    )}
                     <CustomDatatable
                       apiLoading={borrowerLoading}
                       columns={column(handleRowClick, handleRowRmBorrClick)}
                       data={dataBorrower}
-                      enableCustomHeader={true} 
-                      title={''}  
+                      enableCustomHeader={true}
+                      title={''}
+                      serverSidePagination={serverSidePaginationProps}
                     />
                   </div>
                 </div>

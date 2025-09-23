@@ -13,7 +13,14 @@ const LoanProductList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
   const [singleData, setSingleData] = useState<DataRowLoanProducts>();
-  const { data, loading, fetchLoanProducts } = useLoanProducts();
+  const {
+    dataLoanProducts,
+    loanProductsLoading,
+    loanProductsError,
+    serverSidePaginationProps,
+    refresh,
+    fetchLoanProducts
+  } = useLoanProducts();
 
   const handleCreateLoanProduct = () => {
     setShowForm(true);
@@ -31,9 +38,7 @@ const LoanProductList: React.FC = () => {
     console.log(data, ' whole row click tr');
   }
 
-  useEffect(() => {
-    fetchLoanProducts()
-  }, [])
+  // Note: Removed useEffect - usePagination handles initial data loading
 
   return (
     <div>
@@ -49,13 +54,25 @@ const LoanProductList: React.FC = () => {
                 </div>
                 <div className="p-7">
                   <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
+                  {loanProductsError && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                      Error loading loan products: {loanProductsError}
+                      <button
+                        onClick={refresh}
+                        className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
                   <CustomDatatable
-                    apiLoading={loading}
+                    apiLoading={loanProductsLoading}
                     columns={column(handleRowClick)}
-                    data={data}
-                    enableCustomHeader={true} 
+                    data={dataLoanProducts}
+                    enableCustomHeader={true}
                     onRowClicked={handleWholeRowClick}
-                    title={''}  
+                    title={''}
+                    serverSidePagination={serverSidePaginationProps}
                   />
                 </div>
               </div>
@@ -73,7 +90,7 @@ const LoanProductList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={fetchLoanProducts} singleData={singleData} actionLbl={actionLbl}/>
+                  <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={refresh} singleData={singleData} actionLbl={actionLbl}/>
                 </div>
               </div>
             </div>

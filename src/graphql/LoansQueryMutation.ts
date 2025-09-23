@@ -1,9 +1,10 @@
 const BORROWER_LOAN_QUERY: string = `
-  query GetLoans($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int){
+  query GetLoans($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int, $search: String){
     getLoans(first: $first,
         page: $page,
         orderBy: $orderBy,
-        borrower_id: $borrower_id){
+        borrower_id: $borrower_id,
+        search: $search){
         data {
           id
           loan_ref
@@ -112,6 +113,12 @@ const BORROWER_LOAN_QUERY: string = `
             name
           }
           custom_status
+        }
+        paginatorInfo {
+          total
+          currentPage
+          lastPage
+          hasMorePages
         }
     }
   }

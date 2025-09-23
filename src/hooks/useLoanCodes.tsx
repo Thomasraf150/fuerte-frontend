@@ -1,27 +1,24 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanCodeQueryMutations from '@/graphql/LoanCodeQueryMutations';
 import LoanClientsQueryMutations from '@/graphql/LoanClientsQueryMutations';
 import { DataRowLoanCodes, DataFormLoanCodes, DataRowClientList, DataRowLoanTypeList } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
+import { usePagination } from './usePagination';
 
 const useLoanCodes = () => {
   const { GET_LOAN_CODE_QUERY, GET_LOAN_TYPE_QUERY, SAVE_LOAN_CODE_MUTATION, UPDATE_LOAN_CODE_MUTATION } = LoanCodeQueryMutations;
   const { GET_LOAN_CLIENT_QUERY } = LoanClientsQueryMutations;
 
-  // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
-  const [data, setData] = useState<DataRowLoanCodes[]>([]);
-  const [singleLoanCode, setSingleLoanCode] = useState<DataRowLoanCodes[]>([]);
-  const [dataClients, setDataClients] = useState<DataRowClientList[]>([]);
-  const [dataType, setDataType] = useState<DataRowLoanTypeList[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const rowsPerPage = 10;
-  // Function to fetchdata
-  
-  const fetchLoanCodes = async (orderBy = 'id_desc') => {
+  // Wrapper function to adapt existing API for usePagination hook
+  const fetchLoanCodesForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
@@ -29,13 +26,62 @@ const useLoanCodes = () => {
       },
       body: JSON.stringify({
         query: GET_LOAN_CODE_QUERY,
-        variables: { orderBy },
+        variables: {
+          first,
+          page,
+          ...(search && { search }), // Add search parameter if provided
+          orderBy: [
+            { column: "id", order: 'DESC' }
+          ]
+        },
       }),
     });
 
     const result = await response.json();
-    setData(result.data.getLoanCodes);
-  };
+
+    // Return the expected format for usePagination
+    return {
+      data: result.data.getLoanCodes.data,
+      paginatorInfo: result.data.getLoanCodes.paginatorInfo || {
+        total: result.data.getLoanCodes.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_LOAN_CODE_QUERY]);
+
+  // Use the new pagination hook
+  const {
+    data: dataLoanCodes,
+    loading: loanCodesLoading,
+    error: loanCodesError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination<DataRowLoanCodes>({
+    fetchFunction: fetchLoanCodesForPagination,
+    config: {
+      initialPageSize: 20,
+      defaultPageSize: 20,
+    },
+  });
+
+  // Legacy fetchLoanCodes function for backward compatibility
+  const fetchLoanCodes = useCallback(async (orderBy = 'id_desc') => {
+    const result = await fetchLoanCodesForPagination(20, 1);
+    // This maintains the old behavior for any existing code that still uses it
+    return result;
+  }, [fetchLoanCodesForPagination]);
+
+  // Legacy state for backward compatibility
+  const [dataClients, setDataClients] = useState<DataRowClientList[]>([]);
+  const [dataType, setDataType] = useState<DataRowLoanTypeList[]>([]);
   const fetchLoanClients = async (orderBy = 'id_desc') => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
@@ -99,10 +145,12 @@ const useLoanCodes = () => {
       }),
     });
     const result = await response.json();
-    // if (result.data.createBranch?.name !== null) {
-    //   await fetchDataList();
-    // }
-    toast.success("User Saved!");
+    if (result.errors) {
+      toast.error(result.errors[0].message);
+    } else {
+      toast.success('Loan Code Saved!');
+      refresh(); // Refresh the paginated data after successful save
+    }
   };
 
    // Fetch data on component mount if id exists
@@ -113,11 +161,32 @@ const useLoanCodes = () => {
   }, []);
 
   return {
-    data,
+    // Legacy API for backward compatibility
+    data: dataLoanCodes,
+    loading: loanCodesLoading,
     dataClients,
     onSubmitLoanCode,
     dataType,
-    fetchLoanCodes
+    fetchLoanCodes,
+
+    // New pagination functionality
+    dataLoanCodes,
+    loanCodesLoading,
+    loanCodesError,
+    refresh,
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+    },
   };
 };
 

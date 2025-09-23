@@ -1,23 +1,22 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import { DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
+import { usePagination } from './usePagination';
 
 const useLoanProducts = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
 
-  // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
-  const [data, setData] = useState<DataRowLoanProducts[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const rowsPerPage = 10;
-  // Function to fetchdata
-  
-  const fetchLoanProducts = async (orderBy = 'id_desc') => {
-    setLoading(true);
+  // Wrapper function to adapt existing API for usePagination hook
+  const fetchLoanProductsForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
@@ -25,14 +24,58 @@ const useLoanProducts = () => {
       },
       body: JSON.stringify({
         query: GET_LOAN_PRODUCT_QUERY,
-        variables: { orderBy },
+        variables: {
+          first,
+          page,
+          ...(search && { search }), // Add search parameter if provided
+          orderBy: [
+            { column: "id", order: 'DESC' }
+          ]
+        },
       }),
     });
 
     const result = await response.json();
-    setData(result.data.getLoanProducts);
-    setLoading(false);
-  };
+
+    // Return the expected format for usePagination
+    return {
+      data: result.data.getLoanProducts.data,
+      paginatorInfo: result.data.getLoanProducts.paginatorInfo || {
+        total: result.data.getLoanProducts.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_LOAN_PRODUCT_QUERY]);
+
+  // Use the new pagination hook
+  const {
+    data: dataLoanProducts,
+    loading: loanProductsLoading,
+    error: loanProductsError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination<DataRowLoanProducts>({
+    fetchFunction: fetchLoanProductsForPagination,
+    config: {
+      initialPageSize: 20,
+      defaultPageSize: 20,
+    },
+  });
+
+  // Legacy fetchLoanProducts function for backward compatibility
+  const fetchLoanProducts = useCallback(async (orderBy = 'id_desc') => {
+    const result = await fetchLoanProductsForPagination(20, 1);
+    // This maintains the old behavior for any existing code that still uses it
+    return result;
+  }, [fetchLoanProductsForPagination]);
 
   const onSubmitLoanProduct = async (data: DataFormLoanProducts) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
@@ -81,19 +124,38 @@ const useLoanProducts = () => {
       toast.error(result.errors[0].message);
     } else {
       toast.success('Loan Product Saved!');
+      refresh(); // Refresh the paginated data after successful save
     }
   };
 
-   // Fetch data on component mount if id exists
-  useEffect(() => {
-    // fetchLoanProducts()
-  }, []);
+  // Note: Pagination hook automatically handles initial data loading
+  // No manual useEffect needed for fetching data
 
   return {
-    data,
-    onSubmitLoanProduct,
+    // Legacy API for backward compatibility
+    data: dataLoanProducts,
+    loading: loanProductsLoading,
     fetchLoanProducts,
-    loading
+    onSubmitLoanProduct,
+
+    // New pagination functionality
+    dataLoanProducts,
+    loanProductsLoading,
+    loanProductsError,
+    refresh,
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+    },
   };
 };
 
