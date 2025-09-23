@@ -178,6 +178,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         id="balance"
         type="text"
         icon={Edit3}
+        formatType="number"
         register={register('balance', { required: true })}
         error={errors.balance && "Balance is required"}
         className='mt-2'

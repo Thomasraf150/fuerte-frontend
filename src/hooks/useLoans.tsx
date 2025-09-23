@@ -143,6 +143,10 @@ const useLoans = () => {
   const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
+
+    // Development debugging
+    console.log('useLoans - onSubmitLoanComp called:', { data, process_type });
+
     setLoading(true);
     let variables: { input: any, process_type: string } = {
       input: {
@@ -160,6 +164,8 @@ const useLoans = () => {
       process_type
     };
 
+    console.log('useLoans - API variables:', variables);
+
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
@@ -170,15 +176,23 @@ const useLoans = () => {
         variables,
       }),
     });
-    // const result = await response.json();
-    // console.log(result, ' result')
+    console.log('useLoans - API response:', response);
+
     if (process_type === 'Compute') {
-      setDataComputedLoans(response.data.processALoan);
+      if (response.data && response.data.processALoan) {
+        setDataComputedLoans(response.data.processALoan);
+        console.log('useLoans - Computation successful:', response.data.processALoan);
+      } else {
+        console.error('useLoans - No processALoan data in response:', response);
+        toast.error('Failed to compute loan. Please check all fields.');
+      }
       setLoading(false);
     } else {
       if (response.errors) {
+        console.error('useLoans - API errors:', response.errors);
         toast.error(response.errors[0].message);
       } else {
+        console.log('useLoans - Save successful');
         toast.success('Loan Entry Saved!');
       }
       setLoading(false);

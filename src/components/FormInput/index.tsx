@@ -1,4 +1,4 @@
-import React, { FocusEvent } from 'react';
+import React, { FocusEvent, useState, useEffect } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
 import { Icon } from 'react-feather';
 
@@ -24,12 +24,142 @@ interface FormInputProps {
   readOnly?: boolean;
   value?: string;
   maxLength?: number;
+  formatType?: 'number' | 'contact' | 'currency' | 'none';
 }
 
-const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconComponent, register, maxLength, error, options, placeholder, disabled, defaultValue, onChange, className, readOnly, value }) => {
+// Native number formatting utilities
+const formatNumber = (value: string): string => {
+  if (!value) return '';
+  // Remove all non-digits except decimal point and negative sign
+  const cleanValue = value.replace(/[^\d.-]/g, '');
+  // Only apply comma formatting for 'number' type
+  const number = parseFloat(cleanValue);
+  if (isNaN(number)) return cleanValue;
+  return number.toLocaleString('en-US');
+};
+
+const unformatNumber = (value: string): string => {
+  if (!value) return '';
+  // Remove commas and return raw number string
+  return value.replace(/,/g, '');
+};
+
+// Currency formatting utilities
+const formatCurrency = (value: string): string => {
+  if (!value) return '';
+  // Remove all non-digits except decimal point and negative sign
+  const cleanValue = value.replace(/[^\d.-]/g, '');
+  const number = parseFloat(cleanValue);
+  if (isNaN(number)) return cleanValue;
+  // Display with commas and exactly 2 decimal places
+  return number.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+const unformatCurrency = (value: string): string => {
+  if (!value) return '';
+  // Remove commas and return decimal string with 2 decimal places
+  const cleanValue = value.replace(/,/g, '');
+  const number = parseFloat(cleanValue);
+  if (isNaN(number)) return '';
+  return number.toFixed(2); // Always 2 decimal places
+};
+
+const FormInput: React.FC<FormInputProps> = ({
+  label,
+  id,
+  type,
+  icon: IconComponent,
+  register,
+  maxLength,
+  error,
+  options,
+  placeholder,
+  disabled,
+  defaultValue,
+  onChange,
+  className,
+  readOnly,
+  value,
+  formatType = 'none'
+}) => {
+  const [displayValue, setDisplayValue] = useState<string>('');
+  const [rawValue, setRawValue] = useState<string>('');
+
+  // Initialize display value
+  useEffect(() => {
+    const initialValue = value || defaultValue || '';
+    if (formatType === 'number' && initialValue) {
+      setDisplayValue(formatNumber(initialValue));
+      setRawValue(unformatNumber(initialValue));
+    } else if (formatType === 'currency' && initialValue) {
+      setDisplayValue(formatCurrency(initialValue));
+      setRawValue(unformatCurrency(initialValue));
+    } else {
+      setDisplayValue(initialValue);
+      setRawValue(initialValue);
+    }
+  }, [value, defaultValue, formatType]);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
-    if (onChange) {
-      onChange(event);
+    const inputValue = event.target.value;
+
+    if (formatType === 'number' && type === 'text') {
+      // Format for display, store raw value
+      const formatted = formatNumber(inputValue);
+      const raw = unformatNumber(inputValue);
+
+      setDisplayValue(formatted);
+      setRawValue(raw);
+
+      // Create synthetic event with raw value for form registration
+      const syntheticEvent = {
+        ...event,
+        target: {
+          ...event.target,
+          value: raw
+        }
+      };
+
+      if (register?.onChange) {
+        register.onChange(syntheticEvent as any);
+      }
+      if (onChange) {
+        onChange(syntheticEvent as any);
+      }
+    } else if (formatType === 'currency' && type === 'text') {
+      // Format for display with currency precision, store decimal value
+      const formatted = formatCurrency(inputValue);
+      const raw = unformatCurrency(inputValue);
+
+      setDisplayValue(formatted);
+      setRawValue(raw);
+
+      // Create synthetic event with raw decimal value for form registration
+      const syntheticEvent = {
+        ...event,
+        target: {
+          ...event.target,
+          value: raw
+        }
+      };
+
+      if (register?.onChange) {
+        register.onChange(syntheticEvent as any);
+      }
+      if (onChange) {
+        onChange(syntheticEvent as any);
+      }
+    } else {
+      // No formatting for contact fields or other types
+      setDisplayValue(inputValue);
+      setRawValue(inputValue);
+
+      if (onChange) {
+        onChange(event);
+      }
     }
   };
   return (
@@ -68,11 +198,11 @@ const FormInput: React.FC<FormInputProps> = ({ label, id, type, icon: IconCompon
             id={id}
             placeholder={placeholder}
             disabled={disabled}
-            defaultValue={defaultValue}
+            {...(formatType === 'number' || formatType === 'currency' ? {} : { defaultValue })}
             {...register}
             onChange={handleChange}
             readOnly={readOnly}
-            value={value}
+            value={formatType === 'number' || formatType === 'currency' ? displayValue : value}
             maxLength={maxLength}
           />
         )}

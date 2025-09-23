@@ -10,6 +10,7 @@ import FormLoanComputation from './FormLoanComputation';
 import RenewalAmntForm from './RenewalAmntForm';
 import useLoans from '@/hooks/useLoans';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { toast } from "react-toastify";
 
 interface ParentFormBr {
   createLoans: (value: boolean) => void;
@@ -26,56 +27,95 @@ interface Option {
 }
 
 const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub, dataLoanRenewal, dataComputedRenewal }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
+  const { register, handleSubmit, setValue, reset, watch, getValues, formState: { errors }, control } = useForm<BorrLoanFormValues>();
   const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading } = useLoans();
 
-  const dataLoanComp = {
-    'borrower_id': Number(BorrowerData?.id),
-    'loan_amount': watch('loan_amount'),
-    'branch_sub_id': String(watch('branch_sub_id')),
-    'loan_product_id': String(watch('loan_product_id')),
-    'ob': String(watch('ob') ?? "0.00"),
-    'penalty': String(watch('penalty') ?? "0.00"),
-    'rebates': String(watch('rebates') ?? "0.00"),
-    'renewal_loan_id': dataLoanRenewal?.join(','),
-    'renewal_details': watch('renewal_details')
+  // State to track which action was triggered (compute vs save)
+  const [actionType, setActionType] = useState<'compute' | 'save' | null>(null);
+
+
+  // Safety utility to ensure numeric values are clean (backup for edge cases)
+  const ensureNumericString = (value: any): string => {
+    if (value === null || value === undefined) return "0.00";
+    const cleanValue = String(value).replace(/[^0-9.-]/g, '');
+    return cleanValue || "0.00";
   };
 
-  const onSubmit: SubmitHandler<BorrLoanFormValues> = async (data) => {
+  // Standard React Hook Form pattern (following BorrowerDetails.tsx)
+  const onSubmit = (data: BorrLoanFormValues, submitActionType?: 'compute' | 'save') => {
+    // Basic validation for required fields
+    if (!data.branch_sub_id || !data.loan_product_id) {
+      toast.error("Please select branch and loan product");
+      return;
+    }
+
+    if (!data.loan_amount || Number(data.loan_amount) <= 0) {
+      toast.error("Please enter a valid loan amount");
+      return;
+    }
+
+    // Handle undefined borrower_id for new borrowers
+    const borrowerId = BorrowerData?.id ? Number(BorrowerData.id) : 0;
+    if (borrowerId === 0) {
+      toast.error("Please save borrower information first");
+      return;
+    }
+
+    // Use passed action type or fallback to state
+    const currentActionType = submitActionType || actionType;
+
+    // Development debugging
+    console.log('FormLoans submission:', { data, actionType: currentActionType, borrowerId });
+
+    // Clean data (React Hook Form provides clean values automatically)
+    const cleanData = {
+      'borrower_id': borrowerId,
+      'loan_amount': ensureNumericString(data.loan_amount),
+      'branch_sub_id': String(data.branch_sub_id),
+      'loan_product_id': String(data.loan_product_id),
+      'ob': ensureNumericString(data.ob),
+      'penalty': ensureNumericString(data.penalty),
+      'rebates': ensureNumericString(data.rebates),
+      'renewal_loan_id': dataLoanRenewal?.join(','),
+      'renewal_details': dataComputedRenewal
+    };
+
+    if (currentActionType === 'compute') {
+      setShowComputation(true);
+      onSubmitLoanComp(cleanData, "Compute");
+    } else if (currentActionType === 'save') {
+      handleSaveWithConfirmation(cleanData);
+    }
+
+    // Reset action type
+    setActionType(null);
+  };
+
+  // Separate save handler for better organization
+  const handleSaveWithConfirmation = async (cleanData: any) => {
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You won\'t be able to revert this!',
       'Yes Save it!',
     );
     if (isConfirmed) {
-      onSubmitLoanComp(dataLoanComp, "Create");
+      onSubmitLoanComp(cleanData, "Create");
       if (!loading) {
-        createLoans(false)
+        createLoans(false);
       }
     }
   };
 
-  const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
-    const { value } = event.target;
-    const formattedValue = formatToTwoDecimalPlaces(value);
-    setValue(type, formattedValue);
-  };
   
   const handleCompTblDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
-    const formattedValue = formatToTwoDecimalPlaces(value);
-    setValue(type, formattedValue);
+    // Value is already formatted to 2 decimals by FormInput currency formatType
+    setValue(type, value);
 
-    onSubmitLoanComp(dataLoanComp, "Compute");
+    // Use React Hook Form's getValues to get current clean data and trigger computation
+    handleSubmit((data) => onSubmit(data, 'compute'))();
   };
 
-  const formatToTwoDecimalPlaces = (value: string) => {
-    const num = parseFloat(value);
-    if (!isNaN(num)) {
-      return num.toFixed(2);
-    }
-    return '';
-  };
 
   const [branchOptions, setBranchOptions] = useState<Option[]>([]);
   const [loanProdOptions, setLoanProdOptions] = useState<Option[]>([]);
@@ -85,11 +125,14 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     if (dataBranchSub && Array.isArray(dataBranchSub)) {
       const dynaOpt: Option[] = dataBranchSub.map(dLCodes => ({
         value: String(dLCodes.id),
-        label: dLCodes.name, // assuming `name` is the key you want to use as label
+        label: dLCodes.name,
       }));
       setBranchOptions([
+        { value: '', label: 'Select a Branch...', hidden: true },
         ...dynaOpt,
       ]);
+    } else {
+      setBranchOptions([{ value: '', label: 'No branches available', hidden: true }]);
     }
     console.log(dataLoanRenewal, 'dataLoanRenewal');
   }, [dataBranchSub]);
@@ -98,18 +141,17 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     if (loanProduct && Array.isArray(loanProduct)) {
       const dynaOpt: Option[] = loanProduct.map(dLCodes => ({
         value: String(dLCodes.id),
-        label: dLCodes.description, // assuming `name` is the key you want to use as label
+        label: dLCodes.description,
       }));
       setLoanProdOptions([
+        { value: '', label: 'Select a Loan Product...', hidden: true },
         ...dynaOpt,
       ]);
+    } else {
+      setLoanProdOptions([{ value: '', label: 'No loan products available', hidden: true }]);
     }
   }, [loanProduct, errors]);
 
-  const handleComputeLoan = () => {
-    setShowComputation(true);
-    onSubmitLoanComp(dataLoanComp, "Compute");
-  }
 
   return (
 
@@ -167,22 +209,15 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
               />
               {errors.loan_product_id && <p className="mt-2 text-sm text-red-600">{errors.loan_product_id.message}</p>}
             </div>
-            <div>
-              <FormLabel title={`Loan Amount`}/>
-              <div className="relative">
-                <input
-                  className={`w-full h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
-                  type="text"
-                  id="loan_amount"
-                  {...register('loan_amount', { required: "Loan Amount is required!" })}
-                  onBlur={(e: any) => { return handleDecimal(e, 'loan_amount'); }}
-                />
-                <span className="absolute left-4.5 top-3">
-                  <DollarSign size="18" />
-                </span>
-                {errors.loan_amount && <p className="mt-2 text-sm text-red-600">{errors.loan_amount.message}</p>}
-              </div>
-            </div>
+            <FormInput
+              label="Loan Amount"
+              id="loan_amount"
+              type="text"
+              icon={DollarSign}
+              register={register('loan_amount', { required: "Loan Amount is required!" })}
+              error={errors.loan_amount?.message}
+              formatType="number"
+            />
 
             <div>
               <div className="flex justify-end gap-2 mt-4">
@@ -196,17 +231,22 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                 <button
                   className="flex justify-center rounded bg-primary px-4 py-2 font-medium text-gray hover:bg-opacity-90"
                   type="button"
-                  onClick={handleComputeLoan}
+                  onClick={() => {
+                    handleSubmit((data) => onSubmit(data, 'compute'))();
+                  }}
                 >
                   <span className="mt-1 mr-1">
-                    <Layout size={17} /> 
+                    <Layout size={17} />
                   </span>
                   <span>Compute</span>
                 </button>
                 <button
                   className="flex justify-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90"
-                  type="submit"
+                  type="button"
                   disabled={loading}
+                  onClick={() => {
+                    handleSubmit((data) => onSubmit(data, 'save'))();
+                  }}
                 >
                   {loading ? (
                     <>
@@ -215,7 +255,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                   ) : (
                     <>
                       <span className="mt-1 mr-1">
-                        <Save size={17} /> 
+                        <Save size={17} />
                       </span>
                       <span>Save</span>
                     </>
