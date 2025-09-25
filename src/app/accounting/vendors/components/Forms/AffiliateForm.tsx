@@ -77,6 +77,7 @@ const AffiliateForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetc
             label="Contact No."
             id="contact_no"
             type="text"
+            formatType="contact"
             icon={Edit3}
             register={register('contact_no', { required: true })}
             error={errors.contact_no && "contact no is required"}

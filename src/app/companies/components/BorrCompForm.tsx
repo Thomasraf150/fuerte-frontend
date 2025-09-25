@@ -79,6 +79,7 @@ const BorrCompForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBorrComp, 
         label="Contact No."
         id="contact_no"
         type="text"
+        formatType="contact"
         icon={Home}
         register={register('contact_no', { required: true })}
         error={errors.contact_no && "This field is required"}

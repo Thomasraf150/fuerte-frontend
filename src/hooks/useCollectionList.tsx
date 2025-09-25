@@ -1,23 +1,78 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { DataColListRow, DataRowLoanPayments, DataColEntries } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import CollectionListQueryMutations from '@/graphql/CollectionListQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
+import { usePagination } from './usePagination';
 
 const useCollectionList = () => {
   const { GET_DATA_COLLECTION_LIST, GET_COLLECTION_ENTRY, SAVE_COLLECTION_ENTRY } = CollectionListQueryMutations;
 
-  // const [loanSingleData, setLoanSingleData] = useState<BorrLoanRowData>();
-  const [dataColListData, setDataColListData] = useState<DataColListRow[]>();
+  // Legacy state (kept for backward compatibility)
   const [dataColEntry, setDataColEntry] = useState<DataRowLoanPayments[]>();
   const [loading, setLoading] = useState<boolean>(false);
   const [collectionLoading, setCollectionLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
-  // Function to fetchdata
+
+  // Wrapper function to adapt existing API for usePagination hook
+  const fetchCollectionListForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GET_DATA_COLLECTION_LIST,
+        variables: {
+          first,
+          page,
+          ...(search && { search }), // Add search parameter if provided
+          orderBy: [
+            { column: "loan_id", order: 'DESC' }
+          ]
+        },
+      }),
+    });
+
+    // Return the expected format for usePagination
+    return {
+      data: response.data.getCollectionLists.data,
+      paginatorInfo: response.data.getCollectionLists.paginatorInfo || {
+        total: response.data.getCollectionLists.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_DATA_COLLECTION_LIST]);
+
+  // Use the new pagination hook
+  const {
+    data: dataColListData,
+    loading: collectionListLoading,
+    error: collectionListError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination<DataColListRow>({
+    fetchFunction: fetchCollectionListForPagination,
+    config: {
+      initialPageSize: 20,
+    }
+  });
   
   const fetchCollectionList = async (first: number, page: number, loan_id: number) => {
     setLoading(true);
@@ -113,9 +168,29 @@ const useCollectionList = () => {
   }, []);
 
   return {
+    // New pagination functionality
+    dataColListData,
+    collectionListLoading,
+    collectionListError,
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+      searchPlaceholder: "Search for collection...",
+    },
+    refresh,
+
+    // Legacy functions (kept for backward compatibility)
     fetchCollectionList,
     fetchCollectionEntry,
-    dataColListData,
     dataColEntry,
     loading,
     collectionLoading,

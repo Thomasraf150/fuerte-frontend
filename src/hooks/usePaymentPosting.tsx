@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
@@ -9,40 +9,61 @@ import { useAuthStore } from "@/store";
 import PaymentPostingQueryMutation from '@/graphql/PaymentPostingQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
+import { usePagination } from '@/hooks/usePagination';
 
 const usePaymentPosting = () => {
   const { LOANS_LIST_QUERY, GET_LOAN_SCHEDULE, PROCESS_COLLECTION_PAYMENT, PROCESS_COLLECTION_OTHER_PAYMENT, PROCESS_REMOVE_POSTED_PAYMENT } = PaymentPostingQueryMutation;
 
-  const [loanData, setLoanData] = useState<BorrLoanRowData[]>([]);
   const [loanScheduleList, setLoanScheduleList] = useState<BorrLoanRowData>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [paymentLoading, setPaymentLoading] = useState<boolean>(false);
 
-  // Function to fetchdata
-  
-  const fetchLoans = async (first: number, page: number, borrower_id: number) => {
-    setLoading(true);
+  // Create pagination wrapper function following established pattern
+  const fetchLoansForPagination = useCallback(async (first, page, search) => {
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query: LOANS_LIST_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ], borrower_id}
+        variables: {
+          first,
+          page,
+          ...(search && { search }),
+          borrower_id: 0, // Default to 0 for all borrowers - can be enhanced later
+          orderBy: [{ column: "id", order: 'DESC' }]
+        },
       }),
     });
 
-    // const result = await response.json();
-    setLoanData(response.data.getLoanListPymntPosting.data);
-    setLoading(false);
-  };
+    return {
+      data: response.data.getLoanListPymntPosting.data,
+      paginatorInfo: response.data.getLoanListPymntPosting.paginatorInfo
+    };
+  }, [LOANS_LIST_QUERY]);
+
+  // Use pagination hook for server-side pagination
+  const {
+    data: dataLoans,
+    loading: loansLoading,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    error: loansError,
+  } = usePagination<BorrLoanRowData>({
+    fetchFunction: fetchLoansForPagination,
+    config: { initialPageSize: 20 }
+  });
+
+  // Legacy function for backward compatibility (deprecated - uses refresh instead)
+  const fetchLoans = useCallback(async (first: number, page: number, borrower_id: number) => {
+    // This is kept for backward compatibility but should not be used with large datasets
+    // The component should use the pagination approach instead
+    console.warn('fetchLoans with large datasets is deprecated. Use pagination approach instead.');
+    await refresh();
+  }, [refresh]);
   
   const fetchLoanSchedule = async (loan_id: string) => {
-    setLoading(true);
-
     let variables: { input: any } = {
       input : { loan_id: loan_id }
     };
@@ -60,7 +81,6 @@ const usePaymentPosting = () => {
 
     // const result = await response.json();
     setLoanScheduleList(response.data.getLoanSchedule);
-    setLoading(false);
   };
 
   const onSubmitCollectionPayment = async (data: CollectionFormValues, loan_id: string) => {
@@ -249,10 +269,32 @@ const usePaymentPosting = () => {
   }, []);
 
   return {
-    loading,
-    paymentLoading,
-    fetchLoans,
-    loanData,
+    // New pagination functionality
+    dataLoans,
+    loansLoading,
+    loansError,
+    refresh,
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+      searchPlaceholder: "Search payment posting..."
+    },
+
+    // Legacy compatibility (deprecated but maintained for existing code)
+    loading: loansLoading, // Map to new loading state
+    loanData: dataLoans, // Map to new data state
+    fetchLoans, // Deprecated function that now uses refresh
+
+    // Existing functionality (unchanged)
     onSubmitCollectionPayment,
     fetchLoanSchedule,
     loanScheduleList,

@@ -125,6 +125,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             icon={Home}
             register={register('contact_no', { required: true })}
             error={errors.contact_no && "This field is required"}
+            formatType="contact"
           />
         </div>
         <div>

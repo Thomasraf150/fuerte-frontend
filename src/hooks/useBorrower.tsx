@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
@@ -8,6 +8,7 @@ import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { useAuthStore } from "@/store";
+import { usePagination } from './usePagination';
 
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, BorrowerRowInfo } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -17,15 +18,78 @@ const useBorrower = () => {
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
-  
-  const [borrowerLoading, setBorrowerLoading] = useState<boolean>(false);
+
   const [borrCrudLoading, setBorrCrudLoading] = useState<boolean>(false);
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
   const [dataBorrCompany, setDataBorrCompany] = useState<DataBorrCompanies[] | undefined>(undefined);
-  const [dataBorrower, setDataBorrower] = useState<BorrowerRowInfo[]>([]);
-  // Function to fetchdata
+
+  // Wrapper function to adapt existing API for usePagination hook
+  const fetchBorrowersForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GET_BORROWER_QUERY,
+        variables: {
+          first,
+          page,
+          ...(search && { search }), // Add search parameter if provided
+          orderBy: [
+            { column: "id", order: 'DESC' }
+          ]
+        },
+      }),
+    });
+
+    const result = await response.json();
+
+    // Return the expected format for usePagination
+    return {
+      data: result.data.getBorrowers.data,
+      paginatorInfo: result.data.getBorrowers.paginatorInfo || {
+        total: result.data.getBorrowers.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_BORROWER_QUERY]);
+
+  // Use the new pagination hook
+  const {
+    data: dataBorrower,
+    loading: borrowerLoading,
+    error: borrowerError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination<BorrowerRowInfo>({
+    fetchFunction: fetchBorrowersForPagination,
+    config: {
+      initialPageSize: 20,
+      defaultPageSize: 20,
+    },
+  });
+
+  // Legacy fetchDataBorrower function for backward compatibility
+  const fetchDataBorrower = useCallback(async (first: number, page: number) => {
+    const result = await fetchBorrowersForPagination(first, page);
+    // This maintains the old behavior for any existing code that still uses it
+    return result;
+  }, [fetchBorrowersForPagination]);
 
 
   const createBorrVariables = (data: BorrowerInfo, user_id: number) => ({
@@ -96,40 +160,21 @@ const useBorrower = () => {
       const userData = JSON.parse(storedAuthStore)['state'];
       const variables = createBorrVariables(data, Number(userData?.user?.id));
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: SAVE_BORROWER_MUTATION,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
-
-      // Handle GraphQL errors
-      if (result.errors) {
-        toast.error(result.errors[0].message);
-        return { success: false, error: result.errors[0].message };
-      }
-
-      // Check specific success response
-      if (result.data?.saveBorrower) {
-        toast.success(result.data.saveBorrower.message);
-        fetchDataBorrower(3000, 1);
-        return { success: true, data: result.data.saveBorrower };
-      }
-
-      return { success: false, error: 'Unknown error occurred' };
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
-      toast.error(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setBorrowerLoading(false);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables,
+      }),
+    });
+    setBorrowerLoading(false);
+    const result = await response.json();
+    if (result) {
+      toast.success(result.data.saveBorrower.message);
+      refresh(); // Use pagination hook's refresh function
     }
   };
 
@@ -151,28 +196,7 @@ const useBorrower = () => {
     const result = await response.json();
     setDataChief(result.data.getChief.data);
   };
-  
-  const fetchDataBorrower = async (first: number, page: number) => {
-    setBorrowerLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
-      }),
-    });
 
-    const result = await response.json();
-    setBorrowerLoading(false);
-    setDataBorrower(result.data.getBorrowers.data);
-  };
-  
   const fetchDataArea = async (first: number, page: number) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
@@ -252,7 +276,7 @@ const useBorrower = () => {
       });
       const result = await response.json();
       if (result) {
-        fetchDataBorrower(3000, 1);
+        refresh(); // Use pagination hook's refresh function
         toast.success(result.data?.deleteBorrowerData?.message);
       }
     }
@@ -292,6 +316,7 @@ const useBorrower = () => {
   }, []);
 
   return {
+    // Legacy data and functions (for backward compatibility)
     dataChief,
     dataArea,
     dataSubArea,
@@ -300,18 +325,38 @@ const useBorrower = () => {
     onSubmitBorrower,
     dataBorrower,
     borrowerLoading,
-    fetchDataBorrower,
+    fetchDataBorrower, // Legacy function - maintained for backward compatibility
     fetchDataChief,
     fetchDataArea,
     fetchDataBorrCompany,
     handleRmBorrower,
-    borrCrudLoading
-    // fetchDataArea,
-    // dataArea,
-    // fetchDataSubArea,
-    // dataSubArea,
-    // onSubmitBorrower,
-    // handleDeleteSubArea
+    borrCrudLoading,
+
+    // New pagination functionality
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+    borrowerError,
+
+    // Server-side pagination helpers for CustomDatatable
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+    },
   };
 };
 

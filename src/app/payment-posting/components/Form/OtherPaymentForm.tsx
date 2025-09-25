@@ -8,6 +8,7 @@ import { Printer, CreditCard, Save, RotateCw } from 'react-feather';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import { toast } from "react-toastify";
+import FormInput from '@/components/FormInput';
 interface OMProps {
   selectedMoSchedOthPay: any;
   selectedUdiSched: any;
@@ -155,13 +156,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection</td>
                 <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
+                  <FormInput
                     id="collection"
+                    type="text"
+                    formatType="number"
                     placeholder="0.00"
-                    {...register('collection', { required: "Collection is required!" })}
+                    register={register('collection', { required: "Collection is required!" })}
                     onBlur={(e: any) => { return handleDecimal(e, 'collection'); }}
+                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
               </tr>
@@ -181,52 +183,56 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Payment UA/SP</td>
                 <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
+                  <FormInput
                     id="payment_ua_sp"
+                    type="text"
+                    formatType="number"
                     placeholder="0.00"
-                    {...register('payment_ua_sp')}
+                    register={register('payment_ua_sp')}
                     onBlur={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
+                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
               </tr>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Penalty UA/SP</td>
                 <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
+                  <FormInput
                     id="penalty_ua_sp"
+                    type="text"
+                    formatType="number"
                     placeholder="0.00"
-                    {...register('penalty_ua_sp')}
+                    register={register('penalty_ua_sp')}
                     onBlur={(e: any) => { return handleDecimal(e, 'penalty_ua_sp'); }}
+                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
               </tr>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Advanced Payment</td>
                 <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
+                  <FormInput
                     id="advanced_payment"
+                    type="text"
+                    formatType="number"
                     placeholder="0.00"
-                    {...register('advanced_payment')}
+                    register={register('advanced_payment')}
                     onBlur={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
+                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Bank Charges</td>
                 <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
+                  <FormInput
                     id="bank_charge"
+                    type="text"
+                    formatType="number"
                     placeholder="0.00"
-                    {...register('bank_charge', { required: "Bank Charge is required!" })}
+                    register={register('bank_charge', { required: "Bank Charge is required!" })}
                     onBlur={(e: any) => { return handleDecimal(e, 'bank_charge'); }}
+                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
               </tr>
@@ -246,12 +252,13 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               <tr>
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Commission</td>
                 <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
+                  <FormInput
                     id="commission_fee"
+                    type="text"
+                    formatType="number"
                     placeholder="0.00"
-                    {...register('commission_fee')}
+                    register={register('commission_fee')}
+                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
               </tr>

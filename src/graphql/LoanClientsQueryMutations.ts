@@ -1,10 +1,18 @@
 const GET_LOAN_CLIENT_QUERY: string = `
-    query GetLoanClient($orderBy: String!){
-      getLoanClient(orderBy: $orderBy){
-        id
-        name
-        penalty_rate
-        user_id
+    query GetLoanClient($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String){
+      getLoanClient(first: $first, page: $page, orderBy: $orderBy, search: $search){
+        data {
+          id
+          name
+          penalty_rate
+          user_id
+        }
+        paginatorInfo {
+          total
+          currentPage
+          lastPage
+          hasMorePages
+        }
       }
     }
 `;

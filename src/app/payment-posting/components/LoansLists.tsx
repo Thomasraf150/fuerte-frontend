@@ -14,7 +14,18 @@ const column = loansListColumn;
 const LoansLists: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoanSchedule, loanScheduleList, fetchLoans, loading, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment } = usePaymentPosting();
+  const {
+    dataLoans,
+    loansLoading,
+    loansError,
+    serverSidePaginationProps,
+    refresh,
+    fetchLoanSchedule,
+    loanScheduleList,
+    onSubmitCollectionPayment,
+    onSubmitOthCollectionPayment,
+    fnReversePayment
+  } = usePaymentPosting();
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -32,12 +43,11 @@ const LoansLists: React.FC = () => {
 
   const handleShowForm = (d: boolean) => {
     setShowForm(d);
-    fetchLoans(100000, 1, 0);
+    refresh(); // Use pagination refresh instead of loading 100K records
   }
 
-  useEffect(() => {
-    fetchLoans(100000, 1, 0);
-  }, [loanScheduleList])
+  // Note: Removed useEffect - usePagination handles initial data loading automatically
+  // The component will automatically refresh when needed
 
   return (
     <div>
@@ -52,13 +62,25 @@ const LoansLists: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
+                  {loansError && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                      Error loading payment posting loans: {loansError}
+                      <button
+                        onClick={refresh}
+                        className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
                   <CustomDatatable
-                    apiLoading={loading}
+                    apiLoading={loansLoading}
                     columns={column(handleRowClick)}
                     onRowClicked={handleWholeRowClick}
-                    data={loanData}
-                    enableCustomHeader={true} 
-                    title={''}  
+                    data={dataLoans}
+                    enableCustomHeader={true}
+                    title={''}
+                    serverSidePagination={serverSidePaginationProps}
                   />
                 </div>
               </div>

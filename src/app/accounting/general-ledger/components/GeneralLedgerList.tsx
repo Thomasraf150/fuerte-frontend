@@ -8,6 +8,7 @@ import useGeneralLedger from '@/hooks/useGeneralLedger';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
+import { formatNumberComma } from '@/utils/helper';
 
 const GeneralLedgerList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -81,10 +82,10 @@ const GeneralLedgerList: React.FC = () => {
                                 }`}
                                 onClick={() => handleRowClick(item)}
                               >
-                                <td className="px-4 py-2 border">{item?.account_name}</td> 
+                                <td className="px-4 py-2 border">{item?.account_name}</td>
                                 <td className="px-4 py-2 border text-center">{item?.number}</td>
-                                <td className="px-4 py-2 border text-right">{item?.debit}</td>
-                                <td className="px-4 py-2 border text-right">{item?.credit}</td>
+                                <td className="px-4 py-2 border text-right">{formatNumberComma(Number(item?.debit) || 0)}</td>
+                                <td className="px-4 py-2 border text-right">{formatNumberComma(Number(item?.credit) || 0)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -93,10 +94,10 @@ const GeneralLedgerList: React.FC = () => {
                             <tr className="bg-gray-100 font-semibold">
                               <td className="px-4 py-2 border text-right bg-slate-50" colSpan={2}>Total:</td>
                               <td className="px-4 py-2 border text-right bg-slate-50">
-                                {filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0).toFixed(2)}
+                                {formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
                               </td>
                               <td className="px-4 py-2 border text-right bg-slate-50">
-                                {filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0).toFixed(2)}
+                                {formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
                               </td>
                             </tr>
                           </tfoot>

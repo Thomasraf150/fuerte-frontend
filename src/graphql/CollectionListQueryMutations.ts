@@ -1,9 +1,10 @@
 const GET_DATA_COLLECTION_LIST: string = `
-  query GetCollectionLists($first: Int, $page: Int, $orderBy: [OrderByClause!], $loan_ref: String){
+  query GetCollectionLists($first: Int, $page: Int, $orderBy: [OrderByClause!], $loan_ref: String, $search: String){
     getCollectionLists(first: $first,
       page: $page,
       orderBy: $orderBy,
-      loan_ref: $loan_ref){
+      loan_ref: $loan_ref,
+      search: $search){
       data {
         loan_id
         description
@@ -11,7 +12,13 @@ const GET_DATA_COLLECTION_LIST: string = `
         due_date
         trans_date
         loan_ref
-      } 
+      }
+      paginatorInfo {
+        total
+        currentPage
+        lastPage
+        hasMorePages
+      }
   }
 }
 `;

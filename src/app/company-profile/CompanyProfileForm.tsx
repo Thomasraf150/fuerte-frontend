@@ -100,6 +100,7 @@ const CompanyProfileForm: React.FC = () => {
         icon={Phone}
         register={register('phone_no', { required: true })}
         error={errors.phone_no && "This field is required"}
+        formatType="contact"
       />
       
       <FormInput
@@ -109,6 +110,7 @@ const CompanyProfileForm: React.FC = () => {
         icon={Phone}
         register={register('mobile_no', { required: true })}
         error={errors.mobile_no && "This field is required"}
+        formatType="contact"
       />
       
       <FormInput
@@ -127,6 +129,7 @@ const CompanyProfileForm: React.FC = () => {
         icon={Phone}
         register={register('contact_person_no', { required: true })}
         error={errors.contact_person_no && "This field is required"}
+        formatType="contact"
       />
       
       <FormInput

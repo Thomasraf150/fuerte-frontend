@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData, LoanBankFormValues, LoanReleaseFormValues, DataRenewalData } from '@/utils/DataTypes';
@@ -10,6 +10,7 @@ import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';
+import { usePagination } from '@/hooks/usePagination';
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
@@ -33,8 +34,65 @@ const useLoans = () => {
   const [dataComputedRenewal, setDataComputedRenewal] = useState<DataRenewalData>();
   const [loading, setLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
+
+  // Pagination wrapper function for server-side pagination
+  const fetchLoansForPagination = useCallback(async (first: number, page: number, search?: string) => {
+    const { GET_AUTH_TOKEN } = useAuthStore.getState();
+    try {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
+        },
+        body: JSON.stringify({
+          query: BORROWER_LOAN_QUERY,
+          variables: {
+            first,
+            page,
+            orderBy: [{ column: "id", order: 'DESC' }],
+            borrower_id: 0, // Use 0 to fetch all loans
+            ...(search && { search })
+          },
+        }),
+      });
+
+      console.log('GraphQL Response:', response); // Debug log
+      console.log('Loans Data:', response.data?.getLoans?.data);
+      console.log('Paginator Info:', response.data?.getLoans?.paginatorInfo);
+
+      // Check if response has errors
+      if (response.errors) {
+        console.error('GraphQL Errors:', response.errors);
+        throw new Error(response.errors[0]?.message || 'GraphQL query failed');
+      }
+
+      // Ensure response.data exists
+      if (!response.data || !response.data.getLoans) {
+        console.error('Invalid response structure:', response);
+        throw new Error('Invalid response structure from API');
+      }
+
+      const loansData = response.data.getLoans.data || [];
+      const paginatorInfo = response.data.getLoans.paginatorInfo;
+
+      return {
+        data: loansData,
+        paginatorInfo: paginatorInfo || {
+          total: loansData.length,
+          currentPage: page,
+          lastPage: 1,
+          hasMorePages: false
+        }
+      };
+    } catch (error) {
+      console.error('fetchLoansForPagination error:', error);
+      throw error;
+    }
+  }, [BORROWER_LOAN_QUERY]);
+
   // Function to fetchdata
-  
+
   const fetchLoans = async (first: number, page: number, borrower_id: number) => {
     setLoading(true);
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -141,6 +199,12 @@ const useLoans = () => {
   };
 
   const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+
+    // Development debugging
+    console.log('useLoans - onSubmitLoanComp called:', { data, process_type });
+
     setLoading(true);
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
@@ -162,6 +226,62 @@ const useLoans = () => {
         process_type
       };
 
+    console.log('useLoans - API variables:', variables);
+
+    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: PROCESS_BORROWER_LOAN_MUTATION,
+        variables,
+      }),
+    });
+    console.log('useLoans - API response:', response);
+
+    if (process_type === 'Compute') {
+      if (response.data && response.data.processALoan) {
+        setDataComputedLoans(response.data.processALoan);
+        console.log('useLoans - Computation successful:', response.data.processALoan);
+      } else {
+        console.error('useLoans - No processALoan data in response:', response);
+        toast.error('Failed to compute loan. Please check all fields.');
+      }
+      setLoading(false);
+    } else {
+      if (response.errors) {
+        console.error('useLoans - API errors:', response.errors);
+        toast.error(response.errors[0].message);
+      } else {
+        console.log('useLoans - Save successful');
+        toast.success('Loan Entry Saved!');
+      }
+      setLoading(false);
+    }
+  };
+  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {
+    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+    const userData = JSON.parse(storedAuthStore)['state'];
+    console.log(data, ' data');
+    console.log(status, ' status');
+    console.log(selectedDate, ' selectedDate');
+    let variables: { input: any, selectedDate: string[], interest: string[], monthly: string[], status: number } = {
+      input: {
+        user_id: userData?.user?.id,
+        loan_id: data?.id,
+      },
+      selectedDate,
+      interest,
+      monthly,
+      status
+    };
+    const isConfirmed = await showConfirmationModal(
+      'Are you sure?',
+      'You won\'t be able to revert this!',
+      'Yes it is!',
+    );
+    if (isConfirmed) {
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
@@ -403,7 +523,7 @@ const useLoans = () => {
     }
   };
   
-  const handleDeleteLoans = async (loan_id: String, type: String, fetchLoans: (a: number, b: number, c: number) => void) => {
+  const handleDeleteLoans = async (loan_id: String, type: String) => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
     let variables: { input: any } = {
@@ -432,7 +552,7 @@ const useLoans = () => {
         toast.error(response.errors[0].message);
       } else {
         toast.success(response?.data?.removeLoans?.message);
-        fetchLoans(100000, 1, 0);
+        refresh();
       }
     }
   };
@@ -515,6 +635,21 @@ const useLoans = () => {
     }
   };
 
+  // Pagination hook integration for server-side pagination
+  const {
+    data: dataLoans,
+    loading: loansLoading,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+  } = usePagination<BorrLoanRowData>({
+    fetchFunction: fetchLoansForPagination,
+    config: { initialPageSize: 20 }
+  });
+
    // Fetch data on component mount if id exists
   useEffect(() => {
     fetchLoanProducts()
@@ -538,7 +673,25 @@ const useLoans = () => {
     dataComputedRenewal,
     handleDeleteLoans,
     handleUpdateMaturity,
-    handleChangeReleasedDate
+    handleChangeReleasedDate,
+    // Server-side pagination props
+    dataLoans,
+    loansLoading,
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+      enableSearch: true, // Enable search as backend now supports it
+    },
+    refreshLoans: refresh,
   };
 };
 

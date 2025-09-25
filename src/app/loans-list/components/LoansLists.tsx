@@ -13,11 +13,17 @@ const column = loansListColumn;
 const LoansLists: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { loanData, fetchLoans, handleDeleteLoans, loading } = useLoans();
+  const {
+    dataLoans,
+    loansLoading,
+    serverSidePaginationProps,
+    handleDeleteLoans,
+    refreshLoans
+  } = useLoans();
 
   const handleRowClick = async (data: BorrLoanRowData) => {
     setSingleData(data);
-    handleDeleteLoans(String(data.id), 'rm_loans', fetchLoans);
+    handleDeleteLoans(String(data.id), 'rm_loans');
   }
  
   const handleViewWholeLoan = (data: BorrLoanRowData) => {
@@ -28,12 +34,10 @@ const LoansLists: React.FC = () => {
 
   const handleShowForm = (d: boolean) => {
     setShowForm(d);
-    fetchLoans(100000, 1, 0);
+    refreshLoans();
   }
 
-  useEffect(() => {
-    fetchLoans(100000, 1, 0);
-  }, [])
+  // Note: Removed useEffect - usePagination handles initial data loading
 
   return (
     <div>
@@ -50,12 +54,13 @@ const LoansLists: React.FC = () => {
                 </div>
                 <div className="p-7">
                   <CustomDatatable
-                    apiLoading={loading}
+                    apiLoading={loansLoading}
                     columns={column(handleRowClick, handleViewWholeLoan)}
                     // onRowClicked={handleViewWholeLoan}
-                    data={loanData}
-                    enableCustomHeader={true} 
-                    title={''}  
+                    data={dataLoans}
+                    serverSidePagination={serverSidePaginationProps}
+                    enableCustomHeader={true}
+                    title={''}
                   />
                 </div>
               </div>
