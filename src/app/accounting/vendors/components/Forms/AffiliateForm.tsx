@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, Edit3, ChevronDown } from 'react-feather';
+import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -10,9 +10,9 @@ import { RowVendorsData, DataSubBranches, RowSupCatData } from '@/utils/DataType
 interface ParentFormBr {
   setShowForm: (v: boolean) => void;
   fetchVendors: (v: string) => void;
-  createVendor: (d: RowVendorsData) => void;
+  createVendor: (d: RowVendorsData) => Promise<{success: boolean, error?: string, data?: any}>;
   vendorTypeId: string;
-  loading: boolean;
+  vendorLoading: boolean;
   singleData: RowVendorsData | undefined;
 }
 
@@ -22,7 +22,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const AffiliateForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, loading, singleData }) => {
+const AffiliateForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, vendorLoading, singleData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
 
   useEffect(() => {
@@ -34,12 +34,16 @@ const AffiliateForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetc
     setValue('employee_position', singleData?.employee_position ?? '');
   }, [singleData]);
 
-  const onSubmit: SubmitHandler<RowVendorsData> = data => {
+  const onSubmit: SubmitHandler<RowVendorsData> = async (data) => {
     console.log(data, ' data');
-    createVendor(data);
-    if (!loading) {
+    const result = await createVendor(data);
+    
+    // Only close form and refetch on successful submission
+    if (result.success) {
       fetchVendors(vendorTypeId);
+      setShowForm(false);
     }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -103,10 +107,21 @@ const AffiliateForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetc
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${vendorLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={vendorLoading}
         >
-          Save
+          {vendorLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { DollarSign, Layout, Save } from 'react-feather';
+import { DollarSign, Layout, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
@@ -48,10 +48,13 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       'Yes Save it!',
     );
     if (isConfirmed) {
-      onSubmitLoanComp(dataLoanComp, "Create");
-      if (!loading) {
-        createLoans(false)
+      const result = await onSubmitLoanComp(dataLoanComp, "Create");
+
+      // Only close form on successful submission
+      if (result.success) {
+        createLoans(false);
       }
+      // Form stays open on errors for user to fix and retry
     }
   };
 
@@ -204,19 +207,18 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                   <span>Compute</span>
                 </button>
                 <button
-                  className="flex justify-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90"
+                  className={`flex justify-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90 ${loading ? 'opacity-70' : ''}`}
                   type="submit"
                   disabled={loading}
                 >
                   {loading ? (
                     <>
-                      Please wait..
+                      <RotateCw size={17} className="animate-spin mr-1" />
+                      <span>Saving...</span>
                     </>
                   ) : (
                     <>
-                      <span className="mt-1 mr-1">
-                        <Save size={17} /> 
-                      </span>
+                      <Save size={17} className="mr-1" />
                       <span>Save</span>
                     </>
                   )}

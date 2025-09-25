@@ -23,6 +23,7 @@ const useVendor = () => {
   const [dataCustCat, setDataCustCat] = useState<RowCustCatData[]>();
   const [dataDepartments, setDataDepartments] = useState<RowDepartmentsData[]>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [vendorLoading, setVendorLoading] = useState<boolean>(false);
   // Function to fetchdata
 
   const fetchVendorType = async () => {
@@ -166,47 +167,69 @@ const useVendor = () => {
   };
 
   const createVendor = async (row: RowVendorsData) => {
-    // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    // const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        id: row?.id,
-        vendor_type_id: row?.vendor_type_id,
-        customer_category_id: row?.customer_category_id,
-        supplier_category_id: row?.supplier_category_id,
-        department_id: row?.department_id,
-        name: row?.name,
-        employee_no: row?.employee_no,
-        contact_no: row?.contact_no,
-        employee_position: row?.employee_position,
-        tin: row?.tin,
-        address: row?.address,
-        tax_excempty_date: row?.tax_excempty_date,
-        remarks: row?.remarks,
-        bill_address: row?.bill_address,
-        office_no: row?.office_no,
-        credit_limit: row?.credit_limit,
-        is_allow_excess_limit: row?.is_allow_excess_limit
-      },
-    };
+    setVendorLoading(true);
+    try {
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          id: row?.id,
+          vendor_type_id: row?.vendor_type_id,
+          customer_category_id: row?.customer_category_id,
+          supplier_category_id: row?.supplier_category_id,
+          department_id: row?.department_id,
+          name: row?.name,
+          employee_no: row?.employee_no,
+          contact_no: row?.contact_no,
+          employee_position: row?.employee_position,
+          tin: row?.tin,
+          address: row?.address,
+          tax_excempty_date: row?.tax_excempty_date,
+          remarks: row?.remarks,
+          bill_address: row?.bill_address,
+          office_no: row?.office_no,
+          credit_limit: row?.credit_limit,
+          is_allow_excess_limit: row?.is_allow_excess_limit
+        },
+      };
 
-    mutation = CREATE_VENDOR_QUERY;
-    setLoading(true);
+      mutation = CREATE_VENDOR_QUERY;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    toast.success(result?.data.createVendors?.message);
-    setLoading(false);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation
+      if (result?.data?.createVendors) {
+        const responseData = result.data.createVendors;
+        toast.success(responseData.message || "Vendor created successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Vendor created successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setVendorLoading(false);
+    }
   };
 
    // Fetch data on component mount if id exists
@@ -225,7 +248,8 @@ const useVendor = () => {
     dataCustCat,
     dataVendors,
     dataDepartments,
-    loading
+    loading,
+    vendorLoading
   };
 };
 

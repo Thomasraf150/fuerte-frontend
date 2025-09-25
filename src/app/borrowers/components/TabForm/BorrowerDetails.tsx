@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Link from "next/link";
-import { Camera, Home } from 'react-feather';
+import { Camera, Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies } from '@/utils/DataTypes';
@@ -135,13 +135,16 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     // fetchDataBorrCompany(100, 1);
   }, [dataSubArea, optionsSubArea, fetchDataSubArea])
 
-  const onSubmit = (data: BorrowerInfo) => {
+  const onSubmit = async (data: BorrowerInfo) => {
     data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
-    
-    onSubmitBorrower(data);
-    // setSingleData(data);
-    setShowForm(false);
-    // fetchDataBorrower(100, 1);
+
+    const result = await onSubmitBorrower(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   }
 
   // const [imageSrc, setImageSrc] = useState('/images/user/user-06.png'); // Default image
@@ -990,11 +993,21 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 Back
               </button>
               <button
-                className="flex justify-center rounded bg-black px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+                className={`flex justify-center rounded bg-black px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${borrowerLoading ? 'opacity-70' : ''}`}
                 type="submit"
                 disabled={borrowerLoading}
               >
-                {borrowerLoading ? 'Please wait..' : 'Save'}
+                {borrowerLoading ? (
+                  <>
+                    <RotateCw size={17} className="animate-spin mr-1" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={17} className="mr-1" />
+                    <span>Save</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

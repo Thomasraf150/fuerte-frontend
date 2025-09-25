@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User } from 'react-feather';
+import { Home, MapPin, Archive, Mail, Globe, Phone, User, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useBorrCompanies from '@/hooks/useBorrCompanies';
 import { DataBranches, DataBorrCompanies, } from '@/utils/DataTypes';
@@ -14,7 +14,7 @@ interface ParentFormBr {
 
 const BorrCompForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBorrComp, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataBorrCompanies>();
-  const { onSubmitBorrComp } = useBorrCompanies();
+  const { onSubmitBorrComp, borrCompLoading } = useBorrCompanies();
 
   useEffect(()=>{
     if (initialData) {
@@ -38,9 +38,15 @@ const BorrCompForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBorrComp, 
     }
   }, [initialData, setValue, actionLbl])
 
-  const onSubmit: SubmitHandler<DataBorrCompanies> = data => {
-    onSubmitBorrComp(data);
-    fetchDataBorrComp(10, 1)
+  const onSubmit: SubmitHandler<DataBorrCompanies> = async (data) => {
+    const result = await onSubmitBorrComp(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchDataBorrComp(10, 1);
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -95,10 +101,21 @@ const BorrCompForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBorrComp, 
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${borrCompLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={borrCompLoading}
         >
-          Save
+          {borrCompLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

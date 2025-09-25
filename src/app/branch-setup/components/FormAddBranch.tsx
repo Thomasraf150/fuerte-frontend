@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User } from 'react-feather';
+import { Home, MapPin, Archive, Mail, Globe, Phone, User, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useBranches from '@/hooks/useBranches';
 import { DataBranches, DataFormBranch } from '@/utils/DataTypes';
@@ -14,7 +14,7 @@ interface ParentFormBr {
 
 const FormAddBranch: React.FC<ParentFormBr> = ({ setShowForm, fetchDataList, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataFormBranch>();
-  const { onSubmitBranch } = useBranches();
+  const { onSubmitBranch, branchLoading } = useBranches();
 
   useEffect(()=>{
     if (initialData) {
@@ -30,9 +30,15 @@ const FormAddBranch: React.FC<ParentFormBr> = ({ setShowForm, fetchDataList, ini
     }
   }, [initialData, setValue, actionLbl])
 
-  const onSubmit: SubmitHandler<DataFormBranch> = data => {
-    onSubmitBranch(data);
-    fetchDataList()
+  const onSubmit: SubmitHandler<DataFormBranch> = async (data) => {
+    const result = await onSubmitBranch(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchDataList();
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -55,10 +61,21 @@ const FormAddBranch: React.FC<ParentFormBr> = ({ setShowForm, fetchDataList, ini
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${branchLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={branchLoading}
         >
-          Save
+          {branchLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

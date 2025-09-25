@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown } from 'react-feather';
+import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useSubArea from '@/hooks/useSubArea';
 import { DataSubArea } from '@/utils/DataTypes';
@@ -24,7 +24,8 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
           dataArea,
           dataSubArea,
           onSubmitSubArea,
-          handleDeleteSubArea } = useSubArea();
+          handleDeleteSubArea,
+          subAreaLoading } = useSubArea();
 
   const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
 
@@ -57,9 +58,15 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
     console.log(initialData, ' initialData');
   }, [initialData, setValue, actionLbl, dataArea])
 
-  const onSubmit: SubmitHandler<DataSubArea> = data => {
-    onSubmitSubArea(data);
-    fetchDataSubArea(10, 1)
+  const onSubmit: SubmitHandler<DataSubArea> = async (data) => {
+    const result = await onSubmitSubArea(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchDataSubArea(10, 1);
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -92,10 +99,21 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${subAreaLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={subAreaLoading}
         >
-          Save
+          {subAreaLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

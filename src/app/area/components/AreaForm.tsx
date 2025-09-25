@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown } from 'react-feather';
+import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useArea from '@/hooks/useArea';
 import { DataArea, DataSubBranches } from '@/utils/DataTypes';
@@ -20,7 +20,7 @@ interface OptionSubBranch {
 
 const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataArea>();
-  const { onSubmitArea, branchSubData } = useArea();
+  const { onSubmitArea, branchSubData, areaLoading } = useArea();
 
   const [optionsSubBranch, setOptionsSubBranch] = useState<OptionSubBranch[]>([]);
 
@@ -55,9 +55,15 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
     console.log(initialData, ' initialData');
   }, [initialData, setValue, actionLbl, branchSubData])
 
-  const onSubmit: SubmitHandler<DataArea> = data => {
-    onSubmitArea(data);
-    fetchDataArea(10, 1)
+  const onSubmit: SubmitHandler<DataArea> = async (data) => {
+    const result = await onSubmitArea(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchDataArea(10, 1);
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -99,10 +105,21 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${areaLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={areaLoading}
         >
-          Save
+          {areaLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

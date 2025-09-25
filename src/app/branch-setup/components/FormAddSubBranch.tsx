@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, ChevronDown } from 'react-feather';
+import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormInput from '@/components/FormInput';
 import FormLabel from '@/components/FormLabel';
@@ -24,7 +24,7 @@ interface Option {
 
 const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchId, actionLbl, fetchSubDataList, initialSubData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataFormSubBranches>();
-  const { onSubmitSubBranch, dataBranch } = useBranches();
+  const { onSubmitSubBranch, dataBranch, branchLoading } = useBranches();
 
   useEffect(() => {
       if (initialSubData) {
@@ -90,10 +90,15 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
     }
   }, [dataBranch])
 
-  const onSubmit: SubmitHandler<DataFormSubBranches> = data => {
-    // data.branch_id = selectedBranchId;
-    onSubmitSubBranch(data);
-    fetchSubDataList('id_desc', selectedBranchId);
+  const onSubmit: SubmitHandler<DataFormSubBranches> = async (data) => {
+    const result = await onSubmitSubBranch(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchSubDataList('id_desc', selectedBranchId);
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -240,10 +245,21 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${branchLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={branchLoading}
         >
-          Save
+          {branchLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

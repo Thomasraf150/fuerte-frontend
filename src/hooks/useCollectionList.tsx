@@ -15,6 +15,7 @@ const useCollectionList = () => {
   const [dataColListData, setDataColListData] = useState<DataColListRow[]>();
   const [dataColEntry, setDataColEntry] = useState<DataRowLoanPayments[]>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [collectionLoading, setCollectionLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
   
@@ -62,35 +63,49 @@ const useCollectionList = () => {
   };
 
   const postCollectionEntries = async (loan_payments: DataRowLoanPayments[], subsidiaries: DataColEntries) => {
-    setLoading(true);
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    subsidiaries.user_id = userData?.user?.id
-    let variables: { loan_payments: any, subsidiaries: any } = {
-      loan_payments,
-      subsidiaries
-    };
+    setCollectionLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      subsidiaries.user_id = userData?.user?.id
+      let variables: { loan_payments: any, subsidiaries: any } = {
+        loan_payments,
+        subsidiaries
+      };
 
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: SAVE_COLLECTION_ENTRY,
-        variables
-      }),
-    });
-    // const result = await response.json();
-    // setDataColListData(response.data.getLoans.data);
-    console.log(response.data.postCollectionEntries, 'response.data.postCollectionEntries');
-    if (response.data.postCollectionEntries?.status === false) {
-      toast.error(response.data.postCollectionEntries?.message);
-    } else {
-      toast.success(response.data.postCollectionEntries?.message);
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: SAVE_COLLECTION_ENTRY,
+          variables
+        }),
+      });
+      
+      // Handle API response errors
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+        return { success: false, error: response.errors[0].message };
+      }
+      
+      console.log(response.data.postCollectionEntries, 'response.data.postCollectionEntries');
+      if (response.data.postCollectionEntries?.status === false) {
+        toast.error(response.data.postCollectionEntries?.message);
+        return { success: false, error: response.data.postCollectionEntries?.message };
+      } else {
+        toast.success(response.data.postCollectionEntries?.message);
+        return { success: true, data: response.data.postCollectionEntries };
+      }
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setCollectionLoading(false);
     }
-    setLoading(false);
-    
   };
 
    // Fetch data on component mount if id exists
@@ -103,6 +118,7 @@ const useCollectionList = () => {
     dataColListData,
     dataColEntry,
     loading,
+    collectionLoading,
     postCollectionEntries
   };
 };

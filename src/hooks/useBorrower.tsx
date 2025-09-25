@@ -91,33 +91,45 @@ const useBorrower = () => {
 
   const onSubmitBorrower: SubmitHandler<BorrowerInfo> = async (data) => {
     setBorrowerLoading(true);
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    const variables = createBorrVariables(data, Number(userData?.user?.id));
-    
-    if (data.id) {
-      mutation = SAVE_BORROWER_MUTATION;
-      variables.inputBorrInfo.id = data.id;
-    } else {
-      mutation = SAVE_BORROWER_MUTATION;
-    }
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      const variables = createBorrVariables(data, Number(userData?.user?.id));
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    setBorrowerLoading(false);
-    const result = await response.json();
-    if (result) {
-      toast.success(result.data.saveBorrower.message);
-      fetchDataBorrower(3000, 1);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: SAVE_BORROWER_MUTATION,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check specific success response
+      if (result.data?.saveBorrower) {
+        toast.success(result.data.saveBorrower.message);
+        fetchDataBorrower(3000, 1);
+        return { success: true, data: result.data.saveBorrower };
+      }
+
+      return { success: false, error: 'Unknown error occurred' };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setBorrowerLoading(false);
     }
   };
 

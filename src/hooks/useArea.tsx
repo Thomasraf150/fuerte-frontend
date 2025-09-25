@@ -17,6 +17,7 @@ const useArea = () => {
   
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
+  const [areaLoading, setAreaLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -54,38 +55,64 @@ const useArea = () => {
   };
 
   const onSubmitArea: SubmitHandler<DataArea> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setAreaLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        branch_sub_id: data.branch_sub_id,
-        name: data.name,
-        description: data.description,
-        user_id: userData?.user?.id
-      },
-    };
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          branch_sub_id: data.branch_sub_id,
+          name: data.name,
+          description: data.description,
+          user_id: userData?.user?.id
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_AREA_MUTATION;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_AREA_MUTATION;
+      if (data.id) {
+        mutation = UPDATE_AREA_MUTATION;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_AREA_MUTATION;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createArea || result.data?.updateArea) {
+        const responseData = result.data.createArea || result.data.updateArea;
+        toast.success("Area saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Area saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setAreaLoading(false);
     }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    toast.success("Area is Saved!");
   };
   
   const handleDeleteArea = async (data: any) => {
@@ -120,6 +147,7 @@ const useArea = () => {
     dataArea,
     branchSubData,
     onSubmitArea,
+    areaLoading,
     handleDeleteArea
   };
 };

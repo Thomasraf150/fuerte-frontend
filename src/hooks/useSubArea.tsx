@@ -16,6 +16,7 @@ const useSubArea = () => {
   
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
+  const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
   // Function to fetchdata
 
   const fetchDataArea = async (first: number, page: number) => {
@@ -57,36 +58,62 @@ const useSubArea = () => {
   };
 
   const onSubmitSubArea: SubmitHandler<DataSubArea> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setSubAreaLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        area_id: data.area_id,
-        name: data.name,
-      },
-    };
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          area_id: data.area_id,
+          name: data.name,
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_SUB_AREA_MUTATION;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_SUB_AREA_MUTATION;
+      if (data.id) {
+        mutation = UPDATE_SUB_AREA_MUTATION;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_SUB_AREA_MUTATION;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createSubArea || result.data?.updateSubArea) {
+        const responseData = result.data.createSubArea || result.data.updateSubArea;
+        toast.success("Sub Area saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Sub Area saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setSubAreaLoading(false);
     }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    toast.success("Sub Area is Saved!");
   };
   
   const handleDeleteSubArea = async (data: any) => {
@@ -122,7 +149,8 @@ const useSubArea = () => {
     fetchDataSubArea,
     dataSubArea,
     onSubmitSubArea,
-    handleDeleteSubArea
+    handleDeleteSubArea,
+    subAreaLoading
   };
 };
 

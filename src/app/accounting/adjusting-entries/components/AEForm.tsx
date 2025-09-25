@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, Edit3, ChevronDown, Plus, Trash2 } from 'react-feather';
+import { Home, Edit3, ChevronDown, Plus, Trash2, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -15,9 +15,10 @@ interface ParentFormBr {
   setShowForm: (b: boolean) => void;
   actionLbl: string;
   singleData: RowAcctgEntry | undefined;
-  createAe: (row: RowAcctgEntry) => void;
+  createAe: (row: RowAcctgEntry) => Promise<{success: boolean, error?: string, data?: any}>;
   fetchAe: (a: string, b: string, c: string) => void;
   loading: boolean;
+  adjustingEntriesLoading: boolean;
 }
 
 const AEForm: React.FC<ParentFormBr> = ({ 
@@ -26,7 +27,8 @@ const AEForm: React.FC<ParentFormBr> = ({
       actionLbl, 
       createAe,
       fetchAe,
-      loading 
+      loading,
+      adjustingEntriesLoading 
     }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
@@ -120,9 +122,10 @@ const AEForm: React.FC<ParentFormBr> = ({
       'Yes it is!',
     );
     if (isConfirmed) {
-      createAe(data);
-      if (!loading) {
+      const result = await createAe(data);
+      if (result.success) {
         fetchAe("","","");
+        setShowForm(false);
       }
     }
   };
@@ -332,10 +335,21 @@ const AEForm: React.FC<ParentFormBr> = ({
             )} */}
             {singleData === undefined && (
               <button
-                className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm"
+                className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm ${adjustingEntriesLoading ? 'opacity-70' : ''}`}
                 type="submit"
+                disabled={adjustingEntriesLoading}
               >
-                Save
+                {adjustingEntriesLoading ? (
+                  <>
+                    <RotateCw size={17} className="animate-spin mr-1" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={17} className="mr-1" />
+                    <span>Save</span>
+                  </>
+                )}
               </button>
             )}
           </div>

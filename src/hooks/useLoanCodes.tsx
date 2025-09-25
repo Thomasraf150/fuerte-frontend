@@ -18,6 +18,7 @@ const useLoanCodes = () => {
   const [dataClients, setDataClients] = useState<DataRowClientList[]>([]);
   const [dataType, setDataType] = useState<DataRowLoanTypeList[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loanCodeLoading, setLoanCodeLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
   
@@ -69,40 +70,67 @@ const useLoanCodes = () => {
   };
 
   const onSubmitLoanCode = async (data: DataFormLoanCodes) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setLoanCodeLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        code: data.code,
-        description: data.description,
-        loan_client_id: Number(data.loan_client_id),
-        loan_type_id: Number(data.loan_type_id),
-        user_id: userData?.user?.id
-      },
-    };
-    if (data.id) {
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          code: data.code,
+          description: data.description,
+          loan_client_id: Number(data.loan_client_id),
+          loan_type_id: Number(data.loan_type_id),
+          user_id: userData?.user?.id
+        },
+      };
+
+      if (data.id) {
         mutation = UPDATE_LOAN_CODE_MUTATION;
         variables.input.id = data.id;
-    } else {
-      mutation = SAVE_LOAN_CODE_MUTATION;
+      } else {
+        mutation = SAVE_LOAN_CODE_MUTATION;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createLoanCode || result.data?.updateLoanCode) {
+        const responseData = result.data.createLoanCode || result.data.updateLoanCode;
+        toast.success("Loan code saved successfully!");
+        fetchLoanCodes();
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Loan code saved successfully!");
+      fetchLoanCodes();
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoanCodeLoading(false);
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    // if (result.data.createBranch?.name !== null) {
-    //   await fetchDataList();
-    // }
-    toast.success("User Saved!");
   };
 
    // Fetch data on component mount if id exists
@@ -117,7 +145,8 @@ const useLoanCodes = () => {
     dataClients,
     onSubmitLoanCode,
     dataType,
-    fetchLoanCodes
+    fetchLoanCodes,
+    loanCodeLoading
   };
 };
 

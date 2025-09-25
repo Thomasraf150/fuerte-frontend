@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User } from 'react-feather';
+import { Home, MapPin, Archive, Mail, Globe, Phone, User, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useChiefs from '@/hooks/useChiefs';
 import { DataChief, } from '@/utils/DataTypes';
@@ -14,7 +14,7 @@ interface ParentFormBr {
 
 const ChiefForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataChief, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChief>();
-  const { onSubmitChief } = useChiefs();
+  const { onSubmitChief, chiefLoading } = useChiefs();
 
   useEffect(()=>{
     if (initialData) {
@@ -36,9 +36,15 @@ const ChiefForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataChief, initia
     }
   }, [initialData, setValue, actionLbl])
 
-  const onSubmit: SubmitHandler<DataChief> = data => {
-    onSubmitChief(data);
-    fetchDataChief(10, 1)
+  const onSubmit: SubmitHandler<DataChief> = async (data) => {
+    const result = await onSubmitChief(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchDataChief(10, 1);
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -85,10 +91,21 @@ const ChiefForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataChief, initia
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${chiefLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={chiefLoading}
         >
-          Save
+          {chiefLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>
