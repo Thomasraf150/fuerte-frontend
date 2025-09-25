@@ -15,6 +15,7 @@ const usePaymentPosting = () => {
   const { LOANS_LIST_QUERY, GET_LOAN_SCHEDULE, PROCESS_COLLECTION_PAYMENT, PROCESS_COLLECTION_OTHER_PAYMENT, PROCESS_REMOVE_POSTED_PAYMENT } = PaymentPostingQueryMutation;
 
   const [loanScheduleList, setLoanScheduleList] = useState<BorrLoanRowData>();
+  const [paymentLoading, setPaymentLoading] = useState<boolean>(false);
 
   // Create pagination wrapper function following established pattern
   const fetchLoansForPagination = useCallback(async (first, page, search) => {
@@ -299,7 +300,8 @@ const usePaymentPosting = () => {
     fetchLoanSchedule,
     loanScheduleList,
     onSubmitOthCollectionPayment,
-    fnReversePayment
+    fnReversePayment,
+    paymentLoading
   };
 };
 

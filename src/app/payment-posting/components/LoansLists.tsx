@@ -24,7 +24,8 @@ const LoansLists: React.FC = () => {
     loanScheduleList,
     onSubmitCollectionPayment,
     onSubmitOthCollectionPayment,
-    fnReversePayment
+    fnReversePayment,
+    paymentLoading
   } = usePaymentPosting();
 
   const handleRowClick = (data: BorrLoanRowData) => {
@@ -91,7 +92,8 @@ const LoansLists: React.FC = () => {
                   singleData={loanScheduleList} 
                   handleShowForm={handleShowForm} 
                   onSubmitCollectionPayment={onSubmitCollectionPayment} 
-                  onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
+                  onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}
+                  paymentLoading={paymentLoading} />
               </div>
             )}
             

@@ -257,70 +257,15 @@ const useLoans = () => {
         console.log('useLoans - Save successful');
         toast.success('Loan Entry Saved!');
       }
-      setLoading(false);
     }
-  };
-  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    console.log(data, ' data');
-    console.log(status, ' status');
-    console.log(selectedDate, ' selectedDate');
-    let variables: { input: any, selectedDate: string[], interest: string[], monthly: string[], status: number } = {
-      input: {
-        user_id: userData?.user?.id,
-        loan_id: data?.id,
-      },
-      selectedDate,
-      interest,
-      monthly,
-      status
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
-      'You won\'t be able to revert this!',
-      'Yes it is!',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: PROCESS_BORROWER_LOAN_MUTATION,
-          variables,
-        }),
-      });
-
-      // Handle GraphQL errors
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-        return { success: false, error: response.errors[0].message };
-      }
-
-      if (process_type === 'Compute') {
-        setDataComputedLoans(response.data.processALoan);
-        return { success: true, data: response.data.processALoan };
-      } else {
-        // Check for successful loan creation
-        if (response.data?.processALoan) {
-          toast.success('Loan Entry Saved!');
-          return { success: true, data: response.data.processALoan };
-        }
-
-        toast.success('Loan Entry Saved!');
-        return { success: true };
-      }
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       toast.error(errorMessage);
-      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
+  
   const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {
     setLoading(true);
     try {

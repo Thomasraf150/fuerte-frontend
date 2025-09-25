@@ -8,12 +8,13 @@ import LoanDetails from './LoanDetails';
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
   handleShowForm: (v: boolean) => void;
-  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
-  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
-  fnReversePayment: (d: any, l: string) => void;
+  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  fnReversePayment: (d: any, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  paymentLoading: boolean;
 }
 
-const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment }) => {
+const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment, paymentLoading }) => {
   const [activeTab, setActiveTab] = useState<number>();
 
   useEffect(() => {
@@ -30,7 +31,7 @@ const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowFo
       </div>
       {singleData && (
         <>
-          <LoanDetails fnReversePayment={fnReversePayment} loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} />
+          <LoanDetails fnReversePayment={fnReversePayment} loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading} />
         </>
       )}
     </div>

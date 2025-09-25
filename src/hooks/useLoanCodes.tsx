@@ -12,6 +12,7 @@ import { usePagination } from './usePagination';
 const useLoanCodes = () => {
   const { GET_LOAN_CODE_QUERY, GET_LOAN_TYPE_QUERY, SAVE_LOAN_CODE_MUTATION, UPDATE_LOAN_CODE_MUTATION } = LoanCodeQueryMutations;
   const { GET_LOAN_CLIENT_QUERY } = LoanClientsQueryMutations;
+  const [loanCodeLoading, setLoanCodeLoading] = useState<boolean>(false);
 
   // Wrapper function to adapt existing API for usePagination hook
   const fetchLoanCodesForPagination = useCallback(async (
@@ -210,6 +211,7 @@ const useLoanCodes = () => {
     onSubmitLoanCode,
     dataType,
     fetchLoanCodes,
+    loanCodeLoading,
 
     // New pagination functionality
     dataLoanCodes,

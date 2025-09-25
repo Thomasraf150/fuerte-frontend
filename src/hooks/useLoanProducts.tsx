@@ -10,6 +10,7 @@ import { usePagination } from './usePagination';
 
 const useLoanProducts = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
+  const [loanProductLoading, setLoanProductLoading] = useState<boolean>(false);
 
   // Wrapper function to adapt existing API for usePagination hook
   const fetchLoanProductsForPagination = useCallback(async (
@@ -112,22 +113,46 @@ const useLoanProducts = () => {
     } else {
       mutation = SAVE_LOAN_PRODUCT_QUERY;
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    if (result.errors) {
-      toast.error(result.errors[0].message);
-    } else {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful loan product save
+      if (result.data?.saveLoanProduct || result.data?.updateLoanProduct) {
+        toast.success('Loan Product Saved!');
+        refresh(); // Refresh the paginated data after successful save
+        return { success: true, data: result.data };
+      }
+
       toast.success('Loan Product Saved!');
-      refresh(); // Refresh the paginated data after successful save
+      refresh();
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoanProductLoading(false);
     }
   };
 
@@ -140,6 +165,7 @@ const useLoanProducts = () => {
     loading: loanProductsLoading,
     fetchLoanProducts,
     onSubmitLoanProduct,
+    loanProductLoading,
 
     // New pagination functionality
     dataLoanProducts,
