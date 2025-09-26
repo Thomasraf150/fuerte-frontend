@@ -108,8 +108,6 @@ const CollectionList: React.FC = () => {
                       dataColEntry={dataColEntry || []} 
                       coaDataAccount={coaDataAccount || []} 
                       fetchCollectionList={fetchCollectionList} 
-                      postCollectionEntries={postCollectionEntries} 
-                      loading={loading}
                       setShowForm={setShowForm}/>
                   </div>
                 </div>

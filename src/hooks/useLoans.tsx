@@ -160,12 +160,28 @@ const useLoans = () => {
       },
       body: JSON.stringify({
         query: GET_LOAN_PRODUCT_QUERY,
-        variables: { orderBy },
+        variables: { 
+          first: 1000, // Get a large number to fetch all loan products
+          page: 1,
+          orderBy: [
+            { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }
+          ]
+        },
       }),
     });
 
-    // const result = await response.json();
-    setLoanProduct(response.data.getLoanProducts);
+    // Check for errors and handle response properly
+    if (response.errors) {
+      console.error('Error fetching loan products:', response.errors);
+      toast.error('Error loading loan products: ' + response.errors[0].message);
+      setLoanProduct([]);
+    } else if (response.data && response.data.getLoanProducts) {
+      // Access the data property from the paginated response
+      setLoanProduct(response.data.getLoanProducts.data || []);
+    } else {
+      console.error('Unexpected response structure:', response);
+      setLoanProduct([]);
+    }
     setLoading(false);
   };
 

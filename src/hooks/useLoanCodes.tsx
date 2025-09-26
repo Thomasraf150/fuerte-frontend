@@ -84,19 +84,48 @@ const useLoanCodes = () => {
   const [dataClients, setDataClients] = useState<DataRowClientList[]>([]);
   const [dataType, setDataType] = useState<DataRowLoanTypeList[]>([]);
   const fetchLoanClients = async (orderBy = 'id_desc') => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_CLIENT_QUERY,
-        variables: { orderBy },
-      }),
-    });
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_LOAN_CLIENT_QUERY,
+          variables: { 
+            first: 1000, // Get a large number to fetch all loan clients
+            page: 1,
+            orderBy: [
+              { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }
+            ]
+          },
+        }),
+      });
 
-    const result = await response.json();
-    setDataClients(result.data.getLoanClient);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Check for GraphQL errors
+      if (result.errors) {
+        console.error('Error fetching loan clients:', result.errors);
+        setDataClients([]);
+        return;
+      }
+
+      // Check if response has the expected structure
+      if (result.data && result.data.getLoanClient && result.data.getLoanClient.data) {
+        setDataClients(result.data.getLoanClient.data);
+      } else {
+        console.error('Unexpected response structure for loan clients:', result);
+        setDataClients([]);
+      }
+    } catch (error) {
+      console.error('Error fetching loan clients:', error);
+      setDataClients([]);
+    }
   };
   
   const fetchLoanTypes = async (orderBy = 'id_desc') => {
@@ -176,23 +205,6 @@ const useLoanCodes = () => {
       return { success: false, error: errorMessage };
     } finally {
       setLoanCodeLoading(false);
-    }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    if (result.errors) {
-      toast.error(result.errors[0].message);
-    } else {
-      toast.success('Loan Code Saved!');
-      refresh(); // Refresh the paginated data after successful save
     }
   };
 

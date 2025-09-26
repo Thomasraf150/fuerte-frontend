@@ -70,7 +70,7 @@ const BorrowerCoMaker: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) =
           </div>
         ) : (
           // coMakerData={coMakerData}
-          <FormComaker singleData={BorrowerData} createCoMaker={createCoMaker} coMakerData={coMakerData} borrowerLoading={borrowerLoading}/>
+          <FormComaker singleData={BorrowerData} createCoMaker={createCoMaker} coMakerData={coMakerData} />
         )}
       </div>
   );

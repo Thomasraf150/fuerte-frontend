@@ -2,23 +2,34 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-// import soaListColumn from './SoaListColumn';
+import CommissionScheduleSkeleton from '@/components/LoadingStates/CommissionScheduleSkeleton';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
-import useCommissionSchedule from '@/hooks/useCommissionSchedule';
+import useCommissionSchedulePaginated from '@/hooks/useCommissionSchedulePaginated';
 import useLoans from '@/hooks/useLoans';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
-
-// const column = soaListColumn;
+import { Search, RefreshCw } from 'react-feather';
 
 const SoaList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { fetchCommissionSchedule, dataCommissionSched } = useCommissionSchedule();
+  
+  // Use the paginated hook instead
+  const {
+    dataCommissionSched,
+    months,
+    pagination,
+    loading,
+    isSearching,
+    searchTerm,
+    setSearchTerm,
+    debouncedFetch,
+    loadMoreData
+  } = useCommissionSchedulePaginated();
 
-  const { loanData, fetchLoans, loading } = useLoans();
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const { loanData, fetchLoans } = useLoans();
+  const [startDate, setStartDate] = useState<Date | undefined>(moment('2024-01-01').toDate());
+  const [endDate, setEndDate] = useState<Date | undefined>(moment('2025-01-15').toDate());
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -48,13 +59,30 @@ const SoaList: React.FC = () => {
   };
 
   const handleEndDateChange = (date: Date | null) => {
-    setEndDate(date || undefined);
-    fetchCommissionSchedule(startDate, endDate);
+    const newEndDate = date || undefined;
+    setEndDate(newEndDate);
+    if (startDate && newEndDate) {
+      debouncedFetch(startDate, newEndDate, searchTerm, true);
+    }
+  };
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    if (startDate && endDate) {
+      debouncedFetch(startDate, endDate, term, true);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (startDate && endDate && !loading) {
+      loadMoreData(startDate, endDate, searchTerm);
+    }
   };
 
   useEffect(() => {
-    fetchCommissionSchedule(moment('2024-01-01').toDate(), moment('2025-01-15').toDate());
-    // fetchLoans(1000, 1, 0);/
+    if (startDate && endDate) {
+      debouncedFetch(startDate, endDate, '', true);
+    }
   }, [])
 
   return (
@@ -71,29 +99,58 @@ const SoaList: React.FC = () => {
                 </div>
                 <div className="p-7">
 
-                <div className="rounded-lg bg-gray-200 mb-4">
-                  <label className="mb-2">Select Date Range:</label>
-                  <div className="flex space-x-4">
-                    <DatePicker
-                      selected={startDate}
-                      onChange={handleStartDateChange}
-                      selectsStart
-                      startDate={startDate}
-                      endDate={endDate}
-                      placeholderText="Start Date"
-                      className="border rounded px-4 py-2"
-                    />
-                    <DatePicker
-                      selected={endDate}
-                      onChange={handleEndDateChange}
-                      selectsEnd
-                      startDate={startDate}
-                      endDate={endDate}
-                      minDate={startDate} // Prevent selecting an end date before start date
-                      placeholderText="End Date"
-                      className="border rounded px-4 py-2"
-                    />
+                <div className="rounded-lg bg-gray-200 p-4 mb-4">
+                  <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium">Select Date Range:</label>
+                    <div className="flex space-x-4">
+                      <DatePicker
+                        selected={startDate}
+                        onChange={handleStartDateChange}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        placeholderText="Start Date"
+                        className="border rounded px-4 py-2"
+                        disabled={loading}
+                      />
+                      <DatePicker
+                        selected={endDate}
+                        onChange={handleEndDateChange}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate}
+                        placeholderText="End Date"
+                        className="border rounded px-4 py-2"
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
+                  
+                  <div className="mb-2">
+                    <label className="mb-2 block text-sm font-medium">Search:</label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Loan Ref or Borrower Name"
+                        value={searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        disabled={loading}
+                      />
+                      {isSearching && (
+                        <RefreshCw className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 animate-spin" size={18} />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {pagination.total > 0 && (
+                    <div className="text-sm text-gray-600">
+                      Showing {dataCommissionSched.length} of {pagination.total} records
+                      {searchTerm && ` (filtered by "${searchTerm}")`}
+                    </div>
+                  )}
                 </div>
     
                 <div className="overflow-x-auto">
@@ -102,8 +159,7 @@ const SoaList: React.FC = () => {
                       <tr>
                         <th className="border border-gray-300 px-4 py-2 text-left font-medium w-[250px] min-w-[250px] text-gray-600" rowSpan={2}>Name</th>
                         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600" rowSpan={2}>Loan Ref</th>
-                        {/* <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Notes Receivable</th> */}
-                        {dataCommissionSched && dataCommissionSched?.months?.map(
+                        {months && months.map(
                           (month) => (
                             <th
                               key={month}
@@ -115,10 +171,9 @@ const SoaList: React.FC = () => {
                           )
                         )}
                         <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Total Collected</th>
-                        {/* <th className="border border-gray-300 px-4 py-2 text-right font-medium text-gray-600" rowSpan={2}>Balance</th> */}
                       </tr>
                       <tr>
-                        {Array(dataCommissionSched?.months?.length)
+                        {Array(months?.length)
                           .fill(null)
                           .flatMap(() =>
                             [
@@ -135,20 +190,31 @@ const SoaList: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {dataCommissionSched &&
-                        dataCommissionSched.data?.map((item: any, index: number) => {
+                      {loading && dataCommissionSched.length === 0 ? (
+                        <tr>
+                          <td colSpan={months.length + 3} className="border-0 p-0">
+                            <CommissionScheduleSkeleton 
+                              rows={5} 
+                              columns={months.length || 8} 
+                            />
+                          </td>
+                        </tr>
+                      ) : dataCommissionSched.length === 0 ? (
+                        <tr>
+                          <td colSpan={months.length + 3} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                            {searchTerm ? `No commission records found for "${searchTerm}"` : "No commission data available for selected date range"}
+                          </td>
+                        </tr>
+                      ) : (
+                        dataCommissionSched.map((item: any, index: number) => {
                           // Calculate Total Collected
                           const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                            const collection = parseFloat(value.commission_collected) || 0; // Ensure value is a number
+                            const collection = parseFloat(value.commission_collected) || 0;
                             return sum + collection;
                           }, 0);
 
-                          // Calculate Balance
-                          const pnAmount = parseFloat(item.pn_amount) || 0; // Ensure Notes Receivable is a number
-                          const balance = pnAmount - totalCollected;
-
                           return (
-                            <tr key={index}>
+                            <tr key={`${item.loan_ref}-${index}`} className="hover:bg-gray-50">
                               {/* Name */}
                               <td className="border border-gray-300 px-4 py-2">
                                 {item?.lastname}, {item?.firstname} {item?.middlename}
@@ -157,62 +223,73 @@ const SoaList: React.FC = () => {
                               {/* Loan Reference */}
                               <td className="border border-gray-300 px-4 py-2">{item?.loan_ref}</td>
 
-                              {/* Notes Receivable */}
-                              {/* <td className="border border-gray-300 px-4 py-2 text-right">
-                                {pnAmount.toFixed(2)}
-                              </td> */}
-
                               {/* Monthly Data */}
-                              {dataCommissionSched?.months?.map((month: any, monthIndex: number) => {
+                              {months?.map((month: any, monthIndex: number) => {
                                 const monthlyData = item.trans_per_month.find(
                                   (value: any) => value.month === month
                                 );
 
                                 return monthlyData ? (
-                                  [
-                                    "commission_collected",
-                                  ].map((field, fieldIndex) => (
-                                    <td
-                                      key={`${monthIndex}-${fieldIndex}`}
-                                      className="border border-gray-300 px-2 py-1 text-right text-sm"
-                                    >
-                                      {monthlyData[field]}
-                                    </td>
-                                  ))
+                                  <td
+                                    key={`${monthIndex}-commission`}
+                                    className="border border-gray-300 px-2 py-1 text-right text-sm"
+                                  >
+                                    {parseFloat(monthlyData.commission_collected || '0').toLocaleString('en-US', {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2
+                                    })}
+                                  </td>
                                 ) : (
-                                  Array(1)
-                                    .fill(null)
-                                    .map((_, emptyIndex) => (
-                                      <td
-                                        key={`${monthIndex}-empty-${emptyIndex}`}
-                                        className="border border-gray-300 px-2 py-1 text-right text-sm"
-                                      >
-                                        --
-                                      </td>
-                                    ))
+                                  <td
+                                    key={`${monthIndex}-empty`}
+                                    className="border border-gray-300 px-2 py-1 text-right text-sm text-gray-400"
+                                  >
+                                    --
+                                  </td>
                                 );
                               })}
 
                               {/* Total Collected */}
-                              <td className="border border-gray-300 px-4 py-2 text-right">
+                              <td className="border border-gray-300 px-4 py-2 text-right font-semibold">
                                 {totalCollected.toLocaleString('en-US', {
-                                  minimumFractionDigits: 2, maximumFractionDigits: 2
+                                  minimumFractionDigits: 2, 
+                                  maximumFractionDigits: 2
                                 })}
                               </td>
-
-                              {/* Balance */}
-                              {/* <td className="border border-gray-300 px-4 py-2 text-right">
-                                {balance.toFixed(2)}
-                              </td> */}
                             </tr>
                           );
-                        })}
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
 
+                {/* Load More Button */}
+                {pagination.has_more_pages && !loading && (
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={loading}
+                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors duration-200 inline-flex items-center space-x-2"
+                    >
+                      <span>Load More Records</span>
+                      {loading && <RefreshCw className="animate-spin" size={16} />}
+                    </button>
+                    <div className="mt-2 text-sm text-gray-600">
+                      Page {pagination.current_page} of {pagination.last_page}
+                    </div>
+                  </div>
+                )}
 
-
+                {/* Loading indicator for pagination */}
+                {loading && dataCommissionSched.length > 0 && (
+                  <div className="mt-4">
+                    <CommissionScheduleSkeleton 
+                      rows={3} 
+                      columns={months.length || 8} 
+                    />
+                  </div>
+                )}
 
                 </div>
               </div>

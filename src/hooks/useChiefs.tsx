@@ -15,24 +15,32 @@ const useChiefs = () => {
   
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
   const [chiefLoading, setChiefLoading] = useState<boolean>(false);
+  const [chiefFetchLoading, setChiefFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataChief = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_CHIEF_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
-      }),
-    });
+    setChiefFetchLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_CHIEF_QUERY,
+          variables: { first, page, orderBy: [
+            { column: "id", order: 'DESC' }
+          ] 
+        },
+        }),
+      });
 
-    const result = await response.json();
-    setDataChief(result.data.getChief.data);
+      const result = await response.json();
+      setDataChief(result.data.getChief.data);
+    } catch (error) {
+      console.error('fetchDataChief error:', error);
+    } finally {
+      setChiefFetchLoading(false);
+    }
   };
 
   const onSubmitChief: SubmitHandler<DataChief> = async (data) => {
@@ -129,7 +137,8 @@ const useChiefs = () => {
     dataChief,
     onSubmitChief,
     handleDeleteChief,
-    chiefLoading
+    chiefLoading,
+    chiefFetchLoading
   };
 };
 

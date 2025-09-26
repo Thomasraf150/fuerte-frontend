@@ -17,7 +17,7 @@ const ChiefList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataChief, fetchDataChief, handleDeleteChief } = useChiefs();
+  const { dataChief, fetchDataChief, handleDeleteChief, chiefFetchLoading } = useChiefs();
   
   const [initialFormData, setInitialFormData] = useState<DataChief | null>(null);
 
@@ -71,7 +71,7 @@ const ChiefList: React.FC = () => {
                   <span>Create</span>
                 </button>
                 <CustomDatatable
-                  apiLoading={false}
+                  apiLoading={chiefFetchLoading}
                   title="Branch List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataChief || []}

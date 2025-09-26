@@ -275,6 +275,7 @@ const usePaymentPosting = () => {
     loansLoading,
     loansError,
     refresh,
+    paymentLoading,
     serverSidePaginationProps: {
       totalRecords: pagination.totalRecords,
       currentPage: pagination.currentPage,

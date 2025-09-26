@@ -21,7 +21,7 @@ const BorrowerCompaniesList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataBorrComp, fetchDataBorrComp, handleDeleteBranch } = useBorrCompanies();
+  const { dataBorrComp, fetchDataBorrComp, handleDeleteBranch, borrCompFetchLoading } = useBorrCompanies();
   
   const [initialFormData, setInitialFormData] = useState<DataBorrCompanies | null>(null);
   const [initialFormSubData, setInitialFormSubData] = useState<DataSubBranches | null>(null);
@@ -76,7 +76,7 @@ const BorrowerCompaniesList: React.FC = () => {
                   <span>Create</span>
                 </button>
                 <CustomDatatable
-                  apiLoading={false}
+                  apiLoading={borrCompFetchLoading}
                   title="Branch List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataBorrComp || []}

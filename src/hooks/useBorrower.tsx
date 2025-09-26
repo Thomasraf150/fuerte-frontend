@@ -19,8 +19,7 @@ const useBorrower = () => {
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
 
-  const [borrCrudLoading, setBorrCrudLoading] = useState<boolean>(false);
-  const [borrowerCrudLoading, setBorrowerCrudLoading] = useState<boolean>(false);
+  const [borrowerLoading, setBorrowerLoading] = useState<boolean>(false);
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
@@ -67,7 +66,7 @@ const useBorrower = () => {
   // Use the new pagination hook
   const {
     data: dataBorrower,
-    loading: borrowerLoading,
+    loading: paginationLoading,
     error: borrowerError,
     pagination,
     searchQuery,
@@ -155,7 +154,7 @@ const useBorrower = () => {
   });
 
   const onSubmitBorrower: SubmitHandler<BorrowerInfo> = async (data) => {
-    setBorrowerCrudLoading(true);
+    setBorrowerLoading(true);
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
@@ -197,7 +196,7 @@ const useBorrower = () => {
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
-      setBorrowerCrudLoading(false);
+      setBorrowerLoading(false);
     }
   };
 
@@ -347,8 +346,8 @@ const useBorrower = () => {
     dataBorrCompany,
     onSubmitBorrower,
     dataBorrower,
-    borrowerLoading,
-    borrCrudLoading,
+    borrowerLoading, // For form submission operations
+    paginationLoading, // For table loading operations
     fetchDataBorrower, // Legacy function - maintained for backward compatibility
     fetchDataChief,
     fetchDataArea,

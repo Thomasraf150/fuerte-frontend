@@ -12,24 +12,32 @@ const useBorrCompanies = () => {
   
   const [dataBorrComp, setDataBorrComp] = useState<DataBorrCompanies[] | undefined>(undefined);
   const [borrCompLoading, setBorrCompLoading] = useState<boolean>(false);
+  const [borrCompFetchLoading, setBorrCompFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataBorrComp = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_COMPANIES,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
-      }),
-    });
+    setBorrCompFetchLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_BORROWER_COMPANIES,
+          variables: { first, page, orderBy: [
+            { column: "id", order: 'DESC' }
+          ] 
+        },
+        }),
+      });
 
-    const result = await response.json();
-    setDataBorrComp(result.data.getBorrCompanies.data);
+      const result = await response.json();
+      setDataBorrComp(result.data.getBorrCompanies.data);
+    } catch (error) {
+      console.error('fetchDataBorrComp error:', error);
+    } finally {
+      setBorrCompFetchLoading(false);
+    }
   };
 
   const onSubmitBorrComp: SubmitHandler<DataBorrCompanies> = async (data) => {
@@ -127,7 +135,8 @@ const useBorrCompanies = () => {
     dataBorrComp,
     onSubmitBorrComp,
     handleDeleteBranch,
-    borrCompLoading
+    borrCompLoading,
+    borrCompFetchLoading
   };
 };
 

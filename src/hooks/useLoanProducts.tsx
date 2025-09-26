@@ -18,36 +18,81 @@ const useLoanProducts = () => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_PRODUCT_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }), // Add search parameter if provided
-          orderBy: [
-            { column: "id", order: 'DESC' }
-          ]
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      }),
-    });
+        body: JSON.stringify({
+          query: GET_LOAN_PRODUCT_QUERY,
+          variables: {
+            first,
+            page,
+            ...(search && { search }), // Add search parameter if provided
+            orderBy: [
+              { column: "id", order: 'DESC' }
+            ]
+          },
+        }),
+      });
 
-    const result = await response.json();
-
-    // Return the expected format for usePagination
-    return {
-      data: result.data.getLoanProducts.data,
-      paginatorInfo: result.data.getLoanProducts.paginatorInfo || {
-        total: result.data.getLoanProducts.data.length,
-        currentPage: page,
-        lastPage: 1,
-        hasMorePages: false,
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+
+      const result = await response.json();
+
+      // Check for GraphQL errors
+      if (result.errors) {
+        const errorMessage = result.errors.map((err: any) => err.message).join(', ');
+        throw new Error(`GraphQL error: ${errorMessage}`);
+      }
+
+      // Check if result.data exists and has the expected structure
+      if (!result.data) {
+        throw new Error('No data received from server');
+      }
+
+      if (!result.data.getLoanProducts) {
+        throw new Error('getLoanProducts field not found in response');
+      }
+
+      const loanProductsData = result.data.getLoanProducts;
+
+      // Handle both paginated and non-paginated responses for backwards compatibility
+      let data, paginatorInfo;
+      
+      if (Array.isArray(loanProductsData)) {
+        // Legacy format: direct array
+        data = loanProductsData;
+        paginatorInfo = {
+          total: loanProductsData.length,
+          currentPage: page,
+          lastPage: 1,
+          hasMorePages: false,
+        };
+      } else {
+        // New paginated format
+        data = loanProductsData.data || [];
+        paginatorInfo = loanProductsData.paginatorInfo || {
+          total: data.length,
+          currentPage: page,
+          lastPage: 1,
+          hasMorePages: false,
+        };
+      }
+
+      // Return the expected format for usePagination
+      return {
+        data,
+        paginatorInfo
+      };
+
+    } catch (error) {
+      console.error('Error fetching loan products:', error);
+      throw error;
+    }
   }, [GET_LOAN_PRODUCT_QUERY]);
 
   // Use the new pagination hook

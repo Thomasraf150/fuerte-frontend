@@ -17,7 +17,7 @@ const BankList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataBank, fetchDataBank, handleDeleteBank, bankLoading } = useBank();
+  const { dataBank, fetchDataBank, handleDeleteBank, loading } = useBank();
   
   const [initialFormData, setInitialFormData] = useState<DataBank | null>(null);
 
@@ -71,7 +71,7 @@ const BankList: React.FC = () => {
                   <span>Create</span>
                 </button>
                 <CustomDatatable
-                  apiLoading={false}
+                  apiLoading={loading}
                   title="Bank List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataBank || []}
@@ -90,7 +90,7 @@ const BankList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <BankForm setShowForm={setShowForm} fetchDataBank={fetchDataBank} initialData={initialFormData} actionLbl={actionLbl} bankLoading={bankLoading} />
+                  <BankForm setShowForm={setShowForm} fetchDataBank={fetchDataBank} initialData={initialFormData} actionLbl={actionLbl} />
                 </div>
               </div>
             </div>

@@ -4,7 +4,7 @@ import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
-import { Printer, CreditCard, Save, DollarSign } from 'react-feather';
+import { Printer, CreditCard, Save, DollarSign, RotateCw } from 'react-feather';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import FormInput from '@/components/FormInput';

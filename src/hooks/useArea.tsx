@@ -18,6 +18,7 @@ const useArea = () => {
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
   const [areaLoading, setAreaLoading] = useState<boolean>(false);
+  const [areaFetchLoading, setAreaFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -36,22 +37,29 @@ const useArea = () => {
   };
   
   const fetchDataArea = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_AREA_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
-      }),
-    });
+    setAreaFetchLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_AREA_QUERY,
+          variables: { first, page, orderBy: [
+            { column: "id", order: 'DESC' }
+          ] 
+        },
+        }),
+      });
 
-    const result = await response.json();
-    setDataArea(result.data.getAreas.data);
+      const result = await response.json();
+      setDataArea(result.data.getAreas.data);
+    } catch (error) {
+      console.error('fetchDataArea error:', error);
+    } finally {
+      setAreaFetchLoading(false);
+    }
   };
 
   const onSubmitArea: SubmitHandler<DataArea> = async (data) => {
@@ -148,6 +156,7 @@ const useArea = () => {
     branchSubData,
     onSubmitArea,
     areaLoading,
+    areaFetchLoading,
     handleDeleteArea
   };
 };

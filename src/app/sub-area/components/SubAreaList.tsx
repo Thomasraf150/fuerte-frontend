@@ -22,7 +22,8 @@ const SubAreaList: React.FC = () => {
           fetchDataSubArea,
           dataSubArea,
           onSubmitSubArea,
-          handleDeleteSubArea } = useSubArea();
+          handleDeleteSubArea,
+          subAreaFetchLoading } = useSubArea();
   
   const [initialFormData, setInitialFormData] = useState<DataSubArea | null>(null);
 
@@ -76,7 +77,7 @@ const SubAreaList: React.FC = () => {
                   <span>Create</span>
                 </button>
                 <CustomDatatable
-                  apiLoading={false}
+                  apiLoading={subAreaFetchLoading}
                   title="Sub Area List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataSubArea || []}
