@@ -1,15 +1,17 @@
 "use client";
 import React from "react";
+import { LogIn, RotateCw } from 'react-feather';
 import useLogin from '@/hooks/useLogin';
 import withAuth from '@/hoc/withAuth';
 
 const LoginForm = () => {
 
-  const { email, setEmail, password, setPassword, submit } = useLogin();
+  const { email, setEmail, password, setPassword, submit, loginLoading } = useLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    submit({ email, password });
+    const result = await submit({ email, password });
+    // Login form doesn't close since it redirects on success
   };
 
   return (
@@ -89,11 +91,23 @@ const LoginForm = () => {
           </div>
 
           <div className="mb-5">
-            <input
+            <button
               type="submit"
-              value="Sign In"
-              className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-            />
+              disabled={loginLoading}
+              className={`w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90 flex items-center justify-center ${loginLoading ? 'opacity-70' : ''}`}
+            >
+              {loginLoading ? (
+                <>
+                  <RotateCw size={17} className="animate-spin mr-2" />
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={17} className="mr-2" />
+                  <span>Sign In</span>
+                </>
+              )}
+            </button>
           </div>
 
           <div className="mt-6 text-center">

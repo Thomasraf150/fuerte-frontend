@@ -3,19 +3,20 @@ import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
-import { CheckCircle, CreditCard, RefreshCcw } from 'react-feather';
+import { CheckCircle, CreditCard, RefreshCcw, Save, RotateCw } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
 import PaymentCollectionForm from './Form/PaymentCollectionForm';
 import OtherPaymentForm from './Form/OtherPaymentForm';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
-  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
-  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
-  fnReversePayment: (d: any, l: string) => void;
+  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  fnReversePayment: (d: any, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  paymentLoading: boolean;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment }) => {
+const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment, paymentLoading }) => {
 
   const [selectedMoSched, setSelectedMoSched] = useState<BorrLoanRowData>();
   const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
@@ -39,8 +40,11 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
     setSelectedUdiSched(udiData);
   }
 
-  const handleReversePayment = (row: any) => {
-    fnReversePayment(row, String(loanSingleData?.id));
+  const handleReversePayment = async (row: any) => {
+    const result = await fnReversePayment(row, String(loanSingleData?.id));
+
+    // The hook already handles success/error notifications and data refetch
+    // No additional form closing needed here since this isn't a modal form
   }
 
   useEffect(() => {
@@ -198,11 +202,21 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                     )}
 
                     <button
-                      className="min-w-max flex items-center text-white bg-orange-700 hover:bg-orange-400 focus:ring-4 focus:ring-orange-600 font-medium rounded-lg text-sm px-4 py-2 dark:bg-orange-300 dark:hover:bg-orange-700 dark:focus:ring-orange-400"
+                      className={`min-w-max flex items-center text-white bg-orange-700 hover:bg-orange-400 focus:ring-4 focus:ring-orange-600 font-medium rounded-lg text-sm px-4 py-2 dark:bg-orange-300 dark:hover:bg-orange-700 dark:focus:ring-orange-400 ${paymentLoading ? 'opacity-70' : ''}`}
                       onClick={() => handleReversePayment(item)}
+                      disabled={paymentLoading}
                     >
-                      <RefreshCcw size={17} className="mr-1" />
-                      Reverse
+                      {paymentLoading ? (
+                        <>
+                          <RotateCw size={17} className="mr-1 animate-spin" />
+                          Reversing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCcw size={17} className="mr-1" />
+                          Reverse
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -215,12 +229,12 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
           <div className="basis-[40%] bg-gray-200 rounded">
             {selectedMoSched && (
               <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
-                <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment}/>
+                <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment} paymentLoading={paymentLoading}/>
               </div>
             )}
             {selectedMoSchedOthPay && (
               <div className={`${selectedMoSchedOthPay ? 'fade-in' : 'fade-out'}`}>
-                <OtherPaymentForm selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}/>
+                <OtherPaymentForm selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading}/>
               </div>
             )}
           </div>

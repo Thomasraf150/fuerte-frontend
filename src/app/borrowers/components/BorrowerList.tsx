@@ -22,13 +22,13 @@ const BorrowerList: React.FC = () => {
       dataBorrCompany,
       onSubmitBorrower,
       borrowerLoading,
+      paginationLoading,
       fetchDataBorrower,
       fetchDataChief,
       fetchDataArea,
       fetchDataBorrCompany,
       fetchDataSubArea,
       handleRmBorrower,
-      borrCrudLoading,
       // New pagination functionality
       serverSidePaginationProps,
       borrowerError,
@@ -83,7 +83,7 @@ const BorrowerList: React.FC = () => {
                       </div>
                     )}
                     <CustomDatatable
-                      apiLoading={borrowerLoading}
+                      apiLoading={paginationLoading}
                       columns={column(handleRowClick, handleRowRmBorrClick)}
                       data={dataBorrower}
                       enableCustomHeader={true}

@@ -1,13 +1,13 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User } from 'react-feather';
+import { Home, MapPin, Archive, Mail, Globe, Phone, User, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import FormInputFile from '@/components/FormInputFile';
 import useCompanyProfileForm from '@/hooks/useCompanyProfileForm';
 import Image from 'next/image'; // Import next/image
 
 const CompanyProfileForm: React.FC = () => {
-  const { register, handleSubmit, errors, onSubmit, companyLogo } = useCompanyProfileForm(undefined);
+  const { register, handleSubmit, errors, onSubmit, companyLogo, companyProfileLoading } = useCompanyProfileForm(undefined);
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null); // State for image preview
 
@@ -26,7 +26,10 @@ const CompanyProfileForm: React.FC = () => {
   }, [companyLogo]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(async (data) => {
+      const result = await onSubmit(data);
+      // Note: Company profile form doesn't close automatically since it's a standalone settings page
+    })}>
 
       <FormInputFile
         id="file-upload"
@@ -148,10 +151,21 @@ const CompanyProfileForm: React.FC = () => {
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${companyProfileLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={companyProfileLoading}
         >
-          Save
+          {companyProfileLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

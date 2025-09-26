@@ -4,7 +4,7 @@ import { BorrLoanRowData, OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
-import { Printer, CreditCard } from 'react-feather';
+import { Printer, CreditCard, Save, RotateCw, DollarSign } from 'react-feather';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import { toast } from "react-toastify";
@@ -13,10 +13,11 @@ interface OMProps {
   selectedMoSchedOthPay: any;
   selectedUdiSched: any;
   setSelectedMoSchedOthPay: (data: any) => void;
-  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => void;
+  onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  paymentLoading: boolean;
 }
 
-const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSelectedMoSchedOthPay, selectedUdiSched, onSubmitOthCollectionPayment }) => {
+const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSelectedMoSchedOthPay, selectedUdiSched, onSubmitOthCollectionPayment, paymentLoading }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<OtherCollectionFormValues>();
   const fnComputeUdi = (amountSched: any, udiSched: any) => {
     // if (amount !== '' && parseFloat(amount) > amountSched?.amount) {
@@ -110,10 +111,16 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     setValue(type, value);
   };
 
-  const onSubmit = (data: OtherCollectionFormValues) => {
+  const onSubmit = async (data: OtherCollectionFormValues) => {
     console.log(data, ' data');
-    onSubmitOthCollectionPayment(data, selectedMoSchedOthPay?.loan_id);
-    setSelectedMoSchedOthPay('');
+
+    const result = await onSubmitOthCollectionPayment(data, selectedMoSchedOthPay?.loan_id);
+
+    // Only close form on successful submission
+    if (result.success) {
+      setSelectedMoSchedOthPay('');
+    }
+    // Form stays open on errors for user to fix and retry
   }
 
   useEffect(() => {
@@ -150,12 +157,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection</td>
                 <td className="px-4 py-2 text-gray-900">
                   <FormInput
+                    label=""
                     id="collection"
                     type="text"
+                    icon={DollarSign}
                     formatType="number"
                     placeholder="0.00"
                     register={register('collection', { required: "Collection is required!" })}
-                    onBlur={(e: any) => { return handleDecimal(e, 'collection'); }}
+                    onChange={(e: any) => { return handleDecimal(e, 'collection'); }}
                     className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
@@ -177,12 +186,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Payment UA/SP</td>
                 <td className="px-4 py-2 text-gray-900">
                   <FormInput
+                    label=""
                     id="payment_ua_sp"
                     type="text"
+                    icon={DollarSign}
                     formatType="number"
                     placeholder="0.00"
                     register={register('payment_ua_sp')}
-                    onBlur={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
+                    onChange={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
                     className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
@@ -191,12 +202,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Penalty UA/SP</td>
                 <td className="px-4 py-2 text-gray-900">
                   <FormInput
+                    label=""
                     id="penalty_ua_sp"
                     type="text"
+                    icon={DollarSign}
                     formatType="number"
                     placeholder="0.00"
                     register={register('penalty_ua_sp')}
-                    onBlur={(e: any) => { return handleDecimal(e, 'penalty_ua_sp'); }}
+                    onChange={(e: any) => { return handleDecimal(e, 'penalty_ua_sp'); }}
                     className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
@@ -205,12 +218,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Advanced Payment</td>
                 <td className="px-4 py-2 text-gray-900">
                   <FormInput
+                    label=""
                     id="advanced_payment"
                     type="text"
+                    icon={DollarSign}
                     formatType="number"
                     placeholder="0.00"
                     register={register('advanced_payment')}
-                    onBlur={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
+                    onChange={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
                     className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
@@ -219,12 +234,14 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Bank Charges</td>
                 <td className="px-4 py-2 text-gray-900">
                   <FormInput
+                    label=""
                     id="bank_charge"
                     type="text"
+                    icon={DollarSign}
                     formatType="number"
                     placeholder="0.00"
                     register={register('bank_charge', { required: "Bank Charge is required!" })}
-                    onBlur={(e: any) => { return handleDecimal(e, 'bank_charge'); }}
+                    onChange={(e: any) => { return handleDecimal(e, 'bank_charge'); }}
                     className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   />
                 </td>
@@ -246,8 +263,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Commission</td>
                 <td className="px-4 py-2 text-gray-900">
                   <FormInput
+                    label=""
                     id="commission_fee"
                     type="text"
+                    icon={DollarSign}
                     formatType="number"
                     placeholder="0.00"
                     register={register('commission_fee')}
@@ -272,15 +291,25 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <td className="px-4 py-2"></td>
                 <td className="px-4 py-2 text-gray-900">
                   <button
-                    className="float-right mr-0 flex 
-                    justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 
-                    focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    className={`float-right mr-0 flex justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 ${paymentLoading ? 'opacity-70' : ''}`}
                     type="submit"
+                    disabled={paymentLoading}
                   >
-                    <span className="mr-1">
-                      <CreditCard size={17} /> 
-                    </span>
-                    <span>Pay Now</span>
+                    {paymentLoading ? (
+                      <>
+                        <span className="mr-1">
+                          <RotateCw size={17} className="animate-spin" />
+                        </span>
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-1">
+                          <Save size={17} />
+                        </span>
+                        <span>Pay Now</span>
+                      </>
+                    )}
                   </button>
                 </td>
               </tr>

@@ -4,7 +4,7 @@ import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
-import { Printer, CreditCard, DollarSign } from 'react-feather';
+import { Printer, CreditCard, Save, DollarSign, RotateCw } from 'react-feather';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import FormInput from '@/components/FormInput';
@@ -13,10 +13,11 @@ interface OMProps {
   selectedMoSched: any;
   selectedUdiSched: any;
   setSelectedMoSched: (data: any) => void;
-  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => void;
+  onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  paymentLoading: boolean;
 }
 
-const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelectedMoSched, selectedUdiSched, onSubmitCollectionPayment }) => {
+const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelectedMoSched, selectedUdiSched, onSubmitCollectionPayment, paymentLoading }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<CollectionFormValues>();
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
@@ -79,10 +80,16 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     setValue(type, value);
   };
 
-  const onSubmit = (data: CollectionFormValues) => {
+  const onSubmit = async (data: CollectionFormValues) => {
     console.log(data, ' data');
-    onSubmitCollectionPayment(data, selectedMoSched?.loan_id);
-    setSelectedMoSched('');
+
+    const result = await onSubmitCollectionPayment(data, selectedMoSched?.loan_id);
+
+    // Only close form on successful submission
+    if (result.success) {
+      setSelectedMoSched('');
+    }
+    // Form stays open on errors for user to fix and retry
   }
 
   useEffect(() => {
@@ -236,13 +243,25 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                 <td className="px-4 py-2"></td>
                 <td className="px-4 py-2 text-gray-900">
                   <button
-                    className="float-right mr-0 flex justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    className={`float-right mr-0 flex justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 ${paymentLoading ? 'opacity-70' : ''}`}
                     type="submit"
+                    disabled={paymentLoading}
                   >
-                    <span className="mr-1">
-                      <CreditCard size={17} /> 
-                    </span>
-                    <span>Pay Now</span>
+                    {paymentLoading ? (
+                      <>
+                        <span className="mr-1">
+                          <RotateCw size={17} className="animate-spin" />
+                        </span>
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-1">
+                          <Save size={17} />
+                        </span>
+                        <span>Pay Now</span>
+                      </>
+                    )}
                   </button>
                 </td>
               </tr>

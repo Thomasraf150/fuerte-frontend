@@ -160,12 +160,28 @@ const useLoans = () => {
       },
       body: JSON.stringify({
         query: GET_LOAN_PRODUCT_QUERY,
-        variables: { orderBy },
+        variables: { 
+          first: 1000, // Get a large number to fetch all loan products
+          page: 1,
+          orderBy: [
+            { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }
+          ]
+        },
       }),
     });
 
-    // const result = await response.json();
-    setLoanProduct(response.data.getLoanProducts);
+    // Check for errors and handle response properly
+    if (response.errors) {
+      console.error('Error fetching loan products:', response.errors);
+      toast.error('Error loading loan products: ' + response.errors[0].message);
+      setLoanProduct([]);
+    } else if (response.data && response.data.getLoanProducts) {
+      // Access the data property from the paginated response
+      setLoanProduct(response.data.getLoanProducts.data || []);
+    } else {
+      console.error('Unexpected response structure:', response);
+      setLoanProduct([]);
+    }
     setLoading(false);
   };
 
@@ -206,21 +222,25 @@ const useLoans = () => {
     console.log('useLoans - onSubmitLoanComp called:', { data, process_type });
 
     setLoading(true);
-    let variables: { input: any, process_type: string } = {
-      input: {
-        borrower_id: data.borrower_id,
-        user_id: userData?.user?.id,
-        loan_amount: data.loan_amount,
-        branch_sub_id: data.branch_sub_id,
-        loan_product_id: data.loan_product_id,
-        ob: data.ob,
-        penalty: data.penalty,
-        rebates: data.rebates,
-        ...(data.renewal_loan_id !== '' ? { renewal_loan_id: data.renewal_loan_id } : {}),
-        renewal_details: data.renewal_details
-      },
-      process_type
-    };
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+
+      let variables: { input: any, process_type: string } = {
+        input: {
+          borrower_id: data.borrower_id,
+          user_id: userData?.user?.id,
+          loan_amount: data.loan_amount,
+          branch_sub_id: data.branch_sub_id,
+          loan_product_id: data.loan_product_id,
+          ob: data.ob,
+          penalty: data.penalty,
+          rebates: data.rebates,
+          ...(data.renewal_loan_id !== '' ? { renewal_loan_id: data.renewal_loan_id } : {}),
+          renewal_details: data.renewal_details
+        },
+        process_type
+      };
 
     console.log('useLoans - API variables:', variables);
 
@@ -253,51 +273,70 @@ const useLoans = () => {
         console.log('useLoans - Save successful');
         toast.success('Loan Entry Saved!');
       }
+    }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
+  
   const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    console.log(data, ' data');
-    console.log(status, ' status');
-    console.log(selectedDate, ' selectedDate');
-    let variables: { input: any, selectedDate: string[], interest: string[], monthly: string[], status: number } = {
-      input: {
-        user_id: userData?.user?.id,
-        loan_id: data?.id,
-      },
-      selectedDate,
-      interest,
-      monthly,
-      status
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
-      'You won\'t be able to revert this!',
-      'Yes it is!',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+    setLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      console.log(data, ' data');
+      console.log(status, ' status');
+      console.log(selectedDate, ' selectedDate');
+      let variables: { input: any, selectedDate: string[], interest: string[], monthly: string[], status: number } = {
+        input: {
+          user_id: userData?.user?.id,
+          loan_id: data?.id,
         },
-        body: JSON.stringify({
-          query: APPROVE_LOAN_BY_SCHEDULE,
-          variables,
-        }),
-      });
-      // const result = await response.json();
-      // console.log(result, ' result')
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-      } else {
+        selectedDate,
+        interest,
+        monthly,
+        status
+      };
+      const isConfirmed = await showConfirmationModal(
+        'Are you sure?',
+        'You won\'t be able to revert this!',
+        'Yes it is!',
+      );
+      if (isConfirmed) {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: APPROVE_LOAN_BY_SCHEDULE,
+            variables,
+          }),
+        });
+
+        // Handle GraphQL errors
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+          return { success: false, error: response.errors[0].message };
+        }
+
         toast.success('Loan Schedule Saved!');
-        handleRefetchLoanData()
+        handleRefetchLoanData();
+        return { success: true };
       }
+
+      return { success: false, error: 'Operation cancelled by user' };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
-    
   };
   
   const submitPNSigned = async (data: BorrLoanRowData | undefined, handleRefetchLoanData: () => void) => {
@@ -338,85 +377,111 @@ const useLoans = () => {
   };
   
   const onSubmitLoanBankDetails = async (data: LoanBankFormValues | undefined, handleRefetchLoanData: () => void) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let variables: { input: any } = {
-      input: {
-        loan_id: data?.loan_id,
-        account_name: data?.account_name,
-        surrendered_bank_id: data?.surrendered_bank_id,
-        issued_bank_id: data?.issued_bank_id,
-        surrendered_acct_no: data?.surrendered_acct_no,
-        issued_acct_no: data?.issued_acct_no,
-        surrendered_pin: data?.surrendered_pin,
-        issued_pin: data?.issued_pin,
-      }
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure the bank details is correct?',
-      'You won\'t be able to revert this!',
-      'Yes it is!',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: SAVE_LOAN_BANK_DETAILS,
-          variables,
-        }),
-      });
-      // const result = await response.json();
-      // console.log(result, ' result')
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-      } else {
+    setLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      let variables: { input: any } = {
+        input: {
+          loan_id: data?.loan_id,
+          account_name: data?.account_name,
+          surrendered_bank_id: data?.surrendered_bank_id,
+          issued_bank_id: data?.issued_bank_id,
+          surrendered_acct_no: data?.surrendered_acct_no,
+          issued_acct_no: data?.issued_acct_no,
+          surrendered_pin: data?.surrendered_pin,
+          issued_pin: data?.issued_pin,
+        }
+      };
+      const isConfirmed = await showConfirmationModal(
+        'Are you sure the bank details is correct?',
+        'You won\'t be able to revert this!',
+        'Yes it is!',
+      );
+      if (isConfirmed) {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: SAVE_LOAN_BANK_DETAILS,
+            variables,
+          }),
+        });
+
+        // Handle GraphQL errors
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+          return { success: false, error: response.errors[0].message };
+        }
+
         toast.success('Bank Entry Saved!');
-        handleRefetchLoanData()
+        handleRefetchLoanData();
+        return { success: true };
       }
+
+      return { success: false, error: 'Operation cancelled by user' };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
-    
   };
 
   const onSubmitLoanRelease = async (data: LoanReleaseFormValues | undefined, handleRefetchLoanData: () => void) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let variables: { input: any } = {
-      input: {
-        id: data?.id,
-        released_date: data?.released_date,
-        bank_id: data?.bank_id,
-        check_no: data?.check_no,
-      }
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure you want to released?',
-      'You won\'t be able to revert this!',
-      'Yes it is!',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: SAVE_LOAN_RELEASE,
-          variables,
-        }),
-      });
-      // const result = await response.json();
-      // console.log(result, ' result')
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-      } else {
+    setLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      let variables: { input: any } = {
+        input: {
+          id: data?.id,
+          released_date: data?.released_date,
+          bank_id: data?.bank_id,
+          check_no: data?.check_no,
+        }
+      };
+      const isConfirmed = await showConfirmationModal(
+        'Are you sure you want to released?',
+        'You won\'t be able to revert this!',
+        'Yes it is!',
+      );
+      if (isConfirmed) {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: SAVE_LOAN_RELEASE,
+            variables,
+          }),
+        });
+
+        // Handle GraphQL errors
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+          return { success: false, error: response.errors[0].message };
+        }
+
         toast.success('Loan Successfully Released!');
-        handleRefetchLoanData()
+        handleRefetchLoanData();
+        return { success: true };
       }
+
+      return { success: false, error: 'Operation cancelled by user' };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
-    
   };
   
   const handleDeleteLoans = async (loan_id: String, type: String) => {

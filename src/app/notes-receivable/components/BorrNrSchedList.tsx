@@ -4,9 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import CustomDatatable from '@/components/CustomDatatable';
-// import soaListColumn from './SoaListColumn';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import useNotesReceivable from '@/hooks/useNotesReceivable';
+import { useNotesReceivablePaginated } from '@/hooks/useNotesReceivablePaginated';
+import { NotesReceivableSkeleton, LoadingSpinner } from '@/components/LoadingStates';
+import NetworkStatus from '@/components/NetworkStatus';
+import { useDebounce } from '@/hooks/useDebounce';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,17 +26,60 @@ interface Option {
 const BorrNrSchedList: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   const [showForm, setShowForm] = useState<boolean>(false);
-  const [loanRef, setLoanRef] = useState<any>('');
+  const [searchTerm, setSearchTerm] = useState<any>(''); // Combined search for loan ref and name
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
-  const { fetchNotesReceivableList, dataNotesReceivable, nrLoading } = useNotesReceivable();
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket } = useSummaryTicket();
+  
+  // Date state
+  const [startDate, setStartDate] = useState<Date | null>(moment('2024-01-01').toDate());
+  const [endDate, setEndDate] = useState<Date | null>(moment('2025-01-15').toDate());
+  
+  // Branch state
   const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
   const [branchSubId, setBranchSubId] = useState<string>('');
-
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
+
+  // Debounced search
+  const debouncedSearchTerm = useDebounce(searchTerm, 500); // 500ms delay
+  const [autoSearch, setAutoSearch] = useState(false);
+
+  // Smart pagination hook
+  const {
+    data: paginatedData,
+    allLoadedData,
+    months,
+    loading,
+    initialLoading,
+    loadingMore,
+    currentPage,
+    hasNextPage,
+    totalRecords,
+    pagination,
+    loadNextBatch,
+    goToPage,
+    refresh,
+    setFilters,
+    setPerPage,
+    error,
+    retry,
+  } = useNotesReceivablePaginated(
+    {
+      startDate,
+      endDate,
+      branchId: selectedBranchId || undefined,
+      searchTerm: debouncedSearchTerm || undefined,
+    },
+    {
+      perPage: 20,
+      pagesPerBatch: 1, // Reduced for better performance
+      maxCachedBatches: 2, // Reduced to save memory
+      enableAutoFetch: false, // We'll trigger manually
+    }
+  );
+
+  // Legacy hook for backward compatibility (can be removed later)
+  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket } = useSummaryTicket();
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -51,36 +97,52 @@ const BorrNrSchedList: React.FC = () => {
   // }
 
   const handleStartDateChange = (date: Date | null) => {
-    if (date) {
-      setStartDate(date);
-      // Reset end date if it's before the new start date
-      if (endDate && date > endDate) {
-        setEndDate(undefined);
-      }
-    } else {
-      setStartDate(undefined);
+    setStartDate(date);
+    // Reset end date if it's before the new start date
+    if (date && endDate && date > endDate) {
+      setEndDate(null);
     }
   };
 
   const handleEndDateChange = (date: Date | null) => {
-    setEndDate(date || undefined);
-    fetchNotesReceivableList(startDate, endDate);
+    setEndDate(date);
   };
 
   const handleBranchChange = (branch_id: string) => {
-    // fetchSummaryTixReport(startDate, endDate, branch_id);
-    // setBranchSubId(branch_id);
+    setSelectedBranchId(branch_id);
     fetchSubDataList('id_desc', Number(branch_id));
   };
 
   const handleBranchSubChange = (branch_sub_id: string) => {
-    fetchSummaryTixReport(startDate, endDate, branch_sub_id);
     setBranchSubId(branch_sub_id);
+    if (startDate && endDate) {
+      fetchSummaryTixReport(startDate, endDate, branch_sub_id);
+    }
   };
 
   const handleSearch = () => {
+    if (startDate && endDate) {
+      setFilters({
+        startDate,
+        endDate,
+        branchId: selectedBranchId || undefined,
+        searchTerm: debouncedSearchTerm || undefined,
+      });
+    }
+  };
 
-  }
+  // Auto-search when debounced search term changes (if auto-search is enabled)
+  useEffect(() => {
+    if (autoSearch && startDate && endDate && debouncedSearchTerm) {
+      handleSearch();
+    }
+  }, [debouncedSearchTerm, autoSearch, startDate, endDate]);
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !loadingMore) {
+      loadNextBatch();
+    }
+  };
 
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
@@ -112,16 +174,21 @@ const BorrNrSchedList: React.FC = () => {
     }
   }, [dataBranchSub])
 
+  // Auto-search when component mounts
   useEffect(() => {
-    fetchNotesReceivableList(moment('2024-01-01').toDate(), moment('2025-01-15').toDate());
-  }, [])
+    if (startDate && endDate) {
+      handleSearch();
+    }
+  }, []); // Run once on mount
 
+  // Debug logs
   useEffect(() => {
-    console.log(dataNotesReceivable, ' dataNotesReceivable')
-  }, [dataNotesReceivable]);
+    console.log('Paginated data:', paginatedData?.length, 'All loaded:', allLoadedData?.length);
+  }, [paginatedData, allLoadedData]);
 
   return (
     <div>
+      <NetworkStatus />
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
@@ -174,19 +241,43 @@ const BorrNrSchedList: React.FC = () => {
                       />
                     </div>
 
-                    {/* Loan Ref Input */}
+                    {/* Enhanced Search Input (Loan Ref + Name) */}
                     <div className="flex flex-col">
-                      <label htmlFor="loanRef" className="mb-1 text-sm font-medium text-gray-700">
-                        Loan Ref:
-                      </label>
-                      <input
-                        id="loanRef"
-                        type="text"
-                        placeholder="Loan Ref"
-                        value={loanRef}
-                        onChange={(e) => setLoanRef(e.target.value)}
-                        className="border rounded px-4 py-2 w-40"
-                      />
+                      <div className="flex items-center justify-between mb-1">
+                        <label htmlFor="searchTerm" className="text-sm font-medium text-gray-700">
+                          Search:
+                        </label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            id="autoSearch"
+                            type="checkbox"
+                            checked={autoSearch}
+                            onChange={(e) => setAutoSearch(e.target.checked)}
+                            className="h-3 w-3"
+                          />
+                          <label htmlFor="autoSearch" className="text-xs text-gray-500">
+                            Auto-search
+                          </label>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          id="searchTerm"
+                          type="text"
+                          placeholder="Loan Ref or Borrower Name"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="border rounded px-4 py-2 w-48 pr-8"
+                        />
+                        {searchTerm !== debouncedSearchTerm && (
+                          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Search by loan reference number or borrower name
+                      </div>
                     </div>
 
                     {/* Branch Select */}
@@ -242,65 +333,93 @@ const BorrNrSchedList: React.FC = () => {
                       <label className="mb-1 text-sm font-medium text-transparent select-none">Search</label>
                       <button
                         onClick={handleSearch}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                        disabled={loading || !startDate || !endDate}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2"
                       >
-                        Search
+                        {loading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            <span>Loading...</span>
+                          </>
+                        ) : (
+                          <span>Search</span>
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
 
     
-                <div className="overflow-x-auto overflow-h-auto h-[600px]">
-                  <table className="min-w-full border-collapse border border-gray-300">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="border border-gray-300 px-4 py-2 text-left text-sm w-[100px] min-w-[320px] text-gray-600" rowSpan={2}>Name</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left text-sm text-gray-600" rowSpan={2}>Loan Ref</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Notes Receivable</th>
-                        {dataNotesReceivable && dataNotesReceivable?.months?.map(
-                          (month) => (
-                            <th
-                              key={month}
-                              className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600"
-                              colSpan={10}
-                            >
-                              {month}
-                            </th>
-                          )
-                        )}
-                        <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Total Collected</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Balance</th>
-                      </tr>
-                      <tr>
-                        {Array(dataNotesReceivable?.months?.length)
-                          .fill(null)
-                          .flatMap(() =>
-                            [
-                              "Current Target",
-                              "Actual Collection",
-                              "UA/SP",
-                              "Past Due Target UA/SP",
-                              "Actual Collection UA/SP",
-                              "Past Due Balance UA/SP",
-                              "Advanced Payment",
-                              "OB Closed",
-                              "Early Full Payments",
-                              "Adjustments",
-                            ].map((field, idx1) => (
+                {/* Loading States */}
+                {initialLoading ? (
+                  <NotesReceivableSkeleton rows={5} columns={months?.length || 3} />
+                ) : error ? (
+                  <div className="text-center py-8">
+                    <div className="text-red-600 mb-4">
+                      <p className="text-lg font-semibold">Error Loading Data</p>
+                      <p className="text-sm">{error}</p>
+                    </div>
+                    <button 
+                      onClick={retry}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : allLoadedData?.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600">No data available for the selected date range.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto overflow-h-auto h-[600px]">
+                    <table className="min-w-full border-collapse border border-gray-300">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="border border-gray-300 px-4 py-2 text-left text-sm w-[100px] min-w-[320px] text-gray-600" rowSpan={2}>Name</th>
+                          <th className="border border-gray-300 px-4 py-2 text-left text-sm text-gray-600" rowSpan={2}>Loan Ref</th>
+                          <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Notes Receivable</th>
+                          {months?.map(
+                            (month) => (
                               <th
-                                key={`${field}-${idx1}`}
-                                className="border border-gray-300 px-2 py-1 text-center text-xs text-gray-500 w-[150px] min-w-[150px]"
+                                key={month}
+                                className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600"
+                                colSpan={10}
                               >
-                                {field}
+                                {month}
                               </th>
-                            ))
+                            )
                           )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dataNotesReceivable &&
-                        dataNotesReceivable.data?.map((item: any, index: number) => {
+                          <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Total Collected</th>
+                          <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Balance</th>
+                        </tr>
+                        <tr>
+                          {Array(months?.length)
+                            .fill(null)
+                            .flatMap(() =>
+                              [
+                                "Current Target",
+                                "Actual Collection",
+                                "UA/SP",
+                                "Past Due Target UA/SP",
+                                "Actual Collection UA/SP",
+                                "Past Due Balance UA/SP",
+                                "Advanced Payment",
+                                "OB Closed",
+                                "Early Full Payments",
+                                "Adjustments",
+                              ].map((field, idx1) => (
+                                <th
+                                  key={`${field}-${idx1}`}
+                                  className="border border-gray-300 px-2 py-1 text-center text-xs text-gray-500 w-[150px] min-w-[150px]"
+                                >
+                                  {field}
+                                </th>
+                              ))
+                            )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allLoadedData?.map((item: any, index: number) => {
                           const isSelected = selectedRow === index;
 
                           const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
@@ -313,7 +432,7 @@ const BorrNrSchedList: React.FC = () => {
 
                           return (
                             <tr
-                              key={index}
+                              key={`${item.loan_ref}-${index}`}
                               onClick={() => setSelectedRow(index)}
                               className={`${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'} cursor-pointer`}
                             >
@@ -325,7 +444,7 @@ const BorrNrSchedList: React.FC = () => {
                                 {pnAmount.toFixed(2)}
                               </td>
 
-                              {dataNotesReceivable?.months?.map((month: any, monthIndex: number) => {
+                              {months?.map((month: any, monthIndex: number) => {
                                 const monthlyData = item.trans_per_month.find(
                                   (value: any) => value.month === month
                                 );
@@ -371,9 +490,39 @@ const BorrNrSchedList: React.FC = () => {
                             </tr>
                           );
                         })}
-                    </tbody>
-                  </table>
-                </div>
+                      </tbody>
+                    </table>
+                    
+                    {/* Load More Section */}
+                    {hasNextPage && (
+                      <div className="flex items-center justify-center py-6 border-t border-gray-300">
+                        {loadingMore ? (
+                          <LoadingSpinner message="Loading more records..." />
+                        ) : (
+                          <button
+                            onClick={handleLoadMore}
+                            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition flex items-center space-x-2"
+                          >
+                            <span>Load More Records</span>
+                            <span className="text-sm">({totalRecords - allLoadedData.length} remaining)</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Status Footer */}
+                    <div className="flex items-center justify-between py-4 px-4 bg-gray-50 border-t border-gray-300 text-sm text-gray-600">
+                      <span>
+                        Showing {allLoadedData.length} of {totalRecords} records
+                      </span>
+                      {pagination && (
+                        <span>
+                          Batch {pagination.currentBatch} of {pagination.totalBatches}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
 
 

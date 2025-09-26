@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Trash2 } from 'react-feather';
+import { Trash2, Save, RotateCw, Check } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -13,14 +13,13 @@ interface ParentFormBr {
   dataColEntry: DataRowLoanPayments[];
   coaDataAccount: DataChartOfAccountList[];
   fetchCollectionList: (a: number, b: number, c: number) => void;
-  postCollectionEntries: (a: DataRowLoanPayments[], b: DataColEntries) => void;
-  loading: boolean;
   setShowForm: (b: boolean) => void;
 }
 
-const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, postCollectionEntries, loading, setShowForm }) => {
+const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, setShowForm }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataColEntries>();
-  // const { postCollectionEntries, fetchCollectionList, loading } = useCollectionList();
+  const { postCollectionEntries, collectionLoading } = useCollectionList();
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const flattenAccountsToOptions = (
       accounts: DataChartOfAccountList[],
       level: number = 1
@@ -65,11 +64,17 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
       'Yes it is!',
     );
     if (isConfirmed) {
-      postCollectionEntries(dataColEntry, data);
-      if (!loading) {
+      const result = await postCollectionEntries(dataColEntry, data);
+      
+      // Only close form and refetch on successful submission
+      if (result.success) {
+        setIsSuccess(true);
+        // Small delay to ensure user sees the success state
+        await new Promise(resolve => setTimeout(resolve, 800));
         fetchCollectionList(2000, 1, 0);
         setShowForm(false);
       }
+      // Form stays open on errors for user to fix and retry
     }
   };
 
@@ -161,10 +166,26 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(collectionLoading || isSuccess) ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={collectionLoading || isSuccess}
         >
-          Post
+          {collectionLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Posting...</span>
+            </>
+          ) : isSuccess ? (
+            <>
+              <Check size={17} className="mr-1" />
+              <span>Posted!</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Post</span>
+            </>
+          )}
         </button>
       </div>
     </form>

@@ -14,6 +14,7 @@ const useGeneralVoucher = () => {
   const { CREATE_GV_MUTATION, UPDATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION } = GeneralVoucherQueryMutations;
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [generalVoucherLoading, setGeneralVoucherLoading] = useState<boolean>(false);
   const [dataGV, setDataGV] = useState<RowAcctgEntry[]>();
   const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
   const userData = JSON.parse(storedAuthStore)['state'];
@@ -51,67 +52,115 @@ const useGeneralVoucher = () => {
   };
 
   const createGV = async (row: RowAcctgEntry) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        id: row?.id,
-        user_id: String(userData?.user?.id),
-        journal_date: row?.journal_date,
-        vendor_id: row?.vendor_id,
-        journal_name: row?.journal_name,
-        check_no: row?.check_no,
-        journal_desc: row?.journal_desc,
-        acctg_details: row?.acctg_details
-      },
-    };
+    setGeneralVoucherLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          id: row?.id,
+          user_id: String(userData?.user?.id),
+          journal_date: row?.journal_date,
+          vendor_id: row?.vendor_id,
+          journal_name: row?.journal_name,
+          check_no: row?.check_no,
+          journal_desc: row?.journal_desc,
+          acctg_details: row?.acctg_details
+        },
+      };
 
-    mutation = CREATE_GV_MUTATION;
-    setLoading(true);
+      mutation = CREATE_GV_MUTATION;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    toast.success(result?.data.createGvEntry?.message);
-    setLoading(false);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation
+      if (result?.data?.createGvEntry) {
+        const responseData = result.data.createGvEntry;
+        toast.success(responseData.message || "General voucher created successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("General voucher created successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setGeneralVoucherLoading(false);
+    }
   };
   
   const updateGV = async (row: RowAcctgEntry, journal_date: string) => {
-    const { GET_AUTH_TOKEN } = useAuthStore.getState();
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        id: row?.id,
-        journal_date,
-      },
-    };
+    setGeneralVoucherLoading(true);
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          id: row?.id,
+          journal_date,
+        },
+      };
 
-    mutation = UPDATE_GV_MUTATION;
-    setLoading(true);
+      mutation = UPDATE_GV_MUTATION;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GET_AUTH_TOKEN()}`,
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    toast.success(result?.data.updateGvEntry?.message);
-    setLoading(false);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`,
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful update
+      if (result?.data?.updateGvEntry) {
+        const responseData = result.data.updateGvEntry;
+        toast.success(responseData.message || "General voucher updated successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("General voucher updated successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setGeneralVoucherLoading(false);
+    }
   };
 
   const printSummaryTicketDetails = async (journal_ref: string) => {
@@ -158,6 +207,7 @@ const useGeneralVoucher = () => {
     printSummaryTicketDetails,
     loading,
     setLoading,
+    generalVoucherLoading,
     pubSubBrId: String(userData?.user?.branch_sub_id)
   };
 };

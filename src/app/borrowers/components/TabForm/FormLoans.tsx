@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { DollarSign, Layout, Save } from 'react-feather';
+import { DollarSign, Layout, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
@@ -103,6 +103,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       if (!loading) {
         createLoans(false);
       }
+      // Form stays open on errors for user to fix and retry
     }
   };
 
@@ -250,7 +251,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                 >
                   {loading ? (
                     <>
-                      Please wait..
+                      <RotateCw size={17} className="animate-spin mr-1" />
+                      <span>Saving...</span>
                     </>
                   ) : (
                     <>

@@ -17,7 +17,7 @@ const AreaList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataArea, fetchDataArea, handleDeleteArea } = useArea();
+  const { dataArea, fetchDataArea, handleDeleteArea, areaFetchLoading } = useArea();
   
   const [initialFormData, setInitialFormData] = useState<DataArea | null>(null);
 
@@ -71,7 +71,7 @@ const AreaList: React.FC = () => {
                   <span>Create</span>
                 </button>
                 <CustomDatatable
-                  apiLoading={false}
+                  apiLoading={areaFetchLoading}
                   title="Area List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataArea || []}

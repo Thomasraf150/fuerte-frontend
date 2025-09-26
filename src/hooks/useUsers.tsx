@@ -24,6 +24,7 @@ const useUsers = () => {
   const [singleUserData, setSingleUserData] = useState<DataFormUser | undefined>(undefined);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [userLoading, setUserLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
   const fetchUsers = async (first: number, page: number) => {
@@ -121,47 +122,72 @@ const useUsers = () => {
   }
 
   const onSubmitUser = async (data: DataFormUser) => {
-    const { GET_AUTH_TOKEN } = useAuthStore.getState();
-    console.log(data, ' data')    
+    setUserLoading(true);
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      console.log(data, ' data');
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        name: data.name,
-        email: data.email,
-        branch_sub_id: Number(data.branch_sub_id),
-        role_id: Number(data.role_id)
-      },
-    };
-    if (data.id) {
-      if(data.password){
-        mutation = UPDATE_USER_MUTATION;
-        variables.input.password = data.password;
-        variables.input.id = data.id;
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          name: data.name,
+          email: data.email,
+          branch_sub_id: Number(data.branch_sub_id),
+          role_id: Number(data.role_id)
+        },
+      };
+      
+      if (data.id) {
+        if(data.password){
+          mutation = UPDATE_USER_MUTATION;
+          variables.input.password = data.password;
+          variables.input.id = data.id;
+        } else {
+          mutation = UPDATE_USER_MUTATION;
+          variables.input.id = Number(data.id);
+        }
       } else {
-        mutation = UPDATE_USER_MUTATION;
-        variables.input.id = Number(data.id);
+        mutation = CREATE_USER_MUTATION;
+        variables.input.password = data.password;
       }
-    } else {
-      mutation = CREATE_USER_MUTATION;
-      variables.input.password = data.password;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`,
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+      
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createUser || result.data?.updateUser) {
+        const responseData = result.data.createUser || result.data.updateUser;
+        toast.success(responseData.message || "User saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("User saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setUserLoading(false);
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GET_AUTH_TOKEN()}`,
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    // if (result.data.createBranch?.name !== null) {
-    //   await fetchDataList();
-    // }
-    toast.success("User Saved!");
   };
 
 
@@ -178,6 +204,7 @@ const useUsers = () => {
     setCurrentPage,
     loading,
     onSubmitUser,
+    userLoading,
     dataSubBranch,
     fetchUsers,
     fetchSingleUser,

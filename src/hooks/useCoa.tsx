@@ -14,6 +14,7 @@ const useCoa = () => {
 
   const [coaDataAccount, setCoaDataAccount] = useState<DataChartOfAccountList[]>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [coaLoading, setCoaLoading] = useState<boolean>(false);
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
 
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {
@@ -71,42 +72,67 @@ const useCoa = () => {
   };
 
   const onSubmitCoa: SubmitHandler<DataChartOfAccountList> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        user_id: String(userData?.user?.id),
-        branch_sub_id: data.branch_sub_id,
-        account_name: data.account_name,
-        description: data.description,
-        is_debit: data.is_debit,
-        balance: data.balance,
-        parent_account_id: data.parent_account_id,
-      },
-    };
+    setCoaLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          user_id: String(userData?.user?.id),
+          branch_sub_id: data.branch_sub_id,
+          account_name: data.account_name,
+          description: data.description,
+          is_debit: data.is_debit,
+          balance: data.balance,
+          parent_account_id: data.parent_account_id,
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_COA_MUTATION;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_COA_MUTATION;
+      if (data.id) {
+        mutation = UPDATE_COA_MUTATION;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_COA_MUTATION;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createCoa || result.data?.updateCoa) {
+        const responseData = result.data.createCoa || result.data.updateCoa;
+        toast.success("Chart of Account saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Chart of Account saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setCoaLoading(false);
     }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    toast.success("Coa is Saved!");
-    console.log(result, ' result');
   };
   
   useEffect(() => {
@@ -118,7 +144,8 @@ const useCoa = () => {
     coaDataAccount,
     branchSubData,
     fetchDataSubBranch,
-    onSubmitCoa
+    onSubmitCoa,
+    coaLoading
   };
 };
 

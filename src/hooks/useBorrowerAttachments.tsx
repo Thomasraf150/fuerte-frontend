@@ -19,31 +19,57 @@ const useBorrowerAttachments = () => {
   
   // Function to fetchdata
   const onSubmitBorrAttm: SubmitHandler<BorrAttachmentsFormValues> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    const formData = new FormData();
-    formData.append('operations', JSON.stringify({
-      query: SAVE_BORROWER_ATTACHMENTS_QUERY,
-      variables: {
-        input: {
-          id: data.id,
-          borrower_id: data.borrower_id,
-          file_type: data.file_type,
-          user_id: userData?.user?.id
+    setBorrowerLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      
+      const formData = new FormData();
+      formData.append('operations', JSON.stringify({
+        query: SAVE_BORROWER_ATTACHMENTS_QUERY,
+        variables: {
+          input: {
+            id: data.id,
+            borrower_id: data.borrower_id,
+            file_type: data.file_type,
+            user_id: userData?.user?.id
+          },
+          file: null,
         },
-        file: null,
-      },
-    }));
-    formData.append('map', JSON.stringify({ 'file': ['variables.file'] }));
-    formData.append('file', data.file[0]);
-    // console.log(formData, ' formData')
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      body: formData
-    });
-    const result = await response.json();
-    console.log(result, ' result');
-    toast.success("Borrower is Saved!");
+      }));
+      formData.append('map', JSON.stringify({ 'file': ['variables.file'] }));
+      formData.append('file', data.file[0]);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await response.json();
+      console.log(result, ' result');
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful attachment save
+      if (result.data?.saveBorrowerAttachment) {
+        toast.success("Borrower attachment is saved!");
+        return { success: true, data: result.data.saveBorrowerAttachment };
+      }
+
+      toast.success("Borrower attachment is saved!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setBorrowerLoading(false);
+    }
   };
   
   const fetchDataBorrAttachments = async (first: number, page: number, borrower_id: number) => {

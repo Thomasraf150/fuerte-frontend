@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Printer, Edit3, ChevronDown, Plus, Trash2 } from 'react-feather';
+import { Printer, Edit3, ChevronDown, Plus, Trash2, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -16,15 +16,16 @@ interface ParentFormBr {
   setShowForm: (b: boolean) => void;
   actionLbl: string;
   singleData: RowAcctgEntry | undefined;
-  createGV: (row: RowAcctgEntry) => void;
-  updateGV: (row: RowAcctgEntry, jd: string) => void;
+  createGV: (row: RowAcctgEntry) => Promise<{success: boolean, error?: string, data?: any}>;
+  updateGV: (row: RowAcctgEntry, jd: string) => Promise<{success: boolean, error?: string, data?: any}>;
   fetchGV: (a: string, b: string, c: string) => void;
   printSummaryTicketDetails: (a: string) => void;
   loading: boolean;
+  generalVoucherLoading: boolean;
   pubSubBrId: string;
 }
 
-const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, pubSubBrId }) => {
+const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, generalVoucherLoading, pubSubBrId }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -151,8 +152,11 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       'Yes it is!',
     );
     if (isConfirmed) {
-      await createGV(data);
-      fetchGV(pubSubBrId, "", "");
+      const result = await createGV(data);
+      if (result.success) {
+        fetchGV(pubSubBrId, "", "");
+        setShowForm(false);
+      }
     }
   };
 
@@ -166,9 +170,11 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     if (isConfirmed) {
       // Assuming createGV can also handle cancellation logic.
       // If not, a dedicated cancelGV function would be better.
-      await createGV(data);
-      fetchGV(pubSubBrId, "", "");
-      setShowForm(false);
+      const result = await createGV(data);
+      if (result.success) {
+        fetchGV(pubSubBrId, "", "");
+        setShowForm(false);
+      }
     }
   }
 
@@ -180,9 +186,11 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       'Yes it is!',
     );
     if (isConfirmed) {
-      await updateGV(data, journal_date);
-      fetchGV(pubSubBrId, "", "");
-      setShowForm(false);
+      const result = await updateGV(data, journal_date);
+      if (result.success) {
+        fetchGV(pubSubBrId, "", "");
+        setShowForm(false);
+      }
     }
   }
 
@@ -393,10 +401,21 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
             )}
             {singleData === undefined && (
               <button
-                className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm"
+                className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm ${generalVoucherLoading ? 'opacity-70' : ''}`}
                 type="submit"
+                disabled={generalVoucherLoading}
               >
-                Save
+                {generalVoucherLoading ? (
+                  <>
+                    <RotateCw size={17} className="animate-spin mr-1" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={17} className="mr-1" />
+                    <span>Save</span>
+                  </>
+                )}
               </button>
             )}
           </div>

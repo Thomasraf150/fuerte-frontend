@@ -19,7 +19,7 @@ const useBorrower = () => {
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
 
-  const [borrCrudLoading, setBorrCrudLoading] = useState<boolean>(false);
+  const [borrowerLoading, setBorrowerLoading] = useState<boolean>(false);
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
@@ -66,7 +66,7 @@ const useBorrower = () => {
   // Use the new pagination hook
   const {
     data: dataBorrower,
-    loading: borrowerLoading,
+    loading: paginationLoading,
     error: borrowerError,
     pagination,
     searchQuery,
@@ -155,33 +155,48 @@ const useBorrower = () => {
 
   const onSubmitBorrower: SubmitHandler<BorrowerInfo> = async (data) => {
     setBorrowerLoading(true);
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    const variables = createBorrVariables(data, Number(userData?.user?.id));
-    
-    if (data.id) {
-      mutation = SAVE_BORROWER_MUTATION;
-      variables.inputBorrInfo.id = data.id;
-    } else {
-      mutation = SAVE_BORROWER_MUTATION;
-    }
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      const variables = createBorrVariables(data, Number(userData?.user?.id));
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    setBorrowerLoading(false);
-    const result = await response.json();
-    if (result) {
-      toast.success(result.data.saveBorrower.message);
-      refresh(); // Use pagination hook's refresh function
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: SAVE_BORROWER_MUTATION,
+          variables,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful borrower creation/update
+      if (result.data?.saveBorrower) {
+        toast.success(result.data.saveBorrower.message);
+        refresh(); // Use pagination hook's refresh function
+        return { success: true, data: result.data.saveBorrower };
+      }
+
+      return { success: false, error: "Unknown error occurred" };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setBorrowerLoading(false);
     }
   };
 
@@ -331,13 +346,13 @@ const useBorrower = () => {
     dataBorrCompany,
     onSubmitBorrower,
     dataBorrower,
-    borrowerLoading,
+    borrowerLoading, // For form submission operations
+    paginationLoading, // For table loading operations
     fetchDataBorrower, // Legacy function - maintained for backward compatibility
     fetchDataChief,
     fetchDataArea,
     fetchDataBorrCompany,
     handleRmBorrower,
-    borrCrudLoading,
 
     // New pagination functionality
     pagination,

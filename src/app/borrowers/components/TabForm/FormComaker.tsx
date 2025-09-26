@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, ChevronDown } from 'react-feather';
+import { Home, ChevronDown, Save, RotateCw, Check } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useUsers from '@/hooks/useUsers';
 import { BorrowerRowInfo, BorrCoMakerFormValues, BorrCoMakerRowData } from '@/utils/DataTypes';
@@ -20,12 +20,22 @@ interface ParentFormBr {
 const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: BorrowerData, coMakerData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrCoMakerFormValues>();
 
-  const { onSubmitBorrCoMaker } = useBorrowerCoMaker();
+  const { onSubmitBorrCoMaker, borrowerLoading } = useBorrowerCoMaker();
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const onSubmit: SubmitHandler<BorrCoMakerFormValues> = data => {
+  const onSubmit: SubmitHandler<BorrCoMakerFormValues> = async (data) => {
     data.borrower_id = Number(BorrowerData?.id);
-    onSubmitBorrCoMaker(data);
-    // createCoMaker(false);
+
+    const result = await onSubmitBorrCoMaker(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      setIsSuccess(true);
+      // Small delay to ensure user sees the success state
+      await new Promise(resolve => setTimeout(resolve, 800));
+      createCoMaker(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   useEffect(() => {
@@ -133,10 +143,26 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
               Back
             </button>
             <button
-              className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+              className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(borrowerLoading || isSuccess) ? 'opacity-70' : ''}`}
               type="submit"
+              disabled={borrowerLoading || isSuccess}
             >
-              Save
+              {borrowerLoading ? (
+                <>
+                  <RotateCw size={17} className="animate-spin mr-1" />
+                  <span>Saving...</span>
+                </>
+              ) : isSuccess ? (
+                <>
+                  <Check size={17} className="mr-1" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <Save size={17} className="mr-1" />
+                  <span>Save</span>
+                </>
+              )}
             </button>
           </div>
         </div>

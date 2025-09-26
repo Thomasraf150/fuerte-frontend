@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, ChevronDown } from 'react-feather';
+import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useLoanCodes from '@/hooks/useLoanCodes';
 import { DataFormLoanCodes, DataRowClientList, DataRowLoanCodes } from '@/utils/DataTypes';
@@ -28,7 +28,7 @@ interface OptionType {
 
 const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singleUserData, fetchLoanCodes }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanCodes>();
-  const { onSubmitLoanCode, dataClients, dataType } = useLoanCodes();
+  const { onSubmitLoanCode, dataClients, dataType, loanCodeLoading } = useLoanCodes();
   const [optionsClient, setOptionsClient] = useState<OptionClient[]>([
     { value: '', label: 'Select a Client', hidden: true },
   ]);
@@ -36,10 +36,15 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
     { value: '', label: 'Select a Loan Type', hidden: true },
   ]);
 
-  const onSubmit: SubmitHandler<DataFormLoanCodes> = data => {
-    onSubmitLoanCode(data);
-    setShowForm(false);
-    fetchLoanCodes('id_desc');
+  const onSubmit: SubmitHandler<DataFormLoanCodes> = async (data) => {
+    const result = await onSubmitLoanCode(data);
+
+    // Only close form on successful submission
+    if (result.success) {
+      fetchLoanCodes('id_desc');
+      setShowForm(false);
+    }
+    // Form stays open on errors for user to fix and retry
   };
 
   useEffect(() => {
@@ -130,10 +135,21 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
           Cancel
         </button>
         <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanCodeLoading ? 'opacity-70' : ''}`}
           type="submit"
+          disabled={loanCodeLoading}
         >
-          Save
+          {loanCodeLoading ? (
+            <>
+              <RotateCw size={17} className="animate-spin mr-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={17} className="mr-1" />
+              <span>Save</span>
+            </>
+          )}
         </button>
       </div>
     </form>

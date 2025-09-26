@@ -19,6 +19,7 @@ const useBranches = () => {
   const [dataBranch, setDataBranch] = useState<DataBranches[] | undefined>(undefined);
   const [dataBranchSub, setDataBranchSub] = useState<DataSubBranches[] | undefined>(undefined);
   const [selectedBranchID, setSelectedBranchID] = useState<number>();
+  const [branchLoading, setBranchLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataList = async (orderBy = 'id_desc') => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -54,39 +55,63 @@ const useBranches = () => {
   };
 
   const onSubmitBranch: SubmitHandler<DataFormBranch> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setBranchLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        name: data.name,
-        user_id: userData?.user?.id
-      },
-    };
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          name: data.name,
+          user_id: userData?.user?.id
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_BRANCH_MUTATION;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_BRANCH_MUTATION;
+      if (data.id) {
+        mutation = UPDATE_BRANCH_MUTATION;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_BRANCH_MUTATION;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createBranch || result.data?.updateBranch) {
+        const responseData = result.data.createBranch || result.data.updateBranch;
+        await fetchDataList();
+        toast.success("Branch saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Branch saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setBranchLoading(false);
     }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    if (result.data.createBranch?.name !== null) {
-      await fetchDataList();
-    }
-    toast.success("Branches Saved!");
   };
 
   const handleDeleteBranch = async (id: number) => {
@@ -126,49 +151,71 @@ const useBranches = () => {
   };
   
   const onSubmitSubBranch: SubmitHandler<DataFormSubBranches> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setBranchLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        code: data.code,
-        name: data.name,
-        address: data.address,
-        branch_id: Number(data.branch_id),
-        contact_no: data.contact_no,
-        head_contact: data.head_contact,
-        head_email: data.head_email,
-        head_name: data.head_name,
-        ref_ctr_year: Number(data.ref_ctr_year),
-        ref_current_value: Number(data.ref_current_value),
-        ref_no_length: Number(data.ref_no_length),
-        user_id: userData?.user?.id
-      },
-    };
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          code: data.code,
+          name: data.name,
+          address: data.address,
+          branch_id: Number(data.branch_id),
+          contact_no: data.contact_no,
+          head_contact: data.head_contact,
+          head_email: data.head_email,
+          head_name: data.head_name,
+          ref_ctr_year: Number(data.ref_ctr_year),
+          ref_current_value: Number(data.ref_current_value),
+          ref_no_length: Number(data.ref_no_length),
+          user_id: userData?.user?.id
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_SUB_BRANCH_MUTATION;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_SUB_BRANCH_MUTATION;
-    }
-    
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    if (result.errors) {
-      toast.error(result.errors[0].message);
-    } else {
-      toast.success("Branches Sub Saved!");
+      if (data.id) {
+        mutation = UPDATE_SUB_BRANCH_MUTATION;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_SUB_BRANCH_MUTATION;
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createBranchSub || result.data?.updateBranchSub) {
+        const responseData = result.data.createBranchSub || result.data.updateBranchSub;
+        toast.success("Sub-branch saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Sub-branch saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setBranchLoading(false);
     }
   };
 
@@ -186,7 +233,8 @@ const useBranches = () => {
     selectedBranchID,
     onSubmitSubBranch,
     handleDeleteBranch,
-    handleDeleteSubBranch
+    handleDeleteSubBranch,
+    branchLoading
   };
 };
 

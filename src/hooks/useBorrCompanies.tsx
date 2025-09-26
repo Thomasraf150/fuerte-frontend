@@ -11,61 +11,96 @@ const useBorrCompanies = () => {
   const { GET_BORROWER_COMPANIES, SAVE_BORROWER_COMPANIES, UPDATE_BORROWER_COMPANIES, DELETE_BORR_COMP_MUTATION } = BorrowerCompaniesQueryMutations;
   
   const [dataBorrComp, setDataBorrComp] = useState<DataBorrCompanies[] | undefined>(undefined);
+  const [borrCompLoading, setBorrCompLoading] = useState<boolean>(false);
+  const [borrCompFetchLoading, setBorrCompFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataBorrComp = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_COMPANIES,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
-      }),
-    });
+    setBorrCompFetchLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_BORROWER_COMPANIES,
+          variables: { first, page, orderBy: [
+            { column: "id", order: 'DESC' }
+          ] 
+        },
+        }),
+      });
 
-    const result = await response.json();
-    setDataBorrComp(result.data.getBorrCompanies.data);
+      const result = await response.json();
+      setDataBorrComp(result.data.getBorrCompanies.data);
+    } catch (error) {
+      console.error('fetchDataBorrComp error:', error);
+    } finally {
+      setBorrCompFetchLoading(false);
+    }
   };
 
   const onSubmitBorrComp: SubmitHandler<DataBorrCompanies> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setBorrCompLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        name: data.name,
-        address: data.address,
-        contact_person: data.contact_person,
-        contact_no: data.contact_no,
-        contact_email: data.contact_email,
-        user_id: userData?.user?.id
-      },
-    };
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          name: data.name,
+          address: data.address,
+          contact_person: data.contact_person,
+          contact_no: data.contact_no,
+          contact_email: data.contact_email,
+          user_id: userData?.user?.id
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_BORROWER_COMPANIES;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_BORROWER_COMPANIES;
+      if (data.id) {
+        mutation = UPDATE_BORROWER_COMPANIES;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_BORROWER_COMPANIES;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createBorrCompany || result.data?.updateBorrCompany) {
+        const responseData = result.data.createBorrCompany || result.data.updateBorrCompany;
+        toast.success("Borrower company saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Borrower company saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setBorrCompLoading(false);
     }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    console.log(result, ' result');
   };
   
   const handleDeleteBranch = async (data: any) => {
@@ -99,7 +134,9 @@ const useBorrCompanies = () => {
     fetchDataBorrComp,
     dataBorrComp,
     onSubmitBorrComp,
-    handleDeleteBranch
+    handleDeleteBranch,
+    borrCompLoading,
+    borrCompFetchLoading
   };
 };
 

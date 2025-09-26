@@ -14,60 +14,95 @@ const useChiefs = () => {
           DELETE_CHIEF_MUTATION } = ChiefQueryMutations;
   
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
+  const [chiefLoading, setChiefLoading] = useState<boolean>(false);
+  const [chiefFetchLoading, setChiefFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataChief = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_CHIEF_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
-      }),
-    });
+    setChiefFetchLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_CHIEF_QUERY,
+          variables: { first, page, orderBy: [
+            { column: "id", order: 'DESC' }
+          ] 
+        },
+        }),
+      });
 
-    const result = await response.json();
-    setDataChief(result.data.getChief.data);
+      const result = await response.json();
+      setDataChief(result.data.getChief.data);
+    } catch (error) {
+      console.error('fetchDataChief error:', error);
+    } finally {
+      setChiefFetchLoading(false);
+    }
   };
 
   const onSubmitChief: SubmitHandler<DataChief> = async (data) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
+    setChiefLoading(true);
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
 
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        name: data.name,
-        address: data.address,
-        contact_no: data.contact_no,
-        email: data.email,
-        user_id: userData?.user?.id
-      },
-    };
+      let mutation;
+      let variables: { input: any } = {
+        input: {
+          name: data.name,
+          address: data.address,
+          contact_no: data.contact_no,
+          email: data.email,
+          user_id: userData?.user?.id
+        },
+      };
 
-    if (data.id) {
-      mutation = UPDATE_CHIEF_MUTATION;
-      variables.input.id = data.id;
-    } else {
-      mutation = SAVE_CHIEF_MUTATION;
+      if (data.id) {
+        mutation = UPDATE_CHIEF_MUTATION;
+        variables.input.id = data.id;
+      } else {
+        mutation = SAVE_CHIEF_MUTATION;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Handle GraphQL errors
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return { success: false, error: result.errors[0].message };
+      }
+
+      // Check for successful creation/update
+      if (result.data?.createChief || result.data?.updateChief) {
+        const responseData = result.data.createChief || result.data.updateChief;
+        toast.success("Chief saved successfully!");
+        return { success: true, data: responseData };
+      }
+
+      toast.success("Chief saved successfully!");
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setChiefLoading(false);
     }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    console.log(result, ' result');
   };
   
   const handleDeleteChief = async (data: any) => {
@@ -101,7 +136,9 @@ const useChiefs = () => {
     fetchDataChief,
     dataChief,
     onSubmitChief,
-    handleDeleteChief
+    handleDeleteChief,
+    chiefLoading,
+    chiefFetchLoading
   };
 };
 
