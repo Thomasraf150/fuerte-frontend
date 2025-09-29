@@ -107,7 +107,7 @@ const DefaultPage: React.FC = () => {
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
       <div className="rounded-lg bg-gray-200 p-4">
-        <div className="flex flex-wrap items-end space-x-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-end">
           {/* Start Date */}
           <div className="flex flex-col">
             <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
@@ -121,7 +121,7 @@ const DefaultPage: React.FC = () => {
               startDate={startDate}
               endDate={endDate}
               placeholderText="Start Date"
-              className="border rounded px-4 py-2"
+              className="w-full border rounded px-4 py-2"
             />
           </div>
 
@@ -139,12 +139,12 @@ const DefaultPage: React.FC = () => {
               endDate={endDate}
               minDate={startDate}
               placeholderText="End Date"
-              className="border rounded px-4 py-2"
+              className="w-full border rounded px-4 py-2"
             />
           </div>
 
           {/* Branch Select */}
-          <div className="flex flex-col min-w-[200px]">
+          <div className="flex flex-col w-full">
             <label className="mb-1 text-sm font-medium text-gray-700">
               Branch:
             </label>
@@ -162,13 +162,24 @@ const DefaultPage: React.FC = () => {
                     handleBranchChange(selectedOption?.value ?? '');
                   }}
                   value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                  styles={{
+                    menu: (base) => ({ 
+                      ...base, 
+                      minWidth: '200px' 
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: '200px',
+                      overflowY: 'auto'
+                    })
+                  }}
                 />
               )}
             />
           </div>
 
-          {/* Confirm Branch Select */}
-          <div className="flex flex-col min-w-[200px]">
+          {/* Sub Branch Select */}
+          <div className="flex flex-col w-full">
             <label className="mb-1 text-sm font-medium text-gray-700">
               Sub Branch:
             </label>
@@ -186,6 +197,17 @@ const DefaultPage: React.FC = () => {
                     handleBranchSubChange(selectedOption?.value ?? '');
                   }}
                   value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                  styles={{
+                    menu: (base) => ({ 
+                      ...base, 
+                      minWidth: '200px' 
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: '200px',
+                      overflowY: 'auto'
+                    })
+                  }}
                 />
               )}
             />

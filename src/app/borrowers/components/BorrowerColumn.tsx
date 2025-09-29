@@ -10,46 +10,26 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void, handleRo
     name: 'Branch',
     cell: row => row.borrower_work_background?.area?.branch_sub?.name,
     sortable: true,
-    style: {
-      minWidth: '150px',
-    },
-    width: '150px'
   },
   {
     name: 'First Name',
     cell: row => row.firstname,
     sortable: true,
-    style: {
-      minWidth: '150px',
-    },
-    width: '150px'
   },
   {
     name: 'Middle Name',
     cell: row => row.middlename,
     sortable: true,
-    style: {
-      minWidth: '230px',
-    },
-    width: '230px'
   },
   {
     name: 'Last Name',
     cell: row => row.lastname,
     sortable: true,
-    style: {
-      minWidth: '220px',
-    },
-    width: '220px'
   },
   {
     name: 'Residence Address',
     cell: row => row.residence_address,
     sortable: true,
-    style: {
-      minWidth: '500px',
-    },
-    width: '500px'
   },
   {
     name: 'Chief',
@@ -66,19 +46,22 @@ const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void, handleRo
     cell: row => {
       
       return (
-        <>
-          {/* <Tooltip text="View Sub Branch">
-            <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `} */}
+        <div className="flex items-center space-x-2">
           <Tooltip text="Edit">
-            <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
+            <Edit3 
+              onClick={() => handleRowClick(row)} 
+              size="16" 
+              className="text-cyan-400 cursor-pointer hover:text-cyan-600 p-1 rounded transition-colors min-w-[32px] min-h-[32px]"
+            />
           </Tooltip>
-          {` | `}
           <Tooltip text="Remove">
-            <Trash2 onClick={() => handleRowRmBorrClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+            <Trash2 
+              onClick={() => handleRowRmBorrClick(row)} 
+              size="16" 
+              className="text-cyan-400 cursor-pointer hover:text-red-500 p-1 rounded transition-colors min-w-[32px] min-h-[32px]"
+            />
           </Tooltip>
-        </>
+        </div>
       )
     },
   },
