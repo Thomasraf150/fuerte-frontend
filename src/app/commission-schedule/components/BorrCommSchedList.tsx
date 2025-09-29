@@ -222,23 +222,24 @@ const SoaList: React.FC = () => {
 
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto max-h-[600px]">
-                  <table className="min-w-full border-collapse border border-gray-300">
+                  <table className="min-w-full border-separate border-spacing-0">
                     <thead className="bg-white sticky top-0 z-10">
                       <tr>
-                        <th className="border border-gray-300 px-2 md:px-4 py-2 text-left font-bold min-w-[200px] md:min-w-[250px] text-xs md:text-sm text-gray-600 bg-white" rowSpan={2}>Name</th>
-                        <th className="border border-gray-300 px-2 md:px-4 py-2 text-left font-bold text-xs md:text-sm text-gray-600 bg-white" rowSpan={2}>Loan Ref</th>
+                        <th className="px-2 md:px-4 py-2 text-left font-bold min-w-[200px] md:min-w-[250px] text-xs md:text-sm text-gray-600 bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
+                        <th className="px-2 md:px-4 py-2 text-left font-bold text-xs md:text-sm text-gray-600 bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
                         {months && months.map(
                           (month) => (
                             <th
                               key={month}
-                              className="border border-gray-300 px-1 md:px-2 py-2 text-center font-bold text-xs md:text-sm text-gray-600 hidden lg:table-cell bg-white"
+                              className="px-1 md:px-2 py-2 text-center font-bold text-xs md:text-sm text-gray-600 hidden lg:table-cell bg-white"
+                              style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                               colSpan={1}
                             >
                               {month}
                             </th>
                           )
                         )}
-                        <th className="border border-gray-300 px-2 md:px-4 py-2 text-right font-bold text-xs md:text-sm text-gray-600 bg-white" rowSpan={2}>Total Collected</th>
+                        <th className="px-2 md:px-4 py-2 text-right font-bold text-xs md:text-sm text-gray-600 bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
                       </tr>
                       <tr>
                         {Array(months?.length)
@@ -249,7 +250,8 @@ const SoaList: React.FC = () => {
                             ].map((field, idx1) => (
                               <th
                                 key={`${field}-${idx1}`}
-                                className="border border-gray-300 px-1 md:px-2 py-1 text-center text-xs font-bold text-gray-500 w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden lg:table-cell bg-white"
+                                className="px-1 md:px-2 py-1 text-center text-xs font-bold text-gray-500 w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden lg:table-cell bg-white"
+                                style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                               >
                                 {field}
                               </th>
