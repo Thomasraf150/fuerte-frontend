@@ -25,6 +25,7 @@ interface FormInputProps {
   value?: string;
   maxLength?: number;
   formatType?: 'number' | 'contact' | 'currency' | 'none';
+  required?: boolean;
 }
 
 // Native number formatting utilities
@@ -83,7 +84,8 @@ const FormInput: React.FC<FormInputProps> = ({
   className,
   readOnly,
   value,
-  formatType = 'none'
+  formatType = 'none',
+  required = false
 }) => {
   const [displayValue, setDisplayValue] = useState<string>('');
   const [rawValue, setRawValue] = useState<string>('');
@@ -169,6 +171,7 @@ const FormInput: React.FC<FormInputProps> = ({
         htmlFor={id}
       >
         {label}
+        {required && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
       </label>
       <div className="relative">
         {type === 'checkbox' ? (
@@ -180,7 +183,7 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         ) : type === 'select' ? (
           <select
-            className="h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className="h-11 text-sm w-full appearance-none border border-stroke py-3 pl-4.5 pr-11.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
             id={id}
             {...register}
             onChange={onChange}
@@ -207,11 +210,11 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         )}
         {type !== 'checkbox' && type !== 'file' && (
-          <span className="absolute left-4.5 top-3">
+          <span className={`absolute top-3 ${type === 'select' ? 'right-4.5' : 'left-4.5'}`}>
             <IconComponent size="18" />
           </span>
         )}
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>}
       </div>
     </div>
   );

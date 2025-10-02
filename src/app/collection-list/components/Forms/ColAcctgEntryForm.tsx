@@ -14,9 +14,10 @@ interface ParentFormBr {
   coaDataAccount: DataChartOfAccountList[];
   fetchCollectionList: (a: number, b: number, c: number) => void;
   setShowForm: (b: boolean) => void;
+  isLoading?: boolean;
 }
 
-const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, setShowForm }) => {
+const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, setShowForm, isLoading = false }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataColEntries>();
   const { postCollectionEntries, collectionLoading } = useCollectionList();
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -79,11 +80,11 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-3 gap-1">
-        <div className='mt-2 col-span-2 w-100'>
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+      <div className="flex flex-col gap-3">
+        <div className='w-full'>
           <label
-              className={`block text-sm font-medium text-black dark:text-white mr-2 mb-2`}
+              className={`block text-sm font-medium text-black dark:text-white mb-2`}
           >
             Interest Income
           </label>
@@ -105,9 +106,9 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
             }}
           />
         </div>
-        <div className='mt-2 col-span-2 w-100'>
+        <div className='w-full'>
           <label
-              className={`block text-sm font-medium text-black dark:text-white mr-2 mb-2`}
+              className={`block text-sm font-medium text-black dark:text-white mb-2`}
           >
             Bank Charge
           </label>
@@ -129,7 +130,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
             }}
           />
         </div>
-        <div className='mt-2 col-span-2 w-100'>
+        <div className='w-full'>
           <label
               className={`block text-sm font-medium text-black dark:text-white mb-2`}
           >
@@ -153,11 +154,9 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
             }}
           />
         </div>
-
-        
       </div>
 
-      <div className="flex justify-end gap-4.5 mt-4">
+      <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4.5 mt-4">
         <button
           className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
@@ -166,9 +165,9 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
           Cancel
         </button>
         <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(collectionLoading || isSuccess) ? 'opacity-70' : ''}`}
+          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(collectionLoading || isSuccess || isLoading) ? 'opacity-70' : ''}`}
           type="submit"
-          disabled={collectionLoading || isSuccess}
+          disabled={collectionLoading || isSuccess || isLoading}
         >
           {collectionLoading ? (
             <>

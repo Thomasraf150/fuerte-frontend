@@ -34,22 +34,24 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
 
   return (
     <div>
+      <div className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-0">
         <button
-          className="flex justify-center rounded border bg-white border-stroke px-6 py-4 mb-4 space-x-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+          className="flex items-center justify-center gap-2 rounded border bg-white border-stroke px-4 py-2 sm:px-6 sm:py-4 mb-2 sm:mb-4 w-full sm:w-auto font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
           onClick={() => { setShowForm(false) }}
         >
-         <CornerUpLeft size={15} /> 
+         <CornerUpLeft size={15} />
+         <span className="sm:hidden">Back</span>
         </button>
-        <div className="max-w-12xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="max-w-12xl mx-auto bg-white rounded-xl shadow-md overflow-x-hidden">
           {/* <div className="p-4">
             <h5 className="text-lg font-medium text-black dark:text-white">
               Task title
             </h5>
           </div> */}
-          <div className="flex justify-around border-b">
+          <div className="flex overflow-x-auto border-b scrollbar-hide">
             <button
-              className={`p-4 focus:outline-none border-b-2 ${
+              className={`px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0 whitespace-nowrap focus:outline-none border-b-2 ${
                 activeTab === 'tab1' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab1')}
@@ -57,7 +59,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               Details
             </button>
             <button
-              className={`p-4 focus:outline-none border-b-2 ${
+              className={`px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0 whitespace-nowrap focus:outline-none border-b-2 ${
                 activeTab === 'tab2' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab2')}
@@ -65,7 +67,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               Loans
             </button>
             <button
-              className={`p-4 focus:outline-none border-b-2 ${
+              className={`px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0 whitespace-nowrap focus:outline-none border-b-2 ${
                 activeTab === 'tab3' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab3')}
@@ -73,7 +75,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               Character References
             </button>
             <button
-              className={`p-4 focus:outline-none border-b-2 ${
+              className={`px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0 whitespace-nowrap focus:outline-none border-b-2 ${
                 activeTab === 'tab4' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab4')}
@@ -81,7 +83,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               Co-Maker
             </button>
             <button
-              className={`p-4 focus:outline-none border-b-2 ${
+              className={`px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0 whitespace-nowrap focus:outline-none border-b-2 ${
                 activeTab === 'tab5' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab5')}
@@ -89,7 +91,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               Attachments
             </button>
             <button
-              className={`p-4 focus:outline-none border-b-2 ${
+              className={`px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0 whitespace-nowrap focus:outline-none border-b-2 ${
                 activeTab === 'tab6' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab6')}
@@ -98,7 +100,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             </button>
           </div>
 
-          <div className="p-4">
+          <div className="p-2 sm:p-4">
             {activeTab === 'tab1' && (
               <div id="content1">
                 <BorrowerDetails  
@@ -151,6 +153,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             )}
           </div>
         </div>
+      </div>
     </div>
   );
 };
