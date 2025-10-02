@@ -19,13 +19,17 @@ interface OptionProps {
 }
 const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUsers, singleUserData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormUser>();
-  const { onSubmitUser, userLoading, dataSubBranch, dataRole } = useUsers();
+  const { onSubmitUser, userLoading, dataSubBranch, dataRole, rolesLoading, subBranchLoading } = useUsers();
   const [options, setOptions] = useState<OptionProps[]>([
     { value: '', label: 'Select a branch', hidden: true },
   ]);
   const [optionsRole, setOptionsRole] = useState<OptionProps[]>([
     { value: '', label: 'Select a branch', hidden: true },
   ]);
+  const [localBranchLoading, setLocalBranchLoading] = useState<boolean>(true);
+  const [loadingStartTime] = useState<number>(Date.now());
+  
+  console.log('🔍 FormAddUser render - localBranchLoading:', localBranchLoading, 'dataSubBranch:', !!dataSubBranch, 'length:', dataSubBranch?.length);
 
    // Watch the password field
    const password = watch('password', '');
@@ -51,6 +55,18 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         { value: '', label: 'Select a branch', hidden: true }, // retain the default "Select a branch" option
         ...dynamicOptions,
       ]);
+      
+      // Ensure minimum loading duration for user feedback
+      const elapsedTime = Date.now() - loadingStartTime;
+      const minLoadingDuration = 300; // 300ms minimum
+      
+      if (elapsedTime >= minLoadingDuration) {
+        setLocalBranchLoading(false);
+      } else {
+        setTimeout(() => {
+          setLocalBranchLoading(false);
+        }, minLoadingDuration - elapsedTime);
+      }
     }
     
     if (actionLbl === 'Create User') {
@@ -69,7 +85,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         setValue('role_id', singleUserData.role_id);
       }
     }
-  }, [dataSubBranch, singleUserData, actionLbl])
+  }, [dataSubBranch, singleUserData, actionLbl, loadingStartTime])
 
   useEffect(() => {
     if (dataRole && Array.isArray(dataRole)) {
@@ -96,6 +112,8 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             register={register('branch_sub_id', { required: 'Branch is required' })}
             error={errors.branch_sub_id?.message}
             options={options}
+            isLoading={localBranchLoading}
+            loadingMessage="Loading branches..."
           />
           
           <FormInput
@@ -106,6 +124,8 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             register={register('role_id', { required: 'Role is required' })}
             error={errors.role_id?.message}
             options={optionsRole}
+            isLoading={rolesLoading || !dataRole}
+            loadingMessage="Loading roles..."
           />
 
           <FormInput

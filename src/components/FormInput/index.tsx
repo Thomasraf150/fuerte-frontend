@@ -25,6 +25,8 @@ interface FormInputProps {
   value?: string;
   maxLength?: number;
   formatType?: 'number' | 'contact' | 'currency' | 'none';
+  isLoading?: boolean;
+  loadingMessage?: string;
 }
 
 // Native number formatting utilities
@@ -83,7 +85,9 @@ const FormInput: React.FC<FormInputProps> = ({
   className,
   readOnly,
   value,
-  formatType = 'none'
+  formatType = 'none',
+  isLoading = false,
+  loadingMessage = 'Loading...'
 }) => {
   const [displayValue, setDisplayValue] = useState<string>('');
   const [rawValue, setRawValue] = useState<string>('');
@@ -180,16 +184,23 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         ) : type === 'select' ? (
           <select
-            className="h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className={`h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
             id={id}
             {...register}
             onChange={onChange}
+            disabled={disabled || isLoading}
           >
-            {options && options.map(option => (
-              <option key={option.value} value={option.value} hidden={option.hidden}>
-                {option.label}
+            {isLoading ? (
+              <option value="" disabled selected>
+                {loadingMessage}
               </option>
-            ))}
+            ) : (
+              options && options.map(option => (
+                <option key={option.value} value={option.value} hidden={option.hidden}>
+                  {option.label}
+                </option>
+              ))
+            )}
           </select>
         ) : (
           <input

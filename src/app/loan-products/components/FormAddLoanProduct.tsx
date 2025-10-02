@@ -22,7 +22,7 @@ interface OptionLoanCode {
 const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProducts, actionLbl, singleData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanProducts>();
   const { onSubmitLoanProduct, loanProductLoading } = useLoanProducts();
-  const { data: loanCodeData } = useLoanCodes();
+  const { data: loanCodeData, loading: loanCodeLoading } = useLoanCodes();
   const [optionsClient, setOptionsClient] = useState<OptionLoanCode[]>([]);
   const [selectedOptIsAuto, setSelectedOptIsAuto] = useState<string>();
   const [baseCompOptions, setBaseCompOptions] = useState<OptionLoanCode[]>([
@@ -142,6 +142,8 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             register={register('loan_code_id', { required: 'Loan Code is required' })}
             error={errors.loan_code_id?.message}
             options={optionsClient}
+            isLoading={loanCodeLoading || !loanCodeData}
+            loadingMessage="Loading loan codes..."
           />
         </div>
         <div className="col-span-2">

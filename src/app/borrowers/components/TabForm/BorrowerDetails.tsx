@@ -114,8 +114,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const [optionsSubArea, setOptionsSubArea] = useState<OptionProps[]>([]);
   const [optionsBorrComp, setOptionsBorrComp] = useState<OptionProps[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
 
   const handleOnChangeArea = (value: any) => {
+    setSubAreaLoading(true);
+    // Clear current sub area selection
+    setValue('sub_area_id', '');
+    // Fetch new sub area data
     fetchDataSubArea(value.target.value);
   }
 
@@ -129,11 +134,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
         { value: '', label: 'Select a Sub Area', hidden: true }, // retain the default "Select a branch" option
         ...dynaOpt,
       ]);
+      setSubAreaLoading(false); // Hide loading when data arrives
     }
     // fetchDataChief(100, 1);
     // fetchDataArea(100, 1);
     // fetchDataBorrCompany(100, 1);
-  }, [dataSubArea, optionsSubArea, fetchDataSubArea])
+  }, [dataSubArea])
 
   const onSubmit = async (data: BorrowerInfo) => {
     data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
@@ -464,6 +470,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       register={register('chief_id', { required: 'Chief is required' })}
                       error={errors.chief_id?.message}
                       options={optionsChief}
+                      isLoading={!dataChief}
+                      loadingMessage="Loading chiefs..."
                     />
                   </div>
                   <div>
@@ -710,6 +718,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       register={register('company_borrower_id', { required: 'Office is required' })}
                       error={errors.company_borrower_id?.message}
                       options={optionsBorrComp}
+                      isLoading={!dataBorrCompany}
+                      loadingMessage="Loading companies..."
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -745,6 +755,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       error={errors.area_id?.message}
                       options={optionsArea}
                       onChange={(e: any) => { return handleOnChangeArea(e); } }
+                      isLoading={!dataArea}
+                      loadingMessage="Loading areas..."
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -767,6 +779,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       register={register('sub_area_id', { required: 'Sub Area is required' })}
                       error={errors.sub_area_id?.message}
                       options={optionsSubArea}
+                      isLoading={subAreaLoading}
+                      loadingMessage="Loading sub areas..."
                     />
                     {/* <div className="relative flex mt-2">
                       <label
