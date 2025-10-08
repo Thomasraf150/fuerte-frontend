@@ -15,7 +15,7 @@ interface BorrInfoProps {
   dataArea?: DataArea[] | undefined;
   dataSubArea?: DataSubArea[] | undefined;
   dataBorrCompany?: DataBorrCompanies[] | undefined;
-  onSubmitBorrower: (d: any) => void;
+  onSubmitBorrower: (d: any) => Promise<{ success: boolean }>;
   singleData: BorrowerRowInfo | undefined;
   setSingleData: (d: BorrowerRowInfo | undefined) => void;
   borrowerLoading: boolean;
@@ -141,7 +141,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     const result = await onSubmitBorrower(data);
 
     // Only close form on successful submission
-    if (result.success) {
+    if (result && result.success) {
       setShowForm(false);
     }
     // Form stays open on errors for user to fix and retry
@@ -231,8 +231,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           });
         } else {
           // setValue(key as keyof BorrowerInfo, singleData[key]);
-
-          console.log(singleData, 'singleData');
           setValue('id', singleData.id);
           setValue('chief_id', singleData.chief_id);
           setValue('amount_applied', Number(singleData.amount_applied));

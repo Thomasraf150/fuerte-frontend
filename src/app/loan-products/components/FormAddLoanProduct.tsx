@@ -51,11 +51,11 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   };
 
   const handleComputeUdi = () => {
-    const interest_rate = watch('interest_rate');
-    const terms = watch('terms');
-    const processing = watch('processing');
-    const agent_fee = watch('agent_fee');
-    const collection = watch('collection');
+    const interest_rate = String(watch('interest_rate')).replace(/,/g, '');
+    const terms = String(watch('terms')).replace(/,/g, '');
+    const processing = String(watch('processing')).replace(/,/g, '');
+    const agent_fee = String(watch('agent_fee')).replace(/,/g, '');
+    const collection = String(watch('collection')).replace(/,/g, '');
     const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100) + (Number(agent_fee) / 100))) * 100;
 
     if (!isNaN(udi)) {

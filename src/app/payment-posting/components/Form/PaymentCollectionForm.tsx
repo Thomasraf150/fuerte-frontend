@@ -22,27 +22,28 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
-    const formattedValue = formatToTwoDecimalPlaces(value);
+    const numericValue = value.replace(/,/g, '');
+    const formattedValue = formatToTwoDecimalPlaces(numericValue);
     if (type === 'collection') {
-      if (parseFloat(value) > selectedMoSched?.amount) {
-        setValue('ap_refund', String(((parseFloat(value) || 0) - 
+      if (parseFloat(numericValue) > selectedMoSched?.amount) {
+        setValue('ap_refund', String(((parseFloat(numericValue) || 0) - 
                               parseFloat(selectedMoSched?.amount) -
                               (parseFloat(watch('bank_charge')) || 0)).toFixed(2)))
       } else {
         setValue('ap_refund', "0.00");
       }
-      if(selectedMoSched?.amount >= parseFloat(value)){
+      if(selectedMoSched?.amount >= parseFloat(numericValue)){
         setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) - 
-                          (parseFloat(value) || 0) -
+                          (parseFloat(numericValue) || 0) -
                           (parseFloat(watch('bank_charge')) || 0))).toFixed(2)));
       } else {
         setValue('ua_sp', "0.00");
       }
-      if (value !== '' && parseFloat(value) > selectedMoSched?.amount) {
+      if (numericValue !== '' && parseFloat(numericValue) > selectedMoSched?.amount) {
         const computedUdi = String((parseFloat(selectedUdiSched?.amount)).toFixed(2));
         setValue('interest', computedUdi);
-      } else if(value !== '' && parseFloat(value) <= selectedMoSched?.amount){
-        const computedUdi = String((selectedUdiSched?.amount * ((((parseFloat(value) || 0) - (parseFloat(watch('bank_charge')) || 0)) / selectedMoSched?.amount) * 100 / 100)).toFixed(2));
+      } else if(numericValue !== '' && parseFloat(numericValue) <= selectedMoSched?.amount){
+        const computedUdi = String((selectedUdiSched?.amount * ((((parseFloat(numericValue) || 0) - (parseFloat(watch('bank_charge')) || 0)) / selectedMoSched?.amount) * 100 / 100)).toFixed(2));
         setValue('interest', computedUdi);
         console.log(computedUdi, ' computedUdi');
       } 
@@ -51,17 +52,17 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
       }
     }
     if (type === 'bank_charge') {
-      if (parseFloat(watch('collection')) > selectedMoSched?.amount) {
+      if (parseFloat(watch('collection').replace(/,/g, '')) > selectedMoSched?.amount) {
         setValue('ap_refund', String((parseFloat(watch('collection')) - 
                               parseFloat(selectedMoSched?.amount) -
-                              (parseFloat(watch('bank_charge')) || 0)).toFixed(2)))
+                              (parseFloat(numericValue) || 0)).toFixed(2)))
       } else {
         setValue('ap_refund', "0.00");
       }
-      if (parseFloat(watch('collection')) <= parseFloat(selectedMoSched?.amount)) {
-        setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) - 
-                          (parseFloat(watch('collection')) || 0) -
-                          (parseFloat(watch('bank_charge')) || 0))).toFixed(2)));
+      if (parseFloat(watch('collection').replace(/,/g, '')) <= parseFloat(selectedMoSched?.amount)) {
+        const col = (parseFloat(watch('collection').replace(/,/g, '')) || 0);
+        const bc = col - (parseFloat(numericValue) || 0);
+        setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) - bc)).toFixed(2)));
       }
       if (value !== '' && (parseFloat(watch('collection')) || 0) > selectedMoSched?.amount) {
         const computedUdi = String((parseFloat(selectedUdiSched?.amount)).toFixed(2));
