@@ -76,6 +76,8 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
         register={register('branch_sub_id', { required: 'Branch Sub is required' })}
         error={errors.branch_sub_id?.message}
         options={optionsSubBranch}
+        isLoading={!branchSubData}
+        loadingMessage="Loading branches..."
       />
 
       <FormInput

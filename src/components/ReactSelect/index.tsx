@@ -15,6 +15,8 @@ interface ReactSelectComponentProps {
   menuPortalTarget?: HTMLElement | null;
   menuPosition?: 'fixed' | 'absolute';
   isDisabled?: boolean;
+  isLoading?: boolean;
+  loadingMessage?: () => string;
 }
 
 const ReactSelect: FC<ReactSelectComponentProps> = ({
@@ -25,7 +27,9 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
   styles,
   menuPortalTarget, 
   menuPosition,
-  isDisabled
+  isDisabled,
+  isLoading = false,
+  loadingMessage = () => 'Loading options...'
 }) => {
   return (
     <Select
@@ -39,6 +43,8 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
       menuPortalTarget={menuPortalTarget}
       menuPosition={menuPosition}
       isDisabled={isDisabled}
+      isLoading={isLoading}
+      loadingMessage={loadingMessage}
     />
   );
 };

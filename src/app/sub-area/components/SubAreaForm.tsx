@@ -79,6 +79,8 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
         register={register('area_id', { required: 'Area is required' })}
         error={errors.area_id?.message}
         options={optionsArea}
+        isLoading={!dataArea}
+        loadingMessage="Loading areas..."
       />
 
       <FormInput

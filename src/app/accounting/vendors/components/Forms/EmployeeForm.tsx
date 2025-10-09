@@ -110,6 +110,8 @@ const EmployeeForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
             error={errors.department_id?.message}
             options={optionsDeps}
             className='mt-2'
+            isLoading={!dataDepartments}
+            loadingMessage="Loading departments..."
           />
         </div>
 

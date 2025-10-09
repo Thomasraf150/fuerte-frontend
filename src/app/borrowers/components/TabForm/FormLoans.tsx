@@ -187,6 +187,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={branchOptions.find(option => String(option.value) === String(field.value)) || null}
+                    isLoading={!dataBranchSub || branchOptions.length <= 1}
+                    loadingMessage={() => "Loading branches..."}
                   />
                 )}
               />
@@ -209,6 +211,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={loanProdOptions.find(option => String(option.value) === String(field.value)) || null}
+                    isLoading={loading || !loanProduct || loanProdOptions.length <= 1}
+                    loadingMessage={() => "Loading loan products..."}
                   />
                 )}
               />
