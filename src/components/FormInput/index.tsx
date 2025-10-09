@@ -32,7 +32,19 @@ const formatNumber = (value: string): string => {
   if (!value) return '';
   // Remove all non-digits except decimal point and negative sign
   const cleanValue = value.replace(/[^\d.-]/g, '');
-  // Only apply comma formatting for 'number' type
+
+  // Preserve decimal points during input
+  if (cleanValue.includes('.')) {
+    const parts = cleanValue.split('.');
+    const intPart = parts[0] || '0';
+    const decPart = parts[1] ?? '';
+
+    
+    const formattedInt = intPart ? parseInt(intPart).toLocaleString('en-US') : '0';
+    return `${formattedInt}.${decPart}`;
+  }
+
+  // No decimal - format as whole number
   const number = parseFloat(cleanValue);
   if (isNaN(number)) return cleanValue;
   return number.toLocaleString('en-US');
@@ -49,6 +61,16 @@ const formatCurrency = (value: string): string => {
   if (!value) return '';
   // Remove all non-digits except decimal point and negative sign
   const cleanValue = value.replace(/[^\d.-]/g, '');
+  if (cleanValue.includes('.')) {
+    const parts = cleanValue.split('.');
+    const intPart = parts[0] || '0';
+    const decPart = (parts[1] ?? '').substring(0, 2); // Limit to 2 decimals
+
+    // Format integer with commas, preserve decimals
+    const formattedInt = intPart ? parseInt(intPart).toLocaleString('en-US') : '0';
+    return `${formattedInt}.${decPart}`;
+  }
+
   const number = parseFloat(cleanValue);
   if (isNaN(number)) return cleanValue;
   // Display with commas and exactly 2 decimal places
