@@ -187,25 +187,25 @@ const BorrNrSchedList: React.FC = () => {
   }, [paginatedData, allLoadedData]);
 
   return (
-    <div>
+    <div className="w-full">
       <NetworkStatus />
-      <div className="max-w-12xl">
+      <div className="w-full max-w-full">
         <div className="grid grid-cols-1 gap-4">
-          <div className="">
+          <div className="w-full">
 
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                <div className="border-b border-stroke px-4 sm:px-7 py-4 dark:border-strokedark">
                   <h3 className="text-sm text-black dark:text-white">
                     Notes Receivable
                   </h3>
                 </div>
-                <div className="p-7">
+                <div className="p-4 sm:p-7">
 
 
                 <div className="rounded-lg bg-gray-200 mb-4 p-4">
                   <label className="mb-4 block font-semibold text-gray-800">Select Date Range and Filters:</label>
                   
-                  <div className="flex flex-wrap gap-4 items-end">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-end">
                     {/* Start Date */}
                     <div className="flex flex-col">
                       <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
@@ -219,7 +219,7 @@ const BorrNrSchedList: React.FC = () => {
                         startDate={startDate}
                         endDate={endDate}
                         placeholderText="Start Date"
-                        className="border rounded px-4 py-2"
+                        className="w-full border rounded px-4 py-2"
                       />
                     </div>
 
@@ -237,7 +237,7 @@ const BorrNrSchedList: React.FC = () => {
                         endDate={endDate}
                         minDate={startDate}
                         placeholderText="End Date"
-                        className="border rounded px-4 py-2"
+                        className="w-full border rounded px-4 py-2"
                       />
                     </div>
 
@@ -267,7 +267,7 @@ const BorrNrSchedList: React.FC = () => {
                           placeholder="Loan Ref or Borrower Name"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="border rounded px-4 py-2 w-48 pr-8"
+                          className="w-full border rounded px-4 py-2 pr-8"
                         />
                         {searchTerm !== debouncedSearchTerm && (
                           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -275,13 +275,10 @@ const BorrNrSchedList: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Search by loan reference number or borrower name
-                      </div>
                     </div>
 
                     {/* Branch Select */}
-                    <div className="flex flex-col min-w-[200px]">
+                    <div className="flex flex-col w-full">
                       <label htmlFor="branchSelect" className="mb-1 text-sm font-medium text-gray-700">
                         Branch:
                       </label>
@@ -305,7 +302,7 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Sub Branch Select */}
-                    <div className="flex flex-col min-w-[200px]">
+                    <div className="flex flex-col w-full">
                       <label htmlFor="subBranchSelect" className="mb-1 text-sm font-medium text-gray-700">
                         Sub Branch:
                       </label>
@@ -329,12 +326,12 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Search Button */}
-                    <div className="flex flex-col">
+                    <div className="flex flex-col sm:col-span-2 lg:col-span-1">
                       <label className="mb-1 text-sm font-medium text-transparent select-none">Search</label>
                       <button
                         onClick={handleSearch}
                         disabled={loading || !startDate || !endDate}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2"
+                        className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                       >
                         {loading ? (
                           <>
@@ -371,26 +368,76 @@ const BorrNrSchedList: React.FC = () => {
                     <p className="text-gray-600">No data available for the selected date range.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-h-auto h-[600px]">
-                    <table className="min-w-full border-collapse border border-gray-300">
-                      <thead className="bg-gray-100">
+                  <>
+                  {/* Mobile Card View */}
+                  <div className="block md:hidden space-y-4 max-h-[600px] overflow-y-auto">
+                    {allLoadedData?.map((item: any, index: number) => {
+                      const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
+                        const collection = parseFloat(value.actual_collection) || 0;
+                        return sum + collection;
+                      }, 0);
+
+                      const pnAmount = parseFloat(item.pn_amount) || 0;
+                      const balance = pnAmount - totalCollected;
+                      const isSelected = selectedRow === index;
+
+                      return (
+                        <div
+                          key={`${item.loan_ref}-${index}`}
+                          onClick={() => setSelectedRow(index)}
+                          className={`${isSelected ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
+                        >
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Name</p>
+                              <p className="font-medium text-sm">
+                                {item?.lastname}, {item?.firstname} {item?.middlename}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Loan Ref</p>
+                              <p className="font-medium text-sm">{item?.loan_ref}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Notes Receivable</p>
+                              <p className="font-medium text-sm">{pnAmount.toFixed(2)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Balance</p>
+                              <p className="font-medium text-sm">{balance.toFixed(2)}</p>
+                            </div>
+                            <div className="col-span-2">
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Total Collected</p>
+                              <p className="font-medium text-sm">{totalCollected.toFixed(2)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto max-h-[600px]">
+                    <table className="min-w-full border-separate border-spacing-0">
+                      <thead className="bg-white sticky top-0 z-10">
                         <tr>
-                          <th className="border border-gray-300 px-4 py-2 text-left text-sm w-[100px] min-w-[320px] text-gray-600" rowSpan={2}>Name</th>
-                          <th className="border border-gray-300 px-4 py-2 text-left text-sm text-gray-600" rowSpan={2}>Loan Ref</th>
-                          <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Notes Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-gray-600 font-bold bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
+                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-gray-600 font-bold bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 font-bold hidden lg:table-cell bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
                           {months?.map(
                             (month) => (
                               <th
                                 key={month}
-                                className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600"
+                                className="px-1 md:px-2 py-2 text-center text-xs md:text-sm text-gray-600 font-bold hidden xl:table-cell bg-white"
+                                style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 colSpan={10}
                               >
                                 {month}
                               </th>
                             )
                           )}
-                          <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Total Collected</th>
-                          <th className="border border-gray-300 px-4 py-2 text-right text-sm text-gray-600" rowSpan={2}>Balance</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 font-bold hidden lg:table-cell bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 font-bold bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
                         </tr>
                         <tr>
                           {Array(months?.length)
@@ -398,7 +445,7 @@ const BorrNrSchedList: React.FC = () => {
                             .flatMap(() =>
                               [
                                 "Current Target",
-                                "Actual Collection",
+                                "Actual Collection", 
                                 "UA/SP",
                                 "Past Due Target UA/SP",
                                 "Actual Collection UA/SP",
@@ -410,7 +457,8 @@ const BorrNrSchedList: React.FC = () => {
                               ].map((field, idx1) => (
                                 <th
                                   key={`${field}-${idx1}`}
-                                  className="border border-gray-300 px-2 py-1 text-center text-xs text-gray-500 w-[150px] min-w-[150px]"
+                                  className="px-1 md:px-2 py-1 text-center text-xs text-gray-500 font-bold w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden xl:table-cell bg-white"
+                                  style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 >
                                   {field}
                                 </th>
@@ -418,110 +466,128 @@ const BorrNrSchedList: React.FC = () => {
                             )}
                         </tr>
                       </thead>
-                      <tbody>
-                        {allLoadedData?.map((item: any, index: number) => {
-                          const isSelected = selectedRow === index;
+                          <tbody>
+                            {allLoadedData?.map((item: any, index: number) => {
+                              const isSelected = selectedRow === index;
 
-                          const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                            const collection = parseFloat(value.actual_collection) || 0;
-                            return sum + collection;
-                          }, 0);
+                              const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
+                                const collection = parseFloat(value.actual_collection) || 0;
+                                return sum + collection;
+                              }, 0);
 
-                          const pnAmount = parseFloat(item.pn_amount) || 0;
-                          const balance = pnAmount - totalCollected;
+                              const pnAmount = parseFloat(item.pn_amount) || 0;
+                              const balance = pnAmount - totalCollected;
 
-                          return (
-                            <tr
-                              key={`${item.loan_ref}-${index}`}
-                              onClick={() => setSelectedRow(index)}
-                              className={`${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'} cursor-pointer`}
-                            >
-                              <td className="border border-gray-300 text-sm px-4 py-2">
-                                {item?.lastname}, {item?.firstname} {item?.middlename}
-                              </td>
-                              <td className="border border-gray-300 text-sm px-4 py-2">{item?.loan_ref}</td>
-                              <td className="border border-gray-300 text-sm px-4 py-2 text-right">
-                                {pnAmount.toFixed(2)}
-                              </td>
+                              return (
+                                <tr
+                                  key={`${item.loan_ref}-${index}`}
+                                  onClick={() => setSelectedRow(index)}
+                                  className={`${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'} cursor-pointer`}
+                              >
+                                <td className="border border-gray-300 text-xs md:text-sm px-2 md:px-4 py-2">
+                                  {item?.lastname}, {item?.firstname} {item?.middlename}
+                                </td>
+                                <td className="border border-gray-300 text-xs md:text-sm px-2 md:px-4 py-2">{item?.loan_ref}</td>
+                                <td className="border border-gray-300 text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell">
+                                  {pnAmount.toFixed(2)}
+                                </td>
 
-                              {months?.map((month: any, monthIndex: number) => {
-                                const monthlyData = item.trans_per_month.find(
-                                  (value: any) => value.month === month
-                                );
+                                {months?.map((month: any, monthIndex: number) => {
+                                  const monthlyData = item.trans_per_month.find(
+                                    (value: any) => value.month === month
+                                  );
 
-                                return monthlyData ? (
-                                  [
-                                    "current_target",
-                                    "actual_collection",
-                                    "ua_sp",
-                                    "past_due_target_ua_sp",
-                                    "actual_col_ua_sp",
-                                    "past_due_balance_ua_sp",
-                                    "advanced_payment",
-                                    "ob_closed",
-                                    "early_full_payments",
-                                    "adjustments",
-                                  ].map((field, fieldIndex) => (
-                                    <td
-                                      key={`${monthIndex}-${fieldIndex}`}
-                                      className="border border-gray-300 px-2 py-1 text-right text-sm"
-                                    >
-                                      {monthlyData[field]}
-                                    </td>
-                                  ))
-                                ) : (
-                                  Array(10).fill(null).map((_, emptyIndex) => (
-                                    <td
-                                      key={`${monthIndex}-empty-${emptyIndex}`}
-                                      className="border border-gray-300 px-2 py-1 text-right text-sm"
-                                    >
-                                      --
-                                    </td>
-                                  ))
-                                );
-                              })}
+                                  return monthlyData ? (
+                                    [
+                                      "current_target",
+                                      "actual_collection",
+                                      "ua_sp",
+                                      "past_due_target_ua_sp",
+                                      "actual_col_ua_sp",
+                                      "past_due_balance_ua_sp",
+                                      "advanced_payment",
+                                      "ob_closed",
+                                      "early_full_payments",
+                                      "adjustments",
+                                    ].map((field, fieldIndex) => (
+                                      <td
+                                        key={`${monthIndex}-${fieldIndex}`}
+                                        className="border border-gray-300 px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell"
+                                      >
+                                        {monthlyData[field]}
+                                      </td>
+                                    ))
+                                  ) : (
+                                    Array(10).fill(null).map((_, emptyIndex) => (
+                                      <td
+                                        key={`${monthIndex}-empty-${emptyIndex}`}
+                                        className="border border-gray-300 px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell"
+                                      >
+                                        --
+                                      </td>
+                                    ))
+                                  );
+                                })}
 
-                              <td className="border border-gray-300 px-4 py-2 text-right">
-                                {totalCollected.toFixed(2)}
-                              </td>
-                              <td className="border border-gray-300 px-4 py-2 text-right">
-                                {balance.toFixed(2)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                    
-                    {/* Load More Section */}
-                    {hasNextPage && (
-                      <div className="flex items-center justify-center py-6 border-t border-gray-300">
-                        {loadingMore ? (
-                          <LoadingSpinner message="Loading more records..." />
-                        ) : (
-                          <button
-                            onClick={handleLoadMore}
-                            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition flex items-center space-x-2"
-                          >
-                            <span>Load More Records</span>
-                            <span className="text-sm">({totalRecords - allLoadedData.length} remaining)</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Status Footer */}
-                    <div className="flex items-center justify-between py-4 px-4 bg-gray-50 border-t border-gray-300 text-sm text-gray-600">
-                      <span>
-                        Showing {allLoadedData.length} of {totalRecords} records
-                      </span>
-                      {pagination && (
-                        <span>
-                          Batch {pagination.currentBatch} of {pagination.totalBatches}
-                        </span>
+                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell">
+                                  {totalCollected.toFixed(2)}
+                                </td>
+                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-right text-xs md:text-sm">
+                                  {balance.toFixed(2)}
+                                </td>
+                              </tr>
+                            );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
+                  
+                  {/* Load More Section */}
+                  {hasNextPage && (
+                    <div className="flex items-center justify-center py-6 border-t border-gray-300 md:hidden">
+                      {loadingMore ? (
+                        <LoadingSpinner message="Loading more records..." />
+                      ) : (
+                        <button
+                          onClick={handleLoadMore}
+                          className="bg-blue-600 text-white px-4 md:px-6 py-2 rounded hover:bg-blue-700 transition flex items-center space-x-2 text-sm md:text-base"
+                        >
+                          <span>Load More Records</span>
+                          <span className="text-xs md:text-sm">({totalRecords - allLoadedData.length} remaining)</span>
+                        </button>
                       )}
                     </div>
+                  )}
+
+                  {/* Desktop Load More Section */}
+                  {hasNextPage && (
+                    <div className="hidden md:flex items-center justify-center py-6 border-t border-gray-300">
+                      {loadingMore ? (
+                        <LoadingSpinner message="Loading more records..." />
+                      ) : (
+                        <button
+                          onClick={handleLoadMore}
+                          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition flex items-center space-x-2"
+                        >
+                          <span>Load More Records</span>
+                          <span className="text-sm">({totalRecords - allLoadedData.length} remaining)</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Status Footer */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between py-4 px-4 bg-gray-50 border-t border-gray-300 text-xs md:text-sm text-gray-600 gap-2">
+                    <span>
+                      Showing {allLoadedData.length} of {totalRecords} records
+                    </span>
+                    {pagination && (
+                      <span>
+                        Batch {pagination.currentBatch} of {pagination.totalBatches}
+                      </span>
+                    )}
                   </div>
+                  </>
                 )}
 
 

@@ -81,12 +81,14 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   }, [BorrowerData, showForm]);
 
   return (
-    <div className={`grid grid-cols-1 md:${showDetails ? `grid-cols-3` : `grid-cols-1`} gap-4`}>
-      <div className={`${showDetails ? `col-span-2` : ''}`}>
+    <div className={showDetails ? 'grid grid-cols-1 md:grid-cols-3 gap-4' : 'grid grid-cols-1 gap-4'}>
+      <div className={showDetails ? 'col-span-2' : ''}>
         {showForm === false ? (
           <div className="py-1">
-            <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={() => { createLoans(true) }}>Add Loans</button>
-            <button disabled={btnRenewal} className="bg-green-500 text-white py-2 px-2 mx-1 rounded hover:bg-green-400" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
+            <div className="flex flex-wrap gap-2 mb-3">
+              <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 w-full sm:w-auto" onClick={() => { createLoans(true) }}>Add Loans</button>
+              <button disabled={btnRenewal} className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
+            </div>
             <CustomDatatable
               apiLoading={loading}
               columns={column(handleRowClick, handleCheckboxChange)}

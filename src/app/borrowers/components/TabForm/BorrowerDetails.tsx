@@ -296,44 +296,47 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   }, [dataBorrCompany, singleData])
   
   return (
-      <div className="">
+      <div className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-0">
       <form onSubmit={handleSubmit(onSubmit)}>
 
-        <div className="grid grid-cols-4 gap-4">
-          <div className="flex justify-center items-start">
-            <div className="relative drop-shadow-2">
-              <img
-                src={logoPreview}
-                alt="profile"
-                className="w-50 h-50 rounded-full object-cover"
+        {/* Profile Photo - Centered at top */}
+        <div className="flex justify-center mb-6">
+          <div className="relative drop-shadow-2">
+            <img
+              src={logoPreview}
+              alt="profile"
+              className="w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full object-cover border-4 border-white dark:border-strokedark shadow-lg"
+            />
+            <label
+              htmlFor="photo"
+              className="absolute bottom-0 right-0 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2 shadow-lg"
+            >
+              <Camera size="16" className="sm:hidden" />
+              <Camera size="14" className="hidden sm:block" />
+              <input
+                id="photo"
+                type="file"
+                className="sr-only"
+                onChange={onFileChange}
               />
-              <label
-                htmlFor="photo"
-                className="absolute bottom-0 right-0 flex h-8.5 w-8.5 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2"
-              >
-                <Camera size="14" />
-                <input
-                  id="photo"
-                  type="file"
-                  // register={register('photo')}
-                  className="sr-only"
-                  onChange={onFileChange}
-                />
-              </label>
-            </div>
+            </label>
           </div>
-          <div className="lg:col-span-3 md:col-span-1 col-span-1">
-            <div className="rounded-sm border m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-whiter dark:text-white">
+        </div>
+
+        {/* Form Containers - All full width and aligned */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
                   Borrower Information
                 </h3>
               </div>
-              <div className="flex flex-col gap-5.5 p-6.5">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Amount Applied For"
+                      label="Amount Applied For"
                       id="amount_applied"
                       type="text"
                       icon={Home}
@@ -342,82 +345,90 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       error={errors.amount_applied && "This field is required"}
                       defaultValue="0"
                       formatType="number"
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Purpose"
+                      label="Purpose"
                       id="purpose"
                       type="text"
                       icon={Home}
                       register={register('purpose', { required: true })}
                       error={errors.purpose && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div>
                     <FormInput
-                      label="* Firstname"
+                      label="Firstname"
                       id="firstname"
                       type="text"
                       icon={Home}
                       register={register('firstname', { required: true })}
                       error={errors.firstname && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Middlename"
+                      label="Middlename"
                       id="middlename"
                       type="text"
                       icon={Home}
                       register={register('middlename', { required: true })}
                       error={errors.middlename && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Lastname"
+                      label="Lastname"
                       id="lastname"
                       type="text"
                       icon={Home}
                       register={register('lastname', { required: true })}
                       error={errors.lastname && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Terms of Payment"
+                      label="Terms of Payment"
                       id="terms_of_payment"
                       type="text"
                       icon={Home}
                       register={register('terms_of_payment', { required: true })}
                       error={errors.terms_of_payment && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Other Source of Income"
+                      label="Other Source of Income"
                       id="residence_address"
                       type="text"
                       icon={Home}
                       register={register('other_source_of_inc', { required: true })}
                       error={errors.other_source_of_inc && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Residence Address"
+                      label="Residence Address"
                       id="terms_of_payment"
                       type="text"
                       icon={Home}
                       register={register('residence_address', { required: true })}
                       error={errors.residence_address && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
@@ -436,31 +447,33 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Estimated Monthly Family Income"
+                      label="Estimated Monthly Family Income"
                       id="est_monthly_fam_inc"
                       type="text"
                       icon={Home}
                       register={register('est_monthly_fam_inc', { required: true })}
                       error={errors.est_monthly_fam_inc && "This field is required"}
                       formatType="number"
+                      required={true}
                       defaultValue="0"
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Employment Position"
+                      label="Employment Position"
                       id="employment_position"
                       type="text"
                       icon={Home}
                       register={register('employment_position', { required: true })}
                       error={errors.employment_position && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
                       label="Chief"
@@ -494,97 +507,95 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               </div>
             </div>
           </div>
-          <div>
-          </div>
-          <div className="lg:col-span-3 md:col-span-1 col-span-1">
-            <div className="rounded-sm border m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-whiter dark:text-white">
+          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
                   Borrower Details
                 </h3>
               </div>
-              <div className="flex flex-col gap-5.5 p-6.5">
-           
-                <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Date of Birth"
+                      label="Date of Birth"
                       id="dob"
                       type="date"
                       icon={Home}
                       register={register('dob', { required: true })}
                       error={errors.dob && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Place of birth"
+                      label="Place of birth"
                       id="place_of_birth"
                       type="text"
                       icon={Home}
                       register={register('place_of_birth', { required: true })}
                       error={errors.place_of_birth && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Age"
+                      label="Age"
                       id="age"
                       type="text"
                       icon={Home}
                       register={register('age', { required: true })}
                       error={errors.age && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Email"
+                      label="Email"
                       id="email"
                       type="text"
                       icon={Home}
                       register={register('email', { required: true })}
                       error={errors.email && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="* Contact No."
+                      label="Contact No."
                       id="contact_no"
                       type="text"
                       icon={Home}
                       register={register('contact_no', { required: true })}
                       error={errors.contact_no && "This field is required"}
                       formatType="contact"
+                      required={true}
                     />
                   </div>
                   <div>
                     <FormInput
-                      label="* Civil Status"
+                      label="Civil Status"
                       id="civil_status"
                       type="text"
                       icon={Home}
                       register={register('civil_status', { required: true })}
                       error={errors.civil_status && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
 
               </div>
             </div>
-          </div>
-
-
-
-          <div>
-          </div>
-          <div className="lg:col-span-3 md:col-span-1 col-span-1">
-            <div className="rounded-sm border m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-whiter dark:text-white">
+          </div>          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
                   Borrower Spouse Details
                 </h3>
               </div>
@@ -593,103 +604,112 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <FormInput
-                    label="* Spouse's Work Address"
+                    label="Spouse's Work Address"
                     id="work_address"
                     type="text"
                     icon={Home}
                     register={register('work_address', { required: true })}
                     error={errors.work_address && "This field is required"}
+                    required={true}
                   />
                 </div>
                 <div>
                   <FormInput
-                    label="* Occupation"
+                    label="Occupation"
                     id="occupation"
                     type="text"
                     icon={Home}
                     register={register('occupation', { required: true })}
                     error={errors.occupation && "This field is required"}
+                    required={true}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <FormInput
-                    label="* Fullname"
+                    label="Fullname"
                     id="fullname"
                     type="text"
                     icon={Home}
                     register={register('fullname', { required: true })}
                     error={errors.fullname && "This field is required"}
+                    required={true}
                   />
                 </div>
                 <div>
                   <FormInput
-                    label="* Company"
+                    label="Company"
                     id="company"
                     type="text"
                     icon={Home}
                     register={register('company', { required: true })}
                     error={errors.company && "This field is required"}
+                    required={true}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <FormInput
-                    label="* Dept./Branch"
+                    label="Dept./Branch"
                     id="dept_branch"
                     type="text"
                     icon={Home}
                     register={register('dept_branch', { required: true })}
                     error={errors.dept_branch && "This field is required"}
+                    required={true}
                   />
                 </div>
                 <div>
                   <FormInput
-                    label="* Length of Service"
+                    label="Length of Service"
                     id="length_of_service"
                     type="text"
                     icon={Home}
                     register={register('length_of_service', { required: true })}
                     error={errors.length_of_service && "This field is required"}
+                    required={true}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <FormInput
-                    label="* Salary"
+                    label="Salary"
                     id="salary"
                     type="text"
                     icon={Home}
                     register={register('salary', { required: true })}
                     error={errors.salary && "This field is required"}
                     formatType="number"
+                    required={true}
                     defaultValue="0"
                   />
                 </div>
                 <div>
                   <FormInput
-                    label="* Company Contact Person"
+                    label="Company Contact Person"
                     id="company_contact_person"
                     type="text"
                     icon={Home}
                     register={register('company_contact_person', { required: true })}
                     error={errors.company_contact_person && "This field is required"}
+                    required={true}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <FormInput
-                    label="* Contact No/s."
+                    label="Contact No/s."
                     id="spouse_contact_no"
                     type="text"
                     icon={Home}
                     register={register('spouse_contact_no', { required: true })}
                     error={errors.spouse_contact_no && "This field is required"}
                     formatType="contact"
+                    required={true}
                     defaultValue="N/A"
                   />
                 </div>
@@ -700,17 +720,15 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               </div>
             </div>
           </div>
-          <div>
-          </div>
-          <div className="lg:col-span-3 md:col-span-1 col-span-1">
-            <div className="rounded-sm border m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-whiter dark:text-white">
+          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
                   Work Background
                 </h3>
               </div>
-              <div className="flex flex-col gap-5.5 p-6.5">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
                       label="Office Where Currently Employed"
@@ -746,7 +764,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
                       label="Area"
@@ -797,7 +815,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     </div> */}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
                       label="Station"
@@ -819,7 +837,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
                       label="Employement Status"
@@ -847,7 +865,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
                       label="Monthly Gross Salary"
@@ -873,8 +891,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="col-span-1 md:col-span-2">
                     <FormInput
                       label="Office Address"
                       id="office_address"
@@ -889,20 +907,18 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               </div>
             </div>
           </div>
-          <div>
-          </div>
-          <div className="lg:col-span-3 md:col-span-1 col-span-1">
-            <div className="rounded-sm border m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-whiter dark:text-white">
+          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
                   References
                 </h3>
               </div>
-              <div className="flex flex-col gap-5.5 p-6.5">
-           
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+
+              <div className="flex flex-col gap-4">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="col-span-3 grid grid-cols-3 gap-2">
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 border border-stroke rounded-lg bg-gray-50/50 dark:bg-meta-4/50">
                       <div>
                         <FormInput
                           label="Position"
@@ -934,29 +950,39 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           formatType="contact"
                         />
                       </div>
-                      <div className="col-span-3">
-                        <button type="button" onClick={() => remove(index)}>Remove</button>
+                      <div className="col-span-1 md:col-span-3 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition-colors w-full sm:w-auto"
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-                <button type="button" onClick={() => append({ occupation: '', name: '', contact_no: '' })}>Add More</button>
+                <button
+                  type="button"
+                  onClick={() => append({ occupation: '', name: '', contact_no: '' })}
+                  className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors w-full sm:w-auto"
+                >
+                  Add More
+                </button>
 
               </div>
             </div>
           </div>
-          <div>
-          </div>
-          <div className="lg:col-span-3 md:col-span-1 col-span-1">
-            <div className="rounded-sm border m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-whiter dark:text-white">
+          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
                   Company Information
                 </h3>
               </div>
               <div className="flex flex-col gap-5.5 p-6.5">
            
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div>
                   <FormInput
                     label="Employer"
@@ -995,18 +1021,17 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               </div>
             </div>
           </div>
-          <div></div>
-          <div className="col-span-3 mx-5 mb-5 mt-5">
-            <div className="flex justify-end gap-4.5">
+          <div className="w-full mb-5 mt-5">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mx-2 sm:mx-3">
               <button
-                className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+                className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white w-full sm:w-auto"
                 type="button"
                 onClick={() => setShowForm(false)}
               >
                 Back
               </button>
               <button
-                className={`flex justify-center rounded bg-black px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${borrowerLoading ? 'opacity-70' : ''}`}
+                className={`flex justify-center rounded bg-black px-6 py-2 font-medium text-gray hover:bg-opacity-90 w-full sm:w-auto ${borrowerLoading ? 'opacity-70' : ''}`}
                 type="submit"
                 disabled={borrowerLoading}
               >

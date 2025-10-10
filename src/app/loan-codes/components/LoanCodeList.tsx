@@ -6,6 +6,7 @@ import loanCodeListColumn from './LoanCodeListColumn';
 import FormAddLoanCode from './FormAddLoanCode';
 import { DataRowLoanCodes } from '@/utils/DataTypes';
 import useLoanCodes from '@/hooks/useLoanCodes';
+import { X } from 'react-feather';
 
 
 const column = loanCodeListColumn;
@@ -43,8 +44,8 @@ const LoanCodeList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
@@ -78,12 +79,15 @@ const LoanCodeList: React.FC = () => {
           </div>
 
           {showForm && (
-            <div className={`${showForm ? 'fade-in' : 'fade-out'}`}>
+            <div className="fade-in col-span-1">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}
                   </h3>
+                  <span className="text-right cursor-pointer text-boxdark-2 lg:hidden" onClick={() => setShowForm(false)}>
+                    <X size={17}/>
+                  </span>
                 </div>
                 <div className="p-7">
                   <FormAddLoanCode setShowForm={setShowForm} actionLbl={actionLbl} singleUserData={singleUserData} fetchLoanCodes={refresh}/>

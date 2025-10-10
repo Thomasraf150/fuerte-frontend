@@ -135,6 +135,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             icon={Home}
             register={register('email', { required: true })}
             error={errors.email && "This field is required"}
+            required={true}
           />
 
           <FormInput
@@ -144,6 +145,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             icon={Home}
             register={register('name', { required: true })}
             error={errors.name && "This field is required"}
+            required={true}
           />
         </>
       )}
@@ -157,31 +159,33 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             icon={Home}
             register={register('password', { required: true })}
             error={errors.password && "This field is required"}
+            required={true}
           />
           <FormInput
             label="Confirm Password"
             id="name"
             type="password"
             icon={Home}
-            register={register('confirm_password', { 
+            register={register('confirm_password', {
               required: 'This field is required',
               validate: value => value === password || 'Passwords do not match'
             })}
             error={errors.confirm_password?.message}
+            required={true}
           />
         </>
       )}
-      
-      <div className="flex justify-end gap-4.5">
+
+      <div className="flex justify-end gap-4.5 mt-6">
         <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+          className="flex justify-center rounded border border-stroke px-4 py-2 sm:px-6 sm:py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
           onClick={() => { setShowForm(false) }}
         >
           Cancel
         </button>
         <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${userLoading ? 'opacity-70' : ''}`}
+          className={`flex justify-center rounded bg-primary px-4 py-2 sm:px-6 sm:py-2 font-medium text-gray hover:bg-opacity-90 ${userLoading ? 'opacity-70' : ''}`}
           type="submit"
           disabled={userLoading}
         >

@@ -17,7 +17,8 @@ const customStyles: TableStyles = {
   },
   cells: {
     style: {
-      whiteSpace: 'nowrap',
+      padding: '8px',
+      fontSize: '14px',
     }
   },
   rows: {
@@ -293,7 +294,7 @@ const CustomDatatable = <T extends object>({
   }, [data, localSearchQuery, isServerSide]);
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div className="responsive-table-container">
       {enableCustomHeader && (
         <CustomHeader
           title={title}
@@ -305,24 +306,25 @@ const CustomDatatable = <T extends object>({
           searchPlaceholder={serverSidePagination?.searchPlaceholder}
         />
       )}
-      <DataTable
-        keyField="id"
-        paginationPerPage={isServerSide ? serverSidePagination!.pageSize : 6}
-        progressPending={apiLoading}
-        defaultSortFieldId={defaultSortFieldId}
-        onRowClicked={onRowClicked}
-        noHeader
-        title={title}
-        columns={columns}
-        data={filteredData}
-        customStyles={customStyles}
-        pagination={!isServerSide} // Disable built-in pagination for server-side mode
-        className='rounded'
-        highlightOnHover
-        responsive
-        fixedHeader
-        fixedHeaderScrollHeight="500px"
-      />
+      <div className="table-wrapper">
+        <DataTable
+          keyField="id"
+          paginationPerPage={isServerSide ? serverSidePagination!.pageSize : 6}
+          progressPending={apiLoading}
+          defaultSortFieldId={defaultSortFieldId}
+          onRowClicked={onRowClicked}
+          noHeader
+          title={title}
+          columns={columns}
+          data={filteredData}
+          customStyles={customStyles}
+          pagination={!isServerSide} // Disable built-in pagination for server-side mode
+          className='rounded'
+          highlightOnHover
+          fixedHeader
+          fixedHeaderScrollHeight="500px"
+        />
+      </div>
 
       {/* Custom server-side pagination controls */}
       {isServerSide && serverSidePagination && (

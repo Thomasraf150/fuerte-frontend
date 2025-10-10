@@ -240,16 +240,16 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
       )}
       
 
-      <div className="flex justify-end gap-4.5">
+      <div className="flex justify-end gap-4.5 mt-6">
         <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+          className="flex justify-center rounded border border-stroke px-4 py-2 sm:px-6 sm:py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
           onClick={() => { setShowForm(false) }}
         >
           Cancel
         </button>
         <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${branchLoading ? 'opacity-70' : ''}`}
+          className={`flex justify-center rounded bg-primary px-4 py-2 sm:px-6 sm:py-2 font-medium text-gray hover:bg-opacity-90 ${branchLoading ? 'opacity-70' : ''}`}
           type="submit"
           disabled={branchLoading}
         >

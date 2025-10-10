@@ -47,44 +47,44 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
           <div className="flex flex-col md:flex-row border-b mt-3">
             <button
               onClick={() => handleTabClick(1)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 1
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
+                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
               disabled={false}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Set Effectivity/Maturity</span>
             </button>
             <button
               onClick={() => handleTabClick(2)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 2
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
+                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
               disabled={false}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>PN Signing</span>
             </button>
             <button
               onClick={() => handleTabClick(3)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 3
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
+                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
               disabled={loanSingleData?.status > 0 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Bank Details Entry</span>
             </button>
             <button
               onClick={() => handleTabClick(4)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 4
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
+                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
               disabled={loanSingleData?.status > 1 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Approve and Release</span>

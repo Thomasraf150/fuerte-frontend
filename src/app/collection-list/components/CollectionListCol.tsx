@@ -10,25 +10,29 @@ const collectionListCol = (): TableColumn<DataColListRow>[] => [
     name: 'Loan Ref',
     cell: row => row.loan_ref,
     sortable: true,
-    style: {
-      minWidth: '150px',
-    },
-    width: '150px'
+    minWidth: '120px',
+    maxWidth: '150px',
   },
   {
     name: 'Description',
     cell: row => row.description.slice(0, 35),
     sortable: true,
+    grow: 2,
+    minWidth: '200px',
   },
   {
     name: 'Due Date',
     cell: row => row.due_date,
     sortable: true,
+    minWidth: '100px',
+    maxWidth: '120px',
   },
   {
     name: 'Collection Date',
     cell: row => row.trans_date,
     sortable: true,
+    minWidth: '120px',
+    maxWidth: '150px',
   },
 
 ];
