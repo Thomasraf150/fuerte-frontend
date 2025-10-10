@@ -133,6 +133,8 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
                 // handleBranchSubChange(selectedOption?.value ?? '');
               }}
               value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+              isLoading={!dataBranch || optionsSubBranch.length <= 1}
+              loadingMessage={() => "Loading branches..."}
             />
           )}
         />

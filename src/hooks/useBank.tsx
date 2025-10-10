@@ -162,7 +162,7 @@ const useBank = () => {
 
    // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchDataBank(15, 1); // Smart pagination: load 15 records instead of 1000
+    fetchDataBank(100, 1); // Smart pagination: load 15 records instead of 1000
     fetchDataSubBranch();
   }, []);
 

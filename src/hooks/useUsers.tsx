@@ -24,6 +24,8 @@ const useUsers = () => {
   const [singleUserData, setSingleUserData] = useState<DataFormUser | undefined>(undefined);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [rolesLoading, setRolesLoading] = useState<boolean>(false);
+  const [subBranchLoading, setSubBranchLoading] = useState<boolean>(false);
   const [userLoading, setUserLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
   // Function to fetchdata
@@ -56,7 +58,7 @@ const useUsers = () => {
   };
   
   const fetchRoles = async () => {
-    setLoading(true);
+    setRolesLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
@@ -74,12 +76,13 @@ const useUsers = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
-      setLoading(false);
+      setRolesLoading(false);
     }
   };
 
   const fetchSubBranch = async (orderBy: string) => {
-    setLoading(true);
+    console.log('🔄 Starting fetchSubBranch, setting subBranchLoading to true');
+    setSubBranchLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
@@ -93,11 +96,13 @@ const useUsers = () => {
       });
 
       const result = await response.json();
+      console.log('✅ fetchSubBranch completed, data:', result.data.getAllBranch?.length || 0, 'items');
       setDataSubBranch(result.data.getAllBranch);
     } catch (error) {
       console.error('Error fetching sub branches:', error);
     } finally {
-      setLoading(false);
+      console.log('🔄 Setting subBranchLoading to false');
+      setSubBranchLoading(false);
     }
   };
 
@@ -209,7 +214,9 @@ const useUsers = () => {
     fetchUsers,
     fetchSingleUser,
     singleUserData,
-    dataRole
+    dataRole,
+    rolesLoading,
+    subBranchLoading
   };
 };
 

@@ -77,7 +77,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       'penalty': ensureNumericString(data.penalty),
       'rebates': ensureNumericString(data.rebates),
       'renewal_loan_id': dataLoanRenewal?.join(','),
-      'renewal_details': dataComputedRenewal
+      'renewal_details': watch('renewal_details')// Array.isArray(dataComputedRenewal) ? dataComputedRenewal : []
     };
 
     if (currentActionType === 'compute') {
@@ -152,7 +152,11 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       setLoanProdOptions([{ value: '', label: 'No loan products available', hidden: true }]);
     }
   }, [loanProduct, errors]);
-
+  
+  const getGetRenewalDetails = (d: any) => {
+    setValue('renewal_details', d);
+    // console.log(d, ' from getGetRenewalDetails');
+  }
 
   return (
 
@@ -165,9 +169,9 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       <div className="max-w-full px-0 z-999999">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 m-5">
         <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
-          <form onSubmit={handleSubmit(onSubmit)} >
+          <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal}/>}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} fnGetRenewalDetails={getGetRenewalDetails} />}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller
@@ -183,6 +187,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={branchOptions.find(option => String(option.value) === String(field.value)) || null}
+                    isLoading={!dataBranchSub || branchOptions.length <= 1}
+                    loadingMessage={() => "Loading branches..."}
                   />
                 )}
               />
@@ -205,6 +211,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={loanProdOptions.find(option => String(option.value) === String(field.value)) || null}
+                    isLoading={loading || !loanProduct || loanProdOptions.length <= 1}
+                    loadingMessage={() => "Loading loan products..."}
                   />
                 )}
               />

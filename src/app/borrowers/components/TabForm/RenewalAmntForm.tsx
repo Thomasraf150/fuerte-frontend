@@ -9,17 +9,18 @@ import FormLabel from '@/components/FormLabel';
 interface ParentFormBr {
   renewalIDs: string[] | [];
   dataComputedRenewal: DataRenewalData | undefined;
+  fnGetRenewalDetails?: (d: any) => void;
   setValue: any;
   watch: any;
 }
 
-const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenewal, setValue, watch }) => {
+const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenewal, setValue, watch, fnGetRenewalDetails }) => {
   // const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrCoMakerFormValues>();
 
   const [openRows, setOpenRows] = useState<number[]>([]); // To hold multiple open row indexes
 
   // Initialize the state to hold the selected values with loan_ref
-  const [selectedValues, setSelectedValues] = useState<Array<{ loan_ref: string; loan_schedule_id: string; amount: string; dueDate: string }>>([]);
+  const [selectedValues, setSelectedValues] = useState<Array<{ loan_ref: string; loan_schedule_id: string; amount: string; dueDate: string, udi_balance: string, loan_udi_schedule_id: string }>>([]);
   const [selectedValuesOb, setSelectedValuesOb] = useState<Array<{ loan_ref: string; amount: string; dueDate: string }>>([]);
 
   const toggleRow = (index: number) => {
@@ -34,9 +35,14 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
     });
   };
 
-  const handleRadioChange = (loan_ref: string, value: { amount: string; loan_schedule_id: string; dueDate: string }) => {
+  const handleRadioChange = (loan_ref: string, value: { amount: string; loan_schedule_id: string; dueDate: string }, udiBalance: any) => {
     setSelectedValues((prevSelected) => {
-      return [...prevSelected, { loan_ref, ...value }];
+      const udiSchedule = udiBalance?.loan_schedules?.udi_balance?.find(
+        (udi: any) => udi.due_date === value.dueDate
+      );
+      const udi_balance = udiSchedule ? udiSchedule.amount : "0.00";
+      const loan_udi_schedule_id = udiSchedule ? udiSchedule.loan_udi_schedule_id : "";
+      return [...prevSelected, { loan_ref, ...value, udi_balance, loan_udi_schedule_id }];
     });
     setSelectedValuesOb((prevSelected) => 
       prevSelected.filter((item) => item.loan_ref !== loan_ref)
@@ -77,8 +83,13 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
 
   useEffect(() => {
     setValue('renewal_details', unifiedSelectedValues);
+    // console.log(unifiedSelectedValues, ' unifiedSelectedValues');
     console.log(dataComputedRenewal, ' dataComputedRenewal');
-  }, [unifiedSelectedValues, renewalIDs])
+    console.log(unifiedSelectedValues, ' unifiedSelectedValues');
+    if (fnGetRenewalDetails) {
+      fnGetRenewalDetails(unifiedSelectedValues);
+    }
+  }, [unifiedSelectedValues, renewalIDs, selectedValues])
 
   return (
 
@@ -132,7 +143,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                       type="radio"
                                       value={JSON.stringify([row?.amount, row?.due_date])}
                                       checked={selectedValues.some(item => item.loan_ref === v.loan_ref && item.amount === row?.amount && item.dueDate === row?.due_date)}
-                                      onChange={() => handleRadioChange(v.loan_ref, { amount: row?.amount, loan_schedule_id: row?.loan_schedule_id, dueDate: row?.due_date })}
+                                      onChange={() => handleRadioChange(v.loan_ref, { amount: row?.amount, loan_schedule_id: row?.loan_schedule_id, dueDate: row?.due_date }, v)}
                                       className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
                                     />
                                   </div>

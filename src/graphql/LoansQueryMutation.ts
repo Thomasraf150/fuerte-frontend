@@ -307,6 +307,11 @@ const GET_LOAN_RENEWAL: string = `
           due_date
           loan_schedule_id
         }
+        udi_balance {
+          amount
+          due_date
+          loan_udi_schedule_id
+        }
       }
     }
   }

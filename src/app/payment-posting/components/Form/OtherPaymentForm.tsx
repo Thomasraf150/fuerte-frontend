@@ -31,7 +31,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // }
     // if ((parseFloat(watch('advanced_payment')) || 0) > 0) {
 
-      const computedUdi = String((Number(udiSched?.amount) * ((((parseFloat(watch('advanced_payment')) || 0 ) + (parseFloat(watch('payment_ua_sp')) || 0)) / Number(amountSched?.amount)) * 100 / 100)).toFixed(2));
+      const computedUdi = String((Number(udiSched?.amount) * ((((parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0 ) + (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0)) / Number(amountSched?.amount)) * 100 / 100)).toFixed(2));
       if (parseFloat(parseFloat(computedUdi).toFixed(2)) > parseFloat(parseFloat(selectedUdiSched?.amount).toFixed(2))) {
         toast.error("Your amount paying is exeeding a total remaining due. Please input a right remain amount");
         setTimeout(function(){
@@ -53,53 +53,54 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
-    const formattedValue = formatToTwoDecimalPlaces(value);
+    const numericValue = value.replace(/,/g, '');
+    const formattedValue = formatToTwoDecimalPlaces(numericValue);
     if (type === 'collection') {
-      if (parseFloat(value) > selectedMoSchedOthPay?.amount) {
-        setValue('ap_refund', String((parseFloat(value) -
-                              (parseFloat(watch('bank_charge')) || 0) -
-                              (parseFloat(watch('payment_ua_sp')) || 0) -
-                              (parseFloat(watch('penalty_ua_sp')) || 0) -
-                              (parseFloat(watch('advanced_payment')) || 0)).toFixed(2)));
+      if (parseFloat(numericValue) > selectedMoSchedOthPay?.amount) {
+        setValue('ap_refund', String((parseFloat(numericValue) -
+                              (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       } else {
         setValue('ap_refund', "0.00");
       }
-
+      fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'bank_charge') {
-      if (parseFloat(watch('collection')) > selectedMoSchedOthPay?.amount) {
-        setValue('ap_refund', String((parseFloat(watch('collection')) -
-                              (parseFloat(value) || 0) -
-                              (parseFloat(watch('payment_ua_sp')) || 0) -
-                              (parseFloat(watch('penalty_ua_sp')) || 0) -
-                              (parseFloat(watch('advanced_payment')) || 0)).toFixed(2)));
+      if (parseFloat(watch('collection')?.replace(/,/g, '')) > selectedMoSchedOthPay?.amount) {
+        setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                              (parseFloat(numericValue) || 0) -
+                              (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       } else {
         setValue('ap_refund', "0.00");
       }
+      fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'payment_ua_sp') {
-      setValue('ap_refund', String((parseFloat(watch('collection')) -
-                            (parseFloat(value) || 0) -
-                            (parseFloat(watch('bank_charge')) || 0) -
-                            (parseFloat(watch('penalty_ua_sp')) || 0) -
-                            (parseFloat(watch('advanced_payment')) || 0)).toFixed(2)));
-      console.log(selectedMoSchedOthPay, 'selectedMoSchedOthPay');
-      console.log(selectedUdiSched, 'selectedUdiSched');
+      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                            (parseFloat(numericValue) || 0) -
+                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'penalty_ua_sp') {
-      setValue('ap_refund', String((parseFloat(watch('collection')) -
-                            (parseFloat(value) || 0) -
-                            (parseFloat(watch('bank_charge')) || 0) -
-                            (parseFloat(watch('payment_ua_sp')) || 0) -
-                            (parseFloat(watch('advanced_payment')) || 0)).toFixed(2)));
+      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                            (parseFloat(numericValue) || 0) -
+                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
+      fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'advanced_payment') {
-      setValue('ap_refund', String((parseFloat(watch('collection')) -
-                            (parseFloat(value) || 0) -
-                            (parseFloat(watch('bank_charge')) || 0) -
-                            (parseFloat(watch('payment_ua_sp')) || 0) -
-                            (parseFloat(watch('penalty_ua_sp')) || 0)).toFixed(2)));
+      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                            (parseFloat(numericValue) || 0) -
+                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0)).toFixed(2)));
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
 

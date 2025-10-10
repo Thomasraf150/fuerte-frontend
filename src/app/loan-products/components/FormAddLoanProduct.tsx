@@ -22,7 +22,7 @@ interface OptionLoanCode {
 const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProducts, actionLbl, singleData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanProducts>();
   const { onSubmitLoanProduct, loanProductLoading } = useLoanProducts();
-  const { data: loanCodeData } = useLoanCodes();
+  const { data: loanCodeData, loading: loanCodeLoading } = useLoanCodes();
   const [optionsClient, setOptionsClient] = useState<OptionLoanCode[]>([]);
   const [selectedOptIsAuto, setSelectedOptIsAuto] = useState<string>();
   const [baseCompOptions, setBaseCompOptions] = useState<OptionLoanCode[]>([
@@ -51,11 +51,11 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   };
 
   const handleComputeUdi = () => {
-    const interest_rate = watch('interest_rate');
-    const terms = watch('terms');
-    const processing = watch('processing');
-    const agent_fee = watch('agent_fee');
-    const collection = watch('collection');
+    const interest_rate = String(watch('interest_rate')).replace(/,/g, '');
+    const terms = String(watch('terms')).replace(/,/g, '');
+    const processing = String(watch('processing')).replace(/,/g, '');
+    const agent_fee = String(watch('agent_fee')).replace(/,/g, '');
+    const collection = String(watch('collection')).replace(/,/g, '');
     const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100) + (Number(agent_fee) / 100))) * 100;
 
     if (!isNaN(udi)) {
@@ -142,6 +142,8 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             register={register('loan_code_id', { required: 'Loan Code is required' })}
             error={errors.loan_code_id?.message}
             options={optionsClient}
+            isLoading={loanCodeLoading || !loanCodeData}
+            loadingMessage="Loading loan codes..."
           />
         </div>
         <div className="col-span-1 md:col-span-2">
