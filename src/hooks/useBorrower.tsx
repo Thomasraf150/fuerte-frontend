@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
@@ -13,8 +14,9 @@ import { usePagination } from './usePagination';
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, BorrowerRowInfo } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 const useBorrower = () => {
+  const router = useRouter();
 
-  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY } = BorrowerQueryMutations;
+  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY, CHECK_BORROWER_DUPLICATE } = BorrowerQueryMutations;
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
@@ -153,9 +155,71 @@ const useBorrower = () => {
     },
   });
 
+  const checkForDuplicates = async (data: BorrowerInfo): Promise<boolean> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: CHECK_BORROWER_DUPLICATE,
+          variables: {
+            firstname: data.firstname,
+            lastname: data.lastname,
+            dob: data.dob,
+            email: data.email || null,
+            contact_no: data.contact_no || null,
+            excludeId: data.id || null,
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.data?.checkBorrowerDuplicate?.isDuplicate) {
+        const duplicate = result.data.checkBorrowerDuplicate;
+        const borrower = duplicate.duplicateBorrower;
+
+        await showConfirmationModal(
+          'Duplicate Borrower Found',
+          `<p>A borrower with the same ${duplicate.duplicateType.replace(/_/g, ' ')} already exists in the system:</p>` +
+          `<br/>` +
+          `<p><strong>Name:</strong> ${borrower.firstname} ${borrower.lastname}</p>` +
+          `<p><strong>Email:</strong> ${borrower.borrower_details?.email || 'N/A'}</p>` +
+          `<p><strong>Contact:</strong> ${borrower.borrower_details?.contact_no || 'N/A'}</p>` +
+          `<br/>` +
+          `<p>Please verify if this is the same person. The borrower was not created to prevent duplicates.</p>`,
+          'Close',
+          false, // Hide cancel button - only show Close
+          true   // Use HTML formatting
+        );
+
+        // Always return false - do not allow duplicate creation
+        return false;
+      }
+
+      return true; // No duplicates, proceed
+    } catch (error) {
+      console.error('Duplicate check error:', error);
+      // On error, allow to proceed (don't block user)
+      return true;
+    }
+  };
+
   const onSubmitBorrower: SubmitHandler<BorrowerInfo> = async (data) => {
     setBorrowerLoading(true);
+
     try {
+      // Check for duplicates only for new borrowers
+      if (!data.id) {
+        const canProceed = await checkForDuplicates(data);
+        if (!canProceed) {
+          setBorrowerLoading(false);
+          return { success: false, error: 'Cancelled by user due to duplicate' };
+        }
+      }
+
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
       const variables = createBorrVariables(data, Number(userData?.user?.id));
