@@ -202,13 +202,13 @@ const BorrNrSchedList: React.FC = () => {
                 <div className="p-4 sm:p-7">
 
 
-                <div className="rounded-lg bg-gray-200 mb-4 p-4">
-                  <label className="mb-4 block font-semibold text-gray-800">Select Date Range and Filters:</label>
+                <div className="rounded-lg bg-gray-200 dark:bg-boxdark mb-4 p-4">
+                  <label className="mb-4 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range and Filters:</label>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-end">
                     {/* Start Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
+                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         Start Date:
                       </label>
                       <DatePicker
@@ -219,13 +219,13 @@ const BorrNrSchedList: React.FC = () => {
                         startDate={startDate}
                         endDate={endDate}
                         placeholderText="Start Date"
-                        className="w-full border rounded px-4 py-2"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                       />
                     </div>
 
                     {/* End Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700">
+                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         End Date:
                       </label>
                       <DatePicker
@@ -237,14 +237,14 @@ const BorrNrSchedList: React.FC = () => {
                         endDate={endDate}
                         minDate={startDate}
                         placeholderText="End Date"
-                        className="w-full border rounded px-4 py-2"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                       />
                     </div>
 
                     {/* Enhanced Search Input (Loan Ref + Name) */}
                     <div className="flex flex-col">
                       <div className="flex items-center justify-between mb-1">
-                        <label htmlFor="searchTerm" className="text-sm font-medium text-gray-700">
+                        <label htmlFor="searchTerm" className="text-sm font-medium text-gray-700 dark:text-bodydark">
                           Search:
                         </label>
                         <div className="flex items-center space-x-2">
@@ -255,7 +255,7 @@ const BorrNrSchedList: React.FC = () => {
                             onChange={(e) => setAutoSearch(e.target.checked)}
                             className="h-3 w-3"
                           />
-                          <label htmlFor="autoSearch" className="text-xs text-gray-500">
+                          <label htmlFor="autoSearch" className="text-xs text-gray-500 dark:text-bodydark">
                             Auto-search
                           </label>
                         </div>
@@ -267,7 +267,7 @@ const BorrNrSchedList: React.FC = () => {
                           placeholder="Loan Ref or Borrower Name"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full border rounded px-4 py-2 pr-8"
+                          className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-48 pr-8 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                         />
                         {searchTerm !== debouncedSearchTerm && (
                           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -275,11 +275,14 @@ const BorrNrSchedList: React.FC = () => {
                           </div>
                         )}
                       </div>
+                      <div className="text-xs text-gray-500 dark:text-bodydark mt-1">
+                        Search by loan reference number or borrower name
+                      </div>
                     </div>
 
                     {/* Branch Select */}
-                    <div className="flex flex-col w-full">
-                      <label htmlFor="branchSelect" className="mb-1 text-sm font-medium text-gray-700">
+                    <div className="flex flex-col min-w-[200px]">
+                      <label htmlFor="branchSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         Branch:
                       </label>
                       <Controller
@@ -302,8 +305,8 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Sub Branch Select */}
-                    <div className="flex flex-col w-full">
-                      <label htmlFor="subBranchSelect" className="mb-1 text-sm font-medium text-gray-700">
+                    <div className="flex flex-col min-w-[200px]">
+                      <label htmlFor="subBranchSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         Sub Branch:
                       </label>
                       <Controller

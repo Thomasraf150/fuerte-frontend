@@ -106,11 +106,11 @@ const DefaultPage: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
-      <div className="rounded-lg bg-gray-200 p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-end">
+      <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-4">
+        <div className="flex flex-wrap items-end space-x-4">
           {/* Start Date */}
           <div className="flex flex-col">
-            <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
+            <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
               Start Date:
             </label>
             <DatePicker
@@ -121,13 +121,13 @@ const DefaultPage: React.FC = () => {
               startDate={startDate}
               endDate={endDate}
               placeholderText="Start Date"
-              className="w-full border rounded px-4 py-2"
+              className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
             />
           </div>
 
           {/* End Date */}
           <div className="flex flex-col">
-            <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700">
+            <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
               End Date:
             </label>
             <DatePicker
@@ -139,13 +139,13 @@ const DefaultPage: React.FC = () => {
               endDate={endDate}
               minDate={startDate}
               placeholderText="End Date"
-              className="w-full border rounded px-4 py-2"
+              className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
             />
           </div>
 
           {/* Branch Select */}
-          <div className="flex flex-col w-full">
-            <label className="mb-1 text-sm font-medium text-gray-700">
+          <div className="flex flex-col min-w-[200px]">
+            <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
               Branch:
             </label>
             <Controller
@@ -178,9 +178,9 @@ const DefaultPage: React.FC = () => {
             />
           </div>
 
-          {/* Sub Branch Select */}
-          <div className="flex flex-col w-full">
-            <label className="mb-1 text-sm font-medium text-gray-700">
+          {/* Confirm Branch Select */}
+          <div className="flex flex-col min-w-[200px]">
+            <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
               Sub Branch:
             </label>
             <Controller
@@ -216,7 +216,7 @@ const DefaultPage: React.FC = () => {
           {/* Button */}
           <div className="flex items-end">
             <button
-              className="flex items-center gap-2 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5"
+              className="flex items-center gap-2 text-white bg-green-700 hover:bg-green-800 dark:bg-meta-3 dark:hover:bg-green-600 focus:ring-4 focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5"
               type="button"
               onClick={() => printSummaryTicketDetails(moment(startDate).format("YYYY-MM-DD"), moment(endDate).format("YYYY-MM-DD"), branchSubId)}
             >

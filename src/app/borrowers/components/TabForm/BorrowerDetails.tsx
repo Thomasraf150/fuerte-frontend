@@ -1031,7 +1031,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 Back
               </button>
               <button
-                className={`flex justify-center rounded bg-black px-6 py-2 font-medium text-gray hover:bg-opacity-90 w-full sm:w-auto ${borrowerLoading ? 'opacity-70' : ''}`}
+                className={`flex justify-center rounded bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 transition ${borrowerLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 type="submit"
                 disabled={borrowerLoading}
               >

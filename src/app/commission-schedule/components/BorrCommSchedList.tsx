@@ -99,15 +99,10 @@ const SoaList: React.FC = () => {
                 </div>
                 <div className="p-4 sm:p-7">
 
-                <div className="rounded-lg bg-gray-200 p-4 mb-4">
-                  <label className="mb-4 block font-semibold text-gray-800">Select Date Range and Filters:</label>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                    {/* Start Date */}
-                    <div className="flex flex-col">
-                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700">
-                        Start Date:
-                      </label>
+                <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-4 mb-4">
+                  <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-bodydark">Select Date Range:</label>
+                    <div className="flex space-x-4">
                       <DatePicker
                         id="startDate"
                         selected={startDate}
@@ -116,7 +111,7 @@ const SoaList: React.FC = () => {
                         startDate={startDate}
                         endDate={endDate}
                         placeholderText="Start Date"
-                        className="w-full border rounded px-4 py-2"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                         disabled={loading}
                       />
                     </div>
@@ -135,36 +130,32 @@ const SoaList: React.FC = () => {
                         endDate={endDate}
                         minDate={startDate}
                         placeholderText="End Date"
-                        className="w-full border rounded px-4 py-2"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                         disabled={loading}
                       />
                     </div>
-
-                    {/* Search */}
-                    <div className="flex flex-col">
-                      <label htmlFor="searchTerm" className="mb-1 text-sm font-medium text-gray-700">
-                        Search:
-                      </label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                          id="searchTerm"
-                          type="text"
-                          placeholder="Loan Ref or Borrower Name"
-                          value={searchTerm}
-                          onChange={(e) => handleSearch(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          disabled={loading}
-                        />
-                        {isSearching && (
-                          <RefreshCw className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 animate-spin" size={18} />
-                        )}
-                      </div>
+                  </div>
+                  
+                  <div className="mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-bodydark">Search:</label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-bodydark" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Loan Ref or Borrower Name"
+                        value={searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-stroke dark:border-strokedark rounded-md bg-white dark:bg-form-input text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                        disabled={loading}
+                      />
+                      {isSearching && (
+                        <RefreshCw className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 animate-spin" size={18} />
+                      )}
                     </div>
                   </div>
                   
                   {pagination.total > 0 && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-bodydark">
                       Showing {dataCommissionSched.length} of {pagination.total} records
                       {searchTerm && ` (filtered by "${searchTerm}")`}
                     </div>

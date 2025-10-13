@@ -84,24 +84,24 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-1 gap-3 p-3 sm:gap-4">
         <div>
-          <h3 className="text-sm font-semibold mb-1">Account Name</h3>
+          <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Account Name</h3>
           <input
             type="text"
-            className="block w-full p-2 mb-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+            className="block w-60 p-2 mb-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
             placeholder="Card Account Name"
             {...register('account_name', { required: "Account name is required!" })}
           />
           {errors.account_name && <p className="mt-2 text-sm text-red-600">{errors.account_name.message}</p>}
         </div>
-        <div className="flow-root border border-gray-100 py-3 shadow-sm overflow-x-auto">
-          <dl className="-my-3 divide-y divide-gray-100 text-sm">
-            <div className="grid grid-cols-3 gap-1 p-3 sm:gap-4 bg-boxdark-2 text-lime-100">
-              <dt className="font-medium text-left text-gray-900"></dt>
-              <dt className="font-medium text-center text-gray-900">ATM Surrender</dt>
-              <dd className="text-gray-700 text-center">ATM Issued</dd>
+        <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
+          <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
+            <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 dark:bg-meta-4 text-lime-100 dark:text-white">
+              <dt className="font-medium text-left text-gray-900 dark:text-bodydark dark:text-white"></dt>
+              <dt className="font-medium text-center text-gray-900 dark:text-bodydark dark:text-white">ATM Surrender</dt>
+              <dd className="text-gray-700 dark:text-bodydark text-center">ATM Issued</dd>
             </div>
-            <div className="grid grid-cols-3 gap-1 p-3 sm:gap-4">
-              <dt className="font-medium text-right text-gray-900 leading-9">
+            <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
+              <dt className="font-medium text-right text-gray-900 dark:text-bodydark leading-9">
                 Bank:
               </dt>
               <dd className="text-gray-700 text-left">
@@ -125,7 +125,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                   {errors.surrendered_bank_id && <p className="mt-2 text-sm text-red-600">{errors.surrendered_bank_id.message}</p>}
                 </div>
               </dd>
-              <dt className="font-medium text-left text-gray-900">
+              <dt className="font-medium text-left text-gray-900 dark:text-bodydark">
                 <div className="">
                   <Controller
                     name="issued_bank_id"
@@ -147,14 +147,14 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                 </div>
               </dt>
             </div>
-            <div className="grid grid-cols-3 gap-1 p-3 sm:gap-4">
-              <dt className="font-medium text-right text-gray-900 leading-9">
+            <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
+              <dt className="font-medium text-right text-gray-900 dark:text-bodydark leading-9">
                 Account / Card No.:
               </dt>
-              <dd className="text-gray-700 text-center">
+              <dd className="text-gray-700 dark:text-bodydark text-center">
                 <div className="relative">
                   <input
-                    className={`block p-2 w-full border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                    className={`block p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
                     type="text"
                     id="surrendered_acct_no"
                     placeholder="Card Account No."
@@ -166,10 +166,10 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                   {errors.surrendered_acct_no && <p className="mt-2 text-sm text-red-600">{errors.surrendered_acct_no.message}</p>}
                 </div>
               </dd>
-              <dt className="font-medium text-center text-gray-900">
+              <dt className="font-medium text-center text-gray-900 dark:text-bodydark">
               <div className="relative">
                   <input
-                    className={`block p-2 w-full border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                    className={`block p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
                     type="text"
                     id="issued_acct_no"
                     placeholder="Card Account No."
@@ -182,14 +182,14 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                 </div>
               </dt>
             </div>
-            <div className="grid grid-cols-3 gap-1 p-3 sm:gap-4">
-              <dt className="font-medium text-right text-gray-900 leading-9">
+            <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
+              <dt className="font-medium text-right text-gray-900 dark:text-bodydark leading-9">
                 PIN.:
               </dt>
-              <dd className="text-gray-700 text-center relative">
+              <dd className="text-gray-700 dark:text-bodydark text-center relative">
                 <input
                   type={showPin1 ? 'text' : 'password'}
-                  className="block p-2 w-full border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                  className="block p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   placeholder="Account PIN"
                   {...register('surrendered_pin', { required: "Surrendered Pin. is required!" })}
                 />
@@ -201,10 +201,10 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                   {showPin1 ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </dd>
-              <dt className="font-medium text-center text-gray-900 relative">
+              <dt className="font-medium text-center text-gray-900 dark:text-bodydark relative">
                 <input
                   type={showPin2 ? 'text' : 'password'}
-                  className="block p-2 w-full border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                  className="block p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
                   placeholder="Account PIN"
                   {...register('issued_pin', { required: "Issued Pin. is required!" })}
                 />

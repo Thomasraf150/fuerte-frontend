@@ -49,9 +49,9 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
               onClick={() => handleTabClick(1)}
               className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 1
-                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
+                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
+              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
               disabled={false}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Set Effectivity/Maturity</span>
@@ -60,9 +60,9 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
               onClick={() => handleTabClick(2)}
               className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 2
-                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
+                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
+              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
               disabled={false}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>PN Signing</span>
@@ -71,9 +71,9 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
               onClick={() => handleTabClick(3)}
               className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 3
-                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
+                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
+              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
               disabled={loanSingleData?.status > 0 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Bank Details Entry</span>
@@ -82,9 +82,9 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
               onClick={() => handleTabClick(4)}
               className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 4
-                  ? 'bg-blue-50 border-b-2 border-blue-600 text-blue-600 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-              } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
+                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
+              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
               disabled={loanSingleData?.status > 1 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Approve and Release</span>
@@ -93,7 +93,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
         </>
       )}
       {/* Tab Content */}
-      <div className="p-6 bg-white">
+      <div className="p-6 bg-white dark:bg-boxdark">
         {activeTab === 1 && (
           <div>
             {loanSingleData && (

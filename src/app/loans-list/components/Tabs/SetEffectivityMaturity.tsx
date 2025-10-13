@@ -64,42 +64,42 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             </button>
           ) : ('')}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="flow-root border border-gray-100 py-3 shadow-sm">
-            <dl className="-my-3 divide-y divide-gray-100 text-sm">
+        <div className="grid grid-cols-3 bg-white dark:bg-boxdark p-4 rounded">
+          <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm mr-3 bg-white dark:bg-boxdark">
+            <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-                <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Monthly Amortization</dt>
+                <dt className="col-span-3 font-medium p-4 bg-black dark:bg-meta-4 text-white text-center">Monthly Amortization</dt>
                 {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
               </div>
               <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
-                <dt className="font-medium text-center text-gray-900">Date</dt>
-                <dt className="font-medium text-center text-gray-900">Monthly</dt>
+                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Date</dt>
+                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Monthly</dt>
               </div>
               {loanSingleData.loan_schedules && loanSingleData.loan_schedules.map((item, i) => {
               return (
                 <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
-                  <dd className="text-gray-700 text-center">{item.due_date}</dd>
-                  <dt className="font-medium text-center text-gray-900">{formatNumber(Number(item.amount))}</dt>
+                  <dd className="text-gray-700 dark:text-bodydark text-center">{item.due_date}</dd>
+                  <dt className="font-medium text-center text-gray-900 dark:text-white">{formatNumber(Number(item.amount))}</dt>
                 </div>
               )
             })}
             </dl>
           </div>
-          <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-            <dl className="-my-3 divide-y divide-gray-100 text-sm">
+          <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
+            <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-                <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">UDI Schedule</dt>
+                <dt className="col-span-3 font-medium p-4 bg-black dark:bg-meta-4 text-white text-center">UDI Schedule</dt>
                 {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
               </div>
               <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
-                <dt className="font-medium text-center text-gray-900">Date</dt>
-                <dt className="font-medium text-center text-gray-900">Monthly</dt>
+                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Date</dt>
+                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Monthly</dt>
               </div>
               {loanSingleData.loan_udi_schedules && loanSingleData.loan_udi_schedules.map((item, i) => {
               return (
                 <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
-                  <dd className="text-gray-700 text-center">{item.due_date}</dd>
-                  <dt className="font-medium text-center text-gray-900">{formatNumber(Number(item.amount))}</dt>
+                  <dd className="text-gray-700 dark:text-bodydark text-center">{item.due_date}</dd>
+                  <dt className="font-medium text-center text-gray-900 dark:text-white">{formatNumber(Number(item.amount))}</dt>
                 </div>
               )
             })}
