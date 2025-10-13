@@ -23,3 +23,41 @@
     opacity: 0;
   }
 }
+
+/* Responsive table improvements */
+.responsive-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .responsive-table-container {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  /* Hide less critical columns on mobile - Terms and Loan Proceeds */
+  [data-column-id="3"],
+  [data-column-id="5"] {
+    display: none !important;
+  }
+
+  /* Better spacing for action buttons on mobile */
+  .rdt_TableCell:last-child {
+    min-width: 100px;
+  }
+
+  /* Improve touch targets */
+  .rdt_TableCell:last-child svg {
+    padding: 8px;
+    margin: 0 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .rdt_TableCell:last-child svg:hover {
+    background-color: rgba(6, 182, 212, 0.1);
+  }
+}

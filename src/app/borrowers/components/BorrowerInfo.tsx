@@ -34,6 +34,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
 
   return (
     <div>
+      <div className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-0">
         <button
           className="flex justify-center rounded border bg-white dark:bg-boxdark border-stroke px-6 py-4 mb-4 space-x-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
@@ -98,7 +99,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             </button>
           </div>
 
-          <div className="p-4">
+          <div className="p-2 sm:p-4">
             {activeTab === 'tab1' && (
               <div id="content1">
                 <BorrowerDetails  
@@ -151,6 +152,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             )}
           </div>
         </div>
+      </div>
     </div>
   );
 };

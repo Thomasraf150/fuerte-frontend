@@ -111,6 +111,8 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
             error={errors.supplier_category_id?.message}
             options={optionsSubCat}
             className='mt-2'
+            isLoading={!dataSupplierCat}
+            loadingMessage="Loading categories..."
           />
         </div>
 

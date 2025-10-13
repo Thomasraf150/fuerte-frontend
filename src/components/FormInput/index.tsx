@@ -25,6 +25,9 @@ interface FormInputProps {
   value?: string;
   maxLength?: number;
   formatType?: 'number' | 'contact' | 'currency' | 'none';
+  required?: boolean;
+  isLoading?: boolean;
+  loadingMessage?: string;
 }
 
 // Native number formatting utilities
@@ -32,7 +35,19 @@ const formatNumber = (value: string): string => {
   if (!value) return '';
   // Remove all non-digits except decimal point and negative sign
   const cleanValue = value.replace(/[^\d.-]/g, '');
-  // Only apply comma formatting for 'number' type
+
+  // Preserve decimal points during input
+  if (cleanValue.includes('.')) {
+    const parts = cleanValue.split('.');
+    const intPart = parts[0] || '0';
+    const decPart = parts[1] ?? '';
+
+    
+    const formattedInt = intPart ? parseInt(intPart).toLocaleString('en-US') : '0';
+    return `${formattedInt}.${decPart}`;
+  }
+
+  // No decimal - format as whole number
   const number = parseFloat(cleanValue);
   if (isNaN(number)) return cleanValue;
   return number.toLocaleString('en-US');
@@ -49,6 +64,16 @@ const formatCurrency = (value: string): string => {
   if (!value) return '';
   // Remove all non-digits except decimal point and negative sign
   const cleanValue = value.replace(/[^\d.-]/g, '');
+  if (cleanValue.includes('.')) {
+    const parts = cleanValue.split('.');
+    const intPart = parts[0] || '0';
+    const decPart = (parts[1] ?? '').substring(0, 2); // Limit to 2 decimals
+
+    // Format integer with commas, preserve decimals
+    const formattedInt = intPart ? parseInt(intPart).toLocaleString('en-US') : '0';
+    return `${formattedInt}.${decPart}`;
+  }
+
   const number = parseFloat(cleanValue);
   if (isNaN(number)) return cleanValue;
   // Display with commas and exactly 2 decimal places
@@ -83,7 +108,10 @@ const FormInput: React.FC<FormInputProps> = ({
   className,
   readOnly,
   value,
-  formatType = 'none'
+  formatType = 'none',
+  required = false,
+  isLoading = false,
+  loadingMessage = 'Loading...'
 }) => {
   const [displayValue, setDisplayValue] = useState<string>('');
   const [rawValue, setRawValue] = useState<string>('');
@@ -169,6 +197,7 @@ const FormInput: React.FC<FormInputProps> = ({
         htmlFor={id}
       >
         {label}
+        {required && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
       </label>
       <div className="relative">
         {type === 'checkbox' ? (
@@ -180,16 +209,23 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         ) : type === 'select' ? (
           <select
-            className="h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className={`h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
             id={id}
             {...register}
             onChange={onChange}
+            disabled={disabled || isLoading}
           >
-            {options && options.map(option => (
-              <option key={option.value} value={option.value} hidden={option.hidden}>
-                {option.label}
+            {isLoading ? (
+              <option value="" disabled selected>
+                {loadingMessage}
               </option>
-            ))}
+            ) : (
+              options && options.map(option => (
+                <option key={option.value} value={option.value} hidden={option.hidden}>
+                  {option.label}
+                </option>
+              ))
+            )}
           </select>
         ) : (
           <input
@@ -207,11 +243,11 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         )}
         {type !== 'checkbox' && type !== 'file' && (
-          <span className="absolute left-4.5 top-3">
+          <span className={`absolute top-3 ${type === 'select' ? 'right-4.5' : 'left-4.5'}`}>
             <IconComponent size="18" />
           </span>
         )}
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>}
       </div>
     </div>
   );

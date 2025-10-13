@@ -12,10 +12,12 @@ export const metadata = {
 const SOA: React.FC = () => {
   return (
     <DefaultLayout>
-      <div className="mx-auto">
+      <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
         <Breadcrumb pageName="Commission Schedule" />
       </div>
-      <BorrCommSchedList />
+      <div className="px-4 sm:px-6 lg:px-8">
+        <BorrCommSchedList />
+      </div>
     </DefaultLayout>
   );
 };

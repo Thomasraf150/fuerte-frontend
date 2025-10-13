@@ -57,11 +57,11 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
     <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="bg-black border-b mb-3 border-stroke px-6.5 py-4 dark:border-strokedark">
         <h3 className="font-medium text-whiter dark:text-white">
-          Create Attachments
+          Add Co-Maker
         </h3>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-        {/* First Column */}
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Full Name */}
         <div>
           <FormInput
             label="* Full Name"
@@ -72,6 +72,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             error={errors.name && "This field is required"}
           />
         </div>
+        {/* Relationship */}
         <div>
           <FormInput
             label="Relationship with borrower"
@@ -82,6 +83,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             error={errors.relationship && "This field is required"}
           />
         </div>
+        {/* Marital Status */}
         <div>
           <FormInput
             label="Marital Status"
@@ -100,6 +102,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             ]}
           />
         </div>
+        {/* Address */}
         <div>
           <FormInput
             label="Address"
@@ -110,6 +113,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             error={errors.address && "This field is required"}
           />
         </div>
+        {/* Date of Birth */}
         <div>
           <FormInput
             label="Date of Birth"
@@ -120,6 +124,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             error={errors.birthdate && "This field is required"}
           />
         </div>
+        {/* Contact Number */}
         <div>
           <FormInput
             label="Contact No./s"

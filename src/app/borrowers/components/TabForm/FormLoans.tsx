@@ -77,7 +77,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       'penalty': ensureNumericString(data.penalty),
       'rebates': ensureNumericString(data.rebates),
       'renewal_loan_id': dataLoanRenewal?.join(','),
-      'renewal_details': dataComputedRenewal
+      'renewal_details': watch('renewal_details')// Array.isArray(dataComputedRenewal) ? dataComputedRenewal : []
     };
 
     if (currentActionType === 'compute') {
@@ -152,7 +152,11 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
       setLoanProdOptions([{ value: '', label: 'No loan products available', hidden: true }]);
     }
   }, [loanProduct, errors]);
-
+  
+  const getGetRenewalDetails = (d: any) => {
+    setValue('renewal_details', d);
+    // console.log(d, ' from getGetRenewalDetails');
+  }
 
   return (
 
@@ -162,12 +166,12 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
           Create Loans
         </h3>
       </div>
-      <div className="max-w-6xl px-0 z-999999">
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 gap-4 m-5">
-        <div className="border-2 border-emerald-200 p-4"> {/* column 1 */}
-          <form onSubmit={handleSubmit(onSubmit)} >
+      <div className="max-w-full px-0 z-999999">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 m-5">
+        <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
+          <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal}/>}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} fnGetRenewalDetails={getGetRenewalDetails} />}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller
@@ -183,6 +187,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={branchOptions.find(option => String(option.value) === String(field.value)) || null}
+                    isLoading={!dataBranchSub || branchOptions.length <= 1}
+                    loadingMessage={() => "Loading branches..."}
                   />
                 )}
               />
@@ -205,6 +211,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={loanProdOptions.find(option => String(option.value) === String(field.value)) || null}
+                    isLoading={loading || !loanProduct || loanProdOptions.length <= 1}
+                    loadingMessage={() => "Loading loan products..."}
                   />
                 )}
               />
@@ -221,28 +229,28 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
             />
 
             <div>
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
                 <button
-                  className="flex justify-center rounded border border-stroke px-4 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+                  className="flex justify-center items-center rounded border border-stroke px-4 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white w-full sm:w-auto"
                   type="button"
                   onClick={()=>{ createLoans(false) }}
                 >
                   Back
                 </button>
                 <button
-                  className="flex justify-center rounded bg-primary px-4 py-2 font-medium text-gray hover:bg-opacity-90"
+                  className="flex justify-center items-center rounded bg-primary px-4 py-2 font-medium text-gray hover:bg-opacity-90 w-full sm:w-auto"
                   type="button"
                   onClick={() => {
                     handleSubmit((data) => onSubmit(data, 'compute'))();
                   }}
                 >
-                  <span className="mt-1 mr-1">
+                  <span className="mr-1">
                     <Layout size={17} />
                   </span>
                   <span>Compute</span>
                 </button>
                 <button
-                  className="flex justify-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90"
+                  className="flex justify-center items-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                   type="button"
                   disabled={loading}
                   onClick={() => {
@@ -256,7 +264,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                     </>
                   ) : (
                     <>
-                      <span className="mt-1 mr-1">
+                      <span className="mr-1">
                         <Save size={17} />
                       </span>
                       <span>Save</span>

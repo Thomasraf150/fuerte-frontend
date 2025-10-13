@@ -47,7 +47,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
           <div className="flex flex-col md:flex-row border-b mt-3">
             <button
               onClick={() => handleTabClick(1)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 1
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
@@ -58,7 +58,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
             </button>
             <button
               onClick={() => handleTabClick(2)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 2
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
@@ -69,7 +69,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
             </button>
             <button
               onClick={() => handleTabClick(3)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 3
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
@@ -80,7 +80,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
             </button>
             <button
               onClick={() => handleTabClick(4)}
-              className={`p-4 text-sm font-medium flex items-center ${
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
                 activeTab === 4
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 dark:text-bodydark hover:text-blue-600'

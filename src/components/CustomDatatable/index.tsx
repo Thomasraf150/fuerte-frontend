@@ -283,7 +283,7 @@ const CustomDatatable = <T extends object>({
   }, [data, localSearchQuery, isServerSide]);
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div className="responsive-table-container">
       {enableCustomHeader && (
         <CustomHeader
           title={title}

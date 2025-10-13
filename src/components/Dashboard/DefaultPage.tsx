@@ -162,6 +162,17 @@ const DefaultPage: React.FC = () => {
                     handleBranchChange(selectedOption?.value ?? '');
                   }}
                   value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                  styles={{
+                    menu: (base) => ({ 
+                      ...base, 
+                      minWidth: '200px' 
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: '200px',
+                      overflowY: 'auto'
+                    })
+                  }}
                 />
               )}
             />
@@ -186,6 +197,17 @@ const DefaultPage: React.FC = () => {
                     handleBranchSubChange(selectedOption?.value ?? '');
                   }}
                   value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                  styles={{
+                    menu: (base) => ({ 
+                      ...base, 
+                      minWidth: '200px' 
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: '200px',
+                      overflowY: 'auto'
+                    })
+                  }}
                 />
               )}
             />

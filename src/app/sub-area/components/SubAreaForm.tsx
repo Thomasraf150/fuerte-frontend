@@ -79,6 +79,8 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
         register={register('area_id', { required: 'Area is required' })}
         error={errors.area_id?.message}
         options={optionsArea}
+        isLoading={!dataArea}
+        loadingMessage="Loading areas..."
       />
 
       <FormInput
@@ -90,7 +92,7 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
         error={errors.name && "This field is required"}
       />
 
-      <div className="flex justify-end gap-4.5">
+      <div className="flex justify-end gap-4.5 mt-6">
         <button
           className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"

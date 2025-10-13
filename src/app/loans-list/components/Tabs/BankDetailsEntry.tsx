@@ -80,9 +80,9 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
   }, [loanSingleData, setValue]);
 
   return (
-    <div className="w-1/2">
+    <div className="w-full lg:w-3/4 xl:w-1/2">
       <form onSubmit={handleSubmit(onSubmit)} >
-      <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-1 sm:grid-cols-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 p-3 sm:gap-4">
         <div>
           <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Account Name</h3>
           <input
