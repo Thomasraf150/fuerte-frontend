@@ -343,7 +343,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       placeholder="0.00"
                       register={register('amount_applied', { required: true })}
                       error={errors.amount_applied && "This field is required"}
-                      defaultValue="0"
+                      defaultValue=""
                       formatType="number"
                       required={true}
                     />
@@ -458,7 +458,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       error={errors.est_monthly_fam_inc && "This field is required"}
                       formatType="number"
                       required={true}
-                      defaultValue="0"
+                      defaultValue=""
                     />
                   </div>
                   <div>
@@ -684,7 +684,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     error={errors.salary && "This field is required"}
                     formatType="number"
                     required={true}
-                    defaultValue="0"
+                    defaultValue=""
                   />
                 </div>
                 <div>
@@ -875,7 +875,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       register={register('monthly_gross', { required: true })}
                       error={errors.monthly_gross && "This field is required"}
                       formatType="number"
-                      defaultValue="0"
+                      defaultValue=""
                     />
                   </div>
                   <div>
@@ -887,7 +887,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       register={register('monthly_net', { required: true })}
                       error={errors.monthly_net && "This field is required"}
                       formatType="number"
-                      defaultValue="0"
+                      defaultValue=""
                     />
                   </div>
                 </div>
@@ -1002,7 +1002,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     register={register('company_salary', { required: true })}
                     error={errors.salary && "This field is required"}
                     formatType="number"
-                    defaultValue="0"
+                    defaultValue=""
                   />
                 </div>
                 <div>
