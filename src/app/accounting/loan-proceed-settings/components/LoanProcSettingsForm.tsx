@@ -183,6 +183,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.nr_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
 
         <FormInput
@@ -194,6 +196,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.ob_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
 
         <FormInput
@@ -205,6 +209,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.udi_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
 
         <FormInput
@@ -216,6 +222,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.proc_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
 
         <FormInput
@@ -227,6 +235,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.ins_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
         
         <FormInput
@@ -238,6 +248,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.ins_mfee_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
 
         <FormInput
@@ -249,6 +261,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.col_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
         
         <FormInput
@@ -260,6 +274,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.not_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
         
         <FormInput
@@ -271,6 +287,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.reb_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
         
         <FormInput
@@ -282,6 +300,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.pen_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
         
         <FormInput
@@ -293,6 +313,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.addon_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
         
         <FormInput
@@ -304,6 +326,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.addon_udi_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
 
         <FormInput
@@ -315,6 +339,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           error={errors.cib_id?.message}
           options={optionsCoaData}
           className='mb-4 mt-4'
+          isLoading={!coaDataAccount}
+          loadingMessage="Loading accounts..."
         />
       </div>
 

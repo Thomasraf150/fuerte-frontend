@@ -19,13 +19,17 @@ interface OptionProps {
 }
 const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUsers, singleUserData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormUser>();
-  const { onSubmitUser, userLoading, dataSubBranch, dataRole } = useUsers();
+  const { onSubmitUser, userLoading, dataSubBranch, dataRole, rolesLoading, subBranchLoading } = useUsers();
   const [options, setOptions] = useState<OptionProps[]>([
     { value: '', label: 'Select a branch', hidden: true },
   ]);
   const [optionsRole, setOptionsRole] = useState<OptionProps[]>([
     { value: '', label: 'Select a branch', hidden: true },
   ]);
+  const [localBranchLoading, setLocalBranchLoading] = useState<boolean>(true);
+  const [loadingStartTime] = useState<number>(Date.now());
+  
+  console.log('🔍 FormAddUser render - localBranchLoading:', localBranchLoading, 'dataSubBranch:', !!dataSubBranch, 'length:', dataSubBranch?.length);
 
    // Watch the password field
    const password = watch('password', '');
@@ -51,6 +55,18 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         { value: '', label: 'Select a branch', hidden: true }, // retain the default "Select a branch" option
         ...dynamicOptions,
       ]);
+      
+      // Ensure minimum loading duration for user feedback
+      const elapsedTime = Date.now() - loadingStartTime;
+      const minLoadingDuration = 300; // 300ms minimum
+      
+      if (elapsedTime >= minLoadingDuration) {
+        setLocalBranchLoading(false);
+      } else {
+        setTimeout(() => {
+          setLocalBranchLoading(false);
+        }, minLoadingDuration - elapsedTime);
+      }
     }
     
     if (actionLbl === 'Create User') {
@@ -69,7 +85,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         setValue('role_id', singleUserData.role_id);
       }
     }
-  }, [dataSubBranch, singleUserData, actionLbl])
+  }, [dataSubBranch, singleUserData, actionLbl, loadingStartTime])
 
   useEffect(() => {
     if (dataRole && Array.isArray(dataRole)) {
@@ -96,6 +112,8 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             register={register('branch_sub_id', { required: 'Branch is required' })}
             error={errors.branch_sub_id?.message}
             options={options}
+            isLoading={localBranchLoading}
+            loadingMessage="Loading branches..."
           />
           
           <FormInput
@@ -106,6 +124,8 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             register={register('role_id', { required: 'Role is required' })}
             error={errors.role_id?.message}
             options={optionsRole}
+            isLoading={rolesLoading || !dataRole}
+            loadingMessage="Loading roles..."
           />
 
           <FormInput
@@ -115,6 +135,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             icon={Home}
             register={register('email', { required: true })}
             error={errors.email && "This field is required"}
+            required={true}
           />
 
           <FormInput
@@ -124,6 +145,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             icon={Home}
             register={register('name', { required: true })}
             error={errors.name && "This field is required"}
+            required={true}
           />
         </>
       )}
@@ -137,31 +159,33 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             icon={Home}
             register={register('password', { required: true })}
             error={errors.password && "This field is required"}
+            required={true}
           />
           <FormInput
             label="Confirm Password"
             id="name"
             type="password"
             icon={Home}
-            register={register('confirm_password', { 
+            register={register('confirm_password', {
               required: 'This field is required',
               validate: value => value === password || 'Passwords do not match'
             })}
             error={errors.confirm_password?.message}
+            required={true}
           />
         </>
       )}
-      
-      <div className="flex justify-end gap-4.5">
+
+      <div className="flex justify-end gap-4.5 mt-6">
         <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+          className="flex justify-center rounded border border-stroke px-4 py-2 sm:px-6 sm:py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
           onClick={() => { setShowForm(false) }}
         >
           Cancel
         </button>
         <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${userLoading ? 'opacity-70' : ''}`}
+          className={`flex justify-center rounded bg-primary px-4 py-2 sm:px-6 sm:py-2 font-medium text-gray hover:bg-opacity-90 ${userLoading ? 'opacity-70' : ''}`}
           type="submit"
           disabled={userLoading}
         >

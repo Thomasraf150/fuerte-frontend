@@ -9,7 +9,7 @@ import FormAddBranch from './FormAddBranch';
 import FormAddSubBranch from './FormAddSubBranch';
 import { useBranchListsStore } from '../hooks/store';
 import useBranches from '@/hooks/useBranches';
-import { GitBranch, SkipBack } from 'react-feather';
+import { GitBranch, SkipBack, X } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 
 const column = branchListCol;
@@ -90,9 +90,9 @@ const BranchLists: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {!showSubBranch && (
-          <div className={`col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
+          <div className={`col-span-1 md:col-span-1 lg:col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
@@ -116,7 +116,7 @@ const BranchLists: React.FC = () => {
         )}
 
           {showSubBranch && (
-            <div className={`col-span-2 ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
+            <div className={`col-span-1 md:col-span-1 lg:col-span-2 ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -154,12 +154,15 @@ const BranchLists: React.FC = () => {
           )}
 
           {showForm && (
-            <div className="fade-in">
+            <div className="fade-in col-span-1">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}
                   </h3>
+                  <span className="text-right cursor-pointer text-boxdark-2 lg:hidden" onClick={() => setShowForm(false)}>
+                    <X size={17}/>
+                  </span>
                 </div>
                 <div className="p-7">
                   <FormAddBranch setShowForm={setShowForm} fetchDataList={fetchDataList} initialData={initialFormData} actionLbl={actionLbl} />
@@ -169,12 +172,15 @@ const BranchLists: React.FC = () => {
           )}
           
           {showSubForm && (
-            <div className="fade-in">
+            <div className="fade-in col-span-1">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}
                   </h3>
+                  <span className="text-right cursor-pointer text-boxdark-2 lg:hidden" onClick={() => setShowSubForm(false)}>
+                    <X size={17}/>
+                  </span>
                 </div>
                 <div className="p-7">
                   <FormAddSubBranch setShowForm={setShowSubForm} selectedBranchId={selectedBranchID ?? 0} initialSubData={initialFormSubData} actionLbl={actionLbl} fetchSubDataList={fetchSubDataList}/>

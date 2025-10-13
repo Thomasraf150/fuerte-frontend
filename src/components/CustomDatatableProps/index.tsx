@@ -1,19 +1,6 @@
 import React from 'react';
 import DataTable, { TableColumn, TableStyles } from 'react-data-table-component';
-
-// Define the custom styles
-const customStyles: TableStyles = {
-  headCells: {
-    style: {
-      color: '#202431',
-      textTransform: 'uppercase',
-      fontSize: '14px',
-      borderBottomWidth: '5px',
-      borderBottomStyle: 'solid',
-      borderBottomColor: '#041e3c'
-    },
-  }
-};
+import { useDatatableTheme } from '@/hooks/useDatatableTheme';
 
 // Define the props for the CustomDatatable component
 interface CustomDatatableProps<T> {
@@ -42,6 +29,8 @@ const CustomDatatableProps = <T extends object>({
   paginationTotalRows,
   onChangePage,
 }: CustomDatatableProps<T>): JSX.Element => {
+
+  const customStyles = useDatatableTheme();
 
   const CustomHeader: React.FC = () => {
     return (

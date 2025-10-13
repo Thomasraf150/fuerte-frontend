@@ -317,6 +317,8 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                                 }}
                                 value={field.value ? optionsCoaData.find(opt => opt.value === field.value) || null : null}
                                 placeholder="Select Account"
+                                isLoading={!coaDataAccount || optionsCoaData.length <= 1}
+                                loadingMessage={() => "Loading accounts..."}
                               />
                             );
                           }}

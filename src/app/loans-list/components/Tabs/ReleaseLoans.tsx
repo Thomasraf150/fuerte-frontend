@@ -104,7 +104,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
 
   return (
     <>
-      <div className="w-1/2">
+      <div className="w-full lg:w-3/4 xl:w-1/2">
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-1 sm:grid-cols-3 sm:gap-4">
         <div className="flow-root border border-gray-100 py-3 shadow-sm">
@@ -126,19 +126,19 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                         selected={field.value}
                         onChange={(date: any) => field.onChange(date)}
                         dateFormat="MM/dd/yyyy"
-                        className="p-2 border w-full border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-sm"
+                        className="p-2 border w-full border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-sm"
                         placeholderText="Select start date"
                         id="startDate"
                       />
                     )}
                   />
-                  <span className="absolute right-3 top-2.5">
+                  <span className="absolute right-3 top-2.5 pointer-events-none">
                     <Calendar size="18" />
                   </span>
-                  {errors.released_date && <p className="mt-2 text-sm text-red-600">{errors.released_date.message}</p>}
                 </div>
+                {errors.released_date && <p className="mt-2 text-sm text-red-600">{errors.released_date.message}</p>}
               </dt>
-              <dd className="text-gray-700 text-left">
+              <dd className="text-gray-700 dark:text-bodydark text-left">
                 <div className="">
                   <Controller
                     name="bank_id"
@@ -182,40 +182,38 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
           </dl>
 
         </div>
-        <div>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:justify-end">
           <button
-            className="bg-purple-700 flex justify-between float-right items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
+            className="bg-purple-700 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm w-full sm:w-auto"
             type="submit"
             disabled={loanSingleData?.status === 3 ? true : false}
           >
             <span className="mt-1 mr-1">
-              <Save size={17} /> 
+              <Save size={17} />
             </span>
             <span>Release</span>
           </button>
           <button
-            className="bg-green-600 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-green-500 text-sm"
+            className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 text-sm w-full sm:w-auto"
             type="button"
             onClick={() => handleChangeReleasedDate(String(loanSingleData?.id), String(watch('released_date')), handleRefetchData)}
           >
             <span className="mt-1 mr-1">
-              <Calendar size={17} /> 
+              <Calendar size={17} />
             </span>
             <span>Update Released Date</span>
           </button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
-            <>
-              <button
-                className="bg-yellow-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-yellow-400 text-sm"
-                type="button"
-                onClick={() => setShowAcctgEntry(true)}
-              >
-                <span className="mt-1 mr-1">
-                  <List size={17} /> 
-                </span>
-                <span>Post Accounting</span>
-              </button>
-            </>
+            <button
+              className="bg-yellow-500 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-yellow-400 text-sm w-full sm:w-auto"
+              type="button"
+              onClick={() => setShowAcctgEntry(true)}
+            >
+              <span className="mt-1 mr-1">
+                <List size={17} />
+              </span>
+              <span>Post Accounting</span>
+            </button>
           ) : ('')}
         </div>
       </div>

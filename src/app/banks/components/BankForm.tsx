@@ -88,6 +88,8 @@ const BankForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBank, initialD
         register={register('branch_sub_id', { required: 'Branch Sub is required' })}
         error={errors.branch_sub_id?.message}
         options={optionsSubBranch}
+        isLoading={!branchSubData}
+        loadingMessage="Loading branches..."
       />
 
       <FormInput
@@ -142,7 +144,7 @@ const BankForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBank, initialD
         error={errors.email && "This field is required"}
       />
 
-      <div className="flex justify-end gap-4.5">
+      <div className="flex justify-end gap-4.5 mt-6">
         <button
           className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"

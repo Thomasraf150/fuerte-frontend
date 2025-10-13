@@ -11,31 +11,17 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   {
     name: 'Loan Product',
     cell: row => row.loan_product.description,
-    style: {
-      minWidth: '370px',
-    },
-    width: '370px',
     sortable: true
   },
   {
     name: 'Borrower',
     cell: row => row?.borrower.lastname + ', ' + row.borrower.firstname,
-    style: {
-      minWidth: '270px',
-    },
-    width: '270px',
     sortable: true
-
   },
   {
     name: 'Terms',
     cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
-    style: {
-      minWidth: '100px',
-    },
-    width: '100px',
     sortable: true
-
   },
   {
     name: 'Loan Ref#',
@@ -80,35 +66,33 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   {
     name: 'Action',
     cell: row => {
-      
+
       return (
-        <>
+        <div className="flex items-center space-x-2">
           <Tooltip text="View">
-            <Eye onClick={() => handleViewWholeLoan(row)} size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
+            <Eye
+              onClick={() => handleViewWholeLoan(row)}
+              size="16"
+              className="text-cyan-400 cursor-pointer hover:text-cyan-600 transition-colors"
+            />
           </Tooltip>
           {
-          row?.acctg_entry !== null ? ('') :
-          (row.is_closed === '1' ? (
-            ''
-          ) :
+          row?.acctg_entry !== null ? null :
+          (row.is_closed === '1' ? null :
           (row.status <= 3
             ? (
-              <>
-                {` | `}
-                <Tooltip text="Remove">
-                  <Trash2 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
-                </Tooltip>
-              </>
-            ) : ('')))
+              <Tooltip text="Remove">
+                <Trash2
+                  onClick={() => handleRowClick(row)}
+                  size="16"
+                  className="text-cyan-400 cursor-pointer hover:text-red-500 transition-colors"
+                />
+              </Tooltip>
+            ) : null))
           }
-          
-        </>
+        </div>
       )
     },
-    style: {
-      minWidth: '120px',
-    },
-    width: '120px'
   },
 ];
 

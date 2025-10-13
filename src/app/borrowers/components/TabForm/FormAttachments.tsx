@@ -75,8 +75,8 @@ const FormAttachments: React.FC<ParentFormBr> = ({ createAttachments, singleData
         value={null}
       /> */}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-        {/* First Column */}
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* File Type */}
         <div>
           <FormLabel title={`File Type`}/>
           <FormInput
@@ -101,6 +101,7 @@ const FormAttachments: React.FC<ParentFormBr> = ({ createAttachments, singleData
             ]}
           />
         </div>
+        {/* File Upload */}
         <div>
           <FormLabel title={`Image`}/>
           <FormInput

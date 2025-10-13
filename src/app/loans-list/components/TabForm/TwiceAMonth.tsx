@@ -43,12 +43,12 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
 
   return (
     <div className="">
-      <h3 className="text-sm font-semibold mb-1">Start Date</h3>
+      <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Start Date</h3>
       <DatePicker
         selected={selectedDate}
         onChange={handleDateChange}
         dateFormat="MM/dd/yyyy"
-        className="p-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 w-70 focus:ring-blue-500 mb-4 text-sm"
+        className="p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 w-70 focus:ring-blue-500 mb-4 text-sm"
         placeholderText="Select start date"
         id="startDate"
       />

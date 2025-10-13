@@ -109,28 +109,28 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
   }, [issuedBankId, isIssuedCash, setValue]);
 
   return (
-    <div className="w-1/2">
+    <div className="w-full lg:w-3/4 xl:w-1/2">
       <form onSubmit={handleSubmit(onSubmit)} >
-      <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-1 sm:grid-cols-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 p-3 sm:gap-4">
         <div>
-          <h3 className="text-sm font-semibold mb-1">Account Name</h3>
+          <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Account Name</h3>
           <input
             type="text"
-            className="block w-60 p-2 mb-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+            className="block w-60 p-2 mb-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
             placeholder="Card Account Name"
             {...register('account_name', { required: "Account name is required!" })}
           />
           {errors.account_name && <p className="mt-2 text-sm text-red-600">{errors.account_name.message}</p>}
         </div>
-        <div className="flow-root border border-gray-100 py-3 shadow-sm">
-          <dl className="-my-3 divide-y divide-gray-100 text-sm">
-            <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 text-lime-100">
-              <dt className="font-medium text-left text-gray-900"></dt>
-              <dt className="font-medium text-center text-gray-900">ATM Surrender</dt>
-              <dd className="text-gray-700 text-center">ATM Issued</dd>
+        <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
+          <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
+            <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 dark:bg-meta-4 text-lime-100 dark:text-white">
+              <dt className="font-medium text-left text-gray-900 dark:text-bodydark dark:text-white"></dt>
+              <dt className="font-medium text-center text-gray-900 dark:text-bodydark dark:text-white">ATM Surrender</dt>
+              <dd className="text-gray-700 dark:text-bodydark text-center">ATM Issued</dd>
             </div>
             <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-              <dt className="font-medium text-right text-gray-900 leading-9">
+              <dt className="font-medium text-right text-gray-900 dark:text-bodydark leading-9">
                 Bank:
               </dt>
               <dd className="text-gray-700 text-left">
@@ -154,7 +154,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                   {errors.surrendered_bank_id && <p className="mt-2 text-sm text-red-600">{errors.surrendered_bank_id.message}</p>}
                 </div>
               </dd>
-              <dt className="font-medium text-left text-gray-900">
+              <dt className="font-medium text-left text-gray-900 dark:text-bodydark">
                 <div className="">
                   <Controller
                     name="issued_bank_id"

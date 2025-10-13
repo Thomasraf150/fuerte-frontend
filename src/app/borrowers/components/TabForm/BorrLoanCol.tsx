@@ -43,31 +43,38 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
     name: 'Loan Product',
     cell: row => row.loan_product.description.substring(0,40),
     sortable: true,
-    style: {
-      minWidth: '350px',
-    },
-    width: '350px'
+    minWidth: '200px',
+    maxWidth: '350px',
+    grow: 2,
   },
-  { 
+  {
     name: 'Loan Ref#',
     cell: row => row.loan_ref,
     sortable: true,
+    minWidth: '120px',
+    grow: 1,
   },
   {
     name: 'Loan Proceeds',
     cell: row => formatNumber(Number(row.loan_proceeds)),
     sortable: true,
+    minWidth: '130px',
+    grow: 1,
+    right: true,
   },
   {
     name: 'PN Amount',
     cell: row => formatNumber(Number(row.pn_amount)),
     sortable: true,
+    minWidth: '130px',
+    grow: 1,
+    right: true,
   },
   {
     name: 'Loan Status',
     cell: row => (
       <span
-        className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
+        className={`text-xs font-medium px-2 py-1 rounded whitespace-nowrap ${
           row?.acctg_entry !== null ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
           (row.is_closed === '1' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
           (row.status === 0
@@ -87,28 +94,9 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
         }`}
       </span>
     ),
-    // cell: row => (
-    //   <span
-    //     className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
-    //       row.is_closed === '1' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
-    //       (row.status === 0
-    //         ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
-    //         : row.status === 1
-    //         ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-red'
-    //         : row.status === 2
-    //         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-    //         : row.status === 3
-    //         ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
-    //         : '')
-    //     }`}
-    //   >
-    //     {`${
-    //       row.is_closed === '1' ? 'Closed' :
-    //       loanStatus(row.status)
-    //     }`}
-    //   </span>
-    // ),
     sortable: true,
+    minWidth: '120px',
+    grow: 1,
   },
   // {
   //   name: 'Action',

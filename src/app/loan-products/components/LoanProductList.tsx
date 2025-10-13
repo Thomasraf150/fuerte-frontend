@@ -42,10 +42,11 @@ const LoanProductList: React.FC = () => {
 
   return (
     <div>
-      {showForm === false ? (
-        <div className="max-w-12xl">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="">
+      <div className="max-w-12xl">
+        <div className="grid grid-cols-1 gap-4">
+          <div className="">
+
+            {showForm === false ? (
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -76,13 +77,7 @@ const LoanProductList: React.FC = () => {
                   />
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="max-w-3xl">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="">
+            ) : (
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -93,10 +88,11 @@ const LoanProductList: React.FC = () => {
                   <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={refresh} singleData={singleData} actionLbl={actionLbl}/>
                 </div>
               </div>
-            </div>
+            )}
+
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

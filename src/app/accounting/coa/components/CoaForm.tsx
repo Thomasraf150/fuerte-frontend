@@ -107,6 +107,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
                 field.onChange(selectedOption?.value);
               }}
               value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+              isLoading={!branchSubData || optionsSubBranch.length <= 1}
+              loadingMessage={() => "Loading branches..."}
             />
           )}
         />
