@@ -102,16 +102,16 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
           <div className="p-2 sm:p-4">
             {activeTab === 'tab1' && (
               <div id="content1">
-                <BorrowerDetails  
+                <BorrowerDetails
                   dataChief={dataChief}
                   dataArea={dataArea}
                   dataSubArea={dataSubArea}
                   dataBorrCompany={dataBorrCompany}
                   onSubmitBorrower={onSubmitBorrower}
                   borrowerLoading={borrowerLoading}
-                  singleData={singleData} 
+                  singleData={singleData}
                   setSingleData={setSingleData}
-                  setShowForm={setShowForm} 
+                  setShowForm={setShowForm}
                   fetchDataBorrower={fetchDataBorrower}
                   fetchDataChief={fetchDataChief}
                   fetchDataArea={fetchDataArea}
