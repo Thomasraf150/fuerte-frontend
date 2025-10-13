@@ -88,15 +88,15 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
       <div className="w-1/2">
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-1 sm:grid-cols-3 sm:gap-4">
-        <div className="flow-root border border-gray-100 py-3 shadow-sm">
-          <dl className="-my-3 divide-y divide-gray-100 text-sm">
-            <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 text-lime-100">
-              <dt className="font-medium text-center text-gray-900">Released Date</dt>
-              <dt className="font-medium text-center text-gray-900">Bank</dt>
-              <dd className="text-gray-700 text-center">Check Number</dd>
+        <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
+          <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
+            <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 dark:bg-meta-4 text-lime-100 dark:text-white">
+              <dt className="font-medium text-center text-gray-900 dark:text-white">Released Date</dt>
+              <dt className="font-medium text-center text-gray-900 dark:text-white">Bank</dt>
+              <dd className="text-gray-700 dark:text-bodydark text-center">Check Number</dd>
             </div>
             <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-2 sm:gap-4">
-              <dt className="font-medium text-left text-gray-900">
+              <dt className="font-medium text-left text-gray-900 dark:text-bodydark">
                 <div className="relative">
                   <Controller
                     control={control}
@@ -107,7 +107,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                         selected={field.value}
                         onChange={(date: any) => field.onChange(date)}
                         dateFormat="MM/dd/yyyy"
-                        className="p-2 border w-full border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-sm"
+                        className="p-2 border w-full border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-sm"
                         placeholderText="Select start date"
                         id="startDate"
                       />
@@ -119,12 +119,12 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                   {errors.released_date && <p className="mt-2 text-sm text-red-600">{errors.released_date.message}</p>}
                 </div>
               </dt>
-              <dd className="text-gray-700 text-left">
+              <dd className="text-gray-700 dark:text-bodydark text-left">
                 <div className="">
                   <Controller
                     name="bank_id"
                     control={control}
-                    rules={{ required: 'Surrendered Bank is required' }} 
+                    rules={{ required: 'Surrendered Bank is required' }}
                     render={({ field }) => (
                       <ReactSelect
                         {...field}
@@ -140,10 +140,10 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                   {errors.bank_id && <p className="mt-2 text-sm text-red-600">{errors.bank_id.message}</p>}
                 </div>
               </dd>
-              <dt className="font-medium text-left text-gray-900">
+              <dt className="font-medium text-left text-gray-900 dark:text-bodydark">
                 <div className="relative">
                   <input
-                    className={`block p-2 w-full border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                    className={`block p-2 w-full border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
                     type="text"
                     id="check_no"
                     placeholder="Card Account No."

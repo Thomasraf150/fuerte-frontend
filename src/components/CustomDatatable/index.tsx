@@ -2,29 +2,16 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import DataTable, { TableColumn, TableStyles } from 'react-data-table-component';
+import { useDatatableTheme } from '@/hooks/useDatatableTheme';
+import DataTableLoadingComponent from './LoadingComponent';
 
-// Define the custom styles
-const customStyles: TableStyles = {
-  headCells: {
-    style: {
-      color: '#202431',
-      textTransform: 'uppercase',
-      fontSize: '14px',
-      borderBottomWidth: '5px',
-      borderBottomStyle: 'solid',
-      borderBottomColor: '#041e3c'
-    },
-  },
-  cells: {
-    style: {
-      whiteSpace: 'nowrap',
-    }
-  },
-  rows: {
-    style: {
-      cursor: 'pointer', // Add this line to change the cursor to pointer
-    },
-  },
+// No data component with dark mode support
+const NoDataComponent: React.FC = () => {
+  return (
+    <div className="w-full flex items-center justify-center py-16 bg-white dark:bg-boxdark">
+      <p className="text-gray-600 dark:text-bodydark">There are no records to display</p>
+    </div>
+  );
 };
 
 // Server-side pagination interface following Interface Segregation Principle
@@ -79,12 +66,12 @@ const ServerSidePaginationControls: React.FC<{
   const endRecord = Math.min(currentPage * pageSize, totalRecords);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+    <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-boxdark border-t border-gray-200 dark:border-strokedark sm:px-6">
       <div className="flex items-center justify-between w-full">
         {/* Records info */}
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-700 dark:text-bodydark">
               Showing <span className="font-medium">{startRecord}</span> to{' '}
               <span className="font-medium">{endRecord}</span> of{' '}
               <span className="font-medium">{totalRecords}</span> results
@@ -94,14 +81,14 @@ const ServerSidePaginationControls: React.FC<{
 
         {/* Page size selector */}
         <div className="flex items-center space-x-2">
-          <label htmlFor="pageSize" className="text-sm text-gray-700">
+          <label htmlFor="pageSize" className="text-sm text-gray-700 dark:text-bodydark">
             Show:
           </label>
           <select
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 dark:border-strokedark rounded-md px-2 py-1 text-sm bg-white dark:bg-form-input text-gray-900 dark:text-bodydark focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-primary"
           >
             {pageSizeOptions.map((size) => (
               <option key={size} value={size}>
@@ -114,7 +101,7 @@ const ServerSidePaginationControls: React.FC<{
         {/* Page status and numbered pagination */}
         <div className="flex items-center space-x-3">
           {/* Page status */}
-          <span className="px-3 py-1 text-sm text-gray-700">
+          <span className="px-3 py-1 text-sm text-gray-700 dark:text-bodydark">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -142,10 +129,10 @@ const ServerSidePaginationControls: React.FC<{
                   <button
                     key={i}
                     onClick={() => onPageChange(i)}
-                    className={`px-3 py-1 text-sm border rounded-md ${
+                    className={`px-3 py-1 text-sm border rounded-md transition-colors ${
                       i === currentPage
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        ? 'bg-primary text-white border-primary dark:bg-primary dark:text-white'
+                        : 'border-gray-300 dark:border-strokedark bg-white dark:bg-boxdark text-gray-700 dark:text-bodydark hover:bg-gray-50 dark:hover:bg-meta-4'
                     }`}
                   >
                     {i}
@@ -157,7 +144,7 @@ const ServerSidePaginationControls: React.FC<{
               if (endPage < totalPages) {
                 if (endPage < totalPages - 1) {
                   pages.push(
-                    <span key="ellipsis" className="px-2 py-1 text-sm text-gray-500">
+                    <span key="ellipsis" className="px-2 py-1 text-sm text-gray-500 dark:text-bodydark2">
                       ...
                     </span>
                   );
@@ -166,7 +153,7 @@ const ServerSidePaginationControls: React.FC<{
                   <button
                     key="last"
                     onClick={() => onPageChange(totalPages)}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-strokedark rounded-md bg-white dark:bg-boxdark text-gray-700 dark:text-bodydark hover:bg-gray-50 dark:hover:bg-meta-4 transition-colors"
                   >
                     Last
                   </button>
@@ -207,7 +194,7 @@ const CustomHeader = React.memo<{
             placeholder={isServerSide ? (searchPlaceholder || "Search...") : "Search current page..."}
             value={searchQuery}
             onChange={handleSearch}
-            className="form-control border border-x-blue-900 rounded-md px-4 py-1 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            className="form-control border border-gray-300 dark:border-strokedark rounded-md px-4 py-1 bg-white dark:bg-form-input text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-primary"
           />
         )}
         {renderButton()}
@@ -231,6 +218,9 @@ const CustomDatatable = <T extends object>({
   defaultSortFieldId,
   serverSidePagination,
 }: CustomDatatableProps<T>): JSX.Element => {
+
+  // Get theme-aware styles for the datatable
+  const customStyles = useDatatableTheme();
 
   // Determine if we're using server-side pagination
   const isServerSide = !!serverSidePagination;
@@ -305,24 +295,28 @@ const CustomDatatable = <T extends object>({
           searchPlaceholder={serverSidePagination?.searchPlaceholder}
         />
       )}
-      <DataTable
-        keyField="id"
-        paginationPerPage={isServerSide ? serverSidePagination!.pageSize : 6}
-        progressPending={apiLoading}
-        defaultSortFieldId={defaultSortFieldId}
-        onRowClicked={onRowClicked}
-        noHeader
-        title={title}
-        columns={columns}
-        data={filteredData}
-        customStyles={customStyles}
-        pagination={!isServerSide} // Disable built-in pagination for server-side mode
-        className='rounded'
-        highlightOnHover
-        responsive
-        fixedHeader
-        fixedHeaderScrollHeight="500px"
-      />
+      <div className="relative">
+        <DataTable
+          keyField="id"
+          paginationPerPage={isServerSide ? serverSidePagination!.pageSize : 6}
+          progressPending={apiLoading}
+          progressComponent={<DataTableLoadingComponent />}
+          noDataComponent={<NoDataComponent />}
+          defaultSortFieldId={defaultSortFieldId}
+          onRowClicked={onRowClicked}
+          noHeader
+          title={title}
+          columns={columns}
+          data={filteredData}
+          customStyles={customStyles}
+          pagination={!isServerSide} // Disable built-in pagination for server-side mode
+          className='rounded'
+          highlightOnHover
+          responsive
+          fixedHeader
+          fixedHeaderScrollHeight="500px"
+        />
+      </div>
 
       {/* Custom server-side pagination controls */}
       {isServerSide && serverSidePagination && (

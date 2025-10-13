@@ -259,12 +259,12 @@ const IncomeStatementList: React.FC = () => {
           <div className={`col-span-2`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
              
-            <div className="rounded-lg bg-gray-200 p-5">
-              <div className="mb-2 font-medium">Select Date Range:</div>
+            <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-5">
+              <div className="mb-2 font-medium text-gray-700 dark:text-bodydark">Select Date Range:</div>
               <div className="flex flex-wrap gap-4">
                 {/* Start Date */}
                 <div className="flex flex-col ">
-                  <label className="mb-1 text-sm font-medium text-gray-700">Start Date:</label>
+                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Start Date:</label>
                   <DatePicker
                     selected={startDate}
                     onChange={handleStartDateChange}
@@ -272,13 +272,13 @@ const IncomeStatementList: React.FC = () => {
                     startDate={startDate}
                     endDate={endDate}
                     placeholderText="Start Date"
-                    className="border rounded px-4 py-2 w-60"
+                    className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-60 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                   />
                 </div>
 
                 {/* End Date */}
                 <div className="flex flex-col ">
-                  <label className="mb-1 text-sm font-medium text-gray-700">End Date:</label>
+                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">End Date:</label>
                   <DatePicker
                     selected={endDate}
                     onChange={handleEndDateChange}
@@ -287,13 +287,13 @@ const IncomeStatementList: React.FC = () => {
                     endDate={endDate}
                     minDate={startDate}
                     placeholderText="End Date"
-                    className="border rounded px-4 py-2 w-60"
+                    className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-60 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                   />
                 </div>
 
                 {/* Branch Select */}
                 <div className="flex flex-col min-w-[200px]">
-                  <label className="mb-1 text-sm font-medium text-gray-700">Branch:</label>
+                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Branch:</label>
                   <Controller
                     name="branch_id"
                     control={control}
@@ -315,7 +315,7 @@ const IncomeStatementList: React.FC = () => {
 
                 {/* Sub Branch Select */}
                 <div className="flex flex-col min-w-[200px]">
-                  <label className="mb-1 text-sm font-medium text-gray-700">Sub Branch:</label>
+                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Sub Branch:</label>
                   <Controller
                     name="branch_sub_id"
                     control={control}

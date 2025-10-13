@@ -54,10 +54,10 @@ const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
 
     return (
         <div className="p-4">
-          <h3 className="text-sm font-semibold mb-1">Enter count to pay</h3>
+          <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Enter count to pay</h3>
           <input
             type="number"
-            className="block w-full p-2 mb-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+            className="block w-full p-2 mb-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
             value={monthsInput}
             onChange={(e) => setMonthsInput(e.target.value)}
             placeholder="0"
@@ -93,7 +93,7 @@ const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
                   selected={date}
                   onChange={(date) => handleDateChange(i, date)}
                   dateFormat="MM/dd/yyyy"
-                  className="p-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
+                  className="p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
                   placeholderText={`Select date for month ${i + 1}`}
                 />
               </div>
