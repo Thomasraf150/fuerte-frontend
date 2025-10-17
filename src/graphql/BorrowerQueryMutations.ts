@@ -230,6 +230,39 @@ const DELETE_BORROWER_QUERY: string = `
   }
 `;
 
+const CHECK_BORROWER_DUPLICATE: string = `
+  query CheckBorrowerDuplicate(
+    $firstname: String!
+    $lastname: String!
+    $dob: String!
+    $email: String
+    $contact_no: String
+    $excludeId: ID
+  ) {
+    checkBorrowerDuplicate(
+      firstname: $firstname
+      lastname: $lastname
+      dob: $dob
+      email: $email
+      contact_no: $contact_no
+      excludeId: $excludeId
+    ) {
+      isDuplicate
+      duplicateType
+      duplicateBorrower {
+        id
+        firstname
+        lastname
+        borrower_details {
+          email
+          contact_no
+        }
+      }
+      message
+    }
+  }
+`;
+
 const BorrowerQueryMutations = {
   GET_BORROWER_QUERY,
   GET_BORROWER_ATTACHMENTS_QUERY,
@@ -239,7 +272,8 @@ const BorrowerQueryMutations = {
   GET_BORROWER_CO_MAKER,
   SAVE_BORROWER_CO_MAKER,
   DELETE_BORROWER_CO_MAKER,
-  DELETE_BORROWER_QUERY
+  DELETE_BORROWER_QUERY,
+  CHECK_BORROWER_DUPLICATE
 };
 
 export default BorrowerQueryMutations;
