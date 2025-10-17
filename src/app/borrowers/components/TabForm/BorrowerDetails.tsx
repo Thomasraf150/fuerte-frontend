@@ -346,6 +346,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       defaultValue=""
                       formatType="number"
                       required={true}
+                      fallbackValue={0}
                     />
                   </div>
                   <div>
@@ -876,6 +877,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       error={errors.monthly_gross && "This field is required"}
                       formatType="number"
                       defaultValue=""
+                      required={true}
+                      fallbackValue={0}
                     />
                   </div>
                   <div>
@@ -888,6 +891,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       error={errors.monthly_net && "This field is required"}
                       formatType="number"
                       defaultValue=""
+                      required={true}
+                      fallbackValue={0}
                     />
                   </div>
                 </div>
@@ -1003,6 +1008,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     error={errors.salary && "This field is required"}
                     formatType="number"
                     defaultValue=""
+                    required={true}
+                    fallbackValue={0}
                   />
                 </div>
                 <div>
