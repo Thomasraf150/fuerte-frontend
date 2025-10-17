@@ -99,10 +99,15 @@ const SoaList: React.FC = () => {
                 </div>
                 <div className="p-4 sm:p-7">
 
-                <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-4 mb-4">
-                  <div className="mb-4">
-                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-bodydark">Select Date Range:</label>
-                    <div className="flex space-x-4">
+                <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-6 mb-4 relative z-20">
+                  <label className="mb-6 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range:</label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 items-end mb-4">
+                    {/* Start Date */}
+                    <div className="flex flex-col">
+                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                        Start Date:
+                      </label>
                       <DatePicker
                         id="startDate"
                         selected={startDate}
@@ -111,14 +116,14 @@ const SoaList: React.FC = () => {
                         startDate={startDate}
                         endDate={endDate}
                         placeholderText="Start Date"
-                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white w-full"
                         disabled={loading}
                       />
                     </div>
 
                     {/* End Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700">
+                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         End Date:
                       </label>
                       <DatePicker
@@ -130,27 +135,28 @@ const SoaList: React.FC = () => {
                         endDate={endDate}
                         minDate={startDate}
                         placeholderText="End Date"
-                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white w-full"
                         disabled={loading}
                       />
                     </div>
-                  </div>
-                  
-                  <div className="mb-2">
-                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-bodydark">Search:</label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-bodydark" size={18} />
-                      <input
-                        type="text"
-                        placeholder="Loan Ref or Borrower Name"
-                        value={searchTerm}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-stroke dark:border-strokedark rounded-md bg-white dark:bg-form-input text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                        disabled={loading}
-                      />
-                      {isSearching && (
-                        <RefreshCw className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 animate-spin" size={18} />
-                      )}
+
+                    {/* Search */}
+                    <div className="flex flex-col">
+                      <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Search:</label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-bodydark" size={18} />
+                        <input
+                          type="text"
+                          placeholder="Loan Ref or Borrower Name"
+                          value={searchTerm}
+                          onChange={(e) => handleSearch(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 border border-stroke dark:border-strokedark rounded-md bg-white dark:bg-form-input text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                          disabled={loading}
+                        />
+                        {isSearching && (
+                          <RefreshCw className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 animate-spin" size={18} />
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -214,15 +220,15 @@ const SoaList: React.FC = () => {
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto max-h-[600px]">
                   <table className="min-w-full border-separate border-spacing-0">
-                    <thead className="bg-white sticky top-0 z-10">
+                    <thead className="bg-white dark:bg-boxdark sticky top-0 z-10">
                       <tr>
-                        <th className="px-2 md:px-4 py-2 text-left font-bold min-w-[200px] md:min-w-[250px] text-xs md:text-sm text-gray-600 bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
-                        <th className="px-2 md:px-4 py-2 text-left font-bold text-xs md:text-sm text-gray-600 bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
+                        <th className="px-2 md:px-4 py-2 text-left font-bold min-w-[200px] md:min-w-[250px] text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
+                        <th className="px-2 md:px-4 py-2 text-left font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
                         {months && months.map(
                           (month) => (
                             <th
                               key={month}
-                              className="px-1 md:px-2 py-2 text-center font-bold text-xs md:text-sm text-gray-600 hidden lg:table-cell bg-white"
+                              className="px-1 md:px-2 py-2 text-center font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
                               style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                               colSpan={1}
                             >
@@ -230,7 +236,7 @@ const SoaList: React.FC = () => {
                             </th>
                           )
                         )}
-                        <th className="px-2 md:px-4 py-2 text-right font-bold text-xs md:text-sm text-gray-600 bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                        <th className="px-2 md:px-4 py-2 text-right font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
                       </tr>
                       <tr>
                         {Array(months?.length)
@@ -241,7 +247,7 @@ const SoaList: React.FC = () => {
                             ].map((field, idx1) => (
                               <th
                                 key={`${field}-${idx1}`}
-                                className="px-1 md:px-2 py-1 text-center text-xs font-bold text-gray-500 w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden lg:table-cell bg-white"
+                                className="px-1 md:px-2 py-1 text-center text-xs font-bold text-gray-500 dark:text-bodydark w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden lg:table-cell bg-white dark:bg-boxdark"
                                 style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                               >
                                 {field}
@@ -275,14 +281,14 @@ const SoaList: React.FC = () => {
                             }, 0);
 
                             return (
-                              <tr key={`${item.loan_ref}-${index}`} className="hover:bg-gray-50">
+                              <tr key={`${item.loan_ref}-${index}`} className="hover:bg-gray-50 dark:hover:bg-meta-4">
                                 {/* Name */}
-                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-xs md:text-sm">
+                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {item?.lastname}, {item?.firstname} {item?.middlename}
                                 </td>
 
                                 {/* Loan Reference */}
-                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-xs md:text-sm">{item?.loan_ref}</td>
+                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
 
                                 {/* Monthly Data */}
                                 {months?.map((month: any, monthIndex: number) => {
@@ -293,7 +299,7 @@ const SoaList: React.FC = () => {
                                   return monthlyData ? (
                                     <td
                                       key={`${monthIndex}-commission`}
-                                      className="border border-gray-300 px-1 md:px-2 py-1 text-right text-xs hidden lg:table-cell"
+                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                     >
                                       {parseFloat(monthlyData.commission_collected || '0').toLocaleString('en-US', {
                                         minimumFractionDigits: 2,
@@ -303,7 +309,7 @@ const SoaList: React.FC = () => {
                                   ) : (
                                     <td
                                       key={`${monthIndex}-empty`}
-                                      className="border border-gray-300 px-1 md:px-2 py-1 text-right text-xs text-gray-400 hidden lg:table-cell"
+                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs text-gray-400 dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
                                     >
                                       --
                                     </td>
@@ -311,9 +317,9 @@ const SoaList: React.FC = () => {
                                 })}
 
                                 {/* Total Collected */}
-                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-right font-semibold text-xs md:text-sm">
+                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right font-semibold text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {totalCollected.toLocaleString('en-US', {
-                                    minimumFractionDigits: 2, 
+                                    minimumFractionDigits: 2,
                                     maximumFractionDigits: 2
                                   })}
                                 </td>
