@@ -30,7 +30,7 @@
     "pusher-js": "^8.4.0",
     "react": "^18",
     "react-apexcharts": "^1.4.1",
-    "react-content-loader": "7.1.1",
+    "react-content-loader": "^7.0.0",
     "react-data-table-component": "^7.6.2",
     "react-datepicker": "^7.3.0",
     "react-dom": "^18",
@@ -46,6 +46,9 @@
     "xlsx": "^0.18.5",
     "zustand": "^4.5.2"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
     "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
@@ -57,6 +60,5 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "typescript": "^5"
-  },
-  "packageManager": "yarn@3.5.1+sha512.8cd0e31bd60779ef4ca92b855fb3462c7ec35ce8b345752b7349a68239776417f46d41d79c8047242d9c93b48a1516f64c7444ebe747d9a02bf26868e6fa1f2b"
+  }
 }
