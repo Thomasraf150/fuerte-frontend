@@ -197,6 +197,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 text-sm w-full sm:w-auto"
             type="button"
             onClick={() => handleChangeReleasedDate(String(loanSingleData?.id), String(watch('released_date')), handleRefetchData)}
+            disabled={loanSingleData?.status === 3 ? false : true}
           >
             <span className="mt-1 mr-1">
               <Calendar size={17} />

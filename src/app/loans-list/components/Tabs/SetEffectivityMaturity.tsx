@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import "react-datepicker/dist/react-datepicker.css";
 import OnceAMonth from '../TabForm/OnceAMonth';
 import TwiceAMonth from '../TabForm/TwiceAMonth';
 import DayOfTheWeek from '../TabForm/DayOfTheWeek';
