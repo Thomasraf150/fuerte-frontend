@@ -28,6 +28,7 @@ interface FormInputProps {
   required?: boolean;
   isLoading?: boolean;
   loadingMessage?: string;
+  fallbackValue?: string | number; // NEW: Value to use when field is empty (for database defaults)
 }
 
 // Native number formatting utilities
@@ -111,7 +112,8 @@ const FormInput: React.FC<FormInputProps> = ({
   formatType = 'none',
   required = false,
   isLoading = false,
-  loadingMessage = 'Loading...'
+  loadingMessage = 'Loading...',
+  fallbackValue
 }) => {
   const [displayValue, setDisplayValue] = useState<string>('');
   const [rawValue, setRawValue] = useState<string>('');
@@ -139,15 +141,20 @@ const FormInput: React.FC<FormInputProps> = ({
       const formatted = formatNumber(inputValue);
       const raw = unformatNumber(inputValue);
 
-      setDisplayValue(formatted);
-      setRawValue(raw);
+      // Apply fallback value if raw is empty and fallback is defined
+      const finalValue = (raw === '' || raw === null || raw === undefined) && fallbackValue !== undefined
+        ? String(fallbackValue)
+        : raw;
 
-      // Create synthetic event with raw value for form registration
+      setDisplayValue(formatted);
+      setRawValue(finalValue);
+
+      // Create synthetic event with final value (with fallback applied) for form registration
       const syntheticEvent = {
         ...event,
         target: {
           ...event.target,
-          value: raw
+          value: finalValue
         }
       };
 
@@ -162,15 +169,20 @@ const FormInput: React.FC<FormInputProps> = ({
       const formatted = formatCurrency(inputValue);
       const raw = unformatCurrency(inputValue);
 
-      setDisplayValue(formatted);
-      setRawValue(raw);
+      // Apply fallback value if raw is empty and fallback is defined
+      const finalValue = (raw === '' || raw === null || raw === undefined) && fallbackValue !== undefined
+        ? String(fallbackValue)
+        : raw;
 
-      // Create synthetic event with raw decimal value for form registration
+      setDisplayValue(formatted);
+      setRawValue(finalValue);
+
+      // Create synthetic event with final value (with fallback applied) for form registration
       const syntheticEvent = {
         ...event,
         target: {
           ...event.target,
-          value: raw
+          value: finalValue
         }
       };
 
@@ -212,7 +224,16 @@ const FormInput: React.FC<FormInputProps> = ({
             className={`h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
             id={id}
             {...register}
-            onChange={onChange}
+            onChange={(e) => {
+              // Call React Hook Form's onChange first for validation
+              if (register?.onChange) {
+                register.onChange(e);
+              }
+              // Then call custom onChange if provided
+              if (onChange) {
+                onChange(e);
+              }
+            }}
             disabled={disabled || isLoading}
           >
             {isLoading ? (

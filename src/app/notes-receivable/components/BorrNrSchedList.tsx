@@ -202,10 +202,10 @@ const BorrNrSchedList: React.FC = () => {
                 <div className="p-4 sm:p-7">
 
 
-                <div className="rounded-lg bg-gray-200 dark:bg-boxdark mb-4 p-4">
-                  <label className="mb-4 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range and Filters:</label>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-end">
+                <div className="rounded-lg bg-gray-200 dark:bg-boxdark mb-4 p-6 relative z-20">
+                  <label className="mb-6 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range and Filters:</label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-x-6 gap-y-4 items-end">
                     {/* Start Date */}
                     <div className="flex flex-col">
                       <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
@@ -242,7 +242,7 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Enhanced Search Input (Loan Ref + Name) */}
-                    <div className="flex flex-col">
+                    <div className="flex flex-col min-w-[220px]">
                       <div className="flex items-center justify-between mb-1">
                         <label htmlFor="searchTerm" className="text-sm font-medium text-gray-700 dark:text-bodydark">
                           Search:
@@ -255,19 +255,19 @@ const BorrNrSchedList: React.FC = () => {
                             onChange={(e) => setAutoSearch(e.target.checked)}
                             className="h-3 w-3"
                           />
-                          <label htmlFor="autoSearch" className="text-xs text-gray-500 dark:text-bodydark">
+                          <label htmlFor="autoSearch" className="text-xs text-gray-500 dark:text-bodydark whitespace-nowrap">
                             Auto-search
                           </label>
                         </div>
                       </div>
-                      <div className="relative">
+                      <div className="relative w-full">
                         <input
                           id="searchTerm"
                           type="text"
-                          placeholder="Loan Ref or Borrower Name"
+                          placeholder="Loan Ref or Borrower"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-48 pr-8 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                          className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-full pr-8 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                         />
                         {searchTerm !== debouncedSearchTerm && (
                           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -276,7 +276,7 @@ const BorrNrSchedList: React.FC = () => {
                         )}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-bodydark mt-1">
-                        Search by loan reference number or borrower name
+                        Loan ref or borrower name
                       </div>
                     </div>
 
@@ -329,7 +329,7 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Search Button */}
-                    <div className="flex flex-col sm:col-span-2 lg:col-span-1">
+                    <div className="flex flex-col">
                       <label className="mb-1 text-sm font-medium text-transparent select-none">Search</label>
                       <button
                         onClick={handleSearch}
@@ -422,16 +422,16 @@ const BorrNrSchedList: React.FC = () => {
                   {/* Desktop Table View */}
                   <div className="hidden md:block overflow-x-auto max-h-[600px]">
                     <table className="min-w-full border-separate border-spacing-0">
-                      <thead className="bg-white sticky top-0 z-10">
+                      <thead className="bg-white dark:bg-boxdark sticky top-0 z-10">
                         <tr>
-                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-gray-600 font-bold bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
-                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-gray-600 font-bold bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 font-bold hidden lg:table-cell bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
+                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
                           {months?.map(
                             (month) => (
                               <th
                                 key={month}
-                                className="px-1 md:px-2 py-2 text-center text-xs md:text-sm text-gray-600 font-bold hidden xl:table-cell bg-white"
+                                className="px-1 md:px-2 py-2 text-center text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden xl:table-cell bg-white dark:bg-boxdark"
                                 style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 colSpan={10}
                               >
@@ -439,8 +439,8 @@ const BorrNrSchedList: React.FC = () => {
                               </th>
                             )
                           )}
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 font-bold hidden lg:table-cell bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 font-bold bg-white" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
                         </tr>
                         <tr>
                           {Array(months?.length)
@@ -460,7 +460,7 @@ const BorrNrSchedList: React.FC = () => {
                               ].map((field, idx1) => (
                                 <th
                                   key={`${field}-${idx1}`}
-                                  className="px-1 md:px-2 py-1 text-center text-xs text-gray-500 font-bold w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden xl:table-cell bg-white"
+                                  className="px-1 md:px-2 py-1 text-center text-xs text-gray-500 dark:text-bodydark font-bold w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden xl:table-cell bg-white dark:bg-boxdark"
                                   style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 >
                                   {field}
@@ -485,13 +485,13 @@ const BorrNrSchedList: React.FC = () => {
                                 <tr
                                   key={`${item.loan_ref}-${index}`}
                                   onClick={() => setSelectedRow(index)}
-                                  className={`${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'} cursor-pointer`}
+                                  className={`${isSelected ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-meta-4'} cursor-pointer`}
                               >
-                                <td className="border border-gray-300 text-xs md:text-sm px-2 md:px-4 py-2">
+                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">
                                   {item?.lastname}, {item?.firstname} {item?.middlename}
                                 </td>
-                                <td className="border border-gray-300 text-xs md:text-sm px-2 md:px-4 py-2">{item?.loan_ref}</td>
-                                <td className="border border-gray-300 text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell">
+                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
+                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {pnAmount.toFixed(2)}
                                 </td>
 
@@ -515,7 +515,7 @@ const BorrNrSchedList: React.FC = () => {
                                     ].map((field, fieldIndex) => (
                                       <td
                                         key={`${monthIndex}-${fieldIndex}`}
-                                        className="border border-gray-300 px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell"
+                                        className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
                                         {monthlyData[field]}
                                       </td>
@@ -524,7 +524,7 @@ const BorrNrSchedList: React.FC = () => {
                                     Array(10).fill(null).map((_, emptyIndex) => (
                                       <td
                                         key={`${monthIndex}-empty-${emptyIndex}`}
-                                        className="border border-gray-300 px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell"
+                                        className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
                                         --
                                       </td>
@@ -532,10 +532,10 @@ const BorrNrSchedList: React.FC = () => {
                                   );
                                 })}
 
-                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell">
+                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {totalCollected.toFixed(2)}
                                 </td>
-                                <td className="border border-gray-300 px-2 md:px-4 py-2 text-right text-xs md:text-sm">
+                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {balance.toFixed(2)}
                                 </td>
                               </tr>
