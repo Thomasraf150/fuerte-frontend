@@ -85,8 +85,8 @@ const BalanceSheetList: React.FC = () => {
           <div className={`col-span-2`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
 
-              <div className="rounded-lg bg-gray-200 p-5">
-                <label className="mb-2">Select Date Range:</label>
+              <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-5">
+                <label className="mb-2 text-gray-700 dark:text-bodydark">Select Date Range:</label>
                 <div className="flex space-x-2">
                   <DatePicker
                     selected={startDate}
@@ -95,7 +95,7 @@ const BalanceSheetList: React.FC = () => {
                     startDate={startDate}
                     endDate={endDate}
                     placeholderText="Start Date"
-                    className="border rounded px-4 py-2"
+                    className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                   />
                   <DatePicker
                     selected={endDate}
@@ -105,7 +105,7 @@ const BalanceSheetList: React.FC = () => {
                     endDate={endDate}
                     minDate={startDate} // Prevent selecting an end date before start date
                     placeholderText="End Date"
-                    className="border rounded px-4 py-2"
+                    className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                   />
                   <div className="w-75">
                     <Controller

@@ -166,9 +166,9 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
           Create Loans
         </h3>
       </div>
-      <div className="max-w-6xl px-0 z-999999">
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 gap-4 m-5">
-        <div className="border-2 border-emerald-200 p-4"> {/* column 1 */}
+      <div className="max-w-full px-0 z-999999">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 m-5">
+        <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
           <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
             {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} fnGetRenewalDetails={getGetRenewalDetails} />}
@@ -229,28 +229,28 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
             />
 
             <div>
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
                 <button
-                  className="flex justify-center rounded border border-stroke px-4 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+                  className="flex justify-center items-center rounded border border-stroke px-4 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white w-full sm:w-auto"
                   type="button"
                   onClick={()=>{ createLoans(false) }}
                 >
                   Back
                 </button>
                 <button
-                  className="flex justify-center rounded bg-primary px-4 py-2 font-medium text-gray hover:bg-opacity-90"
+                  className="flex justify-center items-center rounded bg-primary px-4 py-2 font-medium text-gray hover:bg-opacity-90 w-full sm:w-auto"
                   type="button"
                   onClick={() => {
                     handleSubmit((data) => onSubmit(data, 'compute'))();
                   }}
                 >
-                  <span className="mt-1 mr-1">
+                  <span className="mr-1">
                     <Layout size={17} />
                   </span>
                   <span>Compute</span>
                 </button>
                 <button
-                  className="flex justify-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90"
+                  className="flex justify-center items-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                   type="button"
                   disabled={loading}
                   onClick={() => {
@@ -264,7 +264,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                     </>
                   ) : (
                     <>
-                      <span className="mt-1 mr-1">
+                      <span className="mr-1">
                         <Save size={17} />
                       </span>
                       <span>Save</span>

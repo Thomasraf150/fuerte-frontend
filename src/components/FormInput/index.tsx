@@ -25,6 +25,7 @@ interface FormInputProps {
   value?: string;
   maxLength?: number;
   formatType?: 'number' | 'contact' | 'currency' | 'none';
+  required?: boolean;
   isLoading?: boolean;
   loadingMessage?: string;
 }
@@ -108,6 +109,7 @@ const FormInput: React.FC<FormInputProps> = ({
   readOnly,
   value,
   formatType = 'none',
+  required = false,
   isLoading = false,
   loadingMessage = 'Loading...'
 }) => {
@@ -195,6 +197,7 @@ const FormInput: React.FC<FormInputProps> = ({
         htmlFor={id}
       >
         {label}
+        {required && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
       </label>
       <div className="relative">
         {type === 'checkbox' ? (
@@ -240,11 +243,11 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         )}
         {type !== 'checkbox' && type !== 'file' && (
-          <span className="absolute left-4.5 top-3">
+          <span className={`absolute top-3 ${type === 'select' ? 'right-4.5' : 'left-4.5'}`}>
             <IconComponent size="18" />
           </span>
         )}
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>}
       </div>
     </div>
   );

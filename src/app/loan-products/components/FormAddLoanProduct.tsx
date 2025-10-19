@@ -120,9 +120,9 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   return (
 
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Column */}
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
            <FormInput
             label="Base Deduction"
             id="base_deduction"
@@ -133,7 +133,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             options={baseCompOptions}
           />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
            <FormInput
             label="Loan Code"
             id="loan_code_id"
@@ -146,34 +146,37 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             loadingMessage="Loading loan codes..."
           />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
           <FormInput
-            label="* Description"
+            label="Description"
             id="description"
             type="text"
             icon={Home}
             register={register('description', { required: 'Loan Code is required' })}
             error={errors.description ? "This field is required" : undefined}
+            required={true}
           />
         </div>
         <div>
           <FormInput
-            label="* Interest Rate (%)"
+            label="Interest Rate (%)"
             id="interest_rate"
             type="text"
             icon={Home}
             register={register('interest_rate', { required: true })}
             error={errors.interest_rate && "This field is required"}
+            required={true}
           />
         </div>
         <div>
           <FormInput
-            label="* Terms / No of Mos."
+            label="Terms / No of Mos."
             id="terms"
             type="text"
             icon={Home}
             register={register('terms', { required: true })}
             error={errors.terms && "This field is required"}
+            required={true}
           />
         </div>
         <div>
@@ -208,32 +211,35 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         </div>
         <div>
           <FormInput
-            label="* UDI (%)"
+            label="UDI (%)"
             id="udi"
             type="text"
             icon={Home}
             register={register('udi', { required: true })}
             error={errors.udi && "This field is required"}
+            required={true}
           />
         </div>
         <div>
           <FormInput
-            label="* Addon Terms."
+            label="Addon Terms."
             id="terms"
             type="text"
             icon={Home}
             register={register('addon_terms', { required: true })}
             error={errors.terms && "This field is required"}
+            required={true}
           />
         </div>
         <div>
           <FormInput
-            label="* Addon UDI Rate (%)"
+            label="Addon UDI Rate (%)"
             id="terms"
             type="text"
             icon={Home}
             register={register('addon_udi_rate', { required: true })}
             error={errors.terms && "This field is required"}
+            required={true}
           />
         </div>
         <div>
@@ -276,9 +282,9 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             register={register('is_active')}
           />
         </div>
-        
 
-        <div>
+
+        <div className="col-span-1 md:col-span-2 mt-4">
           <div className="flex justify-end gap-4.5">
             <button
               className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"

@@ -54,7 +54,7 @@ const GeneralLedgerList: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Search by Account Name or Number..."
-                      className="w-full rounded-md border border-stroke p-2 dark:bg-form-input dark:border-strokedark"
+                      className="w-full rounded-md border border-stroke p-2 bg-white dark:bg-form-input text-gray-900 dark:text-white dark:border-strokedark focus:outline-none focus:ring-2 focus:ring-primary"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -64,39 +64,39 @@ const GeneralLedgerList: React.FC = () => {
                       <div className="h-96 w-full overflow-auto">
                         <table className="min-w-full border-collapse">
                           {/* Table Header */}
-                          <thead className="bg-gray-200 text-gray-700 text-sm sticky top-0">
+                          <thead className="bg-gray-200 dark:bg-meta-4 text-gray-700 dark:text-bodydark text-sm sticky top-0">
                             <tr>
-                              <th className="px-4 py-2 border bg-slate-50">Account Name</th>
-                              <th className="px-4 py-2 border bg-slate-50">Account Number</th>
-                              <th className="px-4 py-2 border bg-slate-50">Debit</th>
-                              <th className="px-4 py-2 border bg-slate-50">Credit</th>
+                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Account Name</th>
+                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Account Number</th>
+                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Debit</th>
+                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Credit</th>
                             </tr>
                           </thead>
                           {/* Table Body */}
-                          <tbody className="text-sm">
+                          <tbody className="text-sm text-gray-900 dark:text-bodydark">
                             {filteredData && filteredData.map((item, i) => (
                               <tr
                                 key={i}
-                                className={`hover:bg-gray-100 cursor-pointer ${
-                                  selectedItem?.number === item.number ? 'bg-blue-200 dark:bg-blue-700' : 'even:bg-gray-50'
+                                className={`hover:bg-gray-100 dark:hover:bg-graydark cursor-pointer ${
+                                  selectedItem?.number === item.number ? 'bg-blue-200 dark:bg-blue-700' : 'even:bg-gray-50 dark:even:bg-boxdark'
                                 }`}
                                 onClick={() => handleRowClick(item)}
                               >
-                                <td className="px-4 py-2 border">{item?.account_name}</td>
-                                <td className="px-4 py-2 border text-center">{item?.number}</td>
-                                <td className="px-4 py-2 border text-right">{formatNumberComma(Number(item?.debit) || 0)}</td>
-                                <td className="px-4 py-2 border text-right">{formatNumberComma(Number(item?.credit) || 0)}</td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">{item?.account_name}</td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark text-center">{item?.number}</td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right">{formatNumberComma(Number(item?.debit) || 0)}</td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right">{formatNumberComma(Number(item?.credit) || 0)}</td>
                               </tr>
                             ))}
                           </tbody>
                           {/* Table Footer - Totals */}
-                          <tfoot className="bg-gray-200 text-gray-700 text-sm sticky bottom-0">
-                            <tr className="bg-gray-100 font-semibold">
-                              <td className="px-4 py-2 border text-right bg-slate-50" colSpan={2}>Total:</td>
-                              <td className="px-4 py-2 border text-right bg-slate-50">
+                          <tfoot className="bg-gray-200 dark:bg-meta-4 text-gray-700 dark:text-bodydark text-sm sticky bottom-0">
+                            <tr className="bg-gray-100 dark:bg-boxdark font-semibold">
+                              <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark" colSpan={2}>Total:</td>
+                              <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark">
                                 {formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
                               </td>
-                              <td className="px-4 py-2 border text-right bg-slate-50">
+                              <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark">
                                 {formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
                               </td>
                             </tr>

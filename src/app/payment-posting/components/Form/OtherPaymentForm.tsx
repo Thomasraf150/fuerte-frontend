@@ -24,13 +24,13 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     //   const computedUdi = String((parseFloat(udiSched?.amount)).toFixed(2));
     //   setValue('interest', computedUdi);
     // } else if(amount !== '' && parseFloat(amount) <= amountSched?.amount){
-      
-    // } 
+
+    // }
     // else {
     //   setValue('interest', "0.00");
     // }
     // if ((parseFloat(watch('advanced_payment')) || 0) > 0) {
-      
+
       const computedUdi = String((Number(udiSched?.amount) * ((((parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0 ) + (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0)) / Number(amountSched?.amount)) * 100 / 100)).toFixed(2));
       if (parseFloat(parseFloat(computedUdi).toFixed(2)) > parseFloat(parseFloat(selectedUdiSched?.amount).toFixed(2))) {
         toast.error("Your amount paying is exeeding a total remaining due. Please input a right remain amount");
@@ -57,10 +57,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     const formattedValue = formatToTwoDecimalPlaces(numericValue);
     if (type === 'collection') {
       if (parseFloat(numericValue) > selectedMoSchedOthPay?.amount) {
-        setValue('ap_refund', String((parseFloat(numericValue) - 
-                              (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) - 
-                              (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) - 
-                              (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) - 
+        setValue('ap_refund', String((parseFloat(numericValue) -
+                              (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) -
                               (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       } else {
         setValue('ap_refund', "0.00");
@@ -69,10 +69,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     }
     if (type === 'bank_charge') {
       if (parseFloat(watch('collection')?.replace(/,/g, '')) > selectedMoSchedOthPay?.amount) {
-        setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) - 
-                              (parseFloat(numericValue) || 0) - 
-                              (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) - 
-                              (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) - 
+        setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                              (parseFloat(numericValue) || 0) -
+                              (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
+                              (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) -
                               (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       } else {
         setValue('ap_refund', "0.00");
@@ -80,26 +80,26 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'payment_ua_sp') {
-      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) - 
-                            (parseFloat(numericValue) || 0) - 
-                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) - 
+      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                            (parseFloat(numericValue) || 0) -
+                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
                             (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0) -
                             (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'penalty_ua_sp') {
-      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) - 
-                            (parseFloat(numericValue) || 0) - 
-                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) - 
-                            (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) - 
+      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                            (parseFloat(numericValue) || 0) -
+                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
                             (parseFloat(watch('advanced_payment')?.replace(/,/g, '')) || 0)).toFixed(2)));
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
     if (type === 'advanced_payment') {
-      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) - 
-                            (parseFloat(numericValue) || 0) - 
-                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) - 
-                            (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) - 
+      setValue('ap_refund', String((parseFloat(watch('collection')?.replace(/,/g, '')) -
+                            (parseFloat(numericValue) || 0) -
+                            (parseFloat(watch('bank_charge')?.replace(/,/g, '')) || 0) -
+                            (parseFloat(watch('payment_ua_sp')?.replace(/,/g, '')) || 0) -
                             (parseFloat(watch('penalty_ua_sp')?.replace(/,/g, '')) || 0)).toFixed(2)));
       fnComputeUdi(selectedMoSchedOthPay, selectedUdiSched);
     }
@@ -131,191 +131,234 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
   return (
     <>
-      <div className="bg-gray-200 p-4 rounded">
+      <div className="bg-gray-200 p-2 sm:p-4 rounded">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="px-4 py-4 border border-stroke bg-gradient-to-r from-cyan-500 to-blue-500 md:px-3 xl:px-6">
+          <div className="px-2 py-2 sm:px-4 sm:py-4 border border-stroke bg-gradient-to-r from-cyan-500 to-blue-500 md:px-3 xl:px-6">
             <h5 className="text-m text-lime-50 dark:text-white">
               <span className="font-semibold">Other Payment</span>
             </h5>
           </div>
-          <table className="min-w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="">
-                <td className="px-4 py-4 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Due Date: </td>
-                <td className="px-4 py-2 text-gray-900 text-center">{moment(selectedMoSchedOthPay?.due_date).format('YYYY-MM-DD')}</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-4 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Remaining Due: </td>
-                <td className="px-4 py-2 text-gray-900 text-center">{Number(selectedMoSchedOthPay?.amount).toFixed(2)}</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <FormInput
-                    label=""
-                    id="collection"
-                    type="text"
-                    icon={DollarSign}
-                    formatType="number"
-                    placeholder="0.00"
-                    register={register('collection', { required: "Collection is required!" })}
-                    onChange={(e: any) => { return handleDecimal(e, 'collection'); }}
-                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                  />
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Interest</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="udi"
-                    placeholder="0.00"
-                    readOnly={true}
-                    value={`${Number(watch('interest') ?? 0).toFixed(2)}`}
-                  />
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Payment UA/SP</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <FormInput
-                    label=""
-                    id="payment_ua_sp"
-                    type="text"
-                    icon={DollarSign}
-                    formatType="number"
-                    placeholder="0.00"
-                    register={register('payment_ua_sp')}
-                    onChange={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
-                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                  />
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Penalty UA/SP</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <FormInput
-                    label=""
-                    id="penalty_ua_sp"
-                    type="text"
-                    icon={DollarSign}
-                    formatType="number"
-                    placeholder="0.00"
-                    register={register('penalty_ua_sp')}
-                    onChange={(e: any) => { return handleDecimal(e, 'penalty_ua_sp'); }}
-                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                  />
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Advanced Payment</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <FormInput
-                    label=""
-                    id="advanced_payment"
-                    type="text"
-                    icon={DollarSign}
-                    formatType="number"
-                    placeholder="0.00"
-                    register={register('advanced_payment')}
-                    onChange={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
-                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Bank Charges</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <FormInput
-                    label=""
-                    id="bank_charge"
-                    type="text"
-                    icon={DollarSign}
-                    formatType="number"
-                    placeholder="0.00"
-                    register={register('bank_charge', { required: "Bank Charge is required!" })}
-                    onChange={(e: any) => { return handleDecimal(e, 'bank_charge'); }}
-                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">AP Refund</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="text"
-                    id="ap_refund"
-                    placeholder="0.00"
-                    readOnly={true}
-                    {...register('ap_refund')}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Commission</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <FormInput
-                    label=""
-                    id="commission_fee"
-                    type="text"
-                    icon={DollarSign}
-                    formatType="number"
-                    placeholder="0.00"
-                    register={register('commission_fee')}
-                    className="block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Collection Date</td>
-                <td className="px-4 py-2 text-gray-900">
-                  <input
-                    className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                    type="date"
-                    id="collection_date"
-                    placeholder="mm/dd/YYYY"
-                    {...register('collection_date')}
-                    onBlur={(e: any) => { return handleDate(e, 'collection_date'); }}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2"></td>
-                <td className="px-4 py-2 text-gray-900">
-                  <button
-                    className={`float-right mr-0 flex justify-between items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 ${paymentLoading ? 'opacity-70' : ''}`}
-                    type="submit"
-                    disabled={paymentLoading}
-                  >
-                    {paymentLoading ? (
-                      <>
-                        <span className="mr-1">
-                          <RotateCw size={17} className="animate-spin" />
-                        </span>
-                        <span>Processing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="mr-1">
-                          <Save size={17} />
-                        </span>
-                        <span>Pay Now</span>
-                      </>
-                    )}
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="space-y-1 bg-gray-100 border border-gray-300">
+
+            {/* Due Date */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Due Date:
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900 text-center 2xl:text-left text-xs sm:text-sm">
+                {moment(selectedMoSchedOthPay?.due_date).format('YYYY-MM-DD')}
+              </div>
+            </div>
+
+            {/* Remaining Due */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Remaining Due:
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900 text-center 2xl:text-left text-xs sm:text-sm">
+                {Number(selectedMoSchedOthPay?.amount).toFixed(2)}
+              </div>
+            </div>
+
+            {/* Collection */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Collection
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <FormInput
+                  label=""
+                  id="collection"
+                  type="text"
+                  icon={DollarSign}
+                  formatType="number"
+                  placeholder="0.00"
+                  register={register('collection', { required: "Collection is required!" })}
+                  onChange={(e: any) => { return handleDecimal(e, 'collection'); }}
+                  className="text-center"
+                />
+              </div>
+            </div>
+
+            {/* Interest */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Interest
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <input
+                  className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  type="text"
+                  id="udi"
+                  placeholder="0.00"
+                  readOnly={true}
+                  value={`${Number(watch('interest') ?? 0).toFixed(2)}`}
+                />
+              </div>
+            </div>
+
+            {/* Payment UA/SP */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Payment UA/SP
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <FormInput
+                  label=""
+                  id="payment_ua_sp"
+                  type="text"
+                  icon={DollarSign}
+                  formatType="number"
+                  placeholder="0.00"
+                  register={register('payment_ua_sp')}
+                  onChange={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
+                  className="text-center"
+                />
+              </div>
+            </div>
+
+            {/* Penalty UA/SP */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Penalty UA/SP
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <FormInput
+                  label=""
+                  id="penalty_ua_sp"
+                  type="text"
+                  icon={DollarSign}
+                  formatType="number"
+                  placeholder="0.00"
+                  register={register('penalty_ua_sp')}
+                  onChange={(e: any) => { return handleDecimal(e, 'penalty_ua_sp'); }}
+                  className="text-center"
+                />
+              </div>
+            </div>
+
+            {/* Advanced Payment */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Advanced Payment
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <FormInput
+                  label=""
+                  id="advanced_payment"
+                  type="text"
+                  icon={DollarSign}
+                  formatType="number"
+                  placeholder="0.00"
+                  register={register('advanced_payment')}
+                  onChange={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
+                  className="text-center"
+                />
+              </div>
+            </div>
+
+            {/* Bank Charges */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Bank Charges
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <FormInput
+                  label=""
+                  id="bank_charge"
+                  type="text"
+                  icon={DollarSign}
+                  formatType="number"
+                  placeholder="0.00"
+                  register={register('bank_charge', { required: "Bank Charge is required!" })}
+                  onChange={(e: any) => { return handleDecimal(e, 'bank_charge'); }}
+                  className="text-center"
+                />
+              </div>
+            </div>
+
+            {/* AP Refund */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                AP Refund
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <input
+                  className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  type="text"
+                  id="ap_refund"
+                  placeholder="0.00"
+                  readOnly={true}
+                  {...register('ap_refund')}
+                />
+              </div>
+            </div>
+
+            {/* Commission */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Commission
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <FormInput
+                  label=""
+                  id="commission_fee"
+                  type="text"
+                  icon={DollarSign}
+                  formatType="number"
+                  placeholder="0.00"
+                  register={register('commission_fee')}
+                  className="text-center"
+                />
+              </div>
+            </div>
+
+            {/* Collection Date */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+                Collection Date
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+                <input
+                  className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  type="date"
+                  id="collection_date"
+                  placeholder="mm/dd/YYYY"
+                  {...register('collection_date')}
+                  onBlur={(e: any) => { return handleDate(e, 'collection_date'); }}
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2"></div>
+              <div className="2xl:w-3/5 px-2 py-2 sm:px-4 sm:py-2 text-gray-900">
+                <button
+                  className={`w-full 2xl:w-auto 2xl:float-right flex justify-center items-center focus:outline-none text-white bg-gradient-to-r from-sky-500 to-indigo-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 ${paymentLoading ? 'opacity-70' : ''}`}
+                  type="submit"
+                  disabled={paymentLoading}
+                >
+                  {paymentLoading ? (
+                    <>
+                      <span className="mr-1">
+                        <RotateCw size={17} className="animate-spin" />
+                      </span>
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="mr-1">
+                        <Save size={17} />
+                      </span>
+                      <span>Pay Now</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+          </div>
 
         </form>
       </div>
