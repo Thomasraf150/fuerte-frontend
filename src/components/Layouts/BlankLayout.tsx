@@ -14,7 +14,7 @@ export default function BlankLayout({
       <div className="flex h-screen overflow-hidden">
 
         {/* <!-- ===== Content Area Start ===== --> */}
-        <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-auto">
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>

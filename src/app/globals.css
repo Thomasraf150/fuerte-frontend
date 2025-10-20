@@ -31,3 +31,9 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Responsive table container - ensures tables can scroll horizontally */
+.responsive-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

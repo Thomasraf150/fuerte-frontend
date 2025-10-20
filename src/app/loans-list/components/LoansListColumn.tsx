@@ -54,7 +54,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
             : row.custom_status === 'Released'
             ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
             : row.custom_status === 'Posted'
-            ? 'bg-amber-200 text-graydark dark:bg-green-900 dark:text-green-300'
+            ? 'bg-amber-200 text-graydark dark:bg-amber-900 dark:text-amber-200'
             : '')
         }`}
       >
