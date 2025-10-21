@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { BorrLoanComputationRes, BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import FormInput from '@/components/FormInput';
-import { DollarSign } from 'react-feather';
+import PesoSign from '@/components/PesoSign';
 
 interface ParentFormBr {
   setValue: any;
@@ -161,7 +161,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                       label=""
                       id="ob"
                       type="text"
-                      icon={DollarSign}
+                      icon={PesoSign}
                       register={register('ob')}
                       placeholder="Enter amount"
                       formatType="currency"
@@ -179,7 +179,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                       label=""
                       id="penalty"
                       type="text"
-                      icon={DollarSign}
+                      icon={PesoSign}
                       register={register('penalty')}
                       placeholder="Enter amount"
                       formatType="currency"
@@ -205,7 +205,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                       label=""
                       id="rebates"
                       type="text"
-                      icon={DollarSign}
+                      icon={PesoSign}
                       register={register('rebates')}
                       placeholder="Enter amount"
                       formatType="currency"

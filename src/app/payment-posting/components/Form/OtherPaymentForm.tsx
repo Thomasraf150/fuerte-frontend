@@ -4,7 +4,8 @@ import { BorrLoanRowData, OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
-import { Printer, CreditCard, Save, RotateCw, DollarSign } from 'react-feather';
+import { Printer, CreditCard, Save, RotateCw } from 'react-feather';
+import PesoSign from '@/components/PesoSign';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import { toast } from "react-toastify";
@@ -170,7 +171,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   label=""
                   id="collection"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
                   register={register('collection', { required: "Collection is required!" })}
@@ -207,7 +208,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   label=""
                   id="payment_ua_sp"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
                   register={register('payment_ua_sp')}
@@ -227,7 +228,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   label=""
                   id="penalty_ua_sp"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
                   register={register('penalty_ua_sp')}
@@ -247,7 +248,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   label=""
                   id="advanced_payment"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
                   register={register('advanced_payment')}
@@ -267,7 +268,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   label=""
                   id="bank_charge"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
                   register={register('bank_charge', { required: "Bank Charge is required!" })}
@@ -304,7 +305,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   label=""
                   id="commission_fee"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
                   register={register('commission_fee')}
