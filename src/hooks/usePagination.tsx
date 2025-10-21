@@ -18,7 +18,7 @@ export interface PaginationConfig {
 }
 
 export interface UsePaginationProps {
-  fetchFunction: (first: number, page: number, search?: string) => Promise<{
+  fetchFunction: (first: number, page: number, search?: string, statusFilter?: string) => Promise<{
     data: any[];
     paginatorInfo?: {
       total: number;
@@ -28,6 +28,7 @@ export interface UsePaginationProps {
     };
   }>;
   config?: PaginationConfig;
+  statusFilter?: string;
 }
 
 export interface UsePaginationReturn<T> {
@@ -63,7 +64,8 @@ export interface UsePaginationReturn<T> {
  */
 export function usePagination<T = any>({
   fetchFunction,
-  config = {}
+  config = {},
+  statusFilter = 'all'
 }: UsePaginationProps): UsePaginationReturn<T> {
 
   // Configuration with defaults
@@ -104,7 +106,8 @@ export function usePagination<T = any>({
   const fetchData = useCallback(async (
     page: number = pagination.currentPage,
     pageSize: number = pagination.pageSize,
-    search: string = debouncedSearchQuery
+    search: string = debouncedSearchQuery,
+    status: string = statusFilter
   ) => {
     setLoading(true);
     setError(null);
@@ -112,7 +115,7 @@ export function usePagination<T = any>({
     try {
       // Trim search query to handle whitespace-only searches
       const trimmedSearch = search?.trim();
-      const response = await fetchFunction(pageSize, page, trimmedSearch || undefined);
+      const response = await fetchFunction(pageSize, page, trimmedSearch || undefined, status);
 
       // Handle both paginated and non-paginated responses
       if (response.paginatorInfo) {
@@ -147,40 +150,40 @@ export function usePagination<T = any>({
     } finally {
       setLoading(false);
     }
-  }, [fetchFunction]);
+  }, [fetchFunction, statusFilter]);
 
   // Action: Go to specific page
   const goToPage = useCallback(async (page: number) => {
     if (page < 1 || page > pagination.totalPages) {
       return;
     }
-    await fetchData(page, pagination.pageSize, debouncedSearchQuery);
-  }, [fetchData, pagination.pageSize, pagination.totalPages, debouncedSearchQuery]);
+    await fetchData(page, pagination.pageSize, debouncedSearchQuery, statusFilter);
+  }, [fetchData, pagination.pageSize, pagination.totalPages, debouncedSearchQuery, statusFilter]);
 
   // Action: Change page size and reset to first page
   const changePageSize = useCallback(async (size: number) => {
-    await fetchData(1, size, debouncedSearchQuery);
-  }, [fetchData, debouncedSearchQuery]);
+    await fetchData(1, size, debouncedSearchQuery, statusFilter);
+  }, [fetchData, debouncedSearchQuery, statusFilter]);
 
   // Action: Refresh current page
   const refresh = useCallback(async () => {
-    await fetchData(pagination.currentPage, pagination.pageSize, debouncedSearchQuery);
-  }, [pagination.currentPage, pagination.pageSize, debouncedSearchQuery]);
+    await fetchData(pagination.currentPage, pagination.pageSize, debouncedSearchQuery, statusFilter);
+  }, [pagination.currentPage, pagination.pageSize, debouncedSearchQuery, statusFilter]);
 
-  // Auto-fetch when search query changes (after debounce)
+  // Auto-fetch when search query or status filter changes (after debounce)
   useEffect(() => {
     if (debouncedSearchQuery !== '') {
       // Only reset to page 1 if there's an actual search query
-      fetchData(1, pagination.pageSize, debouncedSearchQuery);
+      fetchData(1, pagination.pageSize, debouncedSearchQuery, statusFilter);
     } else {
       // If search is cleared, refresh current page
-      fetchData(pagination.currentPage, pagination.pageSize, '');
+      fetchData(pagination.currentPage, pagination.pageSize, '', statusFilter);
     }
-  }, [debouncedSearchQuery]); // FIXED: Remove pagination dependencies to prevent infinite loop
+  }, [debouncedSearchQuery, statusFilter]); // Auto-refetch when status filter changes
 
   // Initial data fetch
   useEffect(() => {
-    fetchData(1, initialPageSize, '');
+    fetchData(1, initialPageSize, '', statusFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty - run only once on mount
 

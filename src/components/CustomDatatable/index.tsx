@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import DataTable, { TableColumn, TableStyles } from 'react-data-table-component';
 import { useDatatableTheme } from '@/hooks/useDatatableTheme';
 import DataTableLoadingComponent from './LoadingComponent';
+import StatusFilterChips from '@/components/StatusFilterChips';
 
 // No data component with dark mode support
 const NoDataComponent: React.FC = () => {
@@ -29,6 +30,8 @@ export interface ServerSidePaginationProps {
   onSearchChange?: (query: string) => void;
   enableSearch?: boolean; // Optional flag to enable/disable search
   searchPlaceholder?: string; // Custom search placeholder
+  statusFilter?: string; // Current status filter
+  onStatusFilterChange?: (status: string) => void; // Status filter change handler
 }
 
 // Define the props for the CustomDatatable component
@@ -65,6 +68,11 @@ const ServerSidePaginationControls: React.FC<{
   const startRecord = (currentPage - 1) * pageSize + 1;
   const endRecord = Math.min(currentPage * pageSize, totalRecords);
 
+  // Format status filter text for display
+  const statusFilterText = pagination.statusFilter && pagination.statusFilter !== 'all'
+    ? ` ${pagination.statusFilter.replace('_', ' ')}`
+    : '';
+
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-boxdark border-t border-gray-200 dark:border-strokedark sm:px-6">
       <div className="flex items-center justify-between w-full">
@@ -74,7 +82,7 @@ const ServerSidePaginationControls: React.FC<{
             <p className="text-sm text-gray-700 dark:text-bodydark">
               Showing <span className="font-medium">{startRecord}</span> to{' '}
               <span className="font-medium">{endRecord}</span> of{' '}
-              <span className="font-medium">{totalRecords}</span> results
+              <span className="font-medium">{totalRecords}</span>{statusFilterText} {totalRecords === 1 ? 'loan' : 'loans'}
             </p>
           </div>
         </div>
@@ -295,6 +303,36 @@ const CustomDatatable = <T extends object>({
           searchPlaceholder={serverSidePagination?.searchPlaceholder}
         />
       )}
+
+      {/* Status Filter Chips - Responsive layout for all screen sizes */}
+      {isServerSide && serverSidePagination?.onStatusFilterChange && (
+        <div className="px-4 sm:px-6 md:px-7 pb-4">
+          <StatusFilterChips
+            selectedStatus={serverSidePagination.statusFilter || 'all'}
+            onStatusChange={serverSidePagination.onStatusFilterChange}
+          />
+          {/* Warning message when searching within a filtered status - Responsive text */}
+          {searchQuery && serverSidePagination.statusFilter && serverSidePagination.statusFilter !== 'all' && (
+            <div className="mt-3 flex items-start gap-2">
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+                Searching within <span className="font-medium">{serverSidePagination.statusFilter.replace('_', ' ')}</span> loans only
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="relative">
         <DataTable
           keyField="id"

@@ -107,7 +107,7 @@ const DefaultPage: React.FC = () => {
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
       <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-4 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-4 items-end">
           {/* Start Date */}
           <div className="flex flex-col">
             <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
@@ -211,19 +211,6 @@ const DefaultPage: React.FC = () => {
                 />
               )}
             />
-          </div>
-
-          {/* Button */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-sm font-medium text-transparent select-none">Action</label>
-            <button
-              className="flex items-center gap-2 text-white bg-green-700 hover:bg-green-800 dark:bg-meta-3 dark:hover:bg-green-600 focus:ring-4 focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5"
-              type="button"
-              onClick={() => printSummaryTicketDetails(moment(startDate).format("YYYY-MM-DD"), moment(endDate).format("YYYY-MM-DD"), branchSubId)}
-            >
-              <Printer size={17} />
-              <span>Print Loan Details</span>
-            </button>
           </div>
         </div>
       </div>
