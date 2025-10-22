@@ -11,6 +11,7 @@ import { Poppins } from 'next/font/google';
 import Pusher from "pusher-js";
 import { useRouter, usePathname } from "next/navigation";
 import useMaintenanceRedirect from '@/hooks/useMaintenanceRedirect';
+import NextTopLoader from 'nextjs-toploader';
 
 
 const poppins = Poppins({
@@ -64,6 +65,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={poppins.variable}>
+        {/* Top Loading Bar - Shows during page navigation */}
+        <NextTopLoader
+          color="#2563eb"
+          height={3}
+          showSpinner={false}
+          speed={200}
+          crawlSpeed={200}
+          easing="ease"
+          shadow="0 0 10px #2563eb,0 0 5px #2563eb"
+        />
         <div className="dark:bg-boxdark-2 dark:text-bodydark">
           {loading ? <Loader /> : ''}
           {children}

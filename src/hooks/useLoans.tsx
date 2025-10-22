@@ -33,10 +33,11 @@ const useLoans = () => {
   const [dataComputedLoans, setDataComputedLoans] = useState<[]>([]);
   const [dataComputedRenewal, setDataComputedRenewal] = useState<DataRenewalData>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const rowsPerPage = 10;
 
   // Pagination wrapper function for server-side pagination
-  const fetchLoansForPagination = useCallback(async (first: number, page: number, search?: string) => {
+  const fetchLoansForPagination = useCallback(async (first: number, page: number, search?: string, statusFilter?: string) => {
     const { GET_AUTH_TOKEN } = useAuthStore.getState();
     try {
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -52,7 +53,8 @@ const useLoans = () => {
             page,
             orderBy: [{ column: "id", order: 'DESC' }],
             borrower_id: 0, // Use 0 to fetch all loans
-            ...(search && { search })
+            ...(search && { search }),
+            ...(statusFilter && statusFilter !== 'all' && { statusFilter })
           },
         }),
       });
@@ -608,7 +610,8 @@ const useLoans = () => {
     refresh,
   } = usePagination<BorrLoanRowData>({
     fetchFunction: fetchLoansForPagination,
-    config: { initialPageSize: 20 }
+    config: { initialPageSize: 20 },
+    statusFilter
   });
 
    // Fetch data on component mount if id exists
@@ -651,6 +654,8 @@ const useLoans = () => {
       onSearchChange: setSearchQuery,
       pageSizeOptions: [10, 20, 50, 100],
       enableSearch: true, // Enable search as backend now supports it
+      statusFilter,
+      onStatusFilterChange: setStatusFilter,
     },
     refreshLoans: refresh,
   };

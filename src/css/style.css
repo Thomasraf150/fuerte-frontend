@@ -275,6 +275,12 @@ input[type="search"]::-webkit-search-cancel-button {
     background: #dee9ff;
 }
 
+/* Dark mode styles for form labels */
+.dark .lbl-form {
+    background: #313D4A;  /* meta-4 - matches form inputs */
+    border: 1px solid #2E3A47;  /* strokedark - consistent borders */
+}
+
 button {
     border-radius: 0 !important;
 }

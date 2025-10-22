@@ -10,6 +10,7 @@ import PNSigning from './Tabs/PNSigning';
 import BankDetailsEntry from './Tabs/BankDetailsEntry';
 import ReleaseLoans from './Tabs/ReleaseLoans';
 import useCoa from '@/hooks/useCoa';
+import { LoadingSpinner } from '@/components/LoadingStates';
 
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
@@ -37,11 +38,15 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
     <div className="w-full">
       <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
         <h3 className="font-medium text-black dark:text-white">
-          {loanSingleData?.loan_product?.description} 
+          {loanSingleData?.loan_product?.description}
         </h3>
         <span className="text-right cursor-pointer text-boxdark-2" onClick={() => { return handleShowForm(false); }}><X size={17}/></span>
       </div>
-      {loanSingleData && (
+      {!loanSingleData ? (
+        <div className="flex justify-center py-12">
+          <LoadingSpinner size="lg" message="Loading loan details..." />
+        </div>
+      ) : (
         <>
           <LoanDetails loanSingleData={loanSingleData} printLoanDetails={printLoanDetails} />
           <div className="flex flex-col md:flex-row border-b mt-3">

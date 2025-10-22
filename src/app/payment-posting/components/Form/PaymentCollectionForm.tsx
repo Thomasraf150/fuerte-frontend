@@ -4,7 +4,8 @@ import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
-import { Printer, CreditCard, Save, DollarSign, RotateCw } from 'react-feather';
+import { Printer, CreditCard, Save, RotateCw } from 'react-feather';
+import PesoSign from '@/components/PesoSign';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import FormInput from '@/components/FormInput';
@@ -139,7 +140,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   label=""
                   id="collection"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   register={register('collection', { required: "Collection is required!" })}
                   error={errors.collection?.message}
                   placeholder="0.00"
@@ -177,7 +178,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   label=""
                   id="penalty"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   register={register('penalty')}
                   placeholder="0.00"
                   formatType="number"
@@ -197,7 +198,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   label=""
                   id="bank_charge"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   register={register('bank_charge', { required: "Bank Charge is required!" })}
                   error={errors.bank_charge?.message}
                   placeholder="0.00"
@@ -235,7 +236,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   label=""
                   id="commission_fee"
                   type="text"
-                  icon={DollarSign}
+                  icon={PesoSign}
                   register={register('commission_fee')}
                   placeholder="0.00"
                   formatType="number"

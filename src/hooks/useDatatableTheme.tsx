@@ -37,8 +37,7 @@ export function useDatatableTheme(): TableStyles {
         cells: {
           style: {
             whiteSpace: 'nowrap' as const,
-            color: '#AEB7C0',
-            backgroundColor: '#24303F'
+            color: '#AEB7C0'
           }
         },
         rows: {
@@ -47,7 +46,7 @@ export function useDatatableTheme(): TableStyles {
             backgroundColor: '#24303F',
             borderBottomColor: '#2E3A47',
             '&:hover': {
-              backgroundColor: '#333A48'
+              backgroundColor: '#2A3647'
             }
           },
         },
@@ -97,8 +96,7 @@ export function useDatatableTheme(): TableStyles {
       cells: {
         style: {
           whiteSpace: 'nowrap' as const,
-          color: '#202431',
-          backgroundColor: '#FFFFFF'
+          color: '#202431'
         }
       },
       rows: {
@@ -107,7 +105,7 @@ export function useDatatableTheme(): TableStyles {
           backgroundColor: '#FFFFFF',
           borderBottomColor: '#E2E8F0',
           '&:hover': {
-            backgroundColor: '#F9FAFB'
+            backgroundColor: '#F3F4F6'
           }
         },
       },

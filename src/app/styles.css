@@ -5,3 +5,25 @@
 body {
   font-family: var(--font-poppins);
 }
+
+/* React Data Table - Text truncation with ellipsis by default */
+.rdt_TableCell {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* React Data Table - Expand row and show full text on hover */
+.rdt_TableRow:hover .rdt_TableCell {
+  white-space: normal !important; /* Override CSS-in-JS nowrap */
+  overflow: visible !important;
+}
+
+/* React Data Table - Dark mode hover background color override */
+.dark .rdt_TableRow:hover {
+  background-color: #2A3647 !important;
+}
+
+/* React Data Table - Light mode hover background color override */
+body:not(.dark) .rdt_TableRow:hover {
+  background-color: #F3F4F6 !important;
+}
