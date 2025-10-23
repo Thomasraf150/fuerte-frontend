@@ -132,41 +132,42 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
   return (
     <>
-      <div className="bg-gray-200 p-2 sm:p-4 rounded">
+      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="px-2 py-2 sm:px-4 sm:py-4 border border-stroke bg-gradient-to-r from-cyan-500 to-blue-500 md:px-3 xl:px-6">
-            <h5 className="text-m text-lime-50 dark:text-white">
-              <span className="font-semibold">Other Payment</span>
-            </h5>
+          <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+            <h3 className="font-medium text-black dark:text-white">
+              Other Payment
+            </h3>
           </div>
-          <div className="space-y-1 bg-gray-100 border border-gray-300">
+          <div className="p-7">
+            <div className="space-y-1">
 
             {/* Due Date */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Due Date:
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900 text-center 2xl:text-left text-xs sm:text-sm">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white text-center 2xl:text-left text-xs sm:text-sm">
                 {moment(selectedMoSchedOthPay?.due_date).format('YYYY-MM-DD')}
               </div>
             </div>
 
             {/* Remaining Due */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Remaining Due:
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900 text-center 2xl:text-left text-xs sm:text-sm">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white text-center 2xl:text-left text-xs sm:text-sm">
                 {Number(selectedMoSchedOthPay?.amount).toFixed(2)}
               </div>
             </div>
 
             {/* Collection */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Collection
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <FormInput
                   label=""
                   id="collection"
@@ -183,12 +184,12 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Interest */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Interest
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <input
-                  className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  className={`block p-2 border w-full text-center border-stroke dark:border-strokedark bg-white dark:bg-form-input text-black dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
                   type="text"
                   id="udi"
                   placeholder="0.00"
@@ -200,10 +201,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Payment UA/SP */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Payment UA/SP
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <FormInput
                   label=""
                   id="payment_ua_sp"
@@ -220,10 +221,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Penalty UA/SP */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Penalty UA/SP
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <FormInput
                   label=""
                   id="penalty_ua_sp"
@@ -240,10 +241,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Advanced Payment */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Advanced Payment
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <FormInput
                   label=""
                   id="advanced_payment"
@@ -260,10 +261,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Bank Charges */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Bank Charges
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <FormInput
                   label=""
                   id="bank_charge"
@@ -280,12 +281,12 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* AP Refund */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 AP Refund
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <input
-                  className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  className={`block p-2 border w-full text-center border-stroke dark:border-strokedark bg-white dark:bg-form-input text-black dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
                   type="text"
                   id="ap_refund"
                   placeholder="0.00"
@@ -297,10 +298,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Commission */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Commission
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <FormInput
                   label=""
                   id="commission_fee"
@@ -316,12 +317,12 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
             {/* Collection Date */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
                 Collection Date
               </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-gray-900">
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <input
-                  className={`block p-2 border w-full text-center border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  className={`block p-2 border w-full text-center border-stroke dark:border-strokedark bg-white dark:bg-form-input text-black dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
                   type="date"
                   id="collection_date"
                   placeholder="mm/dd/YYYY"
@@ -359,6 +360,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
             </div>
 
+          </div>
           </div>
 
         </form>

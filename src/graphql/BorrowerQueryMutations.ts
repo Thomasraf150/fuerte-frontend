@@ -233,6 +233,7 @@ const DELETE_BORROWER_QUERY: string = `
 const CHECK_BORROWER_DUPLICATE: string = `
   query CheckBorrowerDuplicate(
     $firstname: String!
+    $middlename: String!
     $lastname: String!
     $dob: String!
     $email: String
@@ -241,6 +242,7 @@ const CHECK_BORROWER_DUPLICATE: string = `
   ) {
     checkBorrowerDuplicate(
       firstname: $firstname
+      middlename: $middlename
       lastname: $lastname
       dob: $dob
       email: $email
@@ -252,6 +254,7 @@ const CHECK_BORROWER_DUPLICATE: string = `
       duplicateBorrower {
         id
         firstname
+        middlename
         lastname
         borrower_details {
           email
