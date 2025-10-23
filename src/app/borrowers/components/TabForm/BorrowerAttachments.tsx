@@ -7,6 +7,7 @@ import useBorrowerAttachments from '@/hooks/useBorrowerAttachments';
 import Lightbox from '@/components/Lightbox';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { Trash2, Download, File, FileText } from 'react-feather';
+import './../../styles.css';
 
 interface BorrAttProps {
   singleData: BorrowerRowInfo | undefined;
