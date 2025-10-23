@@ -166,6 +166,7 @@ const useBorrower = () => {
           query: CHECK_BORROWER_DUPLICATE,
           variables: {
             firstname: data.firstname,
+            middlename: data.middlename,
             lastname: data.lastname,
             dob: data.dob,
             email: data.email || null,
@@ -181,13 +182,32 @@ const useBorrower = () => {
         const duplicate = result.data.checkBorrowerDuplicate;
         const borrower = duplicate.duplicateBorrower;
 
+        // Build middlename display (include space if it exists)
+        const middlename = borrower.middlename ? ` ${borrower.middlename}` : '';
+
+        // Parse duplicate types (can be comma-separated: "contact_number,full_name")
+        const duplicateTypes = duplicate.duplicateType?.split(',') || [];
+
+        // Build dynamic duplicate message with bold formatting
+        let duplicateMessage = 'A borrower with the same ';
+
+        if (duplicateTypes.length === 2) {
+          // Both contact number and full name are duplicates
+          duplicateMessage += '<strong>contact number</strong> and <strong>full name</strong>';
+        } else if (duplicateTypes.includes('contact_number')) {
+          duplicateMessage += '<strong>contact number</strong>';
+        } else if (duplicateTypes.includes('full_name')) {
+          duplicateMessage += '<strong>full name</strong>';
+        }
+
+        duplicateMessage += ' already exists in the system:';
+
         await showConfirmationModal(
           'Duplicate Borrower Found',
-          `<p>A borrower with the same ${duplicate.duplicateType.replace(/_/g, ' ')} already exists in the system:</p>` +
+          `<p>${duplicateMessage}</p>` +
           `<br/>` +
-          `<p><strong>Name:</strong> ${borrower.firstname} ${borrower.lastname}</p>` +
-          `<p><strong>Email:</strong> ${borrower.borrower_details?.email || 'N/A'}</p>` +
-          `<p><strong>Contact:</strong> ${borrower.borrower_details?.contact_no || 'N/A'}</p>` +
+          `<p><strong>Full Name:</strong> ${borrower.firstname}${middlename} ${borrower.lastname}</p>` +
+          `<p><strong>Contact Number:</strong> ${borrower.borrower_details?.contact_no || 'N/A'}</p>` +
           `<br/>` +
           `<p>Please verify if this is the same person. The borrower was not created to prevent duplicates.</p>`,
           'Close',

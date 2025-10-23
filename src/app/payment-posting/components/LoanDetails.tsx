@@ -53,8 +53,8 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-200 p-2 sm:p-4 rounded">
-          <table className="w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
+        <div className="bg-white dark:bg-boxdark p-2 sm:p-4 rounded border border-stroke dark:border-strokedark">
+          <table className="w-full bg-white dark:bg-boxdark border-stroke dark:border-strokedark border-separate border-spacing-y-1">
             <thead>
               <tr>
                 <th></th>
@@ -63,30 +63,30 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
             </thead>
             <tbody>
               <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Borrower</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900 uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Borrower</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</td>
               </tr>
               <tr className="">
-              <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">PN Amount</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{ formatNumber(Number(loanSingleData?.pn_amount)) }</td>
+              <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">PN Amount</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{ formatNumber(Number(loanSingleData?.pn_amount)) }</td>
               </tr>
               <tr>
-              <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Status</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{ loanStatus(loanSingleData?.status) }</td>
+              <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Status</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{ loanStatus(loanSingleData?.status) }</td>
               </tr>
               <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Monthly</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{formatNumber(Number(loanSingleData?.monthly))}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Monthly</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(Number(loanSingleData?.monthly))}</td>
               </tr>
               <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Loan Ref #:</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{loanSingleData?.loan_ref}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Loan Ref #:</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{loanSingleData?.loan_ref}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div className="bg-gray-200 p-2 sm:p-4 rounded">
-          <table className="w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
+        <div className="bg-white dark:bg-boxdark p-2 sm:p-4 rounded border border-stroke dark:border-strokedark">
+          <table className="w-full bg-white dark:bg-boxdark border-stroke dark:border-strokedark border-separate border-spacing-y-1">
             <thead>
               <tr>
                 <th></th>
@@ -95,27 +95,27 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
             </thead>
             <tbody>
               <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Term</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{loanSingleData?.term} Mo/s.</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Term</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{loanSingleData?.term} Mo/s.</td>
               </tr>
               <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Total Deduction</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{formatNumber(totalDeduction)}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Total Deduction</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(totalDeduction)}</td>
               </tr>
               <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Total Interest</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Total Interest</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</td>
               </tr>
               <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Loan Proceeds</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{formatNumber(Number(loanSingleData?.loan_proceeds))}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Loan Proceeds</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(Number(loanSingleData?.loan_proceeds))}</td>
               </tr>
 
             </tbody>
           </table>
         </div>
-        <div className="bg-gray-200 p-2 sm:p-4 rounded">
-          <table className="w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
+        <div className="bg-white dark:bg-boxdark p-2 sm:p-4 rounded border border-stroke dark:border-strokedark">
+          <table className="w-full bg-white dark:bg-boxdark border-stroke dark:border-strokedark border-separate border-spacing-y-1">
             <thead>
               <tr>
                 <th></th>
@@ -124,8 +124,8 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
             </thead>
             <tbody>
               <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-gray-700 bg-neutral-100 text-form-strokedark">Transaction Date</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-900">{formatDate(String(loanSingleData?.created_at))}</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Transaction Date</td>
+                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatDate(String(loanSingleData?.created_at))}</td>
               </tr>
             </tbody>
           </table>
@@ -135,7 +135,7 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
 
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4">
           {/* First Column - Payment Schedule */}
-          <div className="bg-gray-200 rounded">
+          <div>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="px-2 py-2 sm:px-4 sm:py-4 md:px-3 xl:px-6">
                 <h5 className="text-m text-black dark:text-white">
@@ -230,7 +230,7 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
           </div>
 
         {/* Second Column - Payment Form */}
-        <div className="bg-gray-200 rounded">
+        <div>
           {selectedMoSched && (
             <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
               <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment} paymentLoading={paymentLoading}/>
