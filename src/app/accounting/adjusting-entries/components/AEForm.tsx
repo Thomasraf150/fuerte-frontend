@@ -17,18 +17,18 @@ interface ParentFormBr {
   singleData: RowAcctgEntry | undefined;
   createAe: (row: RowAcctgEntry) => Promise<{success: boolean, error?: string, data?: any}>;
   fetchAe: (a: string, b: string, c: string) => void;
+  refresh: () => Promise<void>;
   loading: boolean;
-  adjustingEntriesLoading: boolean;
 }
 
-const AEForm: React.FC<ParentFormBr> = ({ 
-      setShowForm, 
-      singleData, 
-      actionLbl, 
+const AEForm: React.FC<ParentFormBr> = ({
+      setShowForm,
+      singleData,
+      actionLbl,
       createAe,
       fetchAe,
-      loading,
-      adjustingEntriesLoading 
+      refresh,
+      loading
     }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
@@ -124,7 +124,7 @@ const AEForm: React.FC<ParentFormBr> = ({
     if (isConfirmed) {
       const result = await createAe(data);
       if (result.success) {
-        fetchAe("","","");
+        await refresh(); // Use refresh instead of fetchAe
         setShowForm(false);
       }
     }
@@ -345,11 +345,11 @@ const AEForm: React.FC<ParentFormBr> = ({
             )} */}
             {singleData === undefined && (
               <button
-                className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm ${adjustingEntriesLoading ? 'opacity-70' : ''}`}
+                className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm ${loading ? 'opacity-70' : ''}`}
                 type="submit"
-                disabled={adjustingEntriesLoading}
+                disabled={loading}
               >
-                {adjustingEntriesLoading ? (
+                {loading ? (
                   <>
                     <RotateCw size={17} className="animate-spin mr-1" />
                     <span>Saving...</span>

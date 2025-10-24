@@ -11,8 +11,8 @@ import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 const CashPositionList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { incomeStatementData } = useFinancialStatement();
-  
+  const { balanceSheetData } = useFinancialStatement();
+
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
     setActionLbl(lbl);
@@ -20,8 +20,8 @@ const CashPositionList: React.FC = () => {
 
   useEffect(() => {
 
-    console.log(incomeStatementData, ' incomeStatementData');
-  }, [incomeStatementData])
+    console.log(balanceSheetData, ' balanceSheetData');
+  }, [balanceSheetData])
 
   return (
     <div>

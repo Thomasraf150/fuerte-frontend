@@ -83,7 +83,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
     const result = await onSubmitCoa(data);
 
     // Only close form on successful submission
-    if (result.success) {
+    if (result && typeof result === 'object' && 'success' in result && result.success) {
       fetchCoaDataTable();
       setShowForm(false);
     }

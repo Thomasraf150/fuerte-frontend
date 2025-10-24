@@ -14,9 +14,18 @@ const column = aETblColumn;
 const AdjustingEntriesList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { dataAe, createAe, fetchAe, loading } = useAdjustingEntries();
-    const [singleData, setSingleData] = useState<RowAcctgEntry>();
-    const [showFormAe, setShowFormAe] = useState<boolean>(false);
+  const {
+    dataAe,
+    createAe,
+    fetchAe,
+    adjustingEntriesLoading,
+    paginationLoading,
+    serverSidePaginationProps,
+    adjustingEntriesError,
+    refresh
+  } = useAdjustingEntries();
+  const [singleData, setSingleData] = useState<RowAcctgEntry>();
+  const [showFormAe, setShowFormAe] = useState<boolean>(false);
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -53,21 +62,34 @@ const AdjustingEntriesList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowFormAe('Create Adjusting Entries', true) }>
-                      <Plus size={14} /> 
+                      <Plus size={14} />
                       <span>New Adjusting Entry</span>
                   </button>
                 </div>
                 <div className="px-4">
+                  {adjustingEntriesError && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                      Error loading adjusting entries: {adjustingEntriesError}
+                      <button
+                        onClick={refresh}
+                        className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
                   <CustomDatatable
-                    apiLoading={false}
+                    apiLoading={paginationLoading}
                     title="AE List"
                     onRowClicked={handleWholeRowClick}
                     columns={column()}
                     data={dataAe || []}
+                    enableCustomHeader={true}
+                    serverSidePagination={serverSidePaginationProps}
                   />
                 </div>
               </div>
@@ -76,13 +98,14 @@ const AdjustingEntriesList: React.FC = () => {
           {showFormAe && (
             <div className={`col-span-2 ${showFormAe ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <AEForm 
-                  setShowForm={setShowFormAe} 
-                  actionLbl={actionLbl} 
-                  singleData={singleData} 
+                <AEForm
+                  setShowForm={setShowFormAe}
+                  actionLbl={actionLbl}
+                  singleData={singleData}
                   createAe={createAe}
                   fetchAe={fetchAe}
-                  loading={loading}
+                  refresh={refresh}
+                  loading={adjustingEntriesLoading}
                 />
               </div>
             </div>
