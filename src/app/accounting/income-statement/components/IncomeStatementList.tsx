@@ -11,6 +11,7 @@ import ReactSelect from '@/components/ReactSelect';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
+import { LoadingSpinner } from '@/components/LoadingStates';
 // import useCoa from '@/hooks/useCoa';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -29,7 +30,7 @@ const IncomeStatementList: React.FC = () => {
 
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData } = useFinancialStatement();
+  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData, loading } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
@@ -117,6 +118,10 @@ const IncomeStatementList: React.FC = () => {
 
   const parseAmount = (val: any) =>
     parseFloat(val?.toString().replace(/,/g, '')) || 0;
+
+  // Format number with commas
+  const formatNumber = (num: number) =>
+    num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // interest income
   const totalsIntInc = monthKeys.reduce((acc, month) => {
@@ -255,30 +260,33 @@ const IncomeStatementList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-3 gap-4">
-          <div className={`col-span-2`}>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
-             
-            <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-5">
-              <div className="mb-2 font-medium text-gray-700 dark:text-bodydark">Select Date Range:</div>
-              <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-1 gap-4">
+          <div className="">
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-4">
+
+            <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+              <h3 className="font-medium text-black dark:text-white">Report Filters</h3>
+            </div>
+            <div className="p-7">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Start Date */}
-                <div className="flex flex-col ">
-                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Start Date:</label>
+                <div className="flex flex-col relative z-50">
+                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Start Date</label>
                   <DatePicker
                     selected={startDate}
                     onChange={handleStartDateChange}
                     selectsStart
                     startDate={startDate}
                     endDate={endDate}
-                    placeholderText="Start Date"
-                    className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-60 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                    placeholderText="Select start date"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    popperPlacement="bottom-start"
                   />
                 </div>
 
                 {/* End Date */}
-                <div className="flex flex-col ">
-                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">End Date:</label>
+                <div className="flex flex-col relative z-50">
+                  <label className="mb-2 text-sm font-medium text-black dark:text-white">End Date</label>
                   <DatePicker
                     selected={endDate}
                     onChange={handleEndDateChange}
@@ -286,14 +294,15 @@ const IncomeStatementList: React.FC = () => {
                     startDate={startDate}
                     endDate={endDate}
                     minDate={startDate}
-                    placeholderText="End Date"
-                    className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-60 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                    placeholderText="Select end date"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    popperPlacement="bottom-start"
                   />
                 </div>
 
                 {/* Branch Select */}
-                <div className="flex flex-col min-w-[200px]">
-                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Branch:</label>
+                <div className="flex flex-col">
+                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Branch</label>
                   <Controller
                     name="branch_id"
                     control={control}
@@ -308,14 +317,18 @@ const IncomeStatementList: React.FC = () => {
                           handleBranchChange(selectedOption?.value ?? '');
                         }}
                         value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                        menuPortalTarget={document.body}
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                        }}
                       />
                     )}
                   />
                 </div>
 
                 {/* Sub Branch Select */}
-                <div className="flex flex-col min-w-[200px]">
-                  <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Sub Branch:</label>
+                <div className="flex flex-col">
+                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Sub Branch</label>
                   <Controller
                     name="branch_sub_id"
                     control={control}
@@ -330,73 +343,74 @@ const IncomeStatementList: React.FC = () => {
                           handleBranchSubChange(selectedOption?.value ?? '');
                         }}
                         value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                        menuPortalTarget={document.body}
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                        }}
                       />
                     )}
                   />
                 </div>
               </div>
-
-              <div className="flex justify-end px-7 py-2">
-                {/* Uncomment if you want the button */}
-                {/* <button
-                  onClick={handlePrintPDF}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Print as PDF
-                </button> */}
-              </div>
+            </div>
             </div>
 
-
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-boxdark dark:text-boxdark">
+                <h3 className="font-medium text-black dark:text-white">
                   Income Statement
                 </h3>
               </div>
-              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[1000px] h-[1600px]" ref={tableRef}>
-              
-              
-              {/** 
+              <div className="overflow-x-auto p-7" ref={tableRef}>
+
+              {loading ? (
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <LoadingSpinner message="Loading financial data..." size="lg" />
+                </div>
+              ) : (
+                <>
+
+              {/**
                * Interest Income
               */}
-              <table className="table-auto border border-gray-300 w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border text-left" style={{"width": "430px"}}>Account Name</th>
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 z-1">
+                  <tr className="bg-gray-2 dark:bg-meta-4">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white text-left min-w-[280px]">Account Name</th>
                     {monthKeys.map((month: any) => (
-                      <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {moment(month, 'YYYY-MM').format('MMMM YYYY')}
+                      <th key={month} className="px-4 py-4 font-medium text-black dark:text-white text-right min-w-[120px]">
+                        {moment(month, 'YYYY-MM').format('MMM YYYY')}
                       </th>
                     ))}
-                    <th className="border text-right">Variance</th>
+                    <th className="px-4 py-4 font-medium text-black dark:text-white text-right min-w-[100px]">Variance</th>
                   </tr>
                 </thead>
                 {isInterestIncomeData && isInterestIncomeData.length > 0 ? (
                   <>
                     <tbody>
                       {isInterestIncomeData.map((row: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border">{row.AccountName}</td>
+                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
+                          <td className="px-4 py-4 text-black dark:text-white">{row.AccountName}</td>
                           {monthKeys.map((month) => (
-                            <td key={month} className="border text-right">
+                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white">
                               {row[month] ?? "-"}
                             </td>
                           ))}
-                          <td className="border text-right">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white">{row.variance}</td>
                         </tr>
                       ))}
                     </tbody>
 
                     <tfoot>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">Total Interest Income</td>
+                      <tr className="bg-gray-2 dark:bg-meta-4">
+                        <td className="px-4 py-4 font-bold text-black dark:text-white">Total Interest Income</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {totalsIntInc[month].toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-black dark:text-white">
+                            {formatNumber(totalsIntInc[month])}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {totalVarianceIntInc.toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-black dark:text-white">
+                          {formatNumber(totalVarianceIntInc)}
                         </td>
                       </tr>
                     </tfoot>
@@ -404,7 +418,7 @@ const IncomeStatementList: React.FC = () => {
                 ) : (
                   <tbody>
                     <tr>
-                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
                         No data available
                       </td>
                     </tr>
@@ -416,58 +430,47 @@ const IncomeStatementList: React.FC = () => {
               */}
 
 
-              {/** 
+              {/**
                * Other Revenue
               */}
-              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border text-left" style={{"width": "430px"}}></th>
-                    {monthKeys.map((month: any) => (
-                      <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {/* {month} */}
-                      </th>
-                    ))}
-                    <th className="border text-right"></th>
-                  </tr>
-                </thead>
+              <table className="w-full text-sm mt-6">
                 {isOtherRevenueData && isOtherRevenueData.length > 0 ? (
                   <>
                     <tbody>
                       {isOtherRevenueData.map((row: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border">{row.AccountName}</td>
+                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
+                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
-                            <td key={month} className="border text-right">
+                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
                               {row[month] ?? "-"}
                             </td>
                           ))}
-                          <td className="border text-right">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
                         </tr>
                       ))}
                     </tbody>
 
                     <tfoot>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">Total Other Revenue</td>
+                      <tr className="bg-gray-2 dark:bg-meta-4">
+                        <td className="px-4 py-4 font-bold text-black dark:text-white">Total Other Revenue</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {totalsOthRevenue[month].toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-black dark:text-white">
+                            {formatNumber(totalsOthRevenue[month])}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {totalVarianceOthRev.toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-black dark:text-white">
+                          {formatNumber(totalVarianceOthRev)}
                         </td>
                       </tr>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">Total Income</td>
+                      <tr className="bg-primary dark:bg-primary">
+                        <td className="px-4 py-4 font-bold text-white">Total Income</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {(totalsIntInc[month] + totalsOthRevenue[month]).toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
+                            {formatNumber(totalsIntInc[month] + totalsOthRevenue[month])}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {(totalVarianceIntInc + totalVarianceOthRev).toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-white">
+                          {formatNumber(totalVarianceIntInc + totalVarianceOthRev)}
                         </td>
                       </tr>
                     </tfoot>
@@ -475,7 +478,7 @@ const IncomeStatementList: React.FC = () => {
                 ) : (
                   <tbody>
                     <tr>
-                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
                         No data available
                       </td>
                     </tr>
@@ -486,46 +489,35 @@ const IncomeStatementList: React.FC = () => {
                * Other Revenue end
               */}
 
-              {/** 
+              {/**
                * Other Income Expense
               */}
-              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border text-left" style={{"width": "430px"}}></th>
-                    {monthKeys.map((month: any) => (
-                      <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {/* {month} */}
-                      </th>
-                    ))}
-                    <th className="border text-right"></th>
-                  </tr>
-                </thead>
+              <table className="w-full text-sm mt-6">
                 {lessExpenseData && lessExpenseData.length > 0 ? (
                   <>
                     <tbody>
                       {lessExpenseData.map((row: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border">{row.AccountName}</td>
+                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
+                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
-                            <td key={month} className="border text-right">
+                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
                               {row[month] ?? "-"}
                             </td>
                           ))}
-                          <td className="border text-right">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">TOTAL EXPENSE</td>
+                      <tr className="bg-meta-1 dark:bg-meta-1">
+                        <td className="px-4 py-4 font-bold text-white">TOTAL EXPENSE</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {(totalsLessExpense[month]).toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
+                            {formatNumber(totalsLessExpense[month])}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {(totalVarianceLessExp).toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-white">
+                          {formatNumber(totalVarianceLessExp)}
                         </td>
                       </tr>
                     </tfoot>
@@ -533,7 +525,7 @@ const IncomeStatementList: React.FC = () => {
                 ) : (
                   <tbody>
                     <tr>
-                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
                         No data available
                       </td>
                     </tr>
@@ -545,46 +537,35 @@ const IncomeStatementList: React.FC = () => {
               */}
                 
 
-               {/** 
+               {/**
                * Direct Financing Cost
               */}
-              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border text-left" style={{"width": "430px"}}></th>
-                    {monthKeys.map((month: any) => (
-                      <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {/* {month} */}
-                      </th>
-                    ))}
-                    <th className="border text-right"></th>
-                  </tr>
-                </thead>
+              <table className="w-full text-sm mt-6">
                 {directFinancingData && directFinancingData.length > 0 ? (
                   <>
                     <tbody>
                       {directFinancingData.map((row: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border">{row.AccountName}</td>
+                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
+                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
-                            <td key={month} className="border text-right">
+                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
                               {row[month] ?? "-"}
                             </td>
                           ))}
-                          <td className="border text-right">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">NET INCOME BEFORE OTHER INCOME</td>
+                      <tr className="bg-primary dark:bg-primary">
+                        <td className="px-4 py-4 font-bold text-white">NET INCOME BEFORE OTHER INCOME</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]).toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
+                            {formatNumber((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month])}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp).toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-white">
+                          {formatNumber((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp)}
                         </td>
                       </tr>
                     </tfoot>
@@ -592,7 +573,7 @@ const IncomeStatementList: React.FC = () => {
                 ) : (
                   <tbody>
                     <tr>
-                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
                         No data available
                       </td>
                     </tr>
@@ -604,57 +585,46 @@ const IncomeStatementList: React.FC = () => {
               */}
                
                
-               {/** 
+               {/**
                * Other Income Expense
               */}
-              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border text-left" style={{"width": "430px"}}></th>
-                    {monthKeys.map((month: any) => (
-                      <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {/* {month} */}
-                      </th>
-                    ))}
-                    <th className="border text-right"></th>
-                  </tr>
-                </thead>
+              <table className="w-full text-sm mt-6">
                 {otherIncomeExpenseData && otherIncomeExpenseData.length > 0 ? (
                   <>
                     <tbody>
                       {otherIncomeExpenseData.map((row: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border">{row.AccountName}</td>
+                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
+                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
-                            <td key={month} className="border text-right">
+                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
                               {row[month] ?? "-"}
                             </td>
                           ))}
-                          <td className="border text-right">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">Total</td>
+                      <tr className="bg-gray-2 dark:bg-meta-4">
+                        <td className="px-4 py-4 font-bold text-black dark:text-white">Total</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {(totalsOthIncExpense[month]).toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-black dark:text-white">
+                            {formatNumber(totalsOthIncExpense[month])}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {(totalVarianceOthIncExp).toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-black dark:text-white">
+                          {formatNumber(totalVarianceOthIncExp)}
                         </td>
                       </tr>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">NET INCOME BEFORE INCOME TAX</td>
+                      <tr className="bg-primary dark:bg-primary">
+                        <td className="px-4 py-4 font-bold text-white">NET INCOME BEFORE INCOME TAX</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {Math.abs((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month])).toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
+                            {formatNumber(Math.abs((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month])))}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp)).toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-white">
+                          {formatNumber(Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp)))}
                         </td>
                       </tr>
                     </tfoot>
@@ -662,7 +632,7 @@ const IncomeStatementList: React.FC = () => {
                 ) : (
                   <tbody>
                     <tr>
-                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
                         No data available
                       </td>
                     </tr>
@@ -673,76 +643,55 @@ const IncomeStatementList: React.FC = () => {
                * Other Income Expense end
               */}
                
-               {/** 
+               {/**
                * Prov Income Income
               */}
-              <table className="table-auto border border-gray-300 w-full text-sm mt-2">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border text-left" style={{"width": "430px"}}></th>
-                    {monthKeys.map((month: any) => (
-                      <th key={month} className="border text-right" style={{"width": "140px"}}>
-                        {/* {month} */}
-                      </th>
-                    ))}
-                    <th className="border text-right"></th>
-                  </tr>
-                </thead>
+              <table className="w-full text-sm mt-6">
                 {incomeTaxData && incomeTaxData.length > 0 ? (
                   <>
                     <tbody>
                       {incomeTaxData.map((row: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border">{row.AccountName}</td>
+                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
+                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
-                            <td key={month} className="border text-right">
+                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
                               {row[month] ?? "-"}
                             </td>
                           ))}
-                          <td className="border text-right">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">NET INCOME AFTER TAX</td>
+                      <tr className="bg-meta-3 dark:bg-meta-3">
+                        <td className="px-4 py-4 font-bold text-white">NET INCOME AFTER TAX</td>
                         {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {Math.abs(((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month]) - totalsincomeTax[month])).toFixed(2)}
+                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
+                            {formatNumber(Math.abs(((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month]) - totalsincomeTax[month])))}
                           </td>
                         ))}
-                        <td className="border text-right">
-                          {Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp) - totalVarianceIncTax).toFixed(2)}
+                        <td className="px-4 py-4 font-bold text-right text-white">
+                          {formatNumber(Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp) - totalVarianceIncTax))}
                         </td>
                       </tr>
-                      {/* <tr className="bg-gray-100 font-bold">
-                        <td className="border text-left">NET INCOME BEFORE INCOME TAX</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="border text-right">
-                            {((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - (totalsLessExpense[month]) - (totalsOthIncExpense[month])).toFixed(2)}
-                          </td>
-                        ))}
-                        <td className="border text-right">
-                          {((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - (totalVarianceLessExp) - (totalVarianceOthIncExp)).toFixed(2)}
-                        </td>
-                      </tr> */}
                     </tfoot>
                   </>
                 ) : (
                   <tbody>
                     <tr>
-                      <td colSpan={monthKeys.length + 2} className="p-4 text-center">
+                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
                         No data available
                       </td>
                     </tr>
                   </tbody>
                 )}
               </table>
-              {/** 
+              {/**
                * Other Income Expense end
               */}
 
-              
+                </>
+              )}
 
               </div>
             </div>
