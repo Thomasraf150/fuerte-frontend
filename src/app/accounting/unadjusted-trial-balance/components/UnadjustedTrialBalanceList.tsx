@@ -9,7 +9,7 @@ import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 import { formatNumberComma } from '@/utils/helper';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import TrialBalanceSkeleton from '@/components/LoadingStates/TrialBalanceSkeleton';
 
 const UnadjustedTrialBalanceList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -54,28 +54,28 @@ const UnadjustedTrialBalanceList: React.FC = () => {
                           <tbody className="text-sm">
                             {loading ? (
                               <tr>
-                                <td colSpan={4} className="text-center py-8">
-                                  <LoadingSpinner message="Loading trial balance..." />
+                                <td colSpan={4} className="p-0 border-0">
+                                  <TrialBalanceSkeleton rows={15} columns={4} />
                                 </td>
                               </tr>
                             ) : dataUtb !== undefined ? (
                               <>
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
-                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>ASSETS</td> 
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>ASSETS</td>
                                 </tr>
                                 {dataUtb.assets.length > 0 ? dataUtb.assets.map((item: any, i: number) =>
-                                    <tr key={`${i}`} className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                    <tr key={`${i}`} className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                       <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
                                       <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
                                       <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
                                       <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
                                     </tr>
                                 ) : (
-                                  <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
                                   </tr>
                                 )}
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4 font-semibold">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4 font-bold">
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL ASSETS</td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
@@ -85,22 +85,22 @@ const UnadjustedTrialBalanceList: React.FC = () => {
                                     {formatNumberComma(parseFloat(dataUtb.assets.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
                                   </td>
                                 </tr>
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                   <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>LIABILITIES</td>
                                 </tr>
                                 {dataUtb.liabilities.length > 0 ? dataUtb.liabilities.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr key={`${i}`} className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
                                   </tr>
                                 ) : (
-                                  <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
                                   </tr>
                                 )}
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4 font-semibold">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4 font-bold">
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL LIABILITIES</td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
@@ -110,22 +110,22 @@ const UnadjustedTrialBalanceList: React.FC = () => {
                                     {formatNumberComma(parseFloat(dataUtb.liabilities.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
                                   </td>
                                 </tr>
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                   <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>CAPITAL</td>
                                 </tr>
                                 {dataUtb.capital.length > 0 ? dataUtb.capital.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr key={`${i}`} className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
                                   </tr>
                                 ) : (
-                                  <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
                                   </tr>
                                 )}
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4 font-semibold">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4 font-bold">
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL CAPITAL</td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
@@ -135,22 +135,22 @@ const UnadjustedTrialBalanceList: React.FC = () => {
                                     {formatNumberComma(parseFloat(dataUtb.capital.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
                                   </td>
                                 </tr>
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                   <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>REVENUE</td>
                                 </tr>
                                 {dataUtb.revenue.length > 0 ? dataUtb.revenue.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr key={`${i}`} className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
                                   </tr>
                                 ) : (
-                                  <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
                                   </tr>
                                 )}
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4 font-semibold">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4 font-bold">
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL REVENUE</td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
@@ -160,22 +160,22 @@ const UnadjustedTrialBalanceList: React.FC = () => {
                                     {formatNumberComma(parseFloat(dataUtb.revenue.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
                                   </td>
                                 </tr>
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                   <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>EXPENSES</td>
                                 </tr>
                                 {dataUtb.expenses.length > 0 ? dataUtb.expenses.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr key={`${i}`} className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
                                     <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
                                   </tr>
                                 ) : (
-                                  <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4">
+                                  <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
                                     <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
                                   </tr>
                                 )}
-                                <tr className="even:bg-gray-50 hover:bg-gray-100 dark:hover:bg-meta-4 font-semibold">
+                                <tr className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4 font-bold">
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL EXPENSES</td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
                                   <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
