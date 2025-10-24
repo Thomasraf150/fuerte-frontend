@@ -1,50 +1,85 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import AdjustingEntriesQueryMutations from '@/graphql/AdjustingEntriesQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { usePagination } from './usePagination';
 
 const useAdjustingEntries = () => {
 
   const { GET_AE_QUERY, CREATE_AE_MUTATION } = AdjustingEntriesQueryMutations;
 
-  const [loading, setLoading] = useState<boolean>(false);
   const [adjustingEntriesLoading, setAdjustingEntriesLoading] = useState<boolean>(false);
-  const [dataAe, setDataAe] = useState<RowAcctgEntry[]>();
-  // Function to fetchdata
 
-  const fetchAe = async (branch_sub_id: string, startDate: string, endDate: string) => {
-    // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    // const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        branch_sub_id,
-        startDate,
-        endDate
-      },
-    };
-
-    mutation = GET_AE_QUERY;
-    setLoading(true);
-
+  // Wrapper function to adapt existing API for usePagination hook
+  const fetchAdjustingEntriesForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: mutation,
-        variables,
+        query: GET_AE_QUERY,
+        variables: {
+          first,
+          page,
+          ...(search && { search }), // Add search parameter if provided
+          orderBy: [
+            { column: "id", order: 'DESC' }
+          ]
+        },
       }),
     });
+
     const result = await response.json();
-    setDataAe(result?.data.getAdjustingEntries);
-    setLoading(false);
-  };
+
+    // Return the expected format for usePagination
+    return {
+      data: result.data.getAdjustingEntries.data,
+      paginatorInfo: result.data.getAdjustingEntries.paginatorInfo || {
+        total: result.data.getAdjustingEntries.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_AE_QUERY]);
+
+  // Use the new pagination hook
+  const {
+    data: dataAe,
+    loading: paginationLoading,
+    error: adjustingEntriesError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination<RowAcctgEntry>({
+    fetchFunction: fetchAdjustingEntriesForPagination,
+    config: {
+      initialPageSize: 20,
+      defaultPageSize: 20,
+    },
+  });
+
+  // Legacy fetchAe function for backward compatibility
+  const fetchAe = useCallback(async (branch_sub_id: string, startDate: string, endDate: string) => {
+    // For backward compatibility - if this is still used anywhere
+    // This would need to be refactored if filtering by branch/date is still needed
+    const result = await fetchAdjustingEntriesForPagination(20, 1);
+    return result;
+  }, [fetchAdjustingEntriesForPagination]);
 
   const createAe = async (row: RowAcctgEntry) => {
     setAdjustingEntriesLoading(true);
@@ -106,17 +141,44 @@ const useAdjustingEntries = () => {
     }
   };
 
-   // Fetch data on component mount if id exists
+  // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchAe("","","");
+    // Data fetching is now handled by usePagination hook automatically
   }, []);
 
   return {
+    // Legacy data and functions (for backward compatibility)
     createAe,
     fetchAe,
     dataAe,
-    loading,
-    adjustingEntriesLoading
+    adjustingEntriesLoading, // For form submission operations
+    paginationLoading, // For table loading operations
+
+    // New pagination functionality
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+    adjustingEntriesError,
+
+    // Server-side pagination helpers for CustomDatatable
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+    },
   };
 };
 
