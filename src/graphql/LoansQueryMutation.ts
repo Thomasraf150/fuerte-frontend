@@ -282,10 +282,7 @@ const SAVE_LOAN_RELEASE: string = `
       success
       message
       data {
-        id
-        loan_ref
         released_date
-        status
       }
     }
   }
