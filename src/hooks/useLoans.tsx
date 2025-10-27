@@ -470,9 +470,21 @@ const useLoans = () => {
           return { success: false, error: response.errors[0].message };
         }
 
-        toast.success('Loan Successfully Released!');
+        // Check backend success flag
+        const result = response.data?.saveReleaseLoan;
+        if (result && result.success === false) {
+          toast.error(result.message || 'Failed to release loan');
+          return { success: false, error: result.message };
+        }
+
+        // Success - show updated loan_ref if available
+        const loanRef = result?.data?.loan_ref;
+        const successMessage = loanRef
+          ? `Loan Successfully Released! Reference: ${loanRef}`
+          : 'Loan Successfully Released!';
+        toast.success(successMessage);
         handleRefetchLoanData();
-        return { success: true };
+        return { success: true, loanRef };
       }
 
       return { success: false, error: 'Operation cancelled by user' };
