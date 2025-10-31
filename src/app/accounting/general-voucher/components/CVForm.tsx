@@ -39,6 +39,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   // const { createGV, fetchGV, loading } = useGeneralVoucher();
   const [ showPayee, setShowPayee ] = useState<boolean>(false);
   const [ dataPayee, setDataPayee ] = useState<RowVendorsData>();
+  const [activeInput, setActiveInput] = useState<{ index: number; field: 'debit' | 'credit' } | null>(null);
 
   useEffect(() => {
     fetchCoaDataTable();
@@ -336,18 +337,22 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                         <input
                           type="text"
                           className="w-full p-1 border rounded text-right"
-                          value={row.debit ? formatWithThousandsSeparator(row.debit, 2) : ''}
+                          value={activeInput?.index === index && activeInput?.field === 'debit' ? row.debit : (row.debit ? formatWithThousandsSeparator(row.debit, 2) : '')}
                           onChange={(e) => handleChange(index, "debit", e.target.value, '')}
                           disabled={!!row.credit}
+                          onFocus={() => setActiveInput({ index, field: 'debit' })}
+                          onBlur={() => setActiveInput(null)}
                         />
                       </td>
                       <td className="p-2 border w-[30%]">
                         <input
                           type="text"
                           className="w-full p-1 border rounded text-right"
-                          value={row.credit ? formatWithThousandsSeparator(row.credit, 2) : ''}
+                          value={activeInput?.index === index && activeInput?.field === 'credit' ? row.credit : (row.credit ? formatWithThousandsSeparator(row.credit, 2) : '')}
                           onChange={(e) => handleChange(index, "credit", e.target.value, '')}
                           disabled={!!row.debit}
+                          onFocus={() => setActiveInput({ index, field: 'credit' })}
+                          onBlur={() => setActiveInput(null)}
                         />
                       </td>
                       <td className="p-2 border text-center flex gap-3 justify-center w-[100%]">
