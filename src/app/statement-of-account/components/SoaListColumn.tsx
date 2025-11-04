@@ -60,7 +60,7 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
           (row.custom_status === 'For Approval'
             ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
             : row.custom_status === 'Approved'
-            ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-red'
+            ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-yellow-300'
             : row.custom_status === 'For Releasing'
             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
             : row.custom_status === 'Released'
