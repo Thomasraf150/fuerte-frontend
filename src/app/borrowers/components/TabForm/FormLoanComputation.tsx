@@ -7,11 +7,12 @@ import PesoSign from '@/components/PesoSign';
 interface ParentFormBr {
   setValue: any;
   register: any;
+  watch: any;
   handleCompTblDecimal: (e: any, name: string) => void;
   dataComputedLoans: any;
 }
 
-const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDecimal, register, dataComputedLoans }) => {
+const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDecimal, register, watch, dataComputedLoans }) => {
 
   // const handleComputationMisc = (e: any, name: string) => {
   //   const value = e.target.value;
@@ -148,24 +149,18 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <span className="h-px flex-1 bg-black"></span>
                   </span>
                 </li>
-                <li className="flex flex-col sm:flex-row sm:items-center gap-2 border p-3">
+                <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
                     <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Outstanding Balance</h3>
                   </div>
-                  <div className="w-full sm:w-48">
-                    <FormInput
-                      label=""
-                      id="ob"
-                      type="text"
-                      icon={PesoSign}
-                      register={register('ob')}
-                      placeholder="0.00"
-                      formatType="currency"
-                      className="text-right"
-                      onChange={(e) => handleCompTblDecimal(e, 'ob')}
-                    />
+                  <div className="flex items-center justify-end">
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">
+                      {formatNumber(Number(watch('ob')) || 0)}
+                    </h3>
                   </div>
                 </li>
+                {/* Hidden input to maintain form registration for Outstanding Balance */}
+                <input type="hidden" {...register('ob')} />
                 <li className="flex flex-col sm:flex-row sm:items-center gap-2 border p-3">
                   <div className="flex-1">
                     <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Penalty</h3>
