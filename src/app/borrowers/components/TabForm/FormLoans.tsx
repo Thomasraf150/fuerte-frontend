@@ -172,7 +172,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
         <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
           <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} fnGetRenewalDetails={getGetRenewalDetails} />}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={getGetRenewalDetails} />}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller
@@ -280,7 +280,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
           {showComputation && (
             <div className={`${showComputation ? 'fade-in' : 'fade-out'}`}>
-              <FormLoanComputation setValue={setValue} register={register} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} />
+              <FormLoanComputation setValue={setValue} register={register} watch={watch} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} />
             </div>
           )}
 

@@ -5,6 +5,8 @@ import { Home, ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput'
 import { DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
+import { formatNumber } from '@/utils/formatNumber';
+import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 
 interface ParentFormBr {
   renewalIDs: string[] | [];
@@ -12,9 +14,10 @@ interface ParentFormBr {
   fnGetRenewalDetails?: (d: any) => void;
   setValue: any;
   watch: any;
+  loading?: boolean;
 }
 
-const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenewal, setValue, watch, fnGetRenewalDetails }) => {
+const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenewal, setValue, watch, loading = false, fnGetRenewalDetails }) => {
   // const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrCoMakerFormValues>();
 
   const [openRows, setOpenRows] = useState<number[]>([]); // To hold multiple open row indexes
@@ -83,6 +86,14 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
 
   useEffect(() => {
     setValue('renewal_details', unifiedSelectedValues);
+
+    // Auto-populate OB field with total from selected renewal items
+    const renewalTotal = unifiedSelectedValues.reduce(
+      (total: number, row: any) => (row?.amount > 0 ? total + parseFloat(row?.amount) : total),
+      0
+    );
+    setValue('ob', renewalTotal.toFixed(2));
+
     // console.log(unifiedSelectedValues, ' unifiedSelectedValues');
     console.log(dataComputedRenewal, ' dataComputedRenewal');
     console.log(unifiedSelectedValues, ' unifiedSelectedValues');
@@ -95,16 +106,21 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
 
     <div className="max-w-8xl mx-auto pb-4">
       <FormLabel title={`Renewal Details`}/>
-      <div className="overflow-x-auto border border-gray-300 rounded-lg shadow-sm">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border px-4 py-2 text-left">Ref #</th>
-              <th className="border px-4 py-2 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dataComputedRenewal && dataComputedRenewal?.map((v: any, index: number) => (
+      {loading ? (
+        <div className="border border-gray-300 dark:border-strokedark rounded-lg shadow-sm p-12 bg-white dark:bg-meta-4">
+          <LoadingSpinner size="lg" message="Loading renewal data..." />
+        </div>
+      ) : (
+        <div className="overflow-x-auto border border-gray-300 dark:border-strokedark rounded-lg shadow-sm">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border px-4 py-2 text-left">Ref #</th>
+                <th className="border px-4 py-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dataComputedRenewal && dataComputedRenewal?.map((v: any, index: number) => (
               <React.Fragment key={index}>
                 <tr className="hover:bg-gray-50">
                   <td className="border px-4 py-2">{v.loan_ref}</td>
@@ -149,7 +165,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                   </div>
                                 </td>
                                 <td className="text-center px-2 py-2">UA/SP</td>
-                                <td className="text-right px-2 py-2">{row?.amount}</td>
+                                <td className="text-right px-2 py-2">{formatNumber(Number(row?.amount))}</td>
                                 <td className="text-right px-2 py-2">{row?.due_date}</td>
                               </tr>
                             )
@@ -182,7 +198,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                   </div>
                                 </td>
                                 <td className="text-center px-2 py-2">OB</td>
-                                <td className="text-right px-2 py-2">{fOb.toFixed(2)}</td>
+                                <td className="text-right px-2 py-2">{formatNumber(fOb)}</td>
                                 <td className="text-right px-2 py-2">-</td>
                               </tr>
                             ) : (
@@ -201,20 +217,21 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                 )}
               </React.Fragment>
             ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-3 border border-gray-300 rounded-lg p-3 bg-white">
+            </tbody>
+          </table>
+        </div>
+      )}
+      <div className="mt-3 border border-gray-300 dark:border-strokedark rounded-lg p-3 bg-white dark:bg-meta-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="text-lg font-semibold">Total</div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-            <div className="text-lg font-bold text-blue-600">
+            <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {(() => {
                 const renewalTotal = unifiedSelectedValues.reduce(
                   (total: number, row: any) => (row?.amount > 0 ? total + parseFloat(row?.amount) : total),
                   0
                 );
-                return renewalTotal.toFixed(2);
+                return formatNumber(renewalTotal);
               })()}
             </div>
             <button
