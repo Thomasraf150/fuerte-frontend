@@ -17,7 +17,20 @@ const GeneralVoucherList: React.FC = () => {
   const [showFormCv, setShowFormCv] = useState<boolean>(false);
   const [showFormJv, setShowFormJv] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<RowAcctgEntry>();
-  const { dataGV, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, setLoading, pubSubBrId, generalVoucherLoading } = useGeneralVoucher();
+  const {
+    dataGV,
+    createGV,
+    updateGV,
+    fetchGV,
+    printSummaryTicketDetails,
+    generalVoucherLoading,
+    paginationLoading,
+    pubSubBrId,
+    // New pagination functionality
+    serverSidePaginationProps,
+    generalVoucherError,
+    refresh
+  } = useGeneralVoucher();
   
   const handleShowFormCv = (lbl: string, showFrm: boolean) => {
     setShowFormCv(showFrm);
@@ -74,13 +87,25 @@ const GeneralVoucherList: React.FC = () => {
                   </button>
                 </div>
                 <div className="px-4">
+                  {generalVoucherError && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                      Error loading general vouchers: {generalVoucherError}
+                      <button
+                        onClick={refresh}
+                        className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
                   <CustomDatatable
-                    apiLoading={loading}
+                    apiLoading={paginationLoading}
                     title=""
                     onRowClicked={handleWholeRowClick}
-                    enableCustomHeader={true} 
+                    enableCustomHeader={true}
                     columns={column()}
                     data={dataGV || []}
+                    serverSidePagination={serverSidePaginationProps}
                   />
                 </div>
               </div>
@@ -96,10 +121,10 @@ const GeneralVoucherList: React.FC = () => {
                   createGV={createGV}
                   updateGV={updateGV}
                   fetchGV={fetchGV}
-                  loading={loading}
+                  loading={paginationLoading}
+                  generalVoucherLoading={generalVoucherLoading}
                   pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails}
-                  generalVoucherLoading={generalVoucherLoading} />
+                  printSummaryTicketDetails={printSummaryTicketDetails} />
               </div>
             </div>
           )}
@@ -112,10 +137,10 @@ const GeneralVoucherList: React.FC = () => {
                   singleData={singleData}
                   createGV={createGV}
                   fetchGV={fetchGV}
-                  loading={loading}
+                  loading={paginationLoading}
+                  generalVoucherLoading={generalVoucherLoading}
                   pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails}
-                  generalVoucherLoading={generalVoucherLoading} />
+                  printSummaryTicketDetails={printSummaryTicketDetails} />
               </div>
             </div>
           )}

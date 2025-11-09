@@ -75,8 +75,19 @@ const formatCurrency = (value: string): string => {
     return `${formattedInt}.${decPart}`;
   }
 
+  // No decimal point - just format with commas, NO automatic .00
   const number = parseFloat(cleanValue);
   if (isNaN(number)) return cleanValue;
+  return number.toLocaleString('en-US');
+};
+
+// Currency formatting on blur - adds .00 when field loses focus
+const formatCurrencyOnBlur = (value: string): string => {
+  if (!value) return '';
+  // Remove all non-digits except decimal point and negative sign
+  const cleanValue = value.replace(/[^\d.-]/g, '');
+  const number = parseFloat(cleanValue);
+  if (isNaN(number)) return '';
   // Display with commas and exactly 2 decimal places
   return number.toLocaleString('en-US', {
     minimumFractionDigits: 2,
@@ -202,6 +213,40 @@ const FormInput: React.FC<FormInputProps> = ({
       }
     }
   };
+
+  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+    // Apply final formatting when field loses focus
+    if (formatType === 'currency' && type === 'text') {
+      const inputValue = event.target.value;
+      const formatted = formatCurrencyOnBlur(inputValue);
+      const raw = unformatCurrency(inputValue);
+
+      // Apply fallback value if raw is empty and fallback is defined
+      const finalValue = (raw === '' || raw === null || raw === undefined) && fallbackValue !== undefined
+        ? String(fallbackValue)
+        : raw;
+
+      setDisplayValue(formatted);
+      setRawValue(finalValue);
+
+      // Create synthetic event with final value for form registration
+      const syntheticEvent = {
+        ...event,
+        target: {
+          ...event.target,
+          value: finalValue
+        }
+      };
+
+      // Call React Hook Form's onBlur for validation
+      if (register?.onBlur) {
+        register.onBlur(syntheticEvent as any);
+      }
+    } else if (register?.onBlur) {
+      // For non-currency fields, just call the registered onBlur
+      register.onBlur(event);
+    }
+  };
   return (
     <div className={`${type === 'checkbox' ? 'flex items-center' : ''} ${className}`}>
       <label
@@ -258,6 +303,7 @@ const FormInput: React.FC<FormInputProps> = ({
             {...(formatType === 'number' || formatType === 'currency' ? {} : { defaultValue })}
             {...register}
             onChange={handleChange}
+            onBlur={handleBlur}
             readOnly={readOnly}
             value={formatType === 'number' || formatType === 'currency' ? displayValue : value}
             maxLength={maxLength}

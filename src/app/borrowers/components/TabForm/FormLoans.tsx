@@ -1,7 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { DollarSign, Layout, Save, RotateCw } from 'react-feather';
+import { Layout, Save, RotateCw } from 'react-feather';
+import PesoSign from '@/components/PesoSign';
 import FormInput from '@/components/FormInput';
 import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
@@ -171,7 +172,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
         <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
           <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} fnGetRenewalDetails={getGetRenewalDetails} />}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={getGetRenewalDetails} />}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller
@@ -222,7 +223,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
               label="Loan Amount"
               id="loan_amount"
               type="text"
-              icon={DollarSign}
+              icon={PesoSign}
               register={register('loan_amount', { required: "Loan Amount is required!" })}
               error={errors.loan_amount?.message}
               formatType="number"
@@ -279,7 +280,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
           {showComputation && (
             <div className={`${showComputation ? 'fade-in' : 'fade-out'}`}>
-              <FormLoanComputation setValue={setValue} register={register} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} />
+              <FormLoanComputation setValue={setValue} register={register} watch={watch} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} />
             </div>
           )}
 

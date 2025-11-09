@@ -12,6 +12,13 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData } from '@/utils/DataTypes';
 import { toast } from 'react-toastify';
+import {
+  parseFinancialAmount,
+  addAmounts,
+  validateDoubleEntry,
+  formatWithThousandsSeparator,
+  isValidFinancialInput
+} from '@/utils/financial';
 interface ParentFormBr {
   setShowForm: (b: boolean) => void;
   actionLbl: string;
@@ -32,6 +39,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   // const { createGV, fetchGV, loading } = useGeneralVoucher();
   const [ showPayee, setShowPayee ] = useState<boolean>(false);
   const [ dataPayee, setDataPayee ] = useState<RowVendorsData>();
+  const [activeInput, setActiveInput] = useState<{ index: number; field: 'debit' | 'credit' } | null>(null);
 
   useEffect(() => {
     fetchCoaDataTable();
@@ -87,14 +95,6 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     setRows([...rows, { acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   };
 
-  const formatNumber = (numStr: string) => {
-    if (!numStr) return '';
-    // Add commas for thousands separator
-    const parts = numStr.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return parts.join('.');
-  };
-
   const removeRow = (index: number) => {
     if (rows.length > 1) {
       setRows(rows.filter((_, i) => i !== index));
@@ -106,12 +106,12 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
     if (field === 'debit' || field === 'credit') {
       const unformattedValue = value.replace(/,/g, '');
-      // Allow numbers and up to 2 decimal places
-      if (/^\d*\.?\d{0,2}$/.test(unformattedValue)) {
+      // Allow numbers and up to 4 decimal places (matches DB DECIMAL(19,4))
+      if (isValidFinancialInput(unformattedValue)) {
         newRows[index][field] = unformattedValue;
 
         // When a value is entered in one, clear the other
-        if (unformattedValue && parseFloat(unformattedValue) > 0) {
+        if (unformattedValue && parseFinancialAmount(unformattedValue).greaterThan(0)) {
           if (field === 'debit') {
             newRows[index].credit = '';
           } else {
@@ -130,19 +130,28 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     setRows(newRows);
   };
 
-  const calculateTotal = (field: "debit" | "credit") =>
-    rows.reduce((sum, row) => sum + (parseFloat(row[field]) || 0), 0)
-      .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const calculateTotal = (field: "debit" | "credit") => {
+    const amounts = rows.map(row => parseFinancialAmount(row[field] || '0'));
+    const total = addAmounts(...amounts);
+    return formatWithThousandsSeparator(total, 2);
+  };
 
   useEffect(() => {
     setValue('acctg_details', rows);
   }, [rows])
 
   const onSubmit: SubmitHandler<RowAcctgEntry> = async (data) => {
-    const totalDebit = rows.reduce((sum, row) => sum + (parseFloat(row.debit) || 0), 0);
-    const totalCredit = rows.reduce((sum, row) => sum + (parseFloat(row.credit) || 0), 0);
-    if (totalDebit !== totalCredit) {
-      toast.error('Debit and credit are not equal!');
+    // Extract debit and credit amounts from rows
+    const debits = rows.map(row => row.debit || '0');
+    const credits = rows.map(row => row.credit || '0');
+
+    // Validate double-entry accounting using Decimal.js
+    const validation = validateDoubleEntry(debits, credits);
+
+    if (!validation.isValid) {
+      toast.error(
+        `Debit and credit are not equal! Difference: ${formatWithThousandsSeparator(validation.difference, 2)}`
+      );
       return;
     }
 
@@ -328,18 +337,22 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                         <input
                           type="text"
                           className="w-full p-1 border rounded text-right"
-                          value={formatNumber(row.debit)}
+                          value={activeInput?.index === index && activeInput?.field === 'debit' ? row.debit : (row.debit ? formatWithThousandsSeparator(row.debit, 2) : '')}
                           onChange={(e) => handleChange(index, "debit", e.target.value, '')}
                           disabled={!!row.credit}
+                          onFocus={() => setActiveInput({ index, field: 'debit' })}
+                          onBlur={() => setActiveInput(null)}
                         />
                       </td>
                       <td className="p-2 border w-[30%]">
                         <input
                           type="text"
                           className="w-full p-1 border rounded text-right"
-                          value={formatNumber(row.credit)}
+                          value={activeInput?.index === index && activeInput?.field === 'credit' ? row.credit : (row.credit ? formatWithThousandsSeparator(row.credit, 2) : '')}
                           onChange={(e) => handleChange(index, "credit", e.target.value, '')}
                           disabled={!!row.debit}
+                          onFocus={() => setActiveInput({ index, field: 'credit' })}
+                          onBlur={() => setActiveInput(null)}
                         />
                       </td>
                       <td className="p-2 border text-center flex gap-3 justify-center w-[100%]">

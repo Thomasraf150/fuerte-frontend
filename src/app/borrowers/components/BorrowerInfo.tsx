@@ -71,7 +71,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               }`}
               onClick={() => handleTabClick('tab3')}
             >
-              Character References
+              Co-Maker
             </button>
             <button
               className={`p-4 focus:outline-none border-b-2 ${
@@ -79,23 +79,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
               }`}
               onClick={() => handleTabClick('tab4')}
             >
-              Co-Maker
-            </button>
-            <button
-              className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab5' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 dark:text-bodydark hover:border-blue-500 hover:text-blue-500'
-              }`}
-              onClick={() => handleTabClick('tab5')}
-            >
               Attachments
-            </button>
-            <button
-              className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab6' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 dark:text-bodydark hover:border-blue-500 hover:text-blue-500'
-              }`}
-              onClick={() => handleTabClick('tab6')}
-            >
-              Status
             </button>
           </div>
 
@@ -127,27 +111,12 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             )}
             {activeTab === 'tab3' && (
               <div id="content3">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-bodydark">Under Development..</h2>
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
+                <BorrowerCoMaker singleData={singleData} />
               </div>
             )}
             {activeTab === 'tab4' && (
               <div id="content4">
-                {/* <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2> */}
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
-                <BorrowerCoMaker singleData={singleData} />
-              </div>
-            )}
-            {activeTab === 'tab5' && (
-              <div id="content5">
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
                 <BorrowerAttachments singleData={singleData} />
-              </div>
-            )}
-            {activeTab === 'tab6' && (
-              <div id="content6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-bodydark">Under Development..</h2>
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
               </div>
             )}
           </div>

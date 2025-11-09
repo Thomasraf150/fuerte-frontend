@@ -59,7 +59,7 @@ const AuditLogForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, init
     const result = await onSubmitArea(data) as { success: boolean; error?: string; data?: any };
 
     // Only refresh and close on successful submission
-    if (result.success) {
+    if (result && typeof result === 'object' && 'success' in result && result.success) {
       fetchDataArea(10, 1);
       setShowForm(false);
     }

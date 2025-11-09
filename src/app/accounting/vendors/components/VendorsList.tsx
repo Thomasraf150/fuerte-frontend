@@ -34,16 +34,15 @@ const VendorsList: React.FC = () => {
   const [formType, setFormType] = useState<string>('');
   const [singleData, setSingleData] = useState<RowVendorsData | undefined>();
   const [vendorTypeId, setVendorTypeId] = useState<string>('');
-  const {
-      dataVendorType,
-      fetchVendors,
-      dataVendors,
-      createVendor,
-      loading,
+  const { 
+      dataVendorType, 
+      fetchVendors, 
+      dataVendors, 
+      createVendor, 
+      loading, 
       dataCustCat,
       dataSupplierCat,
-      dataDepartments,
-      vendorLoading } = useVendor();
+      dataDepartments } = useVendor();
   const [vendorTypeOptions, setVendorTypeOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -148,10 +147,10 @@ const VendorsList: React.FC = () => {
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
                     loading={loading}
+                    vendorLoading={loading}
                     singleData={singleData}
                     createVendor={createVendor}
-                    dataSupplierCat={dataSupplierCat}
-                    vendorLoading={vendorLoading} />
+                    dataSupplierCat={dataSupplierCat} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -165,9 +164,9 @@ const VendorsList: React.FC = () => {
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
+                    vendorLoading={loading}
                     singleData={singleData}
-                    createVendor={createVendor}
-                    vendorLoading={vendorLoading} />
+                    createVendor={createVendor} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -181,10 +180,10 @@ const VendorsList: React.FC = () => {
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
+                    vendorLoading={loading}
                     singleData={singleData}
                     createVendor={createVendor}
-                    dataCustCat={dataCustCat}
-                    vendorLoading={vendorLoading} />
+                    dataCustCat={dataCustCat} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -198,10 +197,10 @@ const VendorsList: React.FC = () => {
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
+                    vendorLoading={loading}
                     singleData={singleData}
                     createVendor={createVendor}
-                    dataDepartments={dataDepartments}
-                    vendorLoading={vendorLoading} />
+                    dataDepartments={dataDepartments} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -215,9 +214,9 @@ const VendorsList: React.FC = () => {
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
+                    vendorLoading={loading}
                     singleData={singleData}
-                    createVendor={createVendor}
-                    vendorLoading={vendorLoading} />
+                    createVendor={createVendor} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -231,9 +230,9 @@ const VendorsList: React.FC = () => {
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
+                    vendorLoading={loading}
                     singleData={singleData}
-                    createVendor={createVendor}
-                    vendorLoading={vendorLoading} />
+                    createVendor={createVendor} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>

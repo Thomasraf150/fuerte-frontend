@@ -495,6 +495,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       options={optionsChief}
                       isLoading={!dataChief}
                       loadingMessage="Loading chiefs..."
+                      required={true}
                     />
                   </div>
                   <div>
@@ -510,6 +511,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         { value: 'Male', label: 'Male' },
                         { value: 'Female', label: 'Female' },
                       ]}
+                      required={true}
                     />
                   </div>
                 </div>
@@ -568,9 +570,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="email"
                       type="text"
                       icon={Home}
-                      register={register('email', { required: true })}
-                      error={errors.email && "This field is required"}
-                      required={true}
+                      register={register('email', { required: false })}
+                      error={errors.email?.message}
+                      required={false}
                     />
                   </div>
                 </div>
@@ -750,6 +752,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       options={optionsBorrComp}
                       isLoading={!dataBorrCompany}
                       loadingMessage="Loading companies..."
+                      required={true}
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -763,7 +766,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       </label>
                     </div> */}
                   </div>
-                  <div>  
+                  <div>
                     <FormInput
                       label="Employee Number"
                       id="employment_number"
@@ -771,6 +774,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('employment_number', { required: true })}
                       error={errors.employment_number && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
@@ -787,6 +791,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       onChange={(e: any) => { return handleOnChangeArea(e); } }
                       isLoading={!dataArea}
                       loadingMessage="Loading areas..."
+                      required={true}
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -811,6 +816,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       options={optionsSubArea}
                       isLoading={subAreaLoading}
                       loadingMessage="Loading sub areas..."
+                      required={true}
                     />
                     {/* <div className="relative flex mt-2">
                       <label
@@ -834,6 +840,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('station', { required: true })}
                       error={errors.station && "This field is required"}
+                      required={true}
                     />
                   </div>
                   <div>
@@ -844,6 +851,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('term_in_service', { required: true })}
                       error={errors.term_in_service && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
@@ -862,6 +870,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         { value: 'Permanent', label: 'Permanent' },
                         { value: 'Agency', label: 'Agency' },
                       ]}
+                      required={true}
                     />
                   </div>
                   <div>
@@ -872,6 +881,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('division', { required: true })}
                       error={errors.division && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
@@ -914,6 +924,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('office_address', { required: true })}
                       error={errors.office_address && "This field is required"}
+                      required={true}
                     />
                   </div>
                 </div>
@@ -941,6 +952,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           icon={Home}
                           register={register(`reference.${index}.occupation`, { required: true })}
                           error={errors.reference?.[index]?.occupation && "This field is required"}
+                          required={true}
                         />
                       </div>
                       <div>
@@ -951,6 +963,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           icon={Home}
                           register={register(`reference.${index}.name`, { required: true })}
                           error={errors.reference?.[index]?.name && "This field is required"}
+                          required={true}
                         />
                       </div>
                       <div>
@@ -962,6 +975,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           register={register(`reference.${index}.contact_no`, { required: true })}
                           error={errors.reference?.[index]?.contact_no && "This field is required"}
                           formatType="contact"
+                          required={true}
                         />
                       </div>
                       <div className="col-span-1 md:col-span-3 flex justify-end">
@@ -1005,6 +1019,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     icon={Home}
                     register={register('employer', { required: true })}
                     error={errors.employer && "This field is required"}
+                    required={true}
                   />
                 </div>
                 <div>
@@ -1029,6 +1044,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     icon={Home}
                     register={register('contract_duration', { required: true })}
                     error={errors.contract_duration && "This field is required"}
+                    required={true}
                   />
                 </div>
               </div>

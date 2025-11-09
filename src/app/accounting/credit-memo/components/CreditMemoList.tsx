@@ -1,17 +1,27 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import CustomDatatable from '@/components/CustomDatatable';
 import CmForm from './CmForm';
-import { Plus } from 'react-feather';
+import useFinancialStatement from '@/hooks/useFinancialStatement';
+import { GitBranch, Plus } from 'react-feather';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 
 const CreditMemoList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
+  const { balanceSheetData } = useFinancialStatement();
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
     setActionLbl(lbl);
   }
+
+  useEffect(() => {
+
+    console.log(balanceSheetData, ' balanceSheetData');
+  }, [balanceSheetData])
 
   return (
     <div>
