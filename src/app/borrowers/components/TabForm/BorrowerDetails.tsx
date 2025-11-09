@@ -7,7 +7,7 @@ import { Camera, Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies } from '@/utils/DataTypes';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useBorrower from '@/hooks/useBorrower';
 
 interface BorrInfoProps {
@@ -116,6 +116,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const [loading, setLoading] = useState<boolean>(false);
   const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
 
+  // Track previous singleData to detect EDIT→CREATE transitions
+  const prevSingleDataRef = useRef<BorrowerRowInfo | undefined>(singleData);
+
   const handleOnChangeArea = (value: any) => {
     setSubAreaLoading(true);
     // Clear current sub area selection
@@ -144,7 +147,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const onSubmit = async (data: BorrowerInfo) => {
     data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
 
-    const result = await onSubmitBorrower(data);
+    const result = await onSubmitBorrower(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result && result.success) {
@@ -215,6 +218,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   // const areaId = watch('area_id');
 
   useEffect(() => {
+    // Track previous value to detect EDIT→CREATE transitions
+    const prevSingleData = prevSingleDataRef.current;
+    prevSingleDataRef.current = singleData;
+
     if (dataBorrCompany && Array.isArray(dataBorrCompany)) {
       const dynaOpt: OptionProps[] = dataBorrCompany?.map(aSub => ({
         value: String(aSub.id),
@@ -271,7 +278,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           setValue('company_borrower_id', Number(singleData.borrower_work_background.company_borrower_id));
           setValue('employment_number', singleData.borrower_work_background.employment_number);
           setValue('area_id', singleData.borrower_work_background.area_id);
-          
+
           // setValue('sub_area_id', singleData.borrower_work_background.sub_area_id);
           setValue('station', singleData.borrower_work_background.station);
           setValue('term_in_service', singleData.borrower_work_background.term_in_service);
@@ -283,12 +290,14 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           setValue('employer', singleData.borrower_company_info.employer);
           setValue('company_salary', singleData.borrower_company_info.salary);
           setValue('contract_duration', singleData.borrower_company_info.contract_duration);
-          
+
           setLogoPreview(`${process.env.NEXT_PUBLIC_BASE_URL}/storage/` + singleData.photo);
-          
+
         }
       });
-    } else {
+    } else if (prevSingleData && !singleData) {
+      // Only reset when transitioning from EDIT mode (had data) to CREATE mode (now undefined)
+      // This prevents clearing the form after successful CREATE submission
       reset({
         firstname: '',
       });

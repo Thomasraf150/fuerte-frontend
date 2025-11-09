@@ -39,7 +39,7 @@ const BorrCompForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBorrComp, 
   }, [initialData, setValue, actionLbl])
 
   const onSubmit: SubmitHandler<DataBorrCompanies> = async (data) => {
-    const result = await onSubmitBorrComp(data);
+    const result = await onSubmitBorrComp(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

@@ -80,7 +80,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
 
 
   const onSubmit: SubmitHandler<DataChartOfAccountList> = async (data) => {
-    const result = await onSubmitCoa(data);
+    const result = await onSubmitCoa(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

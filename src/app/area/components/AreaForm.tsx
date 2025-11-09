@@ -56,7 +56,7 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
   }, [initialData, setValue, actionLbl, branchSubData])
 
   const onSubmit: SubmitHandler<DataArea> = async (data) => {
-    const result = await onSubmitArea(data);
+    const result = await onSubmitArea(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

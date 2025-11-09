@@ -17,7 +17,7 @@ const GeneralVoucherList: React.FC = () => {
   const [showFormCv, setShowFormCv] = useState<boolean>(false);
   const [showFormJv, setShowFormJv] = useState<boolean>(false);
   const [singleData, setSingleData] = useState<RowAcctgEntry>();
-  const { dataGV, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, setLoading, pubSubBrId } = useGeneralVoucher();
+  const { dataGV, createGV, updateGV, fetchGV, printSummaryTicketDetails, loading, setLoading, pubSubBrId, generalVoucherLoading } = useGeneralVoucher();
   
   const handleShowFormCv = (lbl: string, showFrm: boolean) => {
     setShowFormCv(showFrm);
@@ -89,31 +89,33 @@ const GeneralVoucherList: React.FC = () => {
           {showFormCv && (
             <div className={`col-span-2 ${showFormCv ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <CVForm 
-                  setShowForm={setShowFormCv} 
-                  actionLbl={actionLbl} 
-                  singleData={singleData} 
+                <CVForm
+                  setShowForm={setShowFormCv}
+                  actionLbl={actionLbl}
+                  singleData={singleData}
                   createGV={createGV}
                   updateGV={updateGV}
                   fetchGV={fetchGV}
                   loading={loading}
                   pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails} />
+                  printSummaryTicketDetails={printSummaryTicketDetails}
+                  generalVoucherLoading={generalVoucherLoading} />
               </div>
             </div>
           )}
           {showFormJv && (
             <div className={`col-span-2 ${showFormJv ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <JVForm 
-                  setShowForm={setShowFormJv} 
-                  actionLbl={actionLbl} 
-                  singleData={singleData} 
+                <JVForm
+                  setShowForm={setShowFormJv}
+                  actionLbl={actionLbl}
+                  singleData={singleData}
                   createGV={createGV}
                   fetchGV={fetchGV}
                   loading={loading}
                   pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails} />
+                  printSummaryTicketDetails={printSummaryTicketDetails}
+                  generalVoucherLoading={generalVoucherLoading} />
               </div>
             </div>
           )}

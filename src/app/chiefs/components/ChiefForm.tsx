@@ -37,7 +37,7 @@ const ChiefForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataChief, initia
   }, [initialData, setValue, actionLbl])
 
   const onSubmit: SubmitHandler<DataChief> = async (data) => {
-    const result = await onSubmitChief(data);
+    const result = await onSubmitChief(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

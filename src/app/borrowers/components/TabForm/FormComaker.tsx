@@ -26,7 +26,7 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
   const onSubmit: SubmitHandler<BorrCoMakerFormValues> = async (data) => {
     data.borrower_id = Number(BorrowerData?.id);
 
-    const result = await onSubmitBorrCoMaker(data);
+    const result = await onSubmitBorrCoMaker(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

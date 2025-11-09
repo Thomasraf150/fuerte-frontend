@@ -40,7 +40,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   //  const password = watch('password', '');
 
   const onSubmit: SubmitHandler<DataFormLoanProducts> = async (data) => {
-    const result = await onSubmitLoanProduct(data);
+    const result = await onSubmitLoanProduct(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

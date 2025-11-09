@@ -207,7 +207,7 @@ const useBorrower = () => {
     }
   };
 
-  const onSubmitBorrower: SubmitHandler<BorrowerInfo> = async (data) => {
+  const onSubmitBorrower = async (data: BorrowerInfo): Promise<{ success: boolean; error?: string; data?: any }> => {
     setBorrowerLoading(true);
 
     try {

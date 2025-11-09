@@ -14,7 +14,7 @@ const column = aETblColumn;
 const AdjustingEntriesList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { dataAe, createAe, fetchAe, loading } = useAdjustingEntries();
+  const { dataAe, createAe, fetchAe, loading, adjustingEntriesLoading } = useAdjustingEntries();
     const [singleData, setSingleData] = useState<RowAcctgEntry>();
     const [showFormAe, setShowFormAe] = useState<boolean>(false);
   
@@ -76,13 +76,14 @@ const AdjustingEntriesList: React.FC = () => {
           {showFormAe && (
             <div className={`col-span-2 ${showFormAe ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <AEForm 
-                  setShowForm={setShowFormAe} 
-                  actionLbl={actionLbl} 
-                  singleData={singleData} 
+                <AEForm
+                  setShowForm={setShowFormAe}
+                  actionLbl={actionLbl}
+                  singleData={singleData}
                   createAe={createAe}
                   fetchAe={fetchAe}
                   loading={loading}
+                  adjustingEntriesLoading={adjustingEntriesLoading}
                 />
               </div>
             </div>

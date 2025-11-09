@@ -18,7 +18,7 @@ const usePaymentPosting = () => {
   const [paymentLoading, setPaymentLoading] = useState<boolean>(false);
 
   // Create pagination wrapper function following established pattern
-  const fetchLoansForPagination = useCallback(async (first, page, search) => {
+  const fetchLoansForPagination = useCallback(async (first: number, page: number, search?: string) => {
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -301,8 +301,7 @@ const usePaymentPosting = () => {
     fetchLoanSchedule,
     loanScheduleList,
     onSubmitOthCollectionPayment,
-    fnReversePayment,
-    paymentLoading
+    fnReversePayment
   };
 };
 

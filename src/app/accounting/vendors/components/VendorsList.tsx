@@ -34,15 +34,16 @@ const VendorsList: React.FC = () => {
   const [formType, setFormType] = useState<string>('');
   const [singleData, setSingleData] = useState<RowVendorsData | undefined>();
   const [vendorTypeId, setVendorTypeId] = useState<string>('');
-  const { 
-      dataVendorType, 
-      fetchVendors, 
-      dataVendors, 
-      createVendor, 
-      loading, 
+  const {
+      dataVendorType,
+      fetchVendors,
+      dataVendors,
+      createVendor,
+      loading,
       dataCustCat,
       dataSupplierCat,
-      dataDepartments } = useVendor();
+      dataDepartments,
+      vendorLoading } = useVendor();
   const [vendorTypeOptions, setVendorTypeOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -142,14 +143,15 @@ const VendorsList: React.FC = () => {
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
                 <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                  <SupplierForm 
+                  <SupplierForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
                     loading={loading}
                     singleData={singleData}
-                    createVendor={createVendor} 
-                    dataSupplierCat={dataSupplierCat} />
+                    createVendor={createVendor}
+                    dataSupplierCat={dataSupplierCat}
+                    vendorLoading={vendorLoading} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -159,13 +161,13 @@ const VendorsList: React.FC = () => {
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
                 <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                  <NontradeForm 
-                    setShowForm={setShowForm} 
-                    vendorTypeId={vendorTypeId} 
+                  <NontradeForm
+                    setShowForm={setShowForm}
+                    vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
-                    loading={loading}
-                    singleData={singleData} 
-                    createVendor={createVendor} />
+                    singleData={singleData}
+                    createVendor={createVendor}
+                    vendorLoading={vendorLoading} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -175,14 +177,14 @@ const VendorsList: React.FC = () => {
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
                 <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                  <CustomerForm 
-                    setShowForm={setShowForm} 
-                    vendorTypeId={vendorTypeId} 
+                  <CustomerForm
+                    setShowForm={setShowForm}
+                    vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
-                    loading={loading}
-                    singleData={singleData} 
+                    singleData={singleData}
                     createVendor={createVendor}
-                    dataCustCat={dataCustCat} />
+                    dataCustCat={dataCustCat}
+                    vendorLoading={vendorLoading} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -192,14 +194,14 @@ const VendorsList: React.FC = () => {
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
                 <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                  <EmployeeForm 
-                    setShowForm={setShowForm} 
-                    vendorTypeId={vendorTypeId} 
+                  <EmployeeForm
+                    setShowForm={setShowForm}
+                    vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
-                    loading={loading}
-                    singleData={singleData} 
+                    singleData={singleData}
                     createVendor={createVendor}
-                    dataDepartments={dataDepartments} />
+                    dataDepartments={dataDepartments}
+                    vendorLoading={vendorLoading} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -209,13 +211,13 @@ const VendorsList: React.FC = () => {
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
                 <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                  <OfficerForm 
-                    setShowForm={setShowForm} 
-                    vendorTypeId={vendorTypeId} 
+                  <OfficerForm
+                    setShowForm={setShowForm}
+                    vendorTypeId={vendorTypeId}
                     fetchVendors={fetchVendors}
-                    loading={loading}
-                    singleData={singleData} 
-                    createVendor={createVendor} />
+                    singleData={singleData}
+                    createVendor={createVendor}
+                    vendorLoading={vendorLoading} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
@@ -225,13 +227,13 @@ const VendorsList: React.FC = () => {
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
                 <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                  <AffiliateForm 
-                    setShowForm={setShowForm} 
-                    vendorTypeId={vendorTypeId} 
-                    fetchVendors={fetchVendors} 
-                    loading={loading}
-                    singleData={singleData} 
-                    createVendor={createVendor} />
+                  <AffiliateForm
+                    setShowForm={setShowForm}
+                    vendorTypeId={vendorTypeId}
+                    fetchVendors={fetchVendors}
+                    singleData={singleData}
+                    createVendor={createVendor}
+                    vendorLoading={vendorLoading} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
                 </div>
               </div>
