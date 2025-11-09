@@ -91,7 +91,7 @@ const useCollectionList = () => {
 
     // const result = await response.json();
     // setDataColListData(response.data.getLoans.data);
-    setDataColListData(response.data.getCollectionLists.data);
+    // setDataColListData(response.data.getCollectionLists.data); // FIXME: setDataColListData not defined
     setLoading(false);
   };
 

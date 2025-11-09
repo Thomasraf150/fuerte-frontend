@@ -13,7 +13,7 @@ interface BorrInfoProps {
   dataArea?: DataArea[] | undefined;
   dataSubArea?: DataSubArea[] | undefined;
   dataBorrCompany?: DataBorrCompanies[] | undefined;
-  onSubmitBorrower: (d: any) => void;
+  onSubmitBorrower: (d: any) => Promise<{ success: boolean }>;
   borrowerLoading: boolean;
   singleData?: BorrowerRowInfo | undefined;
   setSingleData: (d: BorrowerRowInfo | undefined) => void;

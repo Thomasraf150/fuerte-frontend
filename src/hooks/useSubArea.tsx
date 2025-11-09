@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 
@@ -8,19 +8,19 @@ import { DataArea, DataSubArea } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 const useSubArea = () => {
 
-  const { GET_AREA_QUERY, 
+  const { GET_AREA_QUERY,
           GET_SUB_AREA_QUERY,
           SAVE_SUB_AREA_MUTATION,
           UPDATE_SUB_AREA_MUTATION,
           DELETE_SUB_AREA_MUTATION } = AreaSubAreaQueryMutations;
-  
+
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
   const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
   const [subAreaFetchLoading, setSubAreaFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
 
-  const fetchDataArea = async (first: number, page: number) => {
+  const fetchDataArea = useCallback(async (first: number, page: number) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
@@ -37,9 +37,9 @@ const useSubArea = () => {
 
     const result = await response.json();
     setDataArea(result.data.getAreas.data);
-  };
-  
-  const fetchDataSubArea = async (first: number, page: number) => {
+  }, [GET_AREA_QUERY]);
+
+  const fetchDataSubArea = useCallback(async (first: number, page: number) => {
     setSubAreaFetchLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -63,7 +63,7 @@ const useSubArea = () => {
     } finally {
       setSubAreaFetchLoading(false);
     }
-  };
+  }, [GET_SUB_AREA_QUERY]);
 
   const onSubmitSubArea: SubmitHandler<DataSubArea> = async (data) => {
     setSubAreaLoading(true);
@@ -149,7 +149,7 @@ const useSubArea = () => {
   useEffect(() => {
     fetchDataArea(10, 1);
     fetchDataSubArea(10, 1);
-  }, []);
+  }, [fetchDataArea, fetchDataSubArea]);
 
   return {
     fetchDataArea,

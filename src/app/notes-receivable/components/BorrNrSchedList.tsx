@@ -216,8 +216,8 @@ const BorrNrSchedList: React.FC = () => {
                         selected={startDate}
                         onChange={handleStartDateChange}
                         selectsStart
-                        startDate={startDate}
-                        endDate={endDate}
+                        startDate={startDate ?? undefined}
+                        endDate={endDate ?? undefined}
                         placeholderText="Start Date"
                         className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                       />
@@ -233,9 +233,9 @@ const BorrNrSchedList: React.FC = () => {
                         selected={endDate}
                         onChange={handleEndDateChange}
                         selectsEnd
-                        startDate={startDate}
-                        endDate={endDate}
-                        minDate={startDate}
+                        startDate={startDate ?? undefined}
+                        endDate={endDate ?? undefined}
+                        minDate={startDate ?? undefined}
                         placeholderText="End Date"
                         className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
                       />

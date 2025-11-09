@@ -65,7 +65,7 @@ const BankForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBank, initialD
   }, [initialData, setValue, actionLbl, branchSubData])
 
   const onSubmit: SubmitHandler<DataBank> = async (data) => {
-    const result = await onSubmitBank(data);
+    const result = await onSubmitBank(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form and refresh data on successful submission
     if (result.success) {

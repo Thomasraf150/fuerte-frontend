@@ -37,7 +37,7 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
   ]);
 
   const onSubmit: SubmitHandler<DataFormLoanCodes> = async (data) => {
-    const result = await onSubmitLoanCode(data);
+    const result = await onSubmitLoanCode(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

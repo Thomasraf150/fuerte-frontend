@@ -31,7 +31,7 @@ const FormAddBranch: React.FC<ParentFormBr> = ({ setShowForm, fetchDataList, ini
   }, [initialData, setValue, actionLbl])
 
   const onSubmit: SubmitHandler<DataFormBranch> = async (data) => {
-    const result = await onSubmitBranch(data);
+    const result = await onSubmitBranch(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

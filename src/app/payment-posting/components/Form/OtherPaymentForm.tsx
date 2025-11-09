@@ -116,7 +116,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
   const onSubmit = async (data: OtherCollectionFormValues) => {
     console.log(data, ' data');
 
-    const result = await onSubmitOthCollectionPayment(data, selectedMoSchedOthPay?.loan_id);
+    const result = await onSubmitOthCollectionPayment(data, selectedMoSchedOthPay?.loan_id) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {

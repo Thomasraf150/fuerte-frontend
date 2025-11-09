@@ -29,7 +29,7 @@ const PerPayments: React.FC<CollectionListProp> = ({ collectionList: BorrowerDat
           <div className="py-1">
             <CustomDatatable
               apiLoading={false}
-              columns={column(handleRowClick)}
+              columns={column()}
               data={[]}
               enableCustomHeader={true} 
               title={''}  

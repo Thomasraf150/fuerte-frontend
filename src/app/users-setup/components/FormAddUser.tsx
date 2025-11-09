@@ -35,7 +35,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
    const password = watch('password', '');
 
   const onSubmit: SubmitHandler<DataFormUser> = async (data) => {
-    const result = await onSubmitUser(data);
+    const result = await onSubmitUser(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {
