@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Edit3, X } from 'react-feather';
+import { Edit3, X, Clock } from 'react-feather';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import LoanDetails from './TabForm/LoanDetails';
 import SetEffectivityMaturity from './Tabs/SetEffectivityMaturity';
@@ -9,6 +9,7 @@ import useLoans from '@/hooks/useLoans';
 import PNSigning from './Tabs/PNSigning';
 import BankDetailsEntry from './Tabs/BankDetailsEntry';
 import ReleaseLoans from './Tabs/ReleaseLoans';
+import LoanHistory from './Tabs/LoanHistory';
 import useCoa from '@/hooks/useCoa';
 import { LoadingSpinner } from '@/components/LoadingStates';
 
@@ -94,6 +95,16 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Approve and Release</span>
             </button>
+            <button
+              onClick={() => handleTabClick(5)}
+              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
+                activeTab === 5
+                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
+              } focus:outline-none`}
+            >
+              <span className="mr-2"><Clock size={18} /></span> <span>History</span>
+            </button>
           </div>
         </>
       )}
@@ -123,15 +134,22 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
         {activeTab === 4 && (
           <div>
             {loanSingleData && (
-              <ReleaseLoans 
-                coaDataAccount={coaDataAccount || []} 
-                branchSubData={branchSubData} 
-                fetchCoaDataTable={fetchCoaDataTable} 
-                loanSingleData={loanSingleData} 
-                handleRefetchData={handleRefetchData} 
+              <ReleaseLoans
+                coaDataAccount={coaDataAccount || []}
+                branchSubData={branchSubData}
+                fetchCoaDataTable={fetchCoaDataTable}
+                loanSingleData={loanSingleData}
+                handleRefetchData={handleRefetchData}
                 onSubmitLoanRelease={onSubmitLoanRelease}
                 handleChangeReleasedDate={handleChangeReleasedDate}
               />
+            )}
+          </div>
+        )}
+        {activeTab === 5 && (
+          <div>
+            {loanSingleData && (
+              <LoanHistory loanId={Number(loanSingleData.id)} />
             )}
           </div>
         )}

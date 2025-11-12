@@ -855,3 +855,26 @@ export interface DataTbRow {
   revenue: any;
   expenses: any;
 }
+
+export interface AuditLogEntry {
+  id: string;
+  table_name: string;
+  operation_type: string;
+  record_id: number;
+  user_id: number | null;
+  new_data: Record<string, any>;
+  old_data: Record<string, any> | null;
+  changed_by: string | null;
+  changed_at: string;
+  user: User | null;
+}
+
+export interface LoanHistoryPaginator {
+  data: AuditLogEntry[];
+  paginatorInfo: {
+    total: number;
+    currentPage: number;
+    lastPage: number;
+    hasMorePages: boolean;
+  };
+}

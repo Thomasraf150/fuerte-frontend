@@ -8,6 +8,7 @@ import { formatNumber } from '@/utils/formatNumber';
 import useLoans from '@/hooks/useLoans';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { Calendar } from 'react-feather';
+import { LoadingSpinner } from '@/components/LoadingStates';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -22,7 +23,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   const [newMonthlyList, setNewMonthlyList] = useState<string[]>();
   const [udiComputedList, setUdiComputedList] = useState<string[]>();
   const [selectedOption, setSelectedOption] = useState<string>();
-  const { submitApproveRelease, handleUpdateMaturity, fetchLoans } = useLoans();
+  const { submitApproveRelease, handleUpdateMaturity, fetchLoans, loading } = useLoans();
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOption(event.target.value);
@@ -111,7 +112,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   };
   
   return (
-    <div>
+    <div className="relative">
+      {loading && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg">
+          <LoadingSpinner size="lg" message="Saving loan schedule..." />
+        </div>
+      )}
       <div className="relative block overflow-hidden rounded-lg border border-gray-100 p-4 mb-4 sm:p-6 lg:p-4">
       <span
         className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-yellow-300 via-orange-300 to-green-500"
