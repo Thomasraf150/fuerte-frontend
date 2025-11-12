@@ -519,6 +519,8 @@ export interface LoanBankFormValues {
   surrendered_pin: string;
   issued_pin: string;
   is_deleted: number;
+  created_at?: string;
+  updated_at?: string;
 }
 export interface BorrLoanRowData {
   id: string;

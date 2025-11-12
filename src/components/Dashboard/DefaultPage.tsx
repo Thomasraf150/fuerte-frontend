@@ -37,6 +37,7 @@ const DefaultPage: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
+  const [branchId, setBranchId] = useState<string>(''); // Track selected branch
 
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
@@ -54,16 +55,31 @@ const DefaultPage: React.FC = () => {
     setEndDate(date || undefined);
     // fetchSummaryTixReport(startDate, endDate);
   };
-  
+
   const handleBranchSubChange = (branch_sub_id: string) => {
+    // Handle "all" value - pass as-is to backend (backend will handle it)
     fetchSummaryTixReport(startDate, endDate, branch_sub_id);
     setBranchSubId(branch_sub_id);
   };
 
   const handleBranchChange = (branch_id: string) => {
-    // fetchSummaryTixReport(startDate, endDate, branch_id);
-    // setBranchSubId(branch_id);
-    fetchSubDataList('id_desc', Number(branch_id));
+    setBranchId(branch_id);
+
+    // If "all" is selected, auto-select "all" for sub-branch and fetch report
+    if (branch_id === 'all') {
+      setValue('branch_sub_id', 'all');
+      setBranchSubId('all');
+      fetchSummaryTixReport(startDate, endDate, 'all');
+    } else {
+      // Reset sub-branch selection when changing to specific branch
+      setValue('branch_sub_id', '');
+      setBranchSubId('');
+
+      if (branch_id && branch_id !== '') {
+        // Fetch sub-branches for the selected branch
+        fetchSubDataList('id_desc', Number(branch_id));
+      }
+    }
   };
 
   useEffect(() => {
@@ -81,9 +97,10 @@ const DefaultPage: React.FC = () => {
       }));
       setOptionsBranch([
         { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: 'all', label: 'All Main Branches' }, // Add "All" option
         ...dynaOpt,
       ]);
-      
+
     }
   }, [dataBranch])
 
@@ -95,9 +112,10 @@ const DefaultPage: React.FC = () => {
       }));
       setOptionsSubBranch([
         { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: 'all', label: 'All Sub-Branches' }, // Add "All" option
         ...dynaOpt,
       ]);
-      
+
     }
   }, [dataBranchSub])
 
@@ -178,7 +196,7 @@ const DefaultPage: React.FC = () => {
             />
           </div>
 
-          {/* Sub Branch Select */}
+          {/* Sub Branch Select - Always visible, disabled when "All Branches" selected */}
           <div className="flex flex-col min-w-[200px]">
             <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
               Sub Branch:
@@ -192,6 +210,7 @@ const DefaultPage: React.FC = () => {
                   {...field}
                   options={optionsSubBranch}
                   placeholder="Select a sub branch..."
+                  isDisabled={branchId === 'all'}
                   onChange={(selectedOption) => {
                     field.onChange(selectedOption?.value);
                     handleBranchSubChange(selectedOption?.value ?? '');
