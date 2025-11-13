@@ -96,6 +96,7 @@ const BORROWER_LOAN_QUERY: string = `
             }
           }
           loan_bank_details {
+            id
             account_name
             issued_acct_no
             issued_bank_id
@@ -104,6 +105,8 @@ const BORROWER_LOAN_QUERY: string = `
             surrendered_acct_no
             surrendered_bank_id
             surrendered_pin
+            created_at
+            updated_at
           }
           acctg_entry {
             journal_no
@@ -183,6 +186,7 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         lastname
       }
       loan_bank_details {
+        id
         account_name
         issued_acct_no
         issued_bank_id
@@ -191,6 +195,8 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         surrendered_acct_no
         surrendered_bank_id
         surrendered_pin
+        created_at
+        updated_at
       }
       acctg_entry {
         id

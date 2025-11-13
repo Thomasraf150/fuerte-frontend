@@ -7,6 +7,7 @@ import FormLabel from '@/components/FormLabel';
 import useLoans from '@/hooks/useLoans';
 import useBank from '@/hooks/useBank';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import moment from 'moment';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -79,6 +80,8 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
     if (loanSingleData) {
       setValue('loan_id', Number(loanSingleData?.id));
       if (loanSingleData?.loan_bank_details) {
+        // CRITICAL FIX: Add id field to enable UPDATE instead of CREATE
+        setValue('id', loanSingleData?.loan_bank_details?.id);
         setValue('account_name', loanSingleData?.loan_bank_details?.account_name);
         setValue('issued_acct_no', loanSingleData?.loan_bank_details?.issued_acct_no);
         setValue('issued_bank_id', loanSingleData?.loan_bank_details?.issued_bank_id);
@@ -92,21 +95,47 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
     console.log(loanSingleData?.status, ' loanSingleData?.status')
   }, [loanSingleData, setValue]);
 
-  // Auto-fill surrendered account/PIN with "000000" when "Cash on hand" is selected
+  // Smart value management for surrendered bank details
   useEffect(() => {
     if (isSurrenderedCash) {
+      // Auto-fill with "000000" for cash on hand
       setValue('surrendered_acct_no', '000000');
       setValue('surrendered_pin', '000000');
-    }
-  }, [surrenderedBankId, isSurrenderedCash, setValue]);
+    } else {
+      // When switching from cash to non-cash, clear ONLY "000000" placeholder
+      // Preserve real account numbers if switching between non-cash banks
+      const currentAcctNo = watch('surrendered_acct_no');
+      const currentPin = watch('surrendered_pin');
 
-  // Auto-fill issued account/PIN with "000000" when "Cash on hand" is selected
+      if (currentAcctNo === '000000') {
+        setValue('surrendered_acct_no', '');
+      }
+      if (currentPin === '000000') {
+        setValue('surrendered_pin', '');
+      }
+    }
+  }, [surrenderedBankId, isSurrenderedCash, setValue, watch]);
+
+  // Smart value management for issued bank details
   useEffect(() => {
     if (isIssuedCash) {
+      // Auto-fill with "000000" for cash on hand
       setValue('issued_acct_no', '000000');
       setValue('issued_pin', '000000');
+    } else {
+      // When switching from cash to non-cash, clear ONLY "000000" placeholder
+      // Preserve real account numbers if switching between non-cash banks
+      const currentAcctNo = watch('issued_acct_no');
+      const currentPin = watch('issued_pin');
+
+      if (currentAcctNo === '000000') {
+        setValue('issued_acct_no', '');
+      }
+      if (currentPin === '000000') {
+        setValue('issued_pin', '');
+      }
     }
-  }, [issuedBankId, isIssuedCash, setValue]);
+  }, [issuedBankId, isIssuedCash, setValue, watch]);
 
   return (
     <div className="w-full lg:w-3/4 xl:w-1/2">
@@ -122,6 +151,11 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
           />
           {errors.account_name && <p className="mt-2 text-sm text-red-600">{errors.account_name.message}</p>}
         </div>
+        {loanSingleData?.loan_bank_details?.updated_at && (
+          <div className="text-base font-semibold text-gray-600 dark:text-gray-400 px-1">
+            Last saved: {moment(loanSingleData.loan_bank_details.updated_at).format('LLL')}
+          </div>
+        )}
         <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
           <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
             <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 dark:bg-meta-4 text-lime-100 dark:text-white">
@@ -138,12 +172,13 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                   <Controller
                     name="surrendered_bank_id"
                     control={control}
-                    rules={{ required: 'Surrendered Bank is required' }} 
+                    rules={{ required: 'Surrendered Bank is required' }}
                     render={({ field }) => (
                       <ReactSelect
                         {...field}
                         options={bankOptions1}
-                        placeholder="Select a Bank..."
+                        placeholder={bankOptions1.length === 0 ? "Loading banks..." : "Select a Bank..."}
+                        isLoading={bankOptions1.length === 0}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                         }}
@@ -159,12 +194,13 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                   <Controller
                     name="issued_bank_id"
                     control={control}
-                    rules={{ required: 'Issued Bank is required' }} 
+                    rules={{ required: 'Issued Bank is required' }}
                     render={({ field }) => (
                       <ReactSelect
                         {...field}
                         options={bankOptions2}
-                        placeholder="Select a Bank..."
+                        placeholder={bankOptions2.length === 0 ? "Loading banks..." : "Select a Bank..."}
+                        isLoading={bankOptions2.length === 0}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                         }}
@@ -189,7 +225,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
                         type="text"
                         id="surrendered_acct_no"
-                        placeholder="Card Account No."
+                        placeholder="000000"
                         {...register('surrendered_acct_no', { required: "Surrendered Card is required!" })}
                       />
                       <span className="absolute right-3 top-2.5">
@@ -207,7 +243,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
                         type="text"
                         id="issued_acct_no"
-                        placeholder="Card Account No."
+                        placeholder="000000"
                         {...register('issued_acct_no', { required: "Issued Card No. is required!" })}
                       />
                       <span className="absolute right-3 top-2.5">
@@ -231,7 +267,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                     <input
                       type={showPin1 ? 'text' : 'password'}
                       className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      placeholder="Account PIN"
+                      placeholder="000000"
                       {...register('surrendered_pin', { required: "Surrendered Pin. is required!" })}
                     />
                     <button
@@ -249,7 +285,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                     <input
                       type={showPin2 ? 'text' : 'password'}
                       className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      placeholder="Account PIN"
+                      placeholder="000000"
                       {...register('issued_pin', { required: "Issued Pin. is required!" })}
                     />
                     <button

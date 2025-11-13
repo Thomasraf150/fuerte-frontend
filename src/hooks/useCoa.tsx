@@ -145,7 +145,8 @@ const useCoa = () => {
     branchSubData,
     fetchDataSubBranch,
     onSubmitCoa,
-    coaLoading
+    coaLoading,
+    loading
   };
 };
 

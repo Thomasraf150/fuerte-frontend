@@ -12,7 +12,11 @@
 
 import Decimal from 'decimal.js';
 
+// Type alias for Decimal instances (to avoid TypeScript errors with outdated @types)
+type DecimalType = InstanceType<typeof Decimal>;
+
 // Configure Decimal.js for financial precision
+// @ts-ignore - Type definitions are outdated, but Decimal.set exists in v10.6.0
 Decimal.set({
   precision: 20,                      // High precision for intermediate calculations
   rounding: Decimal.ROUND_HALF_UP,    // Standard financial rounding (banker's rounding)
@@ -33,7 +37,7 @@ Decimal.set({
  * parseFinancialAmount('')          // Decimal(0)
  * parseFinancialAmount(null)        // Decimal(0)
  */
-export function parseFinancialAmount(value: string | number | null | undefined): Decimal {
+export function parseFinancialAmount(value: string | number | null | undefined): DecimalType {
   if (value === null || value === undefined || value === '') {
     return new Decimal(0);
   }
@@ -64,7 +68,7 @@ export function parseFinancialAmount(value: string | number | null | undefined):
  * formatFinancialAmount('100.126', 2)               // "100.13" (rounded)
  */
 export function formatFinancialAmount(
-  value: Decimal | string | number,
+  value: DecimalType | string | number,
   decimalPlaces: number = 2
 ): string {
   const decimal = value instanceof Decimal ? value : parseFinancialAmount(value);
@@ -81,11 +85,11 @@ export function formatFinancialAmount(
  * addAmounts('100.50', '200.25', '50.10')  // Decimal(350.85)
  * addAmounts('0.1', '0.2')                 // Decimal(0.3) - Precise!
  */
-export function addAmounts(...amounts: (Decimal | string | number)[]): Decimal {
-  return amounts.reduce((sum, amount) => {
+export function addAmounts(...amounts: (DecimalType | string | number)[]): DecimalType {
+  return amounts.reduce((sum: DecimalType, amount) => {
     const decimal = amount instanceof Decimal ? amount : parseFinancialAmount(amount);
     return sum.plus(decimal);
-  }, new Decimal(0));
+  }, new Decimal(0) as DecimalType);
 }
 
 /**
@@ -99,9 +103,9 @@ export function addAmounts(...amounts: (Decimal | string | number)[]): Decimal {
  * subtractAmounts('1000', '249.99', '500')  // Decimal(250.01)
  */
 export function subtractAmounts(
-  minuend: Decimal | string | number,
-  ...subtrahends: (Decimal | string | number)[]
-): Decimal {
+  minuend: DecimalType | string | number,
+  ...subtrahends: (DecimalType | string | number)[]
+): DecimalType {
   let result = minuend instanceof Decimal ? minuend : parseFinancialAmount(minuend);
 
   for (const subtrahend of subtrahends) {
@@ -127,8 +131,8 @@ export function subtractAmounts(
  * areAmountsEqual('100.12345', '100.12340', 5)           // false
  */
 export function areAmountsEqual(
-  amount1: Decimal | string | number,
-  amount2: Decimal | string | number,
+  amount1: DecimalType | string | number,
+  amount2: DecimalType | string | number,
   decimalPlaces: number = 4
 ): boolean {
   const d1 = amount1 instanceof Decimal ? amount1 : parseFinancialAmount(amount1);
@@ -151,9 +155,9 @@ export function areAmountsEqual(
  * // isValid = true, difference = Decimal(0)
  */
 export function validateDoubleEntry(
-  debits: (Decimal | string | number)[],
-  credits: (Decimal | string | number)[]
-): { isValid: boolean; difference: Decimal } {
+  debits: (DecimalType | string | number)[],
+  credits: (DecimalType | string | number)[]
+): { isValid: boolean; difference: DecimalType } {
   const totalDebits = addAmounts(...debits);
   const totalCredits = addAmounts(...credits);
   const difference = totalDebits.minus(totalCredits);
@@ -175,7 +179,7 @@ export function validateDoubleEntry(
  * prepareForGraphQL('129429.79')   // "129429.7900"
  * prepareForGraphQL('100.5')       // "100.5000"
  */
-export function prepareForGraphQL(value: Decimal | string | number): string {
+export function prepareForGraphQL(value: DecimalType | string | number): string {
   const decimal = value instanceof Decimal ? value : parseFinancialAmount(value);
   return decimal.toFixed(4);  // Match database DECIMAL(19,4) precision
 }
@@ -192,9 +196,9 @@ export function prepareForGraphQL(value: Decimal | string | number): string {
  * calculatePercentage('500', '2.5')  // Decimal(12.5) - 2.5% of 500
  */
 export function calculatePercentage(
-  base: Decimal | string | number,
-  percentage: Decimal | string | number
-): Decimal {
+  base: DecimalType | string | number,
+  percentage: DecimalType | string | number
+): DecimalType {
   const baseDecimal = base instanceof Decimal ? base : parseFinancialAmount(base);
   const percentDecimal = percentage instanceof Decimal ? percentage : parseFinancialAmount(percentage);
 
@@ -235,7 +239,7 @@ export function isValidFinancialInput(value: string): boolean {
  * formatWithThousandsSeparator('1000000', 2)    // "1,000,000.00"
  */
 export function formatWithThousandsSeparator(
-  value: Decimal | string | number,
+  value: DecimalType | string | number,
   decimalPlaces: number = 2
 ): string {
   const decimal = value instanceof Decimal ? value : parseFinancialAmount(value);

@@ -55,7 +55,17 @@ const GET_BALANCE_SHEET: string = `
 
 const GET_INCOME_STATEMENT: string = `
   query GetIncomeStatement($startDate: String, $endDate: String, $branch_sub_id: String){
-    getIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id) 
+    getIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id)
+  }
+`;
+
+const PRINT_INCOME_STATEMENT: string = `
+  mutation PrintIncomeStatement($startDate: String!, $endDate: String!, $branch_sub_id: String!){
+    printIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id) {
+      url
+      filename
+      size
+    }
   }
 `;
 
@@ -118,7 +128,8 @@ const GET_INCOME_STATEMENT: string = `
 
 const FinancialStatementQueryMutations = {
   GET_BALANCE_SHEET,
-  GET_INCOME_STATEMENT
+  GET_INCOME_STATEMENT,
+  PRINT_INCOME_STATEMENT
 };
 
 export default FinancialStatementQueryMutations;

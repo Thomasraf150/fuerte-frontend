@@ -13,10 +13,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
 import { LoadingSpinner } from '@/components/LoadingStates';
 // import useCoa from '@/hooks/useCoa';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import moment from 'moment';
 import useBranches from '@/hooks/useBranches';
+import { Printer } from 'react-feather';
 interface Option {
   value: string;
   label: string;
@@ -26,14 +25,15 @@ interface Option {
 const IncomeStatementList: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   // const { onSubmitCoa, branchSubData } = useCoa();
-  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
+  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
 
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData, loading } = useFinancialStatement();
+  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData, printIncomeStatement, loading, printLoading } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
+  const [branchId, setBranchId] = useState<string>(''); // Track selected branch
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
@@ -72,9 +72,10 @@ const IncomeStatementList: React.FC = () => {
       }));
       setOptionsBranch([
         { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: 'all', label: 'All Main Branches' }, // Add "All" option
         ...dynaOpt,
       ]);
-      
+
     }
     console.log(dataBranch, ' dataBranch')
   }, [dataBranch])
@@ -87,11 +88,12 @@ const IncomeStatementList: React.FC = () => {
       }));
       setOptionsSubBranch([
         { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: 'all', label: 'All Sub-Branches' }, // Add "All" option
         ...dynaOpt,
       ]);
-      
+
     }
-    
+
   }, [dataBranchSub])
 
   useEffect(() => {
@@ -225,36 +227,32 @@ const IncomeStatementList: React.FC = () => {
   //     )
   //   : [] : [];
 
-  const tableRef = React.useRef<HTMLDivElement>(null);
-
-  const handlePrintPDF = async () => {
-    if (!tableRef.current) return;
-  
-    const canvas = await html2canvas(tableRef.current, {
-      scale: 2,
-      useCORS: true,
-    });
-  
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('portrait', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();  // ~210mm
-    const pageHeight = pdf.internal.pageSize.getHeight(); // ~297mm
-    const imgProps = pdf.getImageProperties(imgData);
-
-    const margin = 10;
-    const imgWidth = pageWidth - margin * 2;
-    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-    // pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    pdf.save('IncomeStatement.pdf');
-      // Remove class after export
+  const handlePrint = async () => {
+    if (!startDate || !endDate || !branchSubId) {
+      alert('Please select date range and branch before printing');
+      return;
+    }
+    await printIncomeStatement(startDate, endDate, branchSubId);
   };
 
   const handleBranchChange = (branch_id: string) => {
-    // fetchSummaryTixReport(startDate, endDate, branch_id);
-    // setBranchSubId(branch_id);
-    fetchSubDataList('id_desc', Number(branch_id));
+    setBranchId(branch_id);
+
+    // If "all" is selected, auto-select "all" for sub-branch and fetch report
+    if (branch_id === 'all') {
+      setValue('branch_sub_id', 'all');
+      setBranchSubId('all');
+      fetchStatementData(startDate, endDate, 'all');
+    } else {
+      // Reset sub-branch selection when changing to specific branch
+      setValue('branch_sub_id', '');
+      setBranchSubId('');
+
+      if (branch_id && branch_id !== '') {
+        // Fetch sub-branches for the selected branch
+        fetchSubDataList('id_desc', Number(branch_id));
+      }
+    }
   };
 
   return (
@@ -312,6 +310,8 @@ const IncomeStatementList: React.FC = () => {
                         {...field}
                         options={optionsBranch}
                         placeholder="Select a branch..."
+                        isLoading={loadingBranches}
+                        loadingMessage={() => 'Loading branches...'}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                           handleBranchChange(selectedOption?.value ?? '');
@@ -338,6 +338,9 @@ const IncomeStatementList: React.FC = () => {
                         {...field}
                         options={optionsSubBranch}
                         placeholder="Select a sub branch..."
+                        isDisabled={branchId === 'all' || loadingSubBranches}
+                        isLoading={loadingSubBranches}
+                        loadingMessage={() => 'Loading sub-branches...'}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                           handleBranchSubChange(selectedOption?.value ?? '');
@@ -345,7 +348,13 @@ const IncomeStatementList: React.FC = () => {
                         value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
                         menuPortalTarget={document.body}
                         styles={{
-                          menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                          control: (base, state) => ({
+                            ...base,
+                            cursor: state.isDisabled ? 'not-allowed' : 'default',
+                            opacity: state.isDisabled ? 0.6 : 1,
+                            backgroundColor: state.isDisabled ? '#f3f4f6' : base.backgroundColor
+                          })
                         }}
                       />
                     )}
@@ -356,12 +365,21 @@ const IncomeStatementList: React.FC = () => {
             </div>
 
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                 <h3 className="font-medium text-black dark:text-white">
                   Income Statement
                 </h3>
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  disabled={printLoading || !startDate || !endDate || !branchSubId}
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <Printer size={18} />
+                  {printLoading ? 'Generating PDF...' : 'Print Report'}
+                </button>
               </div>
-              <div className="overflow-x-auto p-7" ref={tableRef}>
+              <div className="overflow-x-auto p-7">
 
               {loading ? (
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -390,13 +408,13 @@ const IncomeStatementList: React.FC = () => {
                     <tbody>
                       {isInterestIncomeData.map((row: any, index: number) => (
                         <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white">{row.AccountName}</td>
+                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
                             <td key={month} className="px-4 py-4 text-right text-black dark:text-white">
-                              {row[month] ?? "-"}
+                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
                             </td>
                           ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -439,13 +457,13 @@ const IncomeStatementList: React.FC = () => {
                     <tbody>
                       {isOtherRevenueData.map((row: any, index: number) => (
                         <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
+                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
                             <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ?? "-"}
+                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
                             </td>
                           ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -498,13 +516,13 @@ const IncomeStatementList: React.FC = () => {
                     <tbody>
                       {lessExpenseData.map((row: any, index: number) => (
                         <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
+                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
                             <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ?? "-"}
+                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
                             </td>
                           ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -546,13 +564,13 @@ const IncomeStatementList: React.FC = () => {
                     <tbody>
                       {directFinancingData.map((row: any, index: number) => (
                         <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
+                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
                             <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ?? "-"}
+                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
                             </td>
                           ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -594,13 +612,13 @@ const IncomeStatementList: React.FC = () => {
                     <tbody>
                       {otherIncomeExpenseData.map((row: any, index: number) => (
                         <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
+                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
                             <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ?? "-"}
+                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
                             </td>
                           ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -652,13 +670,13 @@ const IncomeStatementList: React.FC = () => {
                     <tbody>
                       {incomeTaxData.map((row: any, index: number) => (
                         <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white min-w-[280px]">{row.AccountName}</td>
+                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
                           {monthKeys.map((month) => (
                             <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ?? "-"}
+                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
                             </td>
                           ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance}</td>
+                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
                         </tr>
                       ))}
                     </tbody>

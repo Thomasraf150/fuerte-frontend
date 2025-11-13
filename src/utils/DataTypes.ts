@@ -519,6 +519,8 @@ export interface LoanBankFormValues {
   surrendered_pin: string;
   issued_pin: string;
   is_deleted: number;
+  created_at?: string;
+  updated_at?: string;
 }
 export interface BorrLoanRowData {
   id: string;
@@ -852,4 +854,27 @@ export interface DataTbRow {
   capital: any;
   revenue: any;
   expenses: any;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  table_name: string;
+  operation_type: string;
+  record_id: number;
+  user_id: number | null;
+  new_data: Record<string, any>;
+  old_data: Record<string, any> | null;
+  changed_by: string | null;
+  changed_at: string;
+  user: User | null;
+}
+
+export interface LoanHistoryPaginator {
+  data: AuditLogEntry[];
+  paginatorInfo: {
+    total: number;
+    currentPage: number;
+    lastPage: number;
+    hasMorePages: boolean;
+  };
 }
