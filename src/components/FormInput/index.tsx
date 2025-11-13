@@ -97,11 +97,24 @@ const formatCurrencyOnBlur = (value: string): string => {
 
 const unformatCurrency = (value: string): string => {
   if (!value) return '';
-  // Remove commas and return decimal string with 2 decimal places
+  // Remove commas and return raw number string
   const cleanValue = value.replace(/,/g, '');
+
+  // Don't force decimal places during typing/editing
+  // The .00 will be added by formatCurrencyOnBlur when field loses focus
   const number = parseFloat(cleanValue);
   if (isNaN(number)) return '';
-  return number.toFixed(2); // Always 2 decimal places
+
+  // Preserve decimal input if user typed it
+  if (cleanValue.includes('.')) {
+    // Limit to 2 decimal places if decimals exist
+    const parts = cleanValue.split('.');
+    const decPart = (parts[1] ?? '').substring(0, 2);
+    return `${parts[0]}.${decPart}`;
+  }
+
+  // No decimals - return clean integer value (no .00)
+  return cleanValue;
 };
 
 const FormInput: React.FC<FormInputProps> = ({

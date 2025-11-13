@@ -165,7 +165,6 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                       formatType="currency"
                       className="text-right"
                       onChange={(e) => handleCompTblDecimal(e, 'ob')}
-                      fallbackValue="0.00"
                     />
                   </div>
                 </li>

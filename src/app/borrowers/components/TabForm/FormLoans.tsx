@@ -114,8 +114,10 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     // Value is already formatted to 2 decimals by FormInput currency formatType
     setValue(type, value);
 
-    // Use React Hook Form's getValues to get current clean data and trigger computation
-    handleSubmit((data) => onSubmit(data, 'compute'))();
+    // Defer submission to next event loop tick to allow React Hook Form state to update
+    setTimeout(() => {
+      handleSubmit((data) => onSubmit(data, 'compute'))();
+    }, 0);
   };
 
 
