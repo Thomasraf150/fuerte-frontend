@@ -20,38 +20,50 @@ const useBranches = () => {
   const [dataBranchSub, setDataBranchSub] = useState<DataSubBranches[] | undefined>(undefined);
   const [selectedBranchID, setSelectedBranchID] = useState<number>();
   const [branchLoading, setBranchLoading] = useState<boolean>(false);
+  const [loadingBranches, setLoadingBranches] = useState<boolean>(false);
+  const [loadingSubBranches, setLoadingSubBranches] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataList = async (orderBy = 'id_desc') => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BRANCH_QUERY,
-        variables: { orderBy },
-      }),
-    });
+    setLoadingBranches(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_BRANCH_QUERY,
+          variables: { orderBy },
+        }),
+      });
 
-    const result = await response.json();
-    setDataBranch(result.data.getBranch);
+      const result = await response.json();
+      setDataBranch(result.data.getBranch);
+    } finally {
+      setLoadingBranches(false);
+    }
   };
 
   const fetchSubDataList = async (orderBy = 'id_desc', branch_id: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_SUB_BRANCH_QUERY,
-        variables: { orderBy, branch_id },
-      }),
-    });
+    setLoadingSubBranches(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_SUB_BRANCH_QUERY,
+          variables: { orderBy, branch_id },
+        }),
+      });
 
-    const result = await response.json();
-    setDataBranchSub(result.data.getBranchSub);
-    setSelectedBranchID(branch_id)
+      const result = await response.json();
+      setDataBranchSub(result.data.getBranchSub);
+      setSelectedBranchID(branch_id)
+    } finally {
+      setLoadingSubBranches(false);
+    }
   };
 
   const onSubmitBranch: SubmitHandler<DataFormBranch> = async (data) => {
@@ -234,7 +246,9 @@ const useBranches = () => {
     onSubmitSubBranch,
     handleDeleteBranch,
     handleDeleteSubBranch,
-    branchLoading
+    branchLoading,
+    loadingBranches,
+    loadingSubBranches
   };
 };
 
