@@ -221,6 +221,11 @@ const FormInput: React.FC<FormInputProps> = ({
       setDisplayValue(inputValue);
       setRawValue(inputValue);
 
+      // Call React Hook Form's onChange for proper tracking
+      if (register?.onChange) {
+        register.onChange(event);
+      }
+
       if (onChange) {
         onChange(event);
       }

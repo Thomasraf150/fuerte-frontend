@@ -59,7 +59,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           {/* <!-- ===== Main Content End ===== --> */}
         </div>
         {/* <!-- ===== Content Area End ===== --> */}
-        <ToastContainer/>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </div>
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </>

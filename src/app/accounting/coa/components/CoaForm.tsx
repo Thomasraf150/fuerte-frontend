@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
-import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import useCoa from '@/hooks/useCoa';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
@@ -12,6 +11,7 @@ interface ParentFormBr {
   fetchCoaDataTable: () => void;
   actionLbl: string;
   coaDataAccount: DataChartOfAccountList[];
+  selectedAccount?: DataChartOfAccountList | null;
 }
 
 interface Option {
@@ -20,11 +20,12 @@ interface Option {
   hidden?: boolean;
 }
 
-const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actionLbl, coaDataAccount }) => {
+const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actionLbl, coaDataAccount, selectedAccount }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataChartOfAccountList>();
   const { onSubmitCoa, branchSubData, coaLoading } = useCoa();
 
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
+  const [selectedPlacement, setSelectedPlacement] = useState<string>("");
 
   const flattenAccountsToOptions = (
     accounts: DataChartOfAccountList[],
@@ -72,7 +73,25 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
     console.log(coaDataAccount, ' initialData');
   }, [coaDataAccount, setValue, actionLbl, branchSubData])
 
-  const [selectedPlacement, setSelectedPlacement] = useState<string>("");
+  // Populate form when editing an existing account
+  useEffect(() => {
+    if (selectedAccount) {
+      // Populate all form fields with selectedAccount data
+      setValue('id', selectedAccount.id);
+      setValue('account_name', selectedAccount.account_name);
+      setValue('description', selectedAccount.description || '');
+      // Handle null branch for root/general accounts (branch is optional)
+      setValue('branch_sub_id', selectedAccount.branch_sub_id ? String(selectedAccount.branch_sub_id) : '');
+      setValue('balance', selectedAccount.balance || '0');
+      setValue('is_debit', selectedAccount.is_debit);
+      setValue('parent_account_id', selectedAccount.parent_account_id ? String(selectedAccount.parent_account_id) : '');
+      setSelectedPlacement(selectedAccount.is_debit || '');
+    } else {
+      // Reset form when creating new account
+      reset();
+      setSelectedPlacement('');
+    }
+  }, [selectedAccount, setValue, reset, optionsSubBranch]);
 
   const handleChangePlacement = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedPlacement(event.target.value);
@@ -80,12 +99,24 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
 
 
   const onSubmit: SubmitHandler<DataChartOfAccountList> = async (data) => {
+    // TEMPORARY DEBUG: Log form data
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('Account Name:', data.account_name);
+    console.log('Description:', data.description);
+    console.log('Branch Sub ID:', data.branch_sub_id);
+    console.log('Full Data:', data);
+    console.log('===========================');
+
     const result = await onSubmitCoa(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result && typeof result === 'object' && 'success' in result && result.success) {
+      console.log('🔵 CoaForm: Success! About to call fetchCoaDataTable()');
       fetchCoaDataTable();
+      console.log('🔵 CoaForm: Called fetchCoaDataTable(), closing form');
       setShowForm(false);
+    } else {
+      console.log('🔴 CoaForm: Submission failed or returned unexpected result:', result);
     }
     // Form stays open on errors for user to fix and retry
   };
@@ -93,11 +124,13 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="mb-3">
-        <FormLabel title={`Branch`}/>
+        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+          Branch
+        </label>
         <Controller
           name="branch_sub_id"
           control={control}
-          rules={{ required: 'Branch is required' }} 
+          // Branch is optional - root/general accounts don't need a branch
           render={({ field }) => (
             <ReactSelect
               {...field}
@@ -133,6 +166,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         icon={Edit3}
         register={register('account_name', { required: true })}
         error={errors.account_name && "Account name is required"}
+        required={true}
       />
 
       <div className="space-y-2 mt-4">
@@ -140,9 +174,10 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
               className={`block text-sm font-medium text-black dark:text-white mr-2`}
         >
           Placement
+          <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
         </label>
         <div className="flex items-center space-x-6">
-          
+
           <label className="flex items-center space-x-2">
             <input
               type="radio"
@@ -152,7 +187,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
               onChange={handleChangePlacement}
               className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
             />
-            <span className="text-gray-700">Debit</span>
+            <span className="text-gray-700 dark:text-gray-300">Debit</span>
           </label>
 
           <label className="flex items-center space-x-2">
@@ -164,7 +199,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
               onChange={handleChangePlacement}
               className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
             />
-            <span className="text-gray-700">Credit</span>
+            <span className="text-gray-700 dark:text-gray-300">Credit</span>
           </label>
         </div>
         {errors && <p className="mt-2 text-sm text-red-600">{errors.is_debit && "Placement is required!"}</p>}
@@ -178,18 +213,28 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         register={register('description', { required: true })}
         error={errors.description && "Description is required"}
         className='mt-2'
+        required={true}
       />
 
-      <FormInput
-        label="Balance"
-        id="balance"
-        type="text"
-        icon={Edit3}
-        formatType="number"
-        register={register('balance', { required: true })}
-        error={errors.balance && "Balance is required"}
-        className='mt-2'
-      />
+      <div className='mt-2'>
+        <Controller
+          name="balance"
+          control={control}
+          defaultValue="0"
+          render={({ field }) => (
+            <FormInput
+              label="Balance"
+              id="balance"
+              type="text"
+              icon={Edit3}
+              formatType="number"
+              error={errors.balance?.message}
+              value={field.value}
+              onChange={(e) => field.onChange(e.target.value)}
+            />
+          )}
+        />
+      </div>
 
       <FormInput
         label="Parent Account"

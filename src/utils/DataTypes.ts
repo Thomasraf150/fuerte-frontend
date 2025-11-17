@@ -694,6 +694,7 @@ export interface DataChartOfAccountList {
   balance: string;
   is_debit: string;
   parent_account_id: string;
+  is_active: boolean;
   branch_sub: DataSubBranches;
   subAccounts: DataChartOfAccountList[];
 }
