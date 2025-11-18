@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList } from '@/utils/DataTypes';
 import CoaForm from './CoaForm';
 import useCoa from '@/hooks/useCoa';
-import { GitBranch, Printer, Search, Edit2, Trash2, RefreshCw, ChevronDown, ChevronRight, PlusSquare, MinusSquare } from 'react-feather';
+import { GitBranch, Printer, Search, Edit2, Trash2, RefreshCw, ChevronDown, ChevronRight, PlusSquare, MinusSquare, Eye } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import Swal from 'sweetalert2';
 
@@ -35,9 +36,16 @@ const AccountRow = React.memo<AccountRowProps>(({
   onDelete,
   onReactivate
 }) => {
+  const router = useRouter();
+
+  const handleView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/accounting/coa/${account.id}`);
+  };
+
   return (
     <tr
-      className={`border-b dark:border-strokedark hover:bg-opacity-90 ${level > 1 ? 'row-hidden' : ''}`}
+      className="border-b dark:border-strokedark hover:bg-opacity-90"
       style={rowStyle}
       data-account-id={account.id}
       data-parent-id={parentId || undefined}
@@ -68,6 +76,13 @@ const AccountRow = React.memo<AccountRowProps>(({
       <td className="px-6 py-2 text-sm text-center">{account.balance}</td>
       <td className="px-6 py-2 text-sm text-center">
         <div className="flex items-center justify-center space-x-2">
+          <button
+            onClick={handleView}
+            className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
+            title="View Details"
+          >
+            <Eye size={16} />
+          </button>
           <button
             onClick={() => onEdit(account)}
             className="text-orange-300 hover:text-orange-100 dark:text-orange-300 dark:hover:text-orange-100 transition-colors"
@@ -285,23 +300,27 @@ const ChartofAcctList: React.FC = () => {
 
   // Expand all nodes (DOM-based)
   const expandAll = useCallback(() => {
-    const allRows = document.querySelectorAll('tr[data-account-id]');
-    allRows.forEach(row => {
-      row.classList.add('expanded');
-      row.classList.remove('row-hidden');
+    requestAnimationFrame(() => {
+      const allRows = document.querySelectorAll('tr[data-account-id]');
+      allRows.forEach(row => {
+        row.classList.add('expanded');
+        row.classList.remove('row-hidden');
+      });
     });
   }, []);
 
   // Collapse all nodes (DOM-based)
   const collapseAll = useCallback(() => {
-    const allRows = document.querySelectorAll('tr[data-account-id]');
-    allRows.forEach(row => {
-      const level = parseInt(row.getAttribute('data-level') || '1');
-      row.classList.remove('expanded');
-      // Hide all rows except level 1 (top-level)
-      if (level > 1) {
-        row.classList.add('row-hidden');
-      }
+    requestAnimationFrame(() => {
+      const allRows = document.querySelectorAll('tr[data-account-id]');
+      allRows.forEach(row => {
+        const level = parseInt(row.getAttribute('data-level') || '1');
+        row.classList.remove('expanded');
+        // Hide all rows except level 1 (top-level)
+        if (level > 1) {
+          row.classList.add('row-hidden');
+        }
+      });
     });
   }, []);
 
@@ -435,16 +454,16 @@ const ChartofAcctList: React.FC = () => {
                 </button>
               </div>
               <div className="p-5">
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-col gap-2 mb-4">
                   <button
-                    className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 flex items-center space-x-2"
+                    className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 flex items-center justify-center space-x-2"
                     onClick={() => handleShowForm('Create Account', true, null)}
                   >
                     <GitBranch size={14} />
                     <span>Create Account</span>
                   </button>
                   <button
-                    className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 flex items-center space-x-2"
+                    className="bg-success text-white py-2 px-4 rounded hover:bg-opacity-90 flex items-center justify-center space-x-2"
                     onClick={expandAll}
                     title="Expand All Accounts"
                   >
@@ -452,7 +471,7 @@ const ChartofAcctList: React.FC = () => {
                     <span>Expand All</span>
                   </button>
                   <button
-                    className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 flex items-center space-x-2"
+                    className="bg-danger text-white py-2 px-4 rounded hover:bg-opacity-90 flex items-center justify-center space-x-2"
                     onClick={collapseAll}
                     title="Collapse All Accounts"
                   >

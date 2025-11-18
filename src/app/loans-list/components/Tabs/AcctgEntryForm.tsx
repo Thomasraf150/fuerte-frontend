@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, Edit3, ChevronDown, CheckSquare } from 'react-feather';
+import { Home, Edit3, ChevronDown, CheckSquare, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -25,7 +25,7 @@ interface Option {
 
 const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData, loanSingleData, setShowAcctgEntry, handleRefetchData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
-  const { onSubmitLoanProSettings } = useLoanProceedAccount();
+  const { onSubmitLoanProSettings, loanProcLoading } = useLoanProceedAccount();
   const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
 
   useEffect(() => {
@@ -115,7 +115,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notes Receivale</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notes Receivale <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="nr_id"
             control={control}
@@ -136,7 +136,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Outstanding Balance</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Outstanding Balance <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="ob_id"
             control={control}
@@ -157,7 +157,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>UDI</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>UDI <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="udi_id"
             control={control}
@@ -178,7 +178,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Processing</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Processing <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="proc_id"
             control={control}
@@ -199,7 +199,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="ins_id"
             control={control}
@@ -220,7 +220,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
         
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance Manual Fee</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance Manual Fee <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="ins_mfee_id"
             control={control}
@@ -241,7 +241,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Collection</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Collection <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="col_id"
             control={control}
@@ -262,7 +262,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notarial</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notarial <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="not_id"
             control={control}
@@ -283,7 +283,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Rebates</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Rebates <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="reb_id"
             control={control}
@@ -304,7 +304,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Agent Fee</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Agent Fee <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="agent_id"
             control={control}
@@ -325,7 +325,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Penalty</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Penalty <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="pen_id"
             control={control}
@@ -346,7 +346,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon Amount</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon Amount <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="addon_id"
             control={control}
@@ -367,7 +367,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon UDI</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon UDI <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="addon_udi_id"
             control={control}
@@ -388,7 +388,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Cash in Bank</label>
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Cash in Bank <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="cib_id"
             control={control}
@@ -413,13 +413,21 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
       <div className="w-full flex justify-end mt-6">
         <div className="flex gap-4">
           <button
-            className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+            className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanProcLoading ? 'opacity-70' : ''}`}
             type="submit"
+            disabled={loanProcLoading}
           >
-            <span className="mt-1 mr-1">
-              <CheckSquare size={17} /> 
-            </span>
-            Post
+            {loanProcLoading ? (
+              <>
+                <RotateCw size={17} className="animate-spin mr-1" />
+                <span>Posting...</span>
+              </>
+            ) : (
+              <>
+                <CheckSquare size={17} className="mr-1" />
+                <span>Post</span>
+              </>
+            )}
           </button>
         </div>
       </div>
