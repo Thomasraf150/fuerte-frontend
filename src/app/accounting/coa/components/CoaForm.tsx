@@ -1,17 +1,19 @@
 "use client"
-import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
-import ReactSelect from '@/components/ReactSelect';
 import FormInput from '@/components/FormInput';
-import useCoa from '@/hooks/useCoa';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
-interface ParentFormBr {
+interface CoaFormProps {
   setShowForm: (value: boolean) => void;
   fetchCoaDataTable: () => void;
   actionLbl: string;
   coaDataAccount: DataChartOfAccountList[];
   selectedAccount?: DataChartOfAccountList | null;
+  branchSubData: DataSubBranches[] | undefined;
+  onSubmitCoa: SubmitHandler<DataChartOfAccountList>;
+  coaLoading: boolean;
+  onClose?: () => void; // Consistent close handler with logging
 }
 
 interface Option {
@@ -20,58 +22,60 @@ interface Option {
   hidden?: boolean;
 }
 
-const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDataTable, actionLbl, coaDataAccount, selectedAccount }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataChartOfAccountList>();
-  const { onSubmitCoa, branchSubData, coaLoading } = useCoa();
+const CoaForm: React.FC<CoaFormProps> = ({
+  setShowForm,
+  fetchCoaDataTable,
+  actionLbl,
+  coaDataAccount,
+  selectedAccount,
+  branchSubData,
+  onSubmitCoa,
+  coaLoading,
+  onClose
+}) => {
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChartOfAccountList>();
 
-  const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
   const [selectedPlacement, setSelectedPlacement] = useState<string>("");
 
-  const flattenAccountsToOptions = (
-    accounts: DataChartOfAccountList[],
-    level: number = 1
-  ): { label: string; value: string }[] => {
-    // Initialize an empty array for options
-    let options: { label: string; value: string }[] = [];
-  
-    accounts.forEach((account) => {
-      // Add the current account with indentation based on level
-      options.push({
-        label: `${'—'.repeat(level - 1)} ${account.account_name}`,
-        value: account?.id?.toString(),
-      });
-  
-      // Recursively process sub-accounts
-      if (account.subAccounts) {
-        options = options.concat(flattenAccountsToOptions(account.subAccounts, level + 1));
-      }
-    });
-  
-    return options;
-  };
-
-  // Add the default empty option only once at the top
-  const getAccountOptions = (accounts: DataChartOfAccountList[]): { label: string; value: string }[] => {
-    const flattenedOptions = flattenAccountsToOptions(accounts);
-    return [{ label: "Select a Parent account", value: "" }, ...flattenedOptions];
-  };
-
-  const optionsCoaData = getAccountOptions(coaDataAccount);
-
-  useEffect(()=>{
-    if (branchSubData && Array.isArray(branchSubData)) {
-      const dynaOpt: Option[] = branchSubData?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
+  // Memoized branch options - only recalculates when branchSubData changes
+  const optionsSubBranch = useMemo(() => {
+    if (!branchSubData || !Array.isArray(branchSubData)) {
+      return [{ value: '', label: 'Select a Sub Branch', hidden: true }];
     }
 
-    console.log(coaDataAccount, ' initialData');
-  }, [coaDataAccount, setValue, actionLbl, branchSubData])
+    const dynaOpt: Option[] = branchSubData.map(bSub => ({
+      value: String(bSub.id),
+      label: bSub.name,
+    }));
+
+    return [
+      { value: '', label: 'Select a Sub Branch', hidden: true },
+      ...dynaOpt,
+    ];
+  }, [branchSubData])
+
+  // Memoized parent account options - flattens tree into select options
+  const flattenedAccountOptions = useMemo(() => {
+    const flattenAccountsToOptions = (
+      accounts: DataChartOfAccountList[],
+      level: number = 1
+    ): { label: string; value: string }[] => {
+      let options: { label: string; value: string }[] = [];
+      accounts.forEach((account) => {
+        options.push({
+          label: `${'—'.repeat(level - 1)} ${account.account_name}`,
+          value: account?.id?.toString(),
+        });
+        if (account.subAccounts) {
+          options = options.concat(flattenAccountsToOptions(account.subAccounts, level + 1));
+        }
+      });
+      return options;
+    };
+
+    const flattenedOptions = flattenAccountsToOptions(coaDataAccount || []);
+    return [{ label: "Select a Parent account", value: "" }, ...flattenedOptions];
+  }, [coaDataAccount]);
 
   // Populate form when editing an existing account
   useEffect(() => {
@@ -91,7 +95,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
       reset();
       setSelectedPlacement('');
     }
-  }, [selectedAccount, setValue, reset, optionsSubBranch]);
+  }, [selectedAccount, setValue, reset]);
 
   const handleChangePlacement = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedPlacement(event.target.value);
@@ -99,57 +103,21 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
 
 
   const onSubmit: SubmitHandler<DataChartOfAccountList> = async (data) => {
-    // TEMPORARY DEBUG: Log form data
-    console.log('=== FORM SUBMISSION DEBUG ===');
-    console.log('Account Name:', data.account_name);
-    console.log('Description:', data.description);
-    console.log('Branch Sub ID:', data.branch_sub_id);
-    console.log('Full Data:', data);
-    console.log('===========================');
-
     const result = await onSubmitCoa(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result && typeof result === 'object' && 'success' in result && result.success) {
-      console.log('🔵 CoaForm: Success! About to call fetchCoaDataTable()');
-      fetchCoaDataTable();
-      console.log('🔵 CoaForm: Called fetchCoaDataTable(), closing form');
-      setShowForm(false);
-    } else {
-      console.log('🔴 CoaForm: Submission failed or returned unexpected result:', result);
+      // Use onClose if provided (includes logging), otherwise fallback to setShowForm
+      onClose ? onClose() : setShowForm(false);
+      fetchCoaDataTable();        // Refresh table in background (non-blocking)
     }
     // Form stays open on errors for user to fix and retry
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="mb-3">
-        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-          Branch
-        </label>
-        <Controller
-          name="branch_sub_id"
-          control={control}
-          // Branch is optional - root/general accounts don't need a branch
-          render={({ field }) => (
-            <ReactSelect
-              {...field}
-              options={optionsSubBranch}
-              placeholder="Select a branch..."
-              onChange={(selectedOption) => {
-                field.onChange(selectedOption?.value);
-              }}
-              value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
-              isLoading={!branchSubData || optionsSubBranch.length <= 1}
-              loadingMessage={() => "Loading branches..."}
-            />
-          )}
-        />
-        {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
-      </div>
-
-      {/* <FormInput
-        label="Branch Sub"
+      <FormInput
+        label="Branch"
         id="branch_sub_id"
         type="select"
         icon={ChevronDown}
@@ -157,7 +125,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         error={errors.branch_sub_id?.message}
         options={optionsSubBranch}
         className='mb-4'
-      /> */}
+      />
 
       <FormInput
         label="Account Name"
@@ -216,25 +184,16 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         required={true}
       />
 
-      <div className='mt-2'>
-        <Controller
-          name="balance"
-          control={control}
-          defaultValue="0"
-          render={({ field }) => (
-            <FormInput
-              label="Balance"
-              id="balance"
-              type="text"
-              icon={Edit3}
-              formatType="number"
-              error={errors.balance?.message}
-              value={field.value}
-              onChange={(e) => field.onChange(e.target.value)}
-            />
-          )}
-        />
-      </div>
+      <FormInput
+        label="Balance"
+        id="balance"
+        type="text"
+        icon={Edit3}
+        formatType="number"
+        register={register('balance')}
+        error={errors.balance?.message}
+        className='mt-2'
+      />
 
       <FormInput
         label="Parent Account"
@@ -243,7 +202,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         icon={ChevronDown}
         register={register('parent_account_id')}
         error={errors.parent_account_id?.message}
-        options={optionsCoaData}
+        options={flattenedAccountOptions}
         className='mb-4 mt-4'
       />
 
@@ -251,7 +210,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
         <button
           className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           type="button"
-          onClick={() => { setShowForm(false) }}
+          onClick={() => { onClose ? onClose() : setShowForm(false) }}
         >
           Cancel
         </button>
@@ -277,4 +236,4 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, fetchCoaDat
   );
 };
 
-export default LoanProcSettingsForm;
+export default React.memo(CoaForm);

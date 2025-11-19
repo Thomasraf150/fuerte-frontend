@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type {
   AccountDetail,
   AccountTransactionsResponse,
@@ -22,32 +22,39 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
   pagination,
   onPageChange
 }) => {
-  if (!transactions) {
-    return null;
-  }
+  // Memoize pagination calculations to prevent unnecessary recalculations
+  const currentPage = useMemo(
+    () => Math.floor(pagination.offset / pagination.limit) + 1,
+    [pagination.offset, pagination.limit]
+  );
 
-  const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
-  const totalPages = Math.ceil(transactions.total_count / pagination.limit);
-  const hasTransactions = transactions.transactions.length > 0;
+  const totalPages = useMemo(
+    () => transactions ? Math.ceil(transactions.total_count / pagination.limit) : 0,
+    [transactions, pagination.limit]
+  );
 
-  const handlePreviousPage = () => {
+  const hasTransactions = transactions ? transactions.transactions.length > 0 : false;
+
+  // Memoize event handlers to prevent unnecessary re-renders of pagination controls
+  const handlePreviousPage = useCallback(() => {
     if (pagination.offset > 0) {
       onPageChange(pagination.offset - pagination.limit);
     }
-  };
+  }, [pagination.offset, pagination.limit, onPageChange]);
 
-  const handleNextPage = () => {
-    if (pagination.offset + pagination.limit < transactions.total_count) {
+  const handleNextPage = useCallback(() => {
+    if (transactions && pagination.offset + pagination.limit < transactions.total_count) {
       onPageChange(pagination.offset + pagination.limit);
     }
-  };
+  }, [pagination.offset, pagination.limit, transactions, onPageChange]);
 
-  const handlePageClick = (page: number) => {
+  const handlePageClick = useCallback((page: number) => {
     const newOffset = (page - 1) * pagination.limit;
     onPageChange(newOffset);
-  };
+  }, [pagination.limit, onPageChange]);
 
-  const getPageNumbers = () => {
+  // Memoize page numbers calculation - this is expensive with many pages
+  const pageNumbers = useMemo(() => {
     const pages: number[] = [];
     const maxVisiblePages = 5;
 
@@ -80,7 +87,11 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
     }
 
     return pages;
-  };
+  }, [currentPage, totalPages]);
+
+  if (!transactions) {
+    return null;
+  }
 
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -124,28 +135,28 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
               <table className="w-full table-auto">
                 <thead>
                   <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                    <th className="px-4 py-4 font-medium text-black dark:text-white">
+                    <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
                       Date
                     </th>
-                    <th className="px-4 py-4 font-medium text-black dark:text-white">
+                    <th className="hidden min-w-[120px] px-4 py-4 font-medium text-black dark:text-white sm:table-cell">
                       Reference
                     </th>
-                    <th className="px-4 py-4 font-medium text-black dark:text-white">
+                    <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
                       Description
                     </th>
-                    <th className="px-4 py-4 font-medium text-black dark:text-white">
+                    <th className="hidden min-w-[120px] px-4 py-4 font-medium text-black dark:text-white sm:table-cell">
                       Journal Type
                     </th>
-                    <th className="px-4 py-4 text-right font-medium text-black dark:text-white">
+                    <th className="min-w-[100px] px-4 py-4 text-right font-medium text-black dark:text-white">
                       Debit
                     </th>
-                    <th className="px-4 py-4 text-right font-medium text-black dark:text-white">
+                    <th className="min-w-[100px] px-4 py-4 text-right font-medium text-black dark:text-white">
                       Credit
                     </th>
-                    <th className="px-4 py-4 text-right font-medium text-black dark:text-white">
+                    <th className="min-w-[100px] px-4 py-4 text-right font-medium text-black dark:text-white">
                       Balance
                     </th>
-                    <th className="px-4 py-4 font-medium text-black dark:text-white">
+                    <th className="hidden min-w-[120px] px-4 py-4 font-medium text-black dark:text-white md:table-cell">
                       Posted By
                     </th>
                   </tr>
@@ -170,7 +181,7 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="hidden px-4 py-4 sm:table-cell">
                           <div className="font-medium text-black dark:text-white">
                             {transaction.journal_ref}
                           </div>
@@ -185,17 +196,17 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-4 text-black dark:text-white max-w-xs">
+                        <td className="max-w-xs px-4 py-4 text-black dark:text-white">
                           <div className="truncate" title={transaction.journal_desc || ''}>
                             {transaction.journal_desc || '-'}
                           </div>
                           {(transaction.vendor_name || transaction.borrower_name) && (
-                            <div className="text-xs text-bodydark mt-1">
+                            <div className="text-bodydark mt-1 text-xs">
                               {transaction.vendor_name || transaction.borrower_name}
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="hidden px-4 py-4 sm:table-cell">
                           <span className="inline-flex rounded bg-primary bg-opacity-10 px-2 py-1 text-xs font-medium text-primary">
                             {transaction.journal_type}
                           </span>
@@ -226,7 +237,7 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
                         <td className="px-4 py-4 text-right font-semibold text-black dark:text-white">
                           {formatCurrency(transaction.running_balance)}
                         </td>
-                        <td className="px-4 py-4 text-sm text-bodydark">
+                        <td className="hidden px-4 py-4 text-sm text-bodydark md:table-cell">
                           {transaction.posted_by_name || '-'}
                         </td>
                       </tr>
@@ -245,27 +256,31 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
                   {transactions.total_count} transactions
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <button
                     onClick={handlePreviousPage}
                     disabled={pagination.offset === 0}
-                    className="rounded border border-stroke px-3 py-1 text-sm font-medium text-black hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-strokedark dark:text-white dark:hover:bg-meta-4"
+                    className="rounded border border-stroke px-2 py-1 text-sm font-medium text-black hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-strokedark dark:text-white dark:hover:bg-meta-4 sm:px-3"
+                    aria-label="Previous page"
                   >
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Prev</span>
                   </button>
 
-                  {getPageNumbers().map((page, index) => (
+                  {pageNumbers.map((page, index) => (
                     <React.Fragment key={index}>
                       {page === -1 || page === -2 ? (
                         <span className="px-2 text-bodydark">...</span>
                       ) : (
                         <button
                           onClick={() => handlePageClick(page)}
-                          className={`rounded border px-3 py-1 text-sm font-medium ${
+                          className={`rounded border px-2 py-1 text-sm font-medium sm:px-3 ${
                             currentPage === page
                               ? 'border-primary bg-primary text-white'
                               : 'border-stroke text-black hover:bg-gray-2 dark:border-strokedark dark:text-white dark:hover:bg-meta-4'
                           }`}
+                          aria-label={`Go to page ${page}`}
+                          aria-current={currentPage === page ? 'page' : undefined}
                         >
                           {page}
                         </button>
@@ -276,9 +291,11 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
                   <button
                     onClick={handleNextPage}
                     disabled={pagination.offset + pagination.limit >= transactions.total_count}
-                    className="rounded border border-stroke px-3 py-1 text-sm font-medium text-black hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-strokedark dark:text-white dark:hover:bg-meta-4"
+                    className="rounded border border-stroke px-2 py-1 text-sm font-medium text-black hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-strokedark dark:text-white dark:hover:bg-meta-4 sm:px-3"
+                    aria-label="Next page"
                   >
-                    Next
+                    <span className="hidden sm:inline">Next</span>
+                    <span className="sm:hidden">Next</span>
                   </button>
                 </div>
               </div>
@@ -290,4 +307,5 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
   );
 };
 
-export default TransactionHistoryTable;
+// Wrap in React.memo to prevent unnecessary re-renders when parent updates
+export default React.memo(TransactionHistoryTable);

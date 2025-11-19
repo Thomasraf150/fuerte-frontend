@@ -35,6 +35,7 @@ const AccountDetailPage: React.FC = () => {
     endDate: undefined,
     journalType: undefined
   });
+  const [debouncedFilters, setDebouncedFilters] = useState<FilterType>(filters);
   const [pagination, setPagination] = useState<PaginationParams>({
     limit: 20,
     offset: 0
@@ -81,6 +82,16 @@ const AccountDetailPage: React.FC = () => {
     }
   }, [accountId, graphqlAPI]);
 
+  // Debounce filter changes to reduce API calls (300ms delay)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedFilters(filters);
+    }, 300);
+
+    // Cleanup timeout if filters change again before delay completes
+    return () => clearTimeout(timeoutId);
+  }, [filters]);
+
   // Fetch transactions
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -91,9 +102,9 @@ const AccountDetailPage: React.FC = () => {
 
         const variables = {
           accountNumber: account.number,
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-          journalType: filters.journalType,
+          startDate: debouncedFilters.startDate,
+          endDate: debouncedFilters.endDate,
+          journalType: debouncedFilters.journalType,
           limit: pagination.limit,
           offset: pagination.offset
         };
@@ -126,7 +137,7 @@ const AccountDetailPage: React.FC = () => {
     if (account?.number) {
       fetchTransactions();
     }
-  }, [account, filters, pagination, graphqlAPI]);
+  }, [account, debouncedFilters, pagination, graphqlAPI]);
 
   // Handler functions
   const handleFilterChange = (newFilters: FilterType) => {
@@ -185,8 +196,6 @@ const AccountDetailPage: React.FC = () => {
       <div className="mx-auto">
         <Breadcrumb
           pageName={`Account: ${account.account_name}`}
-          previousPage="Chart of Accounts"
-          previousPageLink="/accounting/coa"
         />
       </div>
 

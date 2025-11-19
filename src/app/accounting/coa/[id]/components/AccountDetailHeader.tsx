@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { AccountDetail } from '@/types/chartOfAccounts';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -9,6 +9,8 @@ interface AccountDetailHeaderProps {
 
 const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBack }) => {
   const isDebitAccount = account.is_debit === '1' || account.is_debit === 'true';
+  const [showAllSubAccounts, setShowAllSubAccounts] = useState(false);
+  const INITIAL_DISPLAY_COUNT = 3;
 
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -176,7 +178,10 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
                 Sub Accounts ({account.subAccounts.length})
               </p>
               <div className="flex flex-wrap gap-2">
-                {account.subAccounts.map((subAccount) => (
+                {(showAllSubAccounts
+                  ? account.subAccounts
+                  : account.subAccounts.slice(0, INITIAL_DISPLAY_COUNT)
+                ).map((subAccount) => (
                   <span
                     key={subAccount.id}
                     className="inline-flex items-center gap-1 rounded bg-gray-2 px-3 py-1 text-sm text-black dark:bg-meta-4 dark:text-white"
@@ -190,6 +195,16 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
                   </span>
                 ))}
               </div>
+              {account.subAccounts.length > INITIAL_DISPLAY_COUNT && (
+                <button
+                  onClick={() => setShowAllSubAccounts(!showAllSubAccounts)}
+                  className="mt-3 text-sm text-primary hover:underline focus:outline-none"
+                >
+                  {showAllSubAccounts
+                    ? 'Hide'
+                    : `Show ${account.subAccounts.length - INITIAL_DISPLAY_COUNT} more`}
+                </button>
+              )}
             </div>
           )}
         </div>

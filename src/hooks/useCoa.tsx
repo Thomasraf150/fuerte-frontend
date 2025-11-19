@@ -35,26 +35,13 @@ const useCoa = () => {
     setBranchSubData(result.data.getAllBranch);
   };
   
-  const fetchCoaData = async (orderBy = 'id_desc') => {
-    const { GET_AUTH_TOKEN } = useAuthStore.getState();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-      },
-      body: JSON.stringify({
-        query: GET_ALL_SUB_BRANCH_QUERY,
-        variables: { orderBy }
-      }),
-    });
-
-    const result = await response.json();
-    setBranchSubData(result.data.getAllBranch);
-  };
+  // Initialize data on mount (following useUsers pattern)
+  useEffect(() => {
+    fetchDataSubBranch("id_desc");
+    fetchCoaDataTable();
+  }, []);
 
   const fetchCoaDataTable = async () => {
-    console.log('🟢 useCoa: fetchCoaDataTable() CALLED');
     setLoading(true);
 
     try {
@@ -62,8 +49,6 @@ const useCoa = () => {
         input : { startDate: "", endDate: "" },
         _cacheBust: Date.now() // Force fresh query by preventing cache
       };
-
-      console.log('🟢 useCoa: Fetching COA data with cacheBust:', variables._cacheBust);
 
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -78,7 +63,6 @@ const useCoa = () => {
         }),
       });
       const result = await response.json();
-      console.log('🟢 useCoa: Received response, accounts count:', result?.data?.getChartOfAccounts?.length);
 
       // Check for GraphQL errors
       if (result.errors) {
@@ -104,10 +88,7 @@ const useCoa = () => {
       });
 
       const normalizedData = result.data.getChartOfAccounts.map(normalizeAccount);
-      console.log('🟢 useCoa: About to update state with', normalizedData.length, 'accounts');
-      console.log('🟢 useCoa: Account names:', normalizedData.map((a: any) => a.account_name).join(', '));
       setCoaDataAccount(normalizedData);
-      console.log('🟢 useCoa: State updated, setLoading(false)');
       setLoading(false);
     } catch (error) {
       console.error('Error fetching COA data:', error);
@@ -119,13 +100,13 @@ const useCoa = () => {
   const onSubmitCoa: SubmitHandler<DataChartOfAccountList> = async (data) => {
     setCoaLoading(true);
     try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
-      
+      console.log('🔵 COA SUBMIT - Raw form data:', data);
+
       let mutation;
       let variables: { input: any } = {
         input: {
-          user_id: String(userData?.user?.id),
+          // user_id REMOVED - backend will use auth()->id() from authenticated session
+          // This fixes the foreign key error (localStorage had stale user_id = 39)
           branch_sub_id: data.branch_sub_id || null, // Send NULL for empty branch (root accounts)
           account_name: data.account_name,
           description: data.description,
@@ -142,12 +123,11 @@ const useCoa = () => {
         mutation = SAVE_COA_MUTATION;
       }
 
-      // TEMPORARY DEBUG: Log GraphQL variables
-      console.log('=== GRAPHQL VARIABLES DEBUG ===');
-      console.log('Account Name:', variables.input.account_name);
-      console.log('Description:', variables.input.description);
-      console.log('Full Variables:', JSON.stringify(variables, null, 2));
-      console.log('================================');
+      console.log('🟢 COA SUBMIT - Sending to backend:', {
+        mutation: data.id ? 'UPDATE' : 'CREATE',
+        variables,
+        hasAuthToken: !!useAuthStore.getState().GET_AUTH_TOKEN()
+      });
 
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -164,31 +144,26 @@ const useCoa = () => {
 
       const result = await response.json();
 
-      console.log('🔵 useCoa: Raw GraphQL response:', JSON.stringify(result, null, 2));
+      console.log('🔴 COA SUBMIT - Backend response:', result);
 
       // Handle GraphQL errors
       if (result.errors) {
-        console.log('🔴 useCoa: GraphQL errors detected');
+        console.error('❌ COA SUBMIT - GraphQL error:', result.errors);
         toast.error(result.errors[0].message);
         return { success: false, error: result.errors[0].message };
       }
 
       // Check for response data
       const responseData = result.data?.createCoa || result.data?.updateCoa;
-      console.log('🔵 useCoa: Response data:', JSON.stringify(responseData, null, 2));
-      console.log('🔵 useCoa: Response data status:', responseData?.status, 'type:', typeof responseData?.status);
 
       if (responseData) {
         // Check status field explicitly (handles both boolean and string "true"/"false")
         const status = responseData.status === true || responseData.status === 'true';
-        console.log('🔵 useCoa: Status evaluated to:', status);
 
         if (status) {
-          console.log('✅ useCoa: Success path - calling toast.success()');
           toast.success("Chart of Account saved successfully!");
           return { success: true, data: responseData };
         } else {
-          console.log('❌ useCoa: Failure path - calling toast.error() with message:', responseData.message);
           // Show error message from backend
           toast.error(responseData.message || "Operation failed");
           return { success: false, error: responseData.message };
@@ -483,10 +458,6 @@ const useCoa = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchDataSubBranch();
-  }, []);
 
   return {
     fetchCoaDataTable,
