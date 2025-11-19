@@ -100,8 +100,6 @@ const useCoa = () => {
   const onSubmitCoa: SubmitHandler<DataChartOfAccountList> = async (data) => {
     setCoaLoading(true);
     try {
-      console.log('🔵 COA SUBMIT - Raw form data:', data);
-
       let mutation;
       let variables: { input: any } = {
         input: {
@@ -123,12 +121,6 @@ const useCoa = () => {
         mutation = SAVE_COA_MUTATION;
       }
 
-      console.log('🟢 COA SUBMIT - Sending to backend:', {
-        mutation: data.id ? 'UPDATE' : 'CREATE',
-        variables,
-        hasAuthToken: !!useAuthStore.getState().GET_AUTH_TOKEN()
-      });
-
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
@@ -144,11 +136,9 @@ const useCoa = () => {
 
       const result = await response.json();
 
-      console.log('🔴 COA SUBMIT - Backend response:', result);
-
       // Handle GraphQL errors
       if (result.errors) {
-        console.error('❌ COA SUBMIT - GraphQL error:', result.errors);
+        console.error('COA submission error:', result.errors);
         toast.error(result.errors[0].message);
         return { success: false, error: result.errors[0].message };
       }

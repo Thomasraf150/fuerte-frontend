@@ -264,8 +264,6 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
 
   useEffect(() => {
     fetchCoaDataTable();
-
-    console.log(coaDataAccount, 'coaDataAccount');
   }, [])
 
   // Get level-based CSS classes with support for leaf nodes and inactive accounts

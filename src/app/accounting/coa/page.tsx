@@ -14,6 +14,7 @@ const COA: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [actionLbl, setActionLbl] = useState<string>('');
   const [selectedAccount, setSelectedAccount] = useState<DataChartOfAccountList | null>(null);
+  const [modalLoading, setModalLoading] = useState<boolean>(false);
   const {
     coaDataAccount,
     fetchCoaDataTable,
@@ -27,30 +28,28 @@ const COA: React.FC = () => {
     printChartOfAccounts
   } = useCoa();
 
-  // PATTERN COPIED FROM: Loan Codes, Branch Setup, Area, Users, Vendors (ALL working pages)
-  // Direct state changes with NO setTimeout, NO loading overlay - CSS animation handles transition
   const handleOpenForm = (lbl: string, showFrm: boolean, account: DataChartOfAccountList | null = null) => {
-    console.log('🔵 MODAL - handleOpenForm called:', { lbl, showFrm, accountId: account?.id });
-
     if (showFrm) {
-      // Check if branch data is loaded before opening form
-      if (!branchSubData) {
-        toast.warning('Loading branch data, please wait...');
-        return;
-      }
-
-      // Direct state updates (NO setTimeout) - like ALL other working pages
+      // Show loading overlay when opening modal
+      setModalLoading(true);
       setShowForm(true);
       setActionLbl(lbl);
       setSelectedAccount(account);
-      console.log('✅ MODAL - Opened instantly');
+      // Loading will be hidden by CoaForm's onReady callback
     } else {
-      // Direct close (NO setTimeout) - like ALL other working pages
+      // Show loading overlay when closing modal
+      setModalLoading(true);
       setShowForm(false);
       setActionLbl('');
       setSelectedAccount(null);
-      console.log('✅ MODAL - Closed instantly');
+      // Hide loading after a brief delay for unmount animation
+      setTimeout(() => setModalLoading(false), 300);
     }
+  };
+
+  const handleFormReady = () => {
+    // Called by CoaForm when it has fully mounted and rendered
+    setModalLoading(false);
   };
 
   return (
@@ -93,13 +92,23 @@ const COA: React.FC = () => {
                   onSubmitCoa={onSubmitCoa}
                   coaLoading={coaLoading}
                   onClose={() => handleOpenForm('', false)}
+                  onReady={handleFormReady}
                 />
               </div>
             </div>
           </div>
         )}
       </div>
-      {/* NO loading overlay - CSS animation (0.5s) handles transition like ALL other working pages */}
+
+      {/* Full-page loading overlay for modal operations */}
+      {modalLoading && (
+        <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="flex flex-col items-center">
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+            <p className="mt-4 text-white">Loading...</p>
+          </div>
+        </div>
+      )}
     </DefaultLayout>
   );
 };

@@ -64,6 +64,13 @@ const AccountDetailPage: React.FC = () => {
         });
         const accountResult = await accountResponse.json();
 
+        // Check for GraphQL errors first
+        if (accountResult.errors) {
+          console.error('GraphQL errors:', accountResult.errors);
+          setError(accountResult.errors[0]?.message || 'Failed to load account');
+          return;
+        }
+
         if (accountResult.data?.getAccountById) {
           setAccount(accountResult.data.getAccountById);
         } else {
@@ -122,6 +129,13 @@ const AccountDetailPage: React.FC = () => {
           })
         });
         const transactionResult = await transactionResponse.json();
+
+        // Check for GraphQL errors first
+        if (transactionResult.errors) {
+          console.error('GraphQL transaction errors:', transactionResult.errors);
+          setError(transactionResult.errors[0]?.message || 'Failed to load transactions');
+          return;
+        }
 
         if (transactionResult.data?.getAccountTransactions) {
           setTransactions(transactionResult.data.getAccountTransactions);

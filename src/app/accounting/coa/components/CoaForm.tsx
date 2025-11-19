@@ -14,6 +14,7 @@ interface CoaFormProps {
   onSubmitCoa: SubmitHandler<DataChartOfAccountList>;
   coaLoading: boolean;
   onClose?: () => void; // Consistent close handler with logging
+  onReady?: () => void; // Called when form is fully mounted and ready
 }
 
 interface Option {
@@ -31,7 +32,8 @@ const CoaForm: React.FC<CoaFormProps> = ({
   branchSubData,
   onSubmitCoa,
   coaLoading,
-  onClose
+  onClose,
+  onReady
 }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChartOfAccountList>();
 
@@ -96,6 +98,18 @@ const CoaForm: React.FC<CoaFormProps> = ({
       setSelectedPlacement('');
     }
   }, [selectedAccount, setValue, reset]);
+
+  // Signal to parent that form is fully initialized and ready
+  useEffect(() => {
+    // Wait for branch data to load and form to initialize
+    if (branchSubData && onReady) {
+      // Use setTimeout to ensure DOM has fully rendered
+      const timer = setTimeout(() => {
+        onReady();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [branchSubData, onReady]);
 
   const handleChangePlacement = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedPlacement(event.target.value);
