@@ -83,14 +83,13 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
     <form onSubmit={handleSubmit(onSubmit)} className="w-full">
       <div className="flex flex-col gap-3">
         <div className='w-full'>
-          <label
-              className={`block text-sm font-medium text-black dark:text-white mb-2`}
-          >
-            Interest Income
+          <label className={`block text-sm font-medium text-black dark:text-white mb-2`}>
+            Interest Income <span style={{ color: '#ef4444' }}>*</span>
           </label>
           <Controller
             control={control}
-            name="interest_income" // Registering field dynamically
+            name="interest_income"
+            rules={{ required: 'Interest Income account is required' }}
             render={({ field }) => {
               return (
                 <ReactSelect
@@ -107,16 +106,18 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
               );
             }}
           />
+          {errors.interest_income && (
+            <p className="text-red-500 text-sm mt-1">{errors.interest_income.message}</p>
+          )}
         </div>
         <div className='w-full'>
-          <label
-              className={`block text-sm font-medium text-black dark:text-white mb-2`}
-          >
-            Bank Charge
+          <label className={`block text-sm font-medium text-black dark:text-white mb-2`}>
+            Bank Charge <span style={{ color: '#ef4444' }}>*</span>
           </label>
           <Controller
             control={control}
-            name="bank_charge" // Registering field dynamically
+            name="bank_charge"
+            rules={{ required: 'Bank Charge account is required' }}
             render={({ field }) => {
               return (
                 <ReactSelect
@@ -133,16 +134,18 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
               );
             }}
           />
+          {errors.bank_charge && (
+            <p className="text-red-500 text-sm mt-1">{errors.bank_charge.message}</p>
+          )}
         </div>
         <div className='w-full'>
-          <label
-              className={`block text-sm font-medium text-black dark:text-white mb-2`}
-          >
-            Penalty
+          <label className={`block text-sm font-medium text-black dark:text-white mb-2`}>
+            Penalty <span style={{ color: '#ef4444' }}>*</span>
           </label>
           <Controller
             control={control}
-            name="penalty" // Registering field dynamically
+            name="penalty"
+            rules={{ required: 'Penalty account is required' }}
             render={({ field }) => {
               return (
                 <ReactSelect
@@ -159,6 +162,9 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
               );
             }}
           />
+          {errors.penalty && (
+            <p className="text-red-500 text-sm mt-1">{errors.penalty.message}</p>
+          )}
         </div>
       </div>
 

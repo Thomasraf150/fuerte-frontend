@@ -27,6 +27,18 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    // Chart of Accounts hierarchical colors - active parent accounts (blue)
+    'bg-blue-900', 'bg-blue-800', 'bg-blue-700', 'bg-blue-600', 'bg-blue-500', 'bg-blue-400', 'bg-blue-300', 'bg-blue-200', 'bg-blue-100',
+    // Chart of Accounts - inactive parent accounts (gray)
+    'bg-gray-500', 'bg-gray-400', 'bg-gray-300', 'bg-gray-200', 'bg-gray-100',
+    // Chart of Accounts - text colors
+    'text-white', 'text-black', 'text-gray-900', 'text-gray-800', 'text-gray-700', 'text-gray-600', 'text-gray-500',
+    // Dark mode variants
+    'dark:bg-blue-800', 'dark:bg-blue-700', 'dark:bg-blue-600', 'dark:bg-blue-500', 'dark:bg-blue-400', 'dark:bg-blue-300',
+    'dark:bg-gray-900', 'dark:bg-gray-800', 'dark:bg-gray-700', 'dark:bg-gray-600',
+    'dark:text-white', 'dark:text-gray-900', 'dark:text-gray-400', 'dark:text-gray-300',
+  ],
   darkMode: "class",
   theme: {
     fontFamily: {

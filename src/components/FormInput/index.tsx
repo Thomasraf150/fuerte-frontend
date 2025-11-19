@@ -221,6 +221,11 @@ const FormInput: React.FC<FormInputProps> = ({
       setDisplayValue(inputValue);
       setRawValue(inputValue);
 
+      // Call React Hook Form's onChange for proper tracking
+      if (register?.onChange) {
+        register.onChange(event);
+      }
+
       if (onChange) {
         onChange(event);
       }
@@ -322,8 +327,8 @@ const FormInput: React.FC<FormInputProps> = ({
             maxLength={maxLength}
           />
         )}
-        {type !== 'checkbox' && type !== 'file' && (
-          <span className={`absolute top-3 ${type === 'select' ? 'right-4.5' : 'left-4.5'}`}>
+        {type !== 'checkbox' && type !== 'file' && type !== 'select' && (
+          <span className={`absolute top-3 left-4.5`}>
             <IconComponent size="18" />
           </span>
         )}

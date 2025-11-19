@@ -213,15 +213,25 @@ const useVendor = () => {
         return { success: false, error: result.errors[0].message };
       }
 
-      // Check for successful creation
-      if (result?.data?.createVendors) {
-        const responseData = result.data.createVendors;
-        toast.success(responseData.message || "Vendor created successfully!");
-        return { success: true, data: responseData };
+      // Check for response data
+      const responseData = result.data?.createVendors;
+      if (responseData) {
+        // Check status field explicitly (handles both boolean and string "true"/"false")
+        const status = responseData.status === true || responseData.status === 'true';
+
+        if (status) {
+          toast.success(responseData.message || "Vendor created successfully!");
+          return { success: true, data: responseData };
+        } else {
+          // Show error message from backend
+          toast.error(responseData.message || "Operation failed");
+          return { success: false, error: responseData.message };
+        }
       }
 
-      toast.success("Vendor created successfully!");
-      return { success: true };
+      // Unexpected response format
+      toast.error("Unexpected response from server");
+      return { success: false, error: "Unknown error" };
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
