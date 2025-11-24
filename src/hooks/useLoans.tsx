@@ -59,19 +59,13 @@ const useLoans = () => {
         }),
       });
 
-      console.log('GraphQL Response:', response); // Debug log
-      console.log('Loans Data:', response.data?.getLoans?.data);
-      console.log('Paginator Info:', response.data?.getLoans?.paginatorInfo);
-
       // Check if response has errors
       if (response.errors) {
-        console.error('GraphQL Errors:', response.errors);
         throw new Error(response.errors[0]?.message || 'GraphQL query failed');
       }
 
       // Ensure response.data exists
       if (!response.data || !response.data.getLoans) {
-        console.error('Invalid response structure:', response);
         throw new Error('Invalid response structure from API');
       }
 
@@ -88,7 +82,6 @@ const useLoans = () => {
         }
       };
     } catch (error) {
-      console.error('fetchLoansForPagination error:', error);
       throw error;
     }
   }, [BORROWER_LOAN_QUERY]);
@@ -97,103 +90,169 @@ const useLoans = () => {
 
   const fetchLoans = async (first: number, page: number, borrower_id: number) => {
     setLoading(true);
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: BORROWER_LOAN_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ], borrower_id}
-      }),
-    });
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
 
-    // const result = await response.json();
-    setLoanData(response.data.getLoans.data);
-    setLoading(false);
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          query: BORROWER_LOAN_QUERY,
+          variables: { first, page, orderBy: [
+            { column: "id", order: 'DESC' }
+          ], borrower_id}
+        }),
+      });
+
+      setLoanData(response.data.getLoans.data);
+    } catch (error) {
+      toast.error('Failed to fetch loans');
+    } finally {
+      setLoading(false);
+    }
   };
   
   const fetchSingLoans = async (loan_id: number) => {
     setLoading(true);
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: BORROWER_SINGLE_LOAN_QUERY,
-        variables: { loan_id }
-      }),
-    });
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
 
-    // const result = await response.json();
-    setLoanSingleData(response.data.getLoan);
-    setLoading(false);
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          query: BORROWER_SINGLE_LOAN_QUERY,
+          variables: { loan_id }
+        }),
+      });
+
+      setLoanSingleData(response.data.getLoan);
+    } catch (error) {
+      toast.error('Failed to fetch loan details');
+    } finally {
+      setLoading(false);
+    }
   };
  
   const fetchRerewalLoan = async (renewal_id: string[]) => {
     setLoading(true);
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_RENEWAL,
-        variables: {
-          input: { renewal_id },
-        }
-      }),
-    });
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
 
-    // const result = await response.json();
-    setDataComputedRenewal(response.data.getRenewalBalance);
-    setLoading(false);
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          query: GET_LOAN_RENEWAL,
+          variables: {
+            input: { renewal_id },
+          }
+        }),
+      });
+
+      setDataComputedRenewal(response.data.getRenewalBalance);
+    } catch (error) {
+      toast.error('Failed to fetch renewal loan');
+    } finally {
+      setLoading(false);
+    }
   };
   
   const fetchLoanProducts = async (orderBy = 'id_desc') => {
     setLoading(true);
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_PRODUCT_QUERY,
-        variables: { 
-          first: 1000, // Get a large number to fetch all loan products
-          page: 1,
-          orderBy: [
-            { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }
-          ]
-        },
-      }),
-    });
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
 
-    // Check for errors and handle response properly
-    if (response.errors) {
-      console.error('Error fetching loan products:', response.errors);
-      toast.error('Error loading loan products: ' + response.errors[0].message);
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        setLoanProduct([]);
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          query: GET_LOAN_PRODUCT_QUERY,
+          variables: {
+            first: 1000, // Get a large number to fetch all loan products
+            page: 1,
+            orderBy: [
+              { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }
+            ]
+          },
+        }),
+      });
+
+      // Check for errors and handle response properly
+      if (response.errors) {
+        toast.error('Error loading loan products: ' + response.errors[0].message);
+        setLoanProduct([]);
+      } else if (response.data && response.data.getLoanProducts) {
+        setLoanProduct(response.data.getLoanProducts.data || []);
+      } else {
+        setLoanProduct([]);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch loan products');
       setLoanProduct([]);
-    } else if (response.data && response.data.getLoanProducts) {
-      // Access the data property from the paginated response
-      setLoanProduct(response.data.getLoanProducts.data || []);
-    } else {
-      console.error('Unexpected response structure:', response);
-      setLoanProduct([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const printLoanDetails = async (loan_id: string) => {
     try {
       setLoading(true);
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           query: PRINT_LOAN_DETAILS,
@@ -202,15 +261,14 @@ const useLoans = () => {
           },
         }),
       });
-  
+
       const pdfUrl = response.data.printLoanDetails;
-  
+
       // Open the generated PDF in a new tab
       window.open(process.env.NEXT_PUBLIC_BASE_URL + pdfUrl, '_blank');
-  
+
       setLoading(false);
     } catch (error) {
-      console.error("Error printing loan details:", error);
       toast.error("Failed to print loan details.");
       setLoading(false);
     }
@@ -220,13 +278,18 @@ const useLoans = () => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
 
-    // Development debugging
-    console.log('useLoans - onSubmitLoanComp called:', { data, process_type });
-
     setLoading(true);
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
 
       let variables: { input: any, process_type: string } = {
         input: {
@@ -244,35 +307,29 @@ const useLoans = () => {
         process_type
       };
 
-    console.log('useLoans - API variables:', variables);
-
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
         query: PROCESS_BORROWER_LOAN_MUTATION,
         variables,
       }),
     });
-    console.log('useLoans - API response:', response);
 
     if (process_type === 'Compute') {
       if (response.data && response.data.processALoan) {
         setDataComputedLoans(response.data.processALoan);
-        console.log('useLoans - Computation successful:', response.data.processALoan);
       } else {
-        console.error('useLoans - No processALoan data in response:', response);
         toast.error('Failed to compute loan. Please check all fields.');
       }
       setLoading(false);
     } else {
       if (response.errors) {
-        console.error('useLoans - API errors:', response.errors);
         toast.error(response.errors[0].message);
       } else {
-        console.log('useLoans - Save successful');
         toast.success('Loan Entry Saved!');
       }
     }
@@ -289,9 +346,14 @@ const useLoans = () => {
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
-      console.log(data, ' data');
-      console.log(status, ' status');
-      console.log(selectedDate, ' selectedDate');
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return { success: false, error: 'No auth token' };
+      }
+
       let variables: { input: any, selectedDate: string[], interest: string[], monthly: string[], status: number } = {
         input: {
           user_id: userData?.user?.id,
@@ -311,7 +373,8 @@ const useLoans = () => {
         const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             query: APPROVE_LOAN_BY_SCHEDULE,
@@ -342,40 +405,50 @@ const useLoans = () => {
   };
   
   const submitPNSigned = async (data: BorrLoanRowData | undefined, handleRefetchLoanData: () => void) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let variables: { input: any } = {
-      input: {
-        loan_id: data?.id,
-        is_pn_signed: 1
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return;
       }
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure for PN Signed?',
-      'You won\'t be able to revert this!',
-      'Yes it is!',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: LOAN_PN_SIGNING,
-          variables,
-        }),
-      });
-      // const result = await response.json();
-      // console.log(result, ' result')
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-      } else {
-        toast.success('PN is already been signed!');
-        handleRefetchLoanData()
+
+      let variables: { input: any } = {
+        input: {
+          loan_id: data?.id,
+          is_pn_signed: 1
+        }
+      };
+      const isConfirmed = await showConfirmationModal(
+        'Are you sure for PN Signed?',
+        'You won\'t be able to revert this!',
+        'Yes it is!',
+      );
+      if (isConfirmed) {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            query: LOAN_PN_SIGNING,
+            variables,
+          }),
+        });
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+        } else {
+          toast.success('PN is already been signed!');
+          handleRefetchLoanData()
+        }
       }
+    } catch (error) {
+      toast.error('Failed to submit PN signature');
     }
-    
   };
   
   const onSubmitLoanBankDetails = async (data: LoanBankFormValues | undefined, handleRefetchLoanData: () => void) => {
@@ -383,6 +456,14 @@ const useLoans = () => {
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return { success: false, error: 'No auth token' };
+      }
+
       let variables: { input: any } = {
         input: {
           loan_id: data?.loan_id,
@@ -404,7 +485,8 @@ const useLoans = () => {
         const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             query: SAVE_LOAN_BANK_DETAILS,
@@ -439,6 +521,14 @@ const useLoans = () => {
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return { success: false, error: 'No auth token' };
+      }
+
       let variables: { input: any } = {
         input: {
           id: data?.id,
@@ -456,7 +546,8 @@ const useLoans = () => {
         const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             query: SAVE_LOAN_RELEASE,
@@ -487,74 +578,100 @@ const useLoans = () => {
   };
   
   const handleDeleteLoans = async (loan_id: String, type: String) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let variables: { input: any } = {
-      input: {
-        loan_id,
-        type
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return;
       }
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
-      'You won\'t be able to revert this!',
-      'Yes it is!',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: DELETE_LOANS,
-          variables,
-        }),
-      });
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-      } else {
-        toast.success(response?.data?.removeLoans?.message);
-        refresh();
+
+      let variables: { input: any } = {
+        input: {
+          loan_id,
+          type
+        }
+      };
+      const isConfirmed = await showConfirmationModal(
+        'Are you sure?',
+        'You won\'t be able to revert this!',
+        'Yes it is!',
+      );
+      if (isConfirmed) {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            query: DELETE_LOANS,
+            variables,
+          }),
+        });
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+        } else {
+          toast.success(response?.data?.removeLoans?.message);
+          refresh();
+        }
       }
+    } catch (error) {
+      toast.error('Failed to delete loan');
     }
   };
   
   const handleUpdateMaturity = async (loan_id: String, type: String, handleRefetchLoanData: () => void) => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let variables: { input: any } = {
-      input: {
-        loan_id,
-        type
+    try {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return;
       }
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
-      'This loan is already released, once you confirm it will go back to for approval status',
-      'Confirm',
-    );
-    if (isConfirmed) {
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: DELETE_LOANS,
-          variables,
-        }),
-      });
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-      } else {
-        if (response?.data?.removeLoans?.status === false) {
-          toast.error(response?.data?.removeLoans?.message);
-        } else {
-          toast.success(response?.data?.removeLoans?.message);
+
+      let variables: { input: any } = {
+        input: {
+          loan_id,
+          type
         }
-        handleRefetchLoanData();
+      };
+      const isConfirmed = await showConfirmationModal(
+        'Are you sure?',
+        'This loan is already released, once you confirm it will go back to for approval status',
+        'Confirm',
+      );
+      if (isConfirmed) {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            query: DELETE_LOANS,
+            variables,
+          }),
+        });
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+        } else {
+          if (response?.data?.removeLoans?.status === false) {
+            toast.error(response?.data?.removeLoans?.message);
+          } else {
+            toast.success(response?.data?.removeLoans?.message);
+          }
+          handleRefetchLoanData();
+        }
       }
+    } catch (error) {
+      toast.error('Failed to update loan maturity');
     }
   };
   const handleChangeReleasedDate = async (loan_id: String, released_date: String, handleRefetchLoanData: () => void) => {
