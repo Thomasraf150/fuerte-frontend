@@ -1,11 +1,14 @@
 const BORROWER_LOAN_QUERY: string = `
-  query GetLoans($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int, $search: String, $statusFilter: String){
+  query GetLoans($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int, $search: String, $statusFilter: String, $releaseMonth: Int, $releaseYear: Int, $branchSubId: Int){
     getLoans(first: $first,
         page: $page,
         orderBy: $orderBy,
         borrower_id: $borrower_id,
         search: $search,
-        statusFilter: $statusFilter){
+        statusFilter: $statusFilter,
+        releaseMonth: $releaseMonth,
+        releaseYear: $releaseYear,
+        branchSubId: $branchSubId){
         data {
           id
           loan_ref
