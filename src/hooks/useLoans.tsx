@@ -34,10 +34,24 @@ const useLoans = () => {
   const [dataComputedRenewal, setDataComputedRenewal] = useState<DataRenewalData>();
   const [loading, setLoading] = useState<boolean>(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // NEW: Filter state for month, year, and branch
+  const [month, setMonth] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(null);
+  const [branchSubId, setBranchSubId] = useState<number | null>(null);
+
   const rowsPerPage = 10;
 
   // Pagination wrapper function for server-side pagination
-  const fetchLoansForPagination = useCallback(async (first: number, page: number, search?: string, statusFilter?: string) => {
+  const fetchLoansForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string,
+    statusFilter?: string,
+    releaseMonth?: number | null,
+    releaseYear?: number | null,
+    branchSubId?: number | null
+  ) => {
     const { GET_AUTH_TOKEN } = useAuthStore.getState();
     try {
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -54,7 +68,10 @@ const useLoans = () => {
             orderBy: [{ column: "id", order: 'DESC' }],
             borrower_id: 0, // Use 0 to fetch all loans
             ...(search && { search }),
-            ...(statusFilter && statusFilter !== 'all' && { statusFilter })
+            ...(statusFilter && statusFilter !== 'all' && { statusFilter }),
+            ...(releaseMonth && { releaseMonth }),
+            ...(releaseYear && { releaseYear }),
+            ...(branchSubId && { branchSubId })
           },
         }),
       });
@@ -731,6 +748,36 @@ const useLoans = () => {
     statusFilter
   });
 
+  // NEW: Filter change handlers
+  const handleMonthChange = useCallback((newMonth: number | null) => {
+    setMonth(newMonth);
+  }, [month]);
+
+  const handleYearChange = useCallback((newYear: number | null) => {
+    setYear(newYear);
+  }, [year]);
+
+  const handleBranchChange = useCallback((newBranchSubId: number | null) => {
+    setBranchSubId(newBranchSubId);
+  }, [branchSubId]);
+
+  // NEW: Clear all filters
+  const clearFilters = useCallback(() => {
+    setMonth(null);
+    setYear(null);
+    setBranchSubId(null);
+    setSearchQuery('');
+    setStatusFilter('all');
+  }, [setSearchQuery]);
+
+  // NEW: Auto-refetch when filters change
+  useEffect(() => {
+    if (refresh) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [month, year, branchSubId]);
+
    // Fetch data on component mount if id exists
   useEffect(() => {
     fetchLoanProducts()
@@ -773,8 +820,24 @@ const useLoans = () => {
       enableSearch: true, // Enable search as backend now supports it
       statusFilter,
       onStatusFilterChange: setStatusFilter,
+      // Date & Branch filters
+      month,
+      year,
+      branchSubId,
+      onMonthChange: handleMonthChange,
+      onYearChange: handleYearChange,
+      onBranchSubIdChange: handleBranchChange,
+      onClearFilters: clearFilters,
     },
     refreshLoans: refresh,
+    // NEW: Filter state and handlers
+    month,
+    year,
+    branchSubId,
+    handleMonthChange,
+    handleYearChange,
+    handleBranchChange,
+    clearFilters,
   };
 };
 

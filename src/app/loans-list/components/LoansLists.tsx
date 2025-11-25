@@ -18,7 +18,7 @@ const LoansLists: React.FC = () => {
     loansLoading,
     serverSidePaginationProps,
     handleDeleteLoans,
-    refreshLoans
+    refreshLoans,
   } = useLoans();
 
   const handleRowClick = async (data: BorrLoanRowData) => {
@@ -29,7 +29,6 @@ const LoansLists: React.FC = () => {
   const handleViewWholeLoan = (data: BorrLoanRowData) => {
     setShowForm(true);
     setSingleData(data);
-    console.log(data, ' data');
   }
 
   const handleShowForm = (d: boolean) => {
@@ -69,7 +68,7 @@ const LoansLists: React.FC = () => {
                 <LoanPnSigningForm singleData={singleData} handleShowForm={handleShowForm} />
               </div>
             )}
-            
+
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import DataTable, { TableColumn, TableStyles } from 'react-data-table-component'
 import { useDatatableTheme } from '@/hooks/useDatatableTheme';
 import DataTableLoadingComponent from './LoadingComponent';
 import StatusFilterChips from '@/components/StatusFilterChips';
+import DateBranchFilters from '@/components/LoanFilters/DateBranchFilters';
 
 // No data component with dark mode support
 const NoDataComponent: React.FC = () => {
@@ -32,6 +33,14 @@ export interface ServerSidePaginationProps {
   searchPlaceholder?: string; // Custom search placeholder
   statusFilter?: string; // Current status filter
   onStatusFilterChange?: (status: string) => void; // Status filter change handler
+  // Date & Branch filters (optional)
+  month?: number | null;
+  year?: number | null;
+  branchSubId?: number | null;
+  onMonthChange?: (month: number | null) => void;
+  onYearChange?: (year: number | null) => void;
+  onBranchSubIdChange?: (branchSubId: number | null) => void;
+  onClearFilters?: () => void;
 }
 
 // Define the props for the CustomDatatable component
@@ -330,6 +339,21 @@ const CustomDatatable = <T extends object>({
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Date & Branch Filters - Integrated below status filters */}
+      {isServerSide && serverSidePagination?.onMonthChange && serverSidePagination?.onYearChange && serverSidePagination?.onBranchSubIdChange && (
+        <div className="px-4 sm:px-6 md:px-7 pb-4">
+          <DateBranchFilters
+            month={serverSidePagination.month ?? null}
+            year={serverSidePagination.year ?? null}
+            branchSubId={serverSidePagination.branchSubId ?? null}
+            onMonthChange={serverSidePagination.onMonthChange}
+            onYearChange={serverSidePagination.onYearChange}
+            onBranchSubIdChange={serverSidePagination.onBranchSubIdChange}
+            onClearFilters={serverSidePagination.onClearFilters || (() => {})}
+          />
         </div>
       )}
 
