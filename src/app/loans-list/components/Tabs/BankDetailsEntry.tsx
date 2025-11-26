@@ -34,7 +34,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
   const toggleShowPin1 = () => {
     setShowPin1(!showPin1);
   };
-  
+
   const toggleShowPin2 = () => {
     setShowPin2(!showPin2);
   };
@@ -45,16 +45,38 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
     return bank?.name?.toLowerCase().includes('cash') || false;
   };
 
-  // Watch both bank selections to detect when "Cash on hand" is selected
+  // Check if bank is NONE or N/A (case-insensitive)
+  const isNoneOrNaBank = (bankId: number | string | undefined) => {
+    if (!bankId || !dataBank) return false;
+    const bank = dataBank.find(b => String(b.id) === String(bankId));
+    const name = bank?.name?.toUpperCase() || '';
+    return name === 'NONE' || name === 'N/A';
+  };
+
+  // Combined check: skip validation for Cash, NONE, or N/A banks
+  const isSkipValidationBank = (bankId: number | string | undefined) => {
+    return isCashBank(bankId) || isNoneOrNaBank(bankId);
+  };
+
+  // Clean card number: remove dashes and spaces
+  const cleanCardNumber = (value: string) => value.replace(/[-\s]/g, '');
+
+  // Watch both bank selections to detect when special bank is selected
   const surrenderedBankId = watch('surrendered_bank_id');
   const issuedBankId = watch('issued_bank_id');
 
-  // Check if each bank is cash (independently)
-  const isSurrenderedCash = isCashBank(surrenderedBankId);
-  const isIssuedCash = isCashBank(issuedBankId);
+  // Check if each bank should skip validation (Cash, NONE, or N/A)
+  const isSurrenderedSkip = isSkipValidationBank(surrenderedBankId);
+  const isIssuedSkip = isSkipValidationBank(issuedBankId);
 
   const onSubmit: SubmitHandler<LoanBankFormValues> = async (data) => {
-    onSubmitLoanBankDetails(data, handleRefetchData);
+    // Clean card numbers before submitting (remove dashes and spaces)
+    const cleanedData = {
+      ...data,
+      surrendered_acct_no: cleanCardNumber(data.surrendered_acct_no || ''),
+      issued_acct_no: cleanCardNumber(data.issued_acct_no || ''),
+    };
+    onSubmitLoanBankDetails(cleanedData, handleRefetchData);
   };
 
   const handleLoanBank = (data: LoanBankFormValues | undefined) => {
@@ -97,13 +119,13 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
 
   // Smart value management for surrendered bank details
   useEffect(() => {
-    if (isSurrenderedCash) {
-      // Auto-fill with "000000" for cash on hand
+    if (isSurrenderedSkip) {
+      // Auto-fill with "000000" for Cash, NONE, or N/A banks
       setValue('surrendered_acct_no', '000000');
       setValue('surrendered_pin', '000000');
     } else {
-      // When switching from cash to non-cash, clear ONLY "000000" placeholder
-      // Preserve real account numbers if switching between non-cash banks
+      // When switching from skip bank to regular bank, clear ONLY "000000" placeholder
+      // Preserve real account numbers if switching between regular banks
       const currentAcctNo = watch('surrendered_acct_no');
       const currentPin = watch('surrendered_pin');
 
@@ -114,17 +136,17 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
         setValue('surrendered_pin', '');
       }
     }
-  }, [surrenderedBankId, isSurrenderedCash, setValue, watch]);
+  }, [surrenderedBankId, isSurrenderedSkip, setValue, watch]);
 
   // Smart value management for issued bank details
   useEffect(() => {
-    if (isIssuedCash) {
-      // Auto-fill with "000000" for cash on hand
+    if (isIssuedSkip) {
+      // Auto-fill with "000000" for Cash, NONE, or N/A banks
       setValue('issued_acct_no', '000000');
       setValue('issued_pin', '000000');
     } else {
-      // When switching from cash to non-cash, clear ONLY "000000" placeholder
-      // Preserve real account numbers if switching between non-cash banks
+      // When switching from skip bank to regular bank, clear ONLY "000000" placeholder
+      // Preserve real account numbers if switching between regular banks
       const currentAcctNo = watch('issued_acct_no');
       const currentPin = watch('issued_pin');
 
@@ -135,7 +157,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
         setValue('issued_pin', '');
       }
     }
-  }, [issuedBankId, isIssuedCash, setValue, watch]);
+  }, [issuedBankId, isIssuedSkip, setValue, watch]);
 
   return (
     <div className="w-full lg:w-3/4 xl:w-1/2">
@@ -149,7 +171,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
             placeholder="Card Account Name"
             {...register('account_name', { required: "Account name is required!" })}
           />
-          {errors.account_name && <p className="mt-2 text-sm text-red-600">{errors.account_name.message}</p>}
+          {errors.account_name && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.account_name.message}</p>}
         </div>
         {loanSingleData?.loan_bank_details?.updated_at && (
           <div className="text-base font-semibold text-gray-600 dark:text-gray-400 px-1">
@@ -186,7 +208,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       />
                     )}
                   />
-                  {errors.surrendered_bank_id && <p className="mt-2 text-sm text-red-600">{errors.surrendered_bank_id.message}</p>}
+                  {errors.surrendered_bank_id && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.surrendered_bank_id.message}</p>}
                 </div>
               </dd>
               <dt className="font-medium text-left text-gray-900 dark:text-bodydark">
@@ -208,96 +230,118 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       />
                     )}
                   />
-                  {errors.issued_bank_id && <p className="mt-2 text-sm text-red-600">{errors.issued_bank_id.message}</p>}
+                  {errors.issued_bank_id && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.issued_bank_id.message}</p>}
                 </div>
               </dt>
             </div>
-            {/* Account/Card Number Row - Hidden when cash is selected */}
-            {(!isSurrenderedCash || !isIssuedCash) && (
+            {/* Account/Card Number Row - Hidden when skip validation bank is selected */}
+            {(!isSurrenderedSkip || !isIssuedSkip) && (
               <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
                 <dt className="font-medium text-right text-gray-900 leading-9">
                   Account / Card No.:
                 </dt>
-                {!isSurrenderedCash && (
+                {!isSurrenderedSkip && (
                   <dd className="text-gray-700 text-center">
                     <div className="relative">
-                      <input
-                        className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                        type="text"
-                        id="surrendered_acct_no"
-                        placeholder="000000"
-                        {...register('surrendered_acct_no', { required: "Surrendered Card is required!" })}
+                      <Controller
+                        name="surrendered_acct_no"
+                        control={control}
+                        rules={{ required: "Surrendered Card is required!" }}
+                        render={({ field }) => (
+                          <input
+                            className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                            type="text"
+                            id="surrendered_acct_no"
+                            placeholder="000000"
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(e.target.value)}
+                          />
+                        )}
                       />
                       <span className="absolute right-3 top-2.5">
                         <CreditCard size="18" />
                       </span>
-                      {errors.surrendered_acct_no && <p className="mt-2 text-sm text-red-600">{errors.surrendered_acct_no.message}</p>}
+                      {errors.surrendered_acct_no && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.surrendered_acct_no.message}</p>}
                     </div>
                   </dd>
                 )}
-                {isSurrenderedCash && <dd className="text-gray-700 text-center"></dd>}
-                {!isIssuedCash && (
+                {isSurrenderedSkip && <dd className="text-gray-700 text-center"></dd>}
+                {!isIssuedSkip && (
                   <dt className="font-medium text-center text-gray-900">
                     <div className="relative">
-                      <input
-                        className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
-                        type="text"
-                        id="issued_acct_no"
-                        placeholder="000000"
-                        {...register('issued_acct_no', { required: "Issued Card No. is required!" })}
+                      <Controller
+                        name="issued_acct_no"
+                        control={control}
+                        rules={{ required: "Issued Card No. is required!" }}
+                        render={({ field }) => (
+                          <input
+                            className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                            type="text"
+                            id="issued_acct_no"
+                            placeholder="000000"
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(e.target.value)}
+                          />
+                        )}
                       />
                       <span className="absolute right-3 top-2.5">
                         <CreditCard size="18" />
                       </span>
-                      {errors.issued_acct_no && <p className="mt-2 text-sm text-red-600">{errors.issued_acct_no.message}</p>}
+                      {errors.issued_acct_no && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.issued_acct_no.message}</p>}
                     </div>
                   </dt>
                 )}
-                {isIssuedCash && <dt className="font-medium text-center text-gray-900"></dt>}
+                {isIssuedSkip && <dt className="font-medium text-center text-gray-900"></dt>}
               </div>
             )}
-            {/* PIN Row - Hidden when cash is selected */}
-            {(!isSurrenderedCash || !isIssuedCash) && (
+            {/* PIN Row - Hidden when skip validation bank is selected */}
+            {(!isSurrenderedSkip || !isIssuedSkip) && (
               <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
                 <dt className="font-medium text-right text-gray-900 leading-9">
                   PIN.:
                 </dt>
-                {!isSurrenderedCash && (
-                  <dd className="text-gray-700 text-center relative">
-                    <input
-                      type={showPin1 ? 'text' : 'password'}
-                      className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      placeholder="000000"
-                      {...register('surrendered_pin', { required: "Surrendered Pin. is required!" })}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-2"
-                      onClick={toggleShowPin1}
-                    >
-                      {showPin1 ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
+                {!isSurrenderedSkip && (
+                  <dd className="text-gray-700 text-center">
+                    <div className="relative">
+                      <input
+                        type={showPin1 ? 'text' : 'password'}
+                        className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                        placeholder="000000"
+                        {...register('surrendered_pin', { required: "Surrendered Pin. is required!" })}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-2"
+                        onClick={toggleShowPin1}
+                      >
+                        {showPin1 ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                    {errors.surrendered_pin && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.surrendered_pin.message}</p>}
                   </dd>
                 )}
-                {isSurrenderedCash && <dd className="text-gray-700 text-center relative"></dd>}
-                {!isIssuedCash && (
-                  <dt className="font-medium text-center text-gray-900 relative">
-                    <input
-                      type={showPin2 ? 'text' : 'password'}
-                      className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-                      placeholder="000000"
-                      {...register('issued_pin', { required: "Issued Pin. is required!" })}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-2"
-                      onClick={toggleShowPin2}
-                    >
-                      {showPin2 ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
+                {isSurrenderedSkip && <dd className="text-gray-700 text-center relative"></dd>}
+                {!isIssuedSkip && (
+                  <dt className="font-medium text-center text-gray-900">
+                    <div className="relative">
+                      <input
+                        type={showPin2 ? 'text' : 'password'}
+                        className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                        placeholder="000000"
+                        {...register('issued_pin', { required: "Issued Pin. is required!" })}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-2"
+                        onClick={toggleShowPin2}
+                      >
+                        {showPin2 ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                    {errors.issued_pin && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.issued_pin.message}</p>}
                   </dt>
                 )}
-                {isIssuedCash && <dt className="font-medium text-center text-gray-900 relative"></dt>}
+                {isIssuedSkip && <dt className="font-medium text-center text-gray-900 relative"></dt>}
               </div>
             )}
           </dl>
@@ -310,7 +354,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
           disabled={loanSingleData?.status === 1 ? false : true}
         >
           <span className="mt-1 mr-1">
-            <Save size={17} /> 
+            <Save size={17} />
           </span>
           <span>Save and Submit for Releasing</span>
         </button>
