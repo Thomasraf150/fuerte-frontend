@@ -103,11 +103,9 @@ const BORROWER_LOAN_QUERY: string = `
             account_name
             issued_acct_no
             issued_bank_id
-            issued_pin
             loan_id
             surrendered_acct_no
             surrendered_bank_id
-            surrendered_pin
             created_at
             updated_at
           }
@@ -193,11 +191,9 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         account_name
         issued_acct_no
         issued_bank_id
-        issued_pin
         loan_id
         surrendered_acct_no
         surrendered_bank_id
-        surrendered_pin
         created_at
         updated_at
       }

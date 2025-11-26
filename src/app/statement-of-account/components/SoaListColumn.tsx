@@ -56,6 +56,7 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
     cell: row => (
       <span
         className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
+          row.custom_status === 'Posted (Closed)' ? 'bg-slate-600 text-white dark:bg-slate-500 dark:text-white' :
           row.custom_status === 'Closed' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
           (row.custom_status === 'For Approval'
             ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
