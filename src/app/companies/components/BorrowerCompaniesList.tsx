@@ -21,7 +21,14 @@ const BorrowerCompaniesList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataBorrComp, fetchDataBorrComp, handleDeleteBranch, borrCompFetchLoading } = useBorrCompanies();
+  const {
+    dataBorrComp,
+    fetchDataBorrComp,
+    handleDeleteBranch,
+    borrCompFetchLoading,
+    serverSidePaginationProps,
+    refresh
+  } = useBorrCompanies();
   
   const [initialFormData, setInitialFormData] = useState<DataBorrCompanies | null>(null);
   const [initialFormSubData, setInitialFormSubData] = useState<DataSubBranches | null>(null);
@@ -50,8 +57,8 @@ const BorrowerCompaniesList: React.FC = () => {
       'Yes delete it!',
     );
     if (isConfirmed) {
-      handleDeleteBranch(row);
-      fetchDataBorrComp(10, 1);
+      await handleDeleteBranch(row);
+      refresh();
     }
   }
 
@@ -78,9 +85,11 @@ const BorrowerCompaniesList: React.FC = () => {
                 </button>
                 <CustomDatatable
                   apiLoading={borrCompFetchLoading}
-                  title="Branch List"
+                  title="Companies List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataBorrComp || []}
+                  enableCustomHeader={true}
+                  serverSidePagination={serverSidePaginationProps}
                 />
               </div>
             </div>

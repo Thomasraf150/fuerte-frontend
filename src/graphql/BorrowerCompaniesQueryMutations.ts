@@ -1,6 +1,6 @@
 const GET_BORROWER_COMPANIES: string = `
-    query GetBorrCompanies($first: Int!, $page: Int!, $orderBy: [OrderByClause!]){
-      getBorrCompanies(first: $first, page: $page, orderBy: $orderBy) {
+    query GetBorrCompanies($first: Int!, $page: Int!, $search: String, $orderBy: [OrderByClause!]){
+      getBorrCompanies(first: $first, page: $page, search: $search, orderBy: $orderBy) {
         data {
           id
           name
