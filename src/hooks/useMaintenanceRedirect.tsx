@@ -5,7 +5,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { RowAcctgEntry, DataGLRow } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import AdminQueryMutations from '@/graphql/AdminQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
 

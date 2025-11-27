@@ -100,6 +100,99 @@ const GET_BORROWER_QUERY: string = `
     }
 `;
 
+const GET_SINGLE_BORROWER_QUERY: string = `
+    query GetBorrower($id: ID!){
+      getBorrower(id: $id) {
+        id
+        user_id
+        chief_id
+        amount_applied
+        purpose
+        firstname
+        middlename
+        lastname
+        terms_of_payment
+        residence_address
+        is_rent
+        other_source_of_inc
+        est_monthly_fam_inc
+        employment_position
+        gender
+        photo
+        is_deleted
+        chief {
+          id
+          name
+        }
+        borrower_details {
+          id
+          dob
+          place_of_birth
+          age
+          email
+          contact_no
+          civil_status
+        }
+        borrower_spouse_details {
+          work_address
+          occupation
+          fullname
+          company
+          dept_branch
+          length_of_service
+          salary
+          company_contact_person
+          contact_no
+        }
+        borrower_work_background {
+          id
+          company_borrower_id
+          employment_number
+          area_id
+          sub_area_id
+          station
+          term_in_service
+          employment_status
+          division
+          monthly_gross
+          monthly_net
+          office_address
+          area {
+            id
+            name
+            branch_sub_id
+            branch_sub {
+              id
+              branch_id
+              name
+            }
+          }
+        }
+        borrower_company_info {
+          id
+          employer
+          salary
+          contract_duration
+        }
+        borrower_reference {
+          id
+          occupation
+          name
+          contact_no
+        }
+        user {
+          id
+          name
+          branchSub {
+            id
+            name
+            branch_id
+          }
+        }
+      }
+    }
+`;
+
 const GET_BORROWER_ATTACHMENTS_QUERY: string = `
     query GetBorrAttachments($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $borrower_id: Int){
         getBorrAttachments(first: $first, page: $page, orderBy: $orderBy, borrower_id: $borrower_id){
@@ -268,6 +361,7 @@ const CHECK_BORROWER_DUPLICATE: string = `
 
 const BorrowerQueryMutations = {
   GET_BORROWER_QUERY,
+  GET_SINGLE_BORROWER_QUERY,
   GET_BORROWER_ATTACHMENTS_QUERY,
   SAVE_BORROWER_MUTATION,
   SAVE_BORROWER_ATTACHMENTS_QUERY,

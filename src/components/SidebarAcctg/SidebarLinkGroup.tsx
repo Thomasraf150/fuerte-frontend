@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 
 interface SidebarLinkGroupProps {
   children: (handleClick: () => void, open: boolean) => ReactNode;
@@ -11,6 +11,11 @@ const SidebarLinkGroup = ({
   activeCondition,
 }: SidebarLinkGroupProps) => {
   const [open, setOpen] = useState<boolean>(activeCondition);
+
+  // Sync open state when activeCondition changes (e.g., on navigation)
+  useEffect(() => {
+    setOpen(activeCondition);
+  }, [activeCondition]);
 
   const handleClick = () => {
     setOpen(!open);

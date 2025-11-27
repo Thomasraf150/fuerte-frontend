@@ -1,95 +1,74 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import loanProductListColumn from './LoanProductListColumn';
-import { DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
-import FormAddLoanProduct from './FormAddLoanProduct';
+import { DataRowLoanProducts } from '@/utils/DataTypes';
 import useLoanProducts from '@/hooks/useLoanProducts';
 
 const column = loanProductListColumn;
 
 const LoanProductList: React.FC = () => {
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const [actionLbl, setActionLbl] = useState<string>('');
-  const [singleData, setSingleData] = useState<DataRowLoanProducts>();
+  const router = useRouter();
   const {
     dataLoanProducts,
     loanProductsLoading,
     loanProductsError,
     serverSidePaginationProps,
-    refresh,
-    fetchLoanProducts
+    refresh
   } = useLoanProducts();
 
+  // Navigate to create page (URL-based routing)
   const handleCreateLoanProduct = () => {
-    setShowForm(true);
-    setSingleData(undefined);
-    setActionLbl('Create Loan Product');
-  }
+    router.push('/loan-products/new');
+  };
 
+  // Navigate to edit page on action button click (URL-based routing)
   const handleRowClick = (data: DataRowLoanProducts) => {
-    setActionLbl('Update Loan Product');
-    setShowForm(true);
-    setSingleData(data);
-  }
+    router.push(`/loan-products/${data.id}`);
+  };
 
+  // Navigate to detail page on whole row click (URL-based routing)
   const handleWholeRowClick = (data: DataRowLoanProducts) => {
-    console.log(data, ' whole row click tr');
-  }
-
-  // Note: Removed useEffect - usePagination handles initial data loading
+    router.push(`/loan-products/${data.id}`);
+  };
 
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
-
-            {showForm === false ? (
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    Loan Product
-                  </h3>
-                </div>
-                <div className="p-7">
-                  <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
-                  {loanProductsError && (
-                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                      Error loading loan products: {loanProductsError}
-                      <button
-                        onClick={refresh}
-                        className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  )}
-                  <CustomDatatable
-                    apiLoading={loanProductsLoading}
-                    columns={column(handleRowClick)}
-                    data={dataLoanProducts}
-                    enableCustomHeader={true}
-                    onRowClicked={handleWholeRowClick}
-                    title={''}
-                    serverSidePagination={serverSidePaginationProps}
-                  />
-                </div>
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                <h3 className="font-medium text-black dark:text-white">
+                  Loan Product
+                </h3>
               </div>
-            ) : (
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                </div>
-                <div className="p-7">
-                  <FormAddLoanProduct setShowForm={setShowForm} fetchLoanProducts={refresh} singleData={singleData} actionLbl={actionLbl}/>
-                </div>
+              <div className="p-7">
+                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateLoanProduct}>Create</button>
+                {loanProductsError && (
+                  <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                    Error loading loan products: {loanProductsError}
+                    <button
+                      onClick={refresh}
+                      className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+                <CustomDatatable
+                  apiLoading={loanProductsLoading}
+                  columns={column(handleRowClick)}
+                  data={dataLoanProducts}
+                  enableCustomHeader={true}
+                  onRowClicked={handleWholeRowClick}
+                  title={''}
+                  serverSidePagination={serverSidePaginationProps}
+                />
               </div>
-            )}
-
+            </div>
           </div>
         </div>
       </div>

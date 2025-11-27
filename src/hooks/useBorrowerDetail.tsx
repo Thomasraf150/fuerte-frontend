@@ -1,22 +1,16 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useRouter } from 'nextjs-toploader/app';
+import { useState } from 'react';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { useAuthStore } from "@/store";
-import { usePagination } from './usePagination';
-
-import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, BorrowerRowInfo } from '@/utils/DataTypes';
+import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-const useBorrower = () => {
-  const router = useRouter();
 
-  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY, CHECK_BORROWER_DUPLICATE } = BorrowerQueryMutations;
+const useBorrowerDetail = () => {
+  const { SAVE_BORROWER_MUTATION, CHECK_BORROWER_DUPLICATE, GET_SINGLE_BORROWER_QUERY } = BorrowerQueryMutations;
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
@@ -26,73 +20,6 @@ const useBorrower = () => {
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
   const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
   const [dataBorrCompany, setDataBorrCompany] = useState<DataBorrCompanies[] | undefined>(undefined);
-
-  // Wrapper function to adapt existing API for usePagination hook
-  const fetchBorrowersForPagination = useCallback(async (
-    first: number,
-    page: number,
-    search?: string
-  ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }), // Add search parameter if provided
-          orderBy: [
-            { column: "id", order: 'DESC' }
-          ]
-        },
-      }),
-    });
-
-    const result = await response.json();
-
-    // Return the expected format for usePagination
-    return {
-      data: result.data.getBorrowers.data,
-      paginatorInfo: result.data.getBorrowers.paginatorInfo || {
-        total: result.data.getBorrowers.data.length,
-        currentPage: page,
-        lastPage: 1,
-        hasMorePages: false,
-      }
-    };
-  }, [GET_BORROWER_QUERY]);
-
-  // Use the new pagination hook
-  const {
-    data: dataBorrower,
-    loading: paginationLoading,
-    error: borrowerError,
-    pagination,
-    searchQuery,
-    goToPage,
-    changePageSize,
-    setSearchQuery,
-    refresh,
-    canGoNext,
-    canGoPrevious,
-  } = usePagination<BorrowerRowInfo>({
-    fetchFunction: fetchBorrowersForPagination,
-    config: {
-      initialPageSize: 20,
-      defaultPageSize: 20,
-    },
-  });
-
-  // Legacy fetchDataBorrower function for backward compatibility
-  const fetchDataBorrower = useCallback(async (first: number, page: number) => {
-    const result = await fetchBorrowersForPagination(first, page);
-    // This maintains the old behavior for any existing code that still uses it
-    return result;
-  }, [fetchBorrowersForPagination]);
-
 
   const createBorrVariables = (data: BorrowerInfo, user_id: number) => ({
     inputBorrInfo: {
@@ -227,7 +154,7 @@ const useBorrower = () => {
     }
   };
 
-  const onSubmitBorrower = async (data: BorrowerInfo): Promise<{ success: boolean; error?: string; data?: any }> => {
+  const onSubmitBorrower = async (data: BorrowerInfo, refreshCallback?: () => void): Promise<{ success: boolean; error?: string; data?: any }> => {
     setBorrowerLoading(true);
 
     try {
@@ -270,7 +197,9 @@ const useBorrower = () => {
       // Check for successful borrower creation/update
       if (result.data?.saveBorrower) {
         toast.success(result.data.saveBorrower.message);
-        refresh(); // Use pagination hook's refresh function
+        if (refreshCallback) {
+          refreshCallback();
+        }
         return { success: true, data: result.data.saveBorrower };
       }
 
@@ -294,7 +223,7 @@ const useBorrower = () => {
         query: GET_CHIEF_QUERY,
         variables: { first, page, orderBy: [
           { column: "id", order: 'DESC' }
-        ] 
+        ]
       },
       }),
     });
@@ -313,7 +242,7 @@ const useBorrower = () => {
         query: GET_AREA_QUERY,
         variables: { first, page, orderBy: [
           { column: "id", order: 'DESC' }
-        ] 
+        ]
       },
       }),
     });
@@ -321,7 +250,7 @@ const useBorrower = () => {
     const result = await response.json();
     setDataArea(result.data.getAreas.data);
   };
-  
+
   const fetchDataSubArea = async (area_id: any) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
@@ -348,7 +277,7 @@ const useBorrower = () => {
         query: GET_BORROWER_COMPANIES,
         variables: { first, page, orderBy: [
           { column: "id", order: 'DESC' }
-        ] 
+        ]
       },
       }),
     });
@@ -357,115 +286,57 @@ const useBorrower = () => {
     setDataBorrCompany(result.data.getBorrCompanies.data);
   };
 
-  const handleRmBorrower = async (data: any) => {
-    let variables: { input: any } = {
-      input: {
-        id: data.id,
-        is_deleted: 1,
-      },
-    };
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
-      'You are deleting this borrower',
-      'Confirm',
-    );
-    if (isConfirmed) {
+  const fetchSingleBorrower = async (borrowerId: number) => {
+    setBorrowerLoading(true);
+    try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: DELETE_BORROWER_QUERY,
-          variables
+          query: GET_SINGLE_BORROWER_QUERY,
+          variables: {
+            id: borrowerId.toString()
+          }
         }),
       });
+
       const result = await response.json();
-      if (result) {
-        refresh(); // Use pagination hook's refresh function
-        toast.success(result.data?.deleteBorrowerData?.message);
+
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || 'Failed to fetch borrower');
       }
+
+      const borrower = result.data?.getBorrower;
+
+      if (!borrower) {
+        throw new Error('Borrower not found');
+      }
+
+      setBorrowerLoading(false);
+      return borrower;
+    } catch (error) {
+      console.error('Error fetching single borrower:', error);
+      toast.error('Failed to load borrower details');
+      setBorrowerLoading(false);
+      throw error;
     }
-    
   };
-
-  const handleDeleteSubArea = async (data: any) => {
-    let variables: { input: any } = {
-      input: {
-        id: data.id,
-        is_deleted: 1,
-      },
-    };
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        // query: DELETE_SUB_AREA_MUTATION,
-        variables
-      }),
-    });
-    const result = await response.json();
-    toast.success("Sub Area is Deleted!");
-  };
-
-   // Fetch data on component mount if id exists
-  useEffect(() => {
-    // fetchDataChief(100, 1);
-    // fetchDataArea(100, 1);
-    // fetchDataBorrCompany(100, 1);
-    // fetchDataBorrower(100, 1);
-
-    // fetchDataArea(100, 1);
-    // fetchDataSubArea(10, 1);
-  }, []);
 
   return {
-    // Legacy data and functions (for backward compatibility)
     dataChief,
     dataArea,
     dataSubArea,
     fetchDataSubArea,
     dataBorrCompany,
     onSubmitBorrower,
-    dataBorrower,
-    borrowerLoading, // For form submission operations
-    paginationLoading, // For table loading operations
-    fetchDataBorrower, // Legacy function - maintained for backward compatibility
+    borrowerLoading,
     fetchDataChief,
     fetchDataArea,
     fetchDataBorrCompany,
-    handleRmBorrower,
-
-    // New pagination functionality
-    pagination,
-    searchQuery,
-    goToPage,
-    changePageSize,
-    setSearchQuery,
-    refresh,
-    canGoNext,
-    canGoPrevious,
-    borrowerError,
-
-    // Server-side pagination helpers for CustomDatatable
-    serverSidePaginationProps: {
-      totalRecords: pagination.totalRecords,
-      currentPage: pagination.currentPage,
-      pageSize: pagination.pageSize,
-      totalPages: pagination.totalPages,
-      hasNextPage: pagination.hasNextPage,
-      hasPreviousPage: pagination.hasPreviousPage,
-      onPageChange: goToPage,
-      onPageSizeChange: changePageSize,
-      searchQuery,
-      onSearchChange: setSearchQuery,
-      pageSizeOptions: [10, 20, 50, 100],
-      recordType: 'borrower',
-      recordTypePlural: 'borrowers',
-    },
+    fetchSingleBorrower,
   };
 };
 
-export default useBorrower;
+export default useBorrowerDetail;

@@ -33,6 +33,8 @@ export interface ServerSidePaginationProps {
   searchPlaceholder?: string; // Custom search placeholder
   statusFilter?: string; // Current status filter
   onStatusFilterChange?: (status: string) => void; // Status filter change handler
+  recordType?: string; // Singular form of the record type (e.g., "loan", "borrower") - defaults to "loan"
+  recordTypePlural?: string; // Plural form of the record type (e.g., "loans", "borrowers") - defaults to "loans"
   // Date & Branch filters (optional)
   month?: number | null;
   year?: number | null;
@@ -82,6 +84,10 @@ const ServerSidePaginationControls: React.FC<{
     ? ` ${pagination.statusFilter.replace('_', ' ')}`
     : '';
 
+  // Get record type labels with defaults
+  const recordTypeSingular = pagination.recordType || 'loan';
+  const recordTypePlural = pagination.recordTypePlural || 'loans';
+
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-boxdark border-t border-gray-200 dark:border-strokedark sm:px-6">
       <div className="flex items-center justify-between w-full">
@@ -91,7 +97,7 @@ const ServerSidePaginationControls: React.FC<{
             <p className="text-sm text-gray-700 dark:text-bodydark">
               Showing <span className="font-medium">{startRecord}</span> to{' '}
               <span className="font-medium">{endRecord}</span> of{' '}
-              <span className="font-medium">{totalRecords}</span>{statusFilterText} {totalRecords === 1 ? 'loan' : 'loans'}
+              <span className="font-medium">{totalRecords}</span>{statusFilterText} {totalRecords === 1 ? recordTypeSingular : recordTypePlural}
             </p>
           </div>
         </div>
