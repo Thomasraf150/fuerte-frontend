@@ -7,6 +7,7 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import useLoanProducts from '@/hooks/useLoanProducts';
+import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import FormAddLoanProduct from '../components/FormAddLoanProduct';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
 
@@ -17,45 +18,66 @@ const LoanProductDetailPage: React.FC = () => {
   const productId = params.id as string;
   const isNewProduct = productId === 'new';
 
-  const {
-    dataLoanProducts,
-    loanProductsLoading,
-    loanProductsError,
-    refresh
-  } = useLoanProducts();
+  const { refresh } = useLoanProducts();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<DataRowLoanProducts | undefined>(undefined);
 
-  // Find the specific product when data is loaded
+  // Fetch loan product directly by ID (fixes pagination bug)
   useEffect(() => {
-    if (isNewProduct) {
-      // Creating new product - no data to load
-      setLoading(false);
-      setSingleData(undefined);
-      return;
-    }
-
-    if (!loanProductsLoading && dataLoanProducts) {
-      const product = dataLoanProducts.find(item => String(item.id) === productId);
-      if (product) {
-        setSingleData(product);
-        setError(null);
-      } else {
-        setError('Loan product not found');
+    const fetchLoanProduct = async () => {
+      if (isNewProduct) {
+        // Creating new product - no data to load
+        setLoading(false);
+        setSingleData(undefined);
+        return;
       }
-      setLoading(false);
-    }
-  }, [dataLoanProducts, loanProductsLoading, productId, isNewProduct]);
 
-  // Handle error from hook
-  useEffect(() => {
-    if (loanProductsError && !isNewProduct) {
-      setError(loanProductsError);
-      setLoading(false);
-    }
-  }, [loanProductsError, isNewProduct]);
+      if (!productId || productId === 'undefined') {
+        setError('Invalid loan product ID');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: LoanProductsQueryMutations.GET_LOAN_PRODUCT_BY_ID,
+            variables: { id: productId },
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.errors) {
+          setError(result.errors[0]?.message || 'Failed to load loan product');
+          return;
+        }
+
+        if (result.data?.getLoanProductById) {
+          setSingleData(result.data.getLoanProductById);
+          setError(null);
+        } else {
+          setError('Loan product not found');
+        }
+      } catch (err: any) {
+        console.error('Error fetching loan product:', err);
+        setError(err.message || 'Failed to load loan product');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLoanProduct();
+  }, [productId, isNewProduct]);
 
   // Back button handler - navigates to list
   const handleBack = () => {
@@ -69,7 +91,7 @@ const LoanProductDetailPage: React.FC = () => {
   };
 
   // Loading state
-  if (loading || (loanProductsLoading && !isNewProduct)) {
+  if (loading) {
     return (
       <DefaultLayout>
         <div className="mx-auto">

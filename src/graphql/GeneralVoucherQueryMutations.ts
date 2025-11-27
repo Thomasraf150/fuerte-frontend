@@ -81,11 +81,59 @@ const PRINT_CV_MUTATION: string = `
   }
 `;
 
+const GET_VOUCHER_BY_ID: string = `
+  query GetVoucherById($id: ID!) {
+    getVoucherById(id: $id) {
+      id
+      loan_id
+      vendor_id
+      journal_no
+      journal_name
+      journal_ref
+      journal_invoice
+      journal_date
+      posted_date
+      check_no
+      document_no
+      reference_no
+      journal_desc
+      amount
+      user_id
+      user_id_posted_by
+      user_id_cancelled_by
+      is_posted
+      is_cancelled
+      acctg_details {
+        id
+        acctg_entries_id
+        acctnumber
+        debit
+        credit
+      }
+      vendor {
+        id
+        name
+      }
+      loan {
+        id
+        borrower {
+          lastname
+          firstname
+          middlename
+        }
+      }
+      borrower_full_name
+      vendor_full_name
+    }
+  }
+`;
+
 const GeneralVoucherQueryMutations = {
   CREATE_GV_MUTATION,
   UPDATE_GV_MUTATION,
   GET_GV_QUERY,
-  PRINT_CV_MUTATION
+  PRINT_CV_MUTATION,
+  GET_VOUCHER_BY_ID
 };
 
 export default GeneralVoucherQueryMutations;

@@ -7,6 +7,7 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import useLoanCodes from '@/hooks/useLoanCodes';
+import LoanCodeQueryMutations from '@/graphql/LoanCodeQueryMutations';
 import FormAddLoanCode from '../components/FormAddLoanCode';
 import { DataRowLoanCodes } from '@/utils/DataTypes';
 
@@ -17,45 +18,66 @@ const LoanCodeDetailPage: React.FC = () => {
   const codeId = params.id as string;
   const isNewCode = codeId === 'new';
 
-  const {
-    dataLoanCodes,
-    loanCodesLoading,
-    loanCodesError,
-    refresh
-  } = useLoanCodes();
+  const { refresh } = useLoanCodes();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<DataRowLoanCodes | undefined>(undefined);
 
-  // Find the specific code when data is loaded
+  // Fetch loan code directly by ID (fixes pagination bug)
   useEffect(() => {
-    if (isNewCode) {
-      // Creating new code - no data to load
-      setLoading(false);
-      setSingleData(undefined);
-      return;
-    }
-
-    if (!loanCodesLoading && dataLoanCodes) {
-      const code = dataLoanCodes.find(item => String(item.id) === codeId);
-      if (code) {
-        setSingleData(code);
-        setError(null);
-      } else {
-        setError('Loan code not found');
+    const fetchLoanCode = async () => {
+      if (isNewCode) {
+        // Creating new code - no data to load
+        setLoading(false);
+        setSingleData(undefined);
+        return;
       }
-      setLoading(false);
-    }
-  }, [dataLoanCodes, loanCodesLoading, codeId, isNewCode]);
 
-  // Handle error from hook
-  useEffect(() => {
-    if (loanCodesError && !isNewCode) {
-      setError(loanCodesError);
-      setLoading(false);
-    }
-  }, [loanCodesError, isNewCode]);
+      if (!codeId || codeId === 'undefined') {
+        setError('Invalid loan code ID');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: LoanCodeQueryMutations.GET_LOAN_CODE_BY_ID,
+            variables: { id: codeId },
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.errors) {
+          setError(result.errors[0]?.message || 'Failed to load loan code');
+          return;
+        }
+
+        if (result.data?.getLoanCodeById) {
+          setSingleData(result.data.getLoanCodeById);
+          setError(null);
+        } else {
+          setError('Loan code not found');
+        }
+      } catch (err: any) {
+        console.error('Error fetching loan code:', err);
+        setError(err.message || 'Failed to load loan code');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLoanCode();
+  }, [codeId, isNewCode]);
 
   // Back button handler - navigates to list
   const handleBack = () => {
@@ -69,7 +91,7 @@ const LoanCodeDetailPage: React.FC = () => {
   };
 
   // Loading state
-  if (loading || (loanCodesLoading && !isNewCode)) {
+  if (loading) {
     return (
       <DefaultLayout>
         <div className="mx-auto">

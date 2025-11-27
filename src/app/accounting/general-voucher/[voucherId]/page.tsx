@@ -7,6 +7,7 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import useGeneralVoucher from '@/hooks/useGeneralVoucher';
+import GeneralVoucherQueryMutations from '@/graphql/GeneralVoucherQueryMutations';
 import CVForm from '../components/CVForm';
 import JVForm from '../components/JVForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
@@ -20,24 +21,21 @@ const GeneralVoucherDetailPage: React.FC = () => {
   const voucherType = searchParams.get('type') || ''; // 'cv' or 'jv'
 
   const {
-    dataGV,
     createGV,
     updateGV,
     fetchGV,
     printSummaryTicketDetails,
     generalVoucherLoading,
-    paginationLoading,
     pubSubBrId,
-    refresh
   } = useGeneralVoucher();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<RowAcctgEntry | undefined>(undefined);
 
-  // Fetch voucher data on mount
+  // Fetch voucher directly by ID (fixes pagination bug where voucher was on page 53 but only page 1 was fetched)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchVoucher = async () => {
       if (!voucherId || voucherId === 'undefined') {
         setError('Invalid voucher ID');
         setLoading(false);
@@ -47,31 +45,41 @@ const GeneralVoucherDetailPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        // Trigger data fetch - the hook will handle it
-        refresh();
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: GeneralVoucherQueryMutations.GET_VOUCHER_BY_ID,
+            variables: { id: voucherId },
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.errors) {
+          setError(result.errors[0]?.message || 'Failed to load voucher');
+          return;
+        }
+
+        if (result.data?.getVoucherById) {
+          setSingleData(result.data.getVoucherById);
+          setError(null);
+        } else {
+          setError('Voucher not found');
+        }
       } catch (err: any) {
         console.error('Error fetching voucher:', err);
         setError(err.message || 'Failed to load voucher');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchVoucher();
   }, [voucherId]);
-
-  // Find the specific entry when data is loaded
-  useEffect(() => {
-    if (!paginationLoading && dataGV) {
-      const entry = dataGV.find(item => String(item.id) === voucherId);
-      if (entry) {
-        setSingleData(entry);
-        setError(null);
-      } else {
-        setError('Voucher not found');
-      }
-      setLoading(false);
-    }
-  }, [dataGV, paginationLoading, voucherId]);
 
   // Back button handler
   const handleBack = () => {
@@ -91,7 +99,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
   };
 
   // Loading state
-  if (loading || paginationLoading) {
+  if (loading) {
     return (
       <DefaultLayout>
         <div className="mx-auto">
@@ -159,7 +167,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
                 createGV={createGV}
                 updateGV={updateGV}
                 fetchGV={fetchGV}
-                loading={paginationLoading}
+                loading={loading}
                 generalVoucherLoading={generalVoucherLoading}
                 pubSubBrId={pubSubBrId}
                 printSummaryTicketDetails={printSummaryTicketDetails}
@@ -171,7 +179,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
                 singleData={singleData}
                 createGV={createGV}
                 fetchGV={fetchGV}
-                loading={paginationLoading}
+                loading={loading}
                 generalVoucherLoading={generalVoucherLoading}
                 pubSubBrId={pubSubBrId}
                 printSummaryTicketDetails={printSummaryTicketDetails}

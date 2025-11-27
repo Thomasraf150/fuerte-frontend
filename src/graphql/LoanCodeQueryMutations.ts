@@ -50,11 +50,32 @@ const UPDATE_LOAN_CODE_MUTATION: string = `
   }
 `;
 
+const GET_LOAN_CODE_BY_ID: string = `
+  query GetLoanCodeById($id: ID!) {
+    getLoanCodeById(id: $id) {
+      id
+      code
+      description
+      user_id
+      is_deleted
+      loan_client_id
+      loan_type_id
+      loan_client {
+        name
+      }
+      loan_type {
+        name
+      }
+    }
+  }
+`;
+
 const LoanCodeQueryMutations = {
   GET_LOAN_CODE_QUERY,
   GET_LOAN_TYPE_QUERY,
   SAVE_LOAN_CODE_MUTATION,
-  UPDATE_LOAN_CODE_MUTATION
+  UPDATE_LOAN_CODE_MUTATION,
+  GET_LOAN_CODE_BY_ID
 };
 
 export default LoanCodeQueryMutations;

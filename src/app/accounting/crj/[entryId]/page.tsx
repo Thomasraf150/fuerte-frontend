@@ -6,10 +6,11 @@ import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
-import useGeneralJournal from '@/hooks/useGeneralJournal';
+import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations';
 import useCoa from '@/hooks/useCoa';
 import CrjForm from '../components/CrjForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
+
 const CrjDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
@@ -18,28 +19,17 @@ const CrjDetailPage: React.FC = () => {
   const entryId = params.entryId as string;
   const journalDate = searchParams.get('date') || '';
 
-  const { fetchGJ, dataGj, loading: gjLoading } = useGeneralJournal();
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
-
-  // Get user data from localStorage (includes branch_sub_id)
-  const storedAuthStore = typeof window !== 'undefined' ? localStorage.getItem('authStore') ?? '{}' : '{}';
-  const userData = JSON.parse(storedAuthStore)['state'];
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<RowAcctgEntry | undefined>(undefined);
 
-  // Fetch journal entry data on mount
+  // Fetch CRJ entry directly by ID (fixes pagination bug)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCrjEntry = async () => {
       if (!entryId || entryId === 'undefined') {
-        setError('Invalid journal entry ID');
-        setLoading(false);
-        return;
-      }
-
-      if (!journalDate) {
-        setError('Journal date is required');
+        setError('Invalid CRJ entry ID');
         setLoading(false);
         return;
       }
@@ -48,36 +38,44 @@ const CrjDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const branchSubId = String(userData?.user?.branch_sub_id || '');
-
-        // Fetch journal entries for the date range and COA data
-        await Promise.all([
-          fetchGJ(branchSubId, journalDate, journalDate, 'CRJ'),
+        // Fetch CRJ entry by ID and COA data in parallel
+        const [journalResponse] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: GeneralJournalQueryMutations.GET_JOURNAL_ENTRY_BY_ID,
+              variables: { id: entryId },
+            }),
+          }),
           fetchCoaDataTable()
         ]);
+
+        const result = await journalResponse.json();
+
+        if (result.errors) {
+          setError(result.errors[0]?.message || 'Failed to load CRJ entry');
+          return;
+        }
+
+        if (result.data?.getJournalEntryById) {
+          setSingleData(result.data.getJournalEntryById);
+          setError(null);
+        } else {
+          setError('CRJ entry not found');
+        }
       } catch (err: any) {
         console.error('Error fetching CRJ entry:', err);
         setError(err.message || 'Failed to load CRJ entry');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [entryId, journalDate]);
-
-  // Find the specific entry when data is loaded
-  useEffect(() => {
-    if (!gjLoading && dataGj) {
-      const entry = dataGj.find(item => String(item.id) === entryId);
-      if (entry) {
-        setSingleData(entry);
-        setError(null);
-      } else {
-        setError('CRJ entry not found');
-      }
-      setLoading(false);
-    }
-  }, [dataGj, gjLoading, entryId]);
+    fetchCrjEntry();
+  }, [entryId]);
 
   // Back button handler
   const handleBack = () => {
@@ -91,7 +89,7 @@ const CrjDetailPage: React.FC = () => {
   };
 
   // Loading state
-  if (loading || gjLoading) {
+  if (loading) {
     return (
       <DefaultLayout>
         <div className="mx-auto">

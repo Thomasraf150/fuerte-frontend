@@ -78,10 +78,40 @@ const UPDATE_LOAN_PRODUCT_QUERY: string = `
 
 
 
+const GET_LOAN_PRODUCT_BY_ID: string = `
+  query GetLoanProductById($id: ID!) {
+    getLoanProductById(id: $id) {
+      id
+      loan_code_id
+      user_id
+      description
+      terms
+      interest_rate
+      udi
+      processing
+      agent_fee
+      insurance
+      insurance_fee
+      commission
+      collection
+      notarial
+      base_deduction
+      addon_terms
+      addon_udi_rate
+      is_active
+      loan_code {
+        id
+        code
+      }
+    }
+  }
+`;
+
 const LoanProductsQueryMutations = {
   GET_LOAN_PRODUCT_QUERY,
   SAVE_LOAN_PRODUCT_QUERY,
-  UPDATE_LOAN_PRODUCT_QUERY
+  UPDATE_LOAN_PRODUCT_QUERY,
+  GET_LOAN_PRODUCT_BY_ID
 };
 
 export default LoanProductsQueryMutations;
