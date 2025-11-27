@@ -1,5 +1,5 @@
 import React, { useEffect, ComponentType } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import { useAuthStore } from '@/store/authStore';
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): ComponentType<P> => {

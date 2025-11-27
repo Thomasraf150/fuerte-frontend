@@ -10,7 +10,8 @@ import Loader from "@/components/common/Loader";
 import './styles.css'; // Include your global styles
 import { Poppins } from 'next/font/google';
 import Pusher from "pusher-js";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useRouter } from 'nextjs-toploader/app';
 import useMaintenanceRedirect from '@/hooks/useMaintenanceRedirect';
 import NextTopLoader from 'nextjs-toploader';
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import loanCodeListColumn from './LoanCodeListColumn';
 import { DataRowLoanCodes } from '@/utils/DataTypes';

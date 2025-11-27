@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import { DataColListRow } from '@/utils/DataTypes';
 import useCollectionList from '@/hooks/useCollectionList';
 import collectionListCol from './CollectionListCol';
