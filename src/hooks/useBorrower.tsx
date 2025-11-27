@@ -15,8 +15,9 @@ import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, Borr
 import { toast } from "react-toastify";
 const useBorrower = () => {
   const router = useRouter();
+  const { GET_AUTH_TOKEN } = useAuthStore.getState();
 
-  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_QUERY, CHECK_BORROWER_DUPLICATE } = BorrowerQueryMutations;
+  const { SAVE_BORROWER_MUTATION, GET_BORROWER_QUERY, DELETE_BORROWER_MUTATION, CHECK_BORROWER_DUPLICATE } = BorrowerQueryMutations;
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
@@ -358,35 +359,44 @@ const useBorrower = () => {
   };
 
   const handleRmBorrower = async (data: any) => {
-    let variables: { input: any } = {
-      input: {
-        id: data.id,
-        is_deleted: 1,
-      },
-    };
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You are deleting this borrower',
       'Confirm',
     );
-    if (isConfirmed) {
+    if (!isConfirmed) return;
+
+    try {
+      const token = GET_AUTH_TOKEN();
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          query: DELETE_BORROWER_QUERY,
-          variables
+          query: DELETE_BORROWER_MUTATION,
+          variables: { id: data.id }
         }),
       });
+
       const result = await response.json();
-      if (result) {
-        refresh(); // Use pagination hook's refresh function
-        toast.success(result.data?.deleteBorrowerData?.message);
+
+      if (result.errors) {
+        toast.error(result.errors[0].message);
+        return;
       }
+
+      if (result.data?.deleteBorrower?.status) {
+        refresh();
+        toast.success(result.data.deleteBorrower.message);
+      } else {
+        toast.error(result.data?.deleteBorrower?.message || 'Failed to delete borrower');
+      }
+    } catch (error) {
+      toast.error('Network error occurred');
     }
-    
   };
 
   const handleDeleteSubArea = async (data: any) => {
