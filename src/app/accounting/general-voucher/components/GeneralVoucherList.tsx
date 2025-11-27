@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import CustomDatatable from '@/components/CustomDatatable';
 import CVForm from './CVForm';
 import JVForm from './JVForm';
@@ -13,6 +14,7 @@ import { RowAcctgEntry } from '@/utils/DataTypes';
 const column = gVTblColumn;
 
 const GeneralVoucherList: React.FC = () => {
+  const router = useRouter();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showFormCv, setShowFormCv] = useState<boolean>(false);
   const [showFormJv, setShowFormJv] = useState<boolean>(false);
@@ -46,16 +48,10 @@ const GeneralVoucherList: React.FC = () => {
   useEffect(() => {
   }, [dataGV])
 
+  // Navigate to detail page on row click (URL-based routing)
   const handleWholeRowClick = (row: RowAcctgEntry) => {
-    console.log(row, ' row');
-    setSingleData(row);
-    if (row?.journal_name === 'Check Voucher') {
-      setShowFormCv(true);
-      setActionLbl('Update Check Voucher');
-    } else {
-      setShowFormJv(true);
-      setActionLbl('Update Journal Voucher');
-    }
+    const type = row?.journal_name === 'Check Voucher' ? 'cv' : 'jv';
+    router.push(`/accounting/general-voucher/${row.id}?type=${type}`);
   }
 
   return (
@@ -66,7 +62,7 @@ const GeneralVoucherList: React.FC = () => {
             <div className={`col-span-2 ${!showFormCv ?'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-boxdark dark:text-boxdark">
+                  <h3 className="font-medium text-black dark:text-white">
                     General Voucher
                   </h3>
                 </div>

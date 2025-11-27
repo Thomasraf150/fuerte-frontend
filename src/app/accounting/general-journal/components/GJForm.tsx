@@ -112,7 +112,7 @@ const GJForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, lo
     <>
       <div>
         <div className="border-b border-stroke py-4 dark:border-strokedark">
-          <h3 className="font-medium text-boxdark dark:text-boxdark">
+          <h3 className="font-medium text-black dark:text-white">
             {actionLbl} {singleData && (<>- <span className="font-bold text-orange-500"> {singleData?.journal_ref}</span></>)} 
           </h3>
         </div>
