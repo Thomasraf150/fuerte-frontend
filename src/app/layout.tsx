@@ -65,7 +65,7 @@ export default function RootLayout({
   }, [pathname, router]);
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body suppressHydrationWarning={true} className={poppins.variable}>
         {/* Top Loading Bar - Shows during page navigation */}
         <NextTopLoader
