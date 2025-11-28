@@ -41,7 +41,7 @@ export interface AccountingDashboard {
   sub_branch_breakdown: SubBranchBreakdown[];
 }
 
-export type PeriodOption = '1month' | '3months' | '6months' | '12months';
+export type PeriodOption = '1month' | '3months' | '6months' | '12months' | 'custom';
 
 export interface DashboardFilters {
   period: PeriodOption;

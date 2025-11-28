@@ -18,12 +18,25 @@ interface UseAccountingDashboardReturn {
   setSelectedBranchId: (id: number | null) => void;
   refetch: () => void;
   isAdmin: boolean;
+  customStartDate: string;
+  customEndDate: string;
+  setCustomDateRange: (startDate: string, endDate: string) => void;
 }
 
 /**
  * Calculate start and end dates based on selected period.
+ * For 'custom' period, uses provided custom dates.
  */
-const getDateRange = (period: PeriodOption): { startDate: string; endDate: string } => {
+const getDateRange = (
+  period: PeriodOption,
+  customStart?: string,
+  customEnd?: string
+): { startDate: string; endDate: string } => {
+  // Handle custom date range
+  if (period === "custom" && customStart && customEnd) {
+    return { startDate: customStart, endDate: customEnd };
+  }
+
   const endDate = new Date();
   const startDate = new Date();
 
@@ -39,6 +52,10 @@ const getDateRange = (period: PeriodOption): { startDate: string; endDate: strin
       break;
     case "12months":
       startDate.setMonth(startDate.getMonth() - 12);
+      break;
+    case "custom":
+      // Default to 3 months if custom dates not yet selected
+      startDate.setMonth(startDate.getMonth() - 3);
       break;
   }
 
@@ -59,6 +76,14 @@ const useAccountingDashboard = (): UseAccountingDashboardReturn => {
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<PeriodOption>("3months");
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+
+  // Handler for setting custom date range
+  const setCustomDateRange = useCallback((start: string, end: string) => {
+    setCustomStartDate(start);
+    setCustomEndDate(end);
+  }, []);
 
   // Check if user is admin (role_id = 1 or role name contains ADMIN)
   const checkIsAdmin = (): boolean => {
@@ -87,7 +112,7 @@ const useAccountingDashboard = (): UseAccountingDashboardReturn => {
     setLoading(true);
     setError(null);
 
-    const { startDate, endDate } = getDateRange(period);
+    const { startDate, endDate } = getDateRange(period, customStartDate, customEndDate);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -126,7 +151,7 @@ const useAccountingDashboard = (): UseAccountingDashboardReturn => {
     } finally {
       setLoading(false);
     }
-  }, [period, selectedBranchId, GET_ACCOUNTING_DASHBOARD]);
+  }, [period, selectedBranchId, customStartDate, customEndDate, GET_ACCOUNTING_DASHBOARD]);
 
   // Fetch data when period or branch changes
   useEffect(() => {
@@ -143,6 +168,9 @@ const useAccountingDashboard = (): UseAccountingDashboardReturn => {
     setSelectedBranchId,
     refetch: fetchDashboardData,
     isAdmin,
+    customStartDate,
+    customEndDate,
+    setCustomDateRange,
   };
 };
 

@@ -5,6 +5,7 @@ import useAccountingDashboard from "@/hooks/useAccountingDashboard";
 import NrUdiSummary from "@/components/Dashboard/components/NrUdiSummary";
 import NrUdiTrendChart from "@/components/Dashboard/components/NrUdiTrendChart";
 import SubBranchBreakdownTable from "@/components/Dashboard/components/SubBranchBreakdownTable";
+import DateRangePicker from "@/components/FormElements/DatePicker/DateRangePicker";
 import { PeriodOption } from "@/types/dashboard";
 import { useAuthStore } from "@/store";
 import BranchQueryMutations from "@/graphql/BranchQueryMutation";
@@ -25,6 +26,9 @@ const AcctDefaultPage: React.FC = () => {
     setSelectedBranchId,
     refetch,
     isAdmin,
+    customStartDate,
+    customEndDate,
+    setCustomDateRange,
   } = useAccountingDashboard();
 
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -69,10 +73,11 @@ const AcctDefaultPage: React.FC = () => {
   }, [isAdmin]);
 
   const periodOptions: { value: PeriodOption; label: string }[] = [
-    { value: "1month", label: "Last Month" },
+    { value: "1month", label: "Last 1 Month" },
     { value: "3months", label: "Last 3 Months" },
     { value: "6months", label: "Last 6 Months" },
     { value: "12months", label: "Last 12 Months" },
+    { value: "custom", label: "Custom Range" },
   ];
 
   // Error state
@@ -111,6 +116,15 @@ const AcctDefaultPage: React.FC = () => {
               </option>
             ))}
           </select>
+
+          {/* Custom Date Range Picker */}
+          {period === "custom" && (
+            <DateRangePicker
+              startDate={customStartDate}
+              endDate={customEndDate}
+              onChange={setCustomDateRange}
+            />
+          )}
 
           {/* Branch Selector (Admin Only) */}
           {isAdmin && (
