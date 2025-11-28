@@ -25,15 +25,19 @@ const SignIn: React.FC = () => {
                   className="hidden dark:block"
                   src={"/images/logo/fuerte-logo.png"}
                   alt="Logo"
-                  width={176}
-                  height={32}
+                  width={0}
+                  height={0}
+                  sizes="176px"
+                  style={{ width: '176px', height: 'auto' }}
                 />
                 <Image
                   className="dark:hidden"
                   src={"/images/logo/fuerte-logo.png"}
                   alt="Logo"
-                  width={300}
-                  height={32}
+                  width={0}
+                  height={0}
+                  sizes="300px"
+                  style={{ width: '300px', height: 'auto' }}
                 />
               </Link>
               <p className="2xl:px-20">
