@@ -732,9 +732,9 @@ export interface DataAccBalanceSheet {
   assets: DataChartOfAccountList[];
   liabilities: DataChartOfAccountList[];
   equity: DataChartOfAccountList[];
-  total_assets: number;
-  total_liabilities: number;
-  total_equity: number;
+  total_assets: string;
+  total_liabilities: string;
+  total_equity: string;
 }
 export interface DataAccIncomeStatement {
   revenues: DataChartOfAccountList[];
