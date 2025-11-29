@@ -23,26 +23,56 @@ const useFinancialStatement = () => {
   const [printLoading, setPrintLoading] = useState<boolean>(false);
  
   const fetchBalanceSheetData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
+    // Validate dates before API call
+    if (!startDate || !endDate) {
+      toast.warning('Please select start and end dates');
+      return;
+    }
+
+    const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
+    const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
+
+    if (formattedStartDate === 'Invalid date' || formattedEndDate === 'Invalid date') {
+      toast.error('Invalid date format');
+      return;
+    }
+
     setLoading(true);
 
-    let variables: { startDate: string, endDate: string, branch_sub_id: string } = {
-      startDate : moment(startDate).format('YYYY-MM-DD'),
-      endDate : moment(endDate).format('YYYY-MM-DD'),
-      branch_sub_id
-    };
+    try {
+      const variables: { startDate: string, endDate: string, branch_sub_id: string } = {
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        branch_sub_id
+      };
 
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BALANCE_SHEET,
-        variables
-      }),
-    });
-    setBalanceSheetData(response.data.getBalanceSheet);
-    setLoading(false);
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_BALANCE_SHEET,
+          variables
+        }),
+      });
+
+      // Check for GraphQL errors
+      if (response.errors && response.errors.length > 0) {
+        console.error('Balance Sheet GraphQL errors:', response.errors);
+        toast.error(response.errors[0].message || 'Failed to load Balance Sheet');
+        setBalanceSheetData(undefined);
+        return;
+      }
+
+      setBalanceSheetData(response.data?.getBalanceSheet);
+    } catch (error) {
+      console.error('Balance Sheet fetch error:', error);
+      toast.error('Failed to load Balance Sheet data');
+      setBalanceSheetData(undefined);
+    } finally {
+      setLoading(false);
+    }
   };
   
   const fetchStatementData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
