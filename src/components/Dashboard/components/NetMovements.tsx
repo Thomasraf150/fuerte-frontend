@@ -2,10 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import CardDataStats from "@/components/CardDataStats";
-import { formatToTwoDecimalPlaces } from '@/utils/helper';
-import moment from 'moment';
 import { FileText } from "react-feather";
-import { toCamelCase, formatNumberComma } from '@/utils/helper';
+import { formatNumberComma } from '@/utils/helper';
 
 interface SumProps {
   sumTixData: any;
@@ -19,8 +17,6 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
   useEffect(() => {
     if (!sumTixData) return;
 
-    console.log(sumTixData, 'NetMovements');
-
     // Extract credit values for specific descriptions
     const newIncome = sumTixData.summary_tix
       .filter((item: any) =>
@@ -33,10 +29,6 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
     // Sum the values
     const total = newIncome.reduce((acc: any, value: any) => acc + value, 0);
     setTotalReleasingIncome(total);
-
-    console.log(newIncome, 'newIncome');
-    console.log(total, 'totalReleasingIncome');
-    
   }, [sumTixData]);
 
   return (

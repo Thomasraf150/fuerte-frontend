@@ -126,9 +126,9 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, loading }) => {
         </svg>
       </CardDataStats>
 
-      {/* Active Loans */}
+      {/* Released Loans */}
       <CardDataStats
-        title="Active Loans"
+        title="Released Loans"
         total={summary.active_loan_count}
         rate={formatPercent(summary.loan_count_change_percent)}
         levelUp={isPositive(summary.loan_count_change_percent)}

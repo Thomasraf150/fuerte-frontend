@@ -27,24 +27,24 @@ const LoanByLoanType: React.FC<SumProps> = ({sumTixData, startDate, endDate}) =>
             <table className="w-full table-auto mb-4 min-w-[700px]">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th colSpan={5} className="px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                <th colSpan={5} className="px-4 py-4 font-medium text-black dark:text-white">
                   <h2 className="text-xl mb-2">BREAKDOWN OF LOANS BY LOAN TYPE</h2>
                 </th>
               </tr>
               <tr className=" text-left dark:bg-meta-4">
-                <th className="min-w-[140px] sm:min-w-[160px] lg:min-w-[180px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                <th className="min-w-[140px] sm:min-w-[160px] lg:min-w-[180px] px-4 py-4 font-medium text-black dark:text-white">
                   TYPE
                 </th>
-                <th className="min-w-[80px] sm:min-w-[100px] lg:min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
+                <th className="text-center min-w-[80px] sm:min-w-[100px] lg:min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                   COUNT
                 </th>
-                <th className="text-right min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] px-4 py-4 font-medium text-black dark:text-white">
                   PRINCIPAL
                 </th>
-                <th className="text-right min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] px-4 py-4 font-medium text-black dark:text-white">
                   CASH-OUT
                 </th>
-                <th className="text-right min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] px-4 py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
                   UDI
                 </th>
               </tr>
@@ -53,20 +53,20 @@ const LoanByLoanType: React.FC<SumProps> = ({sumTixData, startDate, endDate}) =>
             {sumTixData?.loan_type_bdown.map((item: any, i: number) => (
               <>
                 <tr key={i}>
-                  <td className="border-b border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
                     {item.description}
                   </td>
-                  <td className="border-b border-[#eee] px-3 py-4 dark:border-strokedark">
+                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
                     {item.loan_count}
                   </td>
-                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {formatNumberComma(parseFloat(item.pn_amount))}
+                  <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                    {'\u20B1'} {formatNumberComma(parseFloat(item.pn_amount))}
                   </td>
-                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {formatNumberComma(parseFloat(item.loan_proceeds))}
+                  <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                    {'\u20B1'} {formatNumberComma(parseFloat(item.loan_proceeds))}
                   </td>
-                  <td className="border-b text-right border-[#eee] px-3 py-4 dark:border-strokedark">
-                    {formatNumberComma(parseFloat(item.udi_balance))}
+                  <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                    {'\u20B1'} {formatNumberComma(parseFloat(item.udi_balance))}
                   </td>
                 </tr>
               </>

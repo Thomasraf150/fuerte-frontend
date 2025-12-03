@@ -18,9 +18,12 @@ import SummaryTicket from './components/SummaryTicket';
 import NetMovements from './components/NetMovements';
 import CashoutByBank from './components/CashoutByBank';
 import LoanByLoanType from './components/LoanByLoanType';
+import SummaryTicketByBranch from './components/SummaryTicketByBranch';
+import NetMovementsByBranch from './components/NetMovementsByBranch';
 import useSummaryTicket from '@/hooks/useSummaryTicket';
 // import useCoa from '@/hooks/useCoa';
 import useBranches from '@/hooks/useBranches';
+import { toast } from 'react-toastify';
 
 interface Option {
   value: string;
@@ -31,13 +34,14 @@ interface Option {
 const DefaultPage: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   // const { onSubmitCoa, branchSubData } = useCoa();
-  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
-  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket, printSummaryTicketDetails } = useSummaryTicket();
+  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
+  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket, printSummaryTicketDetails, printLoading } = useSummaryTicket();
   // Use undefined instead of null for initial state
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
+  const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
 
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
@@ -58,8 +62,12 @@ const DefaultPage: React.FC = () => {
 
   const handleBranchSubChange = (branch_sub_id: string) => {
     // Handle "all" value - pass as-is to backend (backend will handle it)
-    fetchSummaryTixReport(startDate, endDate, branch_sub_id);
+    fetchSummaryTixReport(startDate, endDate, branch_sub_id, showBreakdown);
     setBranchSubId(branch_sub_id);
+    // Reset breakdown when switching to specific branch
+    if (branch_sub_id !== 'all') {
+      setShowBreakdown(false);
+    }
   };
 
   const handleBranchChange = (branch_id: string) => {
@@ -69,17 +77,26 @@ const DefaultPage: React.FC = () => {
     if (branch_id === 'all') {
       setValue('branch_sub_id', 'all');
       setBranchSubId('all');
-      fetchSummaryTixReport(startDate, endDate, 'all');
+      fetchSummaryTixReport(startDate, endDate, 'all', showBreakdown);
     } else {
       // Reset sub-branch selection when changing to specific branch
       setValue('branch_sub_id', '');
       setBranchSubId('');
+      setShowBreakdown(false); // Reset breakdown when switching to specific branch
 
       if (branch_id && branch_id !== '') {
         // Fetch sub-branches for the selected branch
         fetchSubDataList('id_desc', Number(branch_id));
       }
     }
+  };
+
+  const handlePrint = async () => {
+    if (!startDate || !endDate || !branchSubId) {
+      toast.error('Please select date range and branch before printing');
+      return;
+    }
+    await printSummaryTicketDetails(startDate, endDate, branchSubId, showBreakdown);
   };
 
   useEffect(() => {
@@ -125,7 +142,7 @@ const DefaultPage: React.FC = () => {
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
       <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-4 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-4 items-end">
           {/* Start Date */}
           <div className="flex flex-col">
             <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
@@ -175,6 +192,8 @@ const DefaultPage: React.FC = () => {
                   {...field}
                   options={optionsBranch}
                   placeholder="Select a branch..."
+                  isLoading={loadingBranches}
+                  loadingMessage={() => 'Loading branches...'}
                   onChange={(selectedOption) => {
                     field.onChange(selectedOption?.value);
                     handleBranchChange(selectedOption?.value ?? '');
@@ -211,6 +230,8 @@ const DefaultPage: React.FC = () => {
                   options={optionsSubBranch}
                   placeholder="Select a sub branch..."
                   isDisabled={branchId === 'all'}
+                  isLoading={loadingSubBranches}
+                  loadingMessage={() => 'Loading sub-branches...'}
                   onChange={(selectedOption) => {
                     field.onChange(selectedOption?.value);
                     handleBranchSubChange(selectedOption?.value ?? '');
@@ -231,21 +252,87 @@ const DefaultPage: React.FC = () => {
               )}
             />
           </div>
+
+          {/* Breakdown Toggle - Only show when "All Branches" selected */}
+          {dataSummaryTicket !== undefined && branchSubId === 'all' && (
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark invisible">
+                Options:
+              </label>
+              <div className="flex items-center h-[42px] px-4 rounded-md border border-stroke dark:border-strokedark bg-white dark:bg-form-input">
+                <input
+                  type="checkbox"
+                  id="showBreakdown"
+                  checked={showBreakdown}
+                  onChange={(e) => {
+                    setShowBreakdown(e.target.checked);
+                    fetchSummaryTixReport(startDate, endDate, branchSubId, e.target.checked);
+                  }}
+                  className="w-4 h-4 text-primary"
+                />
+                <label htmlFor="showBreakdown" className="ml-2 text-sm text-gray-700 dark:text-bodydark cursor-pointer">
+                  Show branch breakdown
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Print Button - Only show when data is loaded */}
+          {dataSummaryTicket !== undefined && (
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark invisible">
+                Action:
+              </label>
+              <button
+                type="button"
+                onClick={handlePrint}
+                disabled={printLoading || !startDate || !endDate || !branchSubId}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[42px]"
+              >
+                <Printer size={18} />
+                {printLoading ? 'Generating...' : 'Print'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
         
         
         
-        {dataSummaryTicket !== undefined ? (
+        {sumTixLoading ? (
+          <div className="rounded-sm border my-4 border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
+              <span className="text-gray-600 dark:text-gray-300">Loading Summary Ticket data...</span>
+            </div>
+          </div>
+        ) : dataSummaryTicket !== undefined ? (
           <>
-            {/* {} */}
             <SummaryTicket sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate} />
-            {/* {} */}
             <NetMovements sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
-            {/* {} */}
             <CashoutByBank sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
-            {/* {} */}
             <LoanByLoanType sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
+
+            {/* Branch Breakdown - Only show when breakdown is enabled and viewing all branches */}
+            {showBreakdown && branchSubId === 'all' && dataSummaryTicket.summary_tix_by_branch && (
+              <>
+                {/* Summary Ticket Breakdown by Branch */}
+                <SummaryTicketByBranch
+                  data={dataSummaryTicket.summary_tix_by_branch}
+                  startDate={startDate}
+                  endDate={endDate}
+                />
+
+                {/* Net Movements Breakdown by Branch */}
+                {dataSummaryTicket.net_movement_by_branch && (
+                  <NetMovementsByBranch
+                    data={dataSummaryTicket.net_movement_by_branch}
+                    startDate={startDate}
+                    endDate={endDate}
+                  />
+                )}
+              </>
+            )}
           </>
         ) : (
           <div className="rounded-sm border my-4 border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">

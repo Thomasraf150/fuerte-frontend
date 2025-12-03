@@ -27,27 +27,21 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
             <table className="w-full table-auto mb-4 min-w-[800px]">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th colSpan={6} className="px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                <th colSpan={4} className="px-4 py-4 font-medium text-black dark:text-white">
                   <h2 className="text-xl mb-2">BREAKDOWN OF CASH-OUT BY BANK ACCOUNT</h2>
                 </th>
               </tr>
               <tr className=" dark:bg-meta-4">
-                <th className="min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] text-left py-4 font-medium text-black dark:text-white xl:pl-11">
+                <th className="min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] text-left px-4 py-4 font-medium text-black dark:text-white">
                   BANK
                 </th>
-                <th className="min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] text-left py-4 font-medium text-black dark:text-white">
-                  DESCRIPTION
-                </th>
-                <th className="text-left min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] py-4 font-medium text-black dark:text-white xl:pl-11">
-                  ACCOUNT #
-                </th>
-                <th className="text-left min-w-[80px] sm:min-w-[100px] lg:min-w-[120px] py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-center min-w-[80px] sm:min-w-[100px] lg:min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                   COUNT
                 </th>
-                <th className="text-left min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
                   OB
                 </th>
-                <th className="text-left min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] py-4 font-medium text-black dark:text-white xl:pl-3">
+                <th className="text-right min-w-[100px] sm:min-w-[120px] lg:min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
                   CASH-OUT
                 </th>
               </tr>
@@ -56,23 +50,17 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
               {sumTixData?.cashout_by_bank.map((item: any, i: number) => (
                 <>
                   <tr key={i}>
-                    <td className="border-b text-left border-[#eee] px-3 py-4 pl-9 dark:border-strokedark xl:pl-11">
+                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
                       {item.bank_name}
                     </td>
-                    <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                      
-                    </td>
-                    <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                      
-                    </td>
-                    <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
+                    <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
                       {item.loan_count}
                     </td>
-                    <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                      {formatNumberComma(parseFloat(item.total_pn_balance) - parseFloat(item.total_collection))}
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                      {'\u20B1'} {formatNumberComma(parseFloat(item.total_pn_balance) - parseFloat(item.total_collection))}
                     </td>
-                    <td className="border-b text-left border-[#eee] px-3 py-4 dark:border-strokedark">
-                      {formatNumberComma(parseFloat(item.total_net_cashout))}
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                      {'\u20B1'} {formatNumberComma(parseFloat(item.total_net_cashout))}
                     </td>
                   </tr>
                 </>
