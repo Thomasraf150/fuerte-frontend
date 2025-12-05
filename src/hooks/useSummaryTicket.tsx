@@ -12,7 +12,7 @@ const useSummaryTicket = () => {
 
   const { GET_SUMMARY_TICKET_REPORTS, GET_SUMMARY_TICKET_WITH_BREAKDOWN, PRINT_SUMMARY_TIX } = SummaryTicketReports;
 
-  const [dataSummaryTicket, setDataSummaryTicket] = useState<[]>();
+  const [dataSummaryTicket, setDataSummaryTicket] = useState<any>();
   const [sumTixLoading, setSumTixLoading] = useState<boolean>(false);
   const [printLoading, setPrintLoading] = useState<boolean>(false);
   // Function to fetchdata
