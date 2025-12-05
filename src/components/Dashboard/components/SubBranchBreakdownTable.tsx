@@ -27,16 +27,16 @@ const formatCurrency = (value: string): string => {
  * Loading skeleton for table.
  */
 const LoadingSkeleton: React.FC = () => (
-  <div className="col-span-12 xl:col-span-4">
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+  <div className="col-span-12 xl:col-span-5">
+    <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
       <div className="animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex gap-4 py-3">
+          <div key={i} className="flex gap-2 py-3">
             <div className="h-4 bg-gray-200 rounded flex-1 dark:bg-gray-700"></div>
-            <div className="h-4 bg-gray-200 rounded w-16 dark:bg-gray-700"></div>
-            <div className="h-4 bg-gray-200 rounded w-24 dark:bg-gray-700"></div>
-            <div className="h-4 bg-gray-200 rounded w-24 dark:bg-gray-700"></div>
+            <div className="h-4 bg-gray-200 rounded w-12 dark:bg-gray-700"></div>
+            <div className="h-4 bg-gray-200 rounded w-20 dark:bg-gray-700"></div>
+            <div className="h-4 bg-gray-200 rounded w-20 dark:bg-gray-700"></div>
           </div>
         ))}
       </div>
@@ -64,8 +64,8 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
 
   if (breakdown.length === 0) {
     return (
-      <div className="col-span-12 xl:col-span-4">
-        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="col-span-12 xl:col-span-5">
+        <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
             Sub-Branch Breakdown
           </h4>
@@ -78,92 +78,89 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
   }
 
   return (
-    <div className="col-span-12 xl:col-span-4">
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="col-span-12 xl:col-span-5">
+      <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
         <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
           Sub-Branch Breakdown
         </h4>
 
-        <div className="flex flex-col">
-          {/* Header */}
-          <div className="grid grid-cols-4 rounded-sm bg-gray-2 dark:bg-meta-4">
-            <div className="p-2.5 xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Sub-Branch
-              </h5>
-            </div>
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Loans
-              </h5>
-            </div>
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                NR
-              </h5>
-            </div>
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                UDI
-              </h5>
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[400px]">
+            <thead>
+              <tr className="bg-gray-2 dark:bg-meta-4">
+                <th className="p-2 text-left text-xs font-medium uppercase sm:p-3 sm:text-sm">
+                  Sub-Branch
+                </th>
+                <th className="p-2 text-center text-xs font-medium uppercase sm:p-3 sm:text-sm w-16">
+                  Loans
+                </th>
+                <th className="p-2 text-right text-xs font-medium uppercase sm:p-3 sm:text-sm whitespace-nowrap">
+                  NR
+                </th>
+                <th className="p-2 text-right text-xs font-medium uppercase sm:p-3 sm:text-sm whitespace-nowrap">
+                  UDI
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Rows */}
+              {breakdown.map((item, key) => (
+                <tr
+                  className={
+                    key === breakdown.length - 1
+                      ? ""
+                      : "border-b border-stroke dark:border-strokedark"
+                  }
+                  key={item.branch_sub_id}
+                >
+                  <td className="p-2 sm:p-3">
+                    <p className="text-black dark:text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">
+                      {item.branch_sub_name}
+                    </p>
+                  </td>
+                  <td className="p-2 text-center sm:p-3">
+                    <p className="text-black dark:text-white text-xs sm:text-sm">
+                      {item.loan_count}
+                    </p>
+                  </td>
+                  <td className="p-2 text-right sm:p-3">
+                    <p className="text-meta-3 text-xs sm:text-sm whitespace-nowrap">
+                      {formatCurrency(item.nr_balance)}
+                    </p>
+                  </td>
+                  <td className="p-2 text-right sm:p-3">
+                    <p className="text-meta-5 text-xs sm:text-sm whitespace-nowrap">
+                      {formatCurrency(item.udi_balance)}
+                    </p>
+                  </td>
+                </tr>
+              ))}
 
-          {/* Rows */}
-          {breakdown.map((item, key) => (
-            <div
-              className={`grid grid-cols-4 ${
-                key === breakdown.length - 1
-                  ? ""
-                  : "border-b border-stroke dark:border-strokedark"
-              }`}
-              key={item.branch_sub_id}
-            >
-              <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                <p className="text-black dark:text-white text-sm">
-                  {item.branch_sub_name}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{item.loan_count}</p>
-              </div>
-
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-meta-3 text-sm">
-                  {formatCurrency(item.nr_balance)}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-meta-5 text-sm">
-                  {formatCurrency(item.udi_balance)}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {/* Totals Row */}
-          <div className="grid grid-cols-4 rounded-sm bg-gray-2 dark:bg-meta-4">
-            <div className="p-2.5 xl:p-5">
-              <p className="font-bold text-black dark:text-white">TOTAL</p>
-            </div>
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="font-bold text-black dark:text-white">
-                {totals.loan_count}
-              </p>
-            </div>
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="font-bold text-meta-3 text-sm">
-                {formatCurrency(totals.nr_balance)}
-              </p>
-            </div>
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="font-bold text-meta-5 text-sm">
-                {formatCurrency(totals.udi_balance)}
-              </p>
-            </div>
-          </div>
+              {/* Totals Row */}
+              <tr className="bg-gray-2 dark:bg-meta-4">
+                <td className="p-2 sm:p-3">
+                  <p className="font-bold text-black dark:text-white text-xs sm:text-sm">
+                    TOTAL
+                  </p>
+                </td>
+                <td className="p-2 text-center sm:p-3">
+                  <p className="font-bold text-black dark:text-white text-xs sm:text-sm">
+                    {totals.loan_count}
+                  </p>
+                </td>
+                <td className="p-2 text-right sm:p-3">
+                  <p className="font-bold text-meta-3 text-xs sm:text-sm whitespace-nowrap">
+                    {formatCurrency(totals.nr_balance)}
+                  </p>
+                </td>
+                <td className="p-2 text-right sm:p-3">
+                  <p className="font-bold text-meta-5 text-xs sm:text-sm whitespace-nowrap">
+                    {formatCurrency(totals.udi_balance)}
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

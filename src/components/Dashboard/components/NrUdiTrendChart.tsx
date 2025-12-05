@@ -28,7 +28,7 @@ const formatMonth = (month: string): string => {
  * Loading skeleton component.
  */
 const LoadingSkeleton: React.FC = () => (
-  <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
+  <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
     <div className="animate-pulse">
       <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
       <div className="h-[350px] bg-gray-200 rounded dark:bg-gray-700"></div>
@@ -177,7 +177,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
 
   if (trend.length === 0) {
     return (
-      <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
+      <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
         <div className="mb-4">
           <h5 className="text-xl font-semibold text-black dark:text-white">
             NR & UDI Trend
@@ -191,8 +191,8 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
   }
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
-      <div className="mb-4 flex flex-wrap items-center gap-8">
+    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
+      <div className="mb-4 flex flex-wrap items-center gap-4 sm:gap-8">
         <div className="flex items-center gap-2">
           <span className="flex h-4 w-4 items-center justify-center rounded-full border border-primary">
             <span className="block h-2.5 w-2.5 rounded-full bg-primary"></span>
