@@ -162,6 +162,7 @@ const AcctDefaultPage: React.FC = () => {
             nr_change_percent: "0",
             udi_change_percent: "0",
             loan_count_change_percent: "0",
+            outstanding_change_percent: "0",
           }}
           loading={loading}
         />
