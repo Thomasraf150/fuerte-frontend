@@ -151,7 +151,7 @@ const AcctDefaultPage: React.FC = () => {
 
       {/* Summary Cards */}
       {data?.summary ? (
-        <NrUdiSummary summary={data.summary} loading={loading} />
+        <NrUdiSummary summary={data.summary} previous={data.previous} loading={loading} />
       ) : (
         <NrUdiSummary
           summary={{

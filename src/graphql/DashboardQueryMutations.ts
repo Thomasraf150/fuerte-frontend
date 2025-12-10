@@ -13,6 +13,13 @@ const GET_ACCOUNTING_DASHBOARD: string = `
         nr_change_percent
         udi_change_percent
         loan_count_change_percent
+        outstanding_change_percent
+      }
+      previous {
+        total_nr
+        total_udi
+        total_outstanding
+        active_loan_count
       }
       trend {
         month

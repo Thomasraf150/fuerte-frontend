@@ -6,7 +6,9 @@ interface CardDataStatsProps {
   rate: string;
   levelUp?: boolean;
   levelDown?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
+  previousValue?: string;
+  previousPeriod?: string;
 }
 
 const CardDataStats: React.FC<CardDataStatsProps> = ({
@@ -16,14 +18,18 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
   levelUp,
   levelDown,
   children,
+  previousValue,
+  previousPeriod,
 }) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
-        {children}
-      </div>
+      {children && (
+        <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
+          {children}
+        </div>
+      )}
 
-      <div className="mt-4 flex items-end justify-between">
+      <div className={`flex items-end justify-between ${children ? "mt-4" : ""}`}>
         <div>
           <h4 className="text-title-md font-bold text-black dark:text-white">
             {total}
@@ -32,11 +38,18 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
         </div>
 
         <span
-          className={`flex items-center gap-1 text-sm font-medium ${
-            levelUp && "text-meta-3"
-          } ${levelDown && "text-meta-5"} `}
+          className={`relative group flex items-center gap-1 text-sm font-medium ${
+            levelUp ? "text-meta-3" : ""
+          } ${levelDown ? "text-danger" : ""} ${previousValue ? "cursor-pointer" : ""}`}
         >
           {rate}
+          {previousValue && (
+            <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 bg-boxdark text-white text-xs rounded py-2 px-3 whitespace-nowrap z-50 shadow-lg">
+              <div className="font-medium mb-1">Previous Period</div>
+              <div>{previousValue}</div>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-boxdark"></div>
+            </div>
+          )}
 
           {levelUp && (
             <svg
@@ -55,7 +68,7 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
           )}
           {levelDown && (
             <svg
-              className="fill-meta-5"
+              className="fill-danger"
               width="10"
               height="11"
               viewBox="0 0 10 11"

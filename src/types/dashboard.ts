@@ -18,6 +18,14 @@ export interface AccountingDashboardSummary {
   nr_change_percent: string;
   udi_change_percent: string;
   loan_count_change_percent: string;
+  outstanding_change_percent: string;
+}
+
+export interface PreviousPeriodSummary {
+  total_nr: string;
+  total_udi: string;
+  total_outstanding: string;
+  active_loan_count: string;
 }
 
 export interface NrUdiTrend {
@@ -37,6 +45,7 @@ export interface SubBranchBreakdown {
 export interface AccountingDashboard {
   viewing_branch: BranchInfo;
   summary: AccountingDashboardSummary;
+  previous: PreviousPeriodSummary;
   trend: NrUdiTrend[];
   sub_branch_breakdown: SubBranchBreakdown[];
 }

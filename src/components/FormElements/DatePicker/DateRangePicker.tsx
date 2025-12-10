@@ -2,6 +2,7 @@
 
 import React from "react";
 import DatePicker from "react-datepicker";
+import { getMonth, getYear } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface DateRangePickerProps {
@@ -10,6 +11,46 @@ interface DateRangePickerProps {
   onChange: (startDate: string, endDate: string) => void;
   disabled?: boolean;
 }
+
+// Month and year options for dropdown
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+const currentYear = getYear(new Date());
+const years = Array.from({ length: 30 }, (_, i) => currentYear - 15 + i);
+
+// Custom header with Material UI style dropdowns
+const renderCustomHeader = ({
+  date,
+  changeYear,
+  changeMonth,
+}: {
+  date: Date;
+  changeYear: (year: number) => void;
+  changeMonth: (month: number) => void;
+}) => (
+  <div className="flex justify-center gap-2 px-2 py-2">
+    <select
+      value={getMonth(date)}
+      onChange={(e) => changeMonth(Number(e.target.value))}
+      className="px-2 py-1 text-sm border border-stroke rounded bg-white dark:border-strokedark dark:bg-boxdark dark:text-white cursor-pointer"
+    >
+      {months.map((month, i) => (
+        <option key={month} value={i}>{month}</option>
+      ))}
+    </select>
+    <select
+      value={getYear(date)}
+      onChange={(e) => changeYear(Number(e.target.value))}
+      className="px-2 py-1 text-sm border border-stroke rounded bg-white dark:border-strokedark dark:bg-boxdark dark:text-white cursor-pointer"
+    >
+      {years.map((year) => (
+        <option key={year} value={year}>{year}</option>
+      ))}
+    </select>
+  </div>
+);
 
 /**
  * Date range picker using two separate DatePicker inputs.
@@ -50,7 +91,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   };
 
   const inputClassName =
-    "w-32 rounded border border-stroke bg-white px-3 py-2 text-sm text-black outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-white";
+    "w-36 rounded border border-stroke bg-white px-3 py-2 text-sm text-black outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-white";
 
   return (
     <div className="flex items-center gap-2">
@@ -60,8 +101,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         maxDate={end || new Date()}
         placeholderText="Start date"
         disabled={disabled}
-        dateFormat="MM/dd/yyyy"
+        dateFormat="MMM dd, yyyy"
         className={inputClassName}
+        renderCustomHeader={renderCustomHeader}
+        openToDate={start || new Date()}
       />
       <span className="text-gray-500 dark:text-gray-400">to</span>
       <DatePicker
@@ -71,8 +114,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         maxDate={new Date()}
         placeholderText="End date"
         disabled={disabled || !startDate}
-        dateFormat="MM/dd/yyyy"
+        dateFormat="MMM dd, yyyy"
         className={inputClassName}
+        renderCustomHeader={renderCustomHeader}
+        openToDate={end || new Date()}
       />
     </div>
   );
