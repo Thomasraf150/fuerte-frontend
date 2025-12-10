@@ -123,16 +123,16 @@ const usePaymentPosting = () => {
         return { success: false, error: response.errors[0].message };
       }
 
-      // Check for successful payment processing
-      if (response.data?.processCollectionPayment) {
-        toast.success('Payment Entry Saved!');
-        fetchLoanSchedule(loan_id);
-        return { success: true, data: response.data.processCollectionPayment };
+      // Check mutation response status
+      const result = response.data?.paymentPosting;
+      if (!result?.status) {
+        toast.error(result?.message || 'Payment failed');
+        return { success: false, error: result?.message };
       }
 
       toast.success('Payment Entry Saved!');
       fetchLoanSchedule(loan_id);
-      return { success: true };
+      return { success: true, data: result };
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
@@ -184,16 +184,16 @@ const usePaymentPosting = () => {
         return { success: false, error: response.errors[0].message };
       }
 
-      // Check for successful payment reversal
-      if (response.data?.processRemovePostedPayment) {
-        toast.success('Payment Successfully Reversed!');
-        fetchLoanSchedule(loan_id);
-        return { success: true, data: response.data.processRemovePostedPayment };
+      // Check mutation response status
+      const result = response.data?.deletePostedPayment;
+      if (!result?.status) {
+        toast.error(result?.message || 'Reversal failed');
+        return { success: false, error: result?.message };
       }
 
       toast.success('Payment Successfully Reversed!');
       fetchLoanSchedule(loan_id);
-      return { success: true };
+      return { success: true, data: result };
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
@@ -245,16 +245,16 @@ const usePaymentPosting = () => {
         return { success: false, error: response.errors[0].message };
       }
 
-      // Check for successful payment processing
-      if (response.data?.processCollectionOtherPayment) {
-        toast.success('Payment Entry Saved!');
-        fetchLoanSchedule(loan_id);
-        return { success: true, data: response.data.processCollectionOtherPayment };
+      // Check mutation response status
+      const result = response.data?.otherPaymentPosting;
+      if (!result?.status) {
+        toast.error(result?.message || 'Payment failed');
+        return { success: false, error: result?.message };
       }
 
       toast.success('Payment Entry Saved!');
       fetchLoanSchedule(loan_id);
-      return { success: true };
+      return { success: true, data: result };
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
