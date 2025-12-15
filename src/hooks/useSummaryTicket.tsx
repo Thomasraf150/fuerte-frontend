@@ -1,12 +1,9 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useState } from 'react';
 import SummaryTicketReports from '@/graphql/SummaryTicketReportsQueryMutation';
-// import { SummaryTicketValues } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
-import { fetchWithRecache } from '@/utils/helper';
 
 const useSummaryTicket = () => {
 
@@ -118,8 +115,6 @@ const useSummaryTicket = () => {
         }
       };
 
-      console.log('🚀 [PDF Generation] Starting with variables:', variables);
-
       // STEP 3: Execute async GraphQL mutation
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
@@ -132,14 +127,11 @@ const useSummaryTicket = () => {
         }),
       });
 
-      console.log('📡 [PDF Generation] Response status:', response.status, response.statusText);
-
       const result = await response.json();
-      console.log('📦 [PDF Generation] GraphQL result:', result);
 
       // Check for GraphQL errors
       if (result.errors && result.errors.length > 0) {
-        console.error('❌ [PDF Generation] GraphQL errors:', result.errors);
+        console.error('[PDF] GraphQL errors:', result.errors);
         newWindow.close();
         toast.error(result.errors[0].message || 'Failed to generate PDF');
         return null;
@@ -147,10 +139,9 @@ const useSummaryTicket = () => {
 
       // Validate response data
       const pdfUrl = result.data?.printSummaryDetails;
-      console.log('🔗 [PDF Generation] PDF URL from response:', pdfUrl);
 
       if (!pdfUrl || typeof pdfUrl !== 'string') {
-        console.error('❌ [PDF Generation] Invalid PDF URL:', pdfUrl);
+        console.error('[PDF] Invalid URL:', pdfUrl);
         newWindow.close();
         toast.error('PDF generation failed: Invalid URL');
         return null;
@@ -158,7 +149,6 @@ const useSummaryTicket = () => {
 
       // STEP 4: Update the already-open window with PDF URL
       const fullUrl = process.env.NEXT_PUBLIC_BASE_URL + pdfUrl;
-      console.log('✅ [PDF Generation] Opening PDF at:', fullUrl);
       newWindow.location.href = fullUrl;
 
       toast.success('Summary Ticket PDF generated successfully!', {
@@ -168,17 +158,13 @@ const useSummaryTicket = () => {
       return fullUrl;
 
     } catch (error) {
-      console.error('💥 [PDF Generation] Unexpected error:', error);
-      console.error('💥 [PDF Generation] Error type:', typeof error);
-      console.error('💥 [PDF Generation] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      console.error('[PDF] Generation failed:', error);
 
       if (newWindow && !newWindow.closed) {
         newWindow.close();
       }
 
       if (error instanceof Error) {
-        console.error('💥 [PDF Generation] Error message:', error.message);
-        console.error('💥 [PDF Generation] Error stack:', error.stack);
         toast.error(`Failed to generate PDF: ${error.message}`);
       } else {
         toast.error('An unexpected error occurred while generating the PDF');
@@ -188,10 +174,6 @@ const useSummaryTicket = () => {
       setPrintLoading(false);
     }
   };
-
-   // Fetch data on component mount if id exists
-  useEffect(() => {
-  }, []);
 
   return {
     fetchSummaryTixReport,
