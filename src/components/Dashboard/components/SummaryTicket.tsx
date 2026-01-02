@@ -16,23 +16,29 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
   const [totals, setTotals] = useState({
     totalDebit: 0,
     totalCredit: 0,
+    totalIncome: 0,
   });
 
   useEffect(() => {
     if (sumTixData?.summary_tix) {
-      const calculatedTotals = sumTixData.summary_tix
+      const incomeDescriptions = ['udi', 'processing', 'notarial', 'insurance'];
+
+      const calculated = sumTixData.summary_tix
         ?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')
         .reduce(
-        (acc: any, item: any) => {
-          return {
-            totalDebit: parseFloat(acc.totalDebit) + parseFloat((item.debit || 0)),
-            totalCredit: parseFloat(acc.totalCredit) + parseFloat((item.credit || 0)),
-          };
-        },
-        { totalDebit: 0, totalCredit: 0 } // Initial values for debit and credit
-      );
+          (acc: any, item: any) => {
+            const desc = item.description?.trim().toLowerCase();
+            const credit = parseFloat(item.credit || 0);
+            return {
+              totalDebit: acc.totalDebit + parseFloat(item.debit || 0),
+              totalCredit: acc.totalCredit + credit,
+              totalIncome: acc.totalIncome + (incomeDescriptions.includes(desc) ? credit : 0),
+            };
+          },
+          { totalDebit: 0, totalCredit: 0, totalIncome: 0 }
+        );
 
-      setTotals(calculatedTotals);
+      setTotals(calculated);
     }
   }, [sumTixData]);
 
@@ -100,6 +106,18 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                 </td>
                 <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
                   {'\u20B1'} {formatNumberComma(totals?.totalCredit)}
+                </td>
+              </tr>
+              <tr>
+                <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500 font-bold">
+                  TOTAL INCOME
+                </td>
+                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500">
+                </td>
+                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500">
+                </td>
+                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500 font-bold">
+                  {'\u20B1'} {formatNumberComma(totals?.totalIncome)}
                 </td>
               </tr>
             </tbody>
