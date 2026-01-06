@@ -14,7 +14,7 @@ const useSummaryTicket = () => {
   const [printLoading, setPrintLoading] = useState<boolean>(false);
   // Function to fetchdata
 
-  const fetchSummaryTixReport = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string, show_breakdown: boolean = false) => {
+  const fetchSummaryTixReport = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string, show_breakdown: boolean = false, branch_id: string = '') => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
     let mutation;
@@ -23,6 +23,7 @@ const useSummaryTicket = () => {
         startDate: moment(startDate).format('YYYY-MM-DD'),
         endDate: moment(endDate).format('YYYY-MM-DD'),
         branch_sub_id,
+        branch_id,
         show_breakdown
       },
     };
@@ -51,7 +52,8 @@ const useSummaryTicket = () => {
     startDate: Date | undefined,
     endDate: Date | undefined,
     branch_sub_id: string,
-    show_breakdown: boolean = false
+    show_breakdown: boolean = false,
+    branch_id: string = ''
   ) => {
     // STEP 1: Open blank window IMMEDIATELY (prevents popup blocker)
     const newWindow = window.open('', '_blank');
@@ -111,6 +113,7 @@ const useSummaryTicket = () => {
           startDate: moment(startDate).format('YYYY-MM-DD'),
           endDate: moment(endDate).format('YYYY-MM-DD'),
           branch_sub_id,
+          branch_id,
           show_breakdown
         }
       };

@@ -62,7 +62,8 @@ const DefaultPage: React.FC = () => {
 
   const handleBranchSubChange = (branch_sub_id: string) => {
     // Handle "all" value - pass as-is to backend (backend will handle it)
-    fetchSummaryTixReport(startDate, endDate, branch_sub_id, showBreakdown);
+    // Pass branchId to filter by main branch when "All Sub-Branches" is selected
+    fetchSummaryTixReport(startDate, endDate, branch_sub_id, showBreakdown, branchId);
     setBranchSubId(branch_sub_id);
     // Reset breakdown when switching to specific branch
     if (branch_sub_id !== 'all') {
@@ -77,7 +78,8 @@ const DefaultPage: React.FC = () => {
     if (branch_id === 'all') {
       setValue('branch_sub_id', 'all');
       setBranchSubId('all');
-      fetchSummaryTixReport(startDate, endDate, 'all', showBreakdown);
+      // Pass 'all' for both branch_id and branch_sub_id
+      fetchSummaryTixReport(startDate, endDate, 'all', showBreakdown, 'all');
     } else {
       // Reset sub-branch selection when changing to specific branch
       setValue('branch_sub_id', '');
@@ -96,7 +98,7 @@ const DefaultPage: React.FC = () => {
       toast.error('Please select date range and branch before printing');
       return;
     }
-    await printSummaryTicketDetails(startDate, endDate, branchSubId, showBreakdown);
+    await printSummaryTicketDetails(startDate, endDate, branchSubId, showBreakdown, branchId);
   };
 
   useEffect(() => {
@@ -266,7 +268,7 @@ const DefaultPage: React.FC = () => {
                   checked={showBreakdown}
                   onChange={(e) => {
                     setShowBreakdown(e.target.checked);
-                    fetchSummaryTixReport(startDate, endDate, branchSubId, e.target.checked);
+                    fetchSummaryTixReport(startDate, endDate, branchSubId, e.target.checked, branchId);
                   }}
                   className="w-4 h-4 text-primary"
                 />
