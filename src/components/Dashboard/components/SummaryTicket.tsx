@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
-import { formatToTwoDecimalPlaces } from '@/utils/helper';
+import { formatToTwoDecimalPlaces, formatDateRange } from '@/utils/helper';
 import { toCamelCase, formatNumberComma } from '@/utils/helper';
 
 interface SumProps {
@@ -54,7 +53,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th colSpan={4} className="text-center min-w-[220px] px-4 py-4 font-medium text-black dark:text-white">
-                  <h2 className="text-xl mb-2">Summary Ticket as of</h2>{moment(startDate).format('LL')} - {moment(endDate).format('LL')}
+                  <h2 className="text-xl mb-2">Summary Ticket as of</h2>{formatDateRange(startDate, endDate)}
                 </th>
               </tr>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">

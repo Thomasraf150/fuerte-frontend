@@ -1,8 +1,7 @@
 "use client";
 
 import React from 'react';
-import { formatNumberComma } from '@/utils/helper';
-import moment from 'moment';
+import { formatNumberComma, formatDateRange } from '@/utils/helper';
 
 interface NetMovementBranchData {
   branch_sub_id: number;
@@ -58,7 +57,7 @@ const NetMovementsByBranch: React.FC<NetMovementBranchProps> = ({ data, startDat
                 <th colSpan={2} className="text-center px-4 py-4 font-medium text-black dark:text-white">
                   <h2 className="text-xl mb-2">NET MOVEMENTS BY BRANCH</h2>
                   <span className="text-sm font-normal">
-                    {moment(startDate).format('LL')} - {moment(endDate).format('LL')}
+                    {formatDateRange(startDate, endDate)}
                   </span>
                 </th>
               </tr>

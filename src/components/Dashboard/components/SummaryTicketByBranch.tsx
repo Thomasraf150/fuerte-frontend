@@ -1,8 +1,7 @@
 "use client";
 
 import React from 'react';
-import { formatNumberComma } from '@/utils/helper';
-import moment from 'moment';
+import { formatNumberComma, formatDateRange } from '@/utils/helper';
 
 interface BranchBreakdownData {
   branch_sub_id: number;
@@ -65,7 +64,7 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
                 <th colSpan={4} className="text-center px-4 py-4 font-medium text-black dark:text-white">
                   <h2 className="text-xl mb-2">SUMMARY BY BRANCH</h2>
                   <span className="text-sm font-normal">
-                    {moment(startDate).format('LL')} - {moment(endDate).format('LL')}
+                    {formatDateRange(startDate, endDate)}
                   </span>
                 </th>
               </tr>

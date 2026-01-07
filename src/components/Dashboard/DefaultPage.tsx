@@ -101,9 +101,14 @@ const DefaultPage: React.FC = () => {
     await printSummaryTicketDetails(startDate, endDate, branchSubId, showBreakdown, branchId);
   };
 
+  // Refetch data when dates change (only if data was already loaded)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    // console.log(dataSummaryTicket, ' dataSummaryTicket')
-  }, [endDate, dataSummaryTicket])
+    // Only refetch if we have valid dates, a branch selected, and data was previously loaded
+    if (startDate && endDate && branchSubId && dataSummaryTicket !== undefined) {
+      fetchSummaryTixReport(startDate, endDate, branchSubId, showBreakdown, branchId);
+    }
+  }, [startDate, endDate]);
 
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
