@@ -1,35 +1,63 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import CustomDatatable from '@/components/CustomDatatable';
-import useFinancialStatement from '@/hooks/useFinancialStatement';
-import { GitBranch, SkipBack } from 'react-feather';
-import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import useFinancialStatement, { IncomeStatementRow, IncomeStatementByBranchRow, BreakdownData } from '@/hooks/useFinancialStatement';
 import ReactSelect from '@/components/ReactSelect';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
 import { LoadingSpinner } from '@/components/LoadingStates';
-// import useCoa from '@/hooks/useCoa';
-import moment from 'moment';
 import useBranches from '@/hooks/useBranches';
 import { Printer } from 'react-feather';
+import Decimal from 'decimal.js';
+import IncomeStatementTable from './IncomeStatementTable';
+import IncomeStatementBySubBranch from './IncomeStatementBySubBranch';
+import {
+  calculateMonthlyTotals,
+  calculateVarianceTotal,
+  extractMonthKeys,
+  DecimalValue,
+} from '../utils/incomeStatementCalculations';
+
 interface Option {
   value: string;
   label: string;
   hidden?: boolean;
 }
 
+interface IncomeStatementFormData {
+  branch_id: string;
+  branch_sub_id: string;
+}
+
 const IncomeStatementList: React.FC = () => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<IncomeStatementFormData>();
   // const { onSubmitCoa, branchSubData } = useCoa();
   const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
 
-  const [actionLbl, setActionLbl] = useState<string>('');
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const { isInterestIncomeData, isOtherRevenueData, directFinancingData, otherIncomeExpenseData, lessExpenseData, incomeTaxData, fetchStatementData, printIncomeStatement, loading, printLoading } = useFinancialStatement();
+  const {
+    // Aggregated data
+    isInterestIncomeData,
+    isOtherRevenueData,
+    directFinancingData,
+    otherIncomeExpenseData,
+    lessExpenseData,
+    incomeTaxData,
+    // Breakdown data (consolidated)
+    showBreakdown,
+    setShowBreakdown,
+    breakdownByBranch,
+    // Functions
+    fetchStatementData,
+    fetchStatementDataWithBreakdown,
+    clearBreakdownData,
+    printIncomeStatement,
+    // Loading states
+    loading,
+    printLoading,
+    breakdownLoading
+  } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
@@ -37,14 +65,36 @@ const IncomeStatementList: React.FC = () => {
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
-  const handleShowForm = (lbl: string, showFrm: boolean) => {
-    setShowForm(showFrm);
-    setActionLbl(lbl);
-  }
-
   const handleBranchSubChange = (branch_sub_id: string) => {
     setBranchSubId(branch_sub_id);
+
+    // Clear breakdown data when changing branch selection
+    if (branch_sub_id !== 'all') {
+      setShowBreakdown(false);
+      clearBreakdownData();
+    }
+
     fetchStatementData(startDate, endDate, branch_sub_id);
+  };
+
+  /**
+   * Handle breakdown toggle change.
+   * Only available when "All Sub-Branches" is selected.
+   */
+  const handleBreakdownToggle = (enabled: boolean) => {
+    if (!startDate || !endDate) {
+      return;
+    }
+
+    if (enabled) {
+      // Fetch with breakdown data
+      fetchStatementDataWithBreakdown(startDate, endDate, enabled);
+    } else {
+      // Clear breakdown and use regular fetch
+      clearBreakdownData();
+      setShowBreakdown(false);
+      fetchStatementData(startDate, endDate, branchSubId);
+    }
   };
 
   const handleEndDateChange = (date: Date | null) => {
@@ -77,7 +127,6 @@ const IncomeStatementList: React.FC = () => {
       ]);
 
     }
-    console.log(dataBranch, ' dataBranch')
   }, [dataBranch])
 
   useEffect(()=>{
@@ -96,143 +145,85 @@ const IncomeStatementList: React.FC = () => {
 
   }, [dataBranchSub])
 
+
+  // Extract month keys from data using utility function
+  const monthKeys = useMemo(() => extractMonthKeys(isInterestIncomeData), [isInterestIncomeData]);
+
+  // Consolidated calculation of all section totals (monthly totals + variance totals)
+  const sectionTotals = useMemo(() => {
+    return {
+      // Monthly totals per section
+      intInc: calculateMonthlyTotals(isInterestIncomeData, monthKeys),
+      othRevenue: calculateMonthlyTotals(isOtherRevenueData, monthKeys),
+      directFin: calculateMonthlyTotals(directFinancingData, monthKeys),
+      lessExpense: calculateMonthlyTotals(lessExpenseData, monthKeys),
+      othIncExpense: calculateMonthlyTotals(otherIncomeExpenseData, monthKeys),
+      incomeTax: calculateMonthlyTotals(incomeTaxData, monthKeys),
+      // Variance totals per section
+      varianceIntInc: calculateVarianceTotal(isInterestIncomeData),
+      varianceOthRev: calculateVarianceTotal(isOtherRevenueData),
+      varianceDirectFin: calculateVarianceTotal(directFinancingData),
+      varianceOthIncExp: calculateVarianceTotal(otherIncomeExpenseData),
+      varianceLessExp: calculateVarianceTotal(lessExpenseData),
+      varianceIncTax: calculateVarianceTotal(incomeTaxData),
+    };
+  }, [isInterestIncomeData, isOtherRevenueData, directFinancingData, lessExpenseData, otherIncomeExpenseData, incomeTaxData, monthKeys]);
+
+  // Auto-fetch data when dates or branch change (if all required fields are populated)
   useEffect(() => {
-    console.log(isInterestIncomeData, ' isInterestIncomeData');
-  }, [isInterestIncomeData])
+    if (startDate && endDate && branchSubId) {
+      fetchStatementData(startDate, endDate, branchSubId);
+    }
+    // Note: fetchStatementData is excluded from deps to prevent infinite loops
+    // (it's recreated on each render by the hook)
+  }, [startDate, endDate, branchSubId]);
 
-  // Collect all unique keys that look like months
-  const monthKeysSet = new Set<string>();
+  // Computed summary values for display (derived from sectionTotals)
+  const computedTotals = useMemo(() => {
+    const totalIncome: Record<string, DecimalValue> = {};
+    const netIncomeBeforeOther: Record<string, DecimalValue> = {};
+    const netIncomeBeforeTax: Record<string, DecimalValue> = {};
+    const netIncomeAfterTax: Record<string, DecimalValue> = {};
 
-  isInterestIncomeData && isInterestIncomeData.forEach((row: any) => {
-    Object.keys(row).forEach((key) => {
-      if (
-        !["row_count", "AccountName", "acctnumber", "variance"].includes(key)
-      ) {
-        monthKeysSet.add(key);
-      }
+    monthKeys.forEach((month) => {
+      const intInc = sectionTotals.intInc[month] || new Decimal(0);
+      const othRev = sectionTotals.othRevenue[month] || new Decimal(0);
+      const directFin = sectionTotals.directFin[month] || new Decimal(0);
+      const lessExp = sectionTotals.lessExpense[month] || new Decimal(0);
+      const othIncExp = sectionTotals.othIncExpense[month] || new Decimal(0);
+      const incTax = sectionTotals.incomeTax[month] || new Decimal(0);
+
+      totalIncome[month] = intInc.plus(othRev);
+      netIncomeBeforeOther[month] = intInc.plus(othRev).plus(directFin).minus(lessExp);
+      netIncomeBeforeTax[month] = intInc.plus(othRev).plus(directFin).minus(lessExp).minus(othIncExp);
+      netIncomeAfterTax[month] = intInc.plus(othRev).plus(directFin).minus(lessExp).minus(othIncExp).minus(incTax);
     });
-  });
 
-  // Optional: sort the month keys chronologically
-  const monthKeys = Array.from(monthKeysSet).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
+    // Variance computations
+    const totalIncomeVariance = sectionTotals.varianceIntInc.plus(sectionTotals.varianceOthRev);
+    const netBeforeOtherVariance = sectionTotals.varianceIntInc.plus(sectionTotals.varianceOthRev).plus(sectionTotals.varianceDirectFin).minus(sectionTotals.varianceLessExp);
+    const netBeforeTaxVariance = netBeforeOtherVariance.minus(sectionTotals.varianceOthIncExp);
+    const netAfterTaxVariance = netBeforeTaxVariance.minus(sectionTotals.varianceIncTax);
 
-  const parseAmount = (val: any) =>
-    parseFloat(val?.toString().replace(/,/g, '')) || 0;
-
-  // Format number with commas
-  const formatNumber = (num: number) =>
-    num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // interest income
-  const totalsIntInc = monthKeys.reduce((acc, month) => {
-    console.log(month, 'month');
-    console.log(acc, 'acc');
-    acc[month] = (isInterestIncomeData ?? []).reduce(
-      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
-      0
-    );
-    return acc;
-  }, {} as Record<string, number>);
-
-  // other  revenue
-  const totalsOthRevenue = monthKeys.reduce((acc, month) => {
-    acc[month] = (isOtherRevenueData ?? []).reduce(
-      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
-      0
-    );
-    return acc;
-  }, {} as Record<string, number>);
-
-  // direct financing
-  const totalsDirectFin = monthKeys.reduce((acc, month) => {
-    acc[month] = (directFinancingData ?? []).reduce(
-      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
-      0
-    );
-    return acc;
-  }, {} as Record<string, number>);
-
-  // less expense
-  const totalsLessExpense = monthKeys.reduce((acc, month) => {
-    acc[month] = (lessExpenseData ?? []).reduce(
-      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
-      0
-    );
-    return acc;
-  }, {} as Record<string, number>);
-  
-  // other income expense
-  const totalsOthIncExpense = monthKeys.reduce((acc, month) => {
-    acc[month] = (otherIncomeExpenseData ?? []).reduce(
-      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
-      0
-    );
-    return acc;
-  }, {} as Record<string, number>);
-  
-  // prov income tax
-  const totalsincomeTax = monthKeys.reduce((acc, month) => {
-    acc[month] = (incomeTaxData ?? []).reduce(
-      (sum: number, row: { [x: string]: any; }) => sum + parseAmount(row[month]),
-      0
-    );
-    return acc;
-  }, {} as Record<string, number>);
-  
-  // interest income variance
-  const totalVarianceIntInc = (isInterestIncomeData ?? []).reduce(
-    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
-    0
-  );
-
-  // other  revenue variance
-  const totalVarianceOthRev = (isOtherRevenueData ?? []).reduce(
-    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
-    0
-  );
- 
-  // direct financing variance
-  const totalVarianceDirectFin = (directFinancingData ?? []).reduce(
-    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
-    0
-  );
-  
-  // direct financing variance
-  const totalVarianceOthIncExp = (otherIncomeExpenseData ?? []).reduce(
-    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
-    0
-  );
- 
-  // interest expense variance
-  const totalVarianceLessExp = (lessExpenseData ?? []).reduce(
-    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
-    0
-  );
-  
-  // Prov Income Tax variance
-  const totalVarianceIncTax = (incomeTaxData ?? []).reduce(
-    (sum: number, row: { variance: any; }) => sum + parseAmount(row.variance),
-    0
-  );
-
-  useEffect(() => {
-    console.log(monthKeys, 'monthKeys');
-  }, [monthKeys]);
-
-  // const monthKeys = incomeStatementData || incomeStatementData.length > 0 ? incomeStatementData.length > 0
-  //   ? Object.keys(incomeStatementData[0]).filter(
-  //       (key) => !["row_count", "AccountName", "acctnumber", "variance"].includes(key)
-  //     )
-  //   : [] : [];
+    return {
+      totalIncome,
+      netIncomeBeforeOther,
+      netIncomeBeforeTax,
+      netIncomeAfterTax,
+      totalIncomeVariance,
+      netBeforeOtherVariance,
+      netBeforeTaxVariance,
+      netAfterTaxVariance,
+    };
+  }, [monthKeys, sectionTotals]);
 
   const handlePrint = async () => {
     if (!startDate || !endDate || !branchSubId) {
       alert('Please select date range and branch before printing');
       return;
     }
-    await printIncomeStatement(startDate, endDate, branchSubId);
+    // Pass showBreakdown state to include sub-branch breakdown in PDF
+    await printIncomeStatement(startDate, endDate, branchSubId, showBreakdown);
   };
 
   const handleBranchChange = (branch_id: string) => {
@@ -361,6 +352,26 @@ const IncomeStatementList: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* Sub-Branch Breakdown Toggle - Only shown when "All Sub-Branches" is selected */}
+              {branchSubId === 'all' && isInterestIncomeData && (
+                <div className="mt-4 pt-4 border-t border-stroke dark:border-strokedark">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showBreakdown}
+                      onChange={(e) => handleBreakdownToggle(e.target.checked)}
+                      className="mr-3 h-5 w-5 rounded border-stroke bg-transparent text-primary focus:ring-primary dark:border-strokedark"
+                    />
+                    <span className="text-sm font-medium text-black dark:text-white">
+                      Show Sub-Branch Breakdown
+                    </span>
+                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                      (View income/expense breakdown by individual sub-branch)
+                    </span>
+                  </label>
+                </div>
+              )}
             </div>
             </div>
 
@@ -385,328 +396,159 @@ const IncomeStatementList: React.FC = () => {
                 <div className="flex items-center justify-center min-h-[400px]">
                   <LoadingSpinner message="Loading financial data..." size="lg" />
                 </div>
+              ) : !startDate || !endDate || !branchSubId ? (
+                <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+                  <svg
+                    className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Select Report Filters
+                  </h3>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md">
+                    Please select a <strong>start date</strong>, <strong>end date</strong>, and <strong>branch</strong> to generate the income statement report.
+                  </p>
+                </div>
               ) : (
                 <>
 
-              {/**
-               * Interest Income
-              */}
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 z-1">
-                  <tr className="bg-gray-2 dark:bg-meta-4">
-                    <th className="px-4 py-4 font-medium text-black dark:text-white text-left min-w-[280px]">Account Name</th>
-                    {monthKeys.map((month: any) => (
-                      <th key={month} className="px-4 py-4 font-medium text-black dark:text-white text-right min-w-[120px]">
-                        {moment(month, 'YYYY-MM').format('MMM YYYY')}
-                      </th>
-                    ))}
-                    <th className="px-4 py-4 font-medium text-black dark:text-white text-right min-w-[100px]">Variance</th>
-                  </tr>
-                </thead>
-                {isInterestIncomeData && isInterestIncomeData.length > 0 ? (
-                  <>
-                    <tbody>
-                      {isInterestIncomeData.map((row: any, index: number) => (
-                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
-                          {monthKeys.map((month) => (
-                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white">
-                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
-                            </td>
-                          ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
+              {/* ═══════════ MAIN SECTIONS (AGGREGATED) ═══════════ */}
 
-                    <tfoot>
-                      <tr className="bg-gray-2 dark:bg-meta-4">
-                        <td className="px-4 py-4 font-bold text-black dark:text-white">Total Interest Income</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-black dark:text-white">
-                            {formatNumber(totalsIntInc[month])}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-black dark:text-white">
-                          {formatNumber(totalVarianceIntInc)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
-                        No data available
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-              {/** 
-               * Interest Income end
-              */}
+              {/* Interest Income */}
+              <IncomeStatementTable
+                data={isInterestIncomeData}
+                monthKeys={monthKeys}
+                monthlyTotals={sectionTotals.intInc}
+                varianceTotal={sectionTotals.varianceIntInc}
+                totalLabel="Total Interest Income"
+                showHeader={true}
+                headerRowBgClass="bg-blue-50 dark:bg-blue-900/20 border-blue-400"
+              />
 
+              {/* Other Revenue */}
+              <IncomeStatementTable
+                data={isOtherRevenueData}
+                monthKeys={monthKeys}
+                monthlyTotals={sectionTotals.othRevenue}
+                varianceTotal={sectionTotals.varianceOthRev}
+                totalLabel="Total Other Revenue"
+                headerRowBgClass="bg-blue-50 dark:bg-blue-900/20 border-blue-400"
+                summaryRows={[
+                  {
+                    label: 'Total Income',
+                    monthlyValues: computedTotals.totalIncome,
+                    varianceValue: computedTotals.totalIncomeVariance,
+                    bgClass: 'bg-primary dark:bg-primary',
+                  },
+                ]}
+              />
 
-              {/**
-               * Other Revenue
-              */}
-              <table className="w-full text-sm mt-6">
-                {isOtherRevenueData && isOtherRevenueData.length > 0 ? (
-                  <>
-                    <tbody>
-                      {isOtherRevenueData.map((row: any, index: number) => (
-                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
-                          {monthKeys.map((month) => (
-                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
-                            </td>
-                          ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
+              {/* Less Expense */}
+              <IncomeStatementTable
+                data={lessExpenseData}
+                monthKeys={monthKeys}
+                monthlyTotals={sectionTotals.lessExpense}
+                varianceTotal={sectionTotals.varianceLessExp}
+                totalLabel="TOTAL EXPENSE"
+                totalRowBgClass="bg-meta-1 dark:bg-meta-1"
+                totalRowTextClass="text-white"
+                headerRowBgClass="bg-red-50 dark:bg-red-900/20 border-red-400"
+              />
 
-                    <tfoot>
-                      <tr className="bg-gray-2 dark:bg-meta-4">
-                        <td className="px-4 py-4 font-bold text-black dark:text-white">Total Other Revenue</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-black dark:text-white">
-                            {formatNumber(totalsOthRevenue[month])}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-black dark:text-white">
-                          {formatNumber(totalVarianceOthRev)}
-                        </td>
-                      </tr>
-                      <tr className="bg-primary dark:bg-primary">
-                        <td className="px-4 py-4 font-bold text-white">Total Income</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
-                            {formatNumber(totalsIntInc[month] + totalsOthRevenue[month])}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-white">
-                          {formatNumber(totalVarianceIntInc + totalVarianceOthRev)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
-                        No data available
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-              {/** 
-               * Other Revenue end
-              */}
+              {/* Direct Financing Cost */}
+              <IncomeStatementTable
+                data={directFinancingData}
+                monthKeys={monthKeys}
+                monthlyTotals={sectionTotals.directFin}
+                varianceTotal={sectionTotals.varianceDirectFin}
+                totalLabel="Total Direct Financing"
+                headerRowBgClass="bg-orange-50 dark:bg-orange-900/20 border-orange-400"
+                summaryRows={[
+                  {
+                    label: 'NET INCOME BEFORE OTHER INCOME',
+                    monthlyValues: computedTotals.netIncomeBeforeOther,
+                    varianceValue: computedTotals.netBeforeOtherVariance,
+                    bgClass: 'bg-primary dark:bg-primary',
+                  },
+                ]}
+              />
 
-              {/**
-               * Other Income Expense
-              */}
-              <table className="w-full text-sm mt-6">
-                {lessExpenseData && lessExpenseData.length > 0 ? (
-                  <>
-                    <tbody>
-                      {lessExpenseData.map((row: any, index: number) => (
-                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
-                          {monthKeys.map((month) => (
-                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
-                            </td>
-                          ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-meta-1 dark:bg-meta-1">
-                        <td className="px-4 py-4 font-bold text-white">TOTAL EXPENSE</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
-                            {formatNumber(totalsLessExpense[month])}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-white">
-                          {formatNumber(totalVarianceLessExp)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
-                        No data available
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-              {/** 
-               * Other Income Expense end
-              */}
-                
+              {/* Other Income/Expense */}
+              <IncomeStatementTable
+                data={otherIncomeExpenseData}
+                monthKeys={monthKeys}
+                monthlyTotals={sectionTotals.othIncExpense}
+                varianceTotal={sectionTotals.varianceOthIncExp}
+                totalLabel="Total"
+                headerRowBgClass="bg-purple-50 dark:bg-purple-900/20 border-purple-400"
+                summaryRows={[
+                  {
+                    label: 'NET INCOME BEFORE INCOME TAX',
+                    monthlyValues: computedTotals.netIncomeBeforeTax,
+                    varianceValue: computedTotals.netBeforeTaxVariance,
+                    bgClass: 'bg-primary dark:bg-primary',
+                  },
+                ]}
+              />
 
-               {/**
-               * Direct Financing Cost
-              */}
-              <table className="w-full text-sm mt-6">
-                {directFinancingData && directFinancingData.length > 0 ? (
-                  <>
-                    <tbody>
-                      {directFinancingData.map((row: any, index: number) => (
-                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
-                          {monthKeys.map((month) => (
-                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
-                            </td>
-                          ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-primary dark:bg-primary">
-                        <td className="px-4 py-4 font-bold text-white">NET INCOME BEFORE OTHER INCOME</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
-                            {formatNumber((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month])}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-white">
-                          {formatNumber((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
-                        No data available
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-              {/** 
-               * Direct Financing Cost end
-              */}
-               
-               
-               {/**
-               * Other Income Expense
-              */}
-              <table className="w-full text-sm mt-6">
-                {otherIncomeExpenseData && otherIncomeExpenseData.length > 0 ? (
-                  <>
-                    <tbody>
-                      {otherIncomeExpenseData.map((row: any, index: number) => (
-                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
-                          {monthKeys.map((month) => (
-                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
-                            </td>
-                          ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-gray-2 dark:bg-meta-4">
-                        <td className="px-4 py-4 font-bold text-black dark:text-white">Total</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-black dark:text-white">
-                            {formatNumber(totalsOthIncExpense[month])}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-black dark:text-white">
-                          {formatNumber(totalVarianceOthIncExp)}
-                        </td>
-                      </tr>
-                      <tr className="bg-primary dark:bg-primary">
-                        <td className="px-4 py-4 font-bold text-white">NET INCOME BEFORE INCOME TAX</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
-                            {formatNumber(Math.abs((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month])))}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-white">
-                          {formatNumber(Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp)))}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
-                        No data available
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-              {/** 
-               * Other Income Expense end
-              */}
-               
-               {/**
-               * Prov Income Income
-              */}
-              <table className="w-full text-sm mt-6">
-                {incomeTaxData && incomeTaxData.length > 0 ? (
-                  <>
-                    <tbody>
-                      {incomeTaxData.map((row: any, index: number) => (
-                        <tr key={index} className="border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4">
-                          <td className="px-4 py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">{row.AccountName}</td>
-                          {monthKeys.map((month) => (
-                            <td key={month} className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]">
-                              {row[month] ? formatNumber(parseAmount(row[month])) : "-"}
-                            </td>
-                          ))}
-                          <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">{row.variance ? formatNumber(parseAmount(row.variance)) : "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-meta-3 dark:bg-meta-3">
-                        <td className="px-4 py-4 font-bold text-white">NET INCOME AFTER TAX</td>
-                        {monthKeys.map((month) => (
-                          <td key={month} className="px-4 py-4 font-bold text-right text-white">
-                            {formatNumber(Math.abs(((((totalsIntInc[month] + totalsOthRevenue[month] + totalsDirectFin[month]) - totalsLessExpense[month]) - totalsOthIncExpense[month]) - totalsincomeTax[month])))}
-                          </td>
-                        ))}
-                        <td className="px-4 py-4 font-bold text-right text-white">
-                          {formatNumber(Math.abs((((totalVarianceIntInc + totalVarianceOthRev + totalVarianceDirectFin) - totalVarianceLessExp) - totalVarianceOthIncExp) - totalVarianceIncTax))}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td colSpan={monthKeys.length + 2} className="px-4 py-8 text-center text-black dark:text-white">
-                        No data available
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-              {/**
-               * Other Income Expense end
-              */}
+              {/* Income Tax */}
+              <IncomeStatementTable
+                data={incomeTaxData}
+                monthKeys={monthKeys}
+                monthlyTotals={sectionTotals.incomeTax}
+                varianceTotal={sectionTotals.varianceIncTax}
+                totalLabel="Total Income Tax"
+                headerRowBgClass="bg-green-50 dark:bg-green-900/20 border-green-400"
+                summaryRows={[
+                  {
+                    label: 'NET INCOME AFTER TAX',
+                    monthlyValues: computedTotals.netIncomeAfterTax,
+                    varianceValue: computedTotals.netAfterTaxVariance,
+                    bgClass: 'bg-meta-3 dark:bg-meta-3',
+                  },
+                ]}
+              />
+
+              {/* ═══════════ SUB-BRANCH BREAKDOWN SECTION ═══════════ */}
+              {showBreakdown && branchSubId === 'all' && (
+                <div className="mt-12 border-t-4 border-blue-400 pt-8">
+                  {/* Section Title */}
+                  <div className="mb-8 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg">
+                    <h2 className="text-xl font-bold text-white">
+                      Sub-Branch Breakdown
+                    </h2>
+                    <p className="text-blue-100 text-sm mt-1">
+                      Detailed breakdown showing contributions from each sub-branch
+                    </p>
+                  </div>
+
+                  {/* Loading Spinner for Breakdown */}
+                  {breakdownLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <LoadingSpinner message="Loading sub-branch breakdown..." size="md" />
+                    </div>
+                  ) : (
+                    <IncomeStatementBySubBranch
+                      interestIncome={breakdownByBranch.interestIncome || []}
+                      otherRevenues={breakdownByBranch.otherRevenues || []}
+                      directFinancing={breakdownByBranch.directFinancing || []}
+                      lessExpense={breakdownByBranch.lessExpense || []}
+                      otherIncomeExpense={breakdownByBranch.otherIncomeExpense || []}
+                      incomeTax={breakdownByBranch.incomeTax || []}
+                      monthKeys={monthKeys}
+                    />
+                  )}
+                </div>
+              )}
 
                 </>
               )}

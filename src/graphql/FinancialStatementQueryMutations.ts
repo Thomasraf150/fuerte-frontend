@@ -60,8 +60,8 @@ const GET_INCOME_STATEMENT: string = `
 `;
 
 const PRINT_INCOME_STATEMENT: string = `
-  mutation PrintIncomeStatement($startDate: String!, $endDate: String!, $branch_sub_id: String!){
-    printIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id) {
+  mutation PrintIncomeStatement($startDate: String!, $endDate: String!, $branch_sub_id: String!, $show_breakdown: Boolean){
+    printIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id, show_breakdown: $show_breakdown) {
       url
       filename
       size
@@ -69,66 +69,33 @@ const PRINT_INCOME_STATEMENT: string = `
   }
 `;
 
-// {
-//     pivotAccountInterestIncome {
-//         account_name
-//         account_number
-//         monthly_values {
-//             month
-//             value
-//         }
-//         variance
-//     }
-//     pivotAccountOtherRevenues {
-//         account_name
-//         account_number
-//         monthly_values {
-//             month
-//             value
-//         }
-//         variance
-//     }
-//     pivotAccountDirectFinCost {
-//         account_name
-//         account_number
-//         monthly_values {
-//             month
-//             value
-//         }
-//         variance
-//     }
-//     pivotAccountLessExpense {
-//         account_name
-//         account_number
-//         monthly_values {
-//             month
-//             value
-//         }
-//         variance
-//     }
-//     pivotAccountOtherIncomeExp {
-//         account_name
-//         account_number
-//         monthly_values {
-//             month
-//             value
-//         }
-//         variance
-//     }
-//     pivotAccountProvForIncomeTax {
-//         account_name
-//         account_number
-//         monthly_values {
-//             month
-//             value
-//         }
-//         variance
-//     }
-// }
+/**
+ * Income Statement with optional sub-branch breakdown.
+ * Used when user selects "All Sub-Branches" and toggles breakdown view.
+ */
+const GET_INCOME_STATEMENT_WITH_BREAKDOWN: string = `
+  query GetIncomeStatementWithBreakdown($startDate: String, $endDate: String, $show_breakdown: Boolean){
+    getIncomeStatementWithBreakdown(startDate: $startDate, endDate: $endDate, show_breakdown: $show_breakdown) {
+      interest_income
+      other_revenues
+      direct_financing
+      less_expense
+      other_income_expense
+      income_tax
+      interest_income_by_branch
+      other_revenues_by_branch
+      direct_financing_by_branch
+      less_expense_by_branch
+      other_income_expense_by_branch
+      income_tax_by_branch
+    }
+  }
+`;
 
 const FinancialStatementQueryMutations = {
   GET_BALANCE_SHEET,
   GET_INCOME_STATEMENT,
+  GET_INCOME_STATEMENT_WITH_BREAKDOWN,
   PRINT_INCOME_STATEMENT
 };
 
