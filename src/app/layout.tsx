@@ -66,6 +66,9 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
+      <head>
+        <title>Fuerte Lending System</title>
+      </head>
       <body suppressHydrationWarning={true} className={poppins.variable}>
         {/* Top Loading Bar - Shows during page navigation */}
         <NextTopLoader
