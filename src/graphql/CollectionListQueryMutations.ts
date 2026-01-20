@@ -12,6 +12,7 @@ const GET_DATA_COLLECTION_LIST: string = `
         due_date
         trans_date
         loan_ref
+        journal_ref
       }
       paginatorInfo {
         total

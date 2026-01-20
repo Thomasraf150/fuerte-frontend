@@ -34,7 +34,23 @@ const collectionListCol = (): TableColumn<DataColListRow>[] => [
     minWidth: '120px',
     maxWidth: '150px',
   },
-
+  {
+    name: 'Status',
+    cell: row => (
+      row.journal_ref ? (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          Posted
+        </span>
+      ) : (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+          Pending
+        </span>
+      )
+    ),
+    sortable: false,
+    minWidth: '100px',
+    maxWidth: '120px',
+  },
 ];
 
 export default collectionListCol

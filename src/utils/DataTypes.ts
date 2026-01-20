@@ -834,6 +834,7 @@ export interface DataColListRow {
   due_date: string;
   trans_date: string;
   loan_ref: string;
+  journal_ref: string | null;
 }
 
 export interface DataColEntries {
