@@ -54,6 +54,28 @@ const useBorrower = () => {
 
     const result = await response.json();
 
+    // DEBUG LOGS - Remove after fixing
+    console.log('=== BORROWER FETCH DEBUG ===');
+    console.log('API Endpoint:', process.env.NEXT_PUBLIC_API_GRAPHQL);
+    console.log('Response Status:', response.status, response.statusText);
+    console.log('Raw Result:', JSON.stringify(result, null, 2));
+    console.log('Has Errors?:', !!result.errors);
+    if (result.errors) {
+      console.log('GraphQL Errors:', result.errors);
+    }
+    console.log('result.data:', result.data);
+    console.log('result.data?.getBorrowers:', result.data?.getBorrowers);
+    console.log('=== END DEBUG ===');
+
+    // Check for errors before accessing data
+    if (result.errors) {
+      throw new Error(result.errors[0]?.message || 'GraphQL error occurred');
+    }
+
+    if (!result.data || !result.data.getBorrowers) {
+      throw new Error('No data returned from server - check if API is running');
+    }
+
     // Return the expected format for usePagination
     return {
       data: result.data.getBorrowers.data,
