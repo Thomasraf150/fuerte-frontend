@@ -69,7 +69,6 @@ const useAdjustingEntries = () => {
     fetchFunction: fetchAdjustingEntriesForPagination,
     config: {
       initialPageSize: 20,
-      defaultPageSize: 20,
     },
   });
 

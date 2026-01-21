@@ -8,6 +8,7 @@ import { DataRowLoanCodes, DataFormLoanCodes, DataRowClientList, DataRowLoanType
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import { usePagination } from './usePagination';
+import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 
 const useLoanCodes = () => {
   const { GET_LOAN_CODE_QUERY, GET_LOAN_TYPE_QUERY, SAVE_LOAN_CODE_MUTATION, UPDATE_LOAN_CODE_MUTATION } = LoanCodeQueryMutations;
@@ -69,7 +70,6 @@ const useLoanCodes = () => {
     fetchFunction: fetchLoanCodesForPagination,
     config: {
       initialPageSize: 20,
-      defaultPageSize: 20,
     },
   });
 
@@ -92,8 +92,8 @@ const useLoanCodes = () => {
         },
         body: JSON.stringify({
           query: GET_LOAN_CLIENT_QUERY,
-          variables: { 
-            first: 1000, // Get a large number to fetch all loan clients
+          variables: {
+            first: MAX_DROPDOWN_SIZE, // Max allowed for dropdown queries
             page: 1,
             orderBy: [
               { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }

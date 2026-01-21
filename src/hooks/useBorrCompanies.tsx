@@ -58,7 +58,6 @@ const useBorrCompanies = () => {
     fetchFunction: fetchCompaniesForPagination,
     config: {
       initialPageSize: 10,
-      defaultPageSize: 10,
     },
   });
 

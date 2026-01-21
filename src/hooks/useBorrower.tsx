@@ -105,7 +105,6 @@ const useBorrower = () => {
     fetchFunction: fetchBorrowersForPagination,
     config: {
       initialPageSize: 20,
-      defaultPageSize: 20,
     },
   });
 
