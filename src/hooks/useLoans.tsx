@@ -323,6 +323,12 @@ const useLoans = () => {
         return;
       }
 
+      if (!loan_id || loan_id === 'undefined' || loan_id === 'null') {
+        toast.error('Invalid loan ID. Please select a valid loan.');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
@@ -337,10 +343,25 @@ const useLoans = () => {
         }),
       });
 
-      const pdfUrl = response.data.printLoanDetails;
+      // Check for GraphQL errors
+      if (response.errors) {
+        toast.error(response.errors[0]?.message || 'Failed to generate PDF');
+        setLoading(false);
+        return;
+      }
+
+      const pdfUrl = response.data?.printLoanDetails;
+
+      if (!pdfUrl) {
+        toast.error('Failed to generate PDF. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const fullUrl = process.env.NEXT_PUBLIC_BASE_URL + pdfUrl;
 
       // Open the generated PDF in a new tab
-      window.open(process.env.NEXT_PUBLIC_BASE_URL + pdfUrl, '_blank');
+      window.open(fullUrl, '_blank');
 
       setLoading(false);
     } catch (error) {
