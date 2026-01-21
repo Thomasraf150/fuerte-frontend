@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
+import {
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZE_OPTIONS,
+  enforcePageLimit,
+} from '@/constants/pagination';
 
 // Interface following Single Responsibility Principle
 export interface PaginationState {
@@ -14,7 +19,6 @@ export interface PaginationState {
 
 export interface PaginationConfig {
   initialPageSize?: number;
-  defaultPageSize?: number;
 }
 
 export interface UsePaginationProps {
@@ -68,11 +72,11 @@ export function usePagination<T = any>({
   statusFilter = 'all'
 }: UsePaginationProps): UsePaginationReturn<T> {
 
-  // Configuration with defaults
-  const {
-    initialPageSize = 20,
-    defaultPageSize = 20
-  } = config;
+  // Configuration with defaults (enforcing max limits)
+  const { initialPageSize = DEFAULT_PAGE_SIZE } = config;
+
+  // Enforce max limit on initial page size
+  const safeInitialPageSize = enforcePageLimit(initialPageSize);
 
   // Data state
   const [data, setData] = useState<T[]>([]);
@@ -82,7 +86,7 @@ export function usePagination<T = any>({
   // Pagination state
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
-    pageSize: initialPageSize,
+    pageSize: safeInitialPageSize,
     totalRecords: 0,
     totalPages: 0,
     hasNextPage: false,
@@ -160,9 +164,11 @@ export function usePagination<T = any>({
     await fetchData(page, pagination.pageSize, debouncedSearchQuery, statusFilter);
   }, [fetchData, pagination.pageSize, pagination.totalPages, debouncedSearchQuery, statusFilter]);
 
-  // Action: Change page size and reset to first page
+  // Action: Change page size and reset to first page (with max limit enforcement)
   const changePageSize = useCallback(async (size: number) => {
-    await fetchData(1, size, debouncedSearchQuery, statusFilter);
+    // Enforce max limit to prevent DoS and ensure consistent behavior
+    const safeSize = enforcePageLimit(size);
+    await fetchData(1, safeSize, debouncedSearchQuery, statusFilter);
   }, [fetchData, debouncedSearchQuery, statusFilter]);
 
   // Action: Refresh current page
@@ -183,7 +189,7 @@ export function usePagination<T = any>({
 
   // Initial data fetch
   useEffect(() => {
-    fetchData(1, initialPageSize, '', statusFilter);
+    fetchData(1, safeInitialPageSize, '', statusFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty - run only once on mount
 
@@ -215,11 +221,11 @@ export function usePagination<T = any>({
   };
 }
 
-// Default page size options for dropdown
-export const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+// Default page size options for dropdown (exported from constants for consistency)
+export const DEFAULT_PAGE_SIZE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 // Helper function to create page size options
-export function createPageSizeOptions(options: number[] = DEFAULT_PAGE_SIZE_OPTIONS) {
+export function createPageSizeOptions(options: readonly number[] | number[] = PAGE_SIZE_OPTIONS) {
   return options.map(size => ({
     value: size,
     label: `${size} per page`,

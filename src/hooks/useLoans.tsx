@@ -11,6 +11,7 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';
 import { usePagination } from '@/hooks/usePagination';
+import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
@@ -285,7 +286,7 @@ const useLoans = () => {
         body: JSON.stringify({
           query: GET_LOAN_PRODUCT_QUERY,
           variables: {
-            first: 1000, // Get a large number to fetch all loan products
+            first: MAX_DROPDOWN_SIZE, // Max allowed for dropdown queries
             page: 1,
             orderBy: [
               { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }

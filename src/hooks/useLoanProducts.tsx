@@ -112,7 +112,6 @@ const useLoanProducts = () => {
     fetchFunction: fetchLoanProductsForPagination,
     config: {
       initialPageSize: 20,
-      defaultPageSize: 20,
     },
   });
 

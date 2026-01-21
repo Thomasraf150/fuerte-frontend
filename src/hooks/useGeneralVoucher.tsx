@@ -79,7 +79,6 @@ const useGeneralVoucher = () => {
     fetchFunction: fetchGeneralVoucherForPagination,
     config: {
       initialPageSize: 20,
-      defaultPageSize: 20,
     },
   });
 
