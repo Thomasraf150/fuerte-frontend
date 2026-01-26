@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import DataTable, { TableColumn, TableStyles } from 'react-data-table-component';
+import DataTable, { TableColumn, TableStyles, ConditionalStyles } from 'react-data-table-component';
 import { useDatatableTheme } from '@/hooks/useDatatableTheme';
 import DataTableLoadingComponent from './LoadingComponent';
 import StatusFilterChips from '@/components/StatusFilterChips';
@@ -58,6 +58,9 @@ interface CustomDatatableProps<T> {
 
   // Server-side pagination props (optional for backward compatibility)
   serverSidePagination?: ServerSidePaginationProps;
+
+  // Conditional row styling (optional)
+  conditionalRowStyles?: ConditionalStyles<T>[];
 }
 
 // Server-side pagination controls component
@@ -240,6 +243,7 @@ const CustomDatatable = <T extends object>({
   apiLoading = false,
   defaultSortFieldId,
   serverSidePagination,
+  conditionalRowStyles,
 }: CustomDatatableProps<T>): JSX.Element => {
 
   // Get theme-aware styles for the datatable
@@ -383,6 +387,7 @@ const CustomDatatable = <T extends object>({
           responsive
           fixedHeader
           fixedHeaderScrollHeight="500px"
+          conditionalRowStyles={conditionalRowStyles}
         />
       </div>
 

@@ -15,9 +15,10 @@ interface ParentFormBr {
   fetchCollectionList: (a: number, b: number, c: number) => void;
   setShowForm: (b: boolean) => void;
   isLoading?: boolean;
+  isPosted?: boolean;
 }
 
-const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, setShowForm, isLoading = false }) => {
+const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccount, fetchCollectionList, setShowForm, isLoading = false, isPosted = false }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataColEntries>();
   const { postCollectionEntries, collectionLoading } = useCollectionList();
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -102,6 +103,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
                   placeholder="Select Account"
                   isLoading={!coaDataAccount || optionsCoaData.length <= 1}
                   loadingMessage={() => "Loading accounts..."}
+                  isDisabled={isPosted}
                 />
               );
             }}
@@ -130,6 +132,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
                   placeholder="Select Account"
                   isLoading={!coaDataAccount || optionsCoaData.length <= 1}
                   loadingMessage={() => "Loading accounts..."}
+                  isDisabled={isPosted}
                 />
               );
             }}
@@ -158,6 +161,7 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
                   placeholder="Select Account"
                   isLoading={!coaDataAccount || optionsCoaData.length <= 1}
                   loadingMessage={() => "Loading accounts..."}
+                  isDisabled={isPosted}
                 />
               );
             }}
@@ -176,28 +180,35 @@ const ColAcctgEntryForm: React.FC<ParentFormBr> = ({ dataColEntry, coaDataAccoun
         >
           Cancel
         </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(collectionLoading || isSuccess || isLoading) ? 'opacity-70' : ''}`}
-          type="submit"
-          disabled={collectionLoading || isSuccess || isLoading}
-        >
-          {collectionLoading ? (
-            <>
-              <RotateCw size={17} className="animate-spin mr-1" />
-              <span>Posting...</span>
-            </>
-          ) : isSuccess ? (
-            <>
-              <Check size={17} className="mr-1" />
-              <span>Posted!</span>
-            </>
-          ) : (
-            <>
-              <Save size={17} className="mr-1" />
-              <span>Post</span>
-            </>
-          )}
-        </button>
+        {!isPosted ? (
+          <button
+            className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(collectionLoading || isSuccess || isLoading) ? 'opacity-70' : ''}`}
+            type="submit"
+            disabled={collectionLoading || isSuccess || isLoading}
+          >
+            {collectionLoading ? (
+              <>
+                <RotateCw size={17} className="animate-spin mr-1" />
+                <span>Posting...</span>
+              </>
+            ) : isSuccess ? (
+              <>
+                <Check size={17} className="mr-1" />
+                <span>Posted!</span>
+              </>
+            ) : (
+              <>
+                <Save size={17} className="mr-1" />
+                <span>Post</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <div className="flex items-center gap-2 px-6 py-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded font-medium">
+            <Check size={17} />
+            <span>Posted</span>
+          </div>
+        )}
       </div>
     </form>
   );

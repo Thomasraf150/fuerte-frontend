@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import useCollectionList from '@/hooks/useCollectionList';
 import useCoa from '@/hooks/useCoa';
 import ColAcctgEntryForm from '../components/Forms/ColAcctgEntryForm';
-import { Loader } from 'react-feather';
+import { Loader, Info } from 'react-feather';
 
 const CollectionDetailPage: React.FC = () => {
   const params = useParams();
@@ -109,6 +109,9 @@ const CollectionDetailPage: React.FC = () => {
 
   const pageTitle = loanRef ? `Collection Entry: ${loanRef}` : 'Collection Entry';
 
+  // Determine if entry is already posted (read-only mode)
+  const isPosted = dataColEntry && dataColEntry.length > 0 && !!dataColEntry[0]?.journal_ref;
+
   return (
     <DefaultLayout>
       <div className="mx-auto">
@@ -139,6 +142,17 @@ const CollectionDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
+            {isPosted && (
+              <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <Info size={16} className="text-blue-600 dark:text-blue-400" />
+                <span className="text-sm text-blue-700 dark:text-blue-300">
+                  This entry has been posted and is in read-only mode.
+                  {dataColEntry[0]?.journal_ref && (
+                    <span className="ml-2 font-semibold">Journal Ref: {dataColEntry[0].journal_ref}</span>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Form section */}
@@ -149,6 +163,7 @@ const CollectionDetailPage: React.FC = () => {
               fetchCollectionList={fetchCollectionList}
               setShowForm={handleShowForm}
               isLoading={false}
+              isPosted={isPosted}
             />
           </div>
         </div>

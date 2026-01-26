@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
+import { toast } from 'react-toastify';
 import { DataColListRow } from '@/utils/DataTypes';
 import useCollectionList from '@/hooks/useCollectionList';
 import collectionListCol from './CollectionListCol';
@@ -20,8 +21,11 @@ const CollectionList: React.FC = () => {
     refresh,
   } = useCollectionList();
 
-  // Navigate to detail page on row click
+  // Navigate to detail page on row click (show read-only mode message for posted entries)
   const handleRowClick = (data: DataColListRow) => {
+    if (data.journal_ref) {
+      toast.info('Viewing posted entry (read-only mode).');
+    }
     router.push(`/collection-list/${data.loan_schedule_id}?date=${data.trans_date}&ref=${data.loan_ref}`);
   };
 
