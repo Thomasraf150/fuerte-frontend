@@ -19,7 +19,7 @@ interface OptionProps {
 const column = borrLoanCol;
 
 const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => {
-  const { fetchSubDataList, dataBranchSub } = useBranches();
+  const { fetchSubDataList, dataBranchSub, myAccessibleBranchSubs, fetchMyAccessibleBranchSubs, loadingMyAccessibleBranches } = useBranches();
   const { loanData, fetchLoans, loading, fetchRerewalLoan, dataComputedRenewal } = useLoans();
   const [showForm, setShowForm] = useState<boolean>(false);
   const [showDetails, setShowDetails] = useState<boolean>(false);
@@ -30,6 +30,10 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
   const createLoans = (b: boolean) => {
     setShowForm(b);
     setShowDetails(false);
+    if (b === true) {
+      // Fetch accessible branches when opening the form (token is guaranteed to exist at this point)
+      fetchMyAccessibleBranchSubs();
+    }
     if (b === false) {
       setDataLoanRenewal([]);
     }
@@ -70,6 +74,9 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     setShowDetails(true)
   }
 
+  // Note: fetchMyAccessibleBranchSubs is called in createLoans(true) when opening the form
+  // This ensures the auth token is available (user is already logged in and viewing the page)
+
   useEffect(() => {
     if (BorrowerData?.id) {
       fetchSubDataList('id_desc', Number(BorrowerData?.borrower_work_background?.area?.branch_sub?.branch_id));
@@ -77,7 +84,6 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     if (!showForm) {
       fetchLoans(100000, 1, Number(BorrowerData?.id));
     }
-    console.log(BorrowerData, ' BorrowerData')
   }, [BorrowerData, showForm]);
 
   return (
@@ -99,7 +105,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
             />
           </div>
         ) : (
-          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} dataLoanRenewal={dataLoanRenewal} dataComputedRenewal={dataComputedRenewal}/>
+          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} myAccessibleBranchSubs={myAccessibleBranchSubs} loadingMyAccessibleBranches={loadingMyAccessibleBranches} dataLoanRenewal={dataLoanRenewal} dataComputedRenewal={dataComputedRenewal}/>
         )}
       </div>
       {showDetails && (

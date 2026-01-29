@@ -3,25 +3,29 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
+import { useAuthStore } from "@/store";
 
 import { DataBranches, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 const useBranches = () => {
-  const { 
-    SAVE_BRANCH_MUTATION, 
-    GET_BRANCH_QUERY, 
-    UPDATE_BRANCH_MUTATION, 
-    GET_SUB_BRANCH_QUERY, 
-    SAVE_SUB_BRANCH_MUTATION, 
+  const {
+    SAVE_BRANCH_MUTATION,
+    GET_BRANCH_QUERY,
+    UPDATE_BRANCH_MUTATION,
+    GET_SUB_BRANCH_QUERY,
+    SAVE_SUB_BRANCH_MUTATION,
     UPDATE_SUB_BRANCH_MUTATION,
     DELETE_BRANCH_MUTATION,
-    DELETE_SUB_BRANCH_MUTATION } = BranchQueryMutations;
+    DELETE_SUB_BRANCH_MUTATION,
+    GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY } = BranchQueryMutations;
   const [dataBranch, setDataBranch] = useState<DataBranches[] | undefined>(undefined);
   const [dataBranchSub, setDataBranchSub] = useState<DataSubBranches[] | undefined>(undefined);
+  const [myAccessibleBranchSubs, setMyAccessibleBranchSubs] = useState<DataSubBranches[] | undefined>(undefined);
   const [selectedBranchID, setSelectedBranchID] = useState<number>();
   const [branchLoading, setBranchLoading] = useState<boolean>(false);
   const [loadingBranches, setLoadingBranches] = useState<boolean>(false);
   const [loadingSubBranches, setLoadingSubBranches] = useState<boolean>(false);
+  const [loadingMyAccessibleBranches, setLoadingMyAccessibleBranches] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataList = async (orderBy = 'id_desc') => {
     setLoadingBranches(true);
@@ -63,6 +67,44 @@ const useBranches = () => {
       setSelectedBranchID(branch_id)
     } finally {
       setLoadingSubBranches(false);
+    }
+  };
+
+  // Fetch the authenticated user's accessible branch subs
+  const fetchMyAccessibleBranchSubs = async () => {
+    setLoadingMyAccessibleBranches(true);
+    try {
+      // Use the same token retrieval method as useLoans
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+
+      if (!token) {
+        console.warn('No auth token for fetching accessible branches');
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.data?.getMyAccessibleBranchSubs) {
+        setMyAccessibleBranchSubs(result.data.getMyAccessibleBranchSubs);
+      } else if (result.errors) {
+        console.error('GraphQL errors fetching accessible branches:', result.errors);
+      }
+    } catch (error) {
+      console.error('Error fetching accessible branches:', error);
+    } finally {
+      setLoadingMyAccessibleBranches(false);
     }
   };
 
@@ -239,16 +281,19 @@ const useBranches = () => {
   return {
     dataBranch,
     dataBranchSub,
+    myAccessibleBranchSubs,
     onSubmitBranch,
     fetchDataList,
     fetchSubDataList,
+    fetchMyAccessibleBranchSubs,
     selectedBranchID,
     onSubmitSubBranch,
     handleDeleteBranch,
     handleDeleteSubBranch,
     branchLoading,
     loadingBranches,
-    loadingSubBranches
+    loadingSubBranches,
+    loadingMyAccessibleBranches
   };
 };
 

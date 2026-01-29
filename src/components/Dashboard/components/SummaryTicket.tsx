@@ -20,7 +20,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
 
   useEffect(() => {
     if (sumTixData?.summary_tix) {
-      const incomeDescriptions = ['udi', 'processing', 'notarial', 'insurance'];
+      const incomeDescriptions = ['udi', 'processing', 'notarial', 'insurance', 'addon udi'];
 
       const calculated = sumTixData.summary_tix
         ?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')

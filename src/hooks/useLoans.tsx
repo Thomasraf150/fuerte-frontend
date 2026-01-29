@@ -371,7 +371,7 @@ const useLoans = () => {
     }
   };
 
-  const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string) => {
+  const onSubmitLoanComp = async (data: BorrLoanComputationValues, process_type: string): Promise<boolean> => {
     const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
     const userData = JSON.parse(storedAuthStore)['state'];
 
@@ -385,7 +385,7 @@ const useLoans = () => {
       if (!token) {
         toast.error('Authentication required. Please log in again.');
         setLoading(false);
-        return;
+        return false;
       }
 
       let variables: { input: any, process_type: string } = {
@@ -423,16 +423,28 @@ const useLoans = () => {
         toast.error('Failed to compute loan. Please check all fields.');
       }
       setLoading(false);
+      return true;
     } else {
+      // Handle Create response - validate success before showing toast
       if (response.errors) {
         toast.error(response.errors[0].message);
-      } else {
+        return false;
+      } else if (response.data?.processALoan?.success === true) {
         toast.success('Loan Entry Saved!');
+        return true;
+      } else if (response.data?.processALoan?.message) {
+        // Backend returned an error message (e.g., branch access denied)
+        toast.error(response.data.processALoan.message);
+        return false;
+      } else {
+        toast.error('Failed to save loan. Please try again.');
+        return false;
       }
     }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       toast.error(errorMessage);
+      return false;
     } finally {
       setLoading(false);
     }

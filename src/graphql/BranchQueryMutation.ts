@@ -127,6 +127,18 @@ const GET_ALL_SUB_BRANCH_QUERY: string = `
   }
 `;
 
+const GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY: string = `
+  query GetMyAccessibleBranchSubs {
+    getMyAccessibleBranchSubs {
+      id
+      branch_id
+      code
+      name
+      address
+    }
+  }
+`;
+
 const BranchQueryMutations = {
   GET_BRANCH_QUERY,
   DELETE_BRANCH_MUTATION,
@@ -136,7 +148,8 @@ const BranchQueryMutations = {
   SAVE_SUB_BRANCH_MUTATION,
   UPDATE_SUB_BRANCH_MUTATION,
   DELETE_SUB_BRANCH_MUTATION,
-  GET_ALL_SUB_BRANCH_QUERY
+  GET_ALL_SUB_BRANCH_QUERY,
+  GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY
 };
 
 export default BranchQueryMutations;
