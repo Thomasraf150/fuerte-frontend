@@ -17,6 +17,7 @@ const GET_SUMMARY_TICKET_REPORTS: string = `
         loan_count
         total_net_cashout
         total_pn_balance
+        total_ob
         total_collection
         total_udi_collection
       }
@@ -50,6 +51,7 @@ const GET_SUMMARY_TICKET_WITH_BREAKDOWN: string = `
         loan_count
         total_net_cashout
         total_pn_balance
+        total_ob
         total_collection
         total_udi_collection
       }
