@@ -240,7 +240,9 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
       addon_udi
       addon_total
       new_loan_proceeds
-      
+      success
+      loan_id
+      message
     }
   }
 `;
