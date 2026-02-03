@@ -219,9 +219,16 @@ export async function fillBorrowerForm(page: Page, data: BorrowerData) {
   await fillAndBlur(page, 'input[name="spouse_contact_no"]', data.spouse_contact_no);
 
   // SECTION 4: Work Background
-  const companySelect = page.locator('select[name="company_borrower_id"]').first();
-  if (await companySelect.count() > 0) {
-    await companySelect.selectOption(data.company_borrower_id);
+  // Handle ReactSelect for company_borrower_id (searchable dropdown)
+  const reactSelectContainer = page.locator('.react-select__control').first();
+  if (await reactSelectContainer.count() > 0) {
+    await reactSelectContainer.click();
+    await page.waitForTimeout(500); // Wait for dropdown to open
+    // Click the first option (or search and select)
+    const firstOption = page.locator('.react-select__option').first();
+    if (await firstOption.count() > 0) {
+      await firstOption.click();
+    }
   }
 
   await fillAndBlur(page, 'input[name="employment_number"]', data.employment_number);
