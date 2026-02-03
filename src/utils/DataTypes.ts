@@ -238,7 +238,7 @@ export interface BorrowerInfo {
   spouse_contact_no: string;
 
   // work background
-  company_borrower_id: number;
+  company_borrower_id: number | null;
   employment_number: string;
   area_id: string;
   sub_area_id: string;

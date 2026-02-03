@@ -5,7 +5,8 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Link from "next/link";
 import { Camera, Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
-import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
+import { useForm, SubmitHandler, useFieldArray, Controller } from 'react-hook-form';
+import ReactSelect from '@/components/ReactSelect';
 import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies } from '@/utils/DataTypes';
 import { useEffect, useState, useRef } from "react";
 import useBorrower from '@/hooks/useBorrower';
@@ -69,7 +70,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     salary: "",
     company_contact_person: "",
     spouse_contact_no: "",
-    company_borrower_id: 0,
+    company_borrower_id: null,
     employment_number: "",
     area_id: '',
     sub_area_id: '',
@@ -112,7 +113,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const [optionsChief, setOptionsChief] = useState<OptionProps[]>([]);
   const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
   const [optionsSubArea, setOptionsSubArea] = useState<OptionProps[]>([]);
-  const [optionsBorrComp, setOptionsBorrComp] = useState<OptionProps[]>([]);
+  const [optionsBorrComp, setOptionsBorrComp] = useState<{value: string; label: string}[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
 
@@ -223,14 +224,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     prevSingleDataRef.current = singleData;
 
     if (dataBorrCompany && Array.isArray(dataBorrCompany)) {
-      const dynaOpt: OptionProps[] = dataBorrCompany?.map(aSub => ({
+      const dynaOpt = dataBorrCompany.map(aSub => ({
         value: String(aSub.id),
-        label: aSub.name, // assuming `name` is the key you want to use as label
+        label: aSub.name,
       }));
-      setOptionsBorrComp([
-        { value: '', label: 'Select a Company', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
+      setOptionsBorrComp(dynaOpt);
     }
     if (singleData) {
       // Assuming singleData has the structure matching BorrowerInfo
@@ -742,18 +740,33 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
-                    <FormInput
-                      label="Office Where Currently Employed"
-                      id="company_borrower_id"
-                      type="select"
-                      icon={Home}
-                      register={register('company_borrower_id', { required: 'Office is required' })}
-                      error={errors.company_borrower_id?.message}
-                      options={optionsBorrComp}
-                      isLoading={!dataBorrCompany}
-                      loadingMessage="Loading companies..."
-                      required={true}
-                    />
+                    <div>
+                      <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="company_borrower_id">
+                        Office Where Currently Employed
+                        <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
+                      </label>
+                      <Controller
+                        name="company_borrower_id"
+                        control={control}
+                        rules={{ required: 'Office is required' }}
+                        render={({ field }) => (
+                          <ReactSelect
+                            {...field}
+                            options={optionsBorrComp}
+                            placeholder="Select a Company..."
+                            isLoading={!dataBorrCompany}
+                            loadingMessage={() => 'Loading companies...'}
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption ? Number(selectedOption.value) : null);
+                            }}
+                            value={optionsBorrComp.find(option => String(option.value) === String(field.value)) || null}
+                          />
+                        )}
+                      />
+                      {errors.company_borrower_id?.message && (
+                        <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.company_borrower_id.message}</p>
+                      )}
+                    </div>
                     {/* <div className="relative flex mt-2">
                       <label
                         htmlFor="cover"
