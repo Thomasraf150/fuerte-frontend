@@ -25,6 +25,12 @@ Decimal.set({
 });
 
 /**
+ * Standard currency precision for display and validation
+ * Matches database DECIMAL(12,2) and standard currency formatting
+ */
+export const CURRENCY_PRECISION = 2;
+
+/**
  * Parse a financial amount string to Decimal
  * Handles common input formats and sanitizes the value
  *
@@ -118,22 +124,22 @@ export function subtractAmounts(
 
 /**
  * Compare two financial amounts for equality
- * Uses the precision specified (default 4 decimal places to match DB DECIMAL(19,4))
+ * Uses the precision specified (default 2 decimal places to match DB DECIMAL(12,2) and user display)
  *
  * @param amount1 - First amount
  * @param amount2 - Second amount
- * @param decimalPlaces - Precision for comparison (default: 4)
+ * @param decimalPlaces - Precision for comparison (default: 2)
  * @returns true if amounts are equal within the specified precision
  *
  * @example
- * areAmountsEqual('129429.79', '129429.79', 2)           // true
- * areAmountsEqual('100.12345', '100.12340', 4)           // true (rounds to 4)
- * areAmountsEqual('100.12345', '100.12340', 5)           // false
+ * areAmountsEqual('129429.79', '129429.79')              // true (default 2 decimals)
+ * areAmountsEqual('100.125', '100.124', 2)              // true (both round to 100.12)
+ * areAmountsEqual('100.125', '100.124', 3)              // false
  */
 export function areAmountsEqual(
   amount1: DecimalType | string | number,
   amount2: DecimalType | string | number,
-  decimalPlaces: number = 4
+  decimalPlaces: number = CURRENCY_PRECISION
 ): boolean {
   const d1 = amount1 instanceof Decimal ? amount1 : parseFinancialAmount(amount1);
   const d2 = amount2 instanceof Decimal ? amount2 : parseFinancialAmount(amount2);
@@ -163,7 +169,7 @@ export function validateDoubleEntry(
   const difference = totalDebits.minus(totalCredits);
 
   return {
-    isValid: areAmountsEqual(totalDebits, totalCredits),
+    isValid: areAmountsEqual(totalDebits, totalCredits, CURRENCY_PRECISION),
     difference
   };
 }

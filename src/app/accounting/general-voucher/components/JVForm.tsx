@@ -18,7 +18,8 @@ import {
   addAmounts,
   validateDoubleEntry,
   formatWithThousandsSeparator,
-  isValidFinancialInput
+  isValidFinancialInput,
+  CURRENCY_PRECISION
 } from '@/utils/financial';
 interface ParentFormBr {
   setShowForm: (b: boolean) => void;
@@ -149,7 +150,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
     if (!validation.isValid) {
       toast.error(
-        `Debit and credit are not equal! Difference: ${formatWithThousandsSeparator(validation.difference, 2)}`
+        `Debit and credit are not equal! Difference: ${formatWithThousandsSeparator(validation.difference, CURRENCY_PRECISION)}`
       );
       return;
     }
