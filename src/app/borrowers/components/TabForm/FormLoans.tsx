@@ -1,10 +1,10 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Layout, Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import FormInput from '@/components/FormInput';
-import { BorrowerRowInfo, DataRowLoanProducts, BorrLoanFormValues, BorrLoanComputationValues, DataSubBranches, BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
+import { BorrowerRowInfo, BorrLoanFormValues, DataSubBranches, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
 import FormLoanComputation from './FormLoanComputation';
@@ -29,8 +29,8 @@ interface Option {
   hidden?: boolean;
 }
 
-const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches, dataLoanRenewal, dataComputedRenewal }) => {
-  const { register, handleSubmit, setValue, reset, watch, getValues, formState: { errors }, control } = useForm<BorrLoanFormValues>();
+const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub: _dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches, dataLoanRenewal, dataComputedRenewal }) => {
+  const { register, handleSubmit, setValue, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
   const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading } = useLoans();
 
   // State to track which action was triggered (compute vs save)
@@ -125,37 +125,25 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   const [showComputation, setShowComputation] = useState<boolean>(false);
 
   useEffect(() => {
-    // Block render until accessible branches are loaded - prevents flash of unfiltered branches
+    // Show user's accessible branches directly (not filtered by borrower's area)
     if (loadingMyAccessibleBranches || myAccessibleBranchSubs === undefined) {
       setBranchOptions([{ value: '', label: 'Loading branches...', hidden: true }]);
       return;
     }
 
-    if (dataBranchSub && Array.isArray(dataBranchSub)) {
-      // Filter branches to only show those the user has access to
-      let filteredBranches = dataBranchSub;
-
-      if (myAccessibleBranchSubs && Array.isArray(myAccessibleBranchSubs) && myAccessibleBranchSubs.length > 0) {
-        const accessibleIds = new Set(myAccessibleBranchSubs.map(b => b.id));
-        filteredBranches = dataBranchSub.filter(branch => accessibleIds.has(branch.id));
-      }
-
-      if (filteredBranches.length > 0) {
-        const dynaOpt: Option[] = filteredBranches.map(dLCodes => ({
-          value: String(dLCodes.id),
-          label: dLCodes.name,
-        }));
-        setBranchOptions([
-          { value: '', label: 'Select a Branch...', hidden: true },
-          ...dynaOpt,
-        ]);
-      } else {
-        setBranchOptions([{ value: '', label: 'No accessible branches for this borrower area', hidden: true }]);
-      }
+    if (myAccessibleBranchSubs && Array.isArray(myAccessibleBranchSubs) && myAccessibleBranchSubs.length > 0) {
+      const dynaOpt: Option[] = myAccessibleBranchSubs.map(branch => ({
+        value: String(branch.id),
+        label: branch.name,
+      }));
+      setBranchOptions([
+        { value: '', label: 'Select a Branch...', hidden: true },
+        ...dynaOpt,
+      ]);
     } else {
-      setBranchOptions([{ value: '', label: 'No branches available', hidden: true }]);
+      setBranchOptions([{ value: '', label: 'No accessible branches', hidden: true }]);
     }
-  }, [dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches]);
+  }, [myAccessibleBranchSubs, loadingMyAccessibleBranches]);
   
   useEffect(() => {
     if (loanProduct && Array.isArray(loanProduct)) {
@@ -172,9 +160,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     }
   }, [loanProduct]);
   
-  const getGetRenewalDetails = (d: any) => {
-    setValue('renewal_details', d);
-    // console.log(d, ' from getGetRenewalDetails');
+  const setRenewalDetails = (details: any) => {
+    setValue('renewal_details', details);
   }
 
   return (
@@ -190,7 +177,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
         <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
           <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={getGetRenewalDetails} />}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={setRenewalDetails} />}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller
@@ -206,7 +193,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       field.onChange(selectedOption?.value);
                     }}
                     value={branchOptions.find(option => String(option.value) === String(field.value)) || null}
-                    isLoading={loadingMyAccessibleBranches || !dataBranchSub}
+                    isLoading={loadingMyAccessibleBranches}
                     loadingMessage={() => "Loading accessible branches..."}
                   />
                 )}
