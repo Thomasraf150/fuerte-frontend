@@ -35,6 +35,11 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
    const password = watch('password', '');
 
   const onSubmit: SubmitHandler<DataFormUser> = async (data) => {
+    // Validate branch_sub_id is selected and valid (not 0 or empty)
+    if (!data.branch_sub_id || Number(data.branch_sub_id) === 0) {
+      return; // Form validation will show error
+    }
+
     const result = await onSubmitUser(data) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
@@ -74,7 +79,8 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         id: '',
         name: '',
         email: '',
-        branch_sub_id: 0,
+        branch_sub_id: undefined,  // Force user to select a valid branch
+        role_id: undefined,        // Force user to select a valid role
       });
     } else {
       if (singleUserData) {

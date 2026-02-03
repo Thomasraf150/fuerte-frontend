@@ -132,13 +132,27 @@ const useUsers = () => {
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       console.log(data, ' data');
 
+      // Validate branch_sub_id is a valid positive number
+      const branchSubId = Number(data.branch_sub_id);
+      if (!branchSubId || branchSubId <= 0 || isNaN(branchSubId)) {
+        toast.error('Please select a valid branch');
+        return { success: false, error: 'Invalid branch selection' };
+      }
+
+      // Validate role_id is a valid positive number
+      const roleId = Number(data.role_id);
+      if (!roleId || roleId <= 0 || isNaN(roleId)) {
+        toast.error('Please select a valid role');
+        return { success: false, error: 'Invalid role selection' };
+      }
+
       let mutation;
       let variables: { input: any } = {
         input: {
           name: data.name,
           email: data.email,
-          branch_sub_id: Number(data.branch_sub_id),
-          role_id: Number(data.role_id)
+          branch_sub_id: branchSubId,
+          role_id: roleId
         },
       };
       
