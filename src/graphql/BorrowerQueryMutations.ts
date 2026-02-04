@@ -332,6 +332,7 @@ const CHECK_BORROWER_DUPLICATE: string = `
     $email: String
     $contact_no: String
     $excludeId: ID
+    $branch_sub_id: ID
   ) {
     checkBorrowerDuplicate(
       firstname: $firstname
@@ -341,6 +342,7 @@ const CHECK_BORROWER_DUPLICATE: string = `
       email: $email
       contact_no: $contact_no
       excludeId: $excludeId
+      branch_sub_id: $branch_sub_id
     ) {
       isDuplicate
       duplicateType
