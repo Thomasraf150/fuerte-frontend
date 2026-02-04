@@ -1,3 +1,10 @@
+// Shared type for react-select dropdown options
+export interface SelectOption {
+  value: string;
+  label: string;
+  hidden?: boolean;
+}
+
 export interface DataRow {
   id: number;
   branch: string;

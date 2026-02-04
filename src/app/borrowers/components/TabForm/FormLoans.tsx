@@ -4,9 +4,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { Layout, Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import FormInput from '@/components/FormInput';
-import { BorrowerRowInfo, BorrLoanFormValues, DataSubBranches, DataRenewalData } from '@/utils/DataTypes';
+import { BorrowerRowInfo, BorrLoanFormValues, DataSubBranches, DataRenewalData, SelectOption } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
+import AsyncReactSelect from '@/components/ReactSelect/AsyncReactSelect';
 import FormLoanComputation from './FormLoanComputation';
 import RenewalAmntForm from './RenewalAmntForm';
 import useLoans from '@/hooks/useLoans';
@@ -23,15 +24,9 @@ interface ParentFormBr {
   dataComputedRenewal: DataRenewalData | undefined;
 }
 
-interface Option {
-  value: string;
-  label: string;
-  hidden?: boolean;
-}
-
 const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub: _dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches, dataLoanRenewal, dataComputedRenewal }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
-  const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading } = useLoans();
+  const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading, searchLoanProducts } = useLoans();
 
   // State to track which action was triggered (compute vs save)
   const [actionType, setActionType] = useState<'compute' | 'save' | null>(null);
@@ -120,9 +115,10 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   };
 
 
-  const [branchOptions, setBranchOptions] = useState<Option[]>([]);
-  const [loanProdOptions, setLoanProdOptions] = useState<Option[]>([]);
+  const [branchOptions, setBranchOptions] = useState<SelectOption[]>([]);
+  const [loanProdOptions, setLoanProdOptions] = useState<SelectOption[]>([]);
   const [showComputation, setShowComputation] = useState<boolean>(false);
+  const [selectedLoanProduct, setSelectedLoanProduct] = useState<SelectOption | null>(null);
 
   useEffect(() => {
     // Show user's accessible branches directly (not filtered by borrower's area)
@@ -132,7 +128,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     }
 
     if (myAccessibleBranchSubs && Array.isArray(myAccessibleBranchSubs) && myAccessibleBranchSubs.length > 0) {
-      const dynaOpt: Option[] = myAccessibleBranchSubs.map(branch => ({
+      const dynaOpt: SelectOption[] = myAccessibleBranchSubs.map(branch => ({
         value: String(branch.id),
         label: branch.name,
       }));
@@ -147,7 +143,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   
   useEffect(() => {
     if (loanProduct && Array.isArray(loanProduct)) {
-      const dynaOpt: Option[] = loanProduct.map(dLCodes => ({
+      const dynaOpt: SelectOption[] = loanProduct.map(dLCodes => ({
         value: String(dLCodes.id),
         label: dLCodes.description,
       }));
@@ -205,20 +201,27 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
               <Controller
                 name="loan_product_id"
                 control={control}
-                rules={{ required: 'Loan Product is required' }} 
+                rules={{ required: 'Loan Product is required' }}
                 render={({ field }) => (
-                  <ReactSelect
-                    {...field}
-                    options={loanProdOptions}
+                  <AsyncReactSelect
+                    loadOptions={searchLoanProducts}
+                    defaultOptions={loanProdOptions}
                     menuPortalTarget={document.body}
                     menuPosition="fixed"
-                    placeholder="Select a Loan Product..."
+                    placeholder="Type to search loan products..."
                     onChange={(selectedOption) => {
+                      setSelectedLoanProduct(selectedOption);
                       field.onChange(selectedOption?.value);
                     }}
-                    value={loanProdOptions.find(option => String(option.value) === String(field.value)) || null}
+                    value={selectedLoanProduct || loanProdOptions.find(option => String(option.value) === String(field.value)) || null}
                     isLoading={loading || !loanProduct || loanProdOptions.length <= 1}
-                    loadingMessage={() => "Loading loan products..."}
+                    loadingMessage={() => "Searching loan products..."}
+                    noOptionsMessage={({ inputValue }) =>
+                      inputValue.length < 2
+                        ? "Type at least 2 characters to search..."
+                        : "No loan products found"
+                    }
+                    cacheOptions
                   />
                 )}
               />

@@ -1,18 +1,14 @@
 import Select, { StylesConfig } from 'react-select';
 import { FC } from 'react';
 import { useSelectTheme } from '@/hooks/useSelectTheme';
-
-interface Option {
-  value: string;
-  label: string;
-}
+import { SelectOption } from '@/utils/DataTypes';
 
 interface ReactSelectComponentProps {
-  options: Option[];
-  onChange: (selectedOption: Option | null) => void;
-  value: Option | null;
+  options: SelectOption[];
+  onChange: (selectedOption: SelectOption | null) => void;
+  value: SelectOption | null;
   placeholder?: string;
-  styles?: StylesConfig<Option, false>;
+  styles?: StylesConfig<SelectOption, false>;
   menuPortalTarget?: HTMLElement | null;
   menuPosition?: 'fixed' | 'absolute';
   isDisabled?: boolean;
@@ -33,7 +29,7 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
   loadingMessage = () => 'Loading options...'
 }) => {
   // Get theme-aware styles and theme config
-  const { styles: themeStyles, theme } = useSelectTheme<Option>();
+  const { styles: themeStyles, theme } = useSelectTheme<SelectOption>();
 
   // Merge custom styles with theme styles (custom takes precedence)
   const mergedStyles = customStyles

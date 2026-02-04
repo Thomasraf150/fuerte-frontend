@@ -312,6 +312,52 @@ const useLoans = () => {
     }
   };
 
+  // Search loan products for async dropdown (server-side search)
+  const searchLoanProducts = useCallback(async (inputValue: string): Promise<{ value: string; label: string }[]> => {
+    // Return cached products if no search or too short
+    if (!inputValue || inputValue.length < 2) {
+      return loanProduct.map(p => ({ value: String(p.id), label: p.description }));
+    }
+
+    const { GET_AUTH_TOKEN } = useAuthStore.getState();
+    const token = GET_AUTH_TOKEN();
+
+    if (!token) {
+      return loanProduct.map(p => ({ value: String(p.id), label: p.description }));
+    }
+
+    try {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          query: GET_LOAN_PRODUCT_QUERY,
+          variables: {
+            first: MAX_DROPDOWN_SIZE,
+            page: 1,
+            orderBy: [{ column: "id", order: 'DESC' }],
+            search: inputValue // Server-side search!
+          },
+        }),
+      });
+
+      if (response.data?.getLoanProducts?.data) {
+        return response.data.getLoanProducts.data.map((p: DataRowLoanProducts) => ({
+          value: String(p.id),
+          label: p.description,
+        }));
+      }
+    } catch (error) {
+      console.error('Error searching loan products:', error);
+    }
+
+    // Fallback to cached products
+    return loanProduct.map(p => ({ value: String(p.id), label: p.description }));
+  }, [GET_LOAN_PRODUCT_QUERY, loanProduct]);
+
   const printLoanDetails = async (loan_id: string) => {
     try {
       setLoading(true);
@@ -878,6 +924,7 @@ const useLoans = () => {
   return {
     onSubmitLoanComp,
     loanProduct,
+    searchLoanProducts,
     dataComputedLoans,
     fetchLoans,
     loanData,
