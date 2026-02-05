@@ -63,7 +63,7 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
 
     // Only close form on successful submission
     if (result.success) {
-      fetchDataSubArea(10, 1);
+      fetchDataSubArea(100, 1);
       setShowForm(false);
     }
     // Form stays open on errors for user to fix and retry

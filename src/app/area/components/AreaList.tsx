@@ -46,7 +46,7 @@ const AreaList: React.FC = () => {
     );
     if (isConfirmed) {
       handleDeleteArea(row);
-      fetchDataArea(10, 1);
+      fetchDataArea(100, 1);
     }
   }
 

@@ -52,7 +52,7 @@ const SubAreaList: React.FC = () => {
     );
     if (isConfirmed) {
       handleDeleteSubArea(row);
-      fetchDataArea(10, 1);
+      fetchDataArea(100, 1);
     }
   }
 

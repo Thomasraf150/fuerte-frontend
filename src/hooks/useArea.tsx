@@ -146,7 +146,7 @@ const useArea = () => {
 
    // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchDataArea(10, 1);
+    fetchDataArea(100, 1);
     fetchDataSubBranch();
   }, []);
 

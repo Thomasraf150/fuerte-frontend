@@ -60,7 +60,7 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
 
     // Only close form on successful submission
     if (result && typeof result === 'object' && 'success' in result && result.success) {
-      fetchDataArea(10, 1);
+      fetchDataArea(100, 1);
       setShowForm(false);
     }
     // Form stays open on errors for user to fix and retry
