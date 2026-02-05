@@ -14,6 +14,7 @@ interface ReactSelectComponentProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   loadingMessage?: () => string;
+  noOptionsMessage?: (obj: { inputValue: string }) => string | null;
 }
 
 const ReactSelect: FC<ReactSelectComponentProps> = ({
@@ -26,7 +27,8 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
   menuPosition,
   isDisabled,
   isLoading = false,
-  loadingMessage = () => 'Loading options...'
+  loadingMessage = () => 'Loading options...',
+  noOptionsMessage,
 }) => {
   // Get theme-aware styles and theme config
   const { styles: themeStyles, theme } = useSelectTheme<SelectOption>();
@@ -51,6 +53,7 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
       isDisabled={isDisabled}
       isLoading={isLoading}
       loadingMessage={loadingMessage}
+      noOptionsMessage={noOptionsMessage}
     />
   );
 };

@@ -1,15 +1,9 @@
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Image from "next/image";
-import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Link from "next/link";
 import { Camera, Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
-import { useForm, SubmitHandler, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
-import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies } from '@/utils/DataTypes';
+import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies, SelectOption } from '@/utils/DataTypes';
 import { useEffect, useState, useRef } from "react";
-import useBorrower from '@/hooks/useBorrower';
 
 interface BorrInfoProps {
   dataChief?: DataChief[] | undefined;
@@ -26,12 +20,6 @@ interface BorrInfoProps {
   fetchDataArea: (v1: number, v2: number) => void;
   fetchDataSubArea: (v1: number) => void;
   fetchDataBorrCompany: (v1: number, v2: number) => void;
-}
-
-interface OptionProps {
-  value: string | undefined;
-  label: string;
-  hidden?: boolean;
 }
 
 const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
@@ -102,17 +90,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     fetchDataBorrCompany(1000, 1);
   }, []);
 
-  // const { 
-  //     dataChief, 
-  //     dataArea, 
-  //     dataSubArea, 
-  //     fetchDataSubArea, 
-  //     dataBorrCompany, 
-  //     onSubmitBorrower } = useBorrower();
- 
-  const [optionsChief, setOptionsChief] = useState<OptionProps[]>([]);
-  const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
-  const [optionsSubArea, setOptionsSubArea] = useState<OptionProps[]>([]);
+  const [optionsChief, setOptionsChief] = useState<SelectOption[]>([]);
+  const [optionsArea, setOptionsArea] = useState<SelectOption[]>([]);
+  const [optionsSubArea, setOptionsSubArea] = useState<SelectOption[]>([]);
   const [optionsBorrComp, setOptionsBorrComp] = useState<{value: string; label: string}[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
@@ -120,29 +100,28 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   // Track previous singleData to detect EDIT→CREATE transitions
   const prevSingleDataRef = useRef<BorrowerRowInfo | undefined>(singleData);
 
-  const handleOnChangeArea = (value: any) => {
+  // Sub-area is only optional when an area is selected, loading finished, and no sub-areas exist
+  const areaId = watch('area_id');
+  const subAreaNotRequired = !!areaId && !subAreaLoading && optionsSubArea.length === 0;
+
+  const handleOnChangeArea = (selectedOption: SelectOption | null) => {
     setSubAreaLoading(true);
-    // Clear current sub area selection
     setValue('sub_area_id', '');
-    // Fetch new sub area data
-    fetchDataSubArea(value.target.value);
+    setOptionsSubArea([]);
+    if (selectedOption) {
+      fetchDataSubArea(Number(selectedOption.value));
+    }
   }
 
   useEffect(() => {
     if (dataSubArea && Array.isArray(dataSubArea)) {
-      const dynaOpt: OptionProps[] = dataSubArea?.map(aSub => ({
+      const dynaOpt: SelectOption[] = dataSubArea?.map(aSub => ({
         value: String(aSub.id),
-        label: aSub.name, // assuming `name` is the key you want to use as label
+        label: aSub.name,
       }));
-      setOptionsSubArea([
-        { value: '', label: 'Select a Sub Area', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-      setSubAreaLoading(false); // Hide loading when data arrives
+      setOptionsSubArea(dynaOpt);
+      setSubAreaLoading(false);
     }
-    // fetchDataChief(100, 1);
-    // fetchDataArea(100, 1);
-    // fetchDataBorrCompany(100, 1);
   }, [dataSubArea])
 
   const onSubmit = async (data: BorrowerInfo) => {
@@ -157,7 +136,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     // Form stays open on errors for user to fix and retry
   }
 
-  // const [imageSrc, setImageSrc] = useState('/images/user/user-06.png'); // Default image
   const [logoPreview, setLogoPreview] = useState('/images/user/user-06.png'); // State for image preview
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,48 +153,36 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
 
   useEffect(() => {
     if (dataChief && Array.isArray(dataChief)) {
-      const dynaOpt: OptionProps[] = dataChief?.map(bSub => ({
+      const dynaOpt: SelectOption[] = dataChief?.map(bSub => ({
         value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
+        label: bSub.name,
       }));
-      setOptionsChief([
-        { value: '', label: 'Select a Chief', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
+      setOptionsChief(dynaOpt);
     }
   }, [dataChief])
 
   
   useEffect(() => {
     if (dataArea && Array.isArray(dataArea)) {
-      const dynaOpt: OptionProps[] = dataArea?.map(aSub => ({
+      const dynaOpt: SelectOption[] = dataArea?.map(aSub => ({
         value: String(aSub.id),
-        label: aSub.name, // assuming `name` is the key you want to use as label
+        label: aSub.name,
       }));
-      setOptionsArea([
-        { value: '', label: 'Select a Area', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
+      setOptionsArea(dynaOpt);
 
       if (singleData && optionsArea) {
         const subArea = dataArea?.find(item => item.id === String(singleData.borrower_work_background.area_id));
         if (subArea && Array.isArray(subArea?.sub_area)) {
-          const dynaOptSub: OptionProps[] = subArea?.sub_area?.map(sSub => ({
+          const dynaOptSub: SelectOption[] = subArea?.sub_area?.map(sSub => ({
             value: String(sSub.id),
-            label: sSub.name, // assuming `name` is the key you want to use as label
+            label: sSub.name,
           }));
-          setOptionsSubArea([
-            { value: '', label: 'Select a Sub Area', hidden: true }, // retain the default "Select a branch" option
-            ...dynaOptSub,
-          ]);
+          setOptionsSubArea(dynaOptSub);
           setValue('sub_area_id', singleData.borrower_work_background.sub_area_id);
         }
       }
     }
   }, [dataArea])
-
-  // Watch the area_id field
-  // const areaId = watch('area_id');
 
   useEffect(() => {
     // Track previous value to detect EDIT→CREATE transitions
@@ -235,13 +201,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
       Object.keys(singleData).forEach((key) => {
         if (key === "borrower_reference") {
           singleData.borrower_reference.forEach((ref, index) => {
-            // console.log(ref, 'ref');
             setValue(`reference.${index}.occupation`, ref.occupation);
             setValue(`reference.${index}.name`, ref.name);
             setValue(`reference.${index}.contact_no`, ref.contact_no);
           });
         } else {
-          // setValue(key as keyof BorrowerInfo, singleData[key]);
           setValue('id', singleData.id);
           setValue('chief_id', singleData.chief_id);
           setValue('amount_applied', Number(singleData.amount_applied));
@@ -256,7 +220,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           setValue('est_monthly_fam_inc', singleData.est_monthly_fam_inc);
           setValue('employment_position', singleData.employment_position);
           setValue('gender', singleData.gender);
-          // setValue('photo', singleData.photo);
           setValue('user_id', singleData.user_id);
           setValue('dob', singleData.borrower_details.dob);
           setValue('place_of_birth', singleData.borrower_details.place_of_birth);
@@ -277,7 +240,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           setValue('employment_number', singleData.borrower_work_background.employment_number);
           setValue('area_id', singleData.borrower_work_background.area_id);
 
-          // setValue('sub_area_id', singleData.borrower_work_background.sub_area_id);
           setValue('station', singleData.borrower_work_background.station);
           setValue('term_in_service', singleData.borrower_work_background.term_in_service);
           setValue('employment_status', singleData.borrower_work_background.employment_status);
@@ -483,18 +445,30 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
-                    <FormInput
-                      label="Chief"
-                      id="chief_id"
-                      type="select"
-                      icon={Home}
-                      register={register('chief_id', { required: 'Chief is required' })}
-                      error={errors.chief_id?.message}
-                      options={optionsChief}
-                      isLoading={!dataChief}
-                      loadingMessage="Loading chiefs..."
-                      required={true}
+                    <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="chief_id">
+                      Chief
+                      <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
+                    </label>
+                    <Controller
+                      name="chief_id"
+                      control={control}
+                      rules={{ required: 'Chief is required' }}
+                      render={({ field }) => (
+                        <ReactSelect
+                          options={optionsChief}
+                          placeholder="Select a Chief..."
+                          isLoading={!dataChief}
+                          loadingMessage={() => 'Loading chiefs...'}
+                          onChange={(selectedOption) => {
+                            field.onChange(selectedOption ? Number(selectedOption.value) : 0);
+                          }}
+                          value={optionsChief.find(opt => String(opt.value) === String(field.value)) || null}
+                        />
+                      )}
                     />
+                    {errors.chief_id?.message && (
+                      <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.chief_id.message}</p>
+                    )}
                   </div>
                   <div>
                     <FormInput
@@ -767,17 +741,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.company_borrower_id.message}</p>
                       )}
                     </div>
-                    {/* <div className="relative flex mt-2">
-                      <label
-                        htmlFor="cover"
-                        className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
-                      >
-                        <span>
-                          +
-                        </span>
-                        <span>Add Company</span>
-                      </label>
-                    </div> */}
                   </div>
                   <div>
                     <FormInput
@@ -790,58 +753,60 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       required={true}
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                </div>                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
-                    <FormInput
-                      label="Area"
-                      id="area_id"
-                      type="select"
-                      icon={Home}
-                      register={register('area_id', { required: 'Area is required' })}
-                      error={errors.area_id?.message}
-                      options={optionsArea}
-                      onChange={(e: any) => { return handleOnChangeArea(e); } }
-                      isLoading={!dataArea}
-                      loadingMessage="Loading areas..."
-                      required={true}
+                    <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="area_id">
+                      Area
+                      <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
+                    </label>
+                    <Controller
+                      name="area_id"
+                      control={control}
+                      rules={{ required: 'Area is required' }}
+                      render={({ field }) => (
+                        <ReactSelect
+                          options={optionsArea}
+                          placeholder="Select an Area..."
+                          isLoading={!dataArea}
+                          loadingMessage={() => 'Loading areas...'}
+                          onChange={(selectedOption) => {
+                            field.onChange(selectedOption ? selectedOption.value : '');
+                            handleOnChangeArea(selectedOption);
+                          }}
+                          value={optionsArea.find(opt => String(opt.value) === String(field.value)) || null}
+                        />
+                      )}
                     />
-                    {/* <div className="relative flex mt-2">
-                      <label
-                        htmlFor="cover"
-                        className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
-                      >
-                        <span>
-                          +
-                        </span>
-                        <span>Add Area</span>
-                      </label>
-                    </div> */}
+                    {errors.area_id?.message && (
+                      <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.area_id.message}</p>
+                    )}
                   </div>
                   <div>
-                    <FormInput
-                      label="Sub Area"
-                      id="sub_area_id"
-                      type="select"
-                      icon={Home}
-                      register={register('sub_area_id', { required: 'Sub Area is required' })}
-                      error={errors.sub_area_id?.message}
-                      options={optionsSubArea}
-                      isLoading={subAreaLoading}
-                      loadingMessage="Loading sub areas..."
-                      required={true}
+                    <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="sub_area_id">
+                      Sub Area
+                      {!subAreaNotRequired && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+                    </label>
+                    <Controller
+                      name="sub_area_id"
+                      control={control}
+                      rules={{ required: subAreaNotRequired ? false : 'Sub Area is required' }}
+                      render={({ field }) => (
+                        <ReactSelect
+                          options={optionsSubArea}
+                          placeholder="Select a Sub Area..."
+                          isLoading={subAreaLoading}
+                          loadingMessage={() => 'Loading sub areas...'}
+                          noOptionsMessage={() => 'No sub-areas for this area'}
+                          onChange={(selectedOption) => {
+                            field.onChange(selectedOption ? selectedOption.value : '');
+                          }}
+                          value={optionsSubArea.find(opt => String(opt.value) === String(field.value)) || null}
+                        />
+                      )}
                     />
-                    {/* <div className="relative flex mt-2">
-                      <label
-                        htmlFor="cover"
-                        className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
-                      >
-                        <span>
-                          +
-                        </span>
-                        <span>Add Sub Area</span>
-                      </label>
-                    </div> */}
+                    {errors.sub_area_id?.message && (
+                      <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.sub_area_id.message}</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

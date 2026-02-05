@@ -70,7 +70,7 @@ const useBorrowerBase = () => {
       company_borrower_id: String(data.company_borrower_id),
       employment_number: data.employment_number,
       area_id: data.area_id,
-      sub_area_id: data.sub_area_id,
+      sub_area_id: data.sub_area_id || null,
       station: data.station,
       term_in_service: data.term_in_service,
       employment_status: data.employment_status,
@@ -138,9 +138,14 @@ const useBorrowerBase = () => {
 
       // Check for successful borrower creation/update
       if (result.data?.saveBorrower) {
-        toast.success(result.data.saveBorrower.message);
-        onSuccess?.();
-        return { success: true, data: result.data.saveBorrower };
+        if (result.data.saveBorrower.success) {
+          toast.success(result.data.saveBorrower.message);
+          onSuccess?.();
+          return { success: true, data: result.data.saveBorrower };
+        } else {
+          toast.error(result.data.saveBorrower.message || 'Failed to save borrower');
+          return { success: false, error: result.data.saveBorrower.message };
+        }
       }
 
       return { success: false, error: "Unknown error occurred" };

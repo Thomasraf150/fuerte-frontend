@@ -34,10 +34,6 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
   const { CHECK_BORROWER_DUPLICATE } = BorrowerQueryMutations;
 
   try {
-    const authData = getAuthDataFromStorage();
-    const token = authData.authToken;
-    const branchSubId = authData.user?.branch_sub_id;
-
     const variables = {
       firstname: data.firstname,
       middlename: data.middlename,
@@ -46,14 +42,12 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
       email: data.email || null,
       contact_no: data.contact_no || null,
       excludeId: data.id || null,
-      branch_sub_id: branchSubId || null,
     };
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
       body: JSON.stringify({
         query: CHECK_BORROWER_DUPLICATE,
@@ -105,7 +99,9 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
     return true; // No duplicates, proceed
   } catch (error) {
     console.error('Duplicate check error:', error);
-    // On error, allow to proceed (don't block user)
+    // On error, allow to proceed but warn the user
+    const { toast } = await import('react-toastify');
+    toast.warn('Duplicate check failed — please verify manually');
     return true;
   }
 };
