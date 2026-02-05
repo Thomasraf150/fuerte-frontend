@@ -1,13 +1,14 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown, Save, RotateCw } from 'react-feather';
+import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useSubArea from '@/hooks/useSubArea';
 import { DataSubArea } from '@/utils/DataTypes';
+
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
-  fetchDataSubArea: (f: number, p: number) => void;
+  refresh: () => Promise<void>;
   initialData?: DataSubArea | null;
   actionLbl: string;
 }
@@ -18,14 +19,13 @@ interface OptionProps {
   hidden?: boolean;
 }
 
-const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, initialData, actionLbl }) => {
+const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataSubArea>();
   const {
-          dataArea,
-          dataSubArea,
-          onSubmitSubArea,
-          handleDeleteSubArea,
-          subAreaLoading } = useSubArea();
+    dataArea,
+    onSubmitSubArea,
+    subAreaLoading,
+  } = useSubArea();
 
   const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
 
@@ -33,10 +33,10 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
     if (dataArea && Array.isArray(dataArea)) {
       const dynaOpt: OptionProps[] = dataArea?.map(bSub => ({
         value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
+        label: bSub.name,
       }));
       setOptionsArea([
-        { value: '', label: 'Select a Area', hidden: true }, // retain the default "Select a branch" option
+        { value: '', label: 'Select a Area', hidden: true },
         ...dynaOpt,
       ]);
     }
@@ -54,19 +54,15 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataSubArea, in
         });
       }
     }
-
-    console.log(initialData, ' initialData');
-  }, [initialData, setValue, actionLbl, dataArea])
+  }, [initialData, setValue, actionLbl, dataArea, reset])
 
   const onSubmit: SubmitHandler<DataSubArea> = async (data) => {
     const result = await onSubmitSubArea(data) as { success: boolean; error?: string; data?: any };
 
-    // Only close form on successful submission
-    if (result.success) {
-      fetchDataSubArea(100, 1);
+    if (result && typeof result === 'object' && 'success' in result && result.success) {
+      await refresh();
       setShowForm(false);
     }
-    // Form stays open on errors for user to fix and retry
   };
 
   return (

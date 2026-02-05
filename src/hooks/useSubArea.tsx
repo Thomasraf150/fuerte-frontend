@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useCallback, useEffect, useState } from 'react';
+import { SubmitHandler } from 'react-hook-form';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
+import { usePagination } from './usePagination';
 
 import { DataArea, DataSubArea } from '@/utils/DataTypes';
+import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 import { toast } from "react-toastify";
-const useSubArea = () => {
 
+const useSubArea = () => {
   const { GET_AREA_QUERY,
           GET_SUB_AREA_QUERY,
           SAVE_SUB_AREA_MUTATION,
@@ -15,62 +17,87 @@ const useSubArea = () => {
           DELETE_SUB_AREA_MUTATION } = AreaSubAreaQueryMutations;
 
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
-  const [dataSubArea, setDataSubArea] = useState<DataSubArea[] | undefined>(undefined);
   const [subAreaLoading, setSubAreaLoading] = useState<boolean>(false);
-  const [subAreaFetchLoading, setSubAreaFetchLoading] = useState<boolean>(false);
-  // Function to fetchdata
 
+  // Fetch all areas for the form dropdown (not paginated)
   const fetchDataArea = useCallback(async (first: number, page: number) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query: GET_AREA_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ] 
-      },
+        variables: { first, page, orderBy: [{ column: "id", order: 'DESC' }] },
       }),
     });
-
     const result = await response.json();
     setDataArea(result.data.getAreas.data);
   }, [GET_AREA_QUERY]);
 
-  const fetchDataSubArea = useCallback(async (first: number, page: number) => {
-    setSubAreaFetchLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+  // Wrapper for usePagination (same pattern as useBorrower)
+  const fetchSubAreasForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: GET_SUB_AREA_QUERY,
+        variables: {
+          first,
+          page,
+          ...(search && { search }),
+          orderBy: [{ column: "id", order: 'DESC' }]
         },
-        body: JSON.stringify({
-          query: GET_SUB_AREA_QUERY,
-          variables: { first, page, orderBy: [
-            { column: "id", order: 'DESC' }
-          ] 
-        },
-        }),
-      });
+      }),
+    });
 
-      const result = await response.json();
-      setDataSubArea(result.data.getSubAreas.data);
-    } catch (error) {
-      console.error('fetchDataSubArea error:', error);
-    } finally {
-      setSubAreaFetchLoading(false);
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(result.errors[0]?.message || 'GraphQL error occurred');
     }
+
+    if (!result.data || !result.data.getSubAreas) {
+      throw new Error('No data returned from server');
+    }
+
+    return {
+      data: result.data.getSubAreas.data,
+      paginatorInfo: result.data.getSubAreas.paginatorInfo || {
+        total: result.data.getSubAreas.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
   }, [GET_SUB_AREA_QUERY]);
+
+  // Server-side pagination for sub-areas table
+  const {
+    data: dataSubArea,
+    loading: paginationLoading,
+    error: subAreaError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+  } = usePagination<DataSubArea>({
+    fetchFunction: fetchSubAreasForPagination,
+    config: { initialPageSize: 20 },
+  });
+
+  // Fetch areas on mount (for form dropdown)
+  useEffect(() => {
+    fetchDataArea(MAX_DROPDOWN_SIZE, 1);
+  }, [fetchDataArea]);
 
   const onSubmitSubArea: SubmitHandler<DataSubArea> = async (data) => {
     setSubAreaLoading(true);
     try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
-
       let mutation;
       let variables: { input: any } = {
         input: {
@@ -88,33 +115,19 @@ const useSubArea = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: mutation, variables }),
       });
 
       const result = await response.json();
 
-      // Handle GraphQL errors
       if (result.errors) {
         toast.error(result.errors[0].message);
         return { success: false, error: result.errors[0].message };
       }
 
-      // Check for successful creation/update
-      if (result.data?.createSubArea || result.data?.updateSubArea) {
-        const responseData = result.data.createSubArea || result.data.updateSubArea;
-        toast.success("Sub Area saved successfully!");
-        return { success: true, data: responseData };
-      }
-
       toast.success("Sub Area saved successfully!");
       return { success: true };
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       toast.error(errorMessage);
@@ -123,43 +136,52 @@ const useSubArea = () => {
       setSubAreaLoading(false);
     }
   };
-  
-  const handleDeleteSubArea = async (data: any) => {
-    let variables: { input: any } = {
-      input: {
-        id: data.id,
-        is_deleted: 1,
-      },
-    };
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: DELETE_SUB_AREA_MUTATION,
-        variables
-      }),
-    });
-    const result = await response.json();
-    toast.success("Sub Area is Deleted!");
+
+  const handleDeleteSubArea = async (data: DataSubArea) => {
+    try {
+      const variables = { input: { id: data.id, is_deleted: 1 } };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: DELETE_SUB_AREA_MUTATION, variables }),
+      });
+      const result = await response.json();
+      if (result.errors) {
+        toast.error(result.errors[0]?.message || 'Failed to delete sub area');
+        return;
+      }
+      toast.success("Sub Area is Deleted!");
+    } catch (error) {
+      toast.error('Network error occurred');
+    }
   };
 
-   // Fetch data on component mount if id exists
-  useEffect(() => {
-    fetchDataArea(100, 1);
-    fetchDataSubArea(100, 1);
-  }, [fetchDataArea, fetchDataSubArea]);
-
   return {
-    fetchDataArea,
     dataArea,
-    fetchDataSubArea,
     dataSubArea,
     onSubmitSubArea,
     handleDeleteSubArea,
     subAreaLoading,
-    subAreaFetchLoading
+    paginationLoading,
+    subAreaError,
+    refresh,
+
+    // Server-side pagination for CustomDatatable
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+      recordType: 'sub area',
+      recordTypePlural: 'sub areas',
+    },
   };
 };
 

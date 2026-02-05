@@ -1,13 +1,14 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown, Save, RotateCw } from 'react-feather';
+import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useArea from '@/hooks/useArea';
-import { DataArea, DataSubBranches } from '@/utils/DataTypes';
+import { DataArea } from '@/utils/DataTypes';
+
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
-  fetchDataArea: (f: number, p: number) => void;
+  refresh: () => Promise<void>;
   initialData?: DataArea | null;
   actionLbl: string;
 }
@@ -18,7 +19,7 @@ interface OptionSubBranch {
   hidden?: boolean;
 }
 
-const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialData, actionLbl }) => {
+const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData, actionLbl }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataArea>();
   const { onSubmitArea, branchSubData, areaLoading } = useArea();
 
@@ -28,10 +29,10 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
     if (branchSubData && Array.isArray(branchSubData)) {
       const dynaOpt: OptionSubBranch[] = branchSubData?.map(bSub => ({
         value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
+        label: bSub.name,
       }));
       setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: '', label: 'Select a Sub Branch', hidden: true },
         ...dynaOpt,
       ]);
     }
@@ -51,19 +52,15 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
         });
       }
     }
-
-    console.log(initialData, ' initialData');
-  }, [initialData, setValue, actionLbl, branchSubData])
+  }, [initialData, setValue, actionLbl, branchSubData, reset])
 
   const onSubmit: SubmitHandler<DataArea> = async (data) => {
     const result = await onSubmitArea(data) as { success: boolean; error?: string; data?: any };
 
-    // Only close form on successful submission
     if (result && typeof result === 'object' && 'success' in result && result.success) {
-      fetchDataArea(100, 1);
+      await refresh();
       setShowForm(false);
     }
-    // Form stays open on errors for user to fix and retry
   };
 
   return (
@@ -88,7 +85,7 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, initialD
         register={register('name', { required: true })}
         error={errors.name && "This field is required"}
       />
-      
+
       <FormInput
         label="Description"
         id="description"

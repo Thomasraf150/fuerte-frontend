@@ -1,66 +1,99 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useCallback, useEffect, useState } from 'react';
+import { SubmitHandler } from 'react-hook-form';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BranchQueryMutation from '@/graphql/BranchQueryMutation';
+import { usePagination } from './usePagination';
 
 import { DataArea, DataSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-const useArea = () => {
 
+const useArea = () => {
   const { GET_AREA_QUERY,
           SAVE_AREA_MUTATION,
           UPDATE_AREA_MUTATION,
           DELETE_AREA_MUTATION } = AreaSubAreaQueryMutations;
   const { GET_ALL_SUB_BRANCH_QUERY } = BranchQueryMutation;
-  
-  const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
+
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
   const [areaLoading, setAreaLoading] = useState<boolean>(false);
-  const [areaFetchLoading, setAreaFetchLoading] = useState<boolean>(false);
-  // Function to fetchdata
+
+  // Fetch sub-branches for form dropdown
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query: GET_ALL_SUB_BRANCH_QUERY,
-        variables: { orderBy } 
+        variables: { orderBy }
+      }),
+    });
+    const result = await response.json();
+    setBranchSubData(result.data.getAllBranch);
+  };
+
+  // Wrapper for usePagination (same pattern as useBorrower)
+  const fetchAreasForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: GET_AREA_QUERY,
+        variables: {
+          first,
+          page,
+          ...(search && { search }),
+          orderBy: [{ column: "id", order: 'DESC' }]
+        },
       }),
     });
 
     const result = await response.json();
-    setBranchSubData(result.data.getAllBranch);
-  };
-  
-  const fetchDataArea = async (first: number, page: number) => {
-    setAreaFetchLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_AREA_QUERY,
-          variables: { first, page, orderBy: [
-            { column: "id", order: 'DESC' }
-          ] 
-        },
-        }),
-      });
 
-      const result = await response.json();
-      setDataArea(result.data.getAreas.data);
-    } catch (error) {
-      console.error('fetchDataArea error:', error);
-    } finally {
-      setAreaFetchLoading(false);
+    if (result.errors) {
+      throw new Error(result.errors[0]?.message || 'GraphQL error occurred');
     }
-  };
+
+    if (!result.data || !result.data.getAreas) {
+      throw new Error('No data returned from server');
+    }
+
+    return {
+      data: result.data.getAreas.data,
+      paginatorInfo: result.data.getAreas.paginatorInfo || {
+        total: result.data.getAreas.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_AREA_QUERY]);
+
+  // Server-side pagination
+  const {
+    data: dataArea,
+    loading: paginationLoading,
+    error: areaError,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+  } = usePagination<DataArea>({
+    fetchFunction: fetchAreasForPagination,
+    config: { initialPageSize: 20 },
+  });
+
+  // Fetch sub-branches on mount (for form dropdown)
+  useEffect(() => {
+    fetchDataSubBranch();
+  }, []);
 
   const onSubmitArea: SubmitHandler<DataArea> = async (data) => {
     setAreaLoading(true);
@@ -87,33 +120,19 @@ const useArea = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: mutation, variables }),
       });
 
       const result = await response.json();
 
-      // Handle GraphQL errors
       if (result.errors) {
         toast.error(result.errors[0].message);
         return { success: false, error: result.errors[0].message };
       }
 
-      // Check for successful creation/update
-      if (result.data?.createArea || result.data?.updateArea) {
-        const responseData = result.data.createArea || result.data.updateArea;
-        toast.success("Area saved successfully!");
-        return { success: true, data: responseData };
-      }
-
       toast.success("Area saved successfully!");
       return { success: true };
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       toast.error(errorMessage);
@@ -122,42 +141,52 @@ const useArea = () => {
       setAreaLoading(false);
     }
   };
-  
-  const handleDeleteArea = async (data: any) => {
-    let variables: { input: any } = {
-      input: {
-        id: data.id,
-        is_deleted: 1,
-      },
-    };
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: DELETE_AREA_MUTATION,
-        variables
-      }),
-    });
-    const result = await response.json();
-    toast.success("Area is Deleted!");
+
+  const handleDeleteArea = async (data: DataArea) => {
+    try {
+      const variables = { input: { id: data.id, is_deleted: 1 } };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: DELETE_AREA_MUTATION, variables }),
+      });
+      const result = await response.json();
+      if (result.errors) {
+        toast.error(result.errors[0]?.message || 'Failed to delete area');
+        return;
+      }
+      toast.success("Area is Deleted!");
+    } catch (error) {
+      toast.error('Network error occurred');
+    }
   };
 
-   // Fetch data on component mount if id exists
-  useEffect(() => {
-    fetchDataArea(100, 1);
-    fetchDataSubBranch();
-  }, []);
-
   return {
-    fetchDataArea,
     dataArea,
     branchSubData,
     onSubmitArea,
     areaLoading,
-    areaFetchLoading,
-    handleDeleteArea
+    paginationLoading,
+    handleDeleteArea,
+    areaError,
+    refresh,
+
+    // Server-side pagination for CustomDatatable
+    serverSidePaginationProps: {
+      totalRecords: pagination.totalRecords,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+      hasNextPage: pagination.hasNextPage,
+      hasPreviousPage: pagination.hasPreviousPage,
+      onPageChange: goToPage,
+      onPageSizeChange: changePageSize,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      pageSizeOptions: [10, 20, 50, 100],
+      recordType: 'area',
+      recordTypePlural: 'areas',
+    },
   };
 };
 
