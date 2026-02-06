@@ -15,17 +15,18 @@ import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 
 const useLoans = () => {
   const { GET_LOAN_PRODUCT_QUERY, SAVE_LOAN_PRODUCT_QUERY, UPDATE_LOAN_PRODUCT_QUERY } = LoanProductsQueryMutations;
-  const { BORROWER_LOAN_QUERY, 
-          PROCESS_BORROWER_LOAN_MUTATION, 
-          APPROVE_LOAN_BY_SCHEDULE, 
-          BORROWER_SINGLE_LOAN_QUERY, 
-          LOAN_PN_SIGNING, 
+  const { BORROWER_LOAN_QUERY,
+          PROCESS_BORROWER_LOAN_MUTATION,
+          APPROVE_LOAN_BY_SCHEDULE,
+          BORROWER_SINGLE_LOAN_QUERY,
+          LOAN_PN_SIGNING,
           SAVE_LOAN_BANK_DETAILS,
           SAVE_LOAN_RELEASE,
           PRINT_LOAN_DETAILS,
-          GET_LOAN_RENEWAL, 
+          GET_LOAN_RENEWAL,
           DELETE_LOANS,
-          UPDATE_LOAN_RELEASED } = LoansQueryMutation;
+          UPDATE_LOAN_RELEASED,
+          UPDATE_RELEASED_LOAN_INFO } = LoansQueryMutation;
 
   // const [dataUser, setDataUser] = useState<User[] | undefined>(undefined);
   const [loanProduct, setLoanProduct] = useState<DataRowLoanProducts[]>([]);
@@ -870,6 +871,61 @@ const useLoans = () => {
     }
   };
 
+  // Handler for updating released loan info (date, bank, check number)
+  const handleUpdateReleasedLoanInfo = async (
+    loan_id: number,
+    released_date: string,
+    bank_id: number,
+    check_no: string,
+    handleRefetchLoanData: () => void
+  ) => {
+    const { GET_AUTH_TOKEN } = useAuthStore.getState();
+
+    const variables = {
+      input: {
+        loan_id: Number(loan_id),
+        released_date: moment(String(released_date)).format('YYYY-MM-DD'),
+        bank_id: Number(bank_id),
+        check_no: String(check_no)
+      }
+    };
+
+    const isConfirmed = await showConfirmationModal(
+      'Save Changes?',
+      'You are about to update the released date, bank, and check number for this loan.',
+      'Save Changes',
+    );
+
+    if (isConfirmed) {
+      try {
+        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
+          },
+          body: JSON.stringify({
+            query: UPDATE_RELEASED_LOAN_INFO,
+            variables,
+          }),
+        });
+
+        if (response.errors) {
+          toast.error(response.errors[0].message);
+        } else {
+          if (response?.data?.updateReleasedLoanInfo?.status === false) {
+            toast.error(response?.data?.updateReleasedLoanInfo?.message);
+          } else {
+            toast.success(response?.data?.updateReleasedLoanInfo?.message);
+          }
+          handleRefetchLoanData();
+        }
+      } catch (error) {
+        toast.error('Failed to update loan info');
+      }
+    }
+  };
+
   // Pagination hook integration for server-side pagination
   const {
     data: dataLoans,
@@ -941,6 +997,7 @@ const useLoans = () => {
     handleDeleteLoans,
     handleUpdateMaturity,
     handleChangeReleasedDate,
+    handleUpdateReleasedLoanInfo,
     // Server-side pagination props
     dataLoans,
     loansLoading,

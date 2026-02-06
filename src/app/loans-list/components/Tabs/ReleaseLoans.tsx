@@ -16,6 +16,7 @@ interface OMProps {
   branchSubData: DataSubBranches[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
   handleChangeReleasedDate: (l: string, rd: string, fn: () => void) => void;
+  handleUpdateReleasedLoanInfo: (loan_id: number, released_date: string, bank_id: number, check_no: string, fn: () => void) => void;
 }
 interface Option {
   value: string;
@@ -23,7 +24,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate }) => {
+const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate, handleUpdateReleasedLoanInfo }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
   // const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
 
@@ -87,7 +88,6 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
       setValue('bank_id', loanSingleData?.bank_id);
       setValue('check_no', loanSingleData?.check_no);
     }
-    console.log(loanSingleData, ' loanSingleData')
   }, [loanSingleData, setValue]);
 
   useEffect(() => {
@@ -196,13 +196,19 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
           <button
             className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 text-sm w-full sm:w-auto"
             type="button"
-            onClick={() => handleChangeReleasedDate(String(loanSingleData?.id), String(watch('released_date')), handleRefetchData)}
+            onClick={() => handleUpdateReleasedLoanInfo(
+              Number(loanSingleData?.id),
+              String(watch('released_date')),
+              Number(watch('bank_id')),
+              String(watch('check_no') || 'N/A'),
+              handleRefetchData
+            )}
             disabled={loanSingleData?.status === 3 ? false : true}
           >
             <span className="mt-1 mr-1">
-              <Calendar size={17} />
+              <Save size={17} />
             </span>
-            <span>Update Released Date</span>
+            <span>Save Changes</span>
           </button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
             <button

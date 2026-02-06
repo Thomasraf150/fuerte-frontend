@@ -343,6 +343,15 @@ const UPDATE_LOAN_RELEASED: string = `
   }
 `;
 
+const UPDATE_RELEASED_LOAN_INFO: string = `
+  mutation UpdateReleasedLoanInfo($input: UpdateReleasedLoanInfoInput!){
+    updateReleasedLoanInfo(input: $input) {
+      status
+      message
+    }
+  }
+`;
+
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
   PROCESS_BORROWER_LOAN_MUTATION,
@@ -354,7 +363,8 @@ const LoanProductsQueryMutations = {
   PRINT_LOAN_DETAILS,
   GET_LOAN_RENEWAL,
   DELETE_LOANS,
-  UPDATE_LOAN_RELEASED
+  UPDATE_LOAN_RELEASED,
+  UPDATE_RELEASED_LOAN_INFO
 };
 
 export default LoanProductsQueryMutations;
