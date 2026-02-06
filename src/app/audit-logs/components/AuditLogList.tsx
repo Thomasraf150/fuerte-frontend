@@ -17,7 +17,7 @@ const AuditLogList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataArea, fetchDataArea, handleDeleteArea } = useArea();
+  const { dataArea, refresh, handleDeleteArea } = useArea();
   
   const [initialFormData, setInitialFormData] = useState<DataArea | null>(null);
 
@@ -46,7 +46,7 @@ const AuditLogList: React.FC = () => {
     );
     if (isConfirmed) {
       handleDeleteArea(row);
-      fetchDataArea(10, 1);
+      refresh();
     }
   }
 
@@ -90,7 +90,7 @@ const AuditLogList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <AuditLogForm setShowForm={setShowForm} fetchDataArea={fetchDataArea} initialData={initialFormData} actionLbl={actionLbl} />
+                  <AuditLogForm setShowForm={setShowForm} fetchDataArea={refresh} initialData={initialFormData} actionLbl={actionLbl} />
                 </div>
               </div>
             </div>

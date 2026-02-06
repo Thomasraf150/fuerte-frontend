@@ -7,7 +7,7 @@ import useArea from '@/hooks/useArea';
 import { DataArea, DataSubBranches } from '@/utils/DataTypes';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
-  fetchDataArea: (f: number, p: number) => void;
+  fetchDataArea: () => void;
   initialData?: DataArea | null;
   actionLbl: string;
 }
@@ -60,7 +60,7 @@ const AuditLogForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, init
 
     // Only refresh and close on successful submission
     if (result && typeof result === 'object' && 'success' in result && result.success) {
-      fetchDataArea(10, 1);
+      fetchDataArea();
       setShowForm(false);
     }
     // Form stays open on errors for user to fix and retry

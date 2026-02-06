@@ -6,7 +6,7 @@ import { TableColumn } from 'react-data-table-component';
 import { GitBranch, X } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 
-interface EntityListLayoutProps<T> {
+interface EntityListLayoutProps<T extends object> {
   title: string;
   entityName: string;
   data: T[];
@@ -27,7 +27,7 @@ interface EntityListLayoutProps<T> {
   }>;
 }
 
-function EntityListLayout<T>({
+function EntityListLayout<T extends object>({
   title,
   entityName,
   data,
