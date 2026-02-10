@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
@@ -28,7 +28,7 @@ const COA: React.FC = () => {
     printChartOfAccounts
   } = useCoa();
 
-  const handleOpenForm = (lbl: string, showFrm: boolean, account: DataChartOfAccountList | null = null) => {
+  const handleOpenForm = useCallback((lbl: string, showFrm: boolean, account: DataChartOfAccountList | null = null) => {
     if (showFrm) {
       // Show loading overlay when opening modal
       setModalLoading(true);
@@ -45,12 +45,14 @@ const COA: React.FC = () => {
       // Hide loading after a brief delay for unmount animation
       setTimeout(() => setModalLoading(false), 300);
     }
-  };
+  }, []);
 
-  const handleFormReady = () => {
+  const handleFormReady = useCallback(() => {
     // Called by CoaForm when it has fully mounted and rendered
     setModalLoading(false);
-  };
+  }, []);
+
+  const handleCloseForm = useCallback(() => handleOpenForm('', false), [handleOpenForm]);
 
   return (
     <DefaultLayout>
@@ -91,7 +93,7 @@ const COA: React.FC = () => {
                   branchSubData={branchSubData}
                   onSubmitCoa={onSubmitCoa}
                   coaLoading={coaLoading}
-                  onClose={() => handleOpenForm('', false)}
+                  onClose={handleCloseForm}
                   onReady={handleFormReady}
                 />
               </div>

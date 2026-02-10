@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
 import { GitBranch, Printer, Search, Edit2, Trash2, RefreshCw, Eye } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import useDebounce from '@/hooks/useDebounce';
 import Swal from 'sweetalert2';
 
 // Memoized AccountRow component to prevent unnecessary re-renders
@@ -148,6 +149,7 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
   printChartOfAccounts
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
 
@@ -226,31 +228,26 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
   }, [countInactiveDescendants, reactivateAccount]);
 
   // Recursive filter function that preserves hierarchy and filters by status, branch, and search
-  const filterAccounts = (accounts: DataChartOfAccountList[], term: string, status: 'all' | 'active' | 'inactive', branch: string): DataChartOfAccountList[] => {
+  // Note: lowerTerm is pre-lowercased by the caller to avoid redundant toLowerCase() in every recursive call
+  const filterAccounts = useCallback((accounts: DataChartOfAccountList[], lowerTerm: string, status: 'all' | 'active' | 'inactive', branch: string): DataChartOfAccountList[] => {
     return accounts.reduce((filtered: DataChartOfAccountList[], account) => {
-      // Check status filter
       const statusMatches =
         status === 'all' ||
         (status === 'active' && account.is_active) ||
         (status === 'inactive' && !account.is_active);
 
-      // Check branch filter
       const branchMatches =
         branch === 'all' ||
         String(account.branch_sub_id) === branch;
 
-      // Check search term filter
-      const lowerTerm = term.toLowerCase();
-      const searchMatches = !term.trim() ||
+      const searchMatches = !lowerTerm ||
         account.account_name?.toLowerCase().includes(lowerTerm) ||
         account.number?.toLowerCase().includes(lowerTerm);
 
-      // Filter children recursively
       const filteredChildren = account.subAccounts
-        ? filterAccounts(account.subAccounts, term, status, branch)
+        ? filterAccounts(account.subAccounts, lowerTerm, status, branch)
         : [];
 
-      // Include account if it matches all filters OR if any children match
       if ((statusMatches && branchMatches && searchMatches) || filteredChildren.length > 0) {
         filtered.push({
           ...account,
@@ -260,11 +257,9 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
 
       return filtered;
     }, []);
-  };
+  }, []);
 
-  useEffect(() => {
-    fetchCoaDataTable();
-  }, [])
+  // Note: fetchCoaDataTable() is already called on mount inside useCoa hook — no duplicate call needed here
 
   // Get level-based CSS classes with support for leaf nodes and inactive accounts
   const getLevelColorClass = useCallback((level: number, hasChildren: boolean, isActive: boolean): string => {
@@ -325,10 +320,17 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
     });
   }, [handleEdit, handleDelete, handleReactivate, getLevelColorClass]);
 
-  // Apply filter to get filtered accounts (memoized to prevent re-filtering on every render)
+  // Apply filter to get filtered accounts (debounced search term prevents filtering on every keystroke)
   const filteredAccounts = useMemo(() =>
-    filterAccounts(coaDataAccount || [], searchTerm, statusFilter, branchFilter),
-    [coaDataAccount, searchTerm, statusFilter, branchFilter]
+    filterAccounts(coaDataAccount || [], debouncedSearchTerm.toLowerCase().trim(), statusFilter, branchFilter),
+    [coaDataAccount, debouncedSearchTerm, statusFilter, branchFilter, filterAccounts]
+  );
+
+  // Memoize the rendered account tree to prevent re-creating 1000+ JSX elements on keystroke re-renders.
+  // Without this, every searchTerm keystroke calls renderAccounts() even though filteredAccounts hasn't changed.
+  const renderedAccountTree = useMemo(() =>
+    renderAccounts(filteredAccounts),
+    [filteredAccounts, renderAccounts]
   );
 
   return (
@@ -442,7 +444,7 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                       </td>
                     </tr>
                   ) : filteredAccounts.length > 0 ? (
-                    renderAccounts(filteredAccounts)
+                    renderedAccountTree
                   ) : (
                     <tr>
                       <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">

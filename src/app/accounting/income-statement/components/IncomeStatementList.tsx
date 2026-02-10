@@ -32,7 +32,7 @@ interface IncomeStatementFormData {
 }
 
 const IncomeStatementList: React.FC = () => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<IncomeStatementFormData>();
+  const { setValue, control } = useForm<IncomeStatementFormData>();
   // const { onSubmitCoa, branchSubData } = useCoa();
   const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
 
@@ -55,8 +55,7 @@ const IncomeStatementList: React.FC = () => {
     printIncomeStatement,
     // Loading states
     loading,
-    printLoading,
-    breakdownLoading
+    printLoading
   } = useFinancialStatement();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -64,6 +63,25 @@ const IncomeStatementList: React.FC = () => {
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
+
+  // Two-phase reveal: keeps spinner visible until browser has painted the hidden content.
+  // Phase 1: loading=false → content renders hidden (opacity-0) → browser paints
+  // Phase 2: useEffect fires (post-paint) → rAF → reveal (opacity-100)
+  const [isRevealed, setIsRevealed] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (loading) {
+      setIsRevealed(false);
+      return;
+    }
+    // loading just became false. Content is rendered hidden (opacity-0).
+    // useEffect fires AFTER the browser has painted the hidden content.
+    // Schedule reveal for next animation frame to ensure rasterization is complete.
+    const frameId = requestAnimationFrame(() => setIsRevealed(true));
+    return () => cancelAnimationFrame(frameId);
+  }, [loading]);
+
+  const showSpinner = loading || !isRevealed;
 
   const handleBranchSubChange = (branch_sub_id: string) => {
     setBranchSubId(branch_sub_id);
@@ -194,15 +212,15 @@ const IncomeStatementList: React.FC = () => {
       const incTax = sectionTotals.incomeTax[month] || new Decimal(0);
 
       totalIncome[month] = intInc.plus(othRev);
-      netIncomeBeforeOther[month] = intInc.plus(othRev).plus(directFin).minus(lessExp);
-      netIncomeBeforeTax[month] = intInc.plus(othRev).plus(directFin).minus(lessExp).minus(othIncExp);
-      netIncomeAfterTax[month] = intInc.plus(othRev).plus(directFin).minus(lessExp).minus(othIncExp).minus(incTax);
+      netIncomeBeforeOther[month] = intInc.plus(othRev).minus(lessExp).minus(directFin);
+      netIncomeBeforeTax[month] = intInc.plus(othRev).minus(lessExp).minus(directFin).plus(othIncExp);
+      netIncomeAfterTax[month] = intInc.plus(othRev).minus(lessExp).minus(directFin).plus(othIncExp).minus(incTax);
     });
 
     // Variance computations
     const totalIncomeVariance = sectionTotals.varianceIntInc.plus(sectionTotals.varianceOthRev);
-    const netBeforeOtherVariance = sectionTotals.varianceIntInc.plus(sectionTotals.varianceOthRev).plus(sectionTotals.varianceDirectFin).minus(sectionTotals.varianceLessExp);
-    const netBeforeTaxVariance = netBeforeOtherVariance.minus(sectionTotals.varianceOthIncExp);
+    const netBeforeOtherVariance = sectionTotals.varianceIntInc.plus(sectionTotals.varianceOthRev).minus(sectionTotals.varianceLessExp).minus(sectionTotals.varianceDirectFin);
+    const netBeforeTaxVariance = netBeforeOtherVariance.plus(sectionTotals.varianceOthIncExp);
     const netAfterTaxVariance = netBeforeTaxVariance.minus(sectionTotals.varianceIncTax);
 
     return {
@@ -361,7 +379,8 @@ const IncomeStatementList: React.FC = () => {
                       type="checkbox"
                       checked={showBreakdown}
                       onChange={(e) => handleBreakdownToggle(e.target.checked)}
-                      className="mr-3 h-5 w-5 rounded border-stroke bg-transparent text-primary focus:ring-primary dark:border-strokedark"
+                      disabled={loading}
+                      className="mr-3 h-5 w-5 rounded border-stroke bg-transparent text-primary focus:ring-primary dark:border-strokedark disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <span className="text-sm font-medium text-black dark:text-white">
                       Show Sub-Branch Breakdown
@@ -392,11 +411,15 @@ const IncomeStatementList: React.FC = () => {
               </div>
               <div className="overflow-x-auto p-7">
 
-              {loading ? (
+              {/* Loading spinner */}
+              {showSpinner && (
                 <div className="flex items-center justify-center min-h-[400px]">
                   <LoadingSpinner message="Loading financial data..." size="lg" />
                 </div>
-              ) : !startDate || !endDate || !branchSubId ? (
+              )}
+
+              {/* Empty state - no filters selected */}
+              {!showSpinner && (!startDate || !endDate || !branchSubId) && (
                 <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
                   <svg
                     className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4"
@@ -418,8 +441,17 @@ const IncomeStatementList: React.FC = () => {
                     Please select a <strong>start date</strong>, <strong>end date</strong>, and <strong>branch</strong> to generate the income statement report.
                   </p>
                 </div>
-              ) : (
-                <>
+              )}
+
+              {/* Content - always rendered when data exists, hidden during loading */}
+              {startDate && endDate && branchSubId && (
+                <div
+                  className={showSpinner
+                    ? 'opacity-0 pointer-events-none'
+                    : 'transition-opacity duration-150 opacity-100'
+                  }
+                  style={showSpinner ? { willChange: 'opacity' } : undefined}
+                >
 
               {/* ═══════════ MAIN SECTIONS (AGGREGATED) ═══════════ */}
 
@@ -531,26 +563,19 @@ const IncomeStatementList: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Loading Spinner for Breakdown */}
-                  {breakdownLoading ? (
-                    <div className="flex items-center justify-center py-16">
-                      <LoadingSpinner message="Loading sub-branch breakdown..." size="md" />
-                    </div>
-                  ) : (
-                    <IncomeStatementBySubBranch
-                      interestIncome={breakdownByBranch.interestIncome || []}
-                      otherRevenues={breakdownByBranch.otherRevenues || []}
-                      directFinancing={breakdownByBranch.directFinancing || []}
-                      lessExpense={breakdownByBranch.lessExpense || []}
-                      otherIncomeExpense={breakdownByBranch.otherIncomeExpense || []}
-                      incomeTax={breakdownByBranch.incomeTax || []}
-                      monthKeys={monthKeys}
-                    />
-                  )}
+                  <IncomeStatementBySubBranch
+                    interestIncome={breakdownByBranch.interestIncome || []}
+                    otherRevenues={breakdownByBranch.otherRevenues || []}
+                    directFinancing={breakdownByBranch.directFinancing || []}
+                    lessExpense={breakdownByBranch.lessExpense || []}
+                    otherIncomeExpense={breakdownByBranch.otherIncomeExpense || []}
+                    incomeTax={breakdownByBranch.incomeTax || []}
+                    monthKeys={monthKeys}
+                  />
                 </div>
               )}
 
-                </>
+                </div>
               )}
 
               </div>

@@ -125,13 +125,15 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
     map.forEach((branch) => {
       monthKeys.forEach((month) => {
         let total = new Decimal(0);
-        // Income sections (add)
+        // Revenue sections (add)
         total = total.plus(branch.sections.interestIncome.monthlyTotals[month]);
         total = total.plus(branch.sections.otherRevenues.monthlyTotals[month]);
-        total = total.plus(branch.sections.directFinancing.monthlyTotals[month]);
         // Expense sections (subtract)
         total = total.minus(branch.sections.lessExpense.monthlyTotals[month]);
-        total = total.minus(branch.sections.otherIncomeExpense.monthlyTotals[month]);
+        total = total.minus(branch.sections.directFinancing.monthlyTotals[month]);
+        // Other income/expense (add - matches PDF formula)
+        total = total.plus(branch.sections.otherIncomeExpense.monthlyTotals[month]);
+        // Income tax (subtract)
         total = total.minus(branch.sections.incomeTax.monthlyTotals[month]);
         branch.totals.monthly[month] = total;
       });
@@ -139,9 +141,9 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
       let varianceTotal = new Decimal(0);
       varianceTotal = varianceTotal.plus(branch.sections.interestIncome.varianceTotal);
       varianceTotal = varianceTotal.plus(branch.sections.otherRevenues.varianceTotal);
-      varianceTotal = varianceTotal.plus(branch.sections.directFinancing.varianceTotal);
       varianceTotal = varianceTotal.minus(branch.sections.lessExpense.varianceTotal);
-      varianceTotal = varianceTotal.minus(branch.sections.otherIncomeExpense.varianceTotal);
+      varianceTotal = varianceTotal.minus(branch.sections.directFinancing.varianceTotal);
+      varianceTotal = varianceTotal.plus(branch.sections.otherIncomeExpense.varianceTotal);
       varianceTotal = varianceTotal.minus(branch.sections.incomeTax.varianceTotal);
       branch.totals.variance = varianceTotal;
     });

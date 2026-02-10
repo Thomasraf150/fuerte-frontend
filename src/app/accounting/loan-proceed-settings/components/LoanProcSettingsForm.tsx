@@ -103,12 +103,15 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
     let options: { label: string; value: string }[] = [];
   
     accounts.forEach((account) => {
+      // Skip inactive accounts from dropdown options
+      if (!account.is_active) return;
+
       // Add the current account with indentation based on level
       options.push({
         label: `${'—'.repeat(level - 1)} ${account.account_name}`,
         value: account?.id?.toString(),
       });
-  
+
       // Recursively process sub-accounts
       if (account.subAccounts) {
         options = options.concat(flattenAccountsToOptions(account.subAccounts, level + 1));

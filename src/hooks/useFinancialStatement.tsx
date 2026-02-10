@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { DataLoanProceedList, DataAccBalanceSheet, DataAccIncomeStatement } from '@/utils/DataTypes';
+import { useState } from 'react';
+import { DataAccBalanceSheet } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import FinancialStatementQueryMutations from '@/graphql/FinancialStatementQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
@@ -137,14 +136,24 @@ const useFinancialStatement = () => {
   const [otherIncomeExpenseData, setOtherIncomeExpenseData] = useState<IncomeStatementRow[] | undefined>();
   const [lessExpenseData, setLessExpenseData] = useState<IncomeStatementRow[] | undefined>();
   const [incomeTaxData, setIncomeTaxData] = useState<IncomeStatementRow[] | undefined>();
-  const [months, setMonths] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [printLoading, setPrintLoading] = useState<boolean>(false);
-  const [breakdownLoading, setBreakdownLoading] = useState<boolean>(false);
 
   // Sub-branch breakdown state (consolidated)
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
   const [breakdownByBranch, setBreakdownByBranch] = useState<BreakdownData>({});
+
+  /**
+   * Helper to clear all income statement section data
+   */
+  const clearStatementData = () => {
+    setIsInterestIncomeData(undefined);
+    setIsOtherRevenueData(undefined);
+    setDirectFinancingData(undefined);
+    setOtherIncomeExpenseData(undefined);
+    setLessExpenseData(undefined);
+    setIncomeTaxData(undefined);
+  };
  
   const fetchBalanceSheetData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
     // Validate dates before API call
@@ -238,13 +247,7 @@ const useFinancialStatement = () => {
       if (response.errors && response.errors.length > 0) {
         console.error('Income Statement GraphQL errors:', response.errors);
         toast.error(response.errors[0].message || 'Failed to load Income Statement');
-        // Clear data on error
-        setIsInterestIncomeData(undefined);
-        setIsOtherRevenueData(undefined);
-        setDirectFinancingData(undefined);
-        setOtherIncomeExpenseData(undefined);
-        setLessExpenseData(undefined);
-        setIncomeTaxData(undefined);
+        clearStatementData();
         return;
       }
 
@@ -265,13 +268,7 @@ const useFinancialStatement = () => {
     } catch (error) {
       console.error('Income Statement fetch error:', error);
       toast.error('Failed to load Income Statement data');
-      // Clear data on error
-      setIsInterestIncomeData(undefined);
-      setIsOtherRevenueData(undefined);
-      setDirectFinancingData(undefined);
-      setOtherIncomeExpenseData(undefined);
-      setLessExpenseData(undefined);
-      setIncomeTaxData(undefined);
+      clearStatementData();
     } finally {
       setLoading(false);
     }
@@ -300,9 +297,8 @@ const useFinancialStatement = () => {
       return;
     }
 
-    // Use breakdownLoading instead of global loading to keep main content visible
-    setBreakdownLoading(true);
-    setShowBreakdown(shouldShowBreakdown);
+    // Use global loading to show full-page spinner (same UX as changing dates/branch)
+    setLoading(true);
 
     try {
       const variables = {
@@ -326,6 +322,7 @@ const useFinancialStatement = () => {
       if (response.errors && response.errors.length > 0) {
         console.error('Income Statement with breakdown GraphQL errors:', response.errors);
         toast.error(response.errors[0].message || 'Failed to load Income Statement breakdown');
+        setShowBreakdown(false);
         clearBreakdownData();
         return;
       }
@@ -335,6 +332,7 @@ const useFinancialStatement = () => {
       if (!breakdownData) {
         console.error('Invalid Income Statement breakdown response:', response);
         toast.error('Failed to load Income Statement: Invalid data format');
+        setShowBreakdown(false);
         return;
       }
 
@@ -345,6 +343,10 @@ const useFinancialStatement = () => {
       setLessExpenseData(breakdownData.less_expense);
       setOtherIncomeExpenseData(breakdownData.other_income_expense);
       setIncomeTaxData(breakdownData.income_tax);
+
+      // Set showBreakdown AFTER data is populated so the breakdown section
+      // only renders when its data is already in state (prevents empty header flash)
+      setShowBreakdown(shouldShowBreakdown);
 
       // Set branch breakdown data (only populated when show_breakdown is true)
       if (shouldShowBreakdown) {
@@ -362,9 +364,10 @@ const useFinancialStatement = () => {
     } catch (error) {
       console.error('Income Statement with breakdown fetch error:', error);
       toast.error('Failed to load Income Statement breakdown data');
+      setShowBreakdown(false);
       clearBreakdownData();
     } finally {
-      setBreakdownLoading(false);
+      setLoading(false);
     }
   };
 
@@ -462,7 +465,6 @@ const useFinancialStatement = () => {
     // Loading states
     loading,
     printLoading,
-    breakdownLoading,
   };
 };
 

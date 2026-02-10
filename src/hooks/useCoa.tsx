@@ -1,12 +1,20 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useCallback, useEffect, useState } from 'react';
+import { SubmitHandler } from 'react-hook-form';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import CoaQueryMutations from '@/graphql/CoaQueryMutations';
 import BranchQueryMutation from '@/graphql/BranchQueryMutation';
 import { useAuthStore } from "@/store";
+
+// Pure utility — no hook state, safe to define outside the hook for stable reference
+const countInactiveDescendants = (account: DataChartOfAccountList): number => {
+  if (!account.subAccounts || account.subAccounts.length === 0) return 0;
+  return account.subAccounts.reduce((count, child) => {
+    return count + (child.is_active ? 0 : 1) + countInactiveDescendants(child);
+  }, 0);
+};
 
 const useCoa = () => {
   const { COA_TABLE_QUERY, UPDATE_COA_MUTATION, SAVE_COA_MUTATION, TOGGLE_ACTIVE_STATUS_MUTATION, PRINT_CHART_OF_ACCOUNTS } = CoaQueryMutations;
@@ -17,7 +25,7 @@ const useCoa = () => {
   const [coaLoading, setCoaLoading] = useState<boolean>(false);
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
 
-  const fetchDataSubBranch = async (orderBy = 'id_desc') => {
+  const fetchDataSubBranch = useCallback(async (orderBy = 'id_desc') => {
     const { GET_AUTH_TOKEN } = useAuthStore.getState();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
@@ -33,7 +41,7 @@ const useCoa = () => {
 
     const result = await response.json();
     setBranchSubData(result.data.getAllBranch);
-  };
+  }, [GET_ALL_SUB_BRANCH_QUERY]);
   
   // Initialize data on mount (following useUsers pattern)
   useEffect(() => {
@@ -41,7 +49,7 @@ const useCoa = () => {
     fetchCoaDataTable();
   }, []);
 
-  const fetchCoaDataTable = async () => {
+  const fetchCoaDataTable = useCallback(async () => {
     setLoading(true);
 
     try {
@@ -80,10 +88,11 @@ const useCoa = () => {
         return;
       }
 
-      // Normalize is_active to boolean to prevent type inconsistencies
+      // Normalize is_active to boolean - handles all backend value types
+      // Note: Boolean("0") = true in JS (non-empty string), so we must check explicitly
       const normalizeAccount = (account: any): any => ({
         ...account,
-        is_active: Boolean(account.is_active),
+        is_active: account.is_active === true || account.is_active === 1 || account.is_active === '1',
         subAccounts: account.subAccounts?.map(normalizeAccount) || []
       });
 
@@ -95,9 +104,9 @@ const useCoa = () => {
       toast.error('Failed to fetch accounts');
       setLoading(false);
     }
-  };
+  }, [COA_TABLE_QUERY]);
 
-  const onSubmitCoa: SubmitHandler<DataChartOfAccountList> = async (data) => {
+  const onSubmitCoa: SubmitHandler<DataChartOfAccountList> = useCallback(async (data) => {
     setCoaLoading(true);
     try {
       let mutation;
@@ -171,27 +180,10 @@ const useCoa = () => {
     } finally {
       setCoaLoading(false);
     }
-  };
+  }, [UPDATE_COA_MUTATION, SAVE_COA_MUTATION]);
 
-  const countInactiveDescendants = (account: DataChartOfAccountList): number => {
-    if (!account.subAccounts || account.subAccounts.length === 0) {
-      return 0;
-    }
-
-    let count = 0;
-    for (const child of account.subAccounts) {
-      // Count this child if it's inactive
-      if (!child.is_active) {
-        count++;
-      }
-      // Recursively count inactive descendants
-      count += countInactiveDescendants(child);
-    }
-
-    return count;
-  };
-
-  const deleteCoaAccount = async (id: string) => {
+  // Single function for both deactivate and reactivate (eliminates ~75 lines of duplication)
+  const toggleAccountStatus = useCallback(async (id: string, active: boolean, cascade: boolean = false) => {
     setCoaLoading(true);
     try {
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
@@ -203,10 +195,7 @@ const useCoa = () => {
         },
         body: JSON.stringify({
           query: TOGGLE_ACTIVE_STATUS_MUTATION,
-          variables: {
-            id,
-            active: false
-          },
+          variables: { id, active, cascade },
         }),
       });
 
@@ -222,41 +211,33 @@ const useCoa = () => {
         const affectedAccounts = responseData.affectedAccounts || [];
         const affectedCount = affectedAccounts.length;
 
-        // Manually update state with affected accounts if backend returns them
+        // Update local state tree with affected accounts from backend
         if (affectedAccounts.length > 0) {
           const affectedIds = new Set(affectedAccounts.map((acc: any) => acc.id));
 
-          // Recursive function to update account status in the tree
-          const updateAccountStatus = (accounts: DataChartOfAccountList[]): DataChartOfAccountList[] => {
-            return accounts.map(account => {
-              const isAffected = affectedIds.has(account.id);
-              return {
-                ...account,
-                is_active: isAffected ? false : account.is_active,
-                subAccounts: account.subAccounts ? updateAccountStatus(account.subAccounts) : []
-              };
-            });
-          };
+          const updateAccountStatus = (accounts: DataChartOfAccountList[]): DataChartOfAccountList[] =>
+            accounts.map(account => ({
+              ...account,
+              is_active: affectedIds.has(account.id) ? active : account.is_active,
+              subAccounts: account.subAccounts ? updateAccountStatus(account.subAccounts) : []
+            }));
 
-          // Update state - this triggers React re-render
           setCoaDataAccount(prev => prev ? updateAccountStatus(prev) : prev);
         } else {
-          // Fallback: If backend doesn't return affected accounts, refetch all data
           await fetchCoaDataTable();
         }
 
-        if (affectedCount === 1) {
-          toast.success("Account deactivated successfully!");
-        } else if (affectedCount > 1) {
-          toast.success(`Account and ${affectedCount - 1} sub-account(s) deactivated successfully!`);
+        const action = active ? 'reactivated' : 'deactivated';
+        if (affectedCount > 1) {
+          toast.success(`Account and ${affectedCount - 1} sub-account(s) ${action} successfully!`);
         } else {
-          toast.success("Account deactivated successfully!");
+          toast.success(`Account ${action} successfully!`);
         }
 
         return { success: true, data: responseData };
       }
 
-      toast.error("Failed to deactivate account");
+      toast.error(`Failed to ${active ? 'reactivate' : 'deactivate'} account`);
       return { success: false, error: "Unknown error" };
 
     } catch (error) {
@@ -266,87 +247,20 @@ const useCoa = () => {
     } finally {
       setCoaLoading(false);
     }
-  };
+  }, [TOGGLE_ACTIVE_STATUS_MUTATION, fetchCoaDataTable]);
 
-  const reactivateAccount = async (id: string, cascade: boolean = false) => {
-    setCoaLoading(true);
-    try {
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-        },
-        body: JSON.stringify({
-          query: TOGGLE_ACTIVE_STATUS_MUTATION,
-          variables: {
-            id,
-            active: true,
-            cascade: cascade
-          },
-        }),
-      });
+  // Thin wrappers for API compatibility with consumers
+  const deleteCoaAccount = useCallback(
+    (id: string) => toggleAccountStatus(id, false),
+    [toggleAccountStatus]
+  );
 
-      const result = await response.json();
+  const reactivateAccount = useCallback(
+    (id: string, cascade: boolean = false) => toggleAccountStatus(id, true, cascade),
+    [toggleAccountStatus]
+  );
 
-      if (result.errors) {
-        toast.error(result.errors[0].message);
-        return { success: false, error: result.errors[0].message };
-      }
-
-      if (result.data?.toggleActiveStatus) {
-        const responseData = result.data.toggleActiveStatus;
-        const affectedAccounts = responseData.affectedAccounts || [];
-        const affectedCount = affectedAccounts.length;
-
-        // Manually update state with affected accounts if backend returns them
-        if (affectedAccounts.length > 0) {
-          const affectedIds = new Set(affectedAccounts.map((acc: any) => acc.id));
-
-          // Recursive function to update account status in the tree
-          const updateAccountStatus = (accounts: DataChartOfAccountList[]): DataChartOfAccountList[] => {
-            return accounts.map(account => {
-              const isAffected = affectedIds.has(account.id);
-              return {
-                ...account,
-                is_active: isAffected ? true : account.is_active,
-                subAccounts: account.subAccounts ? updateAccountStatus(account.subAccounts) : []
-              };
-            });
-          };
-
-          // Update state - this triggers React re-render
-          setCoaDataAccount(prev => prev ? updateAccountStatus(prev) : prev);
-        } else {
-          // Fallback: If backend doesn't return affected accounts, refetch all data
-          await fetchCoaDataTable();
-        }
-
-        if (affectedCount === 1) {
-          toast.success("Account reactivated successfully!");
-        } else if (affectedCount > 1) {
-          toast.success(`Account and ${affectedCount - 1} sub-account(s) reactivated successfully!`);
-        } else {
-          toast.success("Account reactivated successfully!");
-        }
-
-        return { success: true, data: responseData };
-      }
-
-      toast.error("Failed to reactivate account");
-      return { success: false, error: "Unknown error" };
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
-      toast.error(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setCoaLoading(false);
-    }
-  };
-
-  const printChartOfAccounts = async (branchSubId: string = 'all') => {
+  const printChartOfAccounts = useCallback(async (branchSubId: string = 'all') => {
     setLoading(true);
 
     // Open window synchronously to prevent popup blocker
@@ -447,7 +361,7 @@ const useCoa = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [PRINT_CHART_OF_ACCOUNTS]);
 
   return {
     fetchCoaDataTable,

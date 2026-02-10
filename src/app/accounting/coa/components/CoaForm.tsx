@@ -64,6 +64,9 @@ const CoaForm: React.FC<CoaFormProps> = ({
     ): { label: string; value: string }[] => {
       let options: { label: string; value: string }[] = [];
       accounts.forEach((account) => {
+        // Skip inactive accounts from dropdown options
+        if (!account.is_active) return;
+
         options.push({
           label: `${'—'.repeat(level - 1)} ${account.account_name}`,
           value: account?.id?.toString(),
