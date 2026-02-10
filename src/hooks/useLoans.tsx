@@ -688,7 +688,9 @@ const useLoans = () => {
       let variables: { input: any } = {
         input: {
           id: data?.id,
-          released_date: data?.released_date,
+          released_date: data?.released_date
+            ? moment(data.released_date).format('YYYY-MM-DD')
+            : null,
           bank_id: data?.bank_id,
           check_no: data?.check_no,
         }

@@ -1,5 +1,7 @@
 export const formatDate = (dateString: string) => {
+  if (!dateString || dateString === 'null' || dateString === 'undefined') return '-';
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
     minute: 'numeric',

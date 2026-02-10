@@ -6,6 +6,7 @@ import { LoanReleaseFormValues, BorrLoanRowData, DataSubBranches, DataChartOfAcc
 import FormLabel from '@/components/FormLabel';
 import useBank from '@/hooks/useBank';
 import DatePicker from 'react-datepicker';
+import moment from 'moment';
 import AcctgEntryForm from './AcctgEntryForm';
 
 interface OMProps {
@@ -84,7 +85,10 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   useEffect(() => {
     if (loanSingleData) {
       setValue('id', loanSingleData?.id);
-      setValue('released_date', new Date(loanSingleData?.released_date));
+      setValue('released_date', loanSingleData?.released_date
+        ? new Date(loanSingleData.released_date)
+        : new Date()
+      );
       setValue('bank_id', loanSingleData?.bank_id);
       setValue('check_no', loanSingleData?.check_no);
     }
@@ -198,7 +202,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             type="button"
             onClick={() => handleUpdateReleasedLoanInfo(
               Number(loanSingleData?.id),
-              String(watch('released_date')),
+              moment(watch('released_date')).format('YYYY-MM-DD'),
               Number(watch('bank_id')),
               String(watch('check_no') || 'N/A'),
               handleRefetchData
