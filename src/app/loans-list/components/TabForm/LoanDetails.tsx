@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
@@ -8,10 +8,20 @@ import useLoans from '@/hooks/useLoans';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
-  printLoanDetails: (v: string) => void;
+  printLoanDetails: (v: string) => Promise<void>;
 }
 
 const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) => {
+  const [printLoading, setPrintLoading] = useState(false);
+
+  const handlePrint = async () => {
+    setPrintLoading(true);
+    try {
+      await printLoanDetails(String(loanSingleData?.id));
+    } finally {
+      setPrintLoading(false);
+    }
+  };
 
   const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
                         Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
@@ -99,14 +109,15 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
         </div>
         <div className="bg-gray-200 dark:bg-boxdark p-4 rounded">
           <button
-            className="flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            className="flex justify-between items-center focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             type="button"
-            onClick={() => { return printLoanDetails(String(loanSingleData?.id)); }}
+            onClick={handlePrint}
+            disabled={printLoading}
           >
             <span className="mt-1 mr-1">
-              <Printer size={17} /> 
+              <Printer size={17} />
             </span>
-            <span>Print Loan Details</span>
+            <span>{printLoading ? 'Generating...' : 'Print Loan Details'}</span>
           </button>
         </div>
         {/* Add more grid items as needed */}
