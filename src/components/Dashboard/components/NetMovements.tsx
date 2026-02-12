@@ -20,7 +20,7 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
     // Extract credit values for specific descriptions
     const newIncome = sumTixData.summary_tix
       .filter((item: any) =>
-        ['processing', 'notarial', 'insurance'].includes(item.description)
+        ['processing', 'notarial', 'insurance', 'insurance mfee'].includes(item.description)
       )
       .map((item: any) => Number(item.credit) || 0); // Convert to number and handle NaN
 
