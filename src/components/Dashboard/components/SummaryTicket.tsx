@@ -4,6 +4,15 @@ import React, { useEffect, useState } from 'react';
 import { formatToTwoDecimalPlaces, formatDateRange } from '@/utils/helper';
 import { toCamelCase, formatNumberComma } from '@/utils/helper';
 
+// Display order for summary ticket rows
+const CUSTOM_ORDER = ['notes receivable', 'udi', 'processing',
+                      'agent fee', 'collection', 'insurance', 'insurance mfee', 'notarial',
+                      'outstanding balance', 'penalty', 'rebates', 'addon amount',
+                      'addon udi', 'addon total', 'cash in bank'];
+
+// Descriptions that count toward Total Income (must match summary_ticket.php)
+const INCOME_DESCRIPTIONS = ['udi', 'processing', 'notarial', 'insurance', 'insurance mfee', 'addon udi'];
+
 interface SumProps {
   sumTixData: any;
   startDate: Date | undefined;
@@ -20,8 +29,6 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
 
   useEffect(() => {
     if (sumTixData?.summary_tix) {
-      const incomeDescriptions = ['udi', 'processing', 'notarial', 'insurance', 'addon udi'];
-
       const calculated = sumTixData.summary_tix
         ?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')
         .reduce(
@@ -31,7 +38,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
             return {
               totalDebit: acc.totalDebit + parseFloat(item.debit || 0),
               totalCredit: acc.totalCredit + credit,
-              totalIncome: acc.totalIncome + (incomeDescriptions.includes(desc) ? credit : 0),
+              totalIncome: acc.totalIncome + (INCOME_DESCRIPTIONS.includes(desc) ? credit : 0),
             };
           },
           { totalDebit: 0, totalCredit: 0, totalIncome: 0 }
@@ -39,12 +46,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
 
       setTotals(calculated);
     }
-  }, [sumTixData]);
-
-  const customOrder = ['notes receivable', 'udi', 'processing', 
-                      'agent fee', 'collection', 'insurance', 'insurance mfee', 'notarial', 
-                      'outstanding balance', 'penalty', 'rebates', 'addon amount', 
-                      'addon udi', 'addon total', 'cash in bank']; 
+  }, [sumTixData]); 
 
   return (
     <div>
@@ -77,7 +79,7 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                 </td>
               </tr>
               {sumTixData?.summary_tix?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')
-                  ?.sort((a: any, b: any) => customOrder.indexOf(a.description) - customOrder.indexOf(b.description))
+                  ?.sort((a: any, b: any) => CUSTOM_ORDER.indexOf(a.description) - CUSTOM_ORDER.indexOf(b.description))
                   .map((item: any, i: number) => (
                   <tr key={i}>
                     <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
