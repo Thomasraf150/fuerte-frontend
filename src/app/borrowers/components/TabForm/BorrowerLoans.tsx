@@ -57,9 +57,8 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
 
   const renewALoan = (b: boolean) => {
     setShowForm(b);
-    // console.log(dataLoanRenewal, ' dataLoanRenewal');
     fetchRerewalLoan(dataLoanRenewal);
-
+    fetchMyAccessibleBranchSubs();
     setShowDetails(false);
   }
 
