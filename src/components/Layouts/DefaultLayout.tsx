@@ -2,6 +2,7 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import SidebarAcctg from "@/components/SidebarAcctg";
+import SidebarOwner from "@/components/SidebarOwner";
 import Header from "@/components/Header";
 import withAuth from '@/hoc/withAuth';
 import { ToastContainer } from 'react-toastify';
@@ -37,7 +38,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex h-screen overflow-hidden">
         {/* <!-- ===== Sidebar Start ===== --> */}
-        {userData?.user?.role?.code === 'ACCTG' ? (
+        {userData?.user?.role?.code === 'OWN' ? (
+          <SidebarOwner sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        ) : userData?.user?.role?.code === 'ACCTG' ? (
           <SidebarAcctg sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         ) : (
           <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />

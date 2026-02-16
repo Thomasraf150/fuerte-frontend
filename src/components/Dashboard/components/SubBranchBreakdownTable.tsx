@@ -2,32 +2,19 @@
 
 import React from "react";
 import { SubBranchBreakdown } from "@/types/dashboard";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface SubBranchBreakdownTableProps {
   breakdown: SubBranchBreakdown[];
   loading?: boolean;
+  fullWidth?: boolean;
 }
-
-/**
- * Format number as Philippine Peso currency.
- */
-const formatCurrency = (value: string): string => {
-  const num = parseFloat(value);
-  if (isNaN(num)) return "₱0.00";
-
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-};
 
 /**
  * Loading skeleton for table.
  */
 const LoadingSkeleton: React.FC = () => (
-  <div className="col-span-12 xl:col-span-5">
+  <div>
     <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
       <div className="animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
@@ -47,24 +34,30 @@ const LoadingSkeleton: React.FC = () => (
 const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
   breakdown,
   loading,
+  fullWidth = false,
 }) => {
+  const containerClass = fullWidth ? "" : "col-span-12 xl:col-span-5";
   if (loading) {
-    return <LoadingSkeleton />;
+    return (
+      <div className={containerClass}>
+        <LoadingSkeleton />
+      </div>
+    );
   }
 
-  // Calculate totals
+  // Calculate totals (accumulate as numbers, format at display time)
   const totals = breakdown.reduce(
     (acc, item) => ({
       loan_count: acc.loan_count + item.loan_count,
-      nr_balance: (parseFloat(acc.nr_balance) + parseFloat(item.nr_balance)).toFixed(2),
-      udi_balance: (parseFloat(acc.udi_balance) + parseFloat(item.udi_balance)).toFixed(2),
+      nr_balance: acc.nr_balance + parseFloat(item.nr_balance),
+      udi_balance: acc.udi_balance + parseFloat(item.udi_balance),
     }),
-    { loan_count: 0, nr_balance: "0", udi_balance: "0" }
+    { loan_count: 0, nr_balance: 0, udi_balance: 0 }
   );
 
   if (breakdown.length === 0) {
     return (
-      <div className="col-span-12 xl:col-span-5">
+      <div className={containerClass}>
         <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
             Sub-Branch Breakdown
@@ -78,7 +71,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
   }
 
   return (
-    <div className="col-span-12 xl:col-span-5">
+    <div className={containerClass}>
       <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
         <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
           Sub-Branch Breakdown

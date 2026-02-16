@@ -3,27 +3,14 @@
 import React from "react";
 import CardDataStats from "@/components/CardDataStats";
 import { AccountingDashboardSummary, PreviousPeriodSummary } from "@/types/dashboard";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface NrUdiSummaryProps {
   summary: AccountingDashboardSummary;
   previous?: PreviousPeriodSummary;
   loading?: boolean;
+  isOwner?: boolean;
 }
-
-/**
- * Format number as Philippine Peso currency.
- */
-const formatCurrency = (value: string): string => {
-  const num = parseFloat(value);
-  if (isNaN(num)) return "₱0.00";
-
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-};
 
 /**
  * Format percentage change for display.
@@ -51,11 +38,14 @@ const LoadingSkeleton: React.FC = () => (
   </div>
 );
 
-const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading }) => {
+const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading, isOwner = true }) => {
+  const cardCount = isOwner ? 5 : 3;
+  const gridCols = isOwner ? 'xl:grid-cols-5' : 'xl:grid-cols-3';
+
   if (loading) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        {[1, 2, 3, 4].map((i) => (
+      <div className={`grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 ${gridCols} 2xl:gap-7.5`}>
+        {Array.from({ length: cardCount }, (_, i) => (
           <div
             key={i}
             className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
@@ -68,7 +58,7 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading 
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+    <div className={`grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 ${gridCols} 2xl:gap-7.5`}>
       {/* Total NR */}
       <CardDataStats
         title="Total NR (Net Receivables)"
@@ -79,15 +69,17 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading 
         previousValue={previous ? formatCurrency(previous.total_nr) : undefined}
       />
 
-      {/* Total UDI */}
-      <CardDataStats
-        title="Total UDI"
-        total={formatCurrency(summary.total_udi)}
-        rate={formatPercent(summary.udi_change_percent)}
-        levelUp={isPositive(summary.udi_change_percent)}
-        levelDown={!isPositive(summary.udi_change_percent)}
-        previousValue={previous ? formatCurrency(previous.total_udi) : undefined}
-      />
+      {/* Total UDI - Owner only */}
+      {isOwner && (
+        <CardDataStats
+          title="Total UDI"
+          total={formatCurrency(summary.total_udi)}
+          rate={formatPercent(summary.udi_change_percent)}
+          levelUp={isPositive(summary.udi_change_percent)}
+          levelDown={!isPositive(summary.udi_change_percent)}
+          previousValue={previous ? formatCurrency(previous.total_udi) : undefined}
+        />
+      )}
 
       {/* Released Loans */}
       <CardDataStats
@@ -99,14 +91,26 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading 
         previousValue={previous ? previous.active_loan_count : undefined}
       />
 
-      {/* Total Outstanding */}
+      {/* Total Outstanding - Owner only */}
+      {isOwner && (
+        <CardDataStats
+          title="Total Outstanding (NR + UDI)"
+          total={formatCurrency(summary.total_outstanding)}
+          rate={formatPercent(summary.outstanding_change_percent)}
+          levelUp={isPositive(summary.outstanding_change_percent)}
+          levelDown={!isPositive(summary.outstanding_change_percent)}
+          previousValue={previous ? formatCurrency(previous.total_outstanding) : undefined}
+        />
+      )}
+
+      {/* Cash Out */}
       <CardDataStats
-        title="Total Outstanding (NR + UDI)"
-        total={formatCurrency(summary.total_outstanding)}
-        rate={formatPercent(summary.outstanding_change_percent)}
-        levelUp={isPositive(summary.outstanding_change_percent)}
-        levelDown={!isPositive(summary.outstanding_change_percent)}
-        previousValue={previous ? formatCurrency(previous.total_outstanding) : undefined}
+        title="Cash Out (Loan Proceeds)"
+        total={formatCurrency(summary.total_cash_out)}
+        rate={formatPercent(summary.cash_out_change_percent)}
+        levelUp={isPositive(summary.cash_out_change_percent)}
+        levelDown={!isPositive(summary.cash_out_change_percent)}
+        previousValue={previous ? formatCurrency(previous.total_cash_out) : undefined}
       />
     </div>
   );

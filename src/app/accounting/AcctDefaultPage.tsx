@@ -33,6 +33,12 @@ const AcctDefaultPage: React.FC = () => {
 
   const [branches, setBranches] = useState<Branch[]>([]);
   const [branchesLoading, setBranchesLoading] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    const { user } = useAuthStore.getState() as any;
+    setIsOwner(user?.role?.code === 'OWN');
+  }, []);
 
   // Fetch branches for admin dropdown
   useEffect(() => {
@@ -151,34 +157,44 @@ const AcctDefaultPage: React.FC = () => {
 
       {/* Summary Cards */}
       {data?.summary ? (
-        <NrUdiSummary summary={data.summary} previous={data.previous} loading={loading} />
+        <NrUdiSummary summary={data.summary} previous={data.previous} loading={loading} isOwner={isOwner} />
       ) : (
         <NrUdiSummary
           summary={{
             total_nr: "0",
             total_udi: "0",
             total_outstanding: "0",
+            total_cash_out: "0",
             active_loan_count: "0",
             nr_change_percent: "0",
             udi_change_percent: "0",
             loan_count_change_percent: "0",
             outstanding_change_percent: "0",
+            cash_out_change_percent: "0",
           }}
           loading={loading}
+          isOwner={isOwner}
         />
       )}
 
       {/* Charts and Tables */}
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-        {/* Trend Chart */}
-        <NrUdiTrendChart trend={data?.trend || []} loading={loading} />
-
-        {/* Sub-Branch Breakdown Table */}
-        <SubBranchBreakdownTable
-          breakdown={data?.sub_branch_breakdown || []}
-          loading={loading}
-        />
-      </div>
+      {isOwner ? (
+        <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+          <NrUdiTrendChart trend={data?.trend || []} loading={loading} />
+          <SubBranchBreakdownTable
+            breakdown={data?.sub_branch_breakdown || []}
+            loading={loading}
+          />
+        </div>
+      ) : (
+        <div className="mt-4">
+          <SubBranchBreakdownTable
+            breakdown={data?.sub_branch_breakdown || []}
+            loading={loading}
+            fullWidth
+          />
+        </div>
+      )}
     </>
   );
 };

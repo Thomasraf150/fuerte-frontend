@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import FinancialStatementQueryMutations from '@/graphql/FinancialStatementQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';
+import { useAuthStore } from "@/store";
 
 /**
  * PDF Loading Window HTML template
@@ -121,6 +122,14 @@ export interface BreakdownData {
   incomeTax?: IncomeStatementByBranchRow[];
 }
 
+const getAuthHeaders = (): Record<string, string> => {
+  const token = useAuthStore.getState().GET_AUTH_TOKEN();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+};
+
 const useFinancialStatement = () => {
   const {
     GET_BALANCE_SHEET,
@@ -181,9 +190,7 @@ const useFinancialStatement = () => {
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           query: GET_BALANCE_SHEET,
           variables
@@ -234,9 +241,7 @@ const useFinancialStatement = () => {
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           query: GET_INCOME_STATEMENT,
           variables
@@ -309,9 +314,7 @@ const useFinancialStatement = () => {
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           query: GET_INCOME_STATEMENT_WITH_BREAKDOWN,
           variables
@@ -407,7 +410,7 @@ const useFinancialStatement = () => {
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ query: PRINT_INCOME_STATEMENT, variables }),
       });
 

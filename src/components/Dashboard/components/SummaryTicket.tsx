@@ -13,13 +13,17 @@ const CUSTOM_ORDER = ['notes receivable', 'udi', 'processing',
 // Descriptions that count toward Total Income (must match summary_ticket.php)
 const INCOME_DESCRIPTIONS = ['udi', 'processing', 'notarial', 'insurance', 'insurance mfee', 'addon udi'];
 
+// Allowed rows for non-OWNER users (defense-in-depth)
+const NON_OWNER_ALLOWED = ['notes receivable', 'cash in bank'];
+
 interface SumProps {
   sumTixData: any;
   startDate: Date | undefined;
   endDate: Date | undefined;
+  isOwner?: boolean;
 }
 
-const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
+const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate, isOwner = true}) => {
 
   const [totals, setTotals] = useState({
     totalDebit: 0,
@@ -66,19 +70,27 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
-                  No of Transaction
-                </td>
-                <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                  {sumTixData && sumTixData?.summary_tix[4]?.ccount}
-                </td>
-                <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                </td>
-                <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                </td>
-              </tr>
-              {sumTixData?.summary_tix?.filter((item: any) => item.description?.trim().toLowerCase() !== 'addon total')
+              {isOwner && (
+                <tr>
+                  <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
+                    No of Transaction
+                  </td>
+                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
+                    {sumTixData && sumTixData?.summary_tix[4]?.ccount}
+                  </td>
+                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
+                  </td>
+                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
+                  </td>
+                </tr>
+              )}
+              {sumTixData?.summary_tix?.filter((item: any) => {
+                    const desc = item.description?.trim().toLowerCase();
+                    if (desc === 'addon total') return false;
+                    // Defense-in-depth: non-OWNER only sees allowed rows
+                    if (!isOwner && !NON_OWNER_ALLOWED.includes(desc)) return false;
+                    return true;
+                  })
                   ?.sort((a: any, b: any) => CUSTOM_ORDER.indexOf(a.description) - CUSTOM_ORDER.indexOf(b.description))
                   .map((item: any, i: number) => (
                   <tr key={i}>
@@ -95,32 +107,36 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => 
                     </td>
                   </tr>
               ))}
-              <tr>
-                <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
-                  CONTROL TOTALS
-                </td>
-                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
+              {isOwner && (
+                <>
+                  <tr>
+                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
+                      CONTROL TOTALS
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
 
-                </td>
-                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
-                  {'\u20B1'} {formatNumberComma(totals?.totalDebit)}
-                </td>
-                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
-                  {'\u20B1'} {formatNumberComma(totals?.totalCredit)}
-                </td>
-              </tr>
-              <tr>
-                <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500 font-bold">
-                  TOTAL INCOME
-                </td>
-                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500">
-                </td>
-                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500">
-                </td>
-                <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500 font-bold">
-                  {'\u20B1'} {formatNumberComma(totals?.totalIncome)}
-                </td>
-              </tr>
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
+                      {'\u20B1'} {formatNumberComma(totals?.totalDebit)}
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-strokedark bg-yellow-500">
+                      {'\u20B1'} {formatNumberComma(totals?.totalCredit)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500 font-bold">
+                      TOTAL INCOME
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500">
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500">
+                    </td>
+                    <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark text-white bg-blue-500 font-bold">
+                      {'\u20B1'} {formatNumberComma(totals?.totalIncome)}
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>

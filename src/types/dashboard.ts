@@ -14,17 +14,20 @@ export interface AccountingDashboardSummary {
   total_nr: string;
   total_udi: string;
   total_outstanding: string;
+  total_cash_out: string;
   active_loan_count: string;
   nr_change_percent: string;
   udi_change_percent: string;
   loan_count_change_percent: string;
   outstanding_change_percent: string;
+  cash_out_change_percent: string;
 }
 
 export interface PreviousPeriodSummary {
   total_nr: string;
   total_udi: string;
   total_outstanding: string;
+  total_cash_out: string;
   active_loan_count: string;
 }
 

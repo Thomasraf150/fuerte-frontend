@@ -43,6 +43,34 @@ const DefaultPage: React.FC = () => {
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
 
+  // Role-based access: determine if current user is OWNER
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [userBranchLabel, setUserBranchLabel] = useState<string>('');
+  const [userBranchSubId, setUserBranchSubId] = useState<string>('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+      const userData = JSON.parse(storedAuthStore)['state'];
+      const roleCode = userData?.user?.role?.code;
+      setIsOwner(roleCode === 'OWN');
+
+      if (roleCode !== 'OWN' && userData?.user) {
+        const branchSub = userData.user.branch_sub || userData.user.branchSub;
+        if (branchSub) {
+          const branchName = branchSub.branch?.name || '';
+          const subBranchName = branchSub.name || '';
+          setUserBranchLabel(branchName ? `${branchName} - ${subBranchName}` : subBranchName);
+        } else {
+          setUserBranchLabel('No branch assigned');
+        }
+        const ubsId = String(userData.user.branch_sub_id || '');
+        setUserBranchSubId(ubsId);
+        setBranchSubId(ubsId);
+      }
+    }
+  }, []);
+
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
       setStartDate(date);
@@ -109,6 +137,14 @@ const DefaultPage: React.FC = () => {
       fetchSummaryTixReport(startDate, endDate, branchSubId, showBreakdown, branchId);
     }
   }, [startDate, endDate]);
+
+  // Non-OWNER: auto-fetch when both dates are selected (branch is already locked)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!isOwner && userBranchSubId && startDate && endDate) {
+      fetchSummaryTixReport(startDate, endDate, userBranchSubId, false, '');
+    }
+  }, [isOwner, userBranchSubId, startDate, endDate]);
 
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
@@ -185,83 +221,100 @@ const DefaultPage: React.FC = () => {
             />
           </div>
 
-          {/* Branch Select */}
-          <div className="flex flex-col min-w-[200px]">
-            <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
-              Branch:
-            </label>
-            <Controller
-              name="branch_id"
-              control={control}
-              rules={{ required: 'Branch is required' }}
-              render={({ field }) => (
-                <ReactSelect
-                  {...field}
-                  options={optionsBranch}
-                  placeholder="Select a branch..."
-                  isLoading={loadingBranches}
-                  loadingMessage={() => 'Loading branches...'}
-                  onChange={(selectedOption) => {
-                    field.onChange(selectedOption?.value);
-                    handleBranchChange(selectedOption?.value ?? '');
-                  }}
-                  value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
-                  styles={{
-                    menu: (base) => ({
-                      ...base,
-                      minWidth: '200px'
-                    }),
-                    menuList: (base) => ({
-                      ...base,
-                      maxHeight: '200px',
-                      overflowY: 'auto'
-                    })
-                  }}
+          {/* OWNER: Branch/Sub-Branch dropdowns | Non-OWNER: Static branch label */}
+          {isOwner ? (
+            <>
+              {/* Branch Select */}
+              <div className="flex flex-col min-w-[200px]">
+                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                  Branch:
+                </label>
+                <Controller
+                  name="branch_id"
+                  control={control}
+                  rules={{ required: 'Branch is required' }}
+                  render={({ field }) => (
+                    <ReactSelect
+                      {...field}
+                      options={optionsBranch}
+                      placeholder="Select a branch..."
+                      isLoading={loadingBranches}
+                      loadingMessage={() => 'Loading branches...'}
+                      onChange={(selectedOption) => {
+                        field.onChange(selectedOption?.value);
+                        handleBranchChange(selectedOption?.value ?? '');
+                      }}
+                      value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                      styles={{
+                        menu: (base) => ({
+                          ...base,
+                          minWidth: '200px'
+                        }),
+                        menuList: (base) => ({
+                          ...base,
+                          maxHeight: '200px',
+                          overflowY: 'auto'
+                        })
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
+              </div>
 
-          {/* Sub Branch Select - Always visible, disabled when "All Branches" selected */}
-          <div className="flex flex-col min-w-[200px]">
-            <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
-              Sub Branch:
-            </label>
-            <Controller
-              name="branch_sub_id"
-              control={control}
-              rules={{ required: 'Branch is required' }}
-              render={({ field }) => (
-                <ReactSelect
-                  {...field}
-                  options={optionsSubBranch}
-                  placeholder="Select a sub branch..."
-                  isDisabled={branchId === 'all'}
-                  isLoading={loadingSubBranches}
-                  loadingMessage={() => 'Loading sub-branches...'}
-                  onChange={(selectedOption) => {
-                    field.onChange(selectedOption?.value);
-                    handleBranchSubChange(selectedOption?.value ?? '');
-                  }}
-                  value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
-                  styles={{
-                    menu: (base) => ({
-                      ...base,
-                      minWidth: '200px'
-                    }),
-                    menuList: (base) => ({
-                      ...base,
-                      maxHeight: '200px',
-                      overflowY: 'auto'
-                    })
-                  }}
+              {/* Sub Branch Select - Always visible, disabled when "All Branches" selected */}
+              <div className="flex flex-col min-w-[200px]">
+                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                  Sub Branch:
+                </label>
+                <Controller
+                  name="branch_sub_id"
+                  control={control}
+                  rules={{ required: 'Branch is required' }}
+                  render={({ field }) => (
+                    <ReactSelect
+                      {...field}
+                      options={optionsSubBranch}
+                      placeholder="Select a sub branch..."
+                      isDisabled={branchId === 'all'}
+                      isLoading={loadingSubBranches}
+                      loadingMessage={() => 'Loading sub-branches...'}
+                      onChange={(selectedOption) => {
+                        field.onChange(selectedOption?.value);
+                        handleBranchSubChange(selectedOption?.value ?? '');
+                      }}
+                      value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                      styles={{
+                        menu: (base) => ({
+                          ...base,
+                          minWidth: '200px'
+                        }),
+                        menuList: (base) => ({
+                          ...base,
+                          maxHeight: '200px',
+                          overflowY: 'auto'
+                        })
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
+              </div>
+            </>
+          ) : (
+            /* Non-OWNER: Static branch label */
+            <div className="flex flex-col min-w-[200px]">
+              <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                Branch:
+              </label>
+              <div className="flex items-center h-[42px] px-4 rounded-md border border-stroke dark:border-strokedark bg-white dark:bg-form-input">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {userBranchLabel || 'Loading...'}
+                </span>
+              </div>
+            </div>
+          )}
 
-          {/* Breakdown Toggle - Only show when "All Branches" selected */}
-          {dataSummaryTicket !== undefined && branchSubId === 'all' && (
+          {/* Breakdown Toggle - Only show for OWNER when "All Branches" selected */}
+          {isOwner && dataSummaryTicket !== undefined && branchSubId === 'all' && (
             <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark invisible">
                 Options:
@@ -284,8 +337,8 @@ const DefaultPage: React.FC = () => {
             </div>
           )}
 
-          {/* Print Button - Only show when data is loaded */}
-          {dataSummaryTicket !== undefined && (
+          {/* Print Button - Only show for OWNER when data is loaded */}
+          {isOwner && dataSummaryTicket !== undefined && (
             <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark invisible">
                 Action:
@@ -315,28 +368,29 @@ const DefaultPage: React.FC = () => {
           </div>
         ) : dataSummaryTicket !== undefined ? (
           <>
-            <SummaryTicket sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate} />
-            <NetMovements sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
-            <CashoutByBank sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
-            <LoanByLoanType sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
-
-            {/* Branch Breakdown - Only show when breakdown is enabled and viewing all branches */}
-            {showBreakdown && branchSubId === 'all' && dataSummaryTicket.summary_tix_by_branch && (
+            <SummaryTicket sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate} isOwner={isOwner} />
+            {isOwner && (
               <>
-                {/* Summary Ticket Breakdown by Branch */}
-                <SummaryTicketByBranch
-                  data={dataSummaryTicket.summary_tix_by_branch}
-                  startDate={startDate}
-                  endDate={endDate}
-                />
+                <NetMovements sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
+                <CashoutByBank sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
+                <LoanByLoanType sumTixData={dataSummaryTicket} startDate={startDate} endDate={endDate}/>
 
-                {/* Net Movements Breakdown by Branch */}
-                {dataSummaryTicket.net_movement_by_branch && (
-                  <NetMovementsByBranch
-                    data={dataSummaryTicket.net_movement_by_branch}
-                    startDate={startDate}
-                    endDate={endDate}
-                  />
+                {/* Branch Breakdown - Only show when breakdown is enabled and viewing all branches */}
+                {showBreakdown && branchSubId === 'all' && dataSummaryTicket.summary_tix_by_branch && (
+                  <>
+                    <SummaryTicketByBranch
+                      data={dataSummaryTicket.summary_tix_by_branch}
+                      startDate={startDate}
+                      endDate={endDate}
+                    />
+                    {dataSummaryTicket.net_movement_by_branch && (
+                      <NetMovementsByBranch
+                        data={dataSummaryTicket.net_movement_by_branch}
+                        startDate={startDate}
+                        endDate={endDate}
+                      />
+                    )}
+                  </>
                 )}
               </>
             )}

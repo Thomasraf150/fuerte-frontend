@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SummaryTicketReports from '@/graphql/SummaryTicketReportsQueryMutation';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { useAuthStore } from "@/store";
 
 const useSummaryTicket = () => {
 
@@ -32,10 +33,12 @@ const useSummaryTicket = () => {
     mutation = show_breakdown ? GET_SUMMARY_TICKET_WITH_BREAKDOWN : GET_SUMMARY_TICKET_REPORTS;
     setSumTixLoading(true);
 
+    const token = useAuthStore.getState().GET_AUTH_TOKEN();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
         query: mutation,
@@ -119,10 +122,12 @@ const useSummaryTicket = () => {
       };
 
       // STEP 3: Execute async GraphQL mutation
+      const printToken = useAuthStore.getState().GET_AUTH_TOKEN();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(printToken ? { 'Authorization': `Bearer ${printToken}` } : {}),
         },
         body: JSON.stringify({
           query: PRINT_SUMMARY_TIX,

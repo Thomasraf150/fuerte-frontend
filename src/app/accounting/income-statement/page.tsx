@@ -1,21 +1,21 @@
+"use client";
+
 import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
+import OwnerGuard from '@/components/Guards/OwnerGuard';
 import './styles.css';
 import IncomeStatementList from './components/IncomeStatementList';
-
-export const metadata = {
-  title: "Income Statement",
-  description: "",
-};
 
 const IncomeStatement: React.FC = () => {
   return (
     <DefaultLayout>
-      <div className="mx-auto">
-        <Breadcrumb pageName="Income Statement" />
-      </div>
-      <IncomeStatementList />
+      <OwnerGuard>
+        <div className="mx-auto">
+          <Breadcrumb pageName="Income Statement" />
+        </div>
+        <IncomeStatementList />
+      </OwnerGuard>
     </DefaultLayout>
   );
 };
