@@ -43,6 +43,7 @@ export interface SubBranchBreakdown {
   loan_count: number;
   nr_balance: string;
   udi_balance: string;
+  cash_out: string;
 }
 
 export interface AccountingDashboard {

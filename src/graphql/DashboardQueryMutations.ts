@@ -35,6 +35,7 @@ const GET_ACCOUNTING_DASHBOARD: string = `
         loan_count
         nr_balance
         udi_balance
+        cash_out
       }
     }
   }

@@ -8,6 +8,7 @@ interface SubBranchBreakdownTableProps {
   breakdown: SubBranchBreakdown[];
   loading?: boolean;
   fullWidth?: boolean;
+  isOwner?: boolean;
 }
 
 /**
@@ -35,6 +36,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
   breakdown,
   loading,
   fullWidth = false,
+  isOwner = true,
 }) => {
   const containerClass = fullWidth ? "" : "col-span-12 xl:col-span-5";
   if (loading) {
@@ -51,8 +53,9 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
       loan_count: acc.loan_count + item.loan_count,
       nr_balance: acc.nr_balance + parseFloat(item.nr_balance),
       udi_balance: acc.udi_balance + parseFloat(item.udi_balance),
+      cash_out: acc.cash_out + parseFloat(item.cash_out || "0"),
     }),
-    { loan_count: 0, nr_balance: 0, udi_balance: 0 }
+    { loan_count: 0, nr_balance: 0, udi_balance: 0, cash_out: 0 }
   );
 
   if (breakdown.length === 0) {
@@ -91,7 +94,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
                   NR
                 </th>
                 <th className="p-2 text-right text-xs font-medium uppercase sm:p-3 sm:text-sm whitespace-nowrap">
-                  UDI
+                  {isOwner ? "UDI" : "Cash Out"}
                 </th>
               </tr>
             </thead>
@@ -123,7 +126,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
                   </td>
                   <td className="p-2 text-right sm:p-3">
                     <p className="text-meta-5 text-xs sm:text-sm whitespace-nowrap">
-                      {formatCurrency(item.udi_balance)}
+                      {formatCurrency(isOwner ? item.udi_balance : item.cash_out)}
                     </p>
                   </td>
                 </tr>
@@ -148,7 +151,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
                 </td>
                 <td className="p-2 text-right sm:p-3">
                   <p className="font-bold text-meta-5 text-xs sm:text-sm whitespace-nowrap">
-                    {formatCurrency(totals.udi_balance)}
+                    {formatCurrency(isOwner ? totals.udi_balance : totals.cash_out)}
                   </p>
                 </td>
               </tr>

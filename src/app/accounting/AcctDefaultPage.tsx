@@ -43,7 +43,7 @@ const AcctDefaultPage: React.FC = () => {
   // Fetch branches for admin dropdown
   useEffect(() => {
     const fetchBranches = async () => {
-      if (!isAdmin) return;
+      if (!isOwner) return;
 
       setBranchesLoading(true);
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
@@ -76,7 +76,7 @@ const AcctDefaultPage: React.FC = () => {
     };
 
     fetchBranches();
-  }, [isAdmin]);
+  }, [isOwner]);
 
   const periodOptions: { value: PeriodOption; label: string }[] = [
     { value: "1month", label: "Last 1 Month" },
@@ -106,7 +106,7 @@ const AcctDefaultPage: React.FC = () => {
       {/* Header with Branch Info and Filters */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-semibold text-black dark:text-white">
-          Viewing: {data?.viewing_branch?.branch_name || "Loading..."} Branch
+          Viewing: {data?.viewing_branch?.branch_name || "Loading..."}
         </h2>
 
         <div className="flex flex-wrap gap-3">
@@ -132,8 +132,8 @@ const AcctDefaultPage: React.FC = () => {
             />
           )}
 
-          {/* Branch Selector (Admin Only) */}
-          {isAdmin && (
+          {/* Branch Selector (Owner Only) */}
+          {isOwner && (
             <select
               value={selectedBranchId || ""}
               onChange={(e) =>
@@ -184,6 +184,7 @@ const AcctDefaultPage: React.FC = () => {
           <SubBranchBreakdownTable
             breakdown={data?.sub_branch_breakdown || []}
             loading={loading}
+            isOwner={isOwner}
           />
         </div>
       ) : (
@@ -192,6 +193,7 @@ const AcctDefaultPage: React.FC = () => {
             breakdown={data?.sub_branch_breakdown || []}
             loading={loading}
             fullWidth
+            isOwner={isOwner}
           />
         </div>
       )}
