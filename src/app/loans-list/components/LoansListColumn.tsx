@@ -15,7 +15,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   },
   {
     name: 'Borrower',
-    cell: row => row?.borrower.lastname + ', ' + row.borrower.firstname,
+    cell: row => row?.borrower ? row.borrower.lastname + ', ' + row.borrower.firstname : '-',
     sortable: true
   },
   {
