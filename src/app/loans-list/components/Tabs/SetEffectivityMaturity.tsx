@@ -28,20 +28,42 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOption(event.target.value);
     setDateListSelected([]);
+    setNewMonthlyList(undefined);
+    setUdiComputedList(undefined);
+    setPaycount(0);
   };
   
   const catchSubmitApproval = (status: number) => {
     submitApproveRelease(loanSingleData, dateListSelected ?? [], udiComputedList ?? [], newMonthlyList ?? [], status, handleRefetchData);
   }
 
-  const selectedData = (data: any, pc: number) => {
+  const selectedData = (data: string[], pc: number) => {
+    if (!pc || pc <= 0 || !Number.isFinite(pc)) return;
     const interest: string[] = [];
     const monthly: string[] = [];
     setPaycount(pc);
-    data.forEach((element: any) => {
-      interest.push(formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / pc));
-      monthly.push(formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / pc));
+
+    const totalPn = Number(loanSingleData?.pn_amount ?? 0) + Number(loanSingleData?.addon_amount ?? 0);
+    const udiDetail = loanSingleData?.loan_details?.find((d: any) => d.description === 'udi');
+    const totalUdi = Number(udiDetail?.credit ?? 0);
+
+    // Truncate per-month to 2 decimals (matching formatNumber behavior)
+    const perMonthPn = Math.floor(totalPn * 100 / pc) / 100;
+    const perMonthUdi = Math.floor(totalUdi * 100 / pc) / 100;
+
+    data.forEach((_element: any, index: number) => {
+      if (index === data.length - 1) {
+        // Last payment absorbs the cent remainder so total is exact
+        const lastPn = Math.round((totalPn - perMonthPn * (pc - 1)) * 100) / 100;
+        const lastUdi = Math.round((totalUdi - perMonthUdi * (pc - 1)) * 100) / 100;
+        monthly.push(formatNumber(lastPn));
+        interest.push(formatNumber(lastUdi));
+      } else {
+        monthly.push(formatNumber(perMonthPn));
+        interest.push(formatNumber(perMonthUdi));
+      }
     });
+
     setUdiComputedList(interest);
     setNewMonthlyList(monthly);
     setDateListSelected(data);
@@ -134,7 +156,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
     
       <div className="mt-1 mb-3">
         <p className="text-pretty text-sm text-gray-500">
-          Confirm Approve Loan of with an amount of <strong>{ formatNumber(Number(loanSingleData?.pn_amount)) }</strong>
+          Confirm Approve Loan of with an amount of <strong>{ formatNumber(Number(loanSingleData?.pn_amount ?? 0)) }</strong>
         </p>
       </div>
       </div>
@@ -255,160 +277,42 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
           <span className="h-px flex-1 bg-slate-500"></span>
         </span>
       </div>
-      {selectedOption === 'once_a_month' && (
-        <>
-          <div className="col-span-full lg:col-span-1">
-              <OnceAMonth term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval}/>
-          </div>
-          <div className="col-span-full lg:col-span-2 xl:col-span-4">
-            <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-              <dl className="-my-3 divide-y divide-gray-100 text-sm">
-                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                  <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Payment for Once a Month</dt>
-                  {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-                </div>
-                <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                  <dt className="font-medium text-center text-gray-900">Date</dt>
-                  <dt className="font-medium text-center text-gray-900">Monthly</dt>
-                  <dd className="text-gray-700 text-center">Interest</dd>
-                </div>
-                {dateListSelected && dateListSelected.map((date, i) => {
-                  return (
+      {/* Payment method options - each renders a selector + preview table */}
+      {[
+        { key: 'once_a_month', title: 'Payment for Once a Month', Component: OnceAMonth },
+        { key: 'twice_a_month', title: 'Payment for twice a month', Component: TwiceAMonth },
+        { key: 'day_of_the_week', title: 'Payment for day of the week (weekly)', Component: DayOfTheWeek },
+        { key: 'manual_date', title: 'Payment for manual date', Component: ManualDate },
+        { key: 'twice_a_month_oth_week', title: 'Payment for twice a month other week', Component: TwiceAMonthOtherWeek },
+      ].map(({ key, title, Component }) =>
+        selectedOption === key && (
+          <React.Fragment key={key}>
+            <div className="col-span-full lg:col-span-1">
+              <Component term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
+            </div>
+            <div className="col-span-full lg:col-span-2 xl:col-span-4">
+              <div className="flow-root border border-gray-100 py-3 shadow-sm">
+                <dl className="-my-3 divide-y divide-gray-100 text-sm">
+                  <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
+                    <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">{title}</dt>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
+                    <dt className="font-medium text-center text-gray-900">Date</dt>
+                    <dt className="font-medium text-center text-gray-900">Monthly</dt>
+                    <dd className="text-gray-700 text-center">Interest</dd>
+                  </div>
+                  {dateListSelected && dateListSelected.map((date, i) => (
                     <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
                       <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
-                      <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
+                      <dd className="text-gray-700 text-center">{newMonthlyList?.[i] ?? formatNumber((Number(loanSingleData?.pn_amount ?? 0) + Number(loanSingleData?.addon_amount ?? 0)) / (paycount || 1))}</dd>
+                      <dt className="font-medium text-center text-gray-900">{udiComputedList?.[i] ?? formatNumber(Number(loanSingleData?.loan_details?.find((d: any) => d.description === 'udi')?.credit ?? 0) / (paycount || 1))}</dt>
                     </div>
-                  )
-                })}
-              </dl>
+                  ))}
+                </dl>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-      {selectedOption === 'twice_a_month' && (
-        <>
-          <div className="col-span-full lg:col-span-1">
-              <TwiceAMonth term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
-          </div>
-          <div className="col-span-full lg:col-span-2 xl:col-span-4">
-            <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-              <dl className="-my-3 divide-y divide-gray-100 text-sm">
-                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                  <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Payment for twice a month</dt>
-                  {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-                </div>
-                <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                  <dt className="font-medium text-center text-gray-900">Date</dt>
-                  <dt className="font-medium text-center text-gray-900">Monthly</dt>
-                  <dd className="text-gray-700 text-center">Interest</dd>
-                </div>
-                {dateListSelected && dateListSelected.map((date, i) => {
-                  return (
-                    <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
-                      <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.monthly) / 2))} </dd>
-                      <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
-                    </div>
-                  )
-                })}
-              </dl>
-            </div>
-          </div>
-        </>
-      )}
-      {selectedOption === 'day_of_the_week' && (
-        <>
-          <div className="col-span-full lg:col-span-1">
-              <DayOfTheWeek term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
-          </div>
-          <div className="col-span-full lg:col-span-2 xl:col-span-4">
-            <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-              <dl className="-my-3 divide-y divide-gray-100 text-sm">
-                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                  <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Payment for day of the week (weekly)</dt>
-                  {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-                </div>
-                <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                  <dt className="font-medium text-center text-gray-900">Date</dt>
-                  <dt className="font-medium text-center text-gray-900">Monthly</dt>
-                  <dd className="text-gray-700 text-center">Interest</dd>
-                </div>
-                {dateListSelected && dateListSelected.map((date, i) => {
-                  return (
-                    <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
-                      <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
-                      <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
-                    </div>
-                  )
-                })}
-              </dl>
-            </div>
-          </div>
-        </>
-      )}
-      {selectedOption === 'manual_date' && (
-        <>
-          <div className="col-span-full lg:col-span-1">
-              <ManualDate term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
-          </div>
-          <div className="col-span-full lg:col-span-2 xl:col-span-4">
-            <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-              <dl className="-my-3 divide-y divide-gray-100 text-sm">
-                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                  <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Payment for manual date</dt>
-                  {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-                </div>
-                <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                  <dt className="font-medium text-center text-gray-900">Date</dt>
-                  <dt className="font-medium text-center text-gray-900">Monthly</dt>
-                  <dd className="text-gray-700 text-center">Interest</dd>
-                </div>
-                {dateListSelected && dateListSelected.map((date, i) => {
-                  return (
-                    <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
-                      <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
-                      <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
-                    </div>
-                  )
-                })}
-              </dl>
-            </div>
-          </div>
-        </>
-      )}
-      {selectedOption === 'twice_a_month_oth_week' && (
-        <>
-          <div className="col-span-full lg:col-span-1">
-              <TwiceAMonthOtherWeek term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
-          </div>
-          <div className="col-span-full lg:col-span-2 xl:col-span-4">
-            <div className="flow-root  border border-gray-100 py-3 shadow-sm">
-              <dl className="-my-3 divide-y divide-gray-100 text-sm">
-                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                  <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">Payment for twice a month other week</dt>
-                  {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
-                </div>
-                <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                  <dt className="font-medium text-center text-gray-900">Date</dt>
-                  <dt className="font-medium text-center text-gray-900">Monthly</dt>
-                  <dd className="text-gray-700 text-center">Interest</dd>
-                </div>
-                {dateListSelected && dateListSelected.map((date, i) => {
-                  return (
-                    <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
-                      <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{formatNumber((Number(loanSingleData?.pn_amount) + Number(loanSingleData?.addon_amount)) / paycount)}</dd>
-                      <dt className="font-medium text-center text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit) / paycount)}</dt>
-                    </div>
-                  )
-                })}
-              </dl>
-            </div>
-          </div>
-        </>
+          </React.Fragment>
+        )
       )}
       </div>
     </div>
