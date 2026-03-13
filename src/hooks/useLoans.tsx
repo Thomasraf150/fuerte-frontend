@@ -719,7 +719,12 @@ const useLoans = () => {
           return { success: false, error: response.errors[0].message };
         }
 
-        toast.success('Loan Successfully Released!');
+        const releaseData = response.data?.saveReleaseLoan;
+        if (releaseData?.auto_posted) {
+          toast.success('Loan released & accounting posted automatically!');
+        } else {
+          toast.success('Loan released! Post accounting manually or configure branch defaults.');
+        }
         handleRefetchLoanData();
         return { success: true };
       }

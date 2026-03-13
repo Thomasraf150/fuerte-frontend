@@ -8,6 +8,18 @@
     body {
         @apply relative z-1 bg-whiten font-satoshi text-base font-normal text-body;
     }
+
+    button,
+    a,
+    select,
+    summary,
+    [role="button"],
+    [tabindex]:not([tabindex="-1"]),
+    label[for],
+    input[type="checkbox"],
+    input[type="radio"] {
+        cursor: pointer;
+    }
 }
 
 @layer components {
