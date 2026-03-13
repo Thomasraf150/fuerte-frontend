@@ -8,7 +8,7 @@ import { DataLoanProceedAcctData } from '@/utils/DataTypes';
 const loanProcListCol = (handleRowClick: (row: DataLoanProceedAcctData) => void): TableColumn<DataLoanProceedAcctData>[] => [
   {
     name: 'Branch',
-    cell: row => row?.branch_sub?.name,
+    cell: row => row?.branch_sub?.name ?? 'Global Default',
     sortable: true,
     style: {
       minWidth: '150px',

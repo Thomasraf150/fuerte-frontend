@@ -721,12 +721,12 @@ const useLoans = () => {
 
         const releaseData = response.data?.saveReleaseLoan;
         if (releaseData?.auto_posted) {
-          toast.success('Loan released & accounting posted automatically!');
+          toast.success('Loan released & accounting posted!');
         } else {
-          toast.success('Loan released! Post accounting manually or configure branch defaults.');
+          toast.success('Loan released successfully.');
         }
         handleRefetchLoanData();
-        return { success: true };
+        return { success: true, auto_posted: releaseData?.auto_posted, unmapped: releaseData?.unmapped };
       }
 
       return { success: false, error: 'Operation cancelled by user' };

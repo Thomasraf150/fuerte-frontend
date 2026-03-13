@@ -41,8 +41,9 @@ const useLoanProceedAccount = () => {
   const fetchLpsDataForm = async (row: any) => {
     setLoading(true);
 
+    const branchSubId = row?.branch_sub_id === 'global' ? 'global' : String(row?.branch_sub_id);
     let variables: { input: any } = {
-      input : { branch_sub_id: String(row?.branch_sub_id) }
+      input : { branch_sub_id: branchSubId }
     };
 
     const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -70,7 +71,7 @@ const useLoanProceedAccount = () => {
       let variables: { input: any } = {
         input: {
           user_id: String(userData?.user?.id),
-          branch_sub_id: data?.branch_sub_id,
+          branch_sub_id: data?.branch_sub_id === 'global' ? null : data?.branch_sub_id,
           loan_ref: data?.loan_ref,
           description: data?.description,
           nr_id: data?.nr_id,

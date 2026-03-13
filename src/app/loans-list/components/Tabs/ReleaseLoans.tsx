@@ -12,7 +12,7 @@ import AcctgEntryForm from './AcctgEntryForm';
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   handleRefetchData: () => void;
-  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => void;
+  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => Promise<{ success: boolean; unmapped?: string[] } | undefined>;
   fetchCoaDataTable: () => void;
   branchSubData: DataSubBranches[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
@@ -36,6 +36,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);
   const [showAcctgEntry, setShowAcctgEntry] = useState<boolean>(false);
+  const [unmappedDetails, setUnmappedDetails] = useState<string[]>([]);
 
   const toggleShowPin1 = () => {
     setShowPin1(!showPin1);
@@ -56,7 +57,10 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const isCashSelected = isCashBank(selectedBankId);
 
   const onSubmit: SubmitHandler<LoanReleaseFormValues> = async (data) => {
-    onSubmitLoanRelease(data, handleRefetchData);
+    const result = await onSubmitLoanRelease(data, handleRefetchData);
+    if (result?.unmapped && result.unmapped.length > 0) {
+      setUnmappedDetails(result.unmapped);
+    }
   };
 
   // const handleLoanBank = (data: LoanBankFormValues | undefined) => {
@@ -230,6 +234,15 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
       </div>
       </form>
     </div>
+    {unmappedDetails.length > 0 && (
+      <div className="w-full lg:w-3/4 xl:w-1/2 mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded text-sm text-yellow-800">
+        <strong>Some loan details were not auto-posted</strong> (no account mapping found):
+        <span className="ml-1">{unmappedDetails.join(', ')}</span>
+        <a href="/accounting/loan-proceed-settings" className="ml-2 text-blue-600 underline hover:text-blue-800">
+          Configure Mappings &rarr;
+        </a>
+      </div>
+    )}
     {showAcctgEntry && (
       <>
         <hr className="mb-4"/>

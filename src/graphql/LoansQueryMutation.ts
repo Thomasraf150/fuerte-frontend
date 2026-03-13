@@ -289,6 +289,7 @@ const SAVE_LOAN_RELEASE: string = `
       success
       message
       auto_posted
+      unmapped
       data {
         released_date
       }
