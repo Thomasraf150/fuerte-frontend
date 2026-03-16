@@ -15,6 +15,7 @@ const useGeneralVoucher = () => {
   const { CREATE_GV_MUTATION, UPDATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION } = GeneralVoucherQueryMutations;
 
   const [generalVoucherLoading, setGeneralVoucherLoading] = useState<boolean>(false);
+  const [printLoading, setPrintLoading] = useState<boolean>(false);
   const [dateFilters, setDateFilters] = useState({ startDate: '', endDate: '' });
   const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
   const userData = JSON.parse(storedAuthStore)['state'];
@@ -202,12 +203,65 @@ const useGeneralVoucher = () => {
   };
 
   const printSummaryTicketDetails = async (journal_ref: string) => {
+    // Open blank window immediately (prevents popup blocker)
+    const newWindow = window.open('', '_blank');
+
+    if (!newWindow) {
+      toast.error('Please allow popups for this site to view PDFs');
+      return;
+    }
+
+    // Show loading spinner in the new window
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>Generating PDF...</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+              margin: 0;
+              background: #f5f5f5;
+            }
+            .loader { text-align: center; }
+            .spinner {
+              border: 4px solid #f3f3f3;
+              border-top: 4px solid #3498db;
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              animation: spin 1s linear infinite;
+              margin: 0 auto 20px;
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="loader">
+            <div class="spinner"></div>
+            <h2>Generating Voucher PDF...</h2>
+            <p>Please wait while we prepare your document.</p>
+          </div>
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+
+    setPrintLoading(true);
+
     try {
-      // setSumTixLoading(true);
+      const printToken = useAuthStore.getState().GET_AUTH_TOKEN();
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(printToken ? { 'Authorization': `Bearer ${printToken}` } : {}),
         },
         body: JSON.stringify({
           query: PRINT_CV_MUTATION,
@@ -219,16 +273,30 @@ const useGeneralVoucher = () => {
         }),
       });
 
-      const pdfUrl = response.data.printAcctgEntries;
+      if (response.errors && response.errors.length > 0) {
+        console.error('[PDF] GraphQL errors:', response.errors);
+        if (newWindow && !newWindow.closed) newWindow.close();
+        toast.error(response.errors[0].message || 'Failed to generate PDF');
+        return;
+      }
 
-      // Open the generated PDF in a new tab
-      window.open(process.env.NEXT_PUBLIC_BASE_URL + pdfUrl, '_blank');
+      const pdfUrl = response.data?.printAcctgEntries;
+      if (!pdfUrl || typeof pdfUrl !== 'string' || pdfUrl.startsWith('Failed')) {
+        console.error('[PDF] Invalid URL:', pdfUrl);
+        if (newWindow && !newWindow.closed) newWindow.close();
+        toast.error('PDF generation failed');
+        return;
+      }
 
-      // setSumTixLoading(false);
+      const fullUrl = process.env.NEXT_PUBLIC_BASE_URL + pdfUrl;
+      newWindow.location.href = fullUrl;
+      toast.success('Voucher PDF generated successfully!', { autoClose: 3000 });
     } catch (error) {
-      console.error("Error printing loan details:", error);
-      toast.error("Failed to print loan details.");
-      // setSumTixLoading(false);
+      console.error("Error printing voucher:", error);
+      toast.error("Failed to generate voucher PDF.");
+      if (newWindow && !newWindow.closed) newWindow.close();
+    } finally {
+      setPrintLoading(false);
     }
   };
 
@@ -239,6 +307,7 @@ const useGeneralVoucher = () => {
     fetchGV,
     dataGV,
     printSummaryTicketDetails,
+    printLoading,
     generalVoucherLoading, // For form submission operations
     paginationLoading, // For table loading operations
     pubSubBrId: String(userData?.user?.branch_sub_id),
