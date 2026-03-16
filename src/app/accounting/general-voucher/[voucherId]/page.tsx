@@ -25,6 +25,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
     updateGV,
     fetchGV,
     printSummaryTicketDetails,
+    printLoading,
     generalVoucherLoading,
     pubSubBrId,
   } = useGeneralVoucher();
@@ -171,6 +172,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
                 generalVoucherLoading={generalVoucherLoading}
                 pubSubBrId={pubSubBrId}
                 printSummaryTicketDetails={printSummaryTicketDetails}
+                printLoading={printLoading}
               />
             ) : (
               <JVForm
@@ -183,6 +185,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
                 generalVoucherLoading={generalVoucherLoading}
                 pubSubBrId={pubSubBrId}
                 printSummaryTicketDetails={printSummaryTicketDetails}
+                printLoading={printLoading}
               />
             )}
           </div>

@@ -28,12 +28,13 @@ interface ParentFormBr {
   createGV: (row: RowAcctgEntry) => Promise<{success: boolean, error?: string, data?: any}>;
   fetchGV: (a: string, b: string, c: string) => void;
   printSummaryTicketDetails: (a: string) => void;
+  printLoading: boolean;
   loading: boolean;
   generalVoucherLoading: boolean;
   pubSubBrId: string;
 }
 
-const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, printSummaryTicketDetails, loading, generalVoucherLoading, pubSubBrId }) => {
+const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, fetchGV, printSummaryTicketDetails, printLoading, loading, generalVoucherLoading, pubSubBrId }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -201,11 +202,12 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
         {singleData !== undefined ? (
           <div className="border-b border-stroke py-4 dark:border-strokedark">
             <button
-              className="flex justify-center rounded bg-success border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-light dark:text-white"
+              className="flex justify-center rounded bg-success border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-light dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               type="button"
               onClick={() => printSummaryTicketDetails(singleData?.journal_ref)}
+              disabled={printLoading}
             >
-              <Printer size={19} className="pt-1 mr-1" /> Print CV
+              <Printer size={19} className="pt-1 mr-1" /> {printLoading ? 'Generating...' : 'Print'}
             </button>
           </div>
         ) : (

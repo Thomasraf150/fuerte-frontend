@@ -25,6 +25,7 @@ const GeneralVoucherList: React.FC = () => {
     updateGV,
     fetchGV,
     printSummaryTicketDetails,
+    printLoading,
     generalVoucherLoading,
     paginationLoading,
     pubSubBrId,
@@ -120,7 +121,8 @@ const GeneralVoucherList: React.FC = () => {
                   loading={paginationLoading}
                   generalVoucherLoading={generalVoucherLoading}
                   pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails} />
+                  printSummaryTicketDetails={printSummaryTicketDetails}
+                  printLoading={printLoading} />
               </div>
             </div>
           )}
@@ -136,7 +138,8 @@ const GeneralVoucherList: React.FC = () => {
                   loading={paginationLoading}
                   generalVoucherLoading={generalVoucherLoading}
                   pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails} />
+                  printSummaryTicketDetails={printSummaryTicketDetails}
+                  printLoading={printLoading} />
               </div>
             </div>
           )}
