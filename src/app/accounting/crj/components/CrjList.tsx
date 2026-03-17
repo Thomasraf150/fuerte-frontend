@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import useGeneralJournal from '@/hooks/useGeneralJournal';
@@ -11,11 +11,7 @@ const column = crjTblColumn;
 
 const CrjList: React.FC = () => {
   const router = useRouter();
-  const { fetchGJ, dataGj, loading } = useGeneralJournal();
-
-  useEffect(() => {
-    fetchGJ("", "", "", "CRJ");
-  }, []);
+  const { dataGj, loading, serverSidePaginationProps } = useGeneralJournal('CRJ');
 
   // Navigate to detail page on row click
   const handleRowClick = (row: RowAcctgEntry) => {
@@ -42,6 +38,7 @@ const CrjList: React.FC = () => {
                   columns={column()}
                   enableCustomHeader={true}
                   data={dataGj || []}
+                  serverSidePagination={serverSidePaginationProps}
                 />
               </div>
             </div>

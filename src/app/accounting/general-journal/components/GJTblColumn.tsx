@@ -1,43 +1,44 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
-import Tooltip from '@/components/Tooltip';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 
-const jVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
-  {
-    name: 'Name',
-    cell: row => row?.journal_name,
-    sortable: true,
-    style: {
-      minWidth: '150px',
-    },
-    width: '350px'
+const formatAmount = (row: RowAcctgEntry): string => {
+  const total = row?.acctg_details?.reduce(
+    (sum: number, d: any) => sum + parseFloat(d.debit || '0'), 0
+  ) || 0;
+  return total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
 
+const gJTblColumn = (): TableColumn<RowAcctgEntry>[] => [
+  {
+    name: 'Description',
+    cell: row => row?.borrower_full_name
+      ? `${row.journal_name} - ${row.borrower_full_name}`
+      : (row?.journal_desc || row?.journal_name),
+    sortable: true,
   },
   {
     name: 'Ref #',
     cell: row => row?.journal_ref,
     sortable: true,
-    width: '250px'
   },
   {
-    name: 'Check #',
-    cell: row => row?.check_no,
+    name: 'Type',
+    cell: row => row?.journal_name,
     sortable: true,
   },
   {
     name: 'Amount',
-    cell: row => row?.amount,
+    cell: row => formatAmount(row),
     sortable: true,
+    right: true,
   },
   {
     name: 'Journal Date',
     cell: row => row?.journal_date,
     sortable: true,
   }
-
 ];
 
-export default jVTblColumn
+export default gJTblColumn

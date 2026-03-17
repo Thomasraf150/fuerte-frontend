@@ -274,9 +274,12 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   type="date"
                   id="collection_date"
                   placeholder="mm/dd/YYYY"
-                  {...register('collection_date')}
+                  {...register('collection_date', { required: "Collection Date is required!" })}
                   onBlur={(e: any) => { return handleDate(e, 'collection_date'); }}
                 />
+                {errors.collection_date && (
+                  <p className="mt-2 text-sm font-medium text-center" style={{ color: '#DC2626' }}>{errors.collection_date.message}</p>
+                )}
               </div>
             </div>
 

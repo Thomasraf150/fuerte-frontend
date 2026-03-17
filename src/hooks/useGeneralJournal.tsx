@@ -1,60 +1,95 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useCallback } from 'react';
 import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
-import moment from 'moment';
+import { usePagination } from './usePagination';
 
-const useGeneralVoucher = () => {
-
+const useGeneralJournal = (journalType: string = 'CRJ') => {
   const { GET_GJ_QUERY } = GeneralJournalQueryMutations;
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [dataGj, setDataGj] = useState<RowAcctgEntry[]>();
-  // Function to fetchdata
-
-  const fetchGJ = async (branch_sub_id: string, startDate: string, endDate: string, j_type: string) => {
-    // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    // const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        branch_sub_id,
-        startDate,
-        endDate,
-        j_type
-      },
-    };
-
-    mutation = GET_GJ_QUERY;
-    setLoading(true);
-
+  // Wrapper function for usePagination hook
+  const fetchJournalForPagination = useCallback(async (
+    first: number,
+    page: number,
+    search?: string
+  ) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: mutation,
-        variables,
+        query: GET_GJ_QUERY,
+        variables: {
+          first,
+          page,
+          ...(search && { search }),
+          orderBy: [{ column: "id", order: 'DESC' }],
+          input: {
+            branch_sub_id: '',
+            startDate: '',
+            endDate: '',
+            j_type: journalType
+          }
+        },
       }),
     });
+
     const result = await response.json();
-    setDataGj(result?.data.getJournal);
-    setLoading(false);
+
+    return {
+      data: result.data.getJournal.data,
+      paginatorInfo: result.data.getJournal.paginatorInfo || {
+        total: result.data.getJournal.data.length,
+        currentPage: page,
+        lastPage: 1,
+        hasMorePages: false,
+      }
+    };
+  }, [GET_GJ_QUERY, journalType]);
+
+  const {
+    data: dataGj,
+    loading,
+    error,
+    pagination,
+    searchQuery,
+    goToPage,
+    changePageSize,
+    setSearchQuery,
+    refresh,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination<RowAcctgEntry>({
+    fetchFunction: fetchJournalForPagination,
+    config: {
+      initialPageSize: 20,
+    },
+  });
+
+  // Server-side pagination props for CustomDatatable
+  const serverSidePaginationProps = {
+    totalRecords: pagination.totalRecords,
+    currentPage: pagination.currentPage,
+    pageSize: pagination.pageSize,
+    totalPages: pagination.totalPages,
+    hasNextPage: pagination.hasNextPage,
+    hasPreviousPage: pagination.hasPreviousPage,
+    onPageChange: goToPage,
+    onPageSizeChange: changePageSize,
+    searchQuery,
+    onSearchChange: setSearchQuery,
+    pageSizeOptions: [10, 20, 50, 100],
   };
 
-   // Fetch data on component mount if id exists
-  useEffect(() => {
-  }, []);
-
   return {
-    fetchGJ,
     dataGj,
-    loading
+    loading,
+    error,
+    refresh,
+    serverSidePaginationProps,
   };
 };
 
-export default useGeneralVoucher;
+export default useGeneralJournal;
