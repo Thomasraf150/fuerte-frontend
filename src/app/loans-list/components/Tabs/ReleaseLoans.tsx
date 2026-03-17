@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Hash, Calendar, Save, List } from 'react-feather';
+import { Hash, Calendar, Save, List, AlertTriangle } from 'react-feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import { LoanReleaseFormValues, BorrLoanRowData, DataSubBranches, DataChartOfAccountList } from '@/utils/DataTypes';
@@ -7,12 +7,13 @@ import FormLabel from '@/components/FormLabel';
 import useBank from '@/hooks/useBank';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
+import Link from 'next/link';
 import AcctgEntryForm from './AcctgEntryForm';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   handleRefetchData: () => void;
-  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => void;
+  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => Promise<{ success: boolean; unmapped?: string[] } | undefined>;
   fetchCoaDataTable: () => void;
   branchSubData: DataSubBranches[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
@@ -36,6 +37,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);
   const [showAcctgEntry, setShowAcctgEntry] = useState<boolean>(false);
+  const [unmappedDetails, setUnmappedDetails] = useState<string[]>([]);
 
   const toggleShowPin1 = () => {
     setShowPin1(!showPin1);
@@ -56,7 +58,10 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const isCashSelected = isCashBank(selectedBankId);
 
   const onSubmit: SubmitHandler<LoanReleaseFormValues> = async (data) => {
-    onSubmitLoanRelease(data, handleRefetchData);
+    const result = await onSubmitLoanRelease(data, handleRefetchData);
+    if (result?.unmapped && result.unmapped.length > 0) {
+      setUnmappedDetails(result.unmapped);
+    }
   };
 
   // const handleLoanBank = (data: LoanBankFormValues | undefined) => {
@@ -230,6 +235,32 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
       </div>
       </form>
     </div>
+    {unmappedDetails.length > 0 && (
+      <div className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-4">
+        <div className="flex items-start gap-3">
+          <AlertTriangle size={20} className="text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-yellow-800 dark:text-yellow-300 text-sm">
+              Partial Accounting Entry
+            </p>
+            <p className="text-yellow-700 dark:text-yellow-400 text-sm mt-1">
+              The following loan details were skipped because they have no account mapping for this branch:
+            </p>
+            <ul className="list-disc list-inside mt-2 text-sm text-yellow-800 dark:text-yellow-300">
+              {unmappedDetails.map((desc, i) => (
+                <li key={i} className="font-medium">{desc}</li>
+              ))}
+            </ul>
+            <Link
+              href={`/${process.env.NEXT_PUBLIC_ROUTER_BASEROUTE}/accounting/loan-proceed-settings`}
+              className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Configure Mappings →
+            </Link>
+          </div>
+        </div>
+      </div>
+    )}
     {showAcctgEntry && (
       <>
         <hr className="mb-4"/>

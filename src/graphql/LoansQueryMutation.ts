@@ -288,6 +288,8 @@ const SAVE_LOAN_RELEASE: string = `
     saveReleaseLoan(input: $input){
       success
       message
+      auto_posted
+      unmapped
       data {
         released_date
       }

@@ -85,7 +85,8 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         label: bSub.name, // assuming `name` is the key you want to use as label
       }));
       setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: '', label: 'Select a Sub Branch', hidden: true },
+        { value: 'global', label: '*** Global Defaults ***' },
         ...dynaOpt,
       ]);
     }
