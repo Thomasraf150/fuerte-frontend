@@ -1,73 +1,52 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
+import FormLabel from '@/components/FormLabel';
+import ReactSelect from '@/components/ReactSelect';
 import useLoanCodes from '@/hooks/useLoanCodes';
-import { DataFormLoanCodes, DataRowClientList, DataRowLoanCodes } from '@/utils/DataTypes';
+import { DataFormLoanCodes, DataRowLoanCodes, SelectOption } from '@/utils/DataTypes';
 
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
   fetchLoanCodes: (value: string) => void;
   actionLbl: string;
   singleUserData: DataRowLoanCodes | undefined;
-  // dataClients: DataRowClientList | undefined;
-}
-
-interface OptionClient {
-  value: string | undefined;
-  label: string;
-  hidden?: boolean;
-}
-
-interface OptionType {
-  value: string | undefined;
-  label: string;
-  hidden?: boolean;
 }
 
 const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singleUserData, fetchLoanCodes }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanCodes>();
+  const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<DataFormLoanCodes>();
   const { onSubmitLoanCode, dataClients, dataType, loanCodeLoading } = useLoanCodes();
-  const [optionsClient, setOptionsClient] = useState<OptionClient[]>([
-    { value: '', label: 'Select a Client', hidden: true },
-  ]);
-  const [optionsType, setOptionsType] = useState<OptionType[]>([
-    { value: '', label: 'Select a Loan Type', hidden: true },
-  ]);
+
+  const [optionsClient, setOptionsClient] = useState<SelectOption[]>([]);
+  const [optionsType, setOptionsType] = useState<SelectOption[]>([]);
 
   const onSubmit: SubmitHandler<DataFormLoanCodes> = async (data) => {
     const result = await onSubmitLoanCode(data) as { success: boolean; error?: string; data?: any };
 
-    // Only close form on successful submission
     if (result.success) {
       fetchLoanCodes('id_desc');
       setShowForm(false);
     }
-    // Form stays open on errors for user to fix and retry
   };
 
   useEffect(() => {
     if (dataClients && Array.isArray(dataClients)) {
-      const dynaOpt: OptionClient[] = dataClients?.map(dClients => ({
-        value: String(dClients.id),
-        label: dClients.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsClient([
-        { value: '', label: 'Select a Client', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
+      setOptionsClient(dataClients.map(c => ({
+        value: String(c.id),
+        label: c.name,
+      })));
     }
     if (dataType && Array.isArray(dataType)) {
-      const dynaOpt: OptionType[] = dataType?.map(dType => ({
-        value: String(dType.id),
-        label: dType.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsType([
-        { value: '', label: 'Select a Loan Type', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
+      setOptionsType(dataType.map(t => ({
+        value: String(t.id),
+        label: t.name,
+      })));
     }
+  }, [dataClients, dataType]);
+
+  useEffect(() => {
     if (actionLbl === 'Create Loan Code') {
       reset({
         loan_client_id: 0,
@@ -75,55 +54,79 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
         code: '',
         description: '',
       });
-    } else {
-      if (singleUserData) {
-        setValue('id', singleUserData.id);
-        setValue('loan_client_id', singleUserData.loan_client_id);
-        setValue('loan_type_id', singleUserData.loan_type_id);
-        setValue('code', singleUserData.code);
-        setValue('description', singleUserData.description);
-      }
+    } else if (singleUserData) {
+      setValue('id', singleUserData.id);
+      setValue('loan_client_id', singleUserData.loan_client_id);
+      setValue('loan_type_id', singleUserData.loan_type_id);
+      setValue('code', singleUserData.code);
+      setValue('description', singleUserData.description);
     }
-  }, [dataClients, dataType, actionLbl, singleUserData, reset, setValue])
+  }, [actionLbl, singleUserData, reset, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FormInput
-        label="Loan Clients"
-        id="loan_client_id"
-        type="select"
-        icon={ChevronDown}
-        register={register('loan_client_id', { required: 'Loan Clients is required' })}
-        error={errors.loan_client_id?.message}
-        options={optionsClient}
-      />
+      <div className="mb-4">
+        <FormLabel title="Loan Clients" required />
+        <Controller
+          name="loan_client_id"
+          control={control}
+          rules={{ required: 'Loan Client is required' }}
+          render={({ field }) => (
+            <ReactSelect
+              options={optionsClient}
+              placeholder="Select a Client..."
+              onChange={(selected) => field.onChange(selected ? Number(selected.value) : 0)}
+              value={optionsClient.find(o => String(o.value) === String(field.value)) || null}
+              isLoading={optionsClient.length === 0}
+              loadingMessage={() => "Loading clients..."}
+              noOptionsMessage={() => "No clients found"}
+            />
+          )}
+        />
+        {errors.loan_client_id && (
+          <p className="mt-1 text-sm text-red-500">{errors.loan_client_id.message}</p>
+        )}
+      </div>
 
-      <FormInput
-        label="Loan Types"
-        id="loan_type_id"
-        type="select"
-        icon={ChevronDown}
-        register={register('loan_type_id', { required: 'Loan Types is required' })}
-        error={errors.loan_type_id?.message}
-        options={optionsType}
-      />
+      <div className="mb-4">
+        <FormLabel title="Loan Types" required />
+        <Controller
+          name="loan_type_id"
+          control={control}
+          rules={{ required: 'Loan Type is required' }}
+          render={({ field }) => (
+            <ReactSelect
+              options={optionsType}
+              placeholder="Select a Loan Type..."
+              onChange={(selected) => field.onChange(selected ? Number(selected.value) : 0)}
+              value={optionsType.find(o => String(o.value) === String(field.value)) || null}
+              isLoading={optionsType.length === 0}
+              loadingMessage={() => "Loading loan types..."}
+              noOptionsMessage={() => "No loan types found"}
+            />
+          )}
+        />
+        {errors.loan_type_id && (
+          <p className="mt-1 text-sm text-red-500">{errors.loan_type_id.message}</p>
+        )}
+      </div>
 
       <FormInput
         label="Code"
-        id="name"
+        id="code"
         type="text"
         icon={Home}
-        register={register('code', { required: true })}
-        error={errors.code && "This field is required"}
+        register={register('code', { required: 'Code is required' })}
+        error={errors.code?.message}
       />
 
       <FormInput
         label="Description"
-        id="name"
+        id="description"
         type="text"
         icon={Home}
-        register={register('description', { required: true })}
-        error={errors.description && "This field is required"}
+        register={register('description', { required: 'Description is required' })}
+        error={errors.description?.message}
       />
 
       <div className="flex justify-end gap-4.5 mt-6">

@@ -361,7 +361,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* System */}
               <SidebarLinkGroup activeCondition={
                 pathname === "/borrower-process" || pathname === "/loan-products" || pathname === "/loan-codes" ||
-                pathname === "/clients" || pathname === "/companies" || pathname === "/chiefs" ||
+                pathname === "/loan-types" || pathname === "/clients" || pathname === "/companies" || pathname === "/chiefs" ||
                 pathname === "/area" || pathname === "/sub-area" || pathname === "/banks" ||
                 pathname === "/file-types" || pathname === "/other-company-charges" ||
                 pathname === "/for-new-loans" || pathname === "/audit-logs" ||
@@ -371,7 +371,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   <React.Fragment>
                     <Link href="#" className={linkClass(
                       pathname === "/borrower-process" || pathname === "/loan-products" || pathname === "/loan-codes" ||
-                      pathname === "/clients" || pathname === "/companies" || pathname === "/chiefs" ||
+                      pathname === "/loan-types" || pathname === "/clients" || pathname === "/companies" || pathname === "/chiefs" ||
                       pathname === "/area" || pathname === "/sub-area" || pathname === "/banks" ||
                       pathname === "/file-types" || pathname === "/other-company-charges" ||
                       pathname === "/for-new-loans" || pathname === "/audit-logs" ||
@@ -388,6 +388,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/borrower-process" className={subLinkClass(pathname === "/borrower-process")}>Borrower Process</Link></li>
                         <li><Link href="/loan-products" className={subLinkClass(pathname === "/loan-products")}>Loan Products</Link></li>
                         <li><Link href="/loan-codes" className={subLinkClass(pathname === "/loan-codes")}>Loan Codes</Link></li>
+                        <li><Link href="/loan-types" className={subLinkClass(pathname === "/loan-types")}>Loan Types</Link></li>
                         <li><Link href="/clients" className={subLinkClass(pathname === "/clients")}>Clients</Link></li>
                         <li><Link href="/companies" className={subLinkClass(pathname === "/companies")}>Companies</Link></li>
                         <li><Link href="/chiefs" className={subLinkClass(pathname === "/chiefs")}>Chiefs</Link></li>
