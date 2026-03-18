@@ -14,6 +14,7 @@ interface ParentFormBr {
   branchSubData: DataSubBranches[] | undefined;
   lpsSingleData: DataLoanProceedAcctData[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
+  onSaveSuccess?: () => void;
 }
 
 interface Option {
@@ -22,7 +23,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData }) => {
+const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData, onSaveSuccess }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
   const { onSubmitLoanProSettings, loanProcLoading } = useLoanProceedAccount();
   const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
@@ -131,13 +132,10 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
   const optionsCoaData = getAccountOptions(coaDataAccount);
 
   const onSubmit: SubmitHandler<DataLoanProceedList> = async (data) => {
-    const result = await onSubmitLoanProSettings(data, () => {
-      // Refetch data callback
-      console.log('Data refetched successfully');
-    });
+    const result = await onSubmitLoanProSettings(data, () => {});
 
-    // Only close form on successful submission
     if (result.success) {
+      onSaveSuccess?.();
       setShowForm(false);
     }
     // Form stays open on errors for user to fix and retry
@@ -168,184 +166,39 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
         </div>
         
-        {/* <FormInput
-          label="Description"
-          id="description"
-          type="text"
-          icon={Edit3}
-          register={register('description', { required: true })}
-          error={errors.description && "Description is required"}
-          className='mt-4 mb-4'
-        /> */}
-
-        <FormInput
-          label="Notes Receivale"
-          id="nr_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('nr_id')}
-          error={errors.nr_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-
-        <FormInput
-          label="Outstanding Balance"
-          id="ob_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('ob_id')}
-          error={errors.ob_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-
-        <FormInput
-          label="UDI"
-          id="udi_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('udi_id')}
-          error={errors.udi_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-
-        <FormInput
-          label="Processing"
-          id="proc_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('proc_id')}
-          error={errors.proc_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-
-        <FormInput
-          label="Insurance"
-          id="ins_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('ins_id')}
-          error={errors.ins_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-        
-        <FormInput
-          label="Insurance Mfee"
-          id="ins_mfee_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('ins_mfee_id')}
-          error={errors.ins_mfee_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-
-        <FormInput
-          label="Collection Fee"
-          id="col_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('col_id')}
-          error={errors.col_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-        
-        <FormInput
-          label="Notarial"
-          id="not_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('not_id')}
-          error={errors.not_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-        
-        <FormInput
-          label="Rebates"
-          id="reb_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('reb_id')}
-          error={errors.reb_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-        
-        <FormInput
-          label="Penalty"
-          id="pen_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('pen_id')}
-          error={errors.pen_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-        
-        <FormInput
-          label="Addon Amount"
-          id="addon_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('addon_id')}
-          error={errors.addon_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-        
-        <FormInput
-          label="Addon UDI"
-          id="addon_udi_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('addon_udi_id')}
-          error={errors.addon_udi_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
-
-        <FormInput
-          label="Cash in Bank"
-          id="cib_id"
-          type="select"
-          icon={ChevronDown}
-          register={register('cib_id')}
-          error={errors.cib_id?.message}
-          options={optionsCoaData}
-          className='mb-4 mt-4'
-          isLoading={!coaDataAccount}
-          loadingMessage="Loading accounts..."
-        />
+        {[
+          { name: 'nr_id' as const, label: 'Notes Receivable' },
+          { name: 'ob_id' as const, label: 'Outstanding Balance' },
+          { name: 'udi_id' as const, label: 'UDI' },
+          { name: 'proc_id' as const, label: 'Processing' },
+          { name: 'ins_id' as const, label: 'Insurance' },
+          { name: 'ins_mfee_id' as const, label: 'Insurance Mfee' },
+          { name: 'col_id' as const, label: 'Collection Fee' },
+          { name: 'not_id' as const, label: 'Notarial' },
+          { name: 'reb_id' as const, label: 'Rebates' },
+          { name: 'pen_id' as const, label: 'Penalty' },
+          { name: 'addon_id' as const, label: 'Addon Amount' },
+          { name: 'addon_udi_id' as const, label: 'Addon UDI' },
+          { name: 'cib_id' as const, label: 'Cash in Bank' },
+        ].map(({ name, label }) => (
+          <div key={name} className="col-span-1 mb-4 mt-4">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">{label}</label>
+            <Controller
+              name={name}
+              control={control}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={optionsCoaData}
+                  placeholder="Select a Parent account"
+                  onChange={(selectedOption: any) => field.onChange(selectedOption?.value)}
+                  value={optionsCoaData.find(opt => String(opt.value) === String(field.value)) || null}
+                  isLoading={!coaDataAccount}
+                />
+              )}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="w-full flex justify-end mt-6">

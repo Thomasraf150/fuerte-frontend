@@ -354,6 +354,17 @@ const UPDATE_RELEASED_LOAN_INFO: string = `
   }
 `;
 
+const RETRY_AUTO_POST_ACCOUNTING: string = `
+  mutation RetryAutoPostAccounting($loan_id: Int!){
+    retryAutoPostAccounting(loan_id: $loan_id){
+      message
+      success
+      auto_posted
+      unmapped
+    }
+  }
+`;
+
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
   PROCESS_BORROWER_LOAN_MUTATION,
@@ -366,7 +377,8 @@ const LoanProductsQueryMutations = {
   GET_LOAN_RENEWAL,
   DELETE_LOANS,
   UPDATE_LOAN_RELEASED,
-  UPDATE_RELEASED_LOAN_INFO
+  UPDATE_RELEASED_LOAN_INFO,
+  RETRY_AUTO_POST_ACCOUNTING
 };
 
 export default LoanProductsQueryMutations;

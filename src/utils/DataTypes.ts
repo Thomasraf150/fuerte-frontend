@@ -24,6 +24,12 @@ export interface DataRowLoanTypeList {
   name: string;
 }
 
+export interface DataFormLoanType {
+  id?: number;
+  name: string;
+  is_active?: boolean;
+}
+
 export interface DataRowLoanCodes {
   id: number;
   code: string;

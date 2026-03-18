@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Hash, Calendar, Save, List, AlertTriangle } from 'react-feather';
+import { Hash, Calendar, Save, List, AlertTriangle, XCircle, RotateCw, CheckCircle } from 'react-feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import { LoanReleaseFormValues, BorrLoanRowData, DataSubBranches, DataChartOfAccountList } from '@/utils/DataTypes';
@@ -13,12 +13,13 @@ import AcctgEntryForm from './AcctgEntryForm';
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   handleRefetchData: () => void;
-  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => Promise<{ success: boolean; unmapped?: string[] } | undefined>;
+  onSubmitLoanRelease: (data: LoanReleaseFormValues, callback: () => void) => Promise<{ success: boolean; auto_posted?: boolean; unmapped?: string[] } | undefined>;
   fetchCoaDataTable: () => void;
   branchSubData: DataSubBranches[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
   handleChangeReleasedDate: (l: string, rd: string, fn: () => void) => void;
   handleUpdateReleasedLoanInfo: (loan_id: number, released_date: string, bank_id: number, check_no: string, fn: () => void) => void;
+  retryAutoPostAccounting?: (loanId: number, callback: () => void) => Promise<{ success: boolean; auto_posted?: boolean; unmapped?: string[] } | undefined>;
 }
 interface Option {
   value: string;
@@ -26,7 +27,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate, handleUpdateReleasedLoanInfo }) => {
+const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate, handleUpdateReleasedLoanInfo, retryAutoPostAccounting }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
   // const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
 
@@ -38,6 +39,29 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const [showPin2, setShowPin2] = useState(false);
   const [showAcctgEntry, setShowAcctgEntry] = useState<boolean>(false);
   const [unmappedDetails, setUnmappedDetails] = useState<string[]>([]);
+  const [postingBlocked, setPostingBlocked] = useState(false);
+  const [postingLoading, setPostingLoading] = useState(false);
+  const [releaseLoading, setReleaseLoading] = useState(false);
+
+  const handleRetryAutoPost = async () => {
+    if (!retryAutoPostAccounting || !loanSingleData?.id) return;
+    setPostingLoading(true);
+    try {
+      const result = await retryAutoPostAccounting(Number(loanSingleData.id), handleRefetchData);
+      if (result?.auto_posted) {
+        setUnmappedDetails([]);
+        setPostingBlocked(false);
+        return true;
+      }
+      if (result?.unmapped && result.unmapped.length > 0) {
+        setUnmappedDetails(result.unmapped);
+        setPostingBlocked(true);
+      }
+      return false;
+    } finally {
+      setPostingLoading(false);
+    }
+  };
 
   const toggleShowPin1 = () => {
     setShowPin1(!showPin1);
@@ -58,9 +82,15 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const isCashSelected = isCashBank(selectedBankId);
 
   const onSubmit: SubmitHandler<LoanReleaseFormValues> = async (data) => {
-    const result = await onSubmitLoanRelease(data, handleRefetchData);
-    if (result?.unmapped && result.unmapped.length > 0) {
-      setUnmappedDetails(result.unmapped);
+    setReleaseLoading(true);
+    try {
+      const result = await onSubmitLoanRelease(data, handleRefetchData);
+      if (result?.unmapped && result.unmapped.length > 0) {
+        setUnmappedDetails(result.unmapped);
+        setPostingBlocked(!result.auto_posted);
+      }
+    } finally {
+      setReleaseLoading(false);
     }
   };
 
@@ -193,14 +223,18 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
         </div>
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:justify-end">
           <button
-            className="bg-purple-700 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm w-full sm:w-auto"
+            className={`flex justify-center items-center text-white py-2 px-4 rounded text-sm w-full sm:w-auto ${
+              loanSingleData?.status === 3 || releaseLoading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-purple-700 hover:bg-purple-800'
+            }`}
             type="submit"
-            disabled={loanSingleData?.status === 3 ? true : false}
+            disabled={loanSingleData?.status === 3 || releaseLoading}
           >
             <span className="mt-1 mr-1">
-              <Save size={17} />
+              {releaseLoading ? <RotateCw size={17} className="animate-spin" /> : <Save size={17} />}
             </span>
-            <span>Release</span>
+            <span>{releaseLoading ? 'Releasing...' : 'Release'}</span>
           </button>
           <button
             className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 text-sm w-full sm:w-auto"
@@ -221,45 +255,139 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
           </button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
             <button
-              className="bg-yellow-500 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-yellow-400 text-sm w-full sm:w-auto"
+              className={`bg-yellow-500 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-yellow-400 text-sm w-full sm:w-auto ${postingLoading ? 'opacity-70' : ''}`}
               type="button"
-              onClick={() => setShowAcctgEntry(true)}
+              disabled={postingLoading}
+              onClick={async () => {
+                const posted = await handleRetryAutoPost();
+                if (!posted && !postingBlocked) setShowAcctgEntry(true);
+              }}
             >
               <span className="mt-1 mr-1">
-                <List size={17} />
+                {postingLoading ? <RotateCw size={17} className="animate-spin" /> : <List size={17} />}
               </span>
-              <span>Post Accounting</span>
+              <span>{postingLoading ? 'Posting...' : 'Post Accounting'}</span>
             </button>
           ) : ('')}
         </div>
       </div>
       </form>
     </div>
-    {unmappedDetails.length > 0 && (
-      <div className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-4">
+    {loanSingleData?.status === 3 && loanSingleData?.acctg_entry !== null && (
+      <div
+        className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+        style={{ backgroundColor: '#f0fdf4', borderLeft: '5px solid #22c55e', boxShadow: '0 1px 3px rgba(34,197,94,0.2)' }}
+      >
         <div className="flex items-start gap-3">
-          <AlertTriangle size={20} className="text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+          <CheckCircle size={22} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <p className="font-semibold text-yellow-800 dark:text-yellow-300 text-sm">
-              Partial Accounting Entry
+            <p style={{ color: '#15803d', fontSize: '15px', fontWeight: 700 }}>
+              Accounting Entry Posted
             </p>
-            <p className="text-yellow-700 dark:text-yellow-400 text-sm mt-1">
-              The following loan details were skipped because they have no account mapping for this branch:
+            <p style={{ color: '#166534', fontSize: '13px', marginTop: '4px' }}>
+              Journal Ref: <strong>{loanSingleData.acctg_entry.journal_ref || loanSingleData.acctg_entry.reference_no}</strong>
             </p>
-            <ul className="list-disc list-inside mt-2 text-sm text-yellow-800 dark:text-yellow-300">
-              {unmappedDetails.map((desc, i) => (
-                <li key={i} className="font-medium">{desc}</li>
-              ))}
-            </ul>
-            <Link
-              href={`/${process.env.NEXT_PUBLIC_ROUTER_BASEROUTE}/accounting/loan-proceed-settings`}
-              className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Configure Mappings →
-            </Link>
           </div>
         </div>
       </div>
+    )}
+    {loanSingleData?.status === 3 && loanSingleData?.acctg_entry === null && unmappedDetails.length === 0 && (
+      <div
+        className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+        style={{ backgroundColor: '#fff7ed', borderLeft: '5px solid #f59e0b', boxShadow: '0 1px 3px rgba(245,158,11,0.2)' }}
+      >
+        <div className="flex items-start gap-3">
+          <AlertTriangle size={22} style={{ color: '#d97706', flexShrink: 0, marginTop: '2px' }} />
+          <div>
+            <p style={{ color: '#92400e', fontSize: '15px', fontWeight: 700 }}>
+              Accounting Entry Not Yet Posted
+            </p>
+            <p style={{ color: '#b45309', fontSize: '13px', marginTop: '6px' }}>
+              This loan has been released but has no accounting entry. Click &quot;Post Accounting&quot; to auto-post, or configure mappings first.
+            </p>
+            <div className="flex gap-2 mt-3">
+              <button
+                type="button"
+                disabled={postingLoading}
+                onClick={handleRetryAutoPost}
+                className="inline-flex items-center gap-1.5 text-sm"
+                style={{ color: '#fff', backgroundColor: '#f59e0b', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, opacity: postingLoading ? 0.7 : 1 }}
+              >
+                {postingLoading ? <RotateCw size={15} className="animate-spin" /> : <List size={15} />}
+                {postingLoading ? 'Posting...' : 'Post Accounting'}
+              </button>
+              <Link
+                href="/accounting/loan-proceed-settings"
+                className="inline-flex items-center gap-1.5 text-sm"
+                style={{ color: '#fff', backgroundColor: '#2563eb', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Configure Mappings →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    {unmappedDetails.length > 0 && loanSingleData?.acctg_entry === null && (
+      postingBlocked ? (
+        <div
+          className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+          style={{ backgroundColor: '#fef2f2', borderLeft: '5px solid #dc2626', boxShadow: '0 1px 3px rgba(220,38,38,0.2)' }}
+        >
+          <div className="flex items-start gap-3">
+            <XCircle size={24} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <p style={{ color: '#b91c1c', fontSize: '16px', fontWeight: 700 }}>
+                Accounting Entry NOT Posted
+              </p>
+              <p style={{ color: '#dc2626', fontSize: '13px', marginTop: '6px' }}>
+                These unmapped items have non-zero amounts. Configure their account mappings to enable auto-posting:
+              </p>
+              <ul className="list-disc list-inside mt-2 text-sm" style={{ color: '#b91c1c' }}>
+                {unmappedDetails.map((desc, i) => (
+                  <li key={i} style={{ fontWeight: 600 }}>{desc}</li>
+                ))}
+              </ul>
+              <Link
+                href="/accounting/loan-proceed-settings"
+                className="inline-flex items-center gap-1.5 mt-3 text-sm"
+                style={{ color: '#fff', backgroundColor: '#2563eb', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Configure Mappings →
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+          style={{ backgroundColor: '#fefce8', borderLeft: '5px solid #eab308', boxShadow: '0 1px 3px rgba(234,179,8,0.2)' }}
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={22} style={{ color: '#ca8a04', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <p style={{ color: '#854d0e', fontSize: '14px', fontWeight: 700 }}>
+                Partial Accounting Entry
+              </p>
+              <p style={{ color: '#a16207', fontSize: '13px', marginTop: '6px' }}>
+                The following loan details were skipped because they have no account mapping for this branch:
+              </p>
+              <ul className="list-disc list-inside mt-2 text-sm" style={{ color: '#854d0e' }}>
+                {unmappedDetails.map((desc, i) => (
+                  <li key={i} style={{ fontWeight: 500 }}>{desc}</li>
+                ))}
+              </ul>
+              <Link
+                href="/accounting/loan-proceed-settings"
+                className="inline-flex items-center gap-1.5 mt-3 text-sm"
+                style={{ color: '#1d4ed8', fontWeight: 500, textDecoration: 'underline' }}
+              >
+                Configure Mappings →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
     )}
     {showAcctgEntry && (
       <>

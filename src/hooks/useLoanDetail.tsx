@@ -19,7 +19,8 @@ const useLoanDetail = () => {
     PRINT_LOAN_DETAILS,
     GET_LOAN_RENEWAL,
     DELETE_LOANS,
-    UPDATE_LOAN_RELEASED
+    UPDATE_LOAN_RELEASED,
+    RETRY_AUTO_POST_ACCOUNTING
   } = LoansQueryMutation;
 
   const [loanSingleData, setLoanSingleData] = useState<BorrLoanRowData>();
@@ -492,6 +493,44 @@ const useLoanDetail = () => {
     }
   };
 
+  const retryAutoPostAccounting = async (loanId: number, handleRefetchLoanData: () => void) => {
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return { success: false };
+      }
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          query: RETRY_AUTO_POST_ACCOUNTING,
+          variables: { loan_id: loanId },
+        }),
+      });
+
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+        return { success: false };
+      }
+
+      const result = response.data?.retryAutoPostAccounting;
+      if (result?.auto_posted) {
+        toast.success('Accounting entry posted successfully!');
+        handleRefetchLoanData();
+        return { success: true, auto_posted: true, unmapped: [] };
+      } else {
+        toast.warning(result?.message || 'Auto-post failed');
+        return { success: false, auto_posted: false, unmapped: result?.unmapped || [] };
+      }
+    } catch (error) {
+      toast.error('Failed to post accounting entry');
+      return { success: false };
+    }
+  };
+
   return {
     fetchSingLoans,
     loanSingleData,
@@ -505,6 +544,7 @@ const useLoanDetail = () => {
     dataComputedRenewal,
     handleUpdateMaturity,
     handleChangeReleasedDate,
+    retryAutoPostAccounting,
   };
 };
 

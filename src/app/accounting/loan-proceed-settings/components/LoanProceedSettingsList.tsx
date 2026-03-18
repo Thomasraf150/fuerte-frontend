@@ -59,12 +59,12 @@ const LoanProceedSettingsList: React.FC = () => {
                 </div>
                 <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto">
                   <CustomDatatable
-                    apiLoading={false}
+                    apiLoading={loading}
                     columns={column(handleRowClick)}
-                    data={lpsDataAccount || []}
+                    data={[...(lpsDataAccount || [])].sort((a: any, b: any) => (b.id ?? 0) - (a.id ?? 0))}
                     onRowClicked={handleWholeRowClick}
-                    enableCustomHeader={true} 
-                    title={''}  
+                    enableCustomHeader={true}
+                    title={''}
                   />
                   {/* <table className="w-full text-sm text-left text-black">
                     <thead className="text-xs text-black uppercase bg-gray-3">
@@ -91,12 +91,13 @@ const LoanProceedSettingsList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-7">
-                  <LoanProcSettingsForm 
-                      setShowForm={setShowForm} 
-                      actionLbl={actionLbl} 
+                  <LoanProcSettingsForm
+                      setShowForm={setShowForm}
+                      actionLbl={actionLbl}
                       lpsSingleData={lpsSingleData}
-                      coaDataAccount={coaDataAccount || []} 
-                      branchSubData={branchSubData} />
+                      coaDataAccount={coaDataAccount || []}
+                      branchSubData={branchSubData}
+                      onSaveSuccess={fetchLpsDataTable} />
                 </div>
               </div>
             </div>

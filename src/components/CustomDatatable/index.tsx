@@ -370,7 +370,8 @@ const CustomDatatable = <T extends object>({
       <div className="relative">
         <DataTable
           keyField="id"
-          paginationPerPage={isServerSide ? serverSidePagination!.pageSize : 6}
+          paginationPerPage={isServerSide ? serverSidePagination!.pageSize : 20}
+          paginationRowsPerPageOptions={[10, 20, 50, 100]}
           progressPending={apiLoading}
           progressComponent={<DataTableLoadingComponent />}
           noDataComponent={<NoDataComponent />}
