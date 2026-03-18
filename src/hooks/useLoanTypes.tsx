@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import LoanTypeQueryMutations from '@/graphql/LoanTypeQueryMutations';
 import { DataRowLoanTypeList, DataFormLoanType } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
+import { useAuthStore } from "@/store";
 
 const useLoanTypes = () => {
   const {
@@ -17,12 +18,21 @@ const useLoanTypes = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
+  const getAuthHeaders = () => {
+    const { GET_AUTH_TOKEN } = useAuthStore.getState();
+    const token = GET_AUTH_TOKEN();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    };
+  };
+
   const fetchLoanTypes = useCallback(async (orderBy = 'id_desc') => {
     setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           query: GET_LOAN_TYPES_QUERY,
           variables: { orderBy },
@@ -68,7 +78,7 @@ const useLoanTypes = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ query: mutation, variables }),
       });
 
@@ -96,7 +106,7 @@ const useLoanTypes = () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           query: DELETE_LOAN_TYPE_MUTATION,
           variables: { input: { id, is_deleted: true } },
