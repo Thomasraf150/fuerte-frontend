@@ -200,6 +200,18 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
       acctg_entry {
         id
         reference_no
+        journal_ref
+        journal_date
+        acctg_details {
+          id
+          acctnumber
+          debit
+          credit
+        }
+      }
+      branch_sub {
+        id
+        name
       }
       user {
         branch_sub_id
@@ -365,6 +377,17 @@ const RETRY_AUTO_POST_ACCOUNTING: string = `
   }
 `;
 
+const CANCEL_AND_REPOST_LOAN_ACCOUNTING: string = `
+  mutation CancelAndRepostLoanAccounting($loan_id: Int!, $input: InputLoanProceedSettings){
+    cancelAndRepostLoanAccounting(loan_id: $loan_id, input: $input){
+      message
+      success
+      auto_posted
+      unmapped
+    }
+  }
+`;
+
 const LoanProductsQueryMutations = {
   BORROWER_LOAN_QUERY,
   PROCESS_BORROWER_LOAN_MUTATION,
@@ -378,7 +401,8 @@ const LoanProductsQueryMutations = {
   DELETE_LOANS,
   UPDATE_LOAN_RELEASED,
   UPDATE_RELEASED_LOAN_INFO,
-  RETRY_AUTO_POST_ACCOUNTING
+  RETRY_AUTO_POST_ACCOUNTING,
+  CANCEL_AND_REPOST_LOAN_ACCOUNTING
 };
 
 export default LoanProductsQueryMutations;

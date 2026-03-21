@@ -573,6 +573,19 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
 
+              {/* <!-- Loan Proceed Settings --> */}
+              <li>
+                <Link
+                  href="/accounting/loan-proceed-settings"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    pathname === "/accounting/loan-proceed-settings" && "bg-graydark dark:bg-meta-4"
+                  }`}
+                >
+                  <Server size={14} />
+                  Loan Proceed Settings
+                </Link>
+              </li>
+
               {/* <!-- Coa Item Settings --> */}
               <SidebarLinkGroup
                   activeCondition={
@@ -656,16 +669,16 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Chart of Accounts
                             </Link>
                           </li>
-                          {/* <li>
+                          <li>
                             <Link
                               href="/accounting/loan-proceed-settings"
                               className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/coa" && "text-white"
+                                pathname === "/accounting/loan-proceed-settings" && "text-white"
                               }`}
                             >
                               Loan Proceed Settings
                             </Link>
-                          </li> */}
+                          </li>
                         </ul>
                       </div>
                       {/* <!-- Dropdown Menu End --> */}

@@ -20,6 +20,7 @@ const GET_LOAN_PROCEED_SETTINGS: string = `
         name
       }
       account {
+        id
         account_name
         number
       }

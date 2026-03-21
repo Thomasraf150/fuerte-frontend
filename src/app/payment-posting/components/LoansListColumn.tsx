@@ -19,7 +19,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
   },
   {
     name: 'Borrower',
-    cell: row => row?.borrower.lastname + ', ' + row.borrower.firstname,
+    cell: row => (row?.borrower?.lastname ?? '') + ', ' + (row?.borrower?.firstname ?? ''),
     sortable: true,
     style: {
       minWidth: '270px',

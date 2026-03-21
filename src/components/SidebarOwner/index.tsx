@@ -331,6 +331,14 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   General Ledger
                 </Link>
               </li>
+
+              {/* Loan Proceed Settings */}
+              <li>
+                <Link href="/accounting/loan-proceed-settings" className={linkClass(pathname === "/accounting/loan-proceed-settings")}>
+                  <Server size={14} />
+                  Loan Proceed Settings
+                </Link>
+              </li>
             </ul>
 
             {/* ===== SETTINGS ===== */}
@@ -401,6 +409,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/audit-logs" className={subLinkClass(pathname === "/audit-logs")}>Audit Trail</Link></li>
                         <li><Link href="/accounting/vendors" className={subLinkClass(pathname === "/accounting/vendors")}>Vendors</Link></li>
                         <li><Link href="/accounting/coa" className={subLinkClass(pathname === "/accounting/coa")}>Chart of Accounts</Link></li>
+                        <li><Link href="/accounting/loan-proceed-settings" className={subLinkClass(pathname === "/accounting/loan-proceed-settings")}>Loan Proceed Settings</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>

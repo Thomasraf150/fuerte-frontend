@@ -154,7 +154,7 @@ const CrjForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, l
                     icon={Edit3}
                     error={errors.vendor_id && "journal desc is required"}
                     className='mt-2'
-                    value={dataPayee?.name}
+                    value={dataPayee?.name || singleData?.borrower_full_name}
                     readOnly
                   />
                 </div>

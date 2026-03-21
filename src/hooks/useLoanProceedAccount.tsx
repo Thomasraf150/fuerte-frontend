@@ -61,6 +61,35 @@ const useLoanProceedAccount = () => {
     setLoading(false);
   };
 
+  const fetchLpsWithFallback = async (branchSubId: number | string) => {
+    setLoading(true);
+    try {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_GRAPHQL}`;
+      const makeBody = (id: string) => JSON.stringify({
+        query: GET_LOAN_PROCEED_SETTINGS,
+        variables: { input: { branch_sub_id: id } }
+      });
+      const headers = { 'Content-Type': 'application/json' };
+
+      const [branchResp, globalResp] = await Promise.all([
+        fetchWithRecache(apiUrl, { method: 'POST', headers, body: makeBody(String(branchSubId)) }),
+        fetchWithRecache(apiUrl, { method: 'POST', headers, body: makeBody('global') }),
+      ]);
+
+      const branchData: DataLoanProceedAcctData[] = branchResp?.data?.getLoanProceedSettings ?? [];
+      const globalData: DataLoanProceedAcctData[] = globalResp?.data?.getLoanProceedSettings ?? [];
+
+      const branchDescs = new Set(branchData.map((d: DataLoanProceedAcctData) => d.description?.toLowerCase()?.trim()));
+      const merged = [
+        ...branchData,
+        ...globalData.filter((d: DataLoanProceedAcctData) => !branchDescs.has(d.description?.toLowerCase()?.trim())),
+      ];
+      setLpsSingleData(merged);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmitLoanProSettings = async (data: DataLoanProceedList, handleRefetchData: () => void) => {
     setLoanProcLoading(true);
     try {
@@ -83,6 +112,7 @@ const useLoanProceedAccount = () => {
           col_id: data?.col_id,
           not_id: data?.not_id,
           reb_id: data?.reb_id,
+          agent_id: data?.agent_id,
           pen_id: data?.pen_id,
           addon_id: data?.addon_id,
           addon_udi_id: data?.addon_udi_id,
@@ -114,6 +144,10 @@ const useLoanProceedAccount = () => {
       // Check for successful creation
       if (result?.data?.createLoanProceedSettings) {
         const responseData = result.data.createLoanProceedSettings;
+        if (responseData.status === false) {
+          toast.error(responseData.message || "Failed to save loan proceed settings");
+          return { success: false, error: responseData.message };
+        }
         toast.success(responseData.message || "Loan proceed settings saved successfully!");
         handleRefetchData();
         return { success: true, data: responseData };
@@ -141,6 +175,7 @@ const useLoanProceedAccount = () => {
     loading,
     onSubmitLoanProSettings,
     fetchLpsDataForm,
+    fetchLpsWithFallback,
     lpsSingleData,
     loanProcLoading
   };

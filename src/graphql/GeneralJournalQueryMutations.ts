@@ -82,6 +82,7 @@ const GET_JOURNAL_ENTRY_BY_ID: string = `
         id
         name
       }
+      borrower_full_name
     }
   }
 `;

@@ -23,6 +23,7 @@ const useLoans = () => {
           SAVE_LOAN_BANK_DETAILS,
           SAVE_LOAN_RELEASE,
           RETRY_AUTO_POST_ACCOUNTING,
+          CANCEL_AND_REPOST_LOAN_ACCOUNTING,
           PRINT_LOAN_DETAILS,
           GET_LOAN_RENEWAL,
           DELETE_LOANS,
@@ -1023,6 +1024,44 @@ const useLoans = () => {
     }
   };
 
+  const cancelAndRepostAccounting = async (loanId: number, handleRefetchLoanData: () => void, accountOverrides?: Record<string, string>) => {
+    try {
+      const { GET_AUTH_TOKEN } = useAuthStore.getState();
+      const token = GET_AUTH_TOKEN();
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return { success: false };
+      }
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          query: CANCEL_AND_REPOST_LOAN_ACCOUNTING,
+          variables: { loan_id: loanId, input: accountOverrides ?? null },
+        }),
+      });
+
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+        return { success: false };
+      }
+
+      const result = response.data?.cancelAndRepostLoanAccounting;
+      if (result?.auto_posted) {
+        toast.success('Accounting entry re-posted successfully!');
+        handleRefetchLoanData();
+        return { success: true, auto_posted: true, unmapped: [] };
+      } else {
+        toast.error(result?.message || 'Re-post failed');
+        return { success: false, auto_posted: false, unmapped: result?.unmapped || [] };
+      }
+    } catch (error) {
+      toast.error('Failed to re-post accounting entry');
+      return { success: false };
+    }
+  };
+
   return {
     onSubmitLoanComp,
     loanProduct,
@@ -1045,6 +1084,7 @@ const useLoans = () => {
     handleChangeReleasedDate,
     handleUpdateReleasedLoanInfo,
     retryAutoPostAccounting,
+    cancelAndRepostAccounting,
     // Server-side pagination props
     dataLoans,
     loansLoading,

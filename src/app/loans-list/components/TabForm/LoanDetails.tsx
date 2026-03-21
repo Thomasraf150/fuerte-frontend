@@ -42,7 +42,7 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
             <tbody>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 dark:text-bodydark bg-neutral-100 dark:bg-meta-4 text-form-strokedark">Borrower</td>
-                <td className="px-4 py-2 text-gray-900 dark:text-white">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</td>
+                <td className="px-4 py-2 text-gray-900 dark:text-white">{loanSingleData?.borrower ? `${loanSingleData.borrower.lastname}, ${loanSingleData.borrower.firstname}` : '—'}</td>
               </tr>
               <tr className="">
               <td className="px-4 py-2 font-semibold text-gray-700 dark:text-bodydark bg-neutral-100 dark:bg-meta-4 text-form-strokedark">PN Amount</td>
@@ -103,6 +103,10 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 dark:text-bodydark bg-neutral-100 dark:bg-meta-4 text-form-strokedark">Loan Ref</td>
                 <td className="px-4 py-2 text-gray-900 dark:text-white">{loanSingleData?.loan_ref}</td>
+              </tr>
+              <tr className="">
+                <td className="px-4 py-2 font-semibold text-gray-700 dark:text-bodydark bg-neutral-100 dark:bg-meta-4 text-form-strokedark">Branch</td>
+                <td className="px-4 py-2 text-gray-900 dark:text-white">{loanSingleData?.branch_sub?.name ?? '—'}</td>
               </tr>
             </tbody>
           </table>

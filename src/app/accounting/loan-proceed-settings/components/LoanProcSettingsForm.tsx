@@ -62,6 +62,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         if (item?.description === 'rebates') {
           setValue('reb_id', item?.account_id);
         }
+        if (item?.description === 'agent fee') {
+          setValue('agent_id', item?.account_id);
+        }
         if (item?.description === 'penalty') {
           setValue('pen_id', item?.account_id);
         }
@@ -176,6 +179,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'col_id' as const, label: 'Collection Fee' },
           { name: 'not_id' as const, label: 'Notarial' },
           { name: 'reb_id' as const, label: 'Rebates' },
+          { name: 'agent_id' as const, label: 'Agent Fee' },
           { name: 'pen_id' as const, label: 'Penalty' },
           { name: 'addon_id' as const, label: 'Addon Amount' },
           { name: 'addon_udi_id' as const, label: 'Addon UDI' },

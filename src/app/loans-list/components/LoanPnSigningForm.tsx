@@ -21,7 +21,7 @@ interface BorrInfoProps {
 const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm }) => {
   const [activeTab, setActiveTab] = useState<number>();
   const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
-  const { loanSingleData, fetchSingLoans, onSubmitLoanRelease, printLoanDetails, handleChangeReleasedDate, handleUpdateReleasedLoanInfo, retryAutoPostAccounting } = useLoans();
+  const { loanSingleData, fetchSingLoans, onSubmitLoanRelease, printLoanDetails, handleChangeReleasedDate, handleUpdateReleasedLoanInfo, retryAutoPostAccounting, cancelAndRepostAccounting } = useLoans();
 
   const handleTabClick = (tabIndex: number) => {
     setActiveTab(tabIndex);
@@ -144,6 +144,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                 handleChangeReleasedDate={handleChangeReleasedDate}
                 handleUpdateReleasedLoanInfo={handleUpdateReleasedLoanInfo}
                 retryAutoPostAccounting={retryAutoPostAccounting}
+                cancelAndRepostAccounting={cancelAndRepostAccounting}
               />
             )}
           </div>

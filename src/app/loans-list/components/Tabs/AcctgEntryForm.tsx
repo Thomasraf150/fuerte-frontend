@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Home, Edit3, ChevronDown, CheckSquare, RotateCw } from 'react-feather';
+import { Home, Edit3, ChevronDown, CheckSquare, RotateCw, RefreshCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -10,11 +10,14 @@ import { DataChartOfAccountList, DataSubBranches, DataLoanProceedList, DataLoanP
 
 interface ParentFormBr {
   branchSubData: DataSubBranches[] | undefined;
-  // lpsSingleData: DataLoanProceedAcctData[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
   loanSingleData: BorrLoanRowData | undefined;
   setShowAcctgEntry: (b: boolean) => void;
   handleRefetchData: () => void;
+  lpsSingleData?: DataLoanProceedAcctData[];
+  onAfterSave?: (handleRefetchData: () => void, accountOverrides?: Record<string, string>) => void;
+  isRepostMode?: boolean;
+  isReposting?: boolean;
 }
 
 interface Option {
@@ -23,15 +26,124 @@ interface Option {
   hidden?: boolean;
 }
 
-const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData, loanSingleData, setShowAcctgEntry, handleRefetchData }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
+// Maps LPS description → form field name
+const descriptionToField: Record<string, keyof DataLoanProceedList> = {
+  'notes receivable': 'nr_id',
+  'outstanding balance': 'ob_id',
+  'udi': 'udi_id',
+  'processing': 'proc_id',
+  'insurance': 'ins_id',
+  'insurance mfee': 'ins_mfee_id',
+  'collection': 'col_id',
+  'notarial': 'not_id',
+  'rebates': 'reb_id',
+  'agent fee': 'agent_id',
+  'penalty': 'pen_id',
+  'addon amount': 'addon_id',
+  'addon udi': 'addon_udi_id',
+  'cash in bank': 'cib_id',
+};
+
+const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData, loanSingleData, setShowAcctgEntry, handleRefetchData, lpsSingleData, onAfterSave, isRepostMode, isReposting }) => {
+  const { register, handleSubmit, setValue, reset, getValues, watch, formState: { errors, isDirty }, control } = useForm<DataLoanProceedList>();
   const { onSubmitLoanProSettings, loanProcLoading } = useLoanProceedAccount();
   const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
 
   useEffect(() => {
+    const branchSubId = loanSingleData?.branch_sub?.id ?? loanSingleData?.user?.branch_sub_id;
     setValue('loan_ref', String(loanSingleData?.loan_ref));
-    setValue('branch_sub_id', String(loanSingleData?.user?.branch_sub_id));
+    setValue('branch_sub_id', String(branchSubId));
   }, [loanSingleData])
+
+  // Build flat acctnumber → account_id map from COA tree
+  const buildAcctnumberMap = (accounts: DataChartOfAccountList[]): Record<string, string> => {
+    const map: Record<string, string> = {};
+    const traverse = (accts: DataChartOfAccountList[]) => {
+      accts.forEach(a => {
+        if (a.number && a.id) map[String(a.number)] = String(a.id);
+        if (a.subAccounts) traverse(a.subAccounts);
+      });
+    };
+    traverse(accounts);
+    return map;
+  };
+
+  // Pre-fill priority: 1) existing acctg entry, 2) localStorage overrides, 3) LPS defaults
+  // Fields filled by higher-priority sources are NOT overwritten by lower-priority ones.
+  useEffect(() => {
+    const filledFields = new Set<string>();
+
+    // 1) In re-post mode, pre-fill from the existing accounting entry's actual accounts
+    if (isRepostMode && loanSingleData?.acctg_entry?.acctg_details && loanSingleData?.loan_details && coaDataAccount?.length > 0) {
+      const acctgDetails = loanSingleData.acctg_entry.acctg_details;
+      const loanDetails = loanSingleData.loan_details;
+      const acctnumberToId = buildAcctnumberMap(coaDataAccount);
+
+      const availableDetails = [...acctgDetails];
+
+      loanDetails.forEach((ld: { description?: string; debit?: string; credit?: string }) => {
+        const desc = ld.description?.toLowerCase()?.trim();
+        if (!desc) return;
+        const fieldKey = descriptionToField[desc];
+        if (!fieldKey) return;
+
+        const ldDebit = parseFloat(ld.debit || '0');
+        const ldCredit = parseFloat(ld.credit || '0');
+        if (ldDebit === 0 && ldCredit === 0) return;
+
+        // Find matching acctg_detail by debit/credit amounts
+        const matchIdx = availableDetails.findIndex(ad => {
+          const adDebit = parseFloat(ad.debit || '0');
+          const adCredit = parseFloat(ad.credit || '0');
+          return Math.abs(adDebit - ldDebit) < 0.01 && Math.abs(adCredit - ldCredit) < 0.01;
+        });
+
+        if (matchIdx >= 0) {
+          const match = availableDetails[matchIdx];
+          availableDetails.splice(matchIdx, 1);
+          const accountId = acctnumberToId[match.acctnumber];
+          if (accountId) {
+            setValue(fieldKey, accountId);
+            filledFields.add(fieldKey);
+          }
+        }
+      });
+    }
+
+    // 2) In re-post mode, try localStorage overrides for any remaining empty fields
+    if (isRepostMode && loanSingleData?.id) {
+      const fieldKeys = ['nr_id','ob_id','udi_id','proc_id','agent_id','ins_id','ins_mfee_id','col_id','not_id','reb_id','pen_id','addon_id','addon_udi_id','cib_id'] as const;
+      try {
+        const saved = localStorage.getItem(`lps_repost_${loanSingleData.id}`);
+        if (saved) {
+          const overrides = JSON.parse(saved) as Record<string, string>;
+          fieldKeys.forEach(k => {
+            if (overrides[k] && !filledFields.has(k)) {
+              setValue(k, overrides[k]);
+              filledFields.add(k);
+            }
+          });
+        }
+      } catch { /* invalid JSON, fall through to LPS */ }
+    }
+
+    // 3) Fill remaining empty fields from LPS defaults
+    if (lpsSingleData && lpsSingleData.length > 0) {
+      const seen = new Set<keyof DataLoanProceedList>();
+      lpsSingleData.forEach((item) => {
+        const key = descriptionToField[item.description?.toLowerCase()?.trim()];
+        if (key && !seen.has(key) && !filledFields.has(key)) {
+          seen.add(key);
+          setValue(key, String(item.account?.id ?? item.account_id));
+          filledFields.add(key);
+        }
+      });
+    }
+
+    if (filledFields.size > 0) {
+      setTimeout(() => reset(getValues(), { keepDirty: false }), 50);
+    }
+  }, [lpsSingleData, loanSingleData?.acctg_entry])
 
   useEffect(()=>{
     if (branchSubData && Array.isArray(branchSubData)) {
@@ -64,7 +176,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
       // Add the current account with indentation based on level
       options.push({
         label: `${'—'.repeat(level - 1)} ${account.account_name}`,
-        value: account?.number?.toString(),
+        value: account?.id?.toString(),
       });
 
       // Recursively process sub-accounts
@@ -85,10 +197,8 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
   const optionsCoaData = getAccountOptions(coaDataAccount);
 
   const onSubmit: SubmitHandler<DataLoanProceedList> = data => {
-    onSubmitLoanProSettings(data, handleRefetchData);
-    console.log(data, 'data');
-    // fetchCoaDataTable();
-    // setShowForm(false);
+    const afterSave = onAfterSave ? onAfterSave : handleRefetchData;
+    onSubmitLoanProSettings(data, afterSave as () => void);
     setShowAcctgEntry(false);
   };
 
@@ -415,23 +525,42 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
 
       <div className="w-full flex justify-end mt-6">
         <div className="flex gap-4">
-          <button
-            className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanProcLoading ? 'opacity-70' : ''}`}
-            type="submit"
-            disabled={loanProcLoading}
-          >
-            {loanProcLoading ? (
-              <>
-                <RotateCw size={17} className="animate-spin mr-1" />
-                <span>Posting...</span>
-              </>
-            ) : (
-              <>
-                <CheckSquare size={17} className="mr-1" />
-                <span>Post</span>
-              </>
-            )}
-          </button>
+          {isRepostMode ? (
+            <button
+              className={`flex justify-center items-center gap-1 rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(!isDirty || isReposting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              type="button"
+              disabled={!isDirty || !!isReposting}
+              onClick={() => {
+                const vals = getValues();
+                // Pass form values as one-time overrides directly — does NOT modify LPS defaults
+                const overrides: Record<string, string> = {};
+                const fieldKeys = ['nr_id','ob_id','udi_id','proc_id','agent_id','ins_id','ins_mfee_id','col_id','not_id','reb_id','pen_id','addon_id','addon_udi_id','cib_id'] as const;
+                fieldKeys.forEach(k => { if (vals[k]) overrides[k] = String(vals[k]); });
+                onAfterSave?.(handleRefetchData, overrides);
+              }}
+            >
+              {isReposting ? <RotateCw size={17} className="animate-spin mr-1" /> : <RefreshCw size={17} className="mr-1" />}
+              <span>{isReposting ? 'Re-posting...' : 'Re-post'}</span>
+            </button>
+          ) : (
+            <button
+              className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanProcLoading ? 'opacity-70' : ''}`}
+              type="submit"
+              disabled={loanProcLoading}
+            >
+              {loanProcLoading ? (
+                <>
+                  <RotateCw size={17} className="animate-spin mr-1" />
+                  <span>Posting...</span>
+                </>
+              ) : (
+                <>
+                  <CheckSquare size={17} className="mr-1" />
+                  <span>Post</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </form>

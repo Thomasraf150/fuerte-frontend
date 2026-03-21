@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Hash, Calendar, Save, List, AlertTriangle, XCircle, RotateCw, CheckCircle } from 'react-feather';
+import { Hash, Calendar, Save, List, AlertTriangle, XCircle, RotateCw, CheckCircle, RefreshCw } from 'react-feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import { LoanReleaseFormValues, BorrLoanRowData, DataSubBranches, DataChartOfAccountList } from '@/utils/DataTypes';
@@ -9,6 +9,7 @@ import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import Link from 'next/link';
 import AcctgEntryForm from './AcctgEntryForm';
+import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -20,6 +21,7 @@ interface OMProps {
   handleChangeReleasedDate: (l: string, rd: string, fn: () => void) => void;
   handleUpdateReleasedLoanInfo: (loan_id: number, released_date: string, bank_id: number, check_no: string, fn: () => void) => void;
   retryAutoPostAccounting?: (loanId: number, callback: () => void) => Promise<{ success: boolean; auto_posted?: boolean; unmapped?: string[] } | undefined>;
+  cancelAndRepostAccounting?: (loanId: number, callback: () => void, accountOverrides?: Record<string, string>) => Promise<{ success: boolean; auto_posted?: boolean; unmapped?: string[] } | undefined>;
 }
 interface Option {
   value: string;
@@ -27,14 +29,13 @@ interface Option {
   hidden?: boolean;
 }
 
-const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate, handleUpdateReleasedLoanInfo, retryAutoPostAccounting }) => {
+const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate, handleUpdateReleasedLoanInfo, retryAutoPostAccounting, cancelAndRepostAccounting }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
-  // const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
+  const { dataBank } = useBank();
+  const { fetchLpsWithFallback, lpsSingleData, loading: lpsLoading } = useLoanProceedAccount();
 
   const [bankOptions1, setBankOptions1] = useState<Option[]>([]);
   const [bankOptions2, setBankOptions2] = useState<Option[]>([]);
-  // const { onSubmitLoanRelease } = useLoans();
-  const { dataBank } = useBank();
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);
   const [showAcctgEntry, setShowAcctgEntry] = useState<boolean>(false);
@@ -42,6 +43,21 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   const [postingBlocked, setPostingBlocked] = useState(false);
   const [postingLoading, setPostingLoading] = useState(false);
   const [releaseLoading, setReleaseLoading] = useState(false);
+  const [repostLoading, setRepostLoading] = useState(false);
+
+  const handleRepostAfterSave = async (_refetch: () => void, accountOverrides?: Record<string, string>) => {
+    if (!cancelAndRepostAccounting || !loanSingleData?.id) return;
+    setRepostLoading(true);
+    try {
+      const result = await cancelAndRepostAccounting(Number(loanSingleData.id), handleRefetchData, accountOverrides);
+      // Persist overrides so the form shows correct values after page refresh
+      if (result?.success && accountOverrides) {
+        localStorage.setItem(`lps_repost_${loanSingleData.id}`, JSON.stringify(accountOverrides));
+      }
+    } finally {
+      setRepostLoading(false);
+    }
+  };
 
   const handleRetryAutoPost = async () => {
     if (!retryAutoPostAccounting || !loanSingleData?.id) return;
@@ -140,6 +156,13 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
       }
     }
   }, [selectedBankId, isCashSelected, setValue]);
+
+  useEffect(() => {
+    const branchSubId = loanSingleData?.branch_sub?.id ?? loanSingleData?.user?.branch_sub_id;
+    if (loanSingleData?.status === 3 && loanSingleData?.acctg_entry && branchSubId) {
+      fetchLpsWithFallback(branchSubId);
+    }
+  }, [loanSingleData?.id, !!loanSingleData?.acctg_entry]);
 
   return (
     <>
@@ -275,16 +298,14 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
     </div>
     {loanSingleData?.status === 3 && loanSingleData?.acctg_entry !== null && (
       <div
-        className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+        className="w-full mt-4 rounded-lg p-4"
         style={{ backgroundColor: '#f0fdf4', borderLeft: '5px solid #22c55e', boxShadow: '0 1px 3px rgba(34,197,94,0.2)' }}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 mb-3">
           <CheckCircle size={22} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <p style={{ color: '#15803d', fontSize: '15px', fontWeight: 700 }}>
-              Accounting Entry Posted
-            </p>
-            <p style={{ color: '#166534', fontSize: '13px', marginTop: '4px' }}>
+            <p style={{ color: '#15803d', fontSize: '15px', fontWeight: 700 }}>Accounting Entry Posted</p>
+            <p style={{ color: '#166534', fontSize: '13px', marginTop: '2px' }}>
               Journal Ref: <strong>{loanSingleData.acctg_entry.journal_ref || loanSingleData.acctg_entry.reference_no}</strong>
             </p>
           </div>
@@ -389,17 +410,46 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
         </div>
       )
     )}
-    {showAcctgEntry && (
+    {/* Re-post mode: always shown when posted */}
+    {loanSingleData?.status === 3 && loanSingleData?.acctg_entry !== null && (
       <>
         <hr className="mb-4"/>
         <div className="w-full">
-          <FormLabel title={`Create Proper Account`}/>
-          <AcctgEntryForm 
-            branchSubData={branchSubData} 
-            loanSingleData={loanSingleData} 
-            coaDataAccount={coaDataAccount || []} 
+          <FormLabel title="Review & Re-post Accounting Entry"/>
+          {(lpsLoading || lpsSingleData === undefined) ? (
+            <div className="flex items-center gap-3 p-8 text-gray-500">
+              <RotateCw size={20} className="animate-spin" style={{ color: '#6b7280' }} />
+              <span style={{ fontSize: '14px' }}>Loading account mappings...</span>
+            </div>
+          ) : (
+            <AcctgEntryForm
+              branchSubData={branchSubData}
+              loanSingleData={loanSingleData}
+              coaDataAccount={coaDataAccount || []}
+              setShowAcctgEntry={setShowAcctgEntry}
+              handleRefetchData={handleRefetchData}
+              lpsSingleData={lpsSingleData ?? undefined}
+              onAfterSave={handleRepostAfterSave}
+              isRepostMode={true}
+              isReposting={repostLoading}
+            />
+          )}
+        </div>
+      </>
+    )}
+    {/* Post mode: shown when not yet posted and user clicks Post Accounting */}
+    {showAcctgEntry && loanSingleData?.acctg_entry === null && (
+      <>
+        <hr className="mb-4"/>
+        <div className="w-full">
+          <FormLabel title="Create Proper Account"/>
+          <AcctgEntryForm
+            branchSubData={branchSubData}
+            loanSingleData={loanSingleData}
+            coaDataAccount={coaDataAccount || []}
             setShowAcctgEntry={setShowAcctgEntry}
-            handleRefetchData={handleRefetchData}/>
+            handleRefetchData={handleRefetchData}
+          />
         </div>
       </>
     )}

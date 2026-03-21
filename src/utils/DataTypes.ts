@@ -361,6 +361,13 @@ export interface BorrowerRowInfo {
   chief: DataChief
   user: User
 }
+export interface LoanAcctgDetail {
+  id: string;
+  acctnumber: string;
+  debit: string;
+  credit: string;
+}
+
 export interface AcctgEntryRowData {
   id: string;
   journal_no: string;
@@ -378,6 +385,7 @@ export interface AcctgEntryRowData {
   is_posted: string;
   is_cancelled: string;
   is_deleted: string;
+  acctg_details: LoanAcctgDetail[];
 }
 
 export interface BorrowerDetails {
@@ -568,6 +576,7 @@ export interface BorrLoanRowData {
   loan_bank_details: LoanBankFormValues;
   borrower: BorrowerRowInfo;
   acctg_entry: AcctgEntryRowData;
+  branch_sub: DataSubBranches;
   user: User;
   custom_status: string;
 }
