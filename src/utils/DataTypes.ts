@@ -783,6 +783,7 @@ export interface DataLoanProceedList {
   pen_id: string;
   addon_id: string;
   addon_udi_id: string;
+  addon_total_id: string;
   cib_id: string;
 }
 export interface RowAcctgDetails {

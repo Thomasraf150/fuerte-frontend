@@ -41,6 +41,7 @@ const descriptionToField: Record<string, keyof DataLoanProceedList> = {
   'penalty': 'pen_id',
   'addon amount': 'addon_id',
   'addon udi': 'addon_udi_id',
+  'addon total': 'addon_total_id',
   'cash in bank': 'cib_id',
 };
 
@@ -112,7 +113,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
 
     // 2) In re-post mode, try localStorage overrides for any remaining empty fields
     if (isRepostMode && loanSingleData?.id) {
-      const fieldKeys = ['nr_id','ob_id','udi_id','proc_id','agent_id','ins_id','ins_mfee_id','col_id','not_id','reb_id','pen_id','addon_id','addon_udi_id','cib_id'] as const;
+      const fieldKeys = ['nr_id','ob_id','udi_id','proc_id','agent_id','ins_id','ins_mfee_id','col_id','not_id','reb_id','pen_id','addon_id','addon_udi_id','addon_total_id','cib_id'] as const;
       try {
         const saved = localStorage.getItem(`lps_repost_${loanSingleData.id}`);
         if (saved) {
@@ -501,6 +502,27 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
+          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon Total <span style={{ color: '#ef4444' }}>*</span></label>
+          <Controller
+            name="addon_total_id"
+            control={control}
+            rules={{ required: 'Addon Total is required' }}
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsCoaData}
+                placeholder="Select a Addon Total..."
+                onChange={(selectedOption) => {
+                  field.onChange(selectedOption?.value || "");
+                }}
+                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
+              />
+            )}
+          />
+          {errors.addon_total_id && <p className="mt-2 text-sm text-red-600">{errors.addon_total_id.message}</p>}
+        </div>
+
+        <div className="col-span-1 mb-4 mt-4">
           <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Cash in Bank <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="cib_id"
@@ -534,7 +556,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
                 const vals = getValues();
                 // Pass form values as one-time overrides directly — does NOT modify LPS defaults
                 const overrides: Record<string, string> = {};
-                const fieldKeys = ['nr_id','ob_id','udi_id','proc_id','agent_id','ins_id','ins_mfee_id','col_id','not_id','reb_id','pen_id','addon_id','addon_udi_id','cib_id'] as const;
+                const fieldKeys = ['nr_id','ob_id','udi_id','proc_id','agent_id','ins_id','ins_mfee_id','col_id','not_id','reb_id','pen_id','addon_id','addon_udi_id','addon_total_id','cib_id'] as const;
                 fieldKeys.forEach(k => { if (vals[k]) overrides[k] = String(vals[k]); });
                 onAfterSave?.(handleRefetchData, overrides);
               }}

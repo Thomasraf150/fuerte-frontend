@@ -116,6 +116,7 @@ const useLoanProceedAccount = () => {
           pen_id: data?.pen_id,
           addon_id: data?.addon_id,
           addon_udi_id: data?.addon_udi_id,
+          addon_total_id: data?.addon_total_id,
           cib_id: data?.cib_id
         },
       };

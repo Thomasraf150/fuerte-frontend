@@ -74,6 +74,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         if (item?.description === 'addon udi') {
           setValue('addon_udi_id', item?.account_id);
         }
+        if (item?.description === 'addon total') {
+          setValue('addon_total_id', item?.account_id);
+        }
         if (item?.description === 'cash in bank') {
           setValue('cib_id', item?.account_id);
         }
@@ -183,24 +186,27 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'pen_id' as const, label: 'Penalty' },
           { name: 'addon_id' as const, label: 'Addon Amount' },
           { name: 'addon_udi_id' as const, label: 'Addon UDI' },
+          { name: 'addon_total_id' as const, label: 'Addon Total' },
           { name: 'cib_id' as const, label: 'Cash in Bank' },
         ].map(({ name, label }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">{label}</label>
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">{label} <span style={{ color: '#ef4444' }}>*</span></label>
             <Controller
               name={name}
               control={control}
+              rules={{ required: `${label} is required` }}
               render={({ field }) => (
                 <ReactSelect
                   {...field}
                   options={optionsCoaData}
-                  placeholder="Select a Parent account"
+                  placeholder={`Select a ${label}...`}
                   onChange={(selectedOption: any) => field.onChange(selectedOption?.value)}
                   value={optionsCoaData.find(opt => String(opt.value) === String(field.value)) || null}
                   isLoading={!coaDataAccount}
                 />
               )}
             />
+            {errors[name] && <p className="mt-2 text-sm text-red-600">{errors[name]?.message}</p>}
           </div>
         ))}
       </div>
