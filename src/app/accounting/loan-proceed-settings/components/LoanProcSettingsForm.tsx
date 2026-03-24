@@ -186,7 +186,6 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'pen_id' as const, label: 'Penalty' },
           { name: 'addon_id' as const, label: 'Addon Amount' },
           { name: 'addon_udi_id' as const, label: 'Addon UDI' },
-          { name: 'addon_total_id' as const, label: 'Addon Total' },
           { name: 'cib_id' as const, label: 'Cash in Bank' },
         ].map(({ name, label }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">

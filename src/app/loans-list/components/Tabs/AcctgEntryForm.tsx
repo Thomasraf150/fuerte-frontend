@@ -502,27 +502,6 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon Total <span style={{ color: '#ef4444' }}>*</span></label>
-          <Controller
-            name="addon_total_id"
-            control={control}
-            rules={{ required: 'Addon Total is required' }}
-            render={({ field }) => (
-              <ReactSelect
-                {...field}
-                options={optionsCoaData}
-                placeholder="Select a Addon Total..."
-                onChange={(selectedOption) => {
-                  field.onChange(selectedOption?.value || "");
-                }}
-                value={optionsCoaData.find(option => String(option.value) === String(field.value)) || null}
-              />
-            )}
-          />
-          {errors.addon_total_id && <p className="mt-2 text-sm text-red-600">{errors.addon_total_id.message}</p>}
-        </div>
-
-        <div className="col-span-1 mb-4 mt-4">
           <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Cash in Bank <span style={{ color: '#ef4444' }}>*</span></label>
           <Controller
             name="cib_id"
