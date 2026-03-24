@@ -34,7 +34,7 @@ const useBorrowerBase = () => {
       amount_applied: String(data.amount_applied),
       purpose: data.purpose,
       firstname: data.firstname,
-      middlename: data.middlename,
+      middlename: data.middlename || null,
       lastname: data.lastname,
       terms_of_payment: data.terms_of_payment,
       residence_address: data.residence_address,

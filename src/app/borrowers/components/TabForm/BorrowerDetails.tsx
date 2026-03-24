@@ -348,9 +348,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="middlename"
                       type="text"
                       icon={Home}
-                      register={register('middlename', { required: true })}
-                      error={errors.middlename && "This field is required"}
-                      required={true}
+                      register={register('middlename')}
+                      error={errors.middlename?.message}
                     />
                   </div>
                   <div>

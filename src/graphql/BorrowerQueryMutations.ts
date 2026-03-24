@@ -326,7 +326,7 @@ const DELETE_BORROWER_MUTATION: string = `
 const CHECK_BORROWER_DUPLICATE: string = `
   query CheckBorrowerDuplicate(
     $firstname: String!
-    $middlename: String!
+    $middlename: String
     $lastname: String!
     $dob: String!
     $email: String

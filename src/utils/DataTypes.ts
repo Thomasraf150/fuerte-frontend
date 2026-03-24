@@ -219,7 +219,7 @@ export interface BorrowerInfo {
   amount_applied: number;
   purpose: string;
   firstname: string;
-  middlename: string;
+  middlename?: string;
   lastname: string;
   terms_of_payment: string;
   residence_address: string;
@@ -342,7 +342,7 @@ export interface BorrowerRowInfo {
   amount_applied: string;
   purpose: string;
   firstname: string;
-  middlename: string;
+  middlename?: string;
   lastname: string;
   terms_of_payment: string;
   residence_address: string;

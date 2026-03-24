@@ -394,7 +394,7 @@ const BorrNrSchedList: React.FC = () => {
                             <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Name</p>
                               <p className="font-medium text-sm">
-                                {item?.lastname}, {item?.firstname} {item?.middlename}
+                                {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                               </p>
                             </div>
                             <div>
@@ -488,7 +488,7 @@ const BorrNrSchedList: React.FC = () => {
                                   className={`${isSelected ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-meta-4'} cursor-pointer`}
                               >
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {item?.lastname}, {item?.firstname} {item?.middlename}
+                                  {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                                 </td>
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">

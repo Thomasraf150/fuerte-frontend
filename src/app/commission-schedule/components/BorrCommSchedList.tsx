@@ -194,7 +194,7 @@ const SoaList: React.FC = () => {
                             <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Name</p>
                               <p className="font-medium text-sm">
-                                {item?.lastname}, {item?.firstname} {item?.middlename}
+                                {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                               </p>
                             </div>
                             <div>
@@ -284,7 +284,7 @@ const SoaList: React.FC = () => {
                               <tr key={`${item.loan_ref}-${index}`} className="hover:bg-gray-50 dark:hover:bg-meta-4">
                                 {/* Name */}
                                 <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {item?.lastname}, {item?.firstname} {item?.middlename}
+                                  {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                                 </td>
 
                                 {/* Loan Reference */}

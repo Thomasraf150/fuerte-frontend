@@ -36,7 +36,7 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
   try {
     const variables = {
       firstname: data.firstname,
-      middlename: data.middlename,
+      middlename: data.middlename || null,
       lastname: data.lastname,
       dob: data.dob,
       email: data.email || null,
