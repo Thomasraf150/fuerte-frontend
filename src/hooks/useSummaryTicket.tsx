@@ -4,7 +4,7 @@ import { useState } from 'react';
 import SummaryTicketReports from '@/graphql/SummaryTicketReportsQueryMutation';
 import { toast } from "react-toastify";
 import moment from 'moment';
-import { useAuthStore } from "@/store";
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useSummaryTicket = () => {
 
@@ -13,13 +13,9 @@ const useSummaryTicket = () => {
   const [dataSummaryTicket, setDataSummaryTicket] = useState<any>();
   const [sumTixLoading, setSumTixLoading] = useState<boolean>(false);
   const [printLoading, setPrintLoading] = useState<boolean>(false);
-  // Function to fetchdata
 
   const fetchSummaryTixReport = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string, show_breakdown: boolean = false, branch_id: string = '') => {
-    const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    let variables: { input: any } = {
+    const variables = {
       input: {
         startDate: moment(startDate).format('YYYY-MM-DD'),
         endDate: moment(endDate).format('YYYY-MM-DD'),
@@ -29,26 +25,19 @@ const useSummaryTicket = () => {
       },
     };
 
-    // Use breakdown query when show_breakdown is true
-    mutation = show_breakdown ? GET_SUMMARY_TICKET_WITH_BREAKDOWN : GET_SUMMARY_TICKET_REPORTS;
+    const query = show_breakdown ? GET_SUMMARY_TICKET_WITH_BREAKDOWN : GET_SUMMARY_TICKET_REPORTS;
     setSumTixLoading(true);
 
-    const token = useAuthStore.getState().GET_AUTH_TOKEN();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
-    const data = show_breakdown ? result.data.getSummaryTicketWithBreakdown : result.data.getSummaryTicket;
-    setDataSummaryTicket(data);
-    setSumTixLoading(false);
+    try {
+      const result = await graphqlFetch(query, variables);
+      const data = show_breakdown ? result.data.getSummaryTicketWithBreakdown : result.data.getSummaryTicket;
+      setDataSummaryTicket(data);
+    } catch (error) {
+      // Session expired — graphqlFetch already handles redirect
+      console.error('[SummaryTicket] Fetch failed:', error);
+    } finally {
+      setSumTixLoading(false);
+    }
   };
 
   const printSummaryTicketDetails = async (
@@ -122,20 +111,7 @@ const useSummaryTicket = () => {
       };
 
       // STEP 3: Execute async GraphQL mutation
-      const printToken = useAuthStore.getState().GET_AUTH_TOKEN();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(printToken ? { 'Authorization': `Bearer ${printToken}` } : {}),
-        },
-        body: JSON.stringify({
-          query: PRINT_SUMMARY_TIX,
-          variables
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(PRINT_SUMMARY_TIX, variables);
 
       // Check for GraphQL errors
       if (result.errors && result.errors.length > 0) {
