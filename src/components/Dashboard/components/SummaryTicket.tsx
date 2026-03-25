@@ -76,7 +76,9 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate, isOw
                     No of Transaction
                   </td>
                   <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                    {sumTixData && sumTixData?.summary_tix[4]?.ccount}
+                    {sumTixData?.summary_tix?.find(
+                      (item: any) => item.description?.trim().toLowerCase() === 'notes receivable'
+                    )?.ccount ?? 0}
                   </td>
                   <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
                   </td>
