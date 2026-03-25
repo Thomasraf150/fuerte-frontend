@@ -466,8 +466,14 @@ const useLoans = () => {
     });
 
     if (process_type === 'Compute') {
-      if (response.data && response.data.processALoan) {
-        setDataComputedLoans(response.data.processALoan);
+      if (response.errors) {
+        toast.error(response.errors[0]?.message || 'Failed to compute loan.');
+      } else if (response.data && response.data.processALoan) {
+        if (response.data.processALoan.success === false) {
+          toast.error(response.data.processALoan.message || 'Failed to compute loan.');
+        } else {
+          setDataComputedLoans(response.data.processALoan);
+        }
       } else {
         toast.error('Failed to compute loan. Please check all fields.');
       }

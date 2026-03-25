@@ -44,7 +44,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark">Monthly</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{formatNumber(Number(dataComputedLoans?.monthly_amort))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{formatNumber(Number(dataComputedLoans?.monthly_amort ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
@@ -52,7 +52,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark">Terms</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{dataComputedLoans?.terms}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{dataComputedLoans?.terms ?? ''}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
@@ -60,7 +60,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark">PN</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{formatNumber(Number(dataComputedLoans?.pn))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{formatNumber(Number(dataComputedLoans?.pn ?? 0))}</h3>
                   </div>
                 </li>
                 <li>
@@ -72,42 +72,42 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">U.D.I {`(${dataComputedLoans?.deduction_rate?.udi}%)`}</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">U.D.I {`(${dataComputedLoans?.deduction_rate?.udi ?? 0}%)`}</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.udi))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.udi ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Processing Fee {`(${dataComputedLoans?.deduction_rate?.processing}%)`}</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Processing Fee {`(${dataComputedLoans?.deduction_rate?.processing ?? 0}%)`}</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.processing))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.processing ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Agent Fee {`(${dataComputedLoans?.deduction_rate?.agent_fee}%)`}</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Agent Fee {`(${dataComputedLoans?.deduction_rate?.agent_fee ?? 0}%)`}</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.agent_fee))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.agent_fee ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Collection Fee {`(${dataComputedLoans?.deduction_rate?.collection}%)`}</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Collection Fee {`(${dataComputedLoans?.deduction_rate?.collection ?? 0}%)`}</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.collection))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.collection ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Insurance Fee {`(${dataComputedLoans?.deduction_rate?.insurance}%)`}</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Insurance Fee {`(${dataComputedLoans?.deduction_rate?.insurance ?? 0}%)`}</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.insurance))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.insurance ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
@@ -115,7 +115,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Insurance MFee</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.insurance_fee))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.insurance_fee ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
@@ -123,7 +123,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Notarial Fee</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.notarial))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.deductions?.notarial ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3 bg-gray-50 dark:bg-meta-4">
@@ -131,7 +131,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">Total Deductions</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">{formatNumber(Number(dataComputedLoans?.total_deductions))}</h3>
+                    <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">{formatNumber(Number(dataComputedLoans?.total_deductions ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3 bg-blue-50 dark:bg-blue-900/20">
@@ -139,7 +139,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">Loan Proceeds</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-blue-600 dark:text-blue-400 font-bold">{formatNumber(Number(dataComputedLoans?.loan_proceeds))}</h3>
+                    <h3 className="text-sm sm:text-base text-blue-600 dark:text-blue-400 font-bold">{formatNumber(Number(dataComputedLoans?.loan_proceeds ?? 0))}</h3>
                   </div>
                 </li>
                 <li>
@@ -216,18 +216,18 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Addon Amount ({`${Number(dataComputedLoans?.addon_terms)}`} mos.)</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Addon Amount ({`${Number(dataComputedLoans?.addon_terms ?? 0)}`} mos.)</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.addon_amount))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white">{formatNumber(Number(dataComputedLoans?.addon_amount ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3">
                   <div className="flex-1">
-                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Addon UDI ({`${Number(dataComputedLoans?.addon_udi_rate)}%`})</h3>
+                    <h3 className="text-xs sm:text-sm text-strokedark dark:text-bodydark">Addon UDI ({`${Number(dataComputedLoans?.addon_udi_rate ?? 0)}%`})</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white"><span>- </span>{formatNumber(Number(dataComputedLoans?.addon_udi))}</h3>
+                    <h3 className="text-sm sm:text-base text-gray-900 dark:text-white"><span>- </span>{formatNumber(Number(dataComputedLoans?.addon_udi ?? 0))}</h3>
                   </div>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-4 border p-3 bg-gray-50 dark:bg-meta-4">
@@ -235,7 +235,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">Addon Total</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">{formatNumber(Number(dataComputedLoans?.addon_total))}</h3>
+                    <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">{formatNumber(Number(dataComputedLoans?.addon_total ?? 0))}</h3>
                   </div>
                 </li>
                 <li>
@@ -250,7 +250,7 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ setValue, handleCompTblDe
                     <h3 className="text-sm sm:text-base text-strokedark dark:text-bodydark font-bold">Amount</h3>
                   </div>
                   <div className="flex items-center justify-end">
-                    <h3 className="text-base sm:text-lg text-green-600 dark:text-green-400 font-bold">{formatNumber(Number(dataComputedLoans?.new_loan_proceeds))}</h3>
+                    <h3 className="text-base sm:text-lg text-green-600 dark:text-green-400 font-bold">{formatNumber(Number(dataComputedLoans?.new_loan_proceeds ?? 0))}</h3>
                   </div>
                 </li>
               </ul>
