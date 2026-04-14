@@ -339,6 +339,7 @@ export interface BorrowerRowInfo {
   user_id: number;
   chief_id: number;
   branch_sub_id: string;
+  branch_sub?: DataSubBranches;
   amount_applied: string;
   purpose: string;
   firstname: string;

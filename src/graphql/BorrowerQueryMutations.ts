@@ -63,7 +63,11 @@ const GET_BORROWER_QUERY: string = `
               branch_sub {
                 id
                 branch_id
+                code
                 name
+                branch {
+                  name
+                }
               }
             }
           }
@@ -82,10 +86,12 @@ const GET_BORROWER_QUERY: string = `
           user {
             id
             name
-            branchSub {
-              id
-             	name
-              branch_id
+          }
+          branch_sub {
+            code
+            name
+            branch {
+              name
             }
           }
         }

@@ -18,6 +18,7 @@ const GET_LOAN_PROCEED_SETTINGS: string = `
       is_deleted
       branch_sub {
         name
+        branch { name }
       }
       account {
         id

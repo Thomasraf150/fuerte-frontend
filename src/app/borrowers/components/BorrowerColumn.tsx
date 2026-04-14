@@ -1,15 +1,25 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
+import BranchBadge from '@/components/BranchBadge';
 
 const borrowerColumn = (handleRowClick: (row: BorrowerRowInfo) => void, handleRowRmBorrClick: (row: BorrowerRowInfo) => void): TableColumn<BorrowerRowInfo>[] => [
   {
     name: 'Branch',
-    cell: row => row.borrower_work_background?.area?.branch_sub?.name,
-    sortable: true,
+    cell: row => {
+      const branchSub = row.branch_sub
+        ?? row.borrower_work_background?.area?.branch_sub;
+      return (
+        <BranchBadge
+          branchName={branchSub?.branch?.name}
+          subBranchName={branchSub?.name}
+        />
+      );
+    },
+    sortable: false,
   },
   {
     name: 'First Name',

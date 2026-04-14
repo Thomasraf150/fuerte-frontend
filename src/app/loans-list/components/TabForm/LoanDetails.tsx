@@ -5,6 +5,7 @@ import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
 import { Printer } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
+import BranchBadge from '@/components/BranchBadge';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -106,7 +107,9 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
               </tr>
               <tr className="">
                 <td className="px-4 py-2 font-semibold text-gray-700 dark:text-bodydark bg-neutral-100 dark:bg-meta-4 text-form-strokedark">Branch</td>
-                <td className="px-4 py-2 text-gray-900 dark:text-white">{loanSingleData?.branch_sub?.name ?? '—'}</td>
+                <td className="px-4 py-2 text-gray-900 dark:text-white">
+                  <BranchBadge branchName={loanSingleData?.branch_sub?.branch?.name} subBranchName={loanSingleData?.branch_sub?.name} />
+                </td>
               </tr>
             </tbody>
           </table>

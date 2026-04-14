@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
+import BranchBadge from '@/components/BranchBadge';
 import { GitBranch, Printer, Search, Edit2, Trash2, RefreshCw, Eye } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
@@ -54,7 +55,7 @@ const AccountRow = React.memo<AccountRowProps>(({
         </div>
       </td>
       <td className="px-6 py-2 text-sm font-medium">{account.number}</td>
-      <td className="px-6 py-2 text-sm font-medium">{account?.branch_sub?.name}</td>
+      <td className="px-6 py-2 text-sm font-medium"><BranchBadge branchName={account?.branch_sub?.branch?.name} subBranchName={account?.branch_sub?.name} /></td>
       <td className="px-6 py-2 text-sm text-center">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
       <td className="px-6 py-2 text-sm text-center">
         {Number(account.balance).toLocaleString('en-US', {

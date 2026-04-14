@@ -212,6 +212,7 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
       branch_sub {
         id
         name
+        branch { name }
       }
       user {
         branch_sub_id

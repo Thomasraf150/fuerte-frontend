@@ -14,6 +14,7 @@ const COA_TABLE_QUERY: string = `
           branch_sub {
             id
             name
+            branch { name }
           }
           subAccounts {
             id
@@ -29,6 +30,7 @@ const COA_TABLE_QUERY: string = `
             branch_sub {
               id
               name
+              branch { name }
             }
             subAccounts {
               id
@@ -44,6 +46,7 @@ const COA_TABLE_QUERY: string = `
               branch_sub {
                 id
                 name
+                branch { name }
               }
               subAccounts {
                 id
@@ -59,6 +62,7 @@ const COA_TABLE_QUERY: string = `
                 branch_sub {
                   id
                   name
+                  branch { name }
                 }
                 subAccounts {
                   id
@@ -74,6 +78,7 @@ const COA_TABLE_QUERY: string = `
                   branch_sub {
                     id
                     name
+                    branch { name }
                   }
 
                 }
