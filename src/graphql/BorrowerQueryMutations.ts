@@ -195,6 +195,12 @@ const GET_SINGLE_BORROWER_QUERY: string = `
             branch_id
           }
         }
+        branch_sub {
+          name
+          branch {
+            name
+          }
+        }
       }
     }
 `;

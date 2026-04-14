@@ -6,6 +6,7 @@ import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import BranchBadge from '@/components/BranchBadge';
 import useBorrowerDetail from '@/hooks/useBorrowerDetail';
 import BorrowerInfo from '../components/BorrowerInfo';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
@@ -145,6 +146,15 @@ const BorrowerDetailPage: React.FC = () => {
             { label: borrowerTitle }
           ]}
         />
+        {singleData?.branch_sub?.branch?.name && (
+          <div className="-mt-3 mb-4">
+            <BranchBadge
+              branchName={singleData.branch_sub.branch.name}
+              subBranchName={singleData.branch_sub.name}
+              size="lg"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">

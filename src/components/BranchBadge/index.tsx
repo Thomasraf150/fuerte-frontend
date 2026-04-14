@@ -7,6 +7,8 @@ interface BranchBadgeProps {
   branchName?: string | null;
   /** Sub-branch display name, e.g. "FB Bataan", "Buendia", "MB 1" */
   subBranchName?: string | null;
+  /** 'sm' (default) for table rows, 'lg' for profile pages */
+  size?: 'sm' | 'lg';
 }
 
 // Only FA/FB/FC/FD get badges — everything else defaults to FA
@@ -25,7 +27,7 @@ function getCode(branchName: string): 'FA' | 'FB' | 'FC' | 'FD' {
   return 'FA';
 }
 
-const BranchBadge: React.FC<BranchBadgeProps> = ({ branchName, subBranchName }) => {
+const BranchBadge: React.FC<BranchBadgeProps> = ({ branchName, subBranchName, size = 'sm' }) => {
   if (!branchName) return null;
 
   const code = getCode(branchName);
@@ -36,13 +38,15 @@ const BranchBadge: React.FC<BranchBadgeProps> = ({ branchName, subBranchName }) 
     ? subBranchName.slice(code.length + 1)
     : subBranchName;
 
+  const isLg = size === 'lg';
+
   return (
-    <div className="flex items-center gap-1.5" title={subBranchName ?? branchName}>
-      <span className={`inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${styles}`}>
+    <div className="flex items-center gap-2" title={subBranchName ?? branchName}>
+      <span className={`inline-flex items-center font-bold rounded-full shrink-0 ${styles} ${isLg ? 'text-sm px-3 py-1' : 'text-xs px-2 py-0.5'}`}>
         {code}
       </span>
       {label && (
-        <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[90px]">
+        <span className={`${isLg ? 'text-sm font-medium text-gray-700 dark:text-gray-300' : 'text-xs text-gray-500 dark:text-gray-400 truncate max-w-[90px]'}`}>
           {label}
         </span>
       )}
