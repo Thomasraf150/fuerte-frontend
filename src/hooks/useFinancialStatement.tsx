@@ -73,7 +73,7 @@ function validatePdfResult(pdfResult: PdfResult | null | undefined): string | nu
   }
 
   try {
-    new URL(url);
+    new URL(url, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
   } catch {
     return 'PDF generation failed: Malformed URL';
   }
