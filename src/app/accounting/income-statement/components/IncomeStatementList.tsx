@@ -247,11 +247,11 @@ const IncomeStatementList: React.FC = () => {
   const handleBranchChange = (branch_id: string) => {
     setBranchId(branch_id);
 
-    // If "all" is selected, auto-select "all" for sub-branch and fetch report
+    // If "all" is selected, auto-select "all" for sub-branch
+    // (the useEffect on [startDate, endDate, branchSubId] will trigger the fetch)
     if (branch_id === 'all') {
       setValue('branch_sub_id', 'all');
       setBranchSubId('all');
-      fetchStatementData(startDate, endDate, 'all');
     } else {
       // Reset sub-branch selection when changing to specific branch
       setValue('branch_sub_id', '');
