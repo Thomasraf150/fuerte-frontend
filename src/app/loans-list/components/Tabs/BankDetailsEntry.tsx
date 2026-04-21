@@ -27,7 +27,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
   const [bankOptions1, setBankOptions1] = useState<Option[]>([]);
   const [bankOptions2, setBankOptions2] = useState<Option[]>([]);
   const { submitPNSigned, onSubmitLoanBankDetails } = useLoans();
-  const { dataBank } = useBank();
+  const { dataBank, loading: banksLoading } = useBank();
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);
 
@@ -199,8 +199,10 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       <ReactSelect
                         {...field}
                         options={bankOptions1}
-                        placeholder={bankOptions1.length === 0 ? "Loading banks..." : "Select a Bank..."}
-                        isLoading={bankOptions1.length === 0}
+                        placeholder="Select a Bank..."
+                        isLoading={banksLoading}
+                        loadingMessage={() => 'Loading banks...'}
+                        noOptionsMessage={() => banksLoading ? 'Loading banks...' : 'No banks available'}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                         }}
@@ -221,8 +223,10 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       <ReactSelect
                         {...field}
                         options={bankOptions2}
-                        placeholder={bankOptions2.length === 0 ? "Loading banks..." : "Select a Bank..."}
-                        isLoading={bankOptions2.length === 0}
+                        placeholder="Select a Bank..."
+                        isLoading={banksLoading}
+                        loadingMessage={() => 'Loading banks...'}
+                        noOptionsMessage={() => banksLoading ? 'Loading banks...' : 'No banks available'}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                         }}

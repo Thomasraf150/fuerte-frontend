@@ -14,7 +14,9 @@ const useBank = () => {
 
   const [dataBank, setDataBank] = useState<DataBank[] | undefined>(undefined);
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(false);
+  // loading starts true because fetchDataBank always runs on mount (see effect below).
+  // This avoids a brief "No banks available" flash on first render before useEffect fires.
+  const [loading, setLoading] = useState<boolean>(true);
   const [bankLoading, setBankLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {

@@ -31,7 +31,7 @@ interface Option {
 
 const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, onSubmitLoanRelease, fetchCoaDataTable, branchSubData, coaDataAccount, handleChangeReleasedDate, handleUpdateReleasedLoanInfo, retryAutoPostAccounting, cancelAndRepostAccounting }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<LoanReleaseFormValues>();
-  const { dataBank } = useBank();
+  const { dataBank, loading: banksLoading } = useBank();
   const { fetchLpsWithFallback, lpsSingleData, loading: lpsLoading } = useLoanProceedAccount();
 
   const [bankOptions1, setBankOptions1] = useState<Option[]>([]);
@@ -211,6 +211,9 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                         {...field}
                         options={bankOptions1}
                         placeholder="Select a Bank..."
+                        isLoading={banksLoading}
+                        loadingMessage={() => 'Loading banks...'}
+                        noOptionsMessage={() => banksLoading ? 'Loading banks...' : 'No banks available'}
                         onChange={(selectedOption) => {
                           field.onChange(selectedOption?.value);
                         }}
