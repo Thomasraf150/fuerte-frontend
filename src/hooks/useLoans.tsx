@@ -505,7 +505,7 @@ const useLoans = () => {
     }
   };
   
-  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => void) => {
+  const submitApproveRelease = async (data: BorrLoanRowData | undefined, selectedDate: string[], interest: string[], monthly: string[], status: number, handleRefetchLoanData: () => Promise<void> | void) => {
     setLoading(true);
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
@@ -553,7 +553,7 @@ const useLoans = () => {
         }
 
         toast.success('Loan Schedule Saved!');
-        handleRefetchLoanData();
+        await handleRefetchLoanData();
         return { success: true };
       }
 
@@ -568,10 +568,8 @@ const useLoans = () => {
     }
   };
   
-  const submitPNSigned = async (data: BorrLoanRowData | undefined, handleRefetchLoanData: () => void) => {
+  const submitPNSigned = async (data: BorrLoanRowData | undefined, handleRefetchLoanData: () => Promise<void> | void) => {
     try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       const token = GET_AUTH_TOKEN();
 
@@ -591,7 +589,10 @@ const useLoans = () => {
         'You won\'t be able to revert this!',
         'Yes it is!',
       );
-      if (isConfirmed) {
+      if (!isConfirmed) return;
+
+      setLoading(true);
+      try {
         const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
           method: 'POST',
           headers: {
@@ -607,8 +608,10 @@ const useLoans = () => {
           toast.error(response.errors[0].message);
         } else {
           toast.success('PN is already been signed!');
-          handleRefetchLoanData()
+          await handleRefetchLoanData();
         }
+      } finally {
+        setLoading(false);
       }
     } catch (error) {
       toast.error('Failed to submit PN signature');

@@ -27,8 +27,8 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
     setActiveTab(tabIndex);
   };
 
-  const handleRefetchData = () => {
-    fetchSingLoans(Number(singleData?.id));
+  const handleRefetchData = async () => {
+    await fetchSingLoans(Number(singleData?.id));
   };
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
               } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={false}
+              disabled={(loanSingleData?.loan_schedules?.length ?? 0) > 0 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>PN Signing</span>
             </button>
@@ -80,7 +80,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
               } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={loanSingleData?.status > 0 ? false : true}
+              disabled={loanSingleData?.status > 0 && loanSingleData?.is_pn_signed === 1 ? false : true}
             >
               <span className="mr-2"><Edit3 size={18} /></span> <span>Bank Details Entry</span>
             </button>
