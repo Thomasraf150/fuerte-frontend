@@ -1,13 +1,17 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { ExternalLink } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { loanStatus } from '@/utils/helper';
 
-const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheckboxChange: (row: BorrLoanRowData, isChecked: boolean) => void): TableColumn<BorrLoanRowData>[] => [
+const borrLoanCol = (
+  handleRowClick: (row: BorrLoanRowData) => void,
+  handleCheckboxChange: (row: BorrLoanRowData, isChecked: boolean) => void,
+  handleJumpToLoan: (row: BorrLoanRowData) => void,
+): TableColumn<BorrLoanRowData>[] => [
   {
     name: '',
     cell: row => (
@@ -98,23 +102,23 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleCheck
     minWidth: '120px',
     grow: 1,
   },
-  // {
-  //   name: 'Action',
-  //   cell: row => {
-      
-  //     return (
-  //       <>
-  //         <Tooltip text="Remove">
-  //           <Trash2 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
-  //         </Tooltip>
-  //       </>
-  //     )
-  //   },
-  //   style: {
-  //     minWidth: '120px',
-  //   },
-  //   width: '120px'
-  // },
+  {
+    name: 'Action',
+    cell: row => (
+      <Tooltip text="Jump to Loan Details">
+        <ExternalLink
+          onClick={(e) => {
+            e.stopPropagation();
+            handleJumpToLoan(row);
+          }}
+          size="16"
+          className="text-cyan-400 cursor-pointer hover:text-cyan-600 transition-colors"
+        />
+      </Tooltip>
+    ),
+    width: '100px',
+    style: { justifyContent: 'center' },
+  },
 ];
 
 export default borrLoanCol

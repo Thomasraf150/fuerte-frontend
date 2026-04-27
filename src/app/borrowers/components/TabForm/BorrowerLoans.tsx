@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from 'nextjs-toploader/app';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import CustomDatatable from '@/components/CustomDatatable';
 import borrLoanCol from './BorrLoanCol';
@@ -19,6 +20,7 @@ interface OptionProps {
 const column = borrLoanCol;
 
 const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => {
+  const router = useRouter();
   const { fetchSubDataList, dataBranchSub, myAccessibleBranchSubs, fetchMyAccessibleBranchSubs, loadingMyAccessibleBranches } = useBranches();
   const { loanData, fetchLoans, loading, fetchRerewalLoan, dataComputedRenewal } = useLoans();
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -73,6 +75,10 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     setShowDetails(true)
   }
 
+  const handleJumpToLoan = (row: BorrLoanRowData) => {
+    router.push(`/loans-list/${row.id}`);
+  }
+
   // Note: fetchMyAccessibleBranchSubs is called in createLoans(true) when opening the form
   // This ensures the auth token is available (user is already logged in and viewing the page)
 
@@ -96,7 +102,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
             </div>
             <CustomDatatable
               apiLoading={loading}
-              columns={column(handleRowClick, handleCheckboxChange)}
+              columns={column(handleRowClick, handleCheckboxChange, handleJumpToLoan)}
               data={loanData}
               enableCustomHeader={true} 
               onRowClicked={handleWholeRowClick}
