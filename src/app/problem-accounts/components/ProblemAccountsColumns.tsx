@@ -13,35 +13,36 @@ export interface RowGroupInfo {
   count: number;
 }
 
-export const problemAccountsColumns = (
+const borrowerColumn = (
   groupByLoanId: Map<string, RowGroupInfo>
-): TableColumn<ProblemAccountRow>[] => [
-  {
-    name: "Borrower",
-    sortable: false,
-    grow: 2,
-    cell: (row) => {
-      const info = groupByLoanId.get(row.loan_id) ?? { isFirst: true, count: 1 };
-      return (
-        <div className="flex items-center gap-2 py-1">
-          <span
-            className={
-              info.isFirst
-                ? "text-black dark:text-white font-medium"
-                : "text-gray-400 dark:text-gray-500"
-            }
-          >
-            {row.borrower_name}
+): TableColumn<ProblemAccountRow> => ({
+  name: "Borrower",
+  sortable: false,
+  grow: 2,
+  cell: (row) => {
+    const info = groupByLoanId.get(row.loan_id) ?? { isFirst: true, count: 1 };
+    return (
+      <div className="flex items-center gap-2 py-1">
+        <span
+          className={
+            info.isFirst
+              ? "text-black dark:text-white font-medium"
+              : "text-gray-400 dark:text-gray-500"
+          }
+        >
+          {row.borrower_name}
+        </span>
+        {info.isFirst && info.count > 1 && (
+          <span className="px-1.5 py-0.5 text-[10px] rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+            {info.count} loans
           </span>
-          {info.isFirst && info.count > 1 && (
-            <span className="px-1.5 py-0.5 text-[10px] rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">
-              {info.count} loans
-            </span>
-          )}
-        </div>
-      );
-    },
+        )}
+      </div>
+    );
   },
+});
+
+const baseColumns: TableColumn<ProblemAccountRow>[] = [
   {
     name: "Loan Ref",
     sortable: false,
@@ -104,9 +105,7 @@ export const problemAccountsColumns = (
     sortable: false,
     right: true,
     cell: (row) => (
-      <span style={{ color: RED, fontWeight: 800 }}>
-        {fmt(row.shortfall)}
-      </span>
+      <span style={{ color: RED, fontWeight: 800 }}>{fmt(row.shortfall)}</span>
     ),
   },
   {
@@ -116,3 +115,17 @@ export const problemAccountsColumns = (
   },
 ];
 
+/**
+ * Full column set for the main Problem Accounts list — Borrower column first,
+ * then the per-loan financial columns.
+ */
+export const problemAccountsColumns = (
+  groupByLoanId: Map<string, RowGroupInfo>
+): TableColumn<ProblemAccountRow>[] => [borrowerColumn(groupByLoanId), ...baseColumns];
+
+/**
+ * Same columns minus the Borrower column. Used on the borrower drill-down
+ * page where every row is the same person — Borrower would be redundant.
+ */
+export const problemAccountsColumnsCompact = (): TableColumn<ProblemAccountRow>[] =>
+  baseColumns;

@@ -84,19 +84,19 @@ const ProblemAccountsList: React.FC = () => {
   };
 
   const groupByLoanId = useMemo(() => {
+    // Group same-borrower rows by borrower_id (NOT name) so two distinct
+    // borrowers with identical names don't collapse into one group.
     const counts = new Map<string, number>();
     data.forEach((row) => {
-      const key = row.borrower_name.trim().toLowerCase();
-      counts.set(key, (counts.get(key) ?? 0) + 1);
+      counts.set(row.borrower_id, (counts.get(row.borrower_id) ?? 0) + 1);
     });
 
     const result = new Map<string, { isFirst: boolean; count: number }>();
     const seen = new Set<string>();
     data.forEach((row) => {
-      const key = row.borrower_name.trim().toLowerCase();
-      const isFirst = !seen.has(key);
-      seen.add(key);
-      result.set(row.loan_id, { isFirst, count: counts.get(key) ?? 1 });
+      const isFirst = !seen.has(row.borrower_id);
+      seen.add(row.borrower_id);
+      result.set(row.loan_id, { isFirst, count: counts.get(row.borrower_id) ?? 1 });
     });
     return result;
   }, [data]);
@@ -107,6 +107,11 @@ const ProblemAccountsList: React.FC = () => {
   );
 
   const handleRowClick = (row: ProblemAccountRow) => {
+    const group = groupByLoanId.get(row.loan_id);
+    if (group && group.count > 1 && row.borrower_id) {
+      router.push(`/problem-accounts/borrower/${row.borrower_id}`);
+      return;
+    }
     if (!row.oldest_unpaid_schedule_id) {
       toast.info("No unpaid schedule found for this loan.");
       return;

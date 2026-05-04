@@ -7,7 +7,10 @@ import ProblemAccountsQueryMutation from "@/graphql/ProblemAccountsQueryMutation
 export interface ProblemAccountRow {
   loan_id: string;
   loan_ref: string;
+  borrower_id: string;
   borrower_name: string;
+  borrower_phone: string | null;
+  borrower_address: string | null;
   branch_name: string | null;
   sub_branch_name: string | null;
   pn_amount: string;
@@ -31,6 +34,7 @@ export interface ProblemAccountSummary {
 export interface ProblemAccountFilters {
   branchId?: string;
   branchSubId?: string;
+  borrowerId?: string;
   searchTerm?: string;
   sortBy?: string;
   graceDays?: number;
@@ -82,6 +86,7 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
               input: {
                 branchId: currentFilters.branchId || null,
                 branchSubId: currentFilters.branchSubId || null,
+                borrowerId: currentFilters.borrowerId || null,
                 searchTerm: currentFilters.searchTerm || null,
                 sortBy: currentFilters.sortBy || "shortfall_desc",
                 graceDays: currentFilters.graceDays ?? 0,

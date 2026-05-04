@@ -4,7 +4,10 @@ const GET_PROBLEM_ACCOUNTS: string = `
       data {
         loan_id
         loan_ref
+        borrower_id
         borrower_name
+        borrower_phone
+        borrower_address
         branch_name
         sub_branch_name
         pn_amount
