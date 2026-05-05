@@ -1,21 +1,17 @@
 "use client"
 
 import { useEffect, useState, useCallback } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { DataColListRow, DataRowLoanPayments, DataColEntries } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
+import { DataColListRow, DataRowLoanPayments } from '@/utils/DataTypes';
 import CollectionListQueryMutations from '@/graphql/CollectionListQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
 import { usePagination } from './usePagination';
 
 const useCollectionList = () => {
-  const { GET_DATA_COLLECTION_LIST, GET_COLLECTION_ENTRY, SAVE_COLLECTION_ENTRY } = CollectionListQueryMutations;
+  const { GET_DATA_COLLECTION_LIST, GET_COLLECTION_ENTRY } = CollectionListQueryMutations;
 
   // Legacy state (kept for backward compatibility)
   const [dataColEntry, setDataColEntry] = useState<DataRowLoanPayments[]>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [collectionLoading, setCollectionLoading] = useState<boolean>(false);
   const rowsPerPage = 10;
 
   // Wrapper function to adapt existing API for usePagination hook
@@ -117,52 +113,6 @@ const useCollectionList = () => {
     setDataColEntry(response.data.getCollectionEntry);
   };
 
-  const postCollectionEntries = async (loan_payments: DataRowLoanPayments[], subsidiaries: DataColEntries) => {
-    setCollectionLoading(true);
-    try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
-      subsidiaries.user_id = userData?.user?.id
-      let variables: { loan_payments: any, subsidiaries: any } = {
-        loan_payments,
-        subsidiaries
-      };
-
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: SAVE_COLLECTION_ENTRY,
-          variables
-        }),
-      });
-      
-      // Handle API response errors
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-        return { success: false, error: response.errors[0].message };
-      }
-      
-      console.log(response.data.postCollectionEntries, 'response.data.postCollectionEntries');
-      if (response.data.postCollectionEntries?.status === false) {
-        toast.error(response.data.postCollectionEntries?.message);
-        return { success: false, error: response.data.postCollectionEntries?.message };
-      } else {
-        toast.success(response.data.postCollectionEntries?.message);
-        return { success: true, data: response.data.postCollectionEntries };
-      }
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
-      toast.error(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setCollectionLoading(false);
-    }
-  };
-
    // Fetch data on component mount if id exists
   useEffect(() => {
   }, []);
@@ -188,13 +138,11 @@ const useCollectionList = () => {
     },
     refresh,
 
-    // Legacy functions (kept for backward compatibility)
+    // Legacy read-only functions (kept for the detail page)
     fetchCollectionList,
     fetchCollectionEntry,
     dataColEntry,
     loading,
-    collectionLoading,
-    postCollectionEntries
   };
 };
 
