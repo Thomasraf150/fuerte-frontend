@@ -215,7 +215,7 @@ const useFinancialStatement = () => {
     }
   };
   
-  const fetchStatementData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
+  const fetchStatementData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string, branch_id: string = 'all') => {
     // Validate dates before API call
     if (!startDate || !endDate) {
       toast.warning('Please select start and end dates');
@@ -233,10 +233,11 @@ const useFinancialStatement = () => {
     setLoading(true);
 
     try {
-      const variables: { startDate: string, endDate: string, branch_sub_id: string } = {
+      const variables: { startDate: string, endDate: string, branch_sub_id: string, branch_id: string } = {
         startDate: formattedStartDate,
         endDate: formattedEndDate,
-        branch_sub_id
+        branch_sub_id,
+        branch_id
       };
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -286,7 +287,8 @@ const useFinancialStatement = () => {
   const fetchStatementDataWithBreakdown = async (
     startDate: Date | undefined,
     endDate: Date | undefined,
-    shouldShowBreakdown: boolean
+    shouldShowBreakdown: boolean,
+    branch_id: string = 'all'
   ) => {
     // Validate dates before API call
     if (!startDate || !endDate) {
@@ -309,7 +311,8 @@ const useFinancialStatement = () => {
       const variables = {
         startDate: formattedStartDate,
         endDate: formattedEndDate,
-        show_breakdown: shouldShowBreakdown
+        show_breakdown: shouldShowBreakdown,
+        branch_id
       };
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
@@ -385,7 +388,8 @@ const useFinancialStatement = () => {
     startDate: Date | undefined,
     endDate: Date | undefined,
     branch_sub_id: string,
-    show_breakdown: boolean = false
+    show_breakdown: boolean = false,
+    branch_id: string = 'all'
   ) => {
     // Open blank window IMMEDIATELY (synchronous, during user click)
     const newWindow = window.open('', '_blank');
@@ -405,7 +409,8 @@ const useFinancialStatement = () => {
         startDate: moment(startDate).format('YYYY-MM-DD'),
         endDate: moment(endDate).format('YYYY-MM-DD'),
         branch_sub_id,
-        show_breakdown
+        show_breakdown,
+        branch_id
       };
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {

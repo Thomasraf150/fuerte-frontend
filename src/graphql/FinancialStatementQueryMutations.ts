@@ -54,14 +54,14 @@ const GET_BALANCE_SHEET: string = `
 `;
 
 const GET_INCOME_STATEMENT: string = `
-  query GetIncomeStatement($startDate: String, $endDate: String, $branch_sub_id: String){
-    getIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id)
+  query GetIncomeStatement($startDate: String, $endDate: String, $branch_sub_id: String, $branch_id: String){
+    getIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id, branch_id: $branch_id)
   }
 `;
 
 const PRINT_INCOME_STATEMENT: string = `
-  mutation PrintIncomeStatement($startDate: String!, $endDate: String!, $branch_sub_id: String!, $show_breakdown: Boolean){
-    printIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id, show_breakdown: $show_breakdown) {
+  mutation PrintIncomeStatement($startDate: String!, $endDate: String!, $branch_sub_id: String!, $show_breakdown: Boolean, $branch_id: String){
+    printIncomeStatement(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id, show_breakdown: $show_breakdown, branch_id: $branch_id) {
       url
       filename
       size
@@ -74,8 +74,8 @@ const PRINT_INCOME_STATEMENT: string = `
  * Used when user selects "All Sub-Branches" and toggles breakdown view.
  */
 const GET_INCOME_STATEMENT_WITH_BREAKDOWN: string = `
-  query GetIncomeStatementWithBreakdown($startDate: String, $endDate: String, $show_breakdown: Boolean){
-    getIncomeStatementWithBreakdown(startDate: $startDate, endDate: $endDate, show_breakdown: $show_breakdown) {
+  query GetIncomeStatementWithBreakdown($startDate: String, $endDate: String, $show_breakdown: Boolean, $branch_id: String){
+    getIncomeStatementWithBreakdown(startDate: $startDate, endDate: $endDate, show_breakdown: $show_breakdown, branch_id: $branch_id) {
       interest_income
       other_revenues
       direct_financing

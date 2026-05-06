@@ -92,7 +92,7 @@ const IncomeStatementList: React.FC = () => {
       clearBreakdownData();
     }
 
-    fetchStatementData(startDate, endDate, branch_sub_id);
+    fetchStatementData(startDate, endDate, branch_sub_id, branchId);
   };
 
   /**
@@ -106,12 +106,12 @@ const IncomeStatementList: React.FC = () => {
 
     if (enabled) {
       // Fetch with breakdown data
-      fetchStatementDataWithBreakdown(startDate, endDate, enabled);
+      fetchStatementDataWithBreakdown(startDate, endDate, enabled, branchId);
     } else {
       // Clear breakdown and use regular fetch
       clearBreakdownData();
       setShowBreakdown(false);
-      fetchStatementData(startDate, endDate, branchSubId);
+      fetchStatementData(startDate, endDate, branchSubId, branchId);
     }
   };
 
@@ -190,11 +190,11 @@ const IncomeStatementList: React.FC = () => {
   // Auto-fetch data when dates or branch change (if all required fields are populated)
   useEffect(() => {
     if (startDate && endDate && branchSubId) {
-      fetchStatementData(startDate, endDate, branchSubId);
+      fetchStatementData(startDate, endDate, branchSubId, branchId);
     }
     // Note: fetchStatementData is excluded from deps to prevent infinite loops
     // (it's recreated on each render by the hook)
-  }, [startDate, endDate, branchSubId]);
+  }, [startDate, endDate, branchSubId, branchId]);
 
   // Computed summary values for display (derived from sectionTotals)
   const computedTotals = useMemo(() => {
@@ -241,7 +241,7 @@ const IncomeStatementList: React.FC = () => {
       return;
     }
     // Pass showBreakdown state to include sub-branch breakdown in PDF
-    await printIncomeStatement(startDate, endDate, branchSubId, showBreakdown);
+    await printIncomeStatement(startDate, endDate, branchSubId, showBreakdown, branchId);
   };
 
   const handleBranchChange = (branch_id: string) => {
