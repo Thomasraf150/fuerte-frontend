@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
 import { LoadingSpinner } from '@/components/LoadingStates';
 import useBranches from '@/hooks/useBranches';
+import { buildSelectOptions } from '@/utils/buildSelectOptions';
 import { Printer } from 'react-feather';
 import Decimal from 'decimal.js';
 import IncomeStatementTable from './IncomeStatementTable';
@@ -61,8 +62,15 @@ const IncomeStatementList: React.FC = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
-  const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
-  const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
+
+  const optionsBranch: Option[] = useMemo(
+    () => buildSelectOptions(dataBranch, { placeholderLabel: 'Select a Branch', allLabel: 'All Main Branches' }),
+    [dataBranch]
+  );
+  const optionsSubBranch: Option[] = useMemo(
+    () => buildSelectOptions(dataBranchSub, { placeholderLabel: 'Select a Sub Branch', allLabel: 'All Sub-Branches' }),
+    [dataBranchSub]
+  );
 
   // Two-phase reveal: keeps spinner visible until browser has painted the hidden content.
   // Phase 1: loading=false → content renders hidden (opacity-0) → browser paints
@@ -131,38 +139,6 @@ const IncomeStatementList: React.FC = () => {
       setStartDate(undefined);
     }
   };
-
-  useEffect(()=>{
-    if (dataBranch && Array.isArray(dataBranch)) {
-      const dynaOpt: Option[] = dataBranch?.map(b => ({
-        value: String(b.id),
-        label: b.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsBranch([
-        { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
-        { value: 'all', label: 'All Main Branches' }, // Add "All" option
-        ...dynaOpt,
-      ]);
-
-    }
-  }, [dataBranch])
-
-  useEffect(()=>{
-    if (dataBranchSub && Array.isArray(dataBranchSub)) {
-      const dynaOpt: Option[] = dataBranchSub?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
-        { value: 'all', label: 'All Sub-Branches' }, // Add "All" option
-        ...dynaOpt,
-      ]);
-
-    }
-
-  }, [dataBranchSub])
-
 
   // Extract month keys from data using utility function
   const monthKeys = useMemo(() => extractMonthKeys(isInterestIncomeData), [isInterestIncomeData]);

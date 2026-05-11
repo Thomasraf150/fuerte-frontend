@@ -25,8 +25,13 @@ const PayeeView: React.FC<ParentProp> = ({ setShowPayee, setDataPayee }) => {
   const { control: SelectControl } = useForm<any>();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { dataVendorType, fetchVendors, dataVendors } = useVendor();
+  const { dataVendorType, fetchVendors, dataVendors, loading } = useVendor();
   const [vendorTypeOptions, setVendorTypeOptions] = useState<Option[]>([]);
+
+  // Dropdown shows loading only while vendor types haven't loaded yet (initial mount).
+  // Table shows loading only after the user has picked a payee category and a fetch is in flight.
+  const isDropdownLoading = loading && (!dataVendorType || dataVendorType.length === 0);
+  const isTableLoading = loading && !!actionLbl;
 
   useEffect(() => {
     if (dataVendorType && Array.isArray(dataVendorType)) {
@@ -70,6 +75,11 @@ const PayeeView: React.FC<ParentProp> = ({ setShowPayee, setDataPayee }) => {
                     {...field}
                     options={vendorTypeOptions}
                     placeholder="Select a payee..."
+                    isLoading={isDropdownLoading}
+                    loadingMessage={() => 'Loading payee categories...'}
+                    noOptionsMessage={() =>
+                      isDropdownLoading ? 'Loading payee categories...' : 'No payee categories found'
+                    }
                     onChange={(selectedOption) => {
                       field.onChange(selectedOption?.value);
                       onChangeVendorType(selectedOption);
@@ -96,7 +106,7 @@ const PayeeView: React.FC<ParentProp> = ({ setShowPayee, setDataPayee }) => {
                 </div>
                 <div className="px-4">
                   <CustomDatatable
-                    apiLoading={false}
+                    apiLoading={isTableLoading}
                     title="Vendor List"
                     onRowClicked={handleWholeRowClick}
                     columns={column()}

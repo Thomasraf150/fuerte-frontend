@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import GeneralVoucherQueryMutations from '@/graphql/GeneralVoucherQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
@@ -16,7 +16,12 @@ const useGeneralVoucher = () => {
 
   const [generalVoucherLoading, setGeneralVoucherLoading] = useState<boolean>(false);
   const [printLoading, setPrintLoading] = useState<boolean>(false);
-  const [dateFilters, setDateFilters] = useState({ startDate: '', endDate: '' });
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    branch_id: '',
+    branch_sub_id: '',
+  });
   const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
   const userData = JSON.parse(storedAuthStore)['state'];
 
@@ -41,9 +46,10 @@ const useGeneralVoucher = () => {
             { column: "id", order: 'DESC' }
           ],
           input: {
-            branch_sub_id: String(userData?.user?.branch_sub_id),
-            startDate: dateFilters.startDate,
-            endDate: dateFilters.endDate
+            branch_id: filters.branch_id,
+            branch_sub_id: filters.branch_sub_id,
+            startDate: filters.startDate,
+            endDate: filters.endDate,
           }
         },
       }),
@@ -61,7 +67,7 @@ const useGeneralVoucher = () => {
         hasMorePages: false,
       }
     };
-  }, [GET_GV_QUERY, userData?.user?.branch_sub_id, dateFilters]);
+  }, [GET_GV_QUERY, filters]);
 
   // Use the new pagination hook
   const {
@@ -83,11 +89,31 @@ const useGeneralVoucher = () => {
     },
   });
 
-  // Legacy fetchGV function for backward compatibility
-  const fetchGV = async (branch_sub_id: string, startDate: string, endDate: string) => {
-    setDateFilters({ startDate, endDate });
-    // Trigger refresh after date filters are updated
-    setTimeout(() => refresh(), 0);
+  // Auto-refresh the voucher list whenever filters change.
+  // usePagination only auto-refreshes on search/status changes, so we trigger
+  // a re-fetch here on filter changes. We use goToPage(1) instead of refresh()
+  // because goToPage closes over the freshest fetchData (refresh has a stale-
+  // closure issue with the wrapped fetchFunction). Resetting to page 1 on
+  // filter change is also the expected UX. First mount is skipped because
+  // usePagination already fires an initial fetch.
+  const isFirstFilterRun = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRun.current) {
+      isFirstFilterRun.current = false;
+      return;
+    }
+    goToPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
+
+  // Backward-compat: existing forms call setDateFilters({ startDate, endDate })
+  const setDateFilters = (val: { startDate: string; endDate: string }) => {
+    setFilters(prev => ({ ...prev, startDate: val.startDate, endDate: val.endDate }));
+  };
+
+  // Legacy fetchGV function for backward compatibility (called by CV/JV forms after save)
+  const fetchGV = async (_branch_sub_id: string, startDate: string, endDate: string) => {
+    setFilters(prev => ({ ...prev, startDate, endDate }));
   };
 
   const createGV = async (row: RowAcctgEntry) => {
@@ -323,6 +349,8 @@ const useGeneralVoucher = () => {
     canGoPrevious,
     generalVoucherError,
     setDateFilters,
+    filters,
+    setFilters,
 
     // Server-side pagination helpers for CustomDatatable
     serverSidePaginationProps: {

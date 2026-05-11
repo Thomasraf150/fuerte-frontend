@@ -5,6 +5,7 @@ import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import CVForm from './CVForm';
 import JVForm from './JVForm';
+import VoucherFilters from './VoucherFilters';
 import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
@@ -29,12 +30,12 @@ const GeneralVoucherList: React.FC = () => {
     generalVoucherLoading,
     paginationLoading,
     pubSubBrId,
-    // New pagination functionality
     serverSidePaginationProps,
     generalVoucherError,
-    refresh
+    refresh,
+    setFilters,
   } = useGeneralVoucher();
-  
+
   const handleShowFormCv = (lbl: string, showFrm: boolean) => {
     setShowFormCv(showFrm);
     setActionLbl(lbl);
@@ -61,6 +62,8 @@ const GeneralVoucherList: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           {!showFormCv && !showFormJv && (
             <div className={`col-span-2 ${!showFormCv ?'fade-in' : 'fade-out'}`}>
+              <VoucherFilters onChange={setFilters} />
+
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -68,18 +71,18 @@ const GeneralVoucherList: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowFormCv('Create Check Voucher', true) }>
-                      <Plus size={14} /> 
+                      <Plus size={14} />
                       <span>New CV</span>
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowFormJv('Create Journal Voucher', true) }>
-                      <Plus size={14} /> 
+                      <Plus size={14} />
                       <span>New JV</span>
                   </button>
                 </div>
@@ -144,7 +147,7 @@ const GeneralVoucherList: React.FC = () => {
             </div>
           )}
 
-          
+
         </div>
       </div>
     </div>
