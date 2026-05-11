@@ -131,7 +131,7 @@ const usePaymentPosting = () => {
       }
 
       toast.success('Payment Entry Saved!');
-      fetchLoanSchedule(loan_id);
+      await fetchLoanSchedule(loan_id);
       return { success: true, data: result };
 
     } catch (error) {
@@ -142,7 +142,7 @@ const usePaymentPosting = () => {
       setPaymentLoading(false);
     }
   };
-  
+
   const fnReversePayment = async (data: any, loan_id: string) => {
     try {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
@@ -192,7 +192,7 @@ const usePaymentPosting = () => {
       }
 
       toast.success('Payment Successfully Reversed!');
-      fetchLoanSchedule(loan_id);
+      await fetchLoanSchedule(loan_id);
       return { success: true, data: result };
 
     } catch (error) {
@@ -253,7 +253,7 @@ const usePaymentPosting = () => {
       }
 
       toast.success('Payment Entry Saved!');
-      fetchLoanSchedule(loan_id);
+      await fetchLoanSchedule(loan_id);
       return { success: true, data: result };
 
     } catch (error) {
@@ -264,7 +264,7 @@ const usePaymentPosting = () => {
       setPaymentLoading(false);
     }
   };
-  
+
    // Fetch data on component mount if id exists
   useEffect(() => {
   }, []);
