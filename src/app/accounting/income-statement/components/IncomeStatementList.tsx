@@ -347,7 +347,7 @@ const IncomeStatementList: React.FC = () => {
                         {...field}
                         options={optionsSubBranch}
                         placeholder="Select a sub branch..."
-                        isDisabled={branchId === 'all' || loadingSubBranches}
+                        isDisabled={branchId === 'all'}
                         isLoading={loadingSubBranches}
                         loadingMessage={() => 'Loading sub-branches...'}
                         onChange={(selectedOption) => {
