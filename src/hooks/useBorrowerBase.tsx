@@ -117,6 +117,7 @@ const useBorrowerBase = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(authData.authToken && { Authorization: `Bearer ${authData.authToken}` }),
         },
         body: JSON.stringify({
           query: SAVE_BORROWER_MUTATION,

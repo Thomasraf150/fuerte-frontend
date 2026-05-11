@@ -44,10 +44,12 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
       excludeId: data.id || null,
     };
 
+    const authData = getAuthDataFromStorage();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(authData.authToken && { Authorization: `Bearer ${authData.authToken}` }),
       },
       body: JSON.stringify({
         query: CHECK_BORROWER_DUPLICATE,
