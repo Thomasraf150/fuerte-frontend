@@ -46,6 +46,13 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
 
     const result = await response.json();
 
+    if (result.errors?.length) {
+      throw new Error(result.errors[0].message || 'GraphQL error');
+    }
+    if (!result.data?.getJournal) {
+      throw new Error('getJournal returned no data — backend schema may be out of sync. Clear Lighthouse cache.');
+    }
+
     return {
       data: result.data.getJournal.data,
       paginatorInfo: result.data.getJournal.paginatorInfo || {

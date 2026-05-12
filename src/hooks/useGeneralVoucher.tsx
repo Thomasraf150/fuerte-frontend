@@ -57,6 +57,15 @@ const useGeneralVoucher = () => {
 
     const result = await response.json();
 
+    // Surface GraphQL/server errors as a real Error instead of crashing on
+    // result.data being undefined (which hides the actual message in DevTools).
+    if (result.errors?.length) {
+      throw new Error(result.errors[0].message || 'GraphQL error');
+    }
+    if (!result.data?.getCheckVoucher) {
+      throw new Error('getCheckVoucher returned no data — backend schema may be out of sync. Clear Lighthouse cache.');
+    }
+
     // Return the expected format for usePagination
     return {
       data: result.data.getCheckVoucher.data,
