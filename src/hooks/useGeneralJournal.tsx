@@ -1,12 +1,19 @@
 "use client"
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { usePagination } from './usePagination';
 
 const useGeneralJournal = (journalType: string = 'CRJ') => {
   const { GET_GJ_QUERY } = GeneralJournalQueryMutations;
+
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    branch_id: '',
+    branch_sub_id: '',
+  });
 
   // Wrapper function for usePagination hook
   const fetchJournalForPagination = useCallback(async (
@@ -27,10 +34,11 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
           ...(search && { search }),
           orderBy: [{ column: "id", order: 'DESC' }],
           input: {
-            branch_sub_id: '',
-            startDate: '',
-            endDate: '',
-            j_type: journalType
+            branch_id: filters.branch_id,
+            branch_sub_id: filters.branch_sub_id,
+            startDate: filters.startDate,
+            endDate: filters.endDate,
+            j_type: journalType,
           }
         },
       }),
@@ -47,7 +55,7 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
         hasMorePages: false,
       }
     };
-  }, [GET_GJ_QUERY, journalType]);
+  }, [GET_GJ_QUERY, journalType, filters]);
 
   const {
     data: dataGj,
@@ -67,6 +75,19 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
       initialPageSize: 20,
     },
   });
+
+  // Auto-refresh on filter change. usePagination only auto-refreshes on
+  // search/status, so we fire goToPage(1) when filters change. Skip the
+  // very first render because usePagination already fires an initial fetch.
+  const isFirstFilterRun = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRun.current) {
+      isFirstFilterRun.current = false;
+      return;
+    }
+    goToPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   // Server-side pagination props for CustomDatatable
   const serverSidePaginationProps = {
@@ -88,6 +109,8 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
     loading,
     error,
     refresh,
+    filters,
+    setFilters,
     serverSidePaginationProps,
   };
 };
