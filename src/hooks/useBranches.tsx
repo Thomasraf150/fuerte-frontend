@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import { useAuthStore } from "@/store";
+import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 
 import { DataBranches, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -168,40 +169,42 @@ const useBranches = () => {
     }
   };
 
-  const handleDeleteBranch = async (id: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: DELETE_BRANCH_MUTATION,
-        variables: { id },
-      }),
-    });
-    const result = await response.json();
-    if (result.data.createBranch?.name !== null) {
-      await fetchDataList();
-    }
-    toast.success("Branche Deleted!");
+  const submitDeleteBranch = useDeleteWithApproval<{ id: number }>({
+    mutation: DELETE_BRANCH_MUTATION,
+    responseKey: 'deleteBranch',
+    promptTitle: 'Delete this branch?',
+    promptText: 'Branches are system-level. Only admins or owners can approve a deletion request.',
+    buildVariables: (args, reason) => ({ id: args.id, reason }),
+    errorLabel: 'Failed to delete branch',
+  });
+
+  const handleDeleteBranch = async (
+    id: number,
+    onAfterRequest?: () => Promise<void> | void,
+  ) => {
+    await submitDeleteBranch(
+      { id },
+      { onAfterRequest, onImmediateSuccess: fetchDataList }
+    );
   };
-  
-  const handleDeleteSubBranch = async (id: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: DELETE_SUB_BRANCH_MUTATION,
-        variables: { id },
-      }),
-    });
-    const result = await response.json();
-    if (result.data.createBranch?.name !== null) {
-      await fetchDataList();
-    }
-    toast.success("Branche Deleted!");
+
+  const submitDeleteSubBranch = useDeleteWithApproval<{ id: number }>({
+    mutation: DELETE_SUB_BRANCH_MUTATION,
+    responseKey: 'deleteSubBranch',
+    promptTitle: 'Delete this sub-branch?',
+    promptText: 'A branch admin can approve sub-branch deletion within their branch. Admins and owners can delete immediately.',
+    buildVariables: (args, reason) => ({ id: args.id, reason }),
+    errorLabel: 'Failed to delete sub-branch',
+  });
+
+  const handleDeleteSubBranch = async (
+    id: number,
+    onAfterRequest?: () => Promise<void> | void,
+  ) => {
+    await submitDeleteSubBranch(
+      { id },
+      { onAfterRequest, onImmediateSuccess: fetchDataList }
+    );
   };
   
   const onSubmitSubBranch: SubmitHandler<DataFormSubBranches> = async (data) => {

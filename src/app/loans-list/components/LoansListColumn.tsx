@@ -1,13 +1,19 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { Eye, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
-import { loanStatus } from '@/utils/helper';
+import PendingDeletionBadge from '@/components/PendingDeletion/PendingDeletionBadge';
+import type { PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 
-const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewWholeLoan: (row: BorrLoanRowData) => void): TableColumn<BorrLoanRowData>[] => [
+const borrLoanCol = (
+  handleRowClick: (row: BorrLoanRowData) => void,
+  handleViewWholeLoan: (row: BorrLoanRowData) => void,
+  pendingByEntityId: Map<number, PendingDeletionInfo> = new Map(),
+  onPendingClick: (row: BorrLoanRowData, info: PendingDeletionInfo) => void = () => {},
+): TableColumn<BorrLoanRowData>[] => [
   {
     name: 'Loan Product',
     cell: row => row.loan_product.description,
@@ -67,9 +73,18 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
   {
     name: 'Action',
     cell: row => {
+      const info = pendingByEntityId.get(Number(row.id));
+      const isPending = !!info;
+      const deletable = row?.acctg_entry === null && row.is_closed !== '1' && row.status <= 3;
 
       return (
         <div className="flex items-center space-x-2">
+          {isPending && deletable && (
+            <PendingDeletionBadge
+              info={info!}
+              onClick={() => onPendingClick(row, info!)}
+            />
+          )}
           <Tooltip text="View">
             <Eye
               onClick={() => handleViewWholeLoan(row)}
@@ -77,22 +92,27 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void, handleViewW
               className="text-cyan-400 cursor-pointer hover:text-cyan-600 transition-colors"
             />
           </Tooltip>
-          {
-          row?.acctg_entry !== null ? null :
-          (row.is_closed === '1' ? null :
-          (row.status <= 3
-            ? (
-              <Tooltip text="Remove">
-                <Trash2
-                  onClick={() => handleRowClick(row)}
-                  size="16"
-                  className="text-cyan-400 cursor-pointer hover:text-red-500 transition-colors"
-                />
-              </Tooltip>
-            ) : null))
-          }
+          {deletable && isPending && (
+            <Tooltip text="Already in queue">
+              <Trash2
+                onClick={() => onPendingClick(row, info!)}
+                size="16"
+                className="pdb-disabled-action"
+                aria-label="Already in deletion queue"
+              />
+            </Tooltip>
+          )}
+          {deletable && !isPending && (
+            <Tooltip text="Remove">
+              <Trash2
+                onClick={() => handleRowClick(row)}
+                size="16"
+                className="text-cyan-400 cursor-pointer hover:text-red-500 transition-colors"
+              />
+            </Tooltip>
+          )}
         </div>
-      )
+      );
     },
   },
 ];

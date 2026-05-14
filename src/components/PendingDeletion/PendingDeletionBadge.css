@@ -1,0 +1,97 @@
+/* ============================================================
+ * Pending-Deletion icon-only marker.
+ * Sits in the Action column next to the (dimmed) trash icon.
+ * Uses Fuerte's existing colour vocabulary (cyan + amber) and
+ * the react-feather AlertCircle glyph so it reads as part of
+ * the same UI language as Edit/Trash/Eye actions.
+ * ============================================================ */
+
+.pending-deletion-badge {
+  /* Others' requests — amber (warning) */
+  --pdb-amber: #b45309;       /* amber-700 */
+  --pdb-amber-bg: #fef3c7;    /* amber-100 */
+  --pdb-amber-ring: #fcd34d;  /* amber-300 */
+
+  /* Your own requests — Fuerte cyan (matches existing action icons) */
+  --pdb-mine: #0891b2;        /* cyan-600 */
+  --pdb-mine-bg: #cffafe;     /* cyan-100 */
+  --pdb-mine-ring: #67e8f9;   /* cyan-300 */
+
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--pdb-amber-ring);
+  background: var(--pdb-amber-bg);
+  color: var(--pdb-amber);
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.pending-deletion-badge:hover {
+  background: var(--pdb-amber);
+  color: #ffffff;
+  border-color: var(--pdb-amber);
+  transform: scale(1.06);
+}
+
+.pending-deletion-badge.is-mine {
+  border-color: var(--pdb-mine-ring);
+  background: var(--pdb-mine-bg);
+  color: var(--pdb-mine);
+}
+
+.pending-deletion-badge.is-mine:hover {
+  background: var(--pdb-mine);
+  color: #ffffff;
+  border-color: var(--pdb-mine);
+}
+
+/* Dimmed/disabled trash button shown when a row has a pending deletion.
+ * Cross-hatched and dimmed, so the connection with the warning badge
+ * is visually obvious. */
+.pdb-disabled-action {
+  position: relative;
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  filter: grayscale(0.6);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 4px,
+      rgba(180, 83, 9, 0.16) 4px 5px
+    );
+  border-radius: 4px;
+}
+
+/* Dark-mode — boost contrast so the warning shape stays legible
+ * against Fuerte's dark surfaces. */
+.dark .pending-deletion-badge {
+  --pdb-amber: #fbbf24;
+  --pdb-amber-bg: rgba(251, 191, 36, 0.16);
+  --pdb-amber-ring: rgba(251, 191, 36, 0.45);
+  --pdb-mine: #22d3ee;
+  --pdb-mine-bg: rgba(34, 211, 238, 0.16);
+  --pdb-mine-ring: rgba(34, 211, 238, 0.45);
+}
+.dark .pending-deletion-badge:hover {
+  background: var(--pdb-amber);
+  color: #0f172a;
+}
+.dark .pending-deletion-badge.is-mine:hover {
+  background: var(--pdb-mine);
+  color: #0f172a;
+}
+.dark .pdb-disabled-action {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 4px,
+      rgba(251, 191, 36, 0.22) 4px 5px
+    );
+}

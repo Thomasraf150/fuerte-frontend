@@ -184,6 +184,8 @@ const PROCESS_REMOVE_POSTED_PAYMENT: string = `
     deletePostedPayment(input: $input) {
       message
       status
+      immediate
+      request_id
     }
   }
 `;

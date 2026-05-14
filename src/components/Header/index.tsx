@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownUser from "./DropdownUser";
+import DropdownNotification from "./DropdownNotification";
 import Image from "next/image";
 
 const Header = (props: {
@@ -70,6 +71,10 @@ const Header = (props: {
             {/* <!-- Dark Mode Toggler --> */}
             <DarkModeSwitcher />
             {/* <!-- Dark Mode Toggler --> */}
+
+            {/* <!-- Deletion-Approval bell --> */}
+            <DropdownNotification />
+            {/* <!-- /Deletion-Approval bell --> */}
           </ul>
 
           {/* <!-- User Area --> */}

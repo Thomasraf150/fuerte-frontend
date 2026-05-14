@@ -29,10 +29,12 @@ const GET_BRANCH_QUERY: string = `
 `;
 
 const DELETE_BRANCH_MUTATION: string = `
-  mutation DeleteBranch($id: ID!) {
-    deleteBranch(id: $id) {
-      id
-      name
+  mutation DeleteBranch($id: ID!, $reason: String) {
+    deleteBranch(id: $id, reason: $reason) {
+      status
+      message
+      immediate
+      request_id
     }
   }
 `;
@@ -111,10 +113,12 @@ const UPDATE_SUB_BRANCH_MUTATION: string = `
 `;
 
 const DELETE_SUB_BRANCH_MUTATION: string = `
-  mutation DeleteSubBranch($id: ID!) {
-    deleteSubBranch(id: $id) {
-      id
-      name
+  mutation DeleteSubBranch($id: ID!, $reason: String) {
+    deleteSubBranch(id: $id, reason: $reason) {
+      status
+      message
+      immediate
+      request_id
     }
   }
 `;

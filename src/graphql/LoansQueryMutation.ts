@@ -345,6 +345,8 @@ const DELETE_LOANS: string = `
     removeLoans(input: $input) {
       status
       message
+      immediate
+      request_id
     }
   }
 `;

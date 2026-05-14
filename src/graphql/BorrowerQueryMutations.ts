@@ -327,10 +327,12 @@ const DELETE_BORROWER_CO_MAKER: string = `
 `;
 
 const DELETE_BORROWER_MUTATION: string = `
-  mutation deleteBorrower($id: ID!){
-    deleteBorrower(id: $id){
+  mutation deleteBorrower($id: ID!, $reason: String){
+    deleteBorrower(id: $id, reason: $reason){
       status
       message
+      immediate
+      request_id
     }
   }
 `;

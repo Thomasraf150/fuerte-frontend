@@ -1,13 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import borrowerColumn from './BorrowerColumn';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 import useBorrower from '@/hooks/useBorrower';
-
-const column = borrowerColumn;
+import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDeletions';
+import { showAlreadyPendingModal, showProcessingModal } from '@/components/ConfirmationModal';
+import useDeletionRequests from '@/hooks/useDeletionRequests';
+import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
 
 const BorrowerList: React.FC = () => {
   const router = useRouter();
@@ -19,6 +21,14 @@ const BorrowerList: React.FC = () => {
       borrowerError,
       refresh } = useBorrower();
 
+  const entityIds = useMemo(
+    () => (dataBorrower ?? []).map((r: any) => Number(r.id)).filter(Boolean),
+    [dataBorrower]
+  );
+
+  const { pendingByEntityId, loading: pendingLoading, refresh: refreshPending } = usePendingDeletions('borrower', entityIds);
+  const { cancel: cancelDeletionRequest } = useDeletionRequests();
+
   const handleCreateBorrower = () => {
     router.push('/borrowers/new');
   }
@@ -27,12 +37,33 @@ const BorrowerList: React.FC = () => {
     router.push(`/borrowers/${data.id}`);
   }
 
-  const handleRowRmBorrClick = (data: BorrowerRowInfo) => {
-    handleRmBorrower(data);
+  const handleRowRmBorrClick = async (data: BorrowerRowInfo) => {
+    // refreshPending is passed in so the spinner stays open until the
+    // badge data is ready — no flash-of-no-badge after the modal closes.
+    await handleRmBorrower(data, refreshPending);
   }
 
-  // Note: Pagination hook automatically handles initial data loading
-  // No manual useEffect needed for fetching data
+  const handlePendingClick = async (row: BorrowerRowInfo, info: PendingDeletionInfo) => {
+    const action = await showAlreadyPendingModal({
+      request_id: info.request_id,
+      requested_by_name: info.requested_by_name,
+      reason: info.reason,
+      created_at: info.created_at,
+      is_mine: info.is_mine,
+      entity_label: [row.firstname, row.middlename, row.lastname].filter(Boolean).join(' '),
+    });
+    if (action === 'view') {
+      router.push('/approvals');
+    } else if (action === 'withdraw' && info.is_mine) {
+      const closeProcessing = showProcessingModal('Deleting request…');
+      try {
+        const ok = await cancelDeletionRequest(String(info.request_id));
+        if (ok) await refreshPending();
+      } finally {
+        closeProcessing();
+      }
+    }
+  };
 
   return (
     <div>
@@ -59,12 +90,13 @@ const BorrowerList: React.FC = () => {
                   </div>
                 )}
                 <CustomDatatable
-                  apiLoading={paginationLoading}
-                  columns={column(handleRowClick, handleRowRmBorrClick)}
+                  apiLoading={paginationLoading || pendingLoading}
+                  columns={borrowerColumn(handleRowClick, handleRowRmBorrClick, pendingByEntityId, handlePendingClick)}
                   data={dataBorrower}
                   enableCustomHeader={true}
                   title={''}
                   serverSidePagination={serverSidePaginationProps}
+                  conditionalRowStyles={pendingDeletionRowStyles<BorrowerRowInfo>(pendingByEntityId)}
                 />
               </div>
             </div>

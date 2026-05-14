@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';
 import { usePagination } from '@/hooks/usePagination';
@@ -751,50 +752,74 @@ const useLoans = () => {
     }
   };
   
-  const handleDeleteLoans = async (loan_id: String, type: String) => {
+  // The shared delete-with-approval flow only fits the "rm_loans" path.
+  // "change_effectivity" is a different operation (status reset, no
+  // approval queue) so it stays on the inline confirmation path below.
+  const submitDeleteLoan = useDeleteWithApproval<{ loan_id: string }>({
+    mutation: DELETE_LOANS,
+    responseKey: 'removeLoans',
+    promptTitle: 'Delete this loan?',
+    promptText: 'If you are an admin or owner, this happens immediately. Otherwise, a branch admin will review your request.',
+    buildVariables: (args, reason) => ({
+      input: { loan_id: args.loan_id, type: 'rm_loans', ...(reason ? { reason } : {}) },
+    }),
+    errorLabel: 'Failed to delete loan',
+  });
+
+  const handleDeleteLoans = async (
+    loan_id: String,
+    type: String,
+    onAfterRequest?: () => Promise<void> | void,
+  ) => {
+    if (type === 'rm_loans') {
+      await submitDeleteLoan(
+        { loan_id: String(loan_id) },
+        { onAfterRequest, onImmediateSuccess: refresh }
+      );
+      return;
+    }
+
+    // change_effectivity branch — simple confirm + fire, no approval queue.
     try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       const token = GET_AUTH_TOKEN();
-
       if (!token) {
         toast.error('Authentication required. Please log in again.');
         return;
       }
 
-      let variables: { input: any } = {
-        input: {
-          loan_id,
-          type
-        }
-      };
-      const isConfirmed = await showConfirmationModal(
+      const confirmed = await showConfirmationModal(
         'Are you sure?',
         'You won\'t be able to revert this!',
         'Yes it is!',
       );
-      if (isConfirmed) {
-        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            query: DELETE_LOANS,
-            variables,
-          }),
-        });
-        if (response.errors) {
-          toast.error(response.errors[0].message);
-        } else {
-          toast.success(response?.data?.removeLoans?.message);
-          refresh();
-        }
+      if (!confirmed) return;
+
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: DELETE_LOANS,
+          variables: { input: { loan_id, type } },
+        }),
+      });
+
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+        return;
       }
-    } catch (error) {
-      toast.error('Failed to delete loan');
+      const result = response?.data?.removeLoans;
+      if (!result || result.status === false) {
+        toast.error(result?.message || 'Operation failed.');
+        return;
+      }
+      toast.success(result.message);
+      refresh();
+    } catch {
+      toast.error('Failed to update loan');
     }
   };
   

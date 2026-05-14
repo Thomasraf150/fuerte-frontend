@@ -1,0 +1,308 @@
+/* Approvals page — Fuerte design language.
+ * Card-based, white background, system fonts. Visual signals are
+ * tints from the standard Fuerte palette (cyan / amber / green / red).
+ */
+
+.appr-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 16px 20px 14px;
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+  position: relative;
+}
+
+.appr-card + .appr-card { margin-top: 10px; }
+
+.appr-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 6px -2px rgba(15, 23, 42, 0.1);
+}
+
+.appr-card.is-pending    { border-left: 3px solid #b45309; }
+.appr-card.is-approved   { border-left: 3px solid #15803d; }
+.appr-card.is-rejected   { border-left: 3px solid #dc2626; }
+.appr-card.is-cancelled  { border-left: 3px solid #94a3b8; }
+.appr-card.is-superseded { border-left: 3px solid #94a3b8; }
+
+/* Muted treatment for finalized "doesn't matter anymore" states — these
+ * cards exist for the audit trail but shouldn't compete for attention
+ * with active requests. */
+.appr-card.is-cancelled,
+.appr-card.is-superseded {
+  background: #f8fafc;          /* slate-50 */
+  opacity: 0.65;
+  filter: grayscale(0.4);
+}
+
+.appr-card.is-cancelled:hover,
+.appr-card.is-superseded:hover {
+  opacity: 0.95;
+  filter: grayscale(0);
+  box-shadow: 0 1px 6px -2px rgba(15, 23, 42, 0.1);
+}
+
+.appr-card.is-cancelled h3,
+.appr-card.is-superseded h3 {
+  color: #64748b;
+}
+
+.appr-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.appr-status-pill.is-pending    { background: #fef3c7; color: #b45309; }
+.appr-status-pill.is-approved   { background: #dcfce7; color: #15803d; }
+.appr-status-pill.is-rejected   { background: #fee2e2; color: #dc2626; }
+.appr-status-pill.is-cancelled  { background: #f1f5f9; color: #475569; }
+.appr-status-pill.is-superseded { background: #dbeafe; color: #1d4ed8; }
+
+.appr-kind-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #334155;
+  line-height: 1;
+}
+
+.appr-reason {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-left: 3px solid #3085d6;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  color: #0f172a;
+  line-height: 1.45;
+}
+
+.appr-tab {
+  position: relative;
+  padding: 12px 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.appr-tab:hover { color: #0f172a; }
+
+.appr-tab.is-active {
+  color: #3085d6;
+  border-bottom-color: #3085d6;
+}
+
+.appr-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  line-height: 1;
+}
+
+.appr-tab.is-active .appr-tab-count {
+  background: #3085d6;
+  color: #ffffff;
+}
+
+.appr-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 14px 18px;
+}
+
+.appr-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.appr-stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  margin-top: 8px;
+  color: #0f172a;
+}
+
+.appr-stat-value.is-amber { color: #b45309; }
+.appr-stat-value.is-green { color: #15803d; }
+.appr-stat-value.is-blue  { color: #3085d6; }
+
+.appr-stat-value.is-text {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.appr-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  line-height: 1;
+}
+
+.appr-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.appr-btn-approve {
+  background: #16a34a;
+  color: #ffffff;
+}
+.appr-btn-approve:hover:not(:disabled) { background: #15803d; }
+
+.appr-btn-reject {
+  background: #dc2626;
+  color: #ffffff;
+}
+.appr-btn-reject:hover:not(:disabled) { background: #b91c1c; }
+
+.appr-btn-cancel {
+  background: #ffffff;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+.appr-btn-cancel:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.appr-empty {
+  text-align: center;
+  padding: 56px 24px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+}
+
+.appr-empty-icon {
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.appr-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.appr-empty-text {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ============================================================
+ *  Dark-mode overrides — match Fuerte's existing dark palette
+ *  (boxdark / strokedark / bodydark). Activated by the .dark
+ *  class on a root ancestor (Tailwind class-based dark mode).
+ * ============================================================ */
+
+.dark .appr-card {
+  background: #24303f;          /* boxdark */
+  border-color: #2e3a47;        /* strokedark */
+}
+.dark .appr-card h3 { color: #e2e8f0; }
+.dark .appr-card:hover {
+  border-color: #475569;
+  box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.6);
+}
+.dark .appr-card.is-cancelled,
+.dark .appr-card.is-superseded {
+  background: #1c2632;
+}
+.dark .appr-card.is-cancelled h3,
+.dark .appr-card.is-superseded h3 { color: #94a3b8; }
+
+.dark .appr-status-pill.is-pending    { background: rgba(180, 83, 9, 0.25);  color: #fbbf24; }
+.dark .appr-status-pill.is-approved   { background: rgba(21, 128, 61, 0.25); color: #4ade80; }
+.dark .appr-status-pill.is-rejected   { background: rgba(220, 38, 38, 0.25); color: #f87171; }
+.dark .appr-status-pill.is-cancelled  { background: rgba(100, 116, 139, 0.3); color: #cbd5e1; }
+.dark .appr-status-pill.is-superseded { background: rgba(37, 99, 235, 0.25); color: #93c5fd; }
+
+.dark .appr-kind-pill {
+  background: rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
+}
+
+.dark .appr-reason {
+  background: #1c2632;
+  color: #e2e8f0;
+  border-left-color: #3b82f6;
+}
+
+.dark .appr-tab { color: #94a3b8; }
+.dark .appr-tab:hover { color: #e2e8f0; }
+.dark .appr-tab.is-active { color: #60a5fa; border-bottom-color: #60a5fa; }
+.dark .appr-tab-count { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
+.dark .appr-tab.is-active .appr-tab-count { background: #60a5fa; color: #0f172a; }
+
+.dark .appr-stat-card {
+  background: #24303f;
+  border-color: #2e3a47;
+}
+.dark .appr-stat-label { color: #94a3b8; }
+.dark .appr-stat-value { color: #e2e8f0; }
+.dark .appr-stat-value.is-amber { color: #fbbf24; }
+.dark .appr-stat-value.is-green { color: #4ade80; }
+.dark .appr-stat-value.is-blue  { color: #60a5fa; }
+
+.dark .appr-btn-cancel {
+  background: transparent;
+  color: #f87171;
+  border-color: #b91c1c;
+}
+.dark .appr-btn-cancel:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.18);
+  border-color: #dc2626;
+}
+
+.dark .appr-empty {
+  background: #1c2632;
+  border-color: #475569;
+}
+.dark .appr-empty-icon { color: #475569; }
+.dark .appr-empty-title { color: #e2e8f0; }
+.dark .appr-empty-text { color: #94a3b8; }

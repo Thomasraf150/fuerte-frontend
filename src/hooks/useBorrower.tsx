@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
-import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { useAuthStore } from "@/store";
 import { usePagination } from './usePagination';
 import useBorrowerBase from './useBorrowerBase';
@@ -103,47 +103,27 @@ const useBorrower = () => {
   };
 
   /**
-   * Delete a borrower with confirmation
+   * Delete a borrower. Bypass-eligible roles (ADMIN/OWNER/BRANCH_ADMIN)
+   * soft-delete immediately; everyone else files a request. The shared
+   * `useDeleteWithApproval` hook handles the spinner / branching / errors.
    */
-  const handleRmBorrower = async (data: any) => {
-    const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
-      'You are deleting this borrower',
-      'Confirm',
+  const submitDeleteBorrower = useDeleteWithApproval<{ id: string | number }>({
+    mutation: DELETE_BORROWER_MUTATION,
+    responseKey: 'deleteBorrower',
+    promptTitle: 'Delete this borrower?',
+    promptText: 'If you are an admin or owner, this happens immediately. Otherwise a branch admin will review your request.',
+    buildVariables: (args, reason) => ({ id: args.id, reason }),
+    errorLabel: 'Failed to delete borrower',
+  });
+
+  const handleRmBorrower = async (
+    data: any,
+    onAfterRequest?: () => Promise<void> | void,
+  ) => {
+    await submitDeleteBorrower(
+      { id: data.id },
+      { onAfterRequest, onImmediateSuccess: refresh }
     );
-    if (!isConfirmed) return;
-
-    try {
-      const token = GET_AUTH_TOKEN();
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: DELETE_BORROWER_MUTATION,
-          variables: { id: data.id }
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        toast.error(result.errors[0].message);
-        return;
-      }
-
-      if (result.data?.deleteBorrower?.status) {
-        refresh();
-        toast.success(result.data.deleteBorrower.message);
-      } else {
-        toast.error(result.data?.deleteBorrower?.message || 'Failed to delete borrower');
-      }
-    } catch (error) {
-      toast.error('Network error occurred');
-    }
   };
 
   return {

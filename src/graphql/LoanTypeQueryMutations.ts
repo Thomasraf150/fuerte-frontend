@@ -32,7 +32,10 @@ const UPDATE_LOAN_TYPE_MUTATION: string = `
 const DELETE_LOAN_TYPE_MUTATION: string = `
   mutation DeleteLoanType($input: LoanTypeDeleteInput!) {
     deleteLoanType(input: $input) {
-      id
+      status
+      message
+      immediate
+      request_id
     }
   }
 `;

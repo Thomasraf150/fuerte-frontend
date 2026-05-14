@@ -1,12 +1,115 @@
-import { useEffect, useRef, useState } from "react";
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Bell, CheckSquare } from "react-feather";
+import { useAuthStore } from "@/store";
+import { useDeletionRequestsStore } from "@/store/deletionRequestsStore";
+
+const POLL_MS = 30_000;
+
+const ROLE_NAME = (user: any): string => {
+  if (!user) return "";
+  if (typeof user?.role?.name === "string") return user.role.name;
+  if (Array.isArray(user?.roles) && user.roles[0]?.name) return user.roles[0].name;
+  return "";
+};
+
+const IS_APPROVER_ROLE = (roleName: string): boolean => {
+  const r = (roleName || "").toUpperCase();
+  return r === "ADMIN" || r === "OWNER" || r === "BRANCH_ADMIN";
+};
+
+/**
+ * Generic notification item. Each producer (deletion approvals today,
+ * other systems tomorrow) contributes zero-or-more of these into the
+ * `notifications` array consumed by the bell dropdown.
+ *
+ * `count` raises the aggregate badge number; `body` is the rendered
+ * one-liner in the dropdown; `href` is where clicking it navigates.
+ */
+interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  href: string;
+  count: number;
+  icon: React.ReactNode;
+}
 
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notifying, setNotifying] = useState(true);
-
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
+
+  const pendingCount = useDeletionRequestsStore((s) => s.pendingCount);
+  const pendingIds = useDeletionRequestsStore((s) => s.pendingIds);
+  const fetchPendingCount = useDeletionRequestsStore((s) => s.fetchPendingCount);
+
+  // "Seen" tracking — when the user opens the bell we mark every currently-
+  // pending request ID as seen (persisted in localStorage). The visible
+  // badge then shows only items the user hasn't acknowledged yet.
+  const SEEN_KEY = "fuerte.notif.seenIds";
+
+  const [seenIds, setSeenIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = window.localStorage.getItem(SEEN_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const persistSeenIds = (ids: string[]) => {
+    setSeenIds(ids);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(SEEN_KEY, JSON.stringify(ids));
+      } catch {
+        // localStorage might be full or blocked — ignore, behavior just
+        // resets next session.
+      }
+    }
+  };
+
+  // Items the user has not yet acknowledged. New requests automatically
+  // surface (their IDs aren't in seenIds yet).
+  const unseenCount = pendingIds.filter((id) => !seenIds.includes(id)).length;
+
+  // Reactively follow the auth store so the bell starts polling as soon
+  // as login completes (Zustand persist hydrates from localStorage after
+  // the first render — a bare getState() at mount sees the empty user).
+  const [authUser, setAuthUser] = useState<any>(() => useAuthStore.getState().user);
+  const [authToken, setAuthToken] = useState<string | undefined>(() =>
+    useAuthStore.getState().GET_AUTH_TOKEN()
+  );
+
+  useEffect(() => {
+    const unsub = useAuthStore.subscribe((s: any) => {
+      setAuthUser(s.user);
+      setAuthToken(s.authToken);
+    });
+    // After mount, re-read once in case persist hydrated between init and now.
+    setAuthUser(useAuthStore.getState().user);
+    setAuthToken(useAuthStore.getState().GET_AUTH_TOKEN());
+    return () => unsub();
+  }, []);
+
+  const canPoll = !!authToken && IS_APPROVER_ROLE(ROLE_NAME(authUser));
+
+  // Poll for sources every 30s when the user is approver-eligible. The
+  // effect re-runs when auth changes, so login / logout / role change
+  // all start or stop polling cleanly.
+  useEffect(() => {
+    if (!canPoll) return;
+
+    fetchPendingCount(authToken);
+    const id = setInterval(() => {
+      fetchPendingCount(useAuthStore.getState().GET_AUTH_TOKEN());
+    }, POLL_MS);
+    return () => clearInterval(id);
+  }, [canPoll, authToken, fetchPendingCount]);
 
   useEffect(() => {
     const clickHandler = ({ target }: MouseEvent) => {
@@ -23,7 +126,6 @@ const DropdownNotification = () => {
     return () => document.removeEventListener("click", clickHandler);
   });
 
-  // close if the esc key is pressed
   useEffect(() => {
     const keyHandler = ({ keyCode }: KeyboardEvent) => {
       if (!dropdownOpen || keyCode !== 27) return;
@@ -33,117 +135,107 @@ const DropdownNotification = () => {
     return () => document.removeEventListener("keydown", keyHandler);
   });
 
+  // ---------- aggregate notifications from all sources ----------
+  const notifications: Notification[] = useMemo(() => {
+    const out: Notification[] = [];
+
+    if (pendingCount > 0) {
+      out.push({
+        id: "deletion-approvals",
+        title: "Deletion approvals",
+        body: `${pendingCount} pending ${
+          pendingCount === 1 ? "request awaits" : "requests await"
+        } your decision.`,
+        href: "/approvals",
+        count: pendingCount,
+        icon: <CheckSquare size={16} />,
+      });
+    }
+
+    // Future producers append here.
+
+    return out;
+  }, [pendingCount]);
+
+  // Total pending count (used inside the dropdown body so the message
+  // reflects reality). Badge uses unseenCount so it clears after the user
+  // opens the bell.
+  const totalCount = notifications.reduce((n, item) => n + item.count, 0);
+  const hasAny = totalCount > 0;
+  const badgeCount = Math.min(unseenCount, totalCount);
+  const showBadge = badgeCount > 0;
+
+  // Open the dropdown AND mark every currently-pending ID as seen. New
+  // pending IDs polled afterwards aren't in seenIds → badge re-appears.
+  const handleBellClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const next = !dropdownOpen;
+    setDropdownOpen(next);
+    if (next && pendingIds.length > 0) {
+      // Replace seenIds with the current set (drops stale IDs that aren't
+      // pending anymore — keeps localStorage tidy over time).
+      persistSeenIds(pendingIds);
+    }
+  };
+
   return (
     <li className="relative">
       <Link
-        ref={trigger}
-        onClick={() => {
-          setNotifying(false);
-          setDropdownOpen(!dropdownOpen);
-        }}
+        ref={trigger as any}
+        onClick={handleBellClick}
         href="#"
         className="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border-[0.5px] border-stroke bg-gray hover:text-primary dark:border-strokedark dark:bg-meta-4 dark:text-white"
+        aria-label={showBadge ? `${badgeCount} new notification(s)` : "Notifications"}
       >
-        <span
-          className={`absolute -top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-meta-1 ${
-            notifying === false ? "hidden" : "inline"
-          }`}
-        >
-          <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-75"></span>
-        </span>
+        {showBadge && (
+          <span className="absolute -top-1 -right-1 z-10 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-meta-1 px-1 text-[10px] font-semibold text-white">
+            {badgeCount > 99 ? "99+" : badgeCount}
+            <span className="absolute -z-10 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-60"></span>
+          </span>
+        )}
 
-        <svg
-          className="fill-current duration-300 ease-in-out"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M16.1999 14.9343L15.6374 14.0624C15.5249 13.8937 15.4687 13.7249 15.4687 13.528V7.67803C15.4687 6.01865 14.7655 4.47178 13.4718 3.31865C12.4312 2.39053 11.0812 1.7999 9.64678 1.6874V1.1249C9.64678 0.787402 9.36553 0.478027 8.9999 0.478027C8.6624 0.478027 8.35303 0.759277 8.35303 1.1249V1.65928C8.29678 1.65928 8.24053 1.65928 8.18428 1.6874C4.92178 2.05303 2.4749 4.66865 2.4749 7.79053V13.528C2.44678 13.8093 2.39053 13.9499 2.33428 14.0343L1.7999 14.9343C1.63115 15.2155 1.63115 15.553 1.7999 15.8343C1.96865 16.0874 2.2499 16.2562 2.55928 16.2562H8.38115V16.8749C8.38115 17.2124 8.6624 17.5218 9.02803 17.5218C9.36553 17.5218 9.6749 17.2405 9.6749 16.8749V16.2562H15.4687C15.778 16.2562 16.0593 16.0874 16.228 15.8343C16.3968 15.553 16.3968 15.2155 16.1999 14.9343ZM3.23428 14.9905L3.43115 14.653C3.5999 14.3718 3.68428 14.0343 3.74053 13.6405V7.79053C3.74053 5.31553 5.70928 3.23428 8.3249 2.95303C9.92803 2.78428 11.503 3.2624 12.6562 4.2749C13.6687 5.1749 14.2312 6.38428 14.2312 7.67803V13.528C14.2312 13.9499 14.3437 14.3437 14.5968 14.7374L14.7655 14.9905H3.23428Z"
-            fill=""
-          />
-        </svg>
+        <Bell size={18} />
       </Link>
 
       <div
-        ref={dropdown}
+        ref={dropdown as any}
         onFocus={() => setDropdownOpen(true)}
         onBlur={() => setDropdownOpen(false)}
-        className={`absolute -right-27 mt-2.5 flex h-90 w-75 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80 ${
-          dropdownOpen === true ? "block" : "hidden"
+        className={`absolute -right-27 mt-2.5 flex w-75 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80 ${
+          dropdownOpen ? "block" : "hidden"
         }`}
       >
-        <div className="px-4.5 py-3">
-          <h5 className="text-sm font-medium text-bodydark2">Notification</h5>
+        <div className="px-4.5 py-3 border-b border-stroke dark:border-strokedark">
+          <h5 className="text-sm font-medium text-black dark:text-white">Notifications</h5>
         </div>
 
-        <ul className="flex h-auto flex-col overflow-y-auto">
-          <li>
-            <Link
-              className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-              href="#"
-            >
-              <p className="text-sm">
-                <span className="text-black dark:text-white">
-                  Edit your information in a swipe
-                </span>{" "}
-                Sint occaecat cupidatat non proident, sunt in culpa qui officia
-                deserunt mollit anim.
-              </p>
-
-              <p className="text-xs">12 May, 2025</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-              href="#"
-            >
-              <p className="text-sm">
-                <span className="text-black dark:text-white">
-                  It is a long established fact
-                </span>{" "}
-                that a reader will be distracted by the readable.
-              </p>
-
-              <p className="text-xs">24 Feb, 2025</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-              href="#"
-            >
-              <p className="text-sm">
-                <span className="text-black dark:text-white">
-                  There are many variations
-                </span>{" "}
-                of passages of Lorem Ipsum available, but the majority have
-                suffered
-              </p>
-
-              <p className="text-xs">04 Jan, 2025</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-              href="#"
-            >
-              <p className="text-sm">
-                <span className="text-black dark:text-white">
-                  There are many variations
-                </span>{" "}
-                of passages of Lorem Ipsum available, but the majority have
-                suffered
-              </p>
-
-              <p className="text-xs">01 Dec, 2024</p>
-            </Link>
-          </li>
-        </ul>
+        {hasAny ? (
+          <ul className="max-h-80 overflow-y-auto divide-y divide-stroke dark:divide-strokedark">
+            {notifications.map((n) => (
+              <li key={n.id}>
+                <Link
+                  href={n.href}
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-start gap-3 px-4.5 py-3 hover:bg-gray-2 dark:hover:bg-meta-4 transition-colors"
+                >
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
+                    {n.icon}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-black dark:text-white">
+                      {n.title}
+                    </span>
+                    <span className="block text-xs text-bodydark2 mt-0.5">{n.body}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="px-4.5 py-8 text-center">
+            <p className="text-sm text-bodydark2">No notifications</p>
+          </div>
+        )}
       </div>
     </li>
   );

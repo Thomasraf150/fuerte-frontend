@@ -5,6 +5,7 @@ import LoanTypeQueryMutations from '@/graphql/LoanTypeQueryMutations';
 import { DataRowLoanTypeList, DataFormLoanType } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
+import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 
 const useLoanTypes = () => {
   const {
@@ -101,32 +102,26 @@ const useLoanTypes = () => {
     }
   };
 
-  const handleDeleteLoanType = async (id: number) => {
+  const submitDeleteLoanType = useDeleteWithApproval<{ id: number }>({
+    mutation: DELETE_LOAN_TYPE_MUTATION,
+    responseKey: 'deleteLoanType',
+    promptTitle: 'Delete this loan type?',
+    promptText: 'Loan types are system-wide. Only admins or owners can approve deletion requests.',
+    buildVariables: (args, reason) => ({ input: { id: args.id, is_deleted: true, reason } }),
+    errorLabel: 'Failed to delete loan type',
+  });
+
+  const handleDeleteLoanType = async (
+    id: number,
+    onAfterRequest?: () => Promise<void> | void,
+  ) => {
     setSubmitting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          query: DELETE_LOAN_TYPE_MUTATION,
-          variables: { input: { id, is_deleted: true } },
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        toast.error(result.errors[0].message);
-        return { success: false };
-      }
-
-      toast.success('Loan type deleted successfully!');
-      fetchLoanTypes();
+      await submitDeleteLoanType(
+        { id },
+        { onAfterRequest, onImmediateSuccess: fetchLoanTypes }
+      );
       return { success: true };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
-      toast.error(errorMessage);
-      return { success: false };
     } finally {
       setSubmitting(false);
     }

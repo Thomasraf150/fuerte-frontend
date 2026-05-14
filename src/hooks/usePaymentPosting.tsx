@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useAuthStore } from "@/store";
 import PaymentPostingQueryMutation from '@/graphql/PaymentPostingQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { fetchWithRecache } from '@/utils/helper';
 import { usePagination } from '@/hooks/usePagination';
 
@@ -143,67 +144,43 @@ const usePaymentPosting = () => {
     }
   };
 
+  const submitReversePayment = useDeleteWithApproval<{ loan_schedule_id: string; user_id: string }>({
+    mutation: PROCESS_REMOVE_POSTED_PAYMENT,
+    responseKey: 'deletePostedPayment',
+    promptTitle: 'Reverse this payment?',
+    promptText:
+      'Reversal is permanent. Admins or owners reverse immediately; everyone else submits a request for branch admin approval.',
+    buildVariables: (args, reason) => ({
+      input: {
+        user_id: args.user_id,
+        loan_schedule_id: args.loan_schedule_id,
+        ...(reason ? { reason } : {}),
+      },
+    }),
+    errorLabel: 'Reversal failed',
+  });
+
   const fnReversePayment = async (data: any, loan_id: string) => {
+    const userData = (() => {
+      try { return JSON.parse(localStorage.getItem('authStore') ?? '{}')['state']; }
+      catch { return null; }
+    })();
+
+    setPaymentLoading(true);
     try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
-
-      let variables: { input: any } = {
-        input: {
+      await submitReversePayment(
+        {
+          loan_schedule_id: String(data.id),
           user_id: String(userData?.user?.id),
-          loan_schedule_id: String(data.id)
-        }
-      };
-
-      const isConfirmed = await showConfirmationModal(
-        'Are you sure to reverse this payment?',
-        'You won\'t be able to revert this!',
-        'Yes it is!',
-      );
-
-      if (!isConfirmed) {
-        return { success: false, error: 'Operation cancelled by user' };
-      }
-
-      setPaymentLoading(true);
-
-      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          query: PROCESS_REMOVE_POSTED_PAYMENT,
-          variables,
-        }),
-      });
-
-      // Handle GraphQL errors
-      if (response.errors) {
-        toast.error(response.errors[0].message);
-        return { success: false, error: response.errors[0].message };
-      }
-
-      // Check mutation response status
-      const result = response.data?.deletePostedPayment;
-      if (!result?.status) {
-        toast.error(result?.message || 'Reversal failed');
-        return { success: false, error: result?.message };
-      }
-
-      toast.success('Payment Successfully Reversed!');
-      await fetchLoanSchedule(loan_id);
-      return { success: true, data: result };
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
-      toast.error(errorMessage);
-      return { success: false, error: errorMessage };
+        { onImmediateSuccess: () => fetchLoanSchedule(loan_id) }
+      );
+      return { success: true };
     } finally {
       setPaymentLoading(false);
     }
   };
-  
+
   const onSubmitOthCollectionPayment = async (data: OtherCollectionFormValues, loan_id: string) => {
     setPaymentLoading(true);
     try {
