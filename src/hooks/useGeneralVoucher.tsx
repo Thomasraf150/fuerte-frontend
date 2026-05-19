@@ -12,10 +12,11 @@ import { usePagination } from './usePagination';
 
 const useGeneralVoucher = () => {
 
-  const { CREATE_GV_MUTATION, UPDATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION } = GeneralVoucherQueryMutations;
+  const { CREATE_GV_MUTATION, UPDATE_GV_MUTATION, GET_GV_QUERY, PRINT_CV_MUTATION, EXPORT_CV_TO_EXCEL_MUTATION } = GeneralVoucherQueryMutations;
 
   const [generalVoucherLoading, setGeneralVoucherLoading] = useState<boolean>(false);
   const [printLoading, setPrintLoading] = useState<boolean>(false);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
@@ -335,6 +336,68 @@ const useGeneralVoucher = () => {
     }
   };
 
+  const exportCheckVouchersToExcel = async () => {
+    if (!filters.startDate || !filters.endDate) {
+      toast.warning('Please select a date range before exporting.');
+      return;
+    }
+
+    setExportLoading(true);
+    try {
+      const exportToken = useAuthStore.getState().GET_AUTH_TOKEN();
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(exportToken ? { 'Authorization': `Bearer ${exportToken}` } : {}),
+        },
+        body: JSON.stringify({
+          query: EXPORT_CV_TO_EXCEL_MUTATION,
+          variables: {
+            input: {
+              branch_id: filters.branch_id,
+              branch_sub_id: filters.branch_sub_id,
+              startDate: filters.startDate,
+              endDate: filters.endDate,
+            },
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.errors?.length) {
+        console.error('[ExportCV] GraphQL errors:', result.errors);
+        toast.error(result.errors[0].message || 'Failed to generate Excel file');
+        return;
+      }
+
+      const xlsxPath = result.data?.exportCheckVouchers;
+      if (!xlsxPath || typeof xlsxPath !== 'string') {
+        toast.error('Excel export failed: invalid response from server.');
+        return;
+      }
+
+      // Trigger download via hidden link — works in modern browsers without
+      // popup-blocker headaches and avoids leaving a stale tab open.
+      const fullUrl = process.env.NEXT_PUBLIC_BASE_URL + xlsxPath;
+      const link = document.createElement('a');
+      link.href = fullUrl;
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Check vouchers exported to Excel successfully!', { autoClose: 3000 });
+    } catch (error) {
+      console.error('[ExportCV] Export failed:', error);
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(`Failed to export check vouchers: ${message}`);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return {
     // Legacy data and functions (for backward compatibility)
     createGV,
@@ -343,6 +406,8 @@ const useGeneralVoucher = () => {
     dataGV,
     printSummaryTicketDetails,
     printLoading,
+    exportCheckVouchersToExcel,
+    exportLoading,
     generalVoucherLoading, // For form submission operations
     paginationLoading, // For table loading operations
     pubSubBrId: String(userData?.user?.branch_sub_id),

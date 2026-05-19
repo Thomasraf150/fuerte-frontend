@@ -7,7 +7,7 @@ import CVForm from './CVForm';
 import JVForm from './JVForm';
 import VoucherFilters from './VoucherFilters';
 import useGeneralVoucher from '@/hooks/useGeneralVoucher';
-import { GitBranch, Plus } from 'react-feather';
+import { Download, GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import gVTblColumn from './GVTblColumn';
 import { RowAcctgEntry } from '@/utils/DataTypes';
@@ -34,7 +34,12 @@ const GeneralVoucherList: React.FC = () => {
     generalVoucherError,
     refresh,
     setFilters,
+    filters,
+    exportCheckVouchersToExcel,
+    exportLoading,
   } = useGeneralVoucher();
+
+  const exportDisabled = exportLoading || !filters?.startDate || !filters?.endDate;
 
   const handleShowFormCv = (lbl: string, showFrm: boolean) => {
     setShowFormCv(showFrm);
@@ -84,6 +89,17 @@ const GeneralVoucherList: React.FC = () => {
                     onClick={ () => handleShowFormJv('Create Journal Voucher', true) }>
                       <Plus size={14} />
                       <span>New JV</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={exportDisabled}
+                    title={!filters?.startDate || !filters?.endDate
+                      ? 'Select a date range first'
+                      : 'Export check vouchers (in the selected date range and branch) to an Excel file'}
+                    className="ml-auto text-white bg-gradient-to-r items-center from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={exportCheckVouchersToExcel}>
+                      <Download size={14} />
+                      <span>{exportLoading ? 'Exporting…' : 'Export to Excel'}</span>
                   </button>
                 </div>
                 <div className="px-4">

@@ -30,7 +30,6 @@
     "date-fns": "^3.6.0",
     "decimal.js": "10.6.0",
     "feather-icons": "^4.29.2",
-    "file-saver": "^2.0.5",
     "flatpickr": "^4.6.13",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
@@ -54,7 +53,6 @@
     "sweetalert2": "^11.12.2",
     "sweetalert2-react-content": "^5.0.7",
     "swr": "^2.2.5",
-    "xlsx": "^0.18.5",
     "zustand": "^4.5.2"
   },
   "engines": {

@@ -81,6 +81,12 @@ const PRINT_CV_MUTATION: string = `
   }
 `;
 
+const EXPORT_CV_TO_EXCEL_MUTATION: string = `
+  mutation ExportCheckVouchers($input: CvSearchInp!){
+    exportCheckVouchers(input: $input)
+  }
+`;
+
 const GET_VOUCHER_BY_ID: string = `
   query GetVoucherById($id: ID!) {
     getVoucherById(id: $id) {
@@ -133,6 +139,7 @@ const GeneralVoucherQueryMutations = {
   UPDATE_GV_MUTATION,
   GET_GV_QUERY,
   PRINT_CV_MUTATION,
+  EXPORT_CV_TO_EXCEL_MUTATION,
   GET_VOUCHER_BY_ID
 };
 
