@@ -74,6 +74,17 @@ export const formatToTwoDecimalPlaces = (value: string) => {
   return '';
 };
 
+/**
+ * Parse a numeric input that may contain thousands-separator commas
+ * (e.g. "1,234.56") into a finite number. Returns 0 for null/undefined/empty
+ * strings or non-numeric input — never NaN.
+ */
+export const parseNumericInput = (raw: unknown): number => {
+  const cleaned = (raw ?? '').toString().replace(/,/g, '');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+};
+
 export const toCamelCase = (str: string) => {
   return str
     .toLowerCase()

@@ -117,7 +117,7 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
 
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-between">
-          <span>Error loading borrower's problem accounts: {error}</span>
+          <span>Error loading borrower&apos;s problem accounts: {error}</span>
           <button
             onClick={refresh}
             className="ml-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"

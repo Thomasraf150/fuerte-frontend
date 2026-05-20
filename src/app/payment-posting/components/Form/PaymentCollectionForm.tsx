@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { BorrLoanRowData, CollectionFormValues } from '@/utils/DataTypes';
-import { formatNumber } from '@/utils/formatNumber';
-import { formatDate } from '@/utils/formatDate';
-import { loanStatus, formatToTwoDecimalPlaces } from '@/utils/helper';
-import { Printer, CreditCard, Save, RotateCw } from 'react-feather';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { CollectionFormValues } from '@/utils/DataTypes';
+import { formatToTwoDecimalPlaces, parseNumericInput as num } from '@/utils/helper';
+import { Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
-import usePaymentPosting from '@/hooks/usePaymentPosting';
 import moment from 'moment';
 import FormInput from '@/components/FormInput';
 
@@ -19,61 +16,47 @@ interface OMProps {
 }
 
 const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelectedMoSched, selectedUdiSched, onSubmitCollectionPayment, paymentLoading }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<CollectionFormValues>();
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CollectionFormValues>();
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
     const numericValue = value.replace(/,/g, '');
     const formattedValue = formatToTwoDecimalPlaces(numericValue);
-    if (type === 'collection') {
-      if (parseFloat(numericValue) > selectedMoSched?.amount) {
-        setValue('ap_refund', String(((parseFloat(numericValue) || 0) -
-                              parseFloat(selectedMoSched?.amount) -
-                              (parseFloat(watch('bank_charge')) || 0)).toFixed(2)))
-      } else {
-        setValue('ap_refund', "0.00");
-      }
-      if(selectedMoSched?.amount >= parseFloat(numericValue)){
-        setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) -
-                          (parseFloat(numericValue) || 0) -
-                          (parseFloat(watch('bank_charge')) || 0))).toFixed(2)));
-      } else {
-        setValue('ua_sp', "0.00");
-      }
-      if (numericValue !== '' && parseFloat(numericValue) > selectedMoSched?.amount) {
-        const computedUdi = String((parseFloat(selectedUdiSched?.amount)).toFixed(2));
-        setValue('interest', computedUdi);
-      } else if(numericValue !== '' && parseFloat(numericValue) <= selectedMoSched?.amount){
-        const computedUdi = String((selectedUdiSched?.amount * ((((parseFloat(numericValue) || 0) - (parseFloat(watch('bank_charge')) || 0)) / selectedMoSched?.amount) * 100 / 100)).toFixed(2));
-        setValue('interest', computedUdi);
-        console.log(computedUdi, ' computedUdi');
-      }
-      else {
-        setValue('interest', "0.00");
-      }
+    const incoming = parseFloat(numericValue) || 0;
+
+    const remainingDue = Number(selectedMoSched?.amount) || 0;
+    const remainingUdi = Number(selectedUdiSched?.amount) || 0;
+    const collection = type === 'collection' ? incoming : num(watch('collection'));
+    const bankCharge = type === 'bank_charge' ? incoming : num(watch('bank_charge'));
+
+    // AP Refund: only when collection exceeds remaining due.
+    if (collection > remainingDue) {
+      setValue('ap_refund', (collection - remainingDue - bankCharge).toFixed(2));
+    } else {
+      setValue('ap_refund', '0.00');
     }
-    if (type === 'bank_charge') {
-      if (parseFloat(watch('collection').replace(/,/g, '')) > selectedMoSched?.amount) {
-        setValue('ap_refund', String((parseFloat(watch('collection')) -
-                              parseFloat(selectedMoSched?.amount) -
-                              (parseFloat(numericValue) || 0)).toFixed(2)))
-      } else {
-        setValue('ap_refund', "0.00");
-      }
-      if (parseFloat(watch('collection').replace(/,/g, '')) <= parseFloat(selectedMoSched?.amount)) {
-        const col = (parseFloat(watch('collection').replace(/,/g, '')) || 0);
-        const bc = col - (parseFloat(numericValue) || 0);
-        setValue('ua_sp', String((Math.abs(parseFloat(selectedMoSched?.amount) - bc)).toFixed(2)));
-      }
-      if (value !== '' && (parseFloat(watch('collection')) || 0) > selectedMoSched?.amount) {
-        const computedUdi = String((parseFloat(selectedUdiSched?.amount)).toFixed(2));
-        setValue('interest', computedUdi);
-      } else if(value !== '' && (parseFloat(watch('collection')) || 0) <= selectedMoSched?.amount){
-        const computedUdi = String((selectedUdiSched?.amount * ((((parseFloat(watch('collection')) || 0) - (parseFloat(watch('bank_charge')) || 0)) / selectedMoSched?.amount) * 100 / 100)).toFixed(2));
-        setValue('interest', computedUdi);
-        console.log(computedUdi, ' computedUdi');
-      }
+
+    // UA/SP: shortfall vs remaining due, after bank charge is taken out of collection.
+    if (collection <= remainingDue) {
+      const netCollection = collection - bankCharge;
+      setValue('ua_sp', Math.abs(remainingDue - netCollection).toFixed(2));
+    } else {
+      setValue('ua_sp', '0.00');
     }
+
+    // Interest: capped at remaining UDI. Negative or non-finite results clamp to 0.
+    if (collection > remainingDue) {
+      setValue('interest', remainingUdi.toFixed(2));
+    } else if (remainingDue > 0) {
+      const netCollection = collection - bankCharge;
+      let computed = remainingUdi * (netCollection / remainingDue);
+      if (!isFinite(computed) || isNaN(computed) || computed < 0) computed = 0;
+      if (computed > remainingUdi) computed = remainingUdi;
+      setValue('interest', computed.toFixed(2));
+    } else {
+      setValue('interest', '0.00');
+    }
+
     setValue(type, formattedValue);
   };
 
@@ -131,6 +114,27 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
               </div>
             </div>
 
+            {/* Bank Charges */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
+                Bank Charges
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
+                <FormInput
+                  label=""
+                  id="bank_charge"
+                  type="text"
+                  icon={PesoSign}
+                  register={register('bank_charge', { required: "Bank Charge is required!" })}
+                  error={errors.bank_charge?.message}
+                  placeholder="0.00"
+                  formatType="number"
+                  className="text-center"
+                  onChange={(e) => handleDecimal(e, 'bank_charge')}
+                />
+              </div>
+            </div>
+
             {/* Collection */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
               <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
@@ -185,27 +189,6 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   formatType="number"
                   className="text-center"
                   onChange={(e) => handleDecimal(e, 'penalty')}
-                />
-              </div>
-            </div>
-
-            {/* Bank Charges */}
-            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
-                Bank Charges
-              </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
-                <FormInput
-                  label=""
-                  id="bank_charge"
-                  type="text"
-                  icon={PesoSign}
-                  register={register('bank_charge', { required: "Bank Charge is required!" })}
-                  error={errors.bank_charge?.message}
-                  placeholder="0.00"
-                  formatType="number"
-                  className="text-center"
-                  onChange={(e) => handleDecimal(e, 'bank_charge')}
                 />
               </div>
             </div>
