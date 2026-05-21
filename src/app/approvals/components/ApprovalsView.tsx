@@ -80,8 +80,12 @@ const ApprovalsView: React.FC = () => {
     if (isApprover) {
       fetchAllRequests();
     }
+    // Depend on userId (not just isApprover) so non-approvers also get
+    // a guaranteed re-fetch the moment the user resolves from Zustand
+    // hydration — otherwise their first fetch can race the auth token
+    // and the page stays empty.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isApprover]);
+  }, [isApprover, userId]);
 
   const current: DeletionRequest[] =
     tab === "pending" ? pendingForMe : tab === "mine" ? myRequests : allRequests;
