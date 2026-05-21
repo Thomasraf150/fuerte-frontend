@@ -60,12 +60,17 @@ export const useDeletionRequests = () => {
   const [myRequests, setMyRequests] = useState<DeletionRequest[]>([]);
   const [allRequests, setAllRequests] = useState<DeletionRequest[]>([]);
 
-  const token = useAuthStore.getState().GET_AUTH_TOKEN();
+  // Token is read live inside each fetch — NOT captured at hook mount.
+  // Capturing at mount races with Zustand persist hydration: if /approvals
+  // mounts before hydration completes, the captured token is empty and every
+  // fetch silently returns []. Reading inside each call mirrors the bell
+  // badge's pattern and stays correct after re-renders too.
+  const getToken = () => useAuthStore.getState().GET_AUTH_TOKEN();
 
   const fetchPendingForMe = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await post(PENDING_DELETION_REQUESTS_FOR_ME, {}, token);
+      const r = await post(PENDING_DELETION_REQUESTS_FOR_ME, {}, getToken());
       if (r.errors) {
         toast.error(r.errors[0].message);
         return;
@@ -74,12 +79,12 @@ export const useDeletionRequests = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const fetchMyRequests = useCallback(async (status?: DeletionRequestStatus) => {
     setLoading(true);
     try {
-      const r = await post(MY_DELETION_REQUESTS, status ? { status } : {}, token);
+      const r = await post(MY_DELETION_REQUESTS, status ? { status } : {}, getToken());
       if (r.errors) {
         toast.error(r.errors[0].message);
         return;
@@ -88,7 +93,7 @@ export const useDeletionRequests = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const fetchAllRequests = useCallback(async (status?: DeletionRequestStatus, branch_sub_id?: number) => {
     setLoading(true);
@@ -96,7 +101,7 @@ export const useDeletionRequests = () => {
       const vars: Record<string, unknown> = {};
       if (status) vars.status = status;
       if (branch_sub_id) vars.branch_sub_id = branch_sub_id;
-      const r = await post(ALL_DELETION_REQUESTS, vars, token);
+      const r = await post(ALL_DELETION_REQUESTS, vars, getToken());
       if (r.errors) {
         toast.error(r.errors[0].message);
         return;
@@ -105,37 +110,37 @@ export const useDeletionRequests = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const approve = useCallback(async (id: string, note?: string) => {
-    const r = await post(APPROVE_DELETION_REQUEST, { id, note: note || null }, token);
+    const r = await post(APPROVE_DELETION_REQUEST, { id, note: note || null }, getToken());
     if (r.errors) {
       toast.error(r.errors[0].message);
       return false;
     }
     toast.success("Deletion approved.");
     return true;
-  }, [token]);
+  }, []);
 
   const reject = useCallback(async (id: string, note?: string) => {
-    const r = await post(REJECT_DELETION_REQUEST, { id, note: note || null }, token);
+    const r = await post(REJECT_DELETION_REQUEST, { id, note: note || null }, getToken());
     if (r.errors) {
       toast.error(r.errors[0].message);
       return false;
     }
     toast.success("Request rejected.");
     return true;
-  }, [token]);
+  }, []);
 
   const cancel = useCallback(async (id: string) => {
-    const r = await post(CANCEL_DELETION_REQUEST, { id }, token);
+    const r = await post(CANCEL_DELETION_REQUEST, { id }, getToken());
     if (r.errors) {
       toast.error(r.errors[0].message);
       return false;
     }
     toast.success("Request cancelled.");
     return true;
-  }, [token]);
+  }, []);
 
   return {
     loading,
