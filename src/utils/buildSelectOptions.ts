@@ -14,7 +14,7 @@ export interface BuildSelectOptionsConfig {
  * accounting filter bars: a hidden placeholder, an optional "All ___" sentinel,
  * then the data rows. Returns [] when data isn't an array yet (i.e. mid-fetch).
  */
-export function buildSelectOptions<T extends { id: number | string; name: string }>(
+export function buildSelectOptions<T extends { id?: number | string; name: string }>(
   data: T[] | undefined | null,
   config: BuildSelectOptionsConfig
 ): SelectOption[] {

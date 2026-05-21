@@ -17,7 +17,7 @@ const useVendor = () => {
     GET_DEPARTMENT_QUERY,
     CREATE_VENDOR_QUERY } = VendorQueryMutations;
   
-  const [dataVendorType, setDataVendorType] = useState<RowVendorTypeData>();
+  const [dataVendorType, setDataVendorType] = useState<RowVendorTypeData[]>();
   const [dataVendors, setDataVendors] = useState<RowVendorsData[]>();
   const [dataSupplierCat, setDataSupplierCat] = useState<RowSupCatData[]>();
   const [dataCustCat, setDataCustCat] = useState<RowCustCatData[]>();

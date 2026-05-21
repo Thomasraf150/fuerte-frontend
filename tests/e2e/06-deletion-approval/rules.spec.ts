@@ -241,6 +241,26 @@ test.describe('Deletion-approval authorization rules', () => {
     clearAllPendingDeletionRequests();
   });
 
+  test('0. Sidebar has an Approvals link for every role that needs one', async ({ page }) => {
+    // Catches the bug where a role-specific Sidebar variant forgets to
+    // include the Approvals nav item (the page is reachable by URL but
+    // not by clicking through the UI).
+    for (const [label, email] of Object.entries({
+      OWNER:        USERS.owner,
+      ADMIN:        USERS.admin,
+      'BRADMIN-A':  USERS.bradminA,
+      PROCESSING:   USERS.processingA,
+    })) {
+      await loginAs(page, email);
+      const approvalsLink = page.locator('a[href="/approvals"]:has-text("Approvals")');
+      const count = await approvalsLink.count();
+      if (count === 0) {
+        throw new Error(`Sidebar for ${label} (${email}) has no link to /approvals`);
+      }
+      await logout(page);
+    }
+  });
+
   test('1. PROCESSING delete → "Approval requested" toast', async ({ page }) => {
     await loginAs(page, USERS.processingA);
     const { toastText } = await deleteFirstBorrowerInList(page, 'E2E PROCESSING-filed');
