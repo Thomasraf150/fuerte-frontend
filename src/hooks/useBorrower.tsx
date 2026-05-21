@@ -15,7 +15,6 @@ import { toast } from "react-toastify";
  * Extends useBorrowerBase with pagination and delete functionality
  */
 const useBorrower = () => {
-  const { GET_AUTH_TOKEN } = useAuthStore.getState();
   const { GET_BORROWER_QUERY, DELETE_BORROWER_MUTATION } = BorrowerQueryMutations;
 
   const {
@@ -37,9 +36,15 @@ const useBorrower = () => {
     page: number,
     search?: string
   ) => {
+    // Read token live each call — same pattern as the bell badge to avoid
+    // the Zustand-hydration race that would send an empty auth header
+    const token = useAuthStore.getState().GET_AUTH_TOKEN();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         query: GET_BORROWER_QUERY,
         variables: {
