@@ -149,7 +149,7 @@ const usePaymentPosting = () => {
     responseKey: 'deletePostedPayment',
     promptTitle: 'Reverse this payment?',
     promptText:
-      'Reversal is permanent. Admins or owners reverse immediately; everyone else submits a request for branch admin approval.',
+      'Reversal is permanent and will reverse all accounting entries for this payment. This action is logged in the approvals history.',
     buildVariables: (args, reason) => ({
       input: {
         user_id: args.user_id,
