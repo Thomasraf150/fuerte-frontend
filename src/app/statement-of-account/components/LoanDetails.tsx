@@ -1,24 +1,39 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
-import { Printer } from 'react-feather';
-import useLoans from '@/hooks/useLoans';
+import { Printer, RotateCw } from 'react-feather';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
+  onPrint?: () => void;
+  printing?: boolean;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
+const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onPrint, printing }) => {
 
-  const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[4]?.credit ?? 0) + 
+  const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) +
+                        Number(loanSingleData?.loan_details[3]?.credit ?? 0) +
+                        Number(loanSingleData?.loan_details[4]?.credit ?? 0) +
                         Number(loanSingleData?.loan_details[5]?.credit ?? 0) +
                         Number(loanSingleData?.loan_details[6]?.credit ?? 0);
 
   return (
+    <>
+      {onPrint && (
+        <div className="flex justify-end pb-3">
+          <button
+            type="button"
+            onClick={onPrint}
+            disabled={printing || !loanSingleData?.id}
+            className="inline-flex items-center gap-2 rounded border border-teal-700 bg-teal-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {printing ? <RotateCw size={15} className="animate-spin" /> : <Printer size={15} />}
+            <span>{printing ? 'Generating…' : 'Print Statement'}</span>
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 pb-4 md:grid-cols-3 gap-4">
         <div className="bg-gray-200 rounded">
           <table className="min-w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
@@ -103,6 +118,7 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData }) => {
    
         {/* Add more grid items as needed */}
       </div>
+    </>
   );
 };
 

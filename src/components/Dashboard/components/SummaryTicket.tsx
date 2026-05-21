@@ -70,22 +70,23 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate, isOw
               </tr>
             </thead>
             <tbody>
-              {isOwner && (
-                <tr>
-                  <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
-                    No of Transaction
-                  </td>
-                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                    {sumTixData?.summary_tix?.find(
-                      (item: any) => item.description?.trim().toLowerCase() === 'notes receivable'
-                    )?.ccount ?? 0}
-                  </td>
-                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                  </td>
-                  <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                  </td>
-                </tr>
-              )}
+              {/* Number of Borrowers — count of distinct loans whose Notes
+                  Receivable entry falls in the selected period. Visible to all
+                  roles (branch admins need this to reconcile NR vs Cashout). */}
+              <tr>
+                <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark font-semibold">
+                  Number of Borrowers
+                </td>
+                <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark font-semibold">
+                  {sumTixData?.summary_tix?.find(
+                    (item: any) => item.description?.trim().toLowerCase() === 'notes receivable'
+                  )?.ccount ?? 0}
+                </td>
+                <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
+                </td>
+                <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
+                </td>
+              </tr>
               {sumTixData?.summary_tix?.filter((item: any) => {
                     const desc = item.description?.trim().toLowerCase();
                     if (desc === 'addon total') return false;

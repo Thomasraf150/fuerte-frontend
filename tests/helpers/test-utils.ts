@@ -205,18 +205,34 @@ export async function fillBorrowerForm(page: Page, data: BorrowerData) {
   await fillAndBlur(page, 'input[name="age"]', data.age.toString());
   await fillAndBlur(page, 'input[name="email"]', data.email);
   await fillAndBlur(page, 'input[name="contact_no"]', data.contact_no);
-  await fillAndBlur(page, 'input[name="civil_status"]', data.civil_status);
 
-  // SECTION 3: Spouse Details
-  await fillAndBlur(page, 'input[name="work_address"], textarea[name="work_address"]', data.work_address);
-  await fillAndBlur(page, 'input[name="occupation"]', data.occupation);
-  await fillAndBlur(page, 'input[name="fullname"]', data.fullname);
-  await fillAndBlur(page, 'input[name="company"]', data.company);
-  await fillAndBlur(page, 'input[name="dept_branch"]', data.dept_branch);
-  await fillAndBlur(page, 'input[name="length_of_service"]', data.length_of_service);
-  await fillAndBlur(page, 'input[name="salary"]', data.salary);
-  await fillAndBlur(page, 'input[name="company_contact_person"]', data.company_contact_person);
-  await fillAndBlur(page, 'input[name="spouse_contact_no"]', data.spouse_contact_no);
+  // Civil Status — dropdown since the Married/Live-in spouse-section refactor.
+  // Falls back to the legacy text input for older builds during local rollouts.
+  const civilStatusSelect = page.locator('select[name="civil_status"]').first();
+  if (await civilStatusSelect.count() > 0) {
+    await civilStatusSelect.selectOption(data.civil_status);
+    await page.waitForTimeout(300); // Let the conditional spouse section mount/unmount
+  } else {
+    await fillAndBlur(page, 'input[name="civil_status"]', data.civil_status);
+  }
+
+  // SECTION 3: Spouse Details — only rendered when civil_status is Married or Live-in.
+  // For Single/Widowed/Separated the form unmounts these inputs, so attempting to
+  // fill them would time out. Match the production conditional render here.
+  const requiresSpouse = ['Married', 'Live-in'].includes(data.civil_status);
+  if (requiresSpouse) {
+    await fillAndBlur(page, 'input[name="work_address"], textarea[name="work_address"]', data.work_address);
+    await fillAndBlur(page, 'input[name="occupation"]', data.occupation);
+    await fillAndBlur(page, 'input[name="fullname"]', data.fullname);
+    await fillAndBlur(page, 'input[name="company"]', data.company);
+    await fillAndBlur(page, 'input[name="dept_branch"]', data.dept_branch);
+    await fillAndBlur(page, 'input[name="length_of_service"]', data.length_of_service);
+    await fillAndBlur(page, 'input[name="salary"]', data.salary);
+    await fillAndBlur(page, 'input[name="company_contact_person"]', data.company_contact_person);
+    await fillAndBlur(page, 'input[name="spouse_contact_no"]', data.spouse_contact_no);
+  } else {
+    console.log(`   ⏭ Skipping spouse section (civil_status = "${data.civil_status}")`);
+  }
 
   // SECTION 4: Work Background
   // Handle ReactSelect for company_borrower_id (searchable dropdown)
@@ -281,7 +297,10 @@ export async function fillBorrowerForm(page: Page, data: BorrowerData) {
 // TEST DATA GENERATION - REALISTIC FILIPINO DATA
 // ============================================================================
 
-export function generateTestData(prefix: string = 'E2E'): BorrowerData {
+export function generateTestData(
+  prefix: string = 'E2E',
+  overrides: Partial<BorrowerData> = {}
+): BorrowerData {
   const timestamp = Date.now();
 
   // Realistic Filipino data
@@ -341,7 +360,10 @@ export function generateTestData(prefix: string = 'E2E'): BorrowerData {
     age: randomAge,
     email: `${prefix.toLowerCase()}.${timestamp}@test.com`,
     contact_no: contactNumber,
-    civil_status: ['Single', 'Married', 'Widowed'][Math.floor(Math.random() * 3)],
+    // Default 'Married' so existing tests still exercise the spouse section by
+    // default. Pass `{ civil_status: 'Single' }` via overrides to test the
+    // hidden-spouse path explicitly.
+    civil_status: 'Married',
 
     // Section 3 - Spouse
     work_address: `${randomCompany} Building, ${randomCity}`,
@@ -389,7 +411,9 @@ export function generateTestData(prefix: string = 'E2E'): BorrowerData {
     // Section 6 - Company
     employer: randomCompany,
     company_salary: monthlyIncome,
-    contract_duration: '2 years'
+    contract_duration: '2 years',
+
+    ...overrides,
   };
 }
 
@@ -421,8 +445,14 @@ export async function verifyErrorMessage(page: Page) {
   console.log(`   ⚠️ Error toast appeared: "${toastText}"`);
 }
 
+// Backend port differs by environment — Docker dev exposes 8080, Laragon uses
+// 8000. Default to Docker (current dev standard) and let CI / Laragon users
+// override via TEST_GRAPHQL_URL.
+const GRAPHQL_URL =
+  process.env.TEST_GRAPHQL_URL ?? 'http://localhost:8080/fuerte-api';
+
 export async function queryGraphQL(query: string, variables: any = {}) {
-  const response = await fetch('http://localhost:8000/fuerte-api', {
+  const response = await fetch(GRAPHQL_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables })

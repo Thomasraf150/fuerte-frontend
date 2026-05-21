@@ -24,8 +24,15 @@ const GET_CUSTOMER_LEDGER: string = `
   }
 `;
 
+const PRINT_STATE_OF_ACCOUNT: string = `
+  mutation PrintStateOfAccount($input: CustLedgerInput!){
+    printStateOfAccount(input: $input)
+  }
+`;
+
 const SoaQueryMutation = {
-  GET_CUSTOMER_LEDGER
+  GET_CUSTOMER_LEDGER,
+  PRINT_STATE_OF_ACCOUNT
 };
 
 export default SoaQueryMutation;

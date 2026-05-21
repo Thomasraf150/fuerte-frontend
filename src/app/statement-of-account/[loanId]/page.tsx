@@ -19,7 +19,7 @@ const SoaDetailPage: React.FC = () => {
   const loanId = params.loanId as string;
 
   const { fetchSingLoans, loanSingleData, loading: loanLoading } = useLoans();
-  const { fetchCustomerLedger, custLedgerData, loading: ledgerLoading } = useSoa();
+  const { fetchCustomerLedger, custLedgerData, loading: ledgerLoading, printStateOfAccount, printing } = useSoa();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +128,11 @@ const SoaDetailPage: React.FC = () => {
             <span>Back</span>
           </button>
 
-          <LoanDetails loanSingleData={loanSingleData} />
+          <LoanDetails
+            loanSingleData={loanSingleData}
+            onPrint={() => printStateOfAccount(loanId)}
+            printing={printing}
+          />
           <CustomerLedger custLedgerData={custLedgerData} loading={ledgerLoading} />
         </div>
       </div>
