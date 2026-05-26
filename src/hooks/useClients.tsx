@@ -5,28 +5,20 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanClientsQueryMutations from '@/graphql/LoanClientsQueryMutations';
 import { DataRowClientList } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
 import { usePagination } from './usePagination';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useClients = () => {
   const { GET_LOAN_CLIENT_QUERY } = LoanClientsQueryMutations;
 
   // Create pagination wrapper function following the established pattern
   const fetchClientsForPagination = useCallback(async (first: number, page: number, search?: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_LOAN_CLIENT_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }),
-          orderBy: [{ column: "id", order: 'DESC' }]
-        },
-      }),
+    const result = await graphqlFetch(GET_LOAN_CLIENT_QUERY, {
+      first,
+      page,
+      ...(search && { search }),
+      orderBy: [{ column: "id", order: 'DESC' }]
     });
-    const result = await response.json();
     return {
       data: result.data.getLoanClient.data,
       paginatorInfo: result.data.getLoanClient.paginatorInfo

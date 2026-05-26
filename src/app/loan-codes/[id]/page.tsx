@@ -10,6 +10,7 @@ import useLoanCodes from '@/hooks/useLoanCodes';
 import LoanCodeQueryMutations from '@/graphql/LoanCodeQueryMutations';
 import FormAddLoanCode from '../components/FormAddLoanCode';
 import { DataRowLoanCodes } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const LoanCodeDetailPage: React.FC = () => {
   const params = useParams();
@@ -44,18 +45,10 @@ const LoanCodeDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: LoanCodeQueryMutations.GET_LOAN_CODE_BY_ID,
-            variables: { id: codeId },
-          }),
-        });
-
-        const result = await response.json();
+        const result = await graphqlFetch(
+          LoanCodeQueryMutations.GET_LOAN_CODE_BY_ID,
+          { id: codeId },
+        );
 
         if (result.errors) {
           setError(result.errors[0]?.message || 'Failed to load loan code');

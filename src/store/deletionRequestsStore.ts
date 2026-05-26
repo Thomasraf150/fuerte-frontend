@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 /**
  * Lightweight slice for the bell-icon badge.
@@ -36,15 +37,7 @@ export const useDeletionRequestsStore = create<DeletionRequestsBadgeState>((set)
       return;
     }
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ query: PENDING_QUERY }),
-      });
-      const json = await res.json();
+      const json = await graphqlFetch(PENDING_QUERY);
       const rows = Array.isArray(json?.data?.pendingDeletionRequestsForMe)
         ? json.data.pendingDeletionRequestsForMe
         : [];

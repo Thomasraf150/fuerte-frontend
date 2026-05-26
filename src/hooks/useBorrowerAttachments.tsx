@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
-import { useAuthStore } from "@/store";
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { BorrAttachmentsFormValues, BorrAttachmentsRowData } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -74,22 +74,12 @@ const useBorrowerAttachments = () => {
   
   const fetchDataBorrAttachments = async (first: number, page: number, borrower_id: number) => {
     setBorrowerLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_ATTACHMENTS_QUERY,
-        variables: { first, page, orderBy: [
-          { column: "id", order: 'DESC' }
-        ],
-        borrower_id
-      },
-      }),
+    const result = await graphqlFetch(GET_BORROWER_ATTACHMENTS_QUERY, {
+      first,
+      page,
+      orderBy: [{ column: "id", order: 'DESC' }],
+      borrower_id,
     });
-
-    const result = await response.json();
     // console.log(result, ' result')
     setBorrowerLoading(false);
     setDataBorrAttm(result.data.getBorrAttachments.data);
@@ -97,23 +87,12 @@ const useBorrowerAttachments = () => {
 
   const handleDeleteAttm = async (row: any) => {
     // setBorrowerLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const result = await graphqlFetch(UPDATE_BORROWER_ATTACHMENTS_QUERY, {
+      input: {
+        id: row.id,
+        is_deleted: true,
       },
-      body: JSON.stringify({
-        query: UPDATE_BORROWER_ATTACHMENTS_QUERY,
-        variables: { 
-          input: {
-            id: row.id, 
-            is_deleted: true
-          } 
-        },
-      }),
     });
-
-    const result = await response.json();
     toast.success("Deleted Successfully!");
   };
 

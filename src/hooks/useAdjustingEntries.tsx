@@ -7,6 +7,7 @@ import { RowAcctgEntry } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
 import { usePagination } from './usePagination';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useAdjustingEntries = () => {
 
@@ -20,25 +21,14 @@ const useAdjustingEntries = () => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_AE_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }), // Add search parameter if provided
-          orderBy: [
-            { column: "id", order: 'DESC' }
-          ]
-        },
-      }),
+    const result = await graphqlFetch(GET_AE_QUERY, {
+      first,
+      page,
+      ...(search && { search }), // Add search parameter if provided
+      orderBy: [
+        { column: "id", order: 'DESC' }
+      ]
     });
-
-    const result = await response.json();
 
     // Return the expected format for usePagination
     return {
@@ -102,18 +92,7 @@ const useAdjustingEntries = () => {
 
       mutation = CREATE_AE_MUTATION;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

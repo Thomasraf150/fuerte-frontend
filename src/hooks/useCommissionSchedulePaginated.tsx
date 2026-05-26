@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import CommissionScheduleQueryMutations from '@/graphql/CommissionScheduleQueryMutations';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 interface CSTransPerMonth {
   month: string;
@@ -183,23 +184,7 @@ const useCommissionSchedulePaginated = () => {
         }
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: CS_SCHEDULE_BATCH,
-          variables,
-        }),
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await graphqlFetch(CS_SCHEDULE_BATCH, variables, { signal: controller.signal });
 
       // Check for GraphQL errors
       if (result.errors) {

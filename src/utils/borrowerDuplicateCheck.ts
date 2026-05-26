@@ -1,6 +1,7 @@
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { BorrowerInfo } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 interface AuthData {
   authToken?: string;
@@ -55,19 +56,7 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
       branch_sub_id: branchSubId,
     };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authData.authToken && { Authorization: `Bearer ${authData.authToken}` }),
-      },
-      body: JSON.stringify({
-        query: CHECK_BORROWER_DUPLICATE,
-        variables,
-      }),
-    });
-
-    const result = await response.json();
+    const result = await graphqlFetch(CHECK_BORROWER_DUPLICATE, variables);
 
     if (result.data?.checkBorrowerDuplicate?.isDuplicate) {
       const duplicate = result.data.checkBorrowerDuplicate;

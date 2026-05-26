@@ -5,8 +5,8 @@ import UserQueryMutations from '@/graphql/UserQueryMutation';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import { User, DataFormUser, DataSubBranches, DataRoles } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
 import { usePagination } from './usePagination';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useUsers = () => {
   const { GET_USER_QUERY,
@@ -30,25 +30,12 @@ const useUsers = () => {
     page: number,
     search?: string
   ) => {
-    const token = useAuthStore.getState().GET_AUTH_TOKEN();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({
-        query: GET_USER_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }),
-          orderBy: [{ column: "id", order: 'DESC' }],
-        },
-      }),
+    const result = await graphqlFetch(GET_USER_QUERY, {
+      first,
+      page,
+      ...(search && { search }),
+      orderBy: [{ column: "id", order: 'DESC' }],
     });
-
-    const result = await response.json();
 
     if (result.errors) {
       throw new Error(result.errors[0]?.message || 'GraphQL error occurred');
@@ -89,18 +76,7 @@ const useUsers = () => {
   const fetchRoles = async () => {
     setRolesLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_ROLE_QUERY,
-          variables: {},
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(GET_ROLE_QUERY);
       setDataRole(result.data.role);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -112,18 +88,7 @@ const useUsers = () => {
   const fetchSubBranch = async (orderBy: string) => {
     setSubBranchLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_ALL_SUB_BRANCH_QUERY,
-          variables: { orderBy },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
       setDataSubBranch(result.data.getAllBranch);
     } catch (error) {
       console.error('Error fetching sub branches:', error);
@@ -136,18 +101,7 @@ const useUsers = () => {
   // manage form state directly — no shared singleUserData state needed.
   const fetchSingleUser = async (user: User): Promise<DataFormUser | undefined> => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_SINGLE_USER_QUERY,
-          variables: { id: user.id },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(GET_SINGLE_USER_QUERY, { id: user.id });
       return result.data?.user;
     } catch (error) {
       console.error('Error fetching single user:', error);
@@ -201,25 +155,13 @@ const useUsers = () => {
   const persistAdditionalGrants = async (
     savedUserId: number | string,
     ids: number[] | undefined,
-    token: string | null | undefined,
   ): Promise<void> => {
     if (ids === undefined) return;
     try {
-      const grantRes = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          query: SET_USER_BRANCH_ACCESS_MUTATION,
-          variables: {
-            user_id: String(savedUserId),
-            branch_sub_ids: ids.map((id) => String(id)),
-          },
-        }),
+      const grantJson = await graphqlFetch(SET_USER_BRANCH_ACCESS_MUTATION, {
+        user_id: String(savedUserId),
+        branch_sub_ids: ids.map((id) => String(id)),
       });
-      const grantJson = await grantRes.json();
       if (grantJson.errors) {
         toast.warn(`User saved, but branch access update failed: ${grantJson.errors[0].message}`);
       }
@@ -236,18 +178,9 @@ const useUsers = () => {
       if ('success' in validation) return validation;
       const { branchSubId, roleId } = validation;
 
-      const token = useAuthStore.getState().GET_AUTH_TOKEN();
       const { mutation, variables } = buildUserMutationVars(data, branchSubId, roleId);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ query: mutation, variables }),
-      });
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       if (result.errors) {
         toast.error(result.errors[0].message);
@@ -257,7 +190,7 @@ const useUsers = () => {
       const savedUser = result.data?.createUser || result.data?.updateUser;
       const savedUserId = savedUser?.id ?? data.id;
       if (savedUserId) {
-        await persistAdditionalGrants(savedUserId, data.additional_branch_sub_ids, token);
+        await persistAdditionalGrants(savedUserId, data.additional_branch_sub_ids);
       }
 
       toast.success(savedUser?.message || "User saved successfully!");

@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import { DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { usePagination } from './usePagination';
 
 const useLoanProducts = () => {
@@ -19,29 +19,12 @@ const useLoanProducts = () => {
     search?: string
   ) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_LOAN_PRODUCT_QUERY,
-          variables: {
-            first,
-            page,
-            ...(search && { search }), // Add search parameter if provided
-            orderBy: [
-              { column: "id", order: 'DESC' }
-            ]
-          },
-        }),
+      const result = await graphqlFetch(GET_LOAN_PRODUCT_QUERY, {
+        first,
+        page,
+        ...(search && { search }), // Add search parameter if provided
+        orderBy: [{ column: "id", order: 'DESC' }],
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
 
       // Check for GraphQL errors
       if (result.errors) {
@@ -157,22 +140,7 @@ const useLoanProducts = () => {
     } else {
       mutation = SAVE_LOAN_PRODUCT_QUERY;
     }
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

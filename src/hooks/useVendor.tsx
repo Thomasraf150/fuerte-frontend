@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import VendorQueryMutations from '@/graphql/VendorQueryMutations';
 import { RowVendorTypeData, RowVendorsData, RowSupCatData, RowCustCatData, RowDepartmentsData } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
 import moment from 'moment';
 
@@ -39,17 +40,7 @@ const useVendor = () => {
     mutation = GET_VENDOR_TYPE_QUERY;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataVendorType(result?.data.getVendorType);
     setLoading(false);
   };
@@ -67,17 +58,7 @@ const useVendor = () => {
     mutation = GET_SUPPLIER_CAT_QUERY;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataSupplierCat(result?.data.getSupplierCategory);
     setLoading(false);
   };
@@ -95,17 +76,7 @@ const useVendor = () => {
     mutation = GET_CUSTOMER_CAT_QUERY;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataCustCat(result?.data.getCustomerCategory);
     setLoading(false);
   };
@@ -123,17 +94,7 @@ const useVendor = () => {
     mutation = GET_DEPARTMENT_QUERY;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataDepartments(result?.data.getDepartment);
     setLoading(false);
   };
@@ -151,17 +112,7 @@ const useVendor = () => {
     mutation = GET_VENDOR_LIST_QUERY;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataVendors(result?.data.getVendors);
     setLoading(false);
   };
@@ -194,18 +145,7 @@ const useVendor = () => {
 
       mutation = CREATE_VENDOR_QUERY;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

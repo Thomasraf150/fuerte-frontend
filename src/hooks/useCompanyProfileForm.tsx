@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { DataCompanyFormValues } from '@/utils/DataTypes';
 import SAVE_COMPANY_PROFILE_MUTATION from '@/graphql/SaveCompanyProfileMutation';
 import GET_COMPANY_PROFILE_QUERY from '@/graphql/GetCompanyProfileQuery';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
 
 const useCompanyProfileForm = (initialValues?: DataCompanyFormValues) => {
@@ -18,18 +19,7 @@ const useCompanyProfileForm = (initialValues?: DataCompanyFormValues) => {
 
   // Function to fetch data based on ID
   const fetchData = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_COMPANY_PROFILE_QUERY,
-        variables: {},
-      }),
-    });
-
-    const result = await response.json();
+    const result = await graphqlFetch(GET_COMPANY_PROFILE_QUERY, {});
 
     if (result.data.getCompanyProfile) {
       // Set form values after fetching data

@@ -7,9 +7,9 @@ import { RowAcctgEntry } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
 import { fetchWithRecache } from '@/utils/helper';
-import { useAuthStore } from "@/store";
 import { usePagination } from './usePagination';
 import { useDownloadPdf } from '@/hooks/useDownloadPdf';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useGeneralVoucher = () => {
 
@@ -35,31 +35,20 @@ const useGeneralVoucher = () => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_GV_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }), // Add search parameter if provided
-          orderBy: [
-            { column: "id", order: 'DESC' }
-          ],
-          input: {
-            branch_id: filters.branch_id,
-            branch_sub_id: filters.branch_sub_id,
-            startDate: filters.startDate,
-            endDate: filters.endDate,
-          }
-        },
-      }),
+    const result = await graphqlFetch(GET_GV_QUERY, {
+      first,
+      page,
+      ...(search && { search }), // Add search parameter if provided
+      orderBy: [
+        { column: "id", order: 'DESC' }
+      ],
+      input: {
+        branch_id: filters.branch_id,
+        branch_sub_id: filters.branch_sub_id,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      }
     });
-
-    const result = await response.json();
 
     // Surface GraphQL/server errors as a real Error instead of crashing on
     // result.data being undefined (which hides the actual message in DevTools).
@@ -150,18 +139,7 @@ const useGeneralVoucher = () => {
 
       mutation = CREATE_GV_MUTATION;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -191,7 +169,6 @@ const useGeneralVoucher = () => {
   const updateGV = async (row: RowAcctgEntry, journal_date: string) => {
     setGeneralVoucherLoading(true);
     try {
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
       let mutation;
       let variables: { input: any } = {
         input: {
@@ -203,19 +180,7 @@ const useGeneralVoucher = () => {
 
       mutation = UPDATE_GV_MUTATION;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`,
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -261,27 +226,14 @@ const useGeneralVoucher = () => {
 
     setExportLoading(true);
     try {
-      const exportToken = useAuthStore.getState().GET_AUTH_TOKEN();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(exportToken ? { 'Authorization': `Bearer ${exportToken}` } : {}),
+      const result = await graphqlFetch(EXPORT_CV_TO_EXCEL_MUTATION, {
+        input: {
+          branch_id: filters.branch_id,
+          branch_sub_id: filters.branch_sub_id,
+          startDate: filters.startDate,
+          endDate: filters.endDate,
         },
-        body: JSON.stringify({
-          query: EXPORT_CV_TO_EXCEL_MUTATION,
-          variables: {
-            input: {
-              branch_id: filters.branch_id,
-              branch_sub_id: filters.branch_sub_id,
-              startDate: filters.startDate,
-              endDate: filters.endDate,
-            },
-          },
-        }),
       });
-
-      const result = await response.json();
 
       if (result.errors?.length) {
         console.error('[ExportCV] GraphQL errors:', result.errors);

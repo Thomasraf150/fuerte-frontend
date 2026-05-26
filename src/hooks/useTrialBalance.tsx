@@ -6,6 +6,7 @@ import TrialBalanceQueryMutations from '@/graphql/TrialBalanceQueryMutations';
 import { DataTbRow } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useTrialBalance = () => {
 
@@ -30,17 +31,7 @@ const useTrialBalance = () => {
     mutation = GET_UTB;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataUtb(result?.data.getUnadjustedTBal);
     setLoading(false);
   };

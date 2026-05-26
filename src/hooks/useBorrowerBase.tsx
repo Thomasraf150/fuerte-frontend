@@ -7,6 +7,7 @@ import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } from '@/utils/DataTypes';
 import { checkBorrowerDuplicates, getAuthUserData } from '@/utils/borrowerDuplicateCheck';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
 
 /**
@@ -125,23 +126,7 @@ const useBorrowerBase = () => {
           String(data.branch_sub_id);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authData.authToken && { Authorization: `Bearer ${authData.authToken}` }),
-        },
-        body: JSON.stringify({
-          query: SAVE_BORROWER_MUTATION,
-          variables,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await graphqlFetch(SAVE_BORROWER_MUTATION, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -175,15 +160,11 @@ const useBorrowerBase = () => {
    * Fetch chiefs data
    */
   const fetchDataChief = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_CHIEF_QUERY,
-        variables: { first, page, orderBy: [{ column: "id", order: 'DESC' }] },
-      }),
+    const result = await graphqlFetch(GET_CHIEF_QUERY, {
+      first,
+      page,
+      orderBy: [{ column: "id", order: 'DESC' }],
     });
-    const result = await response.json();
     setDataChief(result.data.getChief.data);
   };
 
@@ -191,15 +172,11 @@ const useBorrowerBase = () => {
    * Fetch areas data
    */
   const fetchDataArea = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_AREA_QUERY,
-        variables: { first, page, orderBy: [{ column: "id", order: 'DESC' }] },
-      }),
+    const result = await graphqlFetch(GET_AREA_QUERY, {
+      first,
+      page,
+      orderBy: [{ column: "id", order: 'DESC' }],
     });
-    const result = await response.json();
     setDataArea(result.data.getAreas.data);
   };
 
@@ -207,15 +184,9 @@ const useBorrowerBase = () => {
    * Fetch sub-areas for a specific area
    */
   const fetchDataSubArea = async (area_id: any) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_SINGLE_SUB_AREA_QUERY,
-        variables: { area_id: Number(area_id) },
-      }),
+    const result = await graphqlFetch(GET_SINGLE_SUB_AREA_QUERY, {
+      area_id: Number(area_id),
     });
-    const result = await response.json();
     setDataSubArea(result.data.getOneSubArea);
   };
 
@@ -223,15 +194,11 @@ const useBorrowerBase = () => {
    * Fetch borrower companies data
    */
   const fetchDataBorrCompany = async (first: number, page: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_BORROWER_COMPANIES,
-        variables: { first, page, orderBy: [{ column: "id", order: 'DESC' }] },
-      }),
+    const result = await graphqlFetch(GET_BORROWER_COMPANIES, {
+      first,
+      page,
+      orderBy: [{ column: "id", order: 'DESC' }],
     });
-    const result = await response.json();
     setDataBorrCompany(result.data.getBorrCompanies.data);
   };
 

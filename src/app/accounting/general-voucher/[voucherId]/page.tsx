@@ -11,6 +11,7 @@ import GeneralVoucherQueryMutations from '@/graphql/GeneralVoucherQueryMutations
 import CVForm from '../components/CVForm';
 import JVForm from '../components/JVForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const GeneralVoucherDetailPage: React.FC = () => {
   const params = useParams();
@@ -47,18 +48,10 @@ const GeneralVoucherDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: GeneralVoucherQueryMutations.GET_VOUCHER_BY_ID,
-            variables: { id: voucherId },
-          }),
-        });
-
-        const result = await response.json();
+        const result = await graphqlFetch(
+          GeneralVoucherQueryMutations.GET_VOUCHER_BY_ID,
+          { id: voucherId },
+        );
 
         if (result.errors) {
           setError(result.errors[0]?.message || 'Failed to load voucher');

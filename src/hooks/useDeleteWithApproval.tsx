@@ -2,8 +2,8 @@
 
 import { useCallback } from "react";
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
 import { showDeletionRequestPrompt, showProcessingModal } from "@/components/ConfirmationModal";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 /**
  * Shape of the response from the 6 in-scope delete mutations.
@@ -68,19 +68,10 @@ export function useDeleteWithApproval<TArgs>(config: UseDeleteWithApprovalConfig
 
       const closeProcessing = showProcessingModal("Submitting…");
       try {
-        const token = useAuthStore.getState().GET_AUTH_TOKEN();
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            query: config.mutation,
-            variables: config.buildVariables(args, reason || null),
-          }),
-        });
-        const json = await response.json();
+        const json = await graphqlFetch(
+          config.mutation,
+          config.buildVariables(args, reason || null),
+        );
 
         if (json.errors) {
           closeProcessing();

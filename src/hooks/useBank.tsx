@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BankQueryMutations from '@/graphql/BankQueryMutations';
 import BranchQueryMutation from '@/graphql/BranchQueryMutation';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataBank, DataSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -20,43 +21,18 @@ const useBank = () => {
   const [bankLoading, setBankLoading] = useState<boolean>(false);
   // Function to fetchdata
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_ALL_SUB_BRANCH_QUERY,
-        variables: { orderBy } 
-      }),
-    });
-
-    const result = await response.json();
+    const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
     setBranchSubData(result.data.getAllBranch);
   };
   
   const fetchDataBank = async (first: number = 15, page: number = 1) => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_BANKS_QUERY,
-          variables: { first, page, orderBy: [
-            { column: "id", order: 'DESC' }
-          ]
-        },
-        }),
+      const result = await graphqlFetch(GET_BANKS_QUERY, {
+        first,
+        page,
+        orderBy: [{ column: "id", order: 'DESC' }],
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
 
       if (result.errors) {
         throw new Error(result.errors[0].message);
@@ -99,22 +75,7 @@ const useBank = () => {
         mutation = SAVE_BANK_MUTATION;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -148,17 +109,7 @@ const useBank = () => {
         is_deleted: 1,
       },
     };
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: DELETE_BANK_MUTATION,
-        variables
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(DELETE_BANK_MUTATION, variables);
     toast.success("Bank is Deleted!");
   };
 

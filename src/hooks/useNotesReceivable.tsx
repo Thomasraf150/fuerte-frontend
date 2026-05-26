@@ -6,6 +6,7 @@ import NotesReceivableQueryMutation from '@/graphql/NotesReceivableQueryMutation
 // import { SummaryTicketValues } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 interface NrProps {
   data: { 
@@ -57,17 +58,7 @@ const useNotesReceivable = () => {
     mutation = NR_SCHEDULE_LIST;
     setNrLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataNotesReceivable(result.data.getNrSchedule);
     setNrLoading(false);
   };

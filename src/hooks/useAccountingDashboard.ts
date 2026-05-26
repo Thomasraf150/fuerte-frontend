@@ -7,6 +7,7 @@ import {
   AccountingDashboard,
   PeriodOption,
 } from "@/types/dashboard";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 interface UseAccountingDashboardReturn {
   data: AccountingDashboard | null;
@@ -115,23 +116,11 @@ const useAccountingDashboard = (): UseAccountingDashboardReturn => {
     const { startDate, endDate } = getDateRange(period, customStartDate, customEndDate);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: GET_ACCOUNTING_DASHBOARD,
-          variables: {
-            branch_id: selectedBranchId,
-            start_date: startDate,
-            end_date: endDate,
-          },
-        }),
+      const result = await graphqlFetch(GET_ACCOUNTING_DASHBOARD, {
+        branch_id: selectedBranchId,
+        start_date: startDate,
+        end_date: endDate,
       });
-
-      const result = await response.json();
 
       if (result.errors) {
         const errorMessage = result.errors[0]?.message || "Failed to fetch dashboard data";

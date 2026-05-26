@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { usePagination } from './usePagination';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { DataBorrCompanies } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import { ServerSidePaginationProps } from '@/components/CustomDatatable';
@@ -19,23 +20,12 @@ const useBorrCompanies = () => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_COMPANIES,
-        variables: {
-          first,
-          page,
-          ...(search && { search }),
-          orderBy: [{ column: "id", order: 'DESC' }]
-        },
-      }),
+    const result = await graphqlFetch(GET_BORROWER_COMPANIES, {
+      first,
+      page,
+      ...(search && { search }),
+      orderBy: [{ column: "id", order: 'DESC' }]
     });
-
-    const result = await response.json();
 
     return {
       data: result.data.getBorrCompanies.data,
@@ -91,18 +81,7 @@ const useBorrCompanies = () => {
         mutation = SAVE_BORROWER_COMPANIES;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       if (result.errors) {
         toast.error(result.errors[0].message);
@@ -129,17 +108,9 @@ const useBorrCompanies = () => {
 
   const handleDeleteBranch = async (data: any) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: DELETE_BORR_COMP_MUTATION,
-          variables: { input: { id: data.id, is_deleted: 1 } }
-        }),
+      const result = await graphqlFetch(DELETE_BORR_COMP_MUTATION, {
+        input: { id: data.id, is_deleted: 1 }
       });
-      const result = await response.json();
 
       if (result.errors) {
         toast.error(result.errors[0].message);

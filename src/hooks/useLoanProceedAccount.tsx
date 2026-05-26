@@ -6,6 +6,7 @@ import { DataLoanProceedList, DataLoanProceedAcctData } from '@/utils/DataTypes'
 import { toast } from "react-toastify";
 import LoanProceedSettingQueryMutations from '@/graphql/LoanProceedSettingQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useLoanProceedAccount = () => {
   const { SAVE_LOAN_PROCEED_SETTINGS, GET_LOAN_PROCEED_SETTINGS } = LoanProceedSettingQueryMutations;
@@ -123,18 +124,7 @@ const useLoanProceedAccount = () => {
 
       mutation = SAVE_LOAN_PROCEED_SETTINGS;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }), 
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

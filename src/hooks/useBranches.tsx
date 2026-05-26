@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
-import { useAuthStore } from "@/store";
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataBranches, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -31,18 +31,7 @@ const useBranches = () => {
   const fetchDataList = async (orderBy = 'id_desc') => {
     setLoadingBranches(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_BRANCH_QUERY,
-          variables: { orderBy },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(GET_BRANCH_QUERY, { orderBy });
       setDataBranch(result.data.getBranch);
     } finally {
       setLoadingBranches(false);
@@ -52,18 +41,7 @@ const useBranches = () => {
   const fetchSubDataList = async (orderBy = 'id_desc', branch_id: number) => {
     setLoadingSubBranches(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_SUB_BRANCH_QUERY,
-          variables: { orderBy, branch_id },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(GET_SUB_BRANCH_QUERY, { orderBy, branch_id });
       setDataBranchSub(result.data.getBranchSub);
       setSelectedBranchID(branch_id)
     } finally {
@@ -75,27 +53,7 @@ const useBranches = () => {
   const fetchMyAccessibleBranchSubs = async () => {
     setLoadingMyAccessibleBranches(true);
     try {
-      // Use the same token retrieval method as useLoans
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
-      const token = GET_AUTH_TOKEN();
-
-      if (!token) {
-        console.warn('No auth token for fetching accessible branches');
-        return;
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY);
 
       if (result.data?.getMyAccessibleBranchSubs) {
         setMyAccessibleBranchSubs(result.data.getMyAccessibleBranchSubs);
@@ -130,18 +88,7 @@ const useBranches = () => {
         mutation = SAVE_BRANCH_MUTATION;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -238,18 +185,7 @@ const useBranches = () => {
         mutation = SAVE_SUB_BRANCH_MUTATION;
       }
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

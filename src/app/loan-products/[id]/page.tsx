@@ -10,6 +10,7 @@ import useLoanProducts from '@/hooks/useLoanProducts';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import FormAddLoanProduct from '../components/FormAddLoanProduct';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const LoanProductDetailPage: React.FC = () => {
   const params = useParams();
@@ -44,18 +45,10 @@ const LoanProductDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: LoanProductsQueryMutations.GET_LOAN_PRODUCT_BY_ID,
-            variables: { id: productId },
-          }),
-        });
-
-        const result = await response.json();
+        const result = await graphqlFetch(
+          LoanProductsQueryMutations.GET_LOAN_PRODUCT_BY_ID,
+          { id: productId },
+        );
 
         if (result.errors) {
           setError(result.errors[0]?.message || 'Failed to load loan product');

@@ -6,7 +6,7 @@ import LoanCodeQueryMutations from '@/graphql/LoanCodeQueryMutations';
 import LoanClientsQueryMutations from '@/graphql/LoanClientsQueryMutations';
 import { DataRowLoanCodes, DataFormLoanCodes, DataRowClientList, DataRowLoanTypeList } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { usePagination } from './usePagination';
 import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 
@@ -21,25 +21,12 @@ const useLoanCodes = () => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_CODE_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }), // Add search parameter if provided
-          orderBy: [
-            { column: "id", order: 'DESC' }
-          ]
-        },
-      }),
+    const result = await graphqlFetch(GET_LOAN_CODE_QUERY, {
+      first,
+      page,
+      ...(search && { search }), // Add search parameter if provided
+      orderBy: [{ column: "id", order: 'DESC' }],
     });
-
-    const result = await response.json();
 
     // Return the expected format for usePagination
     return {
@@ -85,28 +72,11 @@ const useLoanCodes = () => {
   const [dataType, setDataType] = useState<DataRowLoanTypeList[]>([]);
   const fetchLoanClients = async (orderBy = 'id_desc') => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_LOAN_CLIENT_QUERY,
-          variables: {
-            first: MAX_DROPDOWN_SIZE, // Max allowed for dropdown queries
-            page: 1,
-            orderBy: [
-              { column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }
-            ]
-          },
-        }),
+      const result = await graphqlFetch(GET_LOAN_CLIENT_QUERY, {
+        first: MAX_DROPDOWN_SIZE, // Max allowed for dropdown queries
+        page: 1,
+        orderBy: [{ column: "id", order: orderBy.includes('desc') ? 'DESC' : 'ASC' }],
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
 
       // Check for GraphQL errors
       if (result.errors) {
@@ -129,18 +99,7 @@ const useLoanCodes = () => {
   };
   
   const fetchLoanTypes = async (orderBy = 'id_desc') => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_TYPE_QUERY,
-        variables: { orderBy },
-      }),
-    });
-
-    const result = await response.json();
+    const result = await graphqlFetch(GET_LOAN_TYPE_QUERY, { orderBy });
     setDataType(result.data.getLoanTypes);
   };
 
@@ -168,18 +127,7 @@ const useLoanCodes = () => {
         mutation = SAVE_LOAN_CODE_MUTATION;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

@@ -6,6 +6,7 @@ import GeneralLedgerQueryMutations from '@/graphql/GeneralLedgerQueryMutations';
 import { RowAcctgEntry, DataGLRow } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import moment from 'moment';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useGeneralLedger = () => {
 
@@ -29,17 +30,7 @@ const useGeneralLedger = () => {
     mutation = GET_GL_QUERY;
     setLoading(true);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables,
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(mutation, variables);
     setDataGl(result?.data.getGL);
     setLoading(false);
   };

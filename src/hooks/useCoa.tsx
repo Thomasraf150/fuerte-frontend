@@ -6,7 +6,7 @@ import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 import CoaQueryMutations from '@/graphql/CoaQueryMutations';
 import BranchQueryMutation from '@/graphql/BranchQueryMutation';
-import { useAuthStore } from "@/store";
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 // Pure utility — no hook state, safe to define outside the hook for stable reference
 const countInactiveDescendants = (account: DataChartOfAccountList): number => {
@@ -26,20 +26,7 @@ const useCoa = () => {
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
 
   const fetchDataSubBranch = useCallback(async (orderBy = 'id_desc') => {
-    const { GET_AUTH_TOKEN } = useAuthStore.getState();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-      },
-      body: JSON.stringify({
-        query: GET_ALL_SUB_BRANCH_QUERY,
-        variables: { orderBy }
-      }),
-    });
-
-    const result = await response.json();
+    const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
     setBranchSubData(result.data.getAllBranch);
   }, [GET_ALL_SUB_BRANCH_QUERY]);
   
@@ -58,19 +45,7 @@ const useCoa = () => {
         _cacheBust: Date.now() // Force fresh query by preventing cache
       };
 
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-        },
-        body: JSON.stringify({
-          query: COA_TABLE_QUERY,
-          variables
-        }),
-      });
-      const result = await response.json();
+      const result = await graphqlFetch(COA_TABLE_QUERY, variables);
 
       // Check for GraphQL errors
       if (result.errors) {
@@ -130,20 +105,7 @@ const useCoa = () => {
         mutation = SAVE_COA_MUTATION;
       }
 
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -186,20 +148,7 @@ const useCoa = () => {
   const toggleAccountStatus = useCallback(async (id: string, active: boolean, cascade: boolean = false) => {
     setCoaLoading(true);
     try {
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-        },
-        body: JSON.stringify({
-          query: TOGGLE_ACTIVE_STATUS_MUTATION,
-          variables: { id, active, cascade },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(TOGGLE_ACTIVE_STATUS_MUTATION, { id, active, cascade });
 
       if (result.errors) {
         toast.error(result.errors[0].message);
@@ -314,22 +263,9 @@ const useCoa = () => {
     pdfWindow.document.close();
 
     try {
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-        },
-        body: JSON.stringify({
-          query: PRINT_CHART_OF_ACCOUNTS,
-          variables: {
-            branch_sub_id: branchSubId === 'all' ? null : branchSubId
-          },
-        }),
+      const result = await graphqlFetch(PRINT_CHART_OF_ACCOUNTS, {
+        branch_sub_id: branchSubId === 'all' ? null : branchSubId
       });
-
-      const result = await response.json();
 
       if (result.errors) {
         pdfWindow?.close();

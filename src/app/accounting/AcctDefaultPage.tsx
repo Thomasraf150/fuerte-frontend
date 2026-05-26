@@ -9,6 +9,7 @@ import DateRangePicker from "@/components/FormElements/DatePicker/DateRangePicke
 import { PeriodOption } from "@/types/dashboard";
 import { useAuthStore } from "@/store";
 import BranchQueryMutations from "@/graphql/BranchQueryMutation";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 interface Branch {
   id: number;
@@ -46,22 +47,12 @@ const AcctDefaultPage: React.FC = () => {
       if (!isOwner) return;
 
       setBranchesLoading(true);
-      const { GET_AUTH_TOKEN } = useAuthStore.getState();
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${GET_AUTH_TOKEN()}`,
-          },
-          body: JSON.stringify({
-            query: BranchQueryMutations.GET_BRANCH_QUERY,
-            variables: { orderBy: "id_asc" },
-          }),
-        });
-
-        const result = await response.json();
+        const result = await graphqlFetch(
+          BranchQueryMutations.GET_BRANCH_QUERY,
+          { orderBy: "id_asc" },
+        );
         if (result.data?.getBranch) {
           const activeBranches = result.data.getBranch.filter(
             (b: any) => !b.is_deleted

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataChief } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -20,21 +21,11 @@ const useChiefs = () => {
   const fetchDataChief = async (first: number, page: number) => {
     setChiefFetchLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_CHIEF_QUERY,
-          variables: { first, page, orderBy: [
-            { column: "id", order: 'DESC' }
-          ] 
-        },
-        }),
+      const result = await graphqlFetch(GET_CHIEF_QUERY, {
+        first,
+        page,
+        orderBy: [{ column: "id", order: 'DESC' }],
       });
-
-      const result = await response.json();
       setDataChief(result.data.getChief.data);
     } catch (error) {
       console.error('fetchDataChief error:', error);
@@ -67,18 +58,7 @@ const useChiefs = () => {
         mutation = SAVE_CHIEF_MUTATION;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mutation,
-          variables,
-        }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       // Handle GraphQL errors
       if (result.errors) {
@@ -113,17 +93,7 @@ const useChiefs = () => {
       },
     };
     
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: DELETE_CHIEF_MUTATION,
-        variables
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(DELETE_CHIEF_MUTATION, variables);
     toast.success("Chief is Deleted!");
   };
 

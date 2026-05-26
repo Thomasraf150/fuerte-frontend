@@ -165,7 +165,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
               <p className="mb-3 text-xs text-body">
                 Grants the user access to <strong>additional</strong> sub-branches
                 beyond their home branch above. When creating a borrower or loan,
-                the user can pick any of these branches from the form's branch
+                the user can pick any of these branches from the form&apos;s branch
                 dropdown.
               </p>
               {localBranchLoading || !dataSubBranch ? (

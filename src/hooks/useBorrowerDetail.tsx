@@ -2,6 +2,7 @@
 
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { BorrowerInfo } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
 import useBorrowerBase from './useBorrowerBase';
 
@@ -42,16 +43,9 @@ const useBorrowerDetail = () => {
   const fetchSingleBorrower = async (borrowerId: number) => {
     setBorrowerLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: GET_SINGLE_BORROWER_QUERY,
-          variables: { id: borrowerId.toString() }
-        }),
+      const result = await graphqlFetch(GET_SINGLE_BORROWER_QUERY, {
+        id: borrowerId.toString(),
       });
-
-      const result = await response.json();
 
       if (result.errors) {
         throw new Error(result.errors[0]?.message || 'Failed to fetch borrower');

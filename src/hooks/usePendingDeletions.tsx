@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/store";
 import DeletionRequestsQueryMutation from "@/graphql/DeletionRequestsQueryMutation";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 export interface PendingDeletionInfo {
   request_id: string;
@@ -52,18 +53,10 @@ export const usePendingDeletions = (
 
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: DeletionRequestsQueryMutation.PENDING_DELETIONS_FOR_ENTITIES,
-          variables: { entity_type: entityType, entity_ids: entityIds.slice(0, 200) },
-        }),
-      });
-      const json = await res.json();
+      const json = await graphqlFetch(
+        DeletionRequestsQueryMutation.PENDING_DELETIONS_FOR_ENTITIES,
+        { entity_type: entityType, entity_ids: entityIds.slice(0, 200) },
+      );
       const rows: PendingDeletionInfo[] = json?.data?.pendingDeletionsForEntities ?? [];
       const next = new Map<number, PendingDeletionInfo>();
       for (const r of rows) next.set(r.entity_id, r);

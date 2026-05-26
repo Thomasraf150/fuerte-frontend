@@ -5,6 +5,7 @@ import { SubmitHandler } from 'react-hook-form';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BranchQueryMutation from '@/graphql/BranchQueryMutation';
 import { usePagination } from './usePagination';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataArea, DataSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -21,15 +22,7 @@ const useArea = () => {
 
   // Fetch sub-branches for form dropdown
   const fetchDataSubBranch = async (orderBy = 'id_desc') => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_ALL_SUB_BRANCH_QUERY,
-        variables: { orderBy }
-      }),
-    });
-    const result = await response.json();
+    const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
     setBranchSubData(result.data.getAllBranch);
   };
 
@@ -39,21 +32,12 @@ const useArea = () => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: GET_AREA_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }),
-          orderBy: [{ column: "id", order: 'DESC' }]
-        },
-      }),
+    const result = await graphqlFetch(GET_AREA_QUERY, {
+      first,
+      page,
+      ...(search && { search }),
+      orderBy: [{ column: "id", order: 'DESC' }]
     });
-
-    const result = await response.json();
 
     if (result.errors) {
       throw new Error(result.errors[0]?.message || 'GraphQL error occurred');
@@ -118,13 +102,7 @@ const useArea = () => {
         mutation = SAVE_AREA_MUTATION;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: mutation, variables }),
-      });
-
-      const result = await response.json();
+      const result = await graphqlFetch(mutation, variables);
 
       if (result.errors) {
         toast.error(result.errors[0].message);
@@ -145,12 +123,7 @@ const useArea = () => {
   const handleDeleteArea = async (data: DataArea) => {
     try {
       const variables = { input: { id: data.id, is_deleted: 1 } };
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: DELETE_AREA_MUTATION, variables }),
-      });
-      const result = await response.json();
+      const result = await graphqlFetch(DELETE_AREA_MUTATION, variables);
       if (result.errors) {
         toast.error(result.errors[0]?.message || 'Failed to delete area');
         return;

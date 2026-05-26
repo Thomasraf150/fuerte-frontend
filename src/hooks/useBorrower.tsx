@@ -3,9 +3,9 @@
 import { useCallback } from 'react';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
-import { useAuthStore } from "@/store";
 import { usePagination } from './usePagination';
 import useBorrowerBase from './useBorrowerBase';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { BorrowerInfo, BorrowerRowInfo } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -36,27 +36,12 @@ const useBorrower = () => {
     page: number,
     search?: string
   ) => {
-    // Read token live each call — same pattern as the bell badge to avoid
-    // the Zustand-hydration race that would send an empty auth header
-    const token = useAuthStore.getState().GET_AUTH_TOKEN();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({
-        query: GET_BORROWER_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }),
-          orderBy: [{ column: "id", order: 'DESC' }]
-        },
-      }),
+    const result = await graphqlFetch(GET_BORROWER_QUERY, {
+      first,
+      page,
+      ...(search && { search }),
+      orderBy: [{ column: "id", order: 'DESC' }]
     });
-
-    const result = await response.json();
 
     if (result.errors) {
       throw new Error(result.errors[0]?.message || 'GraphQL error occurred');

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { usePagination } from './usePagination';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const useGeneralJournal = (journalType: string = 'CRJ') => {
   const { GET_GJ_QUERY } = GeneralJournalQueryMutations;
@@ -21,30 +22,19 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
     page: number,
     search?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_GJ_QUERY,
-        variables: {
-          first,
-          page,
-          ...(search && { search }),
-          orderBy: [{ column: "id", order: 'DESC' }],
-          input: {
-            branch_id: filters.branch_id,
-            branch_sub_id: filters.branch_sub_id,
-            startDate: filters.startDate,
-            endDate: filters.endDate,
-            j_type: journalType,
-          }
-        },
-      }),
+    const result = await graphqlFetch(GET_GJ_QUERY, {
+      first,
+      page,
+      ...(search && { search }),
+      orderBy: [{ column: "id", order: 'DESC' }],
+      input: {
+        branch_id: filters.branch_id,
+        branch_sub_id: filters.branch_sub_id,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        j_type: journalType,
+      }
     });
-
-    const result = await response.json();
 
     if (result.errors?.length) {
       throw new Error(result.errors[0].message || 'GraphQL error');

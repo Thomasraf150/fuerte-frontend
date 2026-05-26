@@ -10,6 +10,7 @@ import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations
 import useCoa from '@/hooks/useCoa';
 import CdjForm from '../components/CdjForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 const CdjDetailPage: React.FC = () => {
   const params = useParams();
@@ -39,21 +40,13 @@ const CdjDetailPage: React.FC = () => {
         setError(null);
 
         // Fetch CDJ entry by ID and COA data in parallel
-        const [journalResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              query: GeneralJournalQueryMutations.GET_JOURNAL_ENTRY_BY_ID,
-              variables: { id: entryId },
-            }),
-          }),
+        const [result] = await Promise.all([
+          graphqlFetch(
+            GeneralJournalQueryMutations.GET_JOURNAL_ENTRY_BY_ID,
+            { id: entryId },
+          ),
           fetchCoaDataTable()
         ]);
-
-        const result = await journalResponse.json();
 
         if (result.errors) {
           setError(result.errors[0]?.message || 'Failed to load CDJ entry');

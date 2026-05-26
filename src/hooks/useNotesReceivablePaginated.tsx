@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import NotesReceivableQueryMutation from '@/graphql/NotesReceivableQueryMutation';
 import moment from 'moment';
+import { graphqlFetch } from '@/utils/graphqlFetch';
 
 // Types
 interface NrTransPerMonth {
@@ -187,46 +188,20 @@ export function useNotesReceivablePaginated(
 
     try {
       // Try new batch query first
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: NR_SCHEDULE_BATCH,
-          variables,
-        }),
-      });
+      const result = await graphqlFetch(NR_SCHEDULE_BATCH, variables);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
       if (result.errors && result.errors.length > 0) {
         console.warn('Batch query failed, falling back to legacy query:', result.errors[0].message);
-        
-        // Fallback to legacy query
-        const legacyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: NR_SCHEDULE_LIST,
-            variables: {
-              input: {
-                startDate: variables.input.startDate,
-                endDate: variables.input.endDate,
-                branchId: variables.input.branchId,
-                searchTerm: variables.input.searchTerm,
-              }
-            },
-          }),
-        });
 
-        const legacyResult = await legacyResponse.json();
+        // Fallback to legacy query
+        const legacyResult = await graphqlFetch(NR_SCHEDULE_LIST, {
+          input: {
+            startDate: variables.input.startDate,
+            endDate: variables.input.endDate,
+            branchId: variables.input.branchId,
+            searchTerm: variables.input.searchTerm,
+          }
+        });
         const legacyData = legacyResult.data?.getNrSchedule || { data: [], months: [] };
         
         // Create pagination info for legacy data
@@ -268,48 +243,35 @@ export function useNotesReceivablePaginated(
       if (!isRetry) {
         // Try legacy query as final fallback
         try {
-          const legacyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              query: NR_SCHEDULE_LIST,
-              variables: {
-                input: {
-                  startDate: variables.input.startDate,
-                  endDate: variables.input.endDate,
-                  branchId: variables.input.branchId,
-                  searchTerm: variables.input.searchTerm,
-                }
-              },
-            }),
+          const legacyResult = await graphqlFetch(NR_SCHEDULE_LIST, {
+            input: {
+              startDate: variables.input.startDate,
+              endDate: variables.input.endDate,
+              branchId: variables.input.branchId,
+              searchTerm: variables.input.searchTerm,
+            }
           });
+          const legacyData = legacyResult.data?.getNrSchedule || { data: [], months: [] };
 
-          if (legacyResponse.ok) {
-            const legacyResult = await legacyResponse.json();
-            const legacyData = legacyResult.data?.getNrSchedule || { data: [], months: [] };
-            
-            const totalRecords = legacyData.data.length;
-            const startIndex = (batchStartPage - 1) * perPageValue;
-            const endIndex = Math.min(startIndex + (pagesPerBatch * perPageValue), totalRecords);
-            const batchData = legacyData.data.slice(startIndex, endIndex);
-            
-            return {
-              data: batchData,
-              months: legacyData.months,
-              pagination: {
-                currentBatch: Math.ceil(batchStartPage / pagesPerBatch),
-                totalBatches: Math.ceil(totalRecords / (pagesPerBatch * perPageValue)),
-                batchStartPage,
-                batchEndPage: Math.min(batchStartPage + pagesPerBatch - 1, Math.ceil(totalRecords / perPageValue)),
-                totalRecords,
-                hasNextBatch: endIndex < totalRecords,
-                perPage: perPageValue,
-                currentPage: page
-              }
-            };
-          }
+          const totalRecords = legacyData.data.length;
+          const startIndex = (batchStartPage - 1) * perPageValue;
+          const endIndex = Math.min(startIndex + (pagesPerBatch * perPageValue), totalRecords);
+          const batchData = legacyData.data.slice(startIndex, endIndex);
+
+          return {
+            data: batchData,
+            months: legacyData.months,
+            pagination: {
+              currentBatch: Math.ceil(batchStartPage / pagesPerBatch),
+              totalBatches: Math.ceil(totalRecords / (pagesPerBatch * perPageValue)),
+              batchStartPage,
+              batchEndPage: Math.min(batchStartPage + pagesPerBatch - 1, Math.ceil(totalRecords / perPageValue)),
+              totalRecords,
+              hasNextBatch: endIndex < totalRecords,
+              perPage: perPageValue,
+              currentPage: page
+            }
+          };
         } catch (legacyError) {
           console.error('Legacy query also failed:', legacyError);
         }

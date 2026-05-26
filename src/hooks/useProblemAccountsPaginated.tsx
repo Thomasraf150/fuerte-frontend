@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAuthStore } from "@/store";
 import ProblemAccountsQueryMutation from "@/graphql/ProblemAccountsQueryMutation";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 export interface ProblemAccountRow {
   loan_id: string;
@@ -74,34 +75,19 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
       setError(null);
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+        const result = await graphqlFetch(GET_PROBLEM_ACCOUNTS, {
+          input: {
+            branchId: currentFilters.branchId || null,
+            branchSubId: currentFilters.branchSubId || null,
+            borrowerId: currentFilters.borrowerId || null,
+            searchTerm: currentFilters.searchTerm || null,
+            sortBy: currentFilters.sortBy || "shortfall_desc",
+            graceDays: currentFilters.graceDays ?? 0,
+            page,
+            perPage: size,
           },
-          body: JSON.stringify({
-            query: GET_PROBLEM_ACCOUNTS,
-            variables: {
-              input: {
-                branchId: currentFilters.branchId || null,
-                branchSubId: currentFilters.branchSubId || null,
-                borrowerId: currentFilters.borrowerId || null,
-                searchTerm: currentFilters.searchTerm || null,
-                sortBy: currentFilters.sortBy || "shortfall_desc",
-                graceDays: currentFilters.graceDays ?? 0,
-                page,
-                perPage: size,
-              },
-            },
-          }),
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
         if (result.errors && result.errors.length > 0) {
           throw new Error(result.errors[0].message || "GraphQL error");
         }

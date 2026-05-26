@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { GraphQLConnectionError, parseGraphQLResponse } from './graphqlFetch';
 
 /**
  * Formats a date range intelligently:
@@ -43,26 +44,43 @@ export const loanStatus = (status: number | undefined) => {
   }
 };
 
+/**
+ * GraphQL fetch with 429 backoff retry. Delegates response parsing (auth
+ * failure, non-JSON detection, safe JSON parse) to `parseGraphQLResponse`
+ * so the four failure modes stay in one place.
+ *
+ * Retries network errors and HTTP 429 with exponential backoff. Other
+ * non-OK responses bubble up as `GraphQLConnectionError` for the caller's
+ * try/catch to handle.
+ */
 export const fetchWithRecache = async (
   url: string,
   options: RequestInit,
   retries = 5,
-  delay = 1000
+  delay = 1000,
 ): Promise<any> => {
+  const headers = new Headers(options.headers);
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+
+  let response: Response;
   try {
-    const response = await fetch(url, options);
-    if (!response.ok && response.status === 429 && retries > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      return fetchWithRecache(url, options, retries - 1, delay * 2);
-    }
-    return response.json();
-  } catch (error) {
+    response = await fetch(url, { ...options, headers });
+  } catch {
     if (retries > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRecache(url, options, retries - 1, delay * 2);
     }
-    throw error;
+    throw new GraphQLConnectionError(
+      'Cannot reach the server. Please check your connection and retry.',
+    );
   }
+
+  if (response.status === 429 && retries > 0) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return fetchWithRecache(url, options, retries - 1, delay * 2);
+  }
+
+  return parseGraphQLResponse(response);
 };
 
 

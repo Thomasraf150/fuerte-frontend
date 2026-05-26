@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store";
 import DeletionRequestsQueryMutation from "@/graphql/DeletionRequestsQueryMutation";
+import { graphqlFetch } from "@/utils/graphqlFetch";
 
 export type DeletionRequestStatus =
   | "pending"
@@ -42,35 +42,16 @@ const {
   CANCEL_DELETION_REQUEST,
 } = DeletionRequestsQueryMutation;
 
-async function post<T = any>(query: string, variables: Record<string, unknown> = {}, token: string | null | undefined): Promise<T> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ query, variables }),
-  });
-  return res.json();
-}
-
 export const useDeletionRequests = () => {
   const [loading, setLoading] = useState(false);
   const [pendingForMe, setPendingForMe] = useState<DeletionRequest[]>([]);
   const [myRequests, setMyRequests] = useState<DeletionRequest[]>([]);
   const [allRequests, setAllRequests] = useState<DeletionRequest[]>([]);
 
-  // Token is read live inside each fetch — NOT captured at hook mount.
-  // Capturing at mount races with Zustand persist hydration: if /approvals
-  // mounts before hydration completes, the captured token is empty and every
-  // fetch silently returns []. Reading inside each call mirrors the bell
-  // badge's pattern and stays correct after re-renders too.
-  const getToken = () => useAuthStore.getState().GET_AUTH_TOKEN();
-
   const fetchPendingForMe = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await post(PENDING_DELETION_REQUESTS_FOR_ME, {}, getToken());
+      const r = await graphqlFetch(PENDING_DELETION_REQUESTS_FOR_ME, {});
       if (r.errors) {
         toast.error(r.errors[0].message);
         return;
@@ -84,7 +65,7 @@ export const useDeletionRequests = () => {
   const fetchMyRequests = useCallback(async (status?: DeletionRequestStatus) => {
     setLoading(true);
     try {
-      const r = await post(MY_DELETION_REQUESTS, status ? { status } : {}, getToken());
+      const r = await graphqlFetch(MY_DELETION_REQUESTS, status ? { status } : {});
       if (r.errors) {
         toast.error(r.errors[0].message);
         return;
@@ -101,7 +82,7 @@ export const useDeletionRequests = () => {
       const vars: Record<string, unknown> = {};
       if (status) vars.status = status;
       if (branch_sub_id) vars.branch_sub_id = branch_sub_id;
-      const r = await post(ALL_DELETION_REQUESTS, vars, getToken());
+      const r = await graphqlFetch(ALL_DELETION_REQUESTS, vars);
       if (r.errors) {
         toast.error(r.errors[0].message);
         return;
@@ -113,7 +94,7 @@ export const useDeletionRequests = () => {
   }, []);
 
   const approve = useCallback(async (id: string, note?: string) => {
-    const r = await post(APPROVE_DELETION_REQUEST, { id, note: note || null }, getToken());
+    const r = await graphqlFetch(APPROVE_DELETION_REQUEST, { id, note: note || null });
     if (r.errors) {
       toast.error(r.errors[0].message);
       return false;
@@ -123,7 +104,7 @@ export const useDeletionRequests = () => {
   }, []);
 
   const reject = useCallback(async (id: string, note?: string) => {
-    const r = await post(REJECT_DELETION_REQUEST, { id, note: note || null }, getToken());
+    const r = await graphqlFetch(REJECT_DELETION_REQUEST, { id, note: note || null });
     if (r.errors) {
       toast.error(r.errors[0].message);
       return false;
@@ -133,7 +114,7 @@ export const useDeletionRequests = () => {
   }, []);
 
   const cancel = useCallback(async (id: string) => {
-    const r = await post(CANCEL_DELETION_REQUEST, { id }, getToken());
+    const r = await graphqlFetch(CANCEL_DELETION_REQUEST, { id });
     if (r.errors) {
       toast.error(r.errors[0].message);
       return false;
