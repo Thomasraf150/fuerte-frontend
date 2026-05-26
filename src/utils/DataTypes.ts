@@ -186,6 +186,8 @@ export interface DataFormUser {
   role_id: number;
   password: string;
   confirm_password: string;
+  /** Extra sub-branches granted on top of branch_sub_id. Multi-branch users only. */
+  additional_branch_sub_ids?: number[];
 }
 export interface AuthStoreData {
   token: string;
@@ -230,6 +232,12 @@ export interface BorrowerInfo {
   gender: string;
   photo: string | File | null;
   user_id: number;
+  /**
+   * Sub-branch the borrower belongs to. For single-branch users this is
+   * omitted on create (server uses their home branch); for multi-branch
+   * users the form's branch dropdown supplies it.
+   */
+  branch_sub_id?: number | string;
 
   //details
   dob: string;

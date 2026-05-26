@@ -9,6 +9,7 @@ import useLoans from '@/hooks/useLoans';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { Calendar } from 'react-feather';
 import { LoadingSpinner } from '@/components/LoadingStates';
+import { useStableLoading } from '@/hooks/useStableLoading';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -24,6 +25,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   const [udiComputedList, setUdiComputedList] = useState<string[]>();
   const [selectedOption, setSelectedOption] = useState<string>();
   const { submitApproveRelease, handleUpdateMaturity, fetchLoans, loading } = useLoans();
+  const showLoadingOverlay = useStableLoading(loading);
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOption(event.target.value);
@@ -134,9 +136,9 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   };
   
   return (
-    <div className="relative">
-      {loading && (
-        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg">
+    <div className="relative" data-testid="set-effectivity-section">
+      {showLoadingOverlay && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg" data-testid="set-effectivity-loading-overlay">
           <LoadingSpinner size="lg" message="Saving loan schedule..." />
         </div>
       )}
@@ -288,7 +290,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
         selectedOption === key && (
           <React.Fragment key={key}>
             <div className="col-span-full lg:col-span-1">
-              <Component term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} />
+              <Component term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} loading={loading} />
             </div>
             <div className="col-span-full lg:col-span-2 xl:col-span-4">
               <div className="flow-root border border-gray-100 py-3 shadow-sm">

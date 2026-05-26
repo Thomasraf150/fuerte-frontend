@@ -113,6 +113,18 @@ const useBorrowerBase = () => {
       const authData = getAuthUserData();
       const variables = createBorrVariables(data, Number(authData.user?.id));
 
+      // For multi-branch users only, the borrower form renders a branch
+      // dropdown. Pass that value through as branch_sub_id so the
+      // backend stamps the new borrower under the picked branch. For
+      // single-branch users the field is omitted entirely and the
+      // backend falls through to their home branch (byte-identical to
+      // pre-feature behavior).
+      const assigned = authData.user?.assignedBranchSubIds ?? [];
+      if (assigned.length > 1 && data.branch_sub_id) {
+        (variables.inputBorrInfo as Record<string, unknown>).branch_sub_id =
+          String(data.branch_sub_id);
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
         headers: {

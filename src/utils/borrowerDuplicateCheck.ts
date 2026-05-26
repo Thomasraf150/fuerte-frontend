@@ -6,6 +6,7 @@ interface AuthData {
   authToken?: string;
   user?: {
     branch_sub_id?: number;
+    assignedBranchSubIds?: number[];
     id?: number;
   };
 }
@@ -33,6 +34,15 @@ const getAuthDataFromStorage = (): AuthData => {
 export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boolean> => {
   const { CHECK_BORROWER_DUPLICATE } = BorrowerQueryMutations;
 
+  const authData = getAuthDataFromStorage();
+  // Scope the duplicate check to the branch the borrower is being filed
+  // under. For multi-branch users that's the value the form's branch
+  // dropdown supplies in data.branch_sub_id. For single-branch users
+  // data.branch_sub_id is undefined; we fall back to user.branch_sub_id
+  // which matches the legacy server-side fallback in BorrowerService.
+  const branchSubId =
+    (data as any).branch_sub_id ?? authData.user?.branch_sub_id ?? null;
+
   try {
     const variables = {
       firstname: data.firstname,
@@ -42,9 +52,9 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
       email: data.email || null,
       contact_no: data.contact_no || null,
       excludeId: data.id || null,
+      branch_sub_id: branchSubId,
     };
 
-    const authData = getAuthDataFromStorage();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
       method: 'POST',
       headers: {

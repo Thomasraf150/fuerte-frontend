@@ -6,13 +6,15 @@ import BorrowerDetails from './TabForm/BorrowerDetails'
 import BorrowerAttachments from './TabForm/BorrowerAttachments'
 import BorrowerCoMaker from './TabForm/BorrowerCoMaker'
 import BorrowerLoans from './TabForm/BorrowerLoans'
-import { BorrowerRowInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } from '@/utils/DataTypes'
+import { BorrowerRowInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, DataSubBranches } from '@/utils/DataTypes'
 interface BorrInfoProps {
   setShowForm: (v: boolean) => void;
   dataChief?: DataChief[] | undefined;
   dataArea?: DataArea[] | undefined;
   dataSubArea?: DataSubArea[] | undefined;
   dataBorrCompany?: DataBorrCompanies[] | undefined;
+  myAccessibleBranchSubs?: DataSubBranches[] | undefined;
+  loadingMyAccessibleBranches?: boolean;
   onSubmitBorrower: (d: any) => Promise<{ success: boolean }>;
   borrowerLoading: boolean;
   singleData?: BorrowerRowInfo | undefined;
@@ -24,7 +26,7 @@ interface BorrInfoProps {
   fetchDataBorrCompany: (v1: number, v2: number) => void;
 }
 
-const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
+const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
   const [showBorrAttForm, setShowBorrAttForm] = useState<boolean>(false);
 
@@ -91,6 +93,8 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
                   dataArea={dataArea}
                   dataSubArea={dataSubArea}
                   dataBorrCompany={dataBorrCompany}
+                  myAccessibleBranchSubs={myAccessibleBranchSubs}
+                  loadingMyAccessibleBranches={loadingMyAccessibleBranches}
                   onSubmitBorrower={onSubmitBorrower}
                   borrowerLoading={borrowerLoading}
                   singleData={singleData}

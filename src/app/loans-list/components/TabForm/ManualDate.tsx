@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, List } from 'react-feather';
+import { CheckCircle, List, RotateCw } from 'react-feather';
 import DatePicker from 'react-datepicker';
 import { format, addMonths } from 'date-fns';
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,9 +9,10 @@ interface OMProps {
   addon_term: number;
   selectedData: (v: any, p: number) => void;
   handleApproveRelease: (status: number) => void;
+  loading?: boolean;
 }
 
-const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease }) => {
+const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease, loading }) => {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [dates, setDates] = useState<Date[]>([]);
   const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
@@ -64,16 +65,23 @@ const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
           />
 
           <div className="flex justify-between items-center">
-            <button 
-              className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
+            <button
+              className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               onClick={() => { return handleApproveRelease(1); }}
-              disabled={appBtnDisable}>
-              <span className="mr-1">
-                <CheckCircle size={16}/>
-              </span>
-              <span>
-                Approve
-              </span>
+              disabled={appBtnDisable || loading}>
+              {loading ? (
+                <>
+                  <RotateCw size={16} className="animate-spin mr-1" />
+                  <span>Approving...</span>
+                </>
+              ) : (
+                <>
+                  <span className="mr-1">
+                    <CheckCircle size={16}/>
+                  </span>
+                  <span>Approve</span>
+                </>
+              )}
             </button>
             <button 
               className="bg-boxdark-2 w-full text-center flex justify-between items-center mr-auto text-white py-2 px-4 rounded hover:bg-dark-800 text-sm"

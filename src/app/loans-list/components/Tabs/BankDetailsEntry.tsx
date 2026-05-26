@@ -6,7 +6,9 @@ import { LoanBankFormValues, BorrLoanRowData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import useLoans from '@/hooks/useLoans';
 import useBank from '@/hooks/useBank';
+import { useStableLoading } from '@/hooks/useStableLoading';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { LoadingSpinner } from '@/components/LoadingStates';
 import moment from 'moment';
 
 interface OMProps {
@@ -26,7 +28,8 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
 
   const [bankOptions1, setBankOptions1] = useState<Option[]>([]);
   const [bankOptions2, setBankOptions2] = useState<Option[]>([]);
-  const { submitPNSigned, onSubmitLoanBankDetails } = useLoans();
+  const { submitPNSigned, onSubmitLoanBankDetails, loading } = useLoans();
+  const showLoadingOverlay = useStableLoading(loading);
   const { dataBank, loading: banksLoading } = useBank();
   const [showPin1, setShowPin1] = useState(false);
   const [showPin2, setShowPin2] = useState(false);
@@ -160,7 +163,12 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
   }, [issuedBankId, isIssuedSkip, setValue, watch]);
 
   return (
-    <div className="w-full lg:w-3/4 xl:w-1/2">
+    <div className="w-full lg:w-3/4 xl:w-1/2 relative" data-testid="bank-details-entry-section">
+      {showLoadingOverlay && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg" data-testid="bank-details-loading-overlay">
+          <LoadingSpinner size="lg" message="Saving bank details..." />
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-1 gap-3 p-3 sm:gap-4">
         <div>

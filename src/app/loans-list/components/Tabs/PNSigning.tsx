@@ -4,6 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
 import { LoadingSpinner } from '@/components/LoadingStates';
+import { useStableLoading } from '@/hooks/useStableLoading';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -13,6 +14,7 @@ interface OMProps {
 const PNSigning: React.FC<OMProps> = ({ handleRefetchData, loanSingleData }) => {
 
   const { submitPNSigned, loading } = useLoans();
+  const showLoadingOverlay = useStableLoading(loading);
 
   const handlePNSigning = (data: BorrLoanRowData | undefined) => {
     submitPNSigned(data, handleRefetchData);
@@ -22,9 +24,9 @@ const PNSigning: React.FC<OMProps> = ({ handleRefetchData, loanSingleData }) => 
   const isSigned = loanSingleData?.is_pn_signed === 1;
 
   return (
-    <div className="relative">
-      {loading && (
-        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg">
+    <div className="relative" data-testid="pn-signing-section">
+      {showLoadingOverlay && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg" data-testid="pn-signing-loading-overlay">
           <LoadingSpinner size="lg" message="Signing PN..." />
         </div>
       )}

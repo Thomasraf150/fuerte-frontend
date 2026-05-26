@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle } from 'react-feather';
+import { CheckCircle, RotateCw } from 'react-feather';
 import DatePicker from 'react-datepicker';
 import { format, startOfMonth, addMonths, getDay, setDate, addDays } from 'date-fns';
 
@@ -10,9 +10,10 @@ interface OMProps {
   addon_term: number;
   selectedData: (v: any, p: number) => void;
   handleApproveRelease: (status: number) => void;
+  loading?: boolean;
 }
 
-const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease }) => {
+const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease, loading }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [appBtnDisable, setAppBtnDisable] = useState<boolean>(true);
 
@@ -52,16 +53,23 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
         placeholderText="Select start date"
         id="startDate"
       />
-      <button 
-        className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
+      <button
+        className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         onClick={() => { return handleApproveRelease(1); }}
-        disabled={appBtnDisable}>
-        <span className="mr-1">
-          <CheckCircle size={16}/>
-        </span>
-        <span>
-          Approve
-        </span>
+        disabled={appBtnDisable || loading}>
+        {loading ? (
+          <>
+            <RotateCw size={16} className="animate-spin mr-1" />
+            <span>Approving...</span>
+          </>
+        ) : (
+          <>
+            <span className="mr-1">
+              <CheckCircle size={16}/>
+            </span>
+            <span>Approve</span>
+          </>
+        )}
       </button>
     </div>
   );

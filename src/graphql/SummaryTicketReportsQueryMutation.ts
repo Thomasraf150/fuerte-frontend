@@ -63,6 +63,8 @@ const GET_SUMMARY_TICKET_WITH_BREAKDOWN: string = `
         udi_balance
       }
       summary_tix_by_branch {
+        main_branch_id
+        main_branch_name
         branch_sub_id
         branch_name
         branch_code
@@ -72,6 +74,8 @@ const GET_SUMMARY_TICKET_WITH_BREAKDOWN: string = `
         credit
       }
       net_movement_by_branch {
+        main_branch_id
+        main_branch_name
         branch_sub_id
         branch_name
         branch_code

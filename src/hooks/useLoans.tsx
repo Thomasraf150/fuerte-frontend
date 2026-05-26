@@ -620,10 +620,7 @@ const useLoans = () => {
   };
   
   const onSubmitLoanBankDetails = async (data: LoanBankFormValues | undefined, handleRefetchLoanData: () => void) => {
-    setLoading(true);
     try {
-      const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-      const userData = JSON.parse(storedAuthStore)['state'];
       const { GET_AUTH_TOKEN } = useAuthStore.getState();
       const token = GET_AUTH_TOKEN();
 
@@ -649,7 +646,14 @@ const useLoans = () => {
         'You won\'t be able to revert this!',
         'Yes it is!',
       );
-      if (isConfirmed) {
+      if (!isConfirmed) return { success: false, error: 'Operation cancelled by user' };
+
+      // Pattern mirrors submitPNSigned: setLoading AFTER the confirmation
+      // modal (so the overlay shows ON the form, not behind a modal) and
+      // AWAIT the refetch so the overlay stays up until the screen
+      // actually reflects the saved bank details.
+      setLoading(true);
+      try {
         const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
           method: 'POST',
           headers: {
@@ -662,25 +666,21 @@ const useLoans = () => {
           }),
         });
 
-        // Handle GraphQL errors
         if (response.errors) {
           toast.error(response.errors[0].message);
           return { success: false, error: response.errors[0].message };
         }
 
         toast.success('Bank Entry Saved!');
-        handleRefetchLoanData();
+        await handleRefetchLoanData();
         return { success: true };
+      } finally {
+        setLoading(false);
       }
-
-      return { success: false, error: 'Operation cancelled by user' };
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -939,33 +939,39 @@ const useLoans = () => {
       'Save Changes',
     );
 
-    if (isConfirmed) {
-      try {
-        const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
-          },
-          body: JSON.stringify({
-            query: UPDATE_RELEASED_LOAN_INFO,
-            variables,
-          }),
-        });
+    if (!isConfirmed) return;
 
-        if (response.errors) {
-          toast.error(response.errors[0].message);
+    // Pattern mirrors submitPNSigned: setLoading AFTER the confirmation
+    // (so the overlay isn't covered by the modal) and AWAIT the refetch
+    // so the overlay stays up until the new loan data is on screen.
+    setLoading(true);
+    try {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GET_AUTH_TOKEN()}`
+        },
+        body: JSON.stringify({
+          query: UPDATE_RELEASED_LOAN_INFO,
+          variables,
+        }),
+      });
+
+      if (response.errors) {
+        toast.error(response.errors[0].message);
+      } else {
+        if (response?.data?.updateReleasedLoanInfo?.status === false) {
+          toast.error(response?.data?.updateReleasedLoanInfo?.message);
         } else {
-          if (response?.data?.updateReleasedLoanInfo?.status === false) {
-            toast.error(response?.data?.updateReleasedLoanInfo?.message);
-          } else {
-            toast.success(response?.data?.updateReleasedLoanInfo?.message);
-          }
-          handleRefetchLoanData();
+          toast.success(response?.data?.updateReleasedLoanInfo?.message);
         }
-      } catch (error) {
-        toast.error('Failed to update loan info');
+        await handleRefetchLoanData();
       }
+    } catch (error) {
+      toast.error('Failed to update loan info');
+    } finally {
+      setLoading(false);
     }
   };
 

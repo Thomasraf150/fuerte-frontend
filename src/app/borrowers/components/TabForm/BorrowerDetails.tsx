@@ -1,15 +1,24 @@
 import { Camera, Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
+import FormLabel from '@/components/FormLabel';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
-import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies, SelectOption } from '@/utils/DataTypes';
-import { useEffect, useState, useRef } from "react";
+import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies, DataSubBranches, SelectOption } from '@/utils/DataTypes';
+import { useAuthStore } from "@/store";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 interface BorrInfoProps {
   dataChief?: DataChief[] | undefined;
   dataArea?: DataArea[] | undefined;
   dataSubArea?: DataSubArea[] | undefined;
   dataBorrCompany?: DataBorrCompanies[] | undefined;
+  /**
+   * Sub-branches the logged-in user is allowed to file new borrowers
+   * under. Driven by getMyAccessibleBranchSubs. Undefined while loading;
+   * empty array means "still single-branch — don't render the picker".
+   */
+  myAccessibleBranchSubs?: DataSubBranches[] | undefined;
+  loadingMyAccessibleBranches?: boolean;
   onSubmitBorrower: (d: any) => Promise<{ success: boolean }>;
   singleData: BorrowerRowInfo | undefined;
   setSingleData: (d: BorrowerRowInfo | undefined) => void;
@@ -22,7 +31,7 @@ interface BorrInfoProps {
   fetchDataBorrCompany: (v1: number, v2: number) => void;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
   const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -78,6 +87,37 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const { register, control, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrowerInfo>({
     defaultValues
   });
+
+  // Multi-branch picker state. The dropdown only renders when (a) the
+  // user has more than one accessible sub-branch, AND (b) we're on the
+  // CREATE flow (no singleData). EDITs never expose the picker because
+  // the backend strips branch_sub_id from update payloads to prevent
+  // accidental cross-branch moves.
+  const { assignedBranchSubIds, homeBranchSubId } = useMemo(() => {
+    const u = useAuthStore.getState().user as { assignedBranchSubIds?: number[]; branch_sub_id?: number } | undefined;
+    return {
+      assignedBranchSubIds: Array.isArray(u?.assignedBranchSubIds) ? u!.assignedBranchSubIds.map(Number) : [],
+      homeBranchSubId: u?.branch_sub_id ? String(u.branch_sub_id) : '',
+    };
+  }, []);
+  const showBranchPicker = assignedBranchSubIds.length > 1 && !singleData?.id;
+
+  const branchOptions: SelectOption[] = useMemo(() => {
+    if (!myAccessibleBranchSubs) return [];
+    return myAccessibleBranchSubs
+      .filter((b) => assignedBranchSubIds.includes(Number(b.id)))
+      .map((b) => ({ value: String(b.id), label: b.name }));
+  }, [myAccessibleBranchSubs, assignedBranchSubIds]);
+
+  // Default the dropdown to the user's home branch on first render so a
+  // multi-branch user filing in their own branch doesn't have to pick
+  // every time.
+  useEffect(() => {
+    if (!showBranchPicker || watch('branch_sub_id')) return;
+    if (homeBranchSubId && branchOptions.some((o) => String(o.value) === homeBranchSubId)) {
+      setValue('branch_sub_id', homeBranchSubId as any);
+    }
+  }, [showBranchPicker, branchOptions, homeBranchSubId, setValue, watch]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -332,6 +372,32 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 </h3>
               </div>
               <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+                {showBranchPicker && (
+                  <div data-testid="borrower-branch-picker">
+                    <FormLabel title="Branch" />
+                    <Controller
+                      name={"branch_sub_id" as any}
+                      control={control}
+                      rules={{ required: 'Branch is required' }}
+                      render={({ field }) => (
+                        <ReactSelect
+                          {...field}
+                          options={branchOptions}
+                          placeholder="Select the branch this borrower belongs to..."
+                          onChange={(selectedOption: any) => field.onChange(selectedOption?.value)}
+                          value={branchOptions.find((o) => String(o.value) === String(field.value)) || null}
+                          isLoading={loadingMyAccessibleBranches}
+                          loadingMessage={() => "Loading accessible branches..."}
+                        />
+                      )}
+                    />
+                    {(errors as any).branch_sub_id && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {String((errors as any).branch_sub_id?.message ?? 'Branch is required')}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput

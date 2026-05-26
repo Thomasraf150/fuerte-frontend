@@ -1,12 +1,13 @@
 "use client";
 
 import React from 'react';
-import { formatNumberComma, formatDateRange } from '@/utils/helper';
+import { formatNumberComma, formatDateRange, toCamelCase } from '@/utils/helper';
+import {
+  BranchHierarchyItem,
+  groupBreakdownByMainBranch,
+} from '@/utils/groupBreakdownByMainBranch';
 
-interface BranchBreakdownData {
-  branch_sub_id: number;
-  branch_name: string;
-  branch_code: string;
+interface BranchBreakdownData extends BranchHierarchyItem {
   description: string;
   ccount: number;
   debit: string;
@@ -19,40 +20,14 @@ interface BranchBreakdownProps {
   endDate: Date | undefined;
 }
 
-interface BranchGroup {
-  branch_name: string;
-  branch_code: string;
-  details: BranchBreakdownData[];
-  totalDebit: number;
-  totalCredit: number;
-}
-
 const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate, endDate }) => {
-  // Group data by branch
-  const branchGroups = data.reduce<Record<number, BranchGroup>>((acc, item) => {
-    const branchKey = item.branch_sub_id;
-    if (!acc[branchKey]) {
-      acc[branchKey] = {
-        branch_name: item.branch_name,
-        branch_code: item.branch_code,
-        details: [],
-        totalDebit: 0,
-        totalCredit: 0,
-      };
-    }
-    acc[branchKey].details.push(item);
-    acc[branchKey].totalDebit += parseFloat(item.debit || '0');
-    acc[branchKey].totalCredit += parseFloat(item.credit || '0');
-    return acc;
-  }, {});
+  const mainBranches = groupBreakdownByMainBranch(data, (item) => ({
+    debit: parseFloat(item.debit || '0'),
+    credit: parseFloat(item.credit || '0'),
+  }));
 
-  // Calculate grand totals
-  const grandTotalDebit = Object.values(branchGroups).reduce(
-    (sum, branch) => sum + branch.totalDebit, 0
-  );
-  const grandTotalCredit = Object.values(branchGroups).reduce(
-    (sum, branch) => sum + branch.totalCredit, 0
-  );
+  const grandTotalDebit  = mainBranches.reduce((s, m) => s + m.totals.debit,  0);
+  const grandTotalCredit = mainBranches.reduce((s, m) => s + m.totals.credit, 0);
 
   return (
     <div className="mt-6">
@@ -62,58 +37,83 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th colSpan={4} className="text-center px-4 py-4 font-medium text-black dark:text-white">
-                  <h2 className="text-xl mb-2">SUMMARY BY BRANCH</h2>
+                  <h2 className="text-xl mb-2">SUMMARY BY BRANCH &amp; SUB-BRANCH</h2>
                   <span className="text-sm font-normal">
                     {formatDateRange(startDate, endDate)}
                   </span>
                 </th>
               </tr>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="min-w-[220px] px-4 py-3 font-medium text-black dark:text-white">DESCRIPTION</th>
+                <th className="min-w-[260px] px-4 py-3 font-medium text-black dark:text-white">BRANCH / SUB-BRANCH / TITLE</th>
                 <th className="text-center min-w-[100px] px-4 py-3 font-medium text-black dark:text-white">COUNT</th>
                 <th className="text-right min-w-[140px] px-4 py-3 font-medium text-black dark:text-white">DEBIT</th>
                 <th className="text-right min-w-[140px] px-4 py-3 font-medium text-black dark:text-white">CREDIT</th>
               </tr>
             </thead>
             <tbody>
-              {Object.values(branchGroups).map((branch, branchIdx) => (
-                <React.Fragment key={branchIdx}>
-                  {/* Branch header row */}
-                  <tr className="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-800">
-                    <td colSpan={4} className="px-4 py-3 font-bold text-lg text-blue-900 dark:text-blue-100">
-                      {branch.branch_name} ({branch.branch_code})
+              {mainBranches.map((main) => (
+                <React.Fragment key={main.main_branch_id ?? main.main_branch_name}>
+                  {/* Main Branch header */}
+                  <tr className="bg-indigo-100 dark:bg-indigo-900/30 border-t-4 border-indigo-300 dark:border-indigo-700">
+                    <td colSpan={4} className="px-4 py-3 font-bold text-lg text-indigo-900 dark:text-indigo-100 uppercase tracking-wide">
+                      {main.main_branch_name}
                     </td>
                   </tr>
 
-                  {/* Detail rows (indented) with alternating colors */}
-                  {branch.details.map((detail, detailIdx) => (
-                    <tr key={detailIdx} className={`border-b border-gray-200 dark:border-strokedark ${detailIdx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
-                      <td className="border-b border-[#eee] px-4 py-3 pl-12 dark:border-strokedark">
-                        {detail.description}
-                      </td>
-                      <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
-                        {detail.ccount}
-                      </td>
-                      <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
-                        ₱ {formatNumberComma(parseFloat(detail.debit))}
-                      </td>
-                      <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
-                        ₱ {formatNumberComma(parseFloat(detail.credit))}
-                      </td>
-                    </tr>
+                  {main.subBranches.map((sub) => (
+                    <React.Fragment key={sub.branch_sub_id}>
+                      {/* Sub-Branch header */}
+                      <tr className="bg-blue-50 dark:bg-blue-900/20">
+                        <td colSpan={4} className="px-4 py-2 pl-8 font-semibold text-base text-blue-900 dark:text-blue-100">
+                          {sub.sub_branch_name}{sub.branch_code ? ` (${sub.branch_code})` : ''}
+                        </td>
+                      </tr>
+
+                      {/* Detail rows */}
+                      {sub.details.map((detail, detailIdx) => (
+                        <tr key={detailIdx} className={`border-b border-gray-200 dark:border-strokedark ${detailIdx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
+                          <td className="border-b border-[#eee] px-4 py-3 pl-16 dark:border-strokedark">
+                            {detail.description?.toLowerCase() === 'cash in bank' ? 'Cash Out' : toCamelCase(detail.description)}
+                          </td>
+                          <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
+                            {detail.ccount}
+                          </td>
+                          <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                            {'₱'} {formatNumberComma(parseFloat(detail.debit))}
+                          </td>
+                          <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                            {'₱'} {formatNumberComma(parseFloat(detail.credit))}
+                          </td>
+                        </tr>
+                      ))}
+
+                      {/* Sub-Branch subtotal */}
+                      <tr className="bg-blue-100 dark:bg-blue-800/30 font-semibold">
+                        <td className="border-b border-[#eee] px-4 py-2 pl-8 dark:border-strokedark">
+                          Sub-Branch Subtotal
+                        </td>
+                        <td className="border-b border-[#eee] px-4 py-2 dark:border-strokedark"></td>
+                        <td className="border-b text-right border-[#eee] px-4 py-2 dark:border-strokedark">
+                          {'₱'} {formatNumberComma(sub.totals.debit)}
+                        </td>
+                        <td className="border-b text-right border-[#eee] px-4 py-2 dark:border-strokedark">
+                          {'₱'} {formatNumberComma(sub.totals.credit)}
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   ))}
 
-                  {/* Branch subtotal row */}
-                  <tr className="bg-blue-100 dark:bg-blue-800/30 font-bold">
-                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
-                      Branch Subtotal
+                  {/* Main Branch subtotal */}
+                  <tr className="bg-indigo-200 dark:bg-indigo-800/40 font-bold">
+                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark uppercase tracking-wide">
+                      {main.main_branch_name} Subtotal
                     </td>
                     <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark"></td>
                     <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
-                      ₱ {formatNumberComma(branch.totalDebit)}
+                      {'₱'} {formatNumberComma(main.totals.debit)}
                     </td>
                     <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
-                      ₱ {formatNumberComma(branch.totalCredit)}
+                      {'₱'} {formatNumberComma(main.totals.credit)}
                     </td>
                   </tr>
                 </React.Fragment>
@@ -124,10 +124,10 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
                 <td className="px-4 py-4">GRAND TOTAL</td>
                 <td className="px-4 py-4"></td>
                 <td className="text-right px-4 py-4">
-                  ₱ {formatNumberComma(grandTotalDebit)}
+                  {'₱'} {formatNumberComma(grandTotalDebit)}
                 </td>
                 <td className="text-right px-4 py-4">
-                  ₱ {formatNumberComma(grandTotalCredit)}
+                  {'₱'} {formatNumberComma(grandTotalCredit)}
                 </td>
               </tr>
             </tbody>

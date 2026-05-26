@@ -59,14 +59,14 @@ export default defineConfig({
   },
 
   // Browser configuration
+  // Headed by default (visible browser, easier debug). Set PWTEST_HEADLESS=1
+  // for unattended CI runs — typical 2-3x speedup for the full suite.
   projects: [
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Browser runs in headed mode (visible) by default
-        // Set headless: true to run in background
-        headless: false,
+        headless: process.env.PWTEST_HEADLESS === '1' || process.env.CI === '1',
       },
     },
   ],

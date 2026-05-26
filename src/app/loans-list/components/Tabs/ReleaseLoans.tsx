@@ -10,6 +10,8 @@ import moment from 'moment';
 import Link from 'next/link';
 import AcctgEntryForm from './AcctgEntryForm';
 import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
+import { LoadingSpinner } from '@/components/LoadingStates';
+import { useStableLoading } from '@/hooks/useStableLoading';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -110,6 +112,27 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
     }
   };
 
+  // Local loading state for the "Save Changes" button (different mutation
+  // from Release — updates released_date/bank/check on an already-released
+  // loan). Mirrors the per-button spinner pattern.
+  const [saveChangesLoading, setSaveChangesLoading] = useState(false);
+  const handleSaveChanges = async () => {
+    setSaveChangesLoading(true);
+    try {
+      await Promise.resolve(
+        handleUpdateReleasedLoanInfo(
+          Number(loanSingleData?.id),
+          moment(watch('released_date')).format('YYYY-MM-DD'),
+          Number(watch('bank_id')),
+          String(watch('check_no') || 'N/A'),
+          handleRefetchData,
+        ),
+      );
+    } finally {
+      setSaveChangesLoading(false);
+    }
+  };
+
   // const handleLoanBank = (data: LoanBankFormValues | undefined) => {
   //   // submitPNSigned(data, handleRefetchData);
   // }
@@ -164,8 +187,30 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
     }
   }, [loanSingleData?.id, !!loanSingleData?.acctg_entry]);
 
+  // One inline overlay covers the whole tab while any of the four async
+  // actions are in flight — matches the pattern Set Effectivity/Maturity
+  // and PN Signing already use. Stabilised with a min-display time so
+  // mutations that complete in <600ms still produce a visible spinner
+  // instead of a frame-flash the user can't perceive.
+  const tabBusyRaw = releaseLoading || saveChangesLoading || postingLoading || repostLoading;
+  const tabBusy = useStableLoading(tabBusyRaw);
+  const tabBusyMessage = releaseLoading
+    ? 'Releasing loan…'
+    : repostLoading
+      ? 'Re-posting accounting entry…'
+      : postingLoading
+        ? 'Posting to accounting…'
+        : saveChangesLoading
+          ? 'Saving changes…'
+          : 'Saving…';
+
   return (
-    <>
+    <div className="relative" data-testid="release-loans-section">
+      {tabBusy && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg" data-testid="release-loans-loading-overlay">
+          <LoadingSpinner size="lg" message={tabBusyMessage} />
+        </div>
+      )}
       <div className="w-full lg:w-3/4 xl:w-1/2">
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-1 sm:grid-cols-3 sm:gap-4">
@@ -263,21 +308,15 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             <span>{releaseLoading ? 'Releasing...' : 'Release'}</span>
           </button>
           <button
-            className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 text-sm w-full sm:w-auto"
+            className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full sm:w-auto"
             type="button"
-            onClick={() => handleUpdateReleasedLoanInfo(
-              Number(loanSingleData?.id),
-              moment(watch('released_date')).format('YYYY-MM-DD'),
-              Number(watch('bank_id')),
-              String(watch('check_no') || 'N/A'),
-              handleRefetchData
-            )}
-            disabled={loanSingleData?.status === 3 ? false : true}
+            onClick={handleSaveChanges}
+            disabled={loanSingleData?.status !== 3 || saveChangesLoading}
           >
             <span className="mt-1 mr-1">
-              <Save size={17} />
+              {saveChangesLoading ? <RotateCw size={17} className="animate-spin" /> : <Save size={17} />}
             </span>
-            <span>Save Changes</span>
+            <span>{saveChangesLoading ? 'Saving...' : 'Save Changes'}</span>
           </button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
             <button
@@ -456,8 +495,8 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
         </div>
       </>
     )}
-  
-    </>
+
+    </div>
   )
 }
 

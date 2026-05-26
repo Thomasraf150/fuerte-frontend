@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { formatNumberComma, formatDateRange } from '@/utils/helper';
+import {
+  BranchHierarchyItem,
+  groupBreakdownByMainBranch,
+} from '@/utils/groupBreakdownByMainBranch';
 
-interface NetMovementBranchData {
-  branch_sub_id: number;
-  branch_name: string;
-  branch_code: string;
+interface NetMovementBranchData extends BranchHierarchyItem {
   ccount: number;
   description: string;
   amount: string;
@@ -18,34 +19,12 @@ interface NetMovementBranchProps {
   endDate: Date | undefined;
 }
 
-interface NetMovementBranchGroup {
-  branch_name: string;
-  branch_code: string;
-  details: NetMovementBranchData[];
-  total: number;
-}
-
 const NetMovementsByBranch: React.FC<NetMovementBranchProps> = ({ data, startDate, endDate }) => {
-  // Group data by branch
-  const branchGroups = data.reduce<Record<number, NetMovementBranchGroup>>((acc, item) => {
-    const branchKey = item.branch_sub_id;
-    if (!acc[branchKey]) {
-      acc[branchKey] = {
-        branch_name: item.branch_name,
-        branch_code: item.branch_code,
-        details: [],
-        total: 0,
-      };
-    }
-    acc[branchKey].details.push(item);
-    acc[branchKey].total += parseFloat(item.amount || '0');
-    return acc;
-  }, {});
+  const mainBranches = groupBreakdownByMainBranch(data, (item) => ({
+    amount: parseFloat(item.amount || '0'),
+  }));
 
-  // Calculate grand total
-  const grandTotal = Object.values(branchGroups).reduce(
-    (sum, branch) => sum + branch.total, 0
-  );
+  const grandTotal = mainBranches.reduce((s, m) => s + m.totals.amount, 0);
 
   return (
     <div className="mt-6">
@@ -55,56 +34,77 @@ const NetMovementsByBranch: React.FC<NetMovementBranchProps> = ({ data, startDat
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th colSpan={2} className="text-center px-4 py-4 font-medium text-black dark:text-white">
-                  <h2 className="text-xl mb-2">NET MOVEMENTS BY BRANCH</h2>
+                  <h2 className="text-xl mb-2">NET MOVEMENTS BY BRANCH &amp; SUB-BRANCH</h2>
                   <span className="text-sm font-normal">
                     {formatDateRange(startDate, endDate)}
                   </span>
                 </th>
               </tr>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="min-w-[220px] px-4 py-3 font-medium text-black dark:text-white">DESCRIPTION</th>
+                <th className="min-w-[260px] px-4 py-3 font-medium text-black dark:text-white">BRANCH / SUB-BRANCH / DESCRIPTION</th>
                 <th className="text-right min-w-[200px] px-4 py-3 font-medium text-black dark:text-white">AMOUNT</th>
               </tr>
             </thead>
             <tbody>
-              {Object.values(branchGroups).map((branch, branchIdx) => (
-                <React.Fragment key={branchIdx}>
-                  {/* Branch header row */}
-                  <tr className="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-800">
-                    <td colSpan={2} className="px-4 py-3 font-bold text-lg text-blue-900 dark:text-blue-100">
-                      {branch.branch_name} ({branch.branch_code})
+              {mainBranches.map((main) => (
+                <React.Fragment key={main.main_branch_id ?? main.main_branch_name}>
+                  {/* Main Branch header */}
+                  <tr className="bg-indigo-100 dark:bg-indigo-900/30 border-t-4 border-indigo-300 dark:border-indigo-700">
+                    <td colSpan={2} className="px-4 py-3 font-bold text-lg text-indigo-900 dark:text-indigo-100 uppercase tracking-wide">
+                      {main.main_branch_name}
                     </td>
                   </tr>
 
-                  {/* Detail rows (indented) with alternating colors */}
-                  {branch.details.map((detail, detailIdx) => (
-                    <tr key={detailIdx} className={`border-b border-gray-200 dark:border-strokedark ${detailIdx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
-                      <td className="border-b border-[#eee] px-4 py-3 pl-12 dark:border-strokedark">
-                        {detail.description}
-                      </td>
-                      <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
-                        ₱ {formatNumberComma(parseFloat(detail.amount))}
-                      </td>
-                    </tr>
+                  {main.subBranches.map((sub) => (
+                    <React.Fragment key={sub.branch_sub_id}>
+                      {/* Sub-Branch header */}
+                      <tr className="bg-blue-50 dark:bg-blue-900/20">
+                        <td colSpan={2} className="px-4 py-2 pl-8 font-semibold text-base text-blue-900 dark:text-blue-100">
+                          {sub.sub_branch_name}{sub.branch_code ? ` (${sub.branch_code})` : ''}
+                        </td>
+                      </tr>
+
+                      {/* Detail rows */}
+                      {sub.details.map((detail, detailIdx) => (
+                        <tr key={detailIdx} className={`border-b border-gray-200 dark:border-strokedark ${detailIdx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
+                          <td className="border-b border-[#eee] px-4 py-3 pl-16 dark:border-strokedark">
+                            {detail.description}
+                          </td>
+                          <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
+                            {'₱'} {formatNumberComma(parseFloat(detail.amount))}
+                          </td>
+                        </tr>
+                      ))}
+
+                      {/* Sub-Branch subtotal */}
+                      <tr className="bg-blue-100 dark:bg-blue-800/30 font-semibold">
+                        <td className="border-b border-[#eee] px-4 py-2 pl-8 dark:border-strokedark">
+                          Sub-Branch Subtotal
+                        </td>
+                        <td className="border-b text-right border-[#eee] px-4 py-2 dark:border-strokedark">
+                          {'₱'} {formatNumberComma(sub.totals.amount)}
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   ))}
 
-                  {/* Branch subtotal row */}
-                  <tr className="bg-blue-100 dark:bg-blue-800/30 font-bold">
-                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">
-                      Branch Subtotal
+                  {/* Main Branch subtotal */}
+                  <tr className="bg-indigo-200 dark:bg-indigo-800/40 font-bold">
+                    <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark uppercase tracking-wide">
+                      {main.main_branch_name} Subtotal
                     </td>
                     <td className="border-b text-right border-[#eee] px-4 py-3 dark:border-strokedark">
-                      ₱ {formatNumberComma(branch.total)}
+                      {'₱'} {formatNumberComma(main.totals.amount)}
                     </td>
                   </tr>
                 </React.Fragment>
               ))}
 
-              {/* Grand total row */}
+              {/* Grand total */}
               <tr className="bg-yellow-500 text-strokedark font-bold text-lg">
                 <td className="px-4 py-4">GRAND TOTAL</td>
                 <td className="text-right px-4 py-4">
-                  ₱ {formatNumberComma(grandTotal)}
+                  {'₱'} {formatNumberComma(grandTotal)}
                 </td>
               </tr>
             </tbody>

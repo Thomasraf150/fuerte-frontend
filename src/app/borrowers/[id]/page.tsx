@@ -8,6 +8,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import BranchBadge from '@/components/BranchBadge';
 import useBorrowerDetail from '@/hooks/useBorrowerDetail';
+import useBranches from '@/hooks/useBranches';
 import BorrowerInfo from '../components/BorrowerInfo';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 
@@ -30,6 +31,15 @@ const BorrowerDetailPage: React.FC = () => {
     fetchSingleBorrower,
   } = useBorrowerDetail();
 
+  // Branch picker data for multi-branch users. The form only renders the
+  // dropdown when assignedBranchSubIds.length > 1, but fetching is cheap
+  // and the resolver already gates by role.
+  const {
+    myAccessibleBranchSubs,
+    fetchMyAccessibleBranchSubs,
+    loadingMyAccessibleBranches,
+  } = useBranches();
+
   const [singleData, setSingleData] = useState<BorrowerRowInfo | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +53,7 @@ const BorrowerDetailPage: React.FC = () => {
           fetchDataChief(100, 1),
           fetchDataArea(100, 1),
           fetchDataBorrCompany(100, 1),
+          fetchMyAccessibleBranchSubs(),
         ]);
         setLoading(false);
       } catch (err: any) {
@@ -166,6 +177,8 @@ const BorrowerDetailPage: React.FC = () => {
           dataArea={dataArea}
           dataSubArea={dataSubArea}
           dataBorrCompany={dataBorrCompany}
+          myAccessibleBranchSubs={myAccessibleBranchSubs}
+          loadingMyAccessibleBranches={loadingMyAccessibleBranches}
           onSubmitBorrower={async (data) => {
             const result = await onSubmitBorrower(data, () => {
               // Refresh callback - navigate back to list

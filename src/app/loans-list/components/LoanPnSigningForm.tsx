@@ -27,8 +27,19 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
     setActiveTab(tabIndex);
   };
 
+  // Tracks the post-mutation refetch that follows a release / approve /
+  // bank-details save. The page-level overlay below stays up until the
+  // new loanSingleData lands — covers the gap where the success toast
+  // had already fired but the header (Status, Loan Ref) hadn't updated yet.
+  const [refetching, setRefetching] = useState<boolean>(false);
+
   const handleRefetchData = async () => {
-    await fetchSingLoans(Number(singleData?.id));
+    setRefetching(true);
+    try {
+      await fetchSingLoans(Number(singleData?.id));
+    } finally {
+      setRefetching(false);
+    }
   };
 
   useEffect(() => {
@@ -36,7 +47,12 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      {refetching && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-start justify-center pt-20 rounded-lg">
+          <LoadingSpinner size="lg" message="Updating loan details..." />
+        </div>
+      )}
       <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
         <h3 className="font-medium text-black dark:text-white">
           {loanSingleData?.loan_product?.description}

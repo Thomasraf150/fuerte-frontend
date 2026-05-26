@@ -331,7 +331,7 @@ const DefaultPage: React.FC = () => {
                   className="w-4 h-4 text-primary"
                 />
                 <label htmlFor="showBreakdown" className="ml-2 text-sm text-gray-700 dark:text-bodydark cursor-pointer">
-                  Show branch breakdown
+                  Show breakdown by branch &amp; sub-branch
                 </label>
               </div>
             </div>

@@ -1,6 +1,6 @@
 const GET_USER_QUERY: string = `
-    query GetUsers($first: Int!, $page: Int!, $orderBy: [OrderByClause!]) {
-      users(first: $first, page: $page, orderBy: $orderBy) {
+    query GetUsers($first: Int!, $page: Int!, $search: String, $orderBy: [OrderByClause!]) {
+      users(first: $first, page: $page, search: $search, orderBy: $orderBy) {
         data {
           id
           name
@@ -54,6 +54,22 @@ const GET_SINGLE_USER_QUERY: string = `
           id
           name
         }
+        additionalBranchSubs {
+          id
+          name
+        }
+      }
+    }
+`;
+
+const SET_USER_BRANCH_ACCESS_MUTATION: string = `
+    mutation SetUserBranchAccess($user_id: ID!, $branch_sub_ids: [ID!]!) {
+      setUserBranchAccess(user_id: $user_id, branch_sub_ids: $branch_sub_ids) {
+        id
+        additionalBranchSubs {
+          id
+          name
+        }
       }
     }
 `;
@@ -72,7 +88,8 @@ const UserQueryMutations = {
   CREATE_USER_MUTATION,
   GET_SINGLE_USER_QUERY,
   UPDATE_USER_MUTATION,
-  GET_ROLE_QUERY
+  GET_ROLE_QUERY,
+  SET_USER_BRANCH_ACCESS_MUTATION
 };
 
 export default UserQueryMutations;

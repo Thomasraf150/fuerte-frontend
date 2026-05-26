@@ -8,7 +8,7 @@ import { DataBranches, DataFormUser, User } from '@/utils/DataTypes';
 
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
-  fetchUsers: (first: number, page: number) => void;
+  onSaved: () => void;
   actionLbl: string;
   singleUserData: DataFormUser | undefined;
 }
@@ -17,7 +17,7 @@ interface OptionProps {
   label: string;
   hidden?: boolean;
 }
-const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUsers, singleUserData }) => {
+const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, singleUserData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormUser>();
   const { onSubmitUser, userLoading, dataSubBranch, dataRole, rolesLoading, subBranchLoading } = useUsers();
   const [options, setOptions] = useState<OptionProps[]>([
@@ -28,11 +28,27 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
   ]);
   const [localBranchLoading, setLocalBranchLoading] = useState<boolean>(true);
   const [loadingStartTime] = useState<number>(Date.now());
-  
-  console.log('🔍 FormAddUser render - localBranchLoading:', localBranchLoading, 'dataSubBranch:', !!dataSubBranch, 'length:', dataSubBranch?.length);
+  // Additional sub-branches granted to this user beyond branch_sub_id.
+  // OWNER-ONLY: cross-branch grants are a privileged operation, so we
+  // hide the section entirely for non-Owner editors.
+  const [additionalIds, setAdditionalIds] = useState<number[]>([]);
+  const [callerIsOwner, setCallerIsOwner] = useState<boolean>(false);
+  const homeBranchId = Number(watch('branch_sub_id'));
 
-   // Watch the password field
-   const password = watch('password', '');
+  // Watch the password field
+  const password = watch('password', '');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('authStore') ?? '{}';
+      const state = JSON.parse(raw)?.state ?? {};
+      const code = state?.user?.role?.code;
+      setCallerIsOwner(code === 'OWN');
+    } catch {
+      setCallerIsOwner(false);
+    }
+  }, []);
 
   const onSubmit: SubmitHandler<DataFormUser> = async (data) => {
     // Validate branch_sub_id is selected and valid (not 0 or empty)
@@ -40,12 +56,20 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
       return; // Form validation will show error
     }
 
-    const result = await onSubmitUser(data) as { success: boolean; error?: string; data?: any };
+    // Only attach additional grants when an Owner is editing — preserves
+    // the "Create User" flow and non-Owner Update flow exactly as before.
+    // The hook will only call setUserBranchAccess if this field is defined.
+    const payload: DataFormUser =
+      actionLbl === 'Update User' && callerIsOwner
+        ? { ...data, additional_branch_sub_ids: additionalIds }
+        : data;
+
+    const result = await onSubmitUser(payload) as { success: boolean; error?: string; data?: any };
 
     // Only close form on successful submission
     if (result.success) {
       setShowForm(false);
-      fetchUsers(10, 1);
+      onSaved();
     }
     // Form stays open on errors for user to fix and retry
   };
@@ -89,6 +113,12 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
         setValue('email', singleUserData.email);
         setValue('branch_sub_id', singleUserData.branch_sub_id);
         setValue('role_id', singleUserData.role_id);
+        const existing = (singleUserData as any)?.additionalBranchSubs ?? [];
+        setAdditionalIds(
+          Array.isArray(existing)
+            ? existing.map((b: any) => Number(b?.id)).filter((n: number) => !Number.isNaN(n))
+            : []
+        );
       }
     }
   }, [dataSubBranch, singleUserData, actionLbl, loadingStartTime])
@@ -121,7 +151,72 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, fetchUser
             isLoading={localBranchLoading}
             loadingMessage="Loading branches..."
           />
-          
+
+          {actionLbl === 'Update User' && callerIsOwner && (
+            <div className="mb-6 mt-6 rounded-md border border-stroke bg-gray-50 px-4 py-4 dark:border-strokedark dark:bg-meta-4">
+              <div className="mb-3 flex items-baseline justify-between gap-2">
+                <label className="block text-sm font-semibold text-black dark:text-white">
+                  Cross-Branch Access
+                </label>
+                <span className="text-[11px] uppercase tracking-wide text-meta-1">
+                  Owner only
+                </span>
+              </div>
+              <p className="mb-3 text-xs text-body">
+                Grants the user access to <strong>additional</strong> sub-branches
+                beyond their home branch above. When creating a borrower or loan,
+                the user can pick any of these branches from the form's branch
+                dropdown.
+              </p>
+              {localBranchLoading || !dataSubBranch ? (
+                <div className="rounded border border-stroke bg-white px-4 py-3 text-sm text-body dark:border-form-strokedark dark:bg-form-input">
+                  Loading branches...
+                </div>
+              ) : (
+                <div className="grid max-h-48 grid-cols-2 gap-2 overflow-y-auto rounded border border-stroke bg-white px-4 py-3 dark:border-form-strokedark dark:bg-form-input">
+                  {dataSubBranch.map((sb) => {
+                    const sbId = Number(sb.id);
+                    const isHome = sbId === homeBranchId;
+                    const isChecked = additionalIds.includes(sbId);
+                    return (
+                      <label
+                        key={sb.id}
+                        className={`flex items-center gap-2 text-sm ${isHome ? 'opacity-50' : ''}`}
+                        title={isHome ? 'Home branch — already granted via branch_sub_id' : ''}
+                      >
+                        <input
+                          type="checkbox"
+                          disabled={isHome}
+                          checked={isChecked && !isHome}
+                          onChange={(e) => {
+                            if (isHome) return;
+                            setAdditionalIds((prev) =>
+                              e.target.checked
+                                ? [...prev, sbId]
+                                : prev.filter((id) => id !== sbId)
+                            );
+                          }}
+                        />
+                        <span>{sb.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+              {additionalIds.length === 0 ? (
+                <p className="mt-3 text-xs text-body">
+                  No extra branches selected — user has access to home branch only.
+                </p>
+              ) : (
+                <p className="mt-3 text-xs font-medium text-meta-3">
+                  {additionalIds.length} additional branch{additionalIds.length === 1 ? '' : 'es'} selected.
+                  The user can pick any of these on the branch dropdown when
+                  creating borrowers or loans.
+                </p>
+              )}
+            </div>
+          )}
+
           <FormInput
             label="Roles"
             id="role_id"
