@@ -20,6 +20,15 @@ interface BranchBreakdownProps {
   endDate: Date | undefined;
 }
 
+// "Borrowers" for a sub-branch = ccount of its 'notes receivable' detail row.
+// Matches the "Number of Borrowers" figure shown at the top of the main
+// Summary Ticket table, so OWNER can reconcile by summing across branches.
+const borrowersOf = (details: BranchBreakdownData[]): number =>
+  details.find(d => d.description?.toLowerCase().trim() === 'notes receivable')?.ccount ?? 0;
+
+const formatBorrowerCount = (n: number): string =>
+  `${n.toLocaleString('en-US')} borrower${n === 1 ? '' : 's'}`;
+
 const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate, endDate }) => {
   const mainBranches = groupBreakdownByMainBranch(data, (item) => ({
     debit: parseFloat(item.debit || '0'),
@@ -28,6 +37,10 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
 
   const grandTotalDebit  = mainBranches.reduce((s, m) => s + m.totals.debit,  0);
   const grandTotalCredit = mainBranches.reduce((s, m) => s + m.totals.credit, 0);
+  const grandBorrowers   = mainBranches.reduce(
+    (s, m) => s + m.subBranches.reduce((ss, sub) => ss + borrowersOf(sub.details), 0),
+    0,
+  );
 
   return (
     <div className="mt-6">
@@ -51,21 +64,31 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
               </tr>
             </thead>
             <tbody>
-              {mainBranches.map((main) => (
+              {mainBranches.map((main) => {
+                const mainBorrowers = main.subBranches.reduce((s, sub) => s + borrowersOf(sub.details), 0);
+                return (
                 <React.Fragment key={main.main_branch_id ?? main.main_branch_name}>
                   {/* Main Branch header */}
                   <tr className="bg-indigo-100 dark:bg-indigo-900/30 border-t-4 border-indigo-300 dark:border-indigo-700">
                     <td colSpan={4} className="px-4 py-3 font-bold text-lg text-indigo-900 dark:text-indigo-100 uppercase tracking-wide">
                       {main.main_branch_name}
+                      <span className="ml-3 text-sm font-medium normal-case tracking-normal text-indigo-700 dark:text-indigo-300">
+                        ({formatBorrowerCount(mainBorrowers)})
+                      </span>
                     </td>
                   </tr>
 
-                  {main.subBranches.map((sub) => (
+                  {main.subBranches.map((sub) => {
+                    const subBorrowers = borrowersOf(sub.details);
+                    return (
                     <React.Fragment key={sub.branch_sub_id}>
                       {/* Sub-Branch header */}
                       <tr className="bg-blue-50 dark:bg-blue-900/20">
                         <td colSpan={4} className="px-4 py-2 pl-8 font-semibold text-base text-blue-900 dark:text-blue-100">
                           {sub.sub_branch_name}{sub.branch_code ? ` (${sub.branch_code})` : ''}
+                          <span className="ml-3 text-xs font-medium text-blue-700 dark:text-blue-300">
+                            · {formatBorrowerCount(subBorrowers)}
+                          </span>
                         </td>
                       </tr>
 
@@ -101,7 +124,8 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
                         </td>
                       </tr>
                     </React.Fragment>
-                  ))}
+                    );
+                  })}
 
                   {/* Main Branch subtotal */}
                   <tr className="bg-indigo-200 dark:bg-indigo-800/40 font-bold">
@@ -117,11 +141,17 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
                     </td>
                   </tr>
                 </React.Fragment>
-              ))}
+                );
+              })}
 
               {/* Grand total row */}
               <tr className="bg-yellow-500 text-strokedark font-bold text-lg">
-                <td className="px-4 py-4">GRAND TOTAL</td>
+                <td className="px-4 py-4">
+                  GRAND TOTAL
+                  <span className="ml-3 text-sm font-medium normal-case">
+                    ({formatBorrowerCount(grandBorrowers)})
+                  </span>
+                </td>
                 <td className="px-4 py-4"></td>
                 <td className="text-right px-4 py-4">
                   {'₱'} {formatNumberComma(grandTotalDebit)}
