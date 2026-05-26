@@ -1,0 +1,349 @@
+
+> fuerte-web@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.3
+  - Environments: .env
+
+   Creating an optimized production build ...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./src/app/accounting/adjusting-entries/components/AEForm.tsx
+53:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+57:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+119:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/cdj/components/CdjForm.tsx
+42:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'setValue'. Either include them or remove the dependency array. If 'fetchCoaDataTable' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+46:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+108:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/cdj/[entryId]/page.tsx
+71:6  Warning: React Hook useEffect has a missing dependency: 'fetchCoaDataTable'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/crj/components/CrjForm.tsx
+42:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'setValue'. Either include them or remove the dependency array. If 'fetchCoaDataTable' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+46:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+108:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/crj/[entryId]/page.tsx
+71:6  Warning: React Hook useEffect has a missing dependency: 'fetchCoaDataTable'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/general-journal/components/GJForm.tsx
+42:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'setValue'. Either include them or remove the dependency array. If 'fetchCoaDataTable' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+46:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+108:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/general-journal/[entryId]/page.tsx
+72:6  Warning: React Hook useEffect has a missing dependency: 'fetchCoaDataTable'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/general-voucher/components/CVForm.tsx
+59:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+63:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+146:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/general-voucher/components/JVForm.tsx
+59:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+63:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+145:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/income-statement/components/IncomeStatementBySubBranch.tsx
+152:6  Warning: React Hook useMemo has a missing dependency: 'createEmptySection'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/income-statement/components/IncomeStatementList.tsx
+173:6  Warning: React Hook useEffect has a missing dependency: 'fetchStatementData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/loan-proceed-settings/components/LoanProceedSettingsList.tsx
+40:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'fetchLpsDataTable'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/loan-proceed-settings/components/LoanProcSettingsForm.tsx
+85:6  Warning: React Hook useEffect has missing dependencies: 'reset' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/vendors/components/Forms/AffiliateForm.tsx
+35:6  Warning: React Hook useEffect has missing dependencies: 'setValue' and 'vendorTypeId'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/vendors/components/Forms/CustomerForm.tsx
+54:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/vendors/components/Forms/EmployeeForm.tsx
+51:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/vendors/components/Forms/NontradeForm.tsx
+37:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/vendors/components/Forms/OfficerForm.tsx
+36:6  Warning: React Hook useEffect has missing dependencies: 'setValue' and 'vendorTypeId'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/accounting/vendors/components/Forms/SupplierForm.tsx
+52:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/audit-logs/components/AuditLogForm.tsx
+56:6  Warning: React Hook useEffect has a missing dependency: 'reset'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/banks/components/BankForm.tsx
+65:6  Warning: React Hook useEffect has a missing dependency: 'reset'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/borrowers/components/TabForm/BorrowerAttachments.tsx
+90:6  Warning: React Hook useEffect has a missing dependency: 'fetchDataBorrAttachments'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/borrowers/components/TabForm/BorrowerCoMaker.tsx
+56:6  Warning: React Hook useEffect has a missing dependency: 'fetchDataBorrCoMaker'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/borrowers/components/TabForm/BorrowerDetails.tsx
+131:6  Warning: React Hook useEffect has missing dependencies: 'fetchDataArea', 'fetchDataBorrCompany', and 'fetchDataChief'. Either include them or remove the dependency array. If 'fetchDataChief' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+175:6  Warning: React Hook useEffect has a missing dependency: 'SPOUSE_FIELDS'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+255:6  Warning: React Hook useEffect has missing dependencies: 'optionsArea', 'setValue', and 'singleData'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+335:6  Warning: React Hook useEffect has missing dependencies: 'reset' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+344:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/borrowers/components/TabForm/BorrowerLoans.tsx
+92:6  Warning: React Hook useEffect has missing dependencies: 'fetchLoans' and 'fetchSubDataList'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/borrowers/components/TabForm/FormComaker.tsx
+53:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/borrowers/components/TabForm/RenewalAmntForm.tsx
+103:6  Warning: React Hook useEffect has missing dependencies: 'dataComputedRenewal', 'fnGetRenewalDetails', and 'setValue'. Either include them or remove the dependency array. If 'setValue' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+
+./src/app/borrowers/[id]/page.tsx
+67:6  Warning: React Hook useEffect has missing dependencies: 'fetchDataArea', 'fetchDataBorrCompany', 'fetchDataChief', and 'fetchMyAccessibleBranchSubs'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+103:6  Warning: React Hook useEffect has a missing dependency: 'fetchSingleBorrower'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/branch-setup/components/FormAddBranch.tsx
+31:6  Warning: React Hook useEffect has a missing dependency: 'reset'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/branch-setup/components/FormAddSubBranch.tsx
+75:6  Warning: React Hook useEffect has missing dependencies: 'reset' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/chiefs/components/ChiefForm.tsx
+37:6  Warning: React Hook useEffect has a missing dependency: 'reset'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/collection-list/[scheduleId]/page.tsx
+50:6  Warning: React Hook useEffect has a missing dependency: 'fetchCollectionEntry'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/commission-schedule/components/BorrCommSchedList.tsx
+86:6  Warning: React Hook useEffect has missing dependencies: 'debouncedFetch', 'endDate', and 'startDate'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/companies/components/BorrCompForm.tsx
+39:6  Warning: React Hook useEffect has a missing dependency: 'reset'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/loan-products/components/FormAddLoanProduct.tsx
+115:6  Warning: React Hook useEffect has missing dependencies: 'reset' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/loans-list/components/LoanPnSigningForm.tsx
+47:6  Warning: React Hook useEffect has missing dependencies: 'fetchSingLoans' and 'singleData?.id'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/loans-list/components/Tabs/AcctgEntryForm.tsx
+57:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+147:6  Warning: React Hook useEffect has missing dependencies: 'coaDataAccount', 'getValues', 'isRepostMode', 'loanSingleData.id', 'loanSingleData.loan_details', 'reset', and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/loans-list/components/Tabs/LoanHistory.tsx
+111:6  Warning: React Hook useEffect has a missing dependency: 'LOAN_HISTORY_QUERY'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/loans-list/components/Tabs/ReleaseLoans.tsx
+142:6  Warning: React Hook useEffect has a missing dependency: 'fetchCoaDataTable'. Either include it or remove the dependency array. If 'fetchCoaDataTable' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+181:6  Warning: React Hook useEffect has a missing dependency: 'watch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+188:6  Warning: React Hook useEffect has missing dependencies: 'fetchLpsWithFallback', 'loanSingleData?.acctg_entry', 'loanSingleData?.branch_sub?.id', 'loanSingleData?.status', and 'loanSingleData?.user?.branch_sub_id'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+188:27  Warning: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+
+./src/app/loans-list/[id]/page.tsx
+57:6  Warning: React Hook useEffect has missing dependencies: 'fetchSingLoans' and 'loanSingleData'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/notes-receivable/components/BorrNrSchedList.tsx
+139:6  Warning: React Hook useEffect has a missing dependency: 'handleSearch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+182:6  Warning: React Hook useEffect has missing dependencies: 'endDate', 'handleSearch', and 'startDate'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/payment-posting/components/Form/OtherPaymentForm.tsx
+77:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/payment-posting/components/Form/PaymentCollectionForm.tsx
+83:6  Warning: React Hook useEffect has a missing dependency: 'setValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/payment-posting/[loanId]/page.tsx
+52:6  Warning: React Hook useEffect has a missing dependency: 'fetchLoanSchedule'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/statement-of-account/components/SoaDetails.tsx
+23:6  Warning: React Hook useEffect has missing dependencies: 'fetchCustomerLedger' and 'singleData'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/statement-of-account/components/SoaList.tsx
+28:6  Warning: React Hook useEffect has a missing dependency: 'fetchLoans'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/statement-of-account/[loanId]/page.tsx
+55:6  Warning: React Hook useEffect has missing dependencies: 'fetchCustomerLedger' and 'fetchSingLoans'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/users-setup/components/FormAddUser.tsx
+124:6  Warning: React Hook useEffect has missing dependencies: 'reset' and 'setValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/Dashboard/DefaultPage.tsx
+139:6  Warning: React Hook useEffect has missing dependencies: 'branchId', 'branchSubId', 'dataSummaryTicket', 'fetchSummaryTixReport', and 'showBreakdown'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+147:6  Warning: React Hook useEffect has a missing dependency: 'fetchSummaryTixReport'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/Lightbox/index.tsx
+22:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/Sidebar/index.tsx
+40:6  Warning: React Hook useEffect has a missing dependency: 'setSidebarOpen'. Either include it or remove the dependency array. If 'setSidebarOpen' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+50:6  Warning: React Hook useEffect has a missing dependency: 'setSidebarOpen'. Either include it or remove the dependency array. If 'setSidebarOpen' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+
+./src/components/SidebarAcctg/index.tsx
+41:6  Warning: React Hook useEffect has a missing dependency: 'setSidebarOpen'. Either include it or remove the dependency array. If 'setSidebarOpen' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+51:6  Warning: React Hook useEffect has a missing dependency: 'setSidebarOpen'. Either include it or remove the dependency array. If 'setSidebarOpen' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+
+./src/components/SidebarOwner/index.tsx
+51:6  Warning: React Hook useEffect has a missing dependency: 'setSidebarOpen'. Either include it or remove the dependency array. If 'setSidebarOpen' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+60:6  Warning: React Hook useEffect has a missing dependency: 'setSidebarOpen'. Either include it or remove the dependency array. If 'setSidebarOpen' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+
+./src/hooks/useArea.tsx
+80:6  Warning: React Hook useEffect has a missing dependency: 'fetchDataSubBranch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useBank.tsx
+120:6  Warning: React Hook useEffect has missing dependencies: 'fetchDataBank' and 'fetchDataSubBranch'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useBranches.tsx
+218:6  Warning: React Hook useEffect has a missing dependency: 'fetchDataList'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useChiefs.tsx
+103:6  Warning: React Hook useEffect has a missing dependency: 'fetchDataChief'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useCoa.tsx
+37:6  Warning: React Hook useEffect has missing dependencies: 'fetchCoaDataTable' and 'fetchDataSubBranch'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useCommissionSchedulePaginated.tsx
+104:6  Warning: React Hook useCallback has a missing dependency: 'CACHE_DURATION_MS'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useCompanyProfileForm.tsx
+107:6  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useLoanCodes.tsx
+164:6  Warning: React Hook useEffect has missing dependencies: 'fetchLoanClients', 'fetchLoanCodes', and 'fetchLoanTypes'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useLoans.tsx
+997:6  Warning: React Hook useCallback has an unnecessary dependency: 'month'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+1001:6  Warning: React Hook useCallback has an unnecessary dependency: 'year'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+1005:6  Warning: React Hook useCallback has an unnecessary dependency: 'branchSubId'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+1027:6  Warning: React Hook useEffect has a missing dependency: 'fetchLoanProducts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useMaintenanceRedirect.tsx
+39:6  Warning: React Hook useEffect has a missing dependency: 'GET_MAINTENANCE_MODE'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useNotesReceivablePaginated.tsx
+399:6  Warning: React Hook useEffect has missing dependencies: 'currentPerPage', 'enableAutoFetch', 'filters', and 'loadPage'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/usePagination.tsx
+157:6  Warning: React Hook useCallback has missing dependencies: 'debouncedSearchQuery', 'pagination.currentPage', and 'pagination.pageSize'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+177:6  Warning: React Hook useCallback has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+188:6  Warning: React Hook useEffect has missing dependencies: 'fetchData', 'pagination.currentPage', and 'pagination.pageSize'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/usePendingDeletions.tsx
+69:6  Warning: React Hook useCallback has a missing dependency: 'entityIds'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useTrialBalance.tsx
+42:6  Warning: React Hook useEffect has a missing dependency: 'fetchUtb'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useUsers.tsx
+211:6  Warning: React Hook useEffect has missing dependencies: 'fetchRoles' and 'fetchSubBranch'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useVendor.tsx
+191:6  Warning: React Hook useEffect has missing dependencies: 'fetchCustomerCategory', 'fetchDepartments', 'fetchSupplierCategory', and 'fetchVendorType'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/67) ...
+   Generating static pages (16/67) 
+   Generating static pages (33/67) 
+   Generating static pages (50/67) 
+ ✓ Generating static pages (67/67)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size     First Load JS
+┌ ○ /                                        11.4 kB         299 kB
+├ ○ /_not-found                              879 B          88.5 kB
+├ ○ /accounting-dashboard                    3.64 kB         208 kB
+├ ○ /accounting/adjusted-trial-balance       5.92 kB         154 kB
+├ ○ /accounting/adjusting-entries            10.6 kB         260 kB
+├ ○ /accounting/aging                        3 kB            165 kB
+├ ○ /accounting/balance-sheet                8.18 kB         292 kB
+├ ○ /accounting/cash-flow                    2.99 kB         165 kB
+├ ○ /accounting/cash-position                3 kB            165 kB
+├ ○ /accounting/cdj                          4.14 kB         317 kB
+├ ƒ /accounting/cdj/[entryId]                9.87 kB         206 kB
+├ ○ /accounting/closing-entries              2.95 kB         143 kB
+├ ○ /accounting/coa                          13.2 kB         174 kB
+├ ƒ /accounting/coa/[id]                     8.23 kB         206 kB
+├ ○ /accounting/commission-schedule          3 kB            165 kB
+├ ○ /accounting/credit-memo                  3 kB            165 kB
+├ ○ /accounting/crj                          4.12 kB         317 kB
+├ ƒ /accounting/crj/[entryId]                9.84 kB         206 kB
+├ ○ /accounting/debit-memo                   3 kB            165 kB
+├ ○ /accounting/general-journal              4.15 kB         317 kB
+├ ƒ /accounting/general-journal/[entryId]    9.93 kB         206 kB
+├ ○ /accounting/general-ledger               4.26 kB         151 kB
+├ ○ /accounting/general-voucher              2.57 kB         345 kB
+├ ƒ /accounting/general-voucher/[voucherId]  3.94 kB         279 kB
+├ ○ /accounting/income-statement             8.3 kB          310 kB
+├ ○ /accounting/loan-proceed-settings        4.83 kB         235 kB
+├ ○ /accounting/refund-schedule              3 kB            165 kB
+├ ○ /accounting/udi-schedule                 3 kB            165 kB
+├ ○ /accounting/unadjusted-trial-balance     5.22 kB         165 kB
+├ ○ /accounting/vendors                      3.97 kB         215 kB
+├ ○ /approvals                               8.74 kB         157 kB
+├ ○ /area                                    2.69 kB         199 kB
+├ ○ /audit-logs                              8.35 kB         198 kB
+├ ○ /auth/signin                             4.52 kB         114 kB
+├ ○ /auth/signup                             2.49 kB         131 kB
+├ ○ /banks                                   7.71 kB         197 kB
+├ ○ /borrower-process                        2.49 kB         131 kB
+├ ○ /borrowers                               9.68 kB         192 kB
+├ ƒ /borrowers/[id]                          22.9 kB         284 kB
+├ ○ /branch-setup                            9.42 kB         240 kB
+├ ○ /calendar                                2.49 kB         131 kB
+├ ○ /chart                                   144 kB          272 kB
+├ ○ /chiefs                                  7.16 kB         197 kB
+├ ○ /clients                                 4.35 kB         162 kB
+├ ○ /collection-list                         1.17 kB         182 kB
+├ ƒ /collection-list/[scheduleId]            2.98 kB         155 kB
+├ ○ /commission-schedule                     10.1 kB         255 kB
+├ ○ /companies                               8.26 kB         198 kB
+├ ○ /company-profile                         5.34 kB         146 kB
+├ ○ /file-types                              2.49 kB         131 kB
+├ ○ /for-new-loans                           2.49 kB         131 kB
+├ ○ /forms/form-elements                     22.3 kB         151 kB
+├ ○ /forms/form-layout                       3.12 kB         131 kB
+├ ○ /loan-codes                              5.81 kB         163 kB
+├ ƒ /loan-codes/[id]                         7.62 kB         185 kB
+├ ○ /loan-products                           5.81 kB         163 kB
+├ ƒ /loan-products/[id]                      7.67 kB         148 kB
+├ ○ /loan-types                              9.01 kB         199 kB
+├ ○ /loans-list                              8.59 kB         213 kB
+├ ƒ /loans-list/[id]                         29.4 kB         323 kB
+├ ○ /maintenance                             1.56 kB        89.2 kB
+├ ○ /notes-receivable                        9.57 kB         294 kB
+├ ○ /other-company-charges                   2.49 kB         131 kB
+├ ○ /payment-posting                         4.75 kB         207 kB
+├ ƒ /payment-posting/[loanId]                8.52 kB         193 kB
+├ ○ /problem-accounts                        3.08 kB         189 kB
+├ ƒ /problem-accounts/borrower/[borrowerId]  1.47 kB         164 kB
+├ ○ /profile                                 2.49 kB         131 kB
+├ ○ /settings                                2.49 kB         131 kB
+├ ○ /statement-of-account                    5.89 kB         211 kB
+├ ƒ /statement-of-account/[loanId]           9.78 kB         185 kB
+├ ○ /sub-area                                2.39 kB         199 kB
+├ ○ /tables                                  2.49 kB         131 kB
+├ ○ /template                                2.94 kB         143 kB
+├ ○ /ui/alerts                               2.49 kB         131 kB
+├ ○ /ui/buttons                              2.49 kB         131 kB
+└ ○ /users-setup                             7.83 kB         177 kB
++ First Load JS shared by all                87.6 kB
+  ├ chunks/7023-33613ea6627c7ad7.js          31.6 kB
+  ├ chunks/fd9d1056-382e0ad9805d626e.js      53.6 kB
+  └ other shared chunks (total)              2.37 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
