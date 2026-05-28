@@ -60,6 +60,7 @@ const GET_GV_QUERY: string = `
         }
         borrower_full_name
         vendor_full_name
+        branch_sub_name
       }
       paginatorInfo {
         count

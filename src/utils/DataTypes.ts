@@ -819,6 +819,7 @@ export interface RowAcctgEntry {
   loan: BorrLoanRowData
   borrower_full_name: string;
   vendor_full_name: string;
+  branch_sub_name: string;
 }
 export interface RowVendorTypeData {
   id?: string;

@@ -20,7 +20,12 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     name: 'Ref #',
     cell: row => row?.journal_ref,
     sortable: true,
-    width: '150px'
+    width: '190px'
+  },
+  {
+    name: 'Sub-Branch',
+    cell: row => row?.branch_sub_name || '',
+    sortable: true,
   },
   {
     name: 'Loan Ref #',

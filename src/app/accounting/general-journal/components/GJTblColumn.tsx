@@ -24,6 +24,11 @@ const gJTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     sortable: true,
   },
   {
+    name: 'Sub-Branch',
+    cell: row => row?.branch_sub_name || '',
+    sortable: true,
+  },
+  {
     name: 'Type',
     cell: row => row?.journal_name,
     sortable: true,

@@ -23,6 +23,7 @@ const GET_GJ_QUERY: string = `
         is_cancelled
         borrower_full_name
         vendor_full_name
+        branch_sub_name
         acctg_details {
           id
           acctg_entries_id
