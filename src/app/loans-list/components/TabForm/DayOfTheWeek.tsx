@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { CheckCircle, RotateCw } from 'react-feather';
-import DatePicker from 'react-datepicker';
 import {
   generateWeeklySchedule,
   WEEKDAY_LABELS,
 } from '@/utils/effectivityDateUtils';
-import "react-datepicker/dist/react-datepicker.css";
+import ReferenceDatePicker from './shared/ReferenceDatePicker';
+import ApprovalActionBar from './shared/ApprovalActionBar';
 
 interface OMProps {
   term: number;
@@ -16,6 +15,13 @@ interface OMProps {
 }
 
 const SELECTABLE_WEEKDAYS = [1, 2, 3, 4, 5, 6] as const; // Mon-Sat
+
+const weekdayPillClass = (active: boolean) =>
+  `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+    active
+      ? 'bg-blue-500 text-white shadow-sm'
+      : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
+  }`;
 
 const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease, loading }) => {
   const [refDate, setRefDate] = useState<Date | null>(new Date());
@@ -42,17 +48,7 @@ const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handl
 
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Reference Date</h3>
-        <DatePicker
-          selected={refDate}
-          onChange={handleDateChange}
-          dateFormat="MM/dd/yyyy"
-          className="p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 w-70 focus:ring-blue-500 text-sm"
-          placeholderText="Select reference date"
-          id="refDate"
-        />
-      </div>
+      <ReferenceDatePicker selected={refDate} onChange={handleDateChange} />
 
       <div>
         <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Weekday</h3>
@@ -62,11 +58,7 @@ const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handl
               key={day}
               type="button"
               onClick={() => handleWeekdayChange(day)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                selectedWeekday === day
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
-              }`}
+              className={weekdayPillClass(selectedWeekday === day)}
             >
               {WEEKDAY_LABELS[day]}
             </button>
@@ -74,23 +66,7 @@ const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handl
         </div>
       </div>
 
-      <button
-        className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-        onClick={() => handleApproveRelease(1)}
-        disabled={!ready || loading}
-      >
-        {loading ? (
-          <>
-            <RotateCw size={16} className="animate-spin mr-1" />
-            <span>Approving...</span>
-          </>
-        ) : (
-          <>
-            <span className="mr-1"><CheckCircle size={16} /></span>
-            <span>Approve</span>
-          </>
-        )}
-      </button>
+      <ApprovalActionBar disabled={!ready} loading={loading} onClick={() => handleApproveRelease(1)} />
     </div>
   );
 };

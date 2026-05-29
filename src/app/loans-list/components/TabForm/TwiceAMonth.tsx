@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { CheckCircle, RotateCw } from 'react-feather';
-import DatePicker from 'react-datepicker';
 import {
   generateSemiMonthlySchedule,
   SEMI_MONTHLY_PRESETS,
 } from '@/utils/effectivityDateUtils';
-import "react-datepicker/dist/react-datepicker.css";
+import ReferenceDatePicker from './shared/ReferenceDatePicker';
+import ApprovalActionBar from './shared/ApprovalActionBar';
 
 interface OMProps {
   term: number;
@@ -16,6 +15,13 @@ interface OMProps {
 }
 
 type PatternKey = '10/25' | '15/30' | '5/20' | 'custom';
+
+const pillClass = (active: boolean) =>
+  `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+    active
+      ? 'bg-blue-500 text-white shadow-sm'
+      : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
+  }`;
 
 const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease, loading }) => {
   const [refDate, setRefDate] = useState<Date | null>(new Date());
@@ -41,8 +47,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
       day2 = preset.day2;
     }
 
-    const totalTerms = term + addon_term;
-    const dates = generateSemiMonthlySchedule(date, day1, day2, totalTerms);
+    const dates = generateSemiMonthlySchedule(date, day1, day2, term + addon_term);
     selectedData(dates, dates.length);
     setReady(true);
   }, [term, addon_term, selectedData]);
@@ -70,17 +75,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
 
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Reference Date</h3>
-        <DatePicker
-          selected={refDate}
-          onChange={handleDateChange}
-          dateFormat="MM/dd/yyyy"
-          className="p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 w-70 focus:ring-blue-500 text-sm"
-          placeholderText="Select reference date"
-          id="refDate"
-        />
-      </div>
+      <ReferenceDatePicker selected={refDate} onChange={handleDateChange} />
 
       <div>
         <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Cutoff Pattern</h3>
@@ -90,11 +85,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
               key={p.label}
               type="button"
               onClick={() => handlePatternChange(p.label as PatternKey)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                pattern === p.label
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
-              }`}
+              className={pillClass(pattern === p.label)}
             >
               {p.label}
             </button>
@@ -102,11 +93,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
           <button
             type="button"
             onClick={() => handlePatternChange('custom')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              pattern === 'custom'
-                ? 'bg-blue-500 text-white shadow-sm'
-                : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
-            }`}
+            className={pillClass(pattern === 'custom')}
           >
             Custom
           </button>
@@ -137,23 +124,7 @@ const TwiceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handle
         </div>
       )}
 
-      <button
-        className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-        onClick={() => handleApproveRelease(1)}
-        disabled={!ready || loading}
-      >
-        {loading ? (
-          <>
-            <RotateCw size={16} className="animate-spin mr-1" />
-            <span>Approving...</span>
-          </>
-        ) : (
-          <>
-            <span className="mr-1"><CheckCircle size={16} /></span>
-            <span>Approve</span>
-          </>
-        )}
-      </button>
+      <ApprovalActionBar disabled={!ready} loading={loading} onClick={() => handleApproveRelease(1)} />
     </div>
   );
 };

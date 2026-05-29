@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { CheckCircle, RotateCw } from 'react-feather';
-import DatePicker from 'react-datepicker';
 import {
   generateMonthlySchedule,
   DAY_OF_MONTH_OPTIONS,
 } from '@/utils/effectivityDateUtils';
-import "react-datepicker/dist/react-datepicker.css";
+import ReferenceDatePicker from './shared/ReferenceDatePicker';
+import ApprovalActionBar from './shared/ApprovalActionBar';
 
 interface OMProps {
   term: number;
@@ -14,6 +13,13 @@ interface OMProps {
   handleApproveRelease: (status: number) => void;
   loading?: boolean;
 }
+
+const dayPillClass = (active: boolean) =>
+  `w-10 h-10 rounded-full text-sm font-medium transition-colors ${
+    active
+      ? 'bg-blue-500 text-white shadow-sm'
+      : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
+  }`;
 
 const OnceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease, loading }) => {
   const [refDate, setRefDate] = useState<Date | null>(new Date());
@@ -40,17 +46,7 @@ const OnceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
 
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Reference Date</h3>
-        <DatePicker
-          selected={refDate}
-          onChange={handleDateChange}
-          dateFormat="MM/dd/yyyy"
-          className="p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 w-70 focus:ring-blue-500 text-sm"
-          placeholderText="Select reference date"
-          id="refDate"
-        />
-      </div>
+      <ReferenceDatePicker selected={refDate} onChange={handleDateChange} />
 
       <div>
         <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Day of Month</h3>
@@ -60,11 +56,7 @@ const OnceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
               key={day}
               type="button"
               onClick={() => handleDayChange(day)}
-              className={`w-10 h-10 rounded-full text-sm font-medium transition-colors ${
-                selectedDay === day
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
-              }`}
+              className={dayPillClass(selectedDay === day)}
             >
               {day}
             </button>
@@ -72,23 +64,7 @@ const OnceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
         </div>
       </div>
 
-      <button
-        className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-        onClick={() => handleApproveRelease(1)}
-        disabled={!ready || loading}
-      >
-        {loading ? (
-          <>
-            <RotateCw size={16} className="animate-spin mr-1" />
-            <span>Approving...</span>
-          </>
-        ) : (
-          <>
-            <span className="mr-1"><CheckCircle size={16} /></span>
-            <span>Approve</span>
-          </>
-        )}
-      </button>
+      <ApprovalActionBar disabled={!ready} loading={loading} onClick={() => handleApproveRelease(1)} />
     </div>
   );
 };
