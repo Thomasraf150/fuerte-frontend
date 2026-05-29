@@ -18,6 +18,7 @@ const GET_PROBLEM_ACCOUNTS: string = `
         shortfall
         oldest_unpaid_due_date
         oldest_unpaid_schedule_id
+        cutoffs_missed
         days_past_due
       }
       summary {

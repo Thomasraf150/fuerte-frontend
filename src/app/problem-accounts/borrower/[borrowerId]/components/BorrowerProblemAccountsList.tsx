@@ -23,7 +23,6 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
     useProblemAccountsPaginated({
       borrowerId,
       sortBy: "shortfall_desc",
-      graceDays: 0,
     });
 
   const headerInfo = useMemo(() => {

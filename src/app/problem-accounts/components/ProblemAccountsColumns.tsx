@@ -57,10 +57,17 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
     },
   },
   {
-    name: "Days Past Due",
+    name: "Missed Cut-offs",
     sortable: false,
     right: true,
-    cell: (row) => row.days_past_due,
+    cell: (row) => {
+      const n = row.cutoffs_missed ?? 0;
+      return n > 0 ? (
+        <span style={{ color: RED, fontWeight: 700 }}>{n}</span>
+      ) : (
+        <span style={{ color: "#9ca3af" }}>0</span>
+      );
+    },
   },
   {
     name: "Scheduled",

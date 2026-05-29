@@ -22,6 +22,7 @@ export interface ProblemAccountRow {
   shortfall: string;
   oldest_unpaid_due_date: string | null;
   oldest_unpaid_schedule_id: string | null;
+  cutoffs_missed: number;
   days_past_due: number;
 }
 
@@ -38,7 +39,6 @@ export interface ProblemAccountFilters {
   borrowerId?: string;
   searchTerm?: string;
   sortBy?: string;
-  graceDays?: number;
 }
 
 const EMPTY_SUMMARY: ProblemAccountSummary = {
@@ -82,7 +82,6 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
             borrowerId: currentFilters.borrowerId || null,
             searchTerm: currentFilters.searchTerm || null,
             sortBy: currentFilters.sortBy || "shortfall_desc",
-            graceDays: currentFilters.graceDays ?? 0,
             page,
             perPage: size,
           },

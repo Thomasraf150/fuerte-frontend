@@ -45,7 +45,6 @@ const ProblemAccountsList: React.FC = () => {
     serverSidePaginationProps,
   } = useProblemAccountsPaginated({
     sortBy: "shortfall_desc",
-    graceDays: 0,
   });
 
   useEffect(() => {
@@ -54,7 +53,6 @@ const ProblemAccountsList: React.FC = () => {
       branchSubId: branchSubId || undefined,
       searchTerm: debouncedSearch || undefined,
       sortBy,
-      graceDays: 0,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchId, branchSubId, debouncedSearch, sortBy]);
