@@ -23,7 +23,6 @@ export interface ProblemAccountRow {
   oldest_unpaid_due_date: string | null;
   oldest_unpaid_schedule_id: string | null;
   cutoffs_missed: number;
-  days_past_due: number;
 }
 
 export interface ProblemAccountSummary {

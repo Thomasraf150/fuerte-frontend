@@ -7,6 +7,7 @@ import { formatNumber } from "@/utils/formatNumber";
 const num = (raw: string) => parseFloat(raw) || 0;
 const fmt = (raw: string) => formatNumber(num(raw));
 const RED = "#dc2626"; // red-600 — inline style to beat any RDT cell default colour
+const GRAY = "#9ca3af"; // gray-400 — neutral "empty" value style
 
 export interface RowGroupInfo {
   isFirst: boolean;
@@ -65,7 +66,7 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
       return n > 0 ? (
         <span style={{ color: RED, fontWeight: 700 }}>{n}</span>
       ) : (
-        <span style={{ color: "#9ca3af" }}>0</span>
+        <span style={{ color: GRAY }}>0</span>
       );
     },
   },
@@ -90,7 +91,7 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
       return v > 0 ? (
         <span style={{ color: RED, fontWeight: 700 }}>{fmt(row.ua_amount)}</span>
       ) : (
-        <span style={{ color: "#9ca3af" }}>—</span>
+        <span style={{ color: GRAY }}>—</span>
       );
     },
   },
@@ -103,7 +104,7 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
       return v > 0 ? (
         <span style={{ color: RED, fontWeight: 700 }}>{fmt(row.sp_amount)}</span>
       ) : (
-        <span style={{ color: "#9ca3af" }}>—</span>
+        <span style={{ color: GRAY }}>—</span>
       );
     },
   },
