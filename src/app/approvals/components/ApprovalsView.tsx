@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Inbox } from "react-feather";
 import { useAuthStore } from "@/store";
 import useDeletionRequests, {
@@ -8,6 +8,7 @@ import useDeletionRequests, {
   DeletionRequestStatus,
 } from "@/hooks/useDeletionRequests";
 import DeletionRequestCard from "./DeletionRequestCard";
+import ApprovalsPager from "./ApprovalsPager";
 import "../styles.css";
 
 type Tab = "pending" | "mine" | "all";
@@ -24,12 +25,21 @@ const IS_APPROVER_ROLE = (roleName: string): boolean => {
   return r === "ADMIN" || r === "OWNER" || r === "BRANCH_ADMIN";
 };
 
+// "All decisions" status filter — `superseded` is an internal auto-state and
+// is intentionally omitted from the chips to keep the row clean.
+const ALL_FILTERS: Array<"" | DeletionRequestStatus> = [
+  "",
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+];
+
 const ApprovalsView: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const userId = user?.id;
   const roleName = ROLE_NAME(user);
   const isApprover = IS_APPROVER_ROLE(roleName);
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   useEffect(() => {
     setUser(useAuthStore.getState().user);
@@ -43,15 +53,19 @@ const ApprovalsView: React.FC = () => {
   }, [isApprover]);
 
   const [allFilter, setAllFilter] = useState<DeletionRequestStatus | "">("");
+  const [allPage, setAllPage] = useState(1);
 
   const {
     loading,
     pendingForMe,
     myRequests,
     allRequests,
+    allPaginatorInfo,
+    decidedTodayCount,
     fetchPendingForMe,
     fetchMyRequests,
     fetchAllRequests,
+    fetchDecidedTodayCount,
     approve,
     reject,
     cancel,
@@ -62,23 +76,23 @@ const ApprovalsView: React.FC = () => {
     // "Requests" only shows in-flight work — decided requests move to
     // All decisions (approvers) or fall off the user's view entirely.
     if (tab === "mine") return fetchMyRequests("pending");
-    return fetchAllRequests(allFilter || undefined);
+    return fetchAllRequests(allFilter || undefined, undefined, allPage);
   };
 
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, allFilter]);
+  }, [tab, allFilter, allPage]);
 
   // Prefetch every dataset on mount (and when the user's approver status
   // first resolves) so the stat strip and tab counters are accurate from
-  // the moment the page renders. Otherwise "All decisions" would tick
-  // from 0 to N a moment after first paint.
+  // the moment the page renders.
   useEffect(() => {
     fetchPendingForMe();
     fetchMyRequests("pending");
     if (isApprover) {
-      fetchAllRequests();
+      fetchAllRequests(undefined, undefined, 1);
+      fetchDecidedTodayCount();
     }
     // Depend on userId (not just isApprover) so non-approvers also get
     // a guaranteed re-fetch the moment the user resolves from Zustand
@@ -91,20 +105,17 @@ const ApprovalsView: React.FC = () => {
     tab === "pending" ? pendingForMe : tab === "mine" ? myRequests : allRequests;
 
   const pendingCount = pendingForMe.length;
-  const decidedToday = allRequests.filter(
-    (r) => r.decided_at && r.decided_at.slice(0, 10) === today
-  ).length;
   const branchOpen = myRequests.filter((r) => r.status === "pending").length;
 
-  // A decision changes more than just the active tab's dataset — it also
-  // affects every counter on the page (pending-for-me, branch-open,
-  // decided-today, tab counts). Refresh all three datasets in parallel
-  // so every number on the screen stays in sync without a manual reload.
+  // A decision affects every counter on the page (pending-for-me, branch-open,
+  // decided-today) and the current ledger page. Refresh them all in parallel so
+  // every number stays in sync without a manual reload.
   const refreshAll = async () => {
     await Promise.all([
       fetchPendingForMe(),
       fetchMyRequests("pending"),
-      isApprover ? fetchAllRequests(allFilter || undefined) : Promise.resolve(),
+      isApprover ? fetchAllRequests(allFilter || undefined, undefined, allPage) : Promise.resolve(),
+      isApprover ? fetchDecidedTodayCount() : Promise.resolve(),
     ]);
   };
 
@@ -145,7 +156,7 @@ const ApprovalsView: React.FC = () => {
           </div>
           <div className="appr-stat-card">
             <div className="appr-stat-label">Decided today</div>
-            <div className="appr-stat-value is-green">{String(decidedToday).padStart(2, "0")}</div>
+            <div className="appr-stat-value is-green">{String(decidedTodayCount).padStart(2, "0")}</div>
           </div>
           <div className="appr-stat-card">
             <div className="appr-stat-label">Your role</div>
@@ -187,15 +198,16 @@ const ApprovalsView: React.FC = () => {
         {/* status filter (All tab only, approvers only) */}
         {tab === "all" && isApprover && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {(["", "pending", "approved", "rejected", "cancelled", "superseded"] as Array<
-              "" | DeletionRequestStatus
-            >).map((s) => {
+            {ALL_FILTERS.map((s) => {
               const active = allFilter === s;
               return (
                 <button
                   key={s || "any"}
                   type="button"
-                  onClick={() => setAllFilter(s as any)}
+                  onClick={() => {
+                    setAllFilter(s as DeletionRequestStatus | "");
+                    setAllPage(1);
+                  }}
                   className={`text-xs px-3 py-1.5 rounded border transition-colors ${
                     active
                       ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white"
@@ -243,6 +255,17 @@ const ApprovalsView: React.FC = () => {
               />
             ))}
           </div>
+        )}
+
+        {tab === "all" && allPaginatorInfo && (
+          <ApprovalsPager
+            currentPage={allPaginatorInfo.currentPage}
+            lastPage={allPaginatorInfo.lastPage}
+            total={allPaginatorInfo.total}
+            perPage={allPaginatorInfo.perPage}
+            onPageChange={setAllPage}
+            disabled={loading}
+          />
         )}
       </div>
     </div>

@@ -36,10 +36,25 @@ const MY_DELETION_REQUESTS: string = `
 `;
 
 const ALL_DELETION_REQUESTS: string = `
-  query AllDeletionRequests($status: String, $branch_sub_id: Int) {
-    allDeletionRequests(status: $status, branch_sub_id: $branch_sub_id) {
-      ${DELETION_REQUEST_FIELDS}
+  query AllDeletionRequests($status: String, $branch_sub_id: Int, $first: Int!, $page: Int!) {
+    allDeletionRequests(status: $status, branch_sub_id: $branch_sub_id, first: $first, page: $page) {
+      data {
+        ${DELETION_REQUEST_FIELDS}
+      }
+      paginatorInfo {
+        currentPage
+        lastPage
+        perPage
+        total
+        hasMorePages
+      }
     }
+  }
+`;
+
+const DELETION_REQUESTS_DECIDED_TODAY_COUNT: string = `
+  query DeletionRequestsDecidedTodayCount {
+    deletionRequestsDecidedTodayCount
   }
 `;
 
@@ -96,6 +111,7 @@ const DeletionRequestsQueryMutation = {
   PENDING_DELETION_REQUESTS_FOR_ME,
   MY_DELETION_REQUESTS,
   ALL_DELETION_REQUESTS,
+  DELETION_REQUESTS_DECIDED_TODAY_COUNT,
   PENDING_DELETIONS_FOR_ENTITIES,
   APPROVE_DELETION_REQUEST,
   REJECT_DELETION_REQUEST,

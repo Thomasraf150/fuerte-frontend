@@ -306,3 +306,116 @@
 .dark .appr-empty-icon { color: #475569; }
 .dark .appr-empty-title { color: #e2e8f0; }
 .dark .appr-empty-text { color: #94a3b8; }
+
+/* ============================================================
+ *  Pager — "All decisions" ledger. Restrained slate controls
+ *  with a cyan active page, matching the tab system.
+ * ============================================================ */
+
+.appr-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.appr-pager-range {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.appr-pager-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.appr-pager-btn,
+.appr-pager-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.appr-pager-page { padding: 0; }
+
+.appr-pager-btn:hover:not(:disabled),
+.appr-pager-page:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.appr-pager-page.is-active,
+.appr-pager-page.is-active:hover {
+  background: #3085d6;
+  border-color: #3085d6;
+  color: #ffffff;
+}
+
+.appr-pager-btn:disabled,
+.appr-pager-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.appr-pager-ellipsis {
+  padding: 0 4px;
+  color: #94a3b8;
+  font-size: 13px;
+  user-select: none;
+}
+
+/* Mobile-first: 48px touch targets, icon-only Prev/Next to save width. */
+@media (max-width: 640px) {
+  .appr-pager { justify-content: center; }
+  .appr-pager-range { width: 100%; text-align: center; }
+  .appr-pager-btn,
+  .appr-pager-page { min-width: 48px; height: 48px; }
+  .appr-pager-btn-label { display: none; }
+}
+
+.dark .appr-pager { border-top-color: #2e3a47; }
+.dark .appr-pager-range { color: #94a3b8; }
+
+.dark .appr-pager-btn,
+.dark .appr-pager-page {
+  background: #24303f;
+  border-color: #2e3a47;
+  color: #cbd5e1;
+}
+
+.dark .appr-pager-btn:hover:not(:disabled),
+.dark .appr-pager-page:hover:not(:disabled) {
+  border-color: #475569;
+  background: #1c2632;
+  color: #e2e8f0;
+}
+
+.dark .appr-pager-page.is-active,
+.dark .appr-pager-page.is-active:hover {
+  background: #3085d6;
+  border-color: #3085d6;
+  color: #ffffff;
+}
+
+.dark .appr-pager-ellipsis { color: #475569; }

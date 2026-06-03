@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import DeletionRequestsQueryMutation from "@/graphql/DeletionRequestsQueryMutation";
 import { graphqlFetch } from "@/utils/graphqlFetch";
+import { DEFAULT_PAGE_SIZE } from "@/constants/pagination";
 
 export type DeletionRequestStatus =
   | "pending"
@@ -33,29 +34,47 @@ export interface DeletionRequest {
   branch?: { id: number; name: string } | null;
 }
 
+export interface DeletionPaginatorInfo {
+  currentPage: number;
+  lastPage: number;
+  perPage: number;
+  total: number;
+  hasMorePages: boolean;
+}
+
 const {
   PENDING_DELETION_REQUESTS_FOR_ME,
   MY_DELETION_REQUESTS,
   ALL_DELETION_REQUESTS,
+  DELETION_REQUESTS_DECIDED_TODAY_COUNT,
   APPROVE_DELETION_REQUEST,
   REJECT_DELETION_REQUEST,
   CANCEL_DELETION_REQUEST,
 } = DeletionRequestsQueryMutation;
+
+// Single place that surfaces a GraphQL error as a toast and tells the caller
+// whether to bail. Keeps every fetcher/mutation guard to one readable line.
+const reportGqlError = (r: { errors?: Array<{ message: string }> }): boolean => {
+  if (r.errors) {
+    toast.error(r.errors[0].message);
+    return true;
+  }
+  return false;
+};
 
 export const useDeletionRequests = () => {
   const [loading, setLoading] = useState(false);
   const [pendingForMe, setPendingForMe] = useState<DeletionRequest[]>([]);
   const [myRequests, setMyRequests] = useState<DeletionRequest[]>([]);
   const [allRequests, setAllRequests] = useState<DeletionRequest[]>([]);
+  const [allPaginatorInfo, setAllPaginatorInfo] = useState<DeletionPaginatorInfo | null>(null);
+  const [decidedTodayCount, setDecidedTodayCount] = useState(0);
 
   const fetchPendingForMe = useCallback(async () => {
     setLoading(true);
     try {
       const r = await graphqlFetch(PENDING_DELETION_REQUESTS_FOR_ME, {});
-      if (r.errors) {
-        toast.error(r.errors[0].message);
-        return;
-      }
+      if (reportGqlError(r)) return;
       setPendingForMe(r.data?.pendingDeletionRequestsForMe ?? []);
     } finally {
       setLoading(false);
@@ -66,59 +85,60 @@ export const useDeletionRequests = () => {
     setLoading(true);
     try {
       const r = await graphqlFetch(MY_DELETION_REQUESTS, status ? { status } : {});
-      if (r.errors) {
-        toast.error(r.errors[0].message);
-        return;
-      }
+      if (reportGqlError(r)) return;
       setMyRequests(r.data?.myDeletionRequests ?? []);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const fetchAllRequests = useCallback(async (status?: DeletionRequestStatus, branch_sub_id?: number) => {
-    setLoading(true);
-    try {
-      const vars: Record<string, unknown> = {};
-      if (status) vars.status = status;
-      if (branch_sub_id) vars.branch_sub_id = branch_sub_id;
-      const r = await graphqlFetch(ALL_DELETION_REQUESTS, vars);
-      if (r.errors) {
-        toast.error(r.errors[0].message);
-        return;
+  const fetchAllRequests = useCallback(
+    async (
+      status?: DeletionRequestStatus,
+      branch_sub_id?: number,
+      page = 1,
+      first = DEFAULT_PAGE_SIZE
+    ) => {
+      setLoading(true);
+      try {
+        const vars: Record<string, unknown> = { first, page };
+        if (status) vars.status = status;
+        if (branch_sub_id) vars.branch_sub_id = branch_sub_id;
+        const r = await graphqlFetch(ALL_DELETION_REQUESTS, vars);
+        if (reportGqlError(r)) return;
+        const payload = r.data?.allDeletionRequests;
+        setAllRequests(payload?.data ?? []);
+        setAllPaginatorInfo(payload?.paginatorInfo ?? null);
+      } finally {
+        setLoading(false);
       }
-      setAllRequests(r.data?.allDeletionRequests ?? []);
-    } finally {
-      setLoading(false);
-    }
+    },
+    []
+  );
+
+  const fetchDecidedTodayCount = useCallback(async () => {
+    const r = await graphqlFetch(DELETION_REQUESTS_DECIDED_TODAY_COUNT, {});
+    if (r.errors) return; // best-effort, like the bell badge — stay silent
+    setDecidedTodayCount(r.data?.deletionRequestsDecidedTodayCount ?? 0);
   }, []);
 
   const approve = useCallback(async (id: string, note?: string) => {
     const r = await graphqlFetch(APPROVE_DELETION_REQUEST, { id, note: note || null });
-    if (r.errors) {
-      toast.error(r.errors[0].message);
-      return false;
-    }
+    if (reportGqlError(r)) return false;
     toast.success("Deletion approved.");
     return true;
   }, []);
 
   const reject = useCallback(async (id: string, note?: string) => {
     const r = await graphqlFetch(REJECT_DELETION_REQUEST, { id, note: note || null });
-    if (r.errors) {
-      toast.error(r.errors[0].message);
-      return false;
-    }
+    if (reportGqlError(r)) return false;
     toast.success("Request rejected.");
     return true;
   }, []);
 
   const cancel = useCallback(async (id: string) => {
     const r = await graphqlFetch(CANCEL_DELETION_REQUEST, { id });
-    if (r.errors) {
-      toast.error(r.errors[0].message);
-      return false;
-    }
+    if (reportGqlError(r)) return false;
     toast.success("Request cancelled.");
     return true;
   }, []);
@@ -128,9 +148,12 @@ export const useDeletionRequests = () => {
     pendingForMe,
     myRequests,
     allRequests,
+    allPaginatorInfo,
+    decidedTodayCount,
     fetchPendingForMe,
     fetchMyRequests,
     fetchAllRequests,
+    fetchDecidedTodayCount,
     approve,
     reject,
     cancel,
