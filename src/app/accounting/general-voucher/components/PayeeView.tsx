@@ -107,7 +107,9 @@ const PayeeView: React.FC<ParentProp> = ({ setShowPayee, setDataPayee }) => {
                 <div className="px-4">
                   <CustomDatatable
                     apiLoading={isTableLoading}
-                    title="Vendor List"
+                    title=""
+                    enableCustomHeader={true}
+                    searchPlaceholder="Search payee by name, employee #, or TIN…"
                     onRowClicked={handleWholeRowClick}
                     columns={column()}
                     data={dataVendors || []}

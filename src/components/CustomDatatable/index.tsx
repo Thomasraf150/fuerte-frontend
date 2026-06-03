@@ -61,6 +61,10 @@ interface CustomDatatableProps<T> {
 
   // Conditional row styling (optional)
   conditionalRowStyles?: ConditionalStyles<T>[];
+
+  // Custom placeholder for the header search input. Works in both client-side
+  // and server-side modes. When omitted, falls back to the existing defaults.
+  searchPlaceholder?: string;
 }
 
 // Server-side pagination controls component
@@ -217,7 +221,7 @@ const CustomHeader = React.memo<{
         {enableSearch && (
           <input
             type="text"
-            placeholder={isServerSide ? (searchPlaceholder || "Search...") : "Search current page..."}
+            placeholder={searchPlaceholder || (isServerSide ? "Search..." : "Search current page...")}
             value={searchQuery}
             onChange={handleSearch}
             className="form-control border border-gray-300 dark:border-strokedark rounded-md px-4 py-1 bg-white dark:bg-form-input text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-primary"
@@ -244,6 +248,7 @@ const CustomDatatable = <T extends object>({
   defaultSortFieldId,
   serverSidePagination,
   conditionalRowStyles,
+  searchPlaceholder,
 }: CustomDatatableProps<T>): JSX.Element => {
 
   // Get theme-aware styles for the datatable
@@ -319,7 +324,7 @@ const CustomDatatable = <T extends object>({
           handleSearch={handleSearch}
           isServerSide={isServerSide}
           enableSearch={serverSidePagination?.enableSearch !== false}
-          searchPlaceholder={serverSidePagination?.searchPlaceholder}
+          searchPlaceholder={searchPlaceholder ?? serverSidePagination?.searchPlaceholder}
         />
       )}
 
