@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { GraphQLConnectionError, parseGraphQLResponse } from './graphqlFetch';
+import { useAuthStore } from '@/store';
 
 /**
  * Formats a date range intelligently:
@@ -61,6 +62,16 @@ export const fetchWithRecache = async (
 ): Promise<any> => {
   const headers = new Headers(options.headers);
   if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+  // Attach the bearer token centrally so every GraphQL call is authenticated
+  // (the backend enforces auth per-resolver). Only added when the caller didn't
+  // already set Authorization and a token exists — logged-out public calls
+  // (e.g. the maintenance check) send none, and hooks that set their own
+  // Authorization header are left untouched. Scoped to the Fuerte GraphQL
+  // endpoint so the API token is never sent to any other URL.
+  if (!headers.has('Authorization') && url === process.env.NEXT_PUBLIC_API_GRAPHQL) {
+    const token = useAuthStore.getState().GET_AUTH_TOKEN();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+  }
 
   let response: Response;
   try {

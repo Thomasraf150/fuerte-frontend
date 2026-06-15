@@ -132,6 +132,9 @@ export function useNotesReceivablePaginated(
   // Cache for batch data
   const batchCache = useRef<Map<string, BatchCacheItem>>(new Map());
   const lastFetchTime = useRef<number>(0);
+  // Monotonic id so a stale out-of-order response can't overwrite the latest
+  // results when the user changes the search/date filters quickly.
+  const latestRequestId = useRef<number>(0);
   
   // Queries
   const { NR_SCHEDULE_BATCH, NR_SCHEDULE_LIST } = NotesReceivableQueryMutation;
@@ -288,6 +291,7 @@ export function useNotesReceivablePaginated(
     perPageValue: number,
     isInitial: boolean = false
   ) => {
+    const requestId = ++latestRequestId.current;
     const cacheKey = generateCacheKey(page, currentFilters, perPageValue);
     
     // Check cache first
@@ -318,7 +322,10 @@ export function useNotesReceivablePaginated(
 
     try {
       const result = await fetchBatchData(page, currentFilters, perPageValue);
-      
+
+      // Discard if a newer request superseded this one.
+      if (requestId !== latestRequestId.current) return;
+
       if (result) {
         // Cache the result
         const cacheItem: BatchCacheItem = {
@@ -344,14 +351,17 @@ export function useNotesReceivablePaginated(
         lastFetchTime.current = Date.now();
       }
     } catch (error) {
+      if (requestId !== latestRequestId.current) return; // stale error, ignore
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data';
       setError(errorMessage);
       console.error('Load page error:', error);
       setRetryCount(prev => prev + 1);
     } finally {
-      setLoading(false);
-      setInitialLoading(false);
-      setLoadingMore(false);
+      if (requestId === latestRequestId.current) {
+        setLoading(false);
+        setInitialLoading(false);
+        setLoadingMore(false);
+      }
     }
   }, [generateCacheKey, fetchBatchData, cleanupCache]);
 

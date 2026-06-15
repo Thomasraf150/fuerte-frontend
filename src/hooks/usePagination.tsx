@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   DEFAULT_PAGE_SIZE,
   PAGE_SIZE_OPTIONS,
@@ -97,6 +97,13 @@ export function usePagination<T = any>({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
 
+  // Monotonic request id. Rapid typing fires several overlapping fetches; without
+  // this, a slower earlier response (e.g. a broad "tela" match) can land AFTER a
+  // more specific one ("tela-0001") and overwrite it. We tag each fetch and only
+  // let the LATEST one update state — discarding stale responses (fixes the
+  // "wrong results until I retype" race).
+  const latestRequestId = useRef<number>(0);
+
   // Debounce search query to avoid excessive API calls
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -113,6 +120,7 @@ export function usePagination<T = any>({
     search: string = debouncedSearchQuery,
     status: string = statusFilter
   ) => {
+    const requestId = ++latestRequestId.current;
     setLoading(true);
     setError(null);
 
@@ -120,6 +128,10 @@ export function usePagination<T = any>({
       // Trim search query to handle whitespace-only searches
       const trimmedSearch = search?.trim();
       const response = await fetchFunction(pageSize, page, trimmedSearch || undefined, status);
+
+      // Discard this response if a newer request has since started — prevents an
+      // out-of-order stale response from overwriting the latest results.
+      if (requestId !== latestRequestId.current) return;
 
       // Handle both paginated and non-paginated responses
       if (response.paginatorInfo) {
@@ -148,11 +160,13 @@ export function usePagination<T = any>({
         }));
       }
     } catch (err) {
+      if (requestId !== latestRequestId.current) return; // stale error, ignore
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data';
       setError(errorMessage);
       console.error('Pagination fetch error:', err);
     } finally {
-      setLoading(false);
+      // Only the latest request clears the loading flag.
+      if (requestId === latestRequestId.current) setLoading(false);
     }
   }, [fetchFunction, statusFilter]);
 

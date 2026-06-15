@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import soaListColumn from './SoaListColumn';
@@ -11,21 +11,34 @@ const column = soaListColumn;
 
 const SoaList: React.FC = () => {
   const router = useRouter();
-  const { loanData, fetchLoans, loading } = useLoans();
+  const { dataLoans, loansLoading, serverSidePaginationProps } = useLoans();
 
-  // Navigate to detail page on action button click (URL-based routing)
+  // Navigate to the SOA detail (ledger) for the chosen loan.
   const handleRowClick = (data: BorrLoanRowData) => {
     router.push(`/statement-of-account/${data.id}`);
   };
 
-  // Navigate to detail page on whole row click (URL-based routing)
-  const handleWholeRowClick = (data: BorrLoanRowData) => {
-    router.push(`/statement-of-account/${data.id}`);
+  // Server-side search + pagination, but WITHOUT the Loans-List status/branch
+  // filters (we omit onStatusFilterChange & the date/branch handlers so those
+  // controls don't render on this page). This makes the SOA search behave like
+  // the Borrowers/Loans search: server-side, case-insensitive, and able to find
+  // ANY loan in the user's branch — not just the first (capped) page that the
+  // old client-side filter could see.
+  const soaSearchProps = {
+    totalRecords: serverSidePaginationProps.totalRecords,
+    currentPage: serverSidePaginationProps.currentPage,
+    pageSize: serverSidePaginationProps.pageSize,
+    totalPages: serverSidePaginationProps.totalPages,
+    hasNextPage: serverSidePaginationProps.hasNextPage,
+    hasPreviousPage: serverSidePaginationProps.hasPreviousPage,
+    onPageChange: serverSidePaginationProps.onPageChange,
+    onPageSizeChange: serverSidePaginationProps.onPageSizeChange,
+    searchQuery: serverSidePaginationProps.searchQuery,
+    onSearchChange: serverSidePaginationProps.onSearchChange,
+    pageSizeOptions: serverSidePaginationProps.pageSizeOptions,
+    enableSearch: true,
+    searchPlaceholder: 'Search loan ref or borrower…',
   };
-
-  useEffect(() => {
-    fetchLoans(100000, 1, 0);
-  }, []);
 
   return (
     <div>
@@ -40,10 +53,11 @@ const SoaList: React.FC = () => {
               </div>
               <div className="p-7">
                 <CustomDatatable
-                  apiLoading={loading}
+                  apiLoading={loansLoading}
                   columns={column(handleRowClick)}
-                  onRowClicked={handleWholeRowClick}
-                  data={loanData}
+                  onRowClicked={handleRowClick}
+                  data={dataLoans}
+                  serverSidePagination={soaSearchProps}
                   enableCustomHeader={true}
                   title={''}
                 />

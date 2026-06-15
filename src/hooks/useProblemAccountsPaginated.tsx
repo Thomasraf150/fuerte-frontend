@@ -60,6 +60,9 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
 
   const { GET_PROBLEM_ACCOUNTS } = ProblemAccountsQueryMutation;
   const initialized = useRef(false);
+  // Monotonic id so a stale out-of-order response can't overwrite the latest
+  // results when the user types/filters quickly (mirrors usePagination).
+  const latestRequestId = useRef(0);
 
   const fetchPage = useCallback(
     async (page: number, size: number, currentFilters: ProblemAccountFilters) => {
@@ -70,6 +73,7 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
         return;
       }
 
+      const requestId = ++latestRequestId.current;
       setLoading(true);
       setError(null);
 
@@ -85,6 +89,9 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
             perPage: size,
           },
         });
+
+        // Discard if a newer request superseded this one.
+        if (requestId !== latestRequestId.current) return;
 
         if (result.errors && result.errors.length > 0) {
           throw new Error(result.errors[0].message || "GraphQL error");
@@ -105,12 +112,13 @@ export function useProblemAccountsPaginated(initialFilters: ProblemAccountFilter
         );
         setCurrentPage(page);
       } catch (e) {
+        if (requestId !== latestRequestId.current) return; // stale error, ignore
         const msg = e instanceof Error ? e.message : "Failed to load problem accounts";
         setError(msg);
         setData([]);
         setSummary(EMPTY_SUMMARY);
       } finally {
-        setLoading(false);
+        if (requestId === latestRequestId.current) setLoading(false);
       }
     },
     [GET_PROBLEM_ACCOUNTS]

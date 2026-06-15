@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import { DataRowLoanProducts, BorrLoanComputationValues, BorrLoanRowData, LoanBankFormValues, LoanReleaseFormValues, DataRenewalData } from '@/utils/DataTypes';
@@ -46,6 +46,10 @@ const useLoans = () => {
   const [branchSubId, setBranchSubId] = useState<number | null>(null);
 
   const rowsPerPage = 10;
+
+  // Guards the async loan-product dropdown search against stale out-of-order
+  // responses (rapid typing) overwriting fresher results.
+  const latestProductSearchId = useRef(0);
 
   // Pagination wrapper function for server-side pagination
   const fetchLoansForPagination = useCallback(async (
@@ -330,6 +334,7 @@ const useLoans = () => {
       return loanProduct.map(p => ({ value: String(p.id), label: p.description }));
     }
 
+    const requestId = ++latestProductSearchId.current;
     try {
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
@@ -348,7 +353,9 @@ const useLoans = () => {
         }),
       });
 
-      if (response.data?.getLoanProducts?.data) {
+      // Ignore a stale response from an earlier keystroke; fall through to the
+      // current cached list so the dropdown never shows out-of-date matches.
+      if (requestId === latestProductSearchId.current && response.data?.getLoanProducts?.data) {
         return response.data.getLoanProducts.data.map((p: DataRowLoanProducts) => ({
           value: String(p.id),
           label: p.description,

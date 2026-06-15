@@ -34,7 +34,7 @@ const BalanceSheetList: React.FC = () => {
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
-  const { balanceSheetData, fetchBalanceSheetData } = useFinancialStatement();
+  const { balanceSheetData, fetchBalanceSheetData, loading } = useFinancialStatement();
   
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
@@ -62,11 +62,6 @@ const BalanceSheetList: React.FC = () => {
     setBranchSubId(branch_sub_id);
     fetchBalanceSheetData(startDate, endDate, branch_sub_id);
   };
-
-  useEffect(() => {
-
-    console.log(balanceSheetData, ' balanceSheetData');
-  }, [balanceSheetData])
 
   useEffect(()=>{
     if (dataBranch && Array.isArray(dataBranch)) {
@@ -213,7 +208,12 @@ const BalanceSheetList: React.FC = () => {
               </div>
 
               <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] max-h-[70vh] lg:h-[600px]">
-                {balanceSheetData !== undefined ? (
+                {loading ? (
+                  <div className="flex items-center justify-center min-h-[300px] text-gray-500 dark:text-bodydark">
+                    <span className="inline-block h-5 w-5 mr-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
+                    Loading balance sheet…
+                  </div>
+                ) : balanceSheetData !== undefined ? (
                   <table className="w-full text-sm border-collapse">
                     <thead>
                       <tr className="bg-gray-100 dark:bg-meta-4 border-b-2 border-gray-300 dark:border-strokedark">
