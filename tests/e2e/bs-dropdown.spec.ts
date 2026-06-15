@@ -20,7 +20,8 @@ test('owner: balance sheet branch dropdown lists branches (null-user-id fix)', a
   // Focus the first react-select and open it via keyboard (robust vs click).
   await page.locator('input[id^="react-select"]').first().click();
   await page.keyboard.press('ArrowDown');
-  await page.waitForTimeout(1200);
+  // Wait for the menu to render (react-select is timing-flaky on cold runs) rather than a fixed delay.
+  await expect(page.getByRole('option').first()).toBeVisible({ timeout: 10000 });
   const options = await page.getByRole('option').allInnerTexts();
   console.log('branch options (' + options.length + '):', options.slice(0, 8).join(' | '));
   expect(options.length).toBeGreaterThan(2); // "All Main Branches" + real branches
