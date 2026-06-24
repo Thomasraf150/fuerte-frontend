@@ -41,11 +41,15 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
       setValue('ap_refund', '0.00');
     }
 
-    // Interest: proportional to (advanced + payment_ua_sp) / remainingDue,
-    // capped at remainingUdi. Fully-paid period (remainingDue = 0) yields 0.
+    // Interest: proportional to the real cash applied to this period
+    // (collection / remainingDue), capped at remainingUdi. Driven by Collection
+    // ONLY (office decision 2026-06-24) so paying a schedule's interest no longer
+    // requires also typing the amount into Advanced Payment — that coupling was
+    // minting duplicate Collection+Advanced-Payment rows that understated the
+    // renewal OB (loan FB BAL-00000947). Fully-paid period (remainingDue = 0) -> 0.
     let interest = 0;
     if (remainingDue > 0) {
-      interest = remainingUdi * ((advanced + paymentUaSp) / remainingDue);
+      interest = remainingUdi * (collection / remainingDue);
       if (!isFinite(interest) || isNaN(interest) || interest < 0) interest = 0;
       if (interest > remainingUdi) interest = remainingUdi;
     }

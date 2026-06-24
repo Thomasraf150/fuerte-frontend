@@ -311,4 +311,47 @@ test.describe('Payment Posting form fixes', () => {
     console.log(`   payment_ua_sp after 1.5s: "${after}" (=${afterNum})`);
     expect(afterNum).toBeCloseTo(parseFloat(big), 1);
   });
+
+  test('Fix: Other Payment interest is driven by Collection (no Advanced Payment needed)', async ({ page }) => {
+    // Regression for the renewal-OB duplicate (loan FB BAL-00000947 / SAUCELO):
+    // the form used to compute interest from advanced_payment, so to record a
+    // schedule's interest an operator had to type the cash into BOTH Collection
+    // and Advanced Payment — minting a duplicate Advanced Payment row that
+    // understated the renewal OB (3,430 vs the true 3,570). Interest is now
+    // remainingUdi * (collection / remainingDue), so Collection alone is enough
+    // and no Advanced Payment entry (= no duplicate) is needed.
+    await openTargetLoan(page);
+
+    const unpaidRow = await firstUnpaidRow(page);
+    expect(unpaidRow, 'need an unpaid row').not.toBeNull();
+    const monthly = parseFloat((await rowAmortization(unpaidRow!)).replace(/,/g, ''));
+    expect(monthly).toBeGreaterThan(0);
+
+    await clickOther(unpaidRow!);
+    await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
+    await page.waitForTimeout(500);
+
+    // Enter ONLY Collection (full amortization). Never touch Advanced Payment.
+    await page.locator('input#bank_charge').fill('0');
+    await page.locator('input#collection').fill(monthly.toFixed(2));
+    await page.waitForTimeout(400);
+
+    const interestFull = await inputNumber(page, 'udi');
+    const advUntouched = await inputValue(page, 'advanced_payment');
+    console.log(`   collection=${monthly} -> interest=${interestFull}, advanced="${advUntouched}"`);
+
+    // Interest computed from Collection alone — positive, not NaN — so the
+    // operator no longer needs an Advanced Payment entry to get interest.
+    expect(interestFull).not.toBeNaN();
+    expect(interestFull).toBeGreaterThan(0);
+    // Advanced Payment was never typed and stays empty/zero (no duplicate seeded).
+    expect(['', '0', '0.00']).toContain(advUntouched);
+
+    // Halving the Collection roughly halves the interest (proportional to cash).
+    await page.locator('input#collection').fill((monthly / 2).toFixed(2));
+    await page.waitForTimeout(400);
+    const interestHalf = await inputNumber(page, 'udi');
+    console.log(`   collection=${(monthly / 2).toFixed(2)} -> interest=${interestHalf}`);
+    expect(interestHalf).toBeCloseTo(interestFull / 2, 0);
+  });
 });
