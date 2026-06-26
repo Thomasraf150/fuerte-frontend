@@ -74,3 +74,18 @@ export function findAccessibleLoan(branchSubId: string | number): AccessibleLoan
   const [loanId, scheduleId, dueDate, amort, udi] = out.split('|');
   return { loanId, scheduleId, dueDate, amort, udi };
 }
+
+export interface SoaView {
+  finalBalance: number;
+  advancePayment: number;
+  paymentUaSp: number;
+  collection: number;
+}
+
+/** SOA (sp_customer_ledger) view for a schedule: the loan's final running balance + the
+ *  schedule's Advanced Payment / Payment UA/SP / Collection display columns. */
+export function soaView(scheduleId: string | number): SoaView {
+  const out = dockerPhp(['soa', String(scheduleId)]);
+  const [finalBalance, advancePayment, paymentUaSp, collection] = out.split('|').map((n) => parseFloat(n));
+  return { finalBalance, advancePayment, paymentUaSp, collection };
+}

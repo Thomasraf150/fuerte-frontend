@@ -1,16 +1,18 @@
 /**
- * Other Payment form — REAL FIX (2026-06-26): Advanced Payment / Payment UA/SP are cash
- * (Heidi), so a payment via ANY of the three boxes must settle the due AND post to the GL.
+ * Other Payment form — REAL FIX (2026-06-26): Advanced Payment / Payment UA/SP are cash (Heidi),
+ * so they must (a) SETTLE the schedule's due, (b) POST to the General Ledger, and (c) still show
+ * on the SOA in their OWN columns (Advanced Payment / Payment UA/SP), not under Collection.
  *
- * The backend folds Advanced Payment / Payment UA/SP into Collection at posting time, so the
- * payment runs through the proven Collection path (settles + books). The three boxes stay
- * mutually exclusive (one-box lock) so the same money can never be booked twice.
+ * Implementation: new such rows are flagged (payment_settles=1) and kept with their description.
+ * The payment screen + SOA running balance + GL count flagged markers; the SOA display columns
+ * are keyed by description, so they still show separately. Old rows (flag 0) are untouched.
  *
- * This suite proves, for EACH of Collection / Advanced Payment / Payment UA/SP:
- *   - the payment SETTLES the schedule (remaining amortization -> 0.00), and
- *   - it POSTS to the General Ledger (>=1 acctg entry), and
- *   - it is recorded as a Collection (the fold), with NO leftover marker row.
- * Plus: one-box lock works, interest auto-fills + editable + not clobbered, empty save blocked.
+ * For EACH of Collection / Advanced Payment / Payment UA/SP this suite proves:
+ *   - remaining amortization -> 0.00 (settles),
+ *   - >=1 GL entry (posts to the ledger),
+ *   - the SOA running balance drops by the amount (settles in the statement), and
+ *   - the SOA shows the amount in the correct column (Collection vs Advanced Payment vs Payment UA/SP).
+ * Plus: one-box lock, interest auto-fill/editable/not-clobbered, empty-save blocked.
  *
  * Auto-discovers a fully-clean, admin-accessible loan (branch_sub 1) and self-cleans (idempotent).
  */
@@ -24,6 +26,7 @@ import {
   cleanupLoan,
   countActivePayments,
   paymentAmount,
+  soaView,
   AccessibleLoan,
 } from '../../helpers/phase-b-helpers';
 
@@ -31,7 +34,7 @@ const ADMIN_BRANCH_SUB = '1';
 
 let loan: AccessibleLoan | null = null;
 
-test.describe('Other Payment form — real fix (all three boxes settle + book)', () => {
+test.describe('Other Payment — all three boxes settle + book + show on the SOA', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.beforeAll(() => { loan = findAccessibleLoan(ADMIN_BRANCH_SUB); });
@@ -61,11 +64,19 @@ test.describe('Other Payment form — real fix (all three boxes settle + book)',
   const val = async (page: Page, id: string) => (await page.locator(`input#${id}`).inputValue());
   const numVal = async (page: Page, id: string) => parseFloat((await val(page, id)).replace(/,/g, ''));
 
-  /** Pay the full amortization via one box, then assert it settled + booked + folded to Collection. */
-  async function payViaBoxAndAssert(page: Page, boxId: 'collection' | 'advanced_payment' | 'payment_ua_sp') {
+  /**
+   * Pay the full amortization via one box, then assert it (1) settled the due, (2) posted to the
+   * GL, (3) dropped the SOA running balance, and (4) shows in the expected SOA column.
+   */
+  async function payAndAssert(
+    page: Page,
+    boxId: 'collection' | 'advanced_payment' | 'payment_ua_sp',
+    soaColumn: 'collection' | 'advancePayment' | 'paymentUaSp',
+  ) {
     const sched = loan!.scheduleId;
     const amort = parseFloat(loan!.amort);
     expect(countActivePayments(sched), 'schedule starts clean').toBe(0);
+    const balBefore = soaView(sched).finalBalance; // clean loan -> full debit
     let saved = false;
     try {
       await openForm(page);
@@ -79,19 +90,24 @@ test.describe('Other Payment form — real fix (all three boxes settle + book)',
       await page.waitForTimeout(900);
 
       const remaining = remainingAmort(sched);
-      const collection = paymentAmount(sched, 'Collection');
-      const advanced = paymentAmount(sched, 'Advanced Payment');
-      const ua = paymentAmount(sched, 'Payment UA/SP');
       const gl = glEntryCount(sched);
-      console.log(`   [${boxId}] remaining=${remaining} collection=${collection} adv=${advanced} uasp=${ua} gl=${gl}`);
+      const soa = soaView(sched);
+      console.log(`   [${boxId}] remaining=${remaining} gl=${gl} soa.collection=${soa.collection} soa.adv=${soa.advancePayment} soa.uasp=${soa.paymentUaSp} balΔ=${(balBefore - soa.finalBalance).toFixed(2)}`);
 
       expect(remaining, `${boxId}: Due Date settled to 0`).toBe('0.00');
       expect(gl, `${boxId}: posted to the General Ledger`).toBeGreaterThanOrEqual(1);
-      // Folded to Collection: the cash is a Collection row of the full amount, no marker row left.
-      expect(collection, `${boxId}: recorded as a Collection`).not.toBeNull();
-      expect(parseFloat(collection!)).toBeCloseTo(amort, 2);
-      expect(advanced, `${boxId}: no Advanced Payment marker row`).toBeNull();
-      expect(ua, `${boxId}: no Payment UA/SP marker row`).toBeNull();
+      expect(balBefore - soa.finalBalance, `${boxId}: SOA running balance dropped by the payment`).toBeCloseTo(amort, 2);
+      expect(soa[soaColumn], `${boxId}: shows in the SOA ${soaColumn} column`).toBeCloseTo(amort, 2);
+
+      // Marker boxes keep their identity (NOT folded into Collection) so the SOA shows them separately.
+      if (boxId === 'advanced_payment') {
+        expect(parseFloat(paymentAmount(sched, 'Advanced Payment')!)).toBeCloseTo(amort, 2);
+        expect(soa.collection, 'advance does NOT show under Collection').toBe(0);
+      }
+      if (boxId === 'payment_ua_sp') {
+        expect(parseFloat(paymentAmount(sched, 'Payment UA/SP')!)).toBeCloseTo(amort, 2);
+        expect(soa.collection, 'UA/SP does NOT show under Collection').toBe(0);
+      }
     } finally {
       if (saved) {
         cleanupLoan(loan!.loanId);
@@ -103,7 +119,6 @@ test.describe('Other Payment form — real fix (all three boxes settle + book)',
   test('One-box lock: typing Collection disables Advanced Payment + Payment UA/SP; clearing re-enables', async ({ page }) => {
     await openForm(page);
     expect(await page.locator('input#advanced_payment').isDisabled()).toBe(false);
-    expect(await page.locator('input#payment_ua_sp').isDisabled()).toBe(false);
     await page.locator('input#collection').fill('100');
     await page.waitForTimeout(400);
     expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced locks').toBe(true);
@@ -148,15 +163,15 @@ test.describe('Other Payment form — real fix (all three boxes settle + book)',
     expect(countActivePayments(loan!.scheduleId)).toBe(0);
   });
 
-  test('Collection payment settles + books', async ({ page }) => {
-    await payViaBoxAndAssert(page, 'collection');
+  test('Collection: settles + books + shows under Collection on the SOA', async ({ page }) => {
+    await payAndAssert(page, 'collection', 'collection');
   });
 
-  test('Advanced Payment (Collection 0) settles + books — recorded as Collection', async ({ page }) => {
-    await payViaBoxAndAssert(page, 'advanced_payment');
+  test('Advanced Payment: settles + books + shows under Advanced Payment on the SOA', async ({ page }) => {
+    await payAndAssert(page, 'advanced_payment', 'advancePayment');
   });
 
-  test('Payment UA/SP (Collection 0) settles + books — recorded as Collection', async ({ page }) => {
-    await payViaBoxAndAssert(page, 'payment_ua_sp');
+  test('Payment UA/SP: settles + books + shows under Payment UA/SP on the SOA', async ({ page }) => {
+    await payAndAssert(page, 'payment_ua_sp', 'paymentUaSp');
   });
 });
