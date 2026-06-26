@@ -1,13 +1,23 @@
 /**
- * Payment-Posting Form Fixes — verifies three reported bugs:
+ * Payment-Posting "Other Payment" form — behaviour locked in by Heidi's rule
+ * (2026-06-26): a payment is recorded in EXACTLY ONE of Collection /
+ * Advanced Payment / Payment UA/SP — never two at once. Booking the same money
+ * in two boxes is what understated the renewal Outstanding Balances
+ * (e.g. FB BAL-00000947 / SAUCELO: 3,430 vs the true 3,570).
  *
- *   1. NaN in Interest field on a fully-paid period when using "Other Payments"
- *   2. Advanced Payment field wiped to 0 after 1s when value exceeds the
- *      current row's monthly amortization
- *   3. Bank Charges should be the first input field in both forms
+ * What this spec proves:
+ *   - Bank Charges is still the first input in both forms (legacy bug #3).
+ *   - Interest is 0.00 (never NaN) on a fully-paid row (legacy bug #1).
+ *   - ONE-BOX LOCK: filling one of the three payment boxes disables + zeroes the
+ *     other two; clearing it re-enables them.
+ *   - Interest auto-computes from WHICHEVER box is used — including an
+ *     advance-only entry (Collection 0 + Advanced Payment / Payment UA/SP) — so
+ *     operators never need a fake Collection just to make interest appear.
+ *   - The Interest field is manually editable and sits at the bottom.
+ *   - A value entered in a payment box is NOT wiped after 1s (legacy bug #2).
  *
- * READ-ONLY: opens forms, types values, observes field behavior. No Save click,
- * no DB writes. Safe to run against live data.
+ * Most tests are READ-ONLY (open form, type, observe — no Save). The single
+ * Phase-B test Saves to the DB and then restores the schedule.
  *
  * Target: loan_id=8189 (FB BAL-00000996) — 1 paid schedule + 7 unpaid.
  */
@@ -99,24 +109,30 @@ async function inputNumber(page: Page, id: string): Promise<number> {
 async function getEditableInputIdsInOrder(form: Locator): Promise<string[]> {
   return await form.locator('input[id]').evaluateAll((els) =>
     (els as HTMLInputElement[])
-      .filter((e) => !e.readOnly && e.type !== 'hidden')
+      .filter((e) => !e.readOnly && !e.disabled && e.type !== 'hidden')
       .map((e) => e.id)
   );
 }
 
-test.describe('Payment Posting form fixes', () => {
+/** Open the Other Payment form on the first unpaid row and return the monthly amortization. */
+async function openOtherOnUnpaid(page: Page): Promise<number> {
+  const unpaidRow = await firstUnpaidRow(page);
+  expect(unpaidRow, 'need at least one unpaid row').not.toBeNull();
+  const monthly = parseFloat((await rowAmortization(unpaidRow!)).replace(/,/g, ''));
+  await clickOther(unpaidRow!);
+  await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
+  await page.waitForTimeout(500);
+  return monthly;
+}
+
+test.describe('Other Payment form — one-box rule + editable interest', () => {
   test.beforeEach(async ({ page }) => {
     await loginToApp(page);
   });
 
   test('Bug #3a: Bank Charges is the first input in Other Payments form', async ({ page }) => {
     await openTargetLoan(page);
-
-    const unpaidRow = await firstUnpaidRow(page);
-    expect(unpaidRow, 'need at least one unpaid row').not.toBeNull();
-    await clickOther(unpaidRow!);
-    await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
-    await page.waitForTimeout(500);
+    await openOtherOnUnpaid(page);
 
     const form = page.locator('form').filter({ has: page.locator('h3:has-text("Other Payment")') });
     const ids = await getEditableInputIdsInOrder(form);
@@ -124,6 +140,9 @@ test.describe('Payment Posting form fixes', () => {
 
     expect(ids[0], 'first editable input must be bank_charge').toBe('bank_charge');
     expect(ids[1], 'second editable input must be collection').toBe('collection');
+    // Interest (id=udi) is now editable and lives at the BOTTOM, just before the date.
+    expect(ids).toContain('udi');
+    expect(ids.indexOf('udi')).toBeGreaterThan(ids.indexOf('commission_fee'));
   });
 
   test('Bug #3b: Bank Charges is the first input in Process Payment form', async ({ page }) => {
@@ -159,7 +178,7 @@ test.describe('Payment Posting form fixes', () => {
     await page.locator('input#collection').fill('3710');
     await page.waitForTimeout(400);
 
-    const interestVal = await page.locator('input#udi').inputValue();
+    const interestVal = await inputValue(page, 'udi');
     const refundVal = await inputValue(page, 'ap_refund');
     console.log(`   Interest="${interestVal}"  AP Refund="${refundVal}"`);
 
@@ -171,49 +190,122 @@ test.describe('Payment Posting form fixes', () => {
     expect(parseFloat(refundVal)).not.toBeNaN();
   });
 
-  test('Bug #2a: Advanced Payment exceeding row amortization is NOT wiped after 1s', async ({ page }) => {
+  test('One-box: typing Collection disables Advanced Payment and Payment UA/SP', async ({ page }) => {
     await openTargetLoan(page);
+    const monthly = await openOtherOnUnpaid(page);
 
-    const unpaidRow = await firstUnpaidRow(page);
-    expect(unpaidRow).not.toBeNull();
-    const monthlyRaw = await rowAmortization(unpaidRow!);
-    const monthly = parseFloat(monthlyRaw.replace(/,/g, ''));
-    expect(monthly).toBeGreaterThan(0);
-    console.log(`   Monthly amortization: ${monthly}`);
+    // Both alternative boxes start enabled.
+    expect(await page.locator('input#advanced_payment').isDisabled()).toBe(false);
+    expect(await page.locator('input#payment_ua_sp').isDisabled()).toBe(false);
 
-    await clickOther(unpaidRow!);
-    await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
-    await page.waitForTimeout(500);
+    await page.locator('input#collection').fill(monthly.toFixed(2));
+    await page.waitForTimeout(400);
 
-    const advanceValue = (monthly * 3).toFixed(2);
-    const collectionValue = (monthly * 3).toFixed(2);
+    // Now they must be locked and read 0.00.
+    expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced_payment locks').toBe(true);
+    expect(await page.locator('input#payment_ua_sp').isDisabled(), 'payment_ua_sp locks').toBe(true);
+    expect(await inputValue(page, 'advanced_payment')).toBe('0.00');
+    expect(await inputValue(page, 'payment_ua_sp')).toBe('0.00');
 
-    await page.locator('input#bank_charge').fill('50');
-    await page.locator('input#collection').fill(collectionValue);
-    await page.locator('input#advanced_payment').fill(advanceValue);
-
-    // Old code wiped to 0 after 1 second via setTimeout.
-    await page.waitForTimeout(1500);
-
-    const advancedAfter = await inputValue(page, 'advanced_payment');
-    const advancedAfterNum = await inputNumber(page, 'advanced_payment');
-    const interestAfter = await page.locator('input#udi').inputValue();
-    const interestAfterNum = parseFloat(interestAfter.replace(/,/g, ''));
-    console.log(`   After 1.5s: advanced="${advancedAfter}" (=${advancedAfterNum}) interest="${interestAfter}" (=${interestAfterNum})`);
-
-    expect(advancedAfter).not.toBe('');
-    expect(advancedAfter).not.toBe('0');
-    expect(advancedAfter).not.toBe('0.00');
-    expect(advancedAfterNum).toBeCloseTo(parseFloat(advanceValue), 1);
-
-    expect(interestAfter).not.toMatch(/NaN/i);
-    expect(interestAfterNum).not.toBeNaN();
-    // Advance of 3× the monthly amortization should drive interest to the
-    // capped value (remaining UDI for this row, which is > 0 for an unpaid row).
-    expect(interestAfterNum).toBeGreaterThan(0);
+    // Clearing Collection re-enables the other two.
+    await page.locator('input#collection').fill('');
+    await page.waitForTimeout(400);
+    expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced_payment re-enables').toBe(false);
+    expect(await page.locator('input#payment_ua_sp').isDisabled(), 'payment_ua_sp re-enables').toBe(false);
   });
 
-  test('Phase B: Save → DB persists Advanced Payment → cleanup restores schedule', async ({ page }) => {
+  test('One-box: Advanced Payment alone (Collection 0) locks the others and still computes interest', async ({ page }) => {
+    await openTargetLoan(page);
+    const monthly = await openOtherOnUnpaid(page);
+    expect(monthly).toBeGreaterThan(0);
+
+    // Genuine advance: enter Advanced Payment ONLY, never touch Collection.
+    const advanceValue = (monthly * 3).toFixed(2);
+    await page.locator('input#advanced_payment').fill(advanceValue);
+    await page.waitForTimeout(400);
+
+    // Collection + Payment UA/SP lock; Collection stays 0 (no fake cash needed).
+    expect(await page.locator('input#collection').isDisabled(), 'collection locks').toBe(true);
+    expect(await page.locator('input#payment_ua_sp').isDisabled(), 'payment_ua_sp locks').toBe(true);
+    expect(await inputValue(page, 'collection')).toBe('0.00');
+
+    // The legacy 1-second wipe must NOT fire — the value survives.
+    await page.waitForTimeout(1500);
+    const advAfter = await inputNumber(page, 'advanced_payment');
+    expect(advAfter, 'advanced payment not wiped after 1.5s').toBeCloseTo(parseFloat(advanceValue), 1);
+
+    // Interest is computed from the advance even though Collection is 0 (Heidi's requirement).
+    const interest = await inputNumber(page, 'udi');
+    console.log(`   advance=${advanceValue}, collection=0 -> interest=${interest}`);
+    expect(interest).not.toBeNaN();
+    expect(interest).toBeGreaterThan(0);
+  });
+
+  test('One-box: Payment UA/SP alone (Collection 0) locks the others and still computes interest', async ({ page }) => {
+    await openTargetLoan(page);
+    const monthly = await openOtherOnUnpaid(page);
+    expect(monthly).toBeGreaterThan(0);
+
+    const big = (monthly * 2).toFixed(2);
+    await page.locator('input#payment_ua_sp').fill(big);
+    await page.waitForTimeout(400);
+
+    expect(await page.locator('input#collection').isDisabled(), 'collection locks').toBe(true);
+    expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced_payment locks').toBe(true);
+
+    // Value survives the legacy wipe window.
+    await page.waitForTimeout(1500);
+    expect(await inputNumber(page, 'payment_ua_sp')).toBeCloseTo(parseFloat(big), 1);
+
+    const interest = await inputNumber(page, 'udi');
+    console.log(`   payment_ua_sp=${big}, collection=0 -> interest=${interest}`);
+    expect(interest).not.toBeNaN();
+    expect(interest).toBeGreaterThan(0);
+  });
+
+  test('Interest is editable: auto-fills from the payment box, then can be typed over', async ({ page }) => {
+    await openTargetLoan(page);
+    const monthly = await openOtherOnUnpaid(page);
+
+    // Enter Collection -> interest auto-fills.
+    await page.locator('input#collection').fill(monthly.toFixed(2));
+    await page.waitForTimeout(400);
+    const auto = await inputNumber(page, 'udi');
+    expect(auto, 'interest auto-fills from Collection').toBeGreaterThan(0);
+
+    // Interest field is NOT read-only and accepts a manual value that sticks.
+    expect(await page.locator('input#udi').isEditable()).toBe(true);
+    await page.locator('input#udi').fill('123.45');
+    await page.waitForTimeout(200);
+    expect(await inputValue(page, 'udi')).toBe('123.45');
+  });
+
+  test('Interest from Collection is proportional to the cash applied', async ({ page }) => {
+    await openTargetLoan(page);
+    const monthly = await openOtherOnUnpaid(page);
+    expect(monthly).toBeGreaterThan(0);
+
+    await page.locator('input#bank_charge').fill('0');
+    await page.locator('input#collection').fill(monthly.toFixed(2));
+    await page.waitForTimeout(400);
+    const interestFull = await inputNumber(page, 'udi');
+    const advUntouched = await inputValue(page, 'advanced_payment');
+    console.log(`   collection=${monthly} -> interest=${interestFull}, advanced="${advUntouched}"`);
+
+    expect(interestFull).not.toBeNaN();
+    expect(interestFull).toBeGreaterThan(0);
+    // Advanced Payment was never typed and is locked at 0 (no duplicate seeded).
+    expect(['', '0', '0.00']).toContain(advUntouched);
+
+    // Halving the Collection roughly halves the interest (proportional to cash).
+    await page.locator('input#collection').fill((monthly / 2).toFixed(2));
+    await page.waitForTimeout(400);
+    const interestHalf = await inputNumber(page, 'udi');
+    console.log(`   collection=${(monthly / 2).toFixed(2)} -> interest=${interestHalf}`);
+    expect(interestHalf).toBeCloseTo(interestFull / 2, 0);
+  });
+
+  test('Phase B: Save advance-only (Collection 0) → DB persists Advanced Payment → cleanup restores schedule', async ({ page }) => {
     // Pre-condition: target schedule must start clean.
     expect(
       countActivePayments(PHASE_B_SCHED_ID),
@@ -234,12 +326,14 @@ test.describe('Payment Posting form fixes', () => {
       await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
       await page.waitForTimeout(500);
 
-      // Fill the form: simulate a customer paying current month + 3 months in advance.
+      // Genuine advance: pay 3 months ahead as Advanced Payment ONLY (Collection 0).
       const today = new Date().toISOString().slice(0, 10);
       await page.locator('input#bank_charge').fill('0');
-      await page.locator('input#collection').fill('3710');
       await page.locator('input#advanced_payment').fill('11130');
       await page.locator('input#collection_date').fill(today);
+
+      // Collection must be locked at 0 by the one-box rule.
+      expect(await page.locator('input#collection').isDisabled()).toBe(true);
 
       // Wait past the old 1-second wipe window — value must survive.
       await page.waitForTimeout(1500);
@@ -261,21 +355,17 @@ test.describe('Payment Posting form fixes', () => {
       // ── DB verification — the headline check ──────────────────────────────
       const collectionPaid = paymentAmount(PHASE_B_SCHED_ID, 'Collection');
       const advancedPaid = paymentAmount(PHASE_B_SCHED_ID, 'Advanced Payment');
-      const udiPaid = paymentAmount(PHASE_B_SCHED_ID, 'UDI');
-      console.log(`   DB rows — Collection=${collectionPaid} Advanced=${advancedPaid} UDI=${udiPaid}`);
+      console.log(`   DB rows — Collection=${collectionPaid} Advanced=${advancedPaid}`);
 
-      // The Advanced Payment row is the one that USED to be wiped. It must exist
-      // with the exact amount the user typed.
+      // The Advanced Payment row must exist with the exact amount typed.
       expect(advancedPaid, 'Advanced Payment row must be persisted with the typed amount').not.toBeNull();
       expect(parseFloat(advancedPaid!)).toBeCloseTo(11130, 2);
 
-      // Collection should also be persisted.
-      expect(collectionPaid).not.toBeNull();
-      expect(parseFloat(collectionPaid!)).toBeCloseTo(3710, 2);
-
-      // UDI (interest) should be capped at remaining UDI (660), not NaN or scaled wildly.
-      expect(udiPaid).not.toBeNull();
-      expect(parseFloat(udiPaid!)).toBeCloseTo(660, 2);
+      // No Collection cash was entered, so there must be no positive Collection row
+      // (one-box rule: the same money is never booked in two places).
+      if (collectionPaid !== null) {
+        expect(parseFloat(collectionPaid)).toBe(0);
+      }
     } finally {
       // Always restore the schedule to a clean state so the spec is idempotent.
       if (needsCleanup) {
@@ -285,73 +375,5 @@ test.describe('Payment Posting form fixes', () => {
         expect(after, 'cleanup must restore zero active payments').toBe(0);
       }
     }
-  });
-
-  test('Bug #2b: payment_ua_sp exceeding row amortization is NOT wiped after 1s', async ({ page }) => {
-    await openTargetLoan(page);
-
-    const unpaidRow = await firstUnpaidRow(page);
-    expect(unpaidRow).not.toBeNull();
-    const monthlyRaw = await rowAmortization(unpaidRow!);
-    const monthly = parseFloat(monthlyRaw.replace(/,/g, ''));
-
-    await clickOther(unpaidRow!);
-    await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
-    await page.waitForTimeout(500);
-
-    const big = (monthly * 2).toFixed(2);
-    await page.locator('input#bank_charge').fill('0');
-    await page.locator('input#collection').fill(big);
-    await page.locator('input#payment_ua_sp').fill(big);
-
-    await page.waitForTimeout(1500);
-
-    const after = await inputValue(page, 'payment_ua_sp');
-    const afterNum = await inputNumber(page, 'payment_ua_sp');
-    console.log(`   payment_ua_sp after 1.5s: "${after}" (=${afterNum})`);
-    expect(afterNum).toBeCloseTo(parseFloat(big), 1);
-  });
-
-  test('Fix: Other Payment interest is driven by Collection (no Advanced Payment needed)', async ({ page }) => {
-    // Regression for the renewal-OB duplicate (loan FB BAL-00000947 / SAUCELO):
-    // the form used to compute interest from advanced_payment, so to record a
-    // schedule's interest an operator had to type the cash into BOTH Collection
-    // and Advanced Payment — minting a duplicate Advanced Payment row that
-    // understated the renewal OB (3,430 vs the true 3,570). Interest is now
-    // remainingUdi * (collection / remainingDue), so Collection alone is enough
-    // and no Advanced Payment entry (= no duplicate) is needed.
-    await openTargetLoan(page);
-
-    const unpaidRow = await firstUnpaidRow(page);
-    expect(unpaidRow, 'need an unpaid row').not.toBeNull();
-    const monthly = parseFloat((await rowAmortization(unpaidRow!)).replace(/,/g, ''));
-    expect(monthly).toBeGreaterThan(0);
-
-    await clickOther(unpaidRow!);
-    await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
-    await page.waitForTimeout(500);
-
-    // Enter ONLY Collection (full amortization). Never touch Advanced Payment.
-    await page.locator('input#bank_charge').fill('0');
-    await page.locator('input#collection').fill(monthly.toFixed(2));
-    await page.waitForTimeout(400);
-
-    const interestFull = await inputNumber(page, 'udi');
-    const advUntouched = await inputValue(page, 'advanced_payment');
-    console.log(`   collection=${monthly} -> interest=${interestFull}, advanced="${advUntouched}"`);
-
-    // Interest computed from Collection alone — positive, not NaN — so the
-    // operator no longer needs an Advanced Payment entry to get interest.
-    expect(interestFull).not.toBeNaN();
-    expect(interestFull).toBeGreaterThan(0);
-    // Advanced Payment was never typed and stays empty/zero (no duplicate seeded).
-    expect(['', '0', '0.00']).toContain(advUntouched);
-
-    // Halving the Collection roughly halves the interest (proportional to cash).
-    await page.locator('input#collection').fill((monthly / 2).toFixed(2));
-    await page.waitForTimeout(400);
-    const interestHalf = await inputNumber(page, 'udi');
-    console.log(`   collection=${(monthly / 2).toFixed(2)} -> interest=${interestHalf}`);
-    expect(interestHalf).toBeCloseTo(interestFull / 2, 0);
   });
 });

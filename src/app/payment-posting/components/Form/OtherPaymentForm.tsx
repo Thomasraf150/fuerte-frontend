@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatToTwoDecimalPlaces, parseNumericInput as num } from '@/utils/helper';
@@ -14,8 +14,58 @@ interface OMProps {
   paymentLoading: boolean;
 }
 
+/**
+ * Suggested interest for a period: proportional to the principal applied to it,
+ * capped at the remaining UDI. A cash Collection is taken net of bank charge
+ * (matches the Process Payment form); Advanced Payment / Payment UA/SP are gross.
+ * Overpaying via Collection earns the full remaining UDI. Returns 0 for a
+ * fully-paid period or any non-finite result. Pure — easy to reason about/test.
+ */
+function suggestInterest(
+  collection: number,
+  advanced: number,
+  paymentUaSp: number,
+  bankCharge: number,
+  remainingDue: number,
+  remainingUdi: number,
+): number {
+  if (remainingDue <= 0) return 0;
+  if (collection > remainingDue) return remainingUdi;
+  const principalNet = collection > 0 ? Math.max(0, collection - bankCharge) : advanced + paymentUaSp;
+  let interest = remainingUdi * (principalNet / remainingDue);
+  if (!isFinite(interest) || isNaN(interest) || interest < 0) interest = 0;
+  if (interest > remainingUdi) interest = remainingUdi;
+  return interest;
+}
+
 const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSelectedMoSchedOthPay, selectedUdiSched, onSubmitOthCollectionPayment, paymentLoading }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<OtherCollectionFormValues>();
+
+  // Heidi's rule (2026-06-26): a payment is recorded in EXACTLY ONE of
+  // Collection / Advanced Payment / Payment UA/SP — never two at once. Booking
+  // the same money in two boxes is what understated the renewal OBs
+  // (e.g. FB BAL-00000947 / SAUCELO). As soon as one of the three carries a
+  // value, the other two are locked (disabled + shown as 0.00) so the duplicate
+  // can never be created at the source.
+  const PRINCIPAL_FIELDS = ['collection', 'advanced_payment', 'payment_ua_sp'] as const;
+  // Fields whose value changes the interest suggestion (bank charge reduces the
+  // net collection). Penalty UA/SP and Commission never affect interest.
+  const INTEREST_DRIVERS = ['collection', 'advanced_payment', 'payment_ua_sp', 'bank_charge'];
+  const collectionVal = num(watch('collection'));
+  const advancedVal = num(watch('advanced_payment'));
+  const paymentUaSpVal = num(watch('payment_ua_sp'));
+  const activePrincipal =
+    collectionVal > 0 ? 'collection'
+      : advancedVal > 0 ? 'advanced_payment'
+        : paymentUaSpVal > 0 ? 'payment_ua_sp'
+          : null;
+  const isLocked = (field: string): boolean => activePrincipal !== null && activePrincipal !== field;
+  // Shown under the Pay Now button if the operator tries to save with none of the
+  // three payment boxes filled.
+  const [principalError, setPrincipalError] = useState<string>('');
+  // True once the operator hand-edits the Interest field — stops the auto-suggestion
+  // from clobbering their value (reset when a payment box or the schedule changes).
+  const interestTouched = useRef(false);
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
@@ -30,30 +80,39 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     const collection = type === 'collection' ? incoming : num(watch('collection'));
     const bankCharge = type === 'bank_charge' ? incoming : num(watch('bank_charge'));
     const paymentUaSp = type === 'payment_ua_sp' ? incoming : num(watch('payment_ua_sp'));
-    const penaltyUaSp = type === 'penalty_ua_sp' ? incoming : num(watch('penalty_ua_sp'));
     const advanced = type === 'advanced_payment' ? incoming : num(watch('advanced_payment'));
 
-    // AP Refund: only when collection exceeds remaining due. Stays 0 otherwise.
+    // AP Refund: the CHANGE returned when a cash Collection exceeds the remaining
+    // due — only the EXCESS over the due (matches the Process Payment form), net of
+    // any bank charge, never negative. (Previously refunded the whole collection,
+    // which cancelled the credit and over-stated the OB.)
     if (collection > remainingDue) {
-      const refund = collection - bankCharge - paymentUaSp - penaltyUaSp - advanced;
-      setValue('ap_refund', (isFinite(refund) ? refund : 0).toFixed(2));
+      const refund = collection - remainingDue - bankCharge;
+      setValue('ap_refund', (isFinite(refund) && refund > 0 ? refund : 0).toFixed(2));
     } else {
       setValue('ap_refund', '0.00');
     }
 
-    // Interest: proportional to the real cash applied to this period
-    // (collection / remainingDue), capped at remainingUdi. Driven by Collection
-    // ONLY (office decision 2026-06-24) so paying a schedule's interest no longer
-    // requires also typing the amount into Advanced Payment — that coupling was
-    // minting duplicate Collection+Advanced-Payment rows that understated the
-    // renewal OB (loan FB BAL-00000947). Fully-paid period (remainingDue = 0) -> 0.
-    let interest = 0;
-    if (remainingDue > 0) {
-      interest = remainingUdi * (collection / remainingDue);
-      if (!isFinite(interest) || isNaN(interest) || interest < 0) interest = 0;
-      if (interest > remainingUdi) interest = remainingUdi;
+    // One-box rule: when one of the three payment boxes is filled, clear the
+    // other two so the same money can never be booked twice (the fields are also
+    // disabled in the UI — this is the belt-and-suspenders for the value).
+    // Editing a payment box also re-engages the interest auto-suggestion.
+    if ((PRINCIPAL_FIELDS as readonly string[]).includes(type)) {
+      interestTouched.current = false;
+      if (incoming > 0) {
+        (PRINCIPAL_FIELDS as readonly string[])
+          .filter((f) => f !== type)
+          .forEach((f) => setValue(f as keyof OtherCollectionFormValues, '0.00'));
+      }
     }
-    setValue('interest', interest.toFixed(2));
+
+    // Interest suggestion (see suggestInterest): computes for a plain Collection
+    // AND for an advance-only entry (Collection 0). NOT recomputed once the
+    // operator hand-edits Interest (interestTouched); only the payment boxes /
+    // bank charge drive it. The field stays editable (office decision 2026-06-26).
+    if (INTEREST_DRIVERS.includes(type) && !interestTouched.current) {
+      setValue('interest', suggestInterest(collection, advanced, paymentUaSp, bankCharge, remainingDue, remainingUdi).toFixed(2));
+    }
 
     setValue(type, formattedValue);
   };
@@ -64,7 +123,19 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
   };
 
   const onSubmit = async (data: OtherCollectionFormValues) => {
-    console.log(data, ' data');
+    // A payment must go into exactly one of the three boxes; block an empty save.
+    const totalPrincipal = num(data.collection) + num(data.advanced_payment) + num(data.payment_ua_sp);
+    if (totalPrincipal <= 0) {
+      setPrincipalError('Enter the payment in Collection, Advanced Payment, or Payment UA/SP.');
+      return;
+    }
+    // Defense-in-depth: the UI lock already prevents this, but never let two boxes through.
+    const nonZeroBoxes = [data.collection, data.advanced_payment, data.payment_ua_sp].filter((v) => num(v) > 0).length;
+    if (nonZeroBoxes > 1) {
+      setPrincipalError('Record the payment in only ONE of Collection, Advanced Payment, or Payment UA/SP.');
+      return;
+    }
+    setPrincipalError('');
 
     const result = await onSubmitOthCollectionPayment(data, selectedMoSchedOthPay?.loan_id) as { success: boolean; error?: string; data?: any };
 
@@ -78,6 +149,8 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
   useEffect(() => {
     setValue('loan_schedule_id', selectedMoSchedOthPay?.id);
     setValue('loan_udi_schedule_id', selectedUdiSched?.id);
+    // New schedule/payment entry — re-enable the interest auto-suggestion.
+    interestTouched.current = false;
   }, [selectedMoSchedOthPay, selectedUdiSched]);
 
   return (
@@ -125,11 +198,17 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
-                  register={register('bank_charge', { required: "Bank Charge is required!" })}
+                  register={register('bank_charge')}
                   onChange={(e: any) => { return handleDecimal(e, 'bank_charge'); }}
                   className="text-center"
                 />
               </div>
+            </div>
+
+            {/* One-box rule hint */}
+            <div className="px-2 sm:px-4 py-1 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+              Record the payment in <span className="font-semibold">only one</span> of Collection,
+              Advanced Payment, or Payment UA/SP. Filling one locks the other two.
             </div>
 
             {/* Collection */}
@@ -145,26 +224,11 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   icon={PesoSign}
                   formatType="number"
                   placeholder="0.00"
-                  register={register('collection', { required: "Collection is required!" })}
+                  register={register('collection')}
                   onChange={(e: any) => { return handleDecimal(e, 'collection'); }}
-                  className="text-center"
-                />
-              </div>
-            </div>
-
-            {/* Interest */}
-            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
-                Interest
-              </div>
-              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
-                <input
-                  className={`block p-2 border w-full text-center border-stroke dark:border-strokedark bg-white dark:bg-form-input text-black dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
-                  type="text"
-                  id="udi"
-                  placeholder="0.00"
-                  readOnly={true}
-                  value={`${Number(watch('interest') ?? 0).toFixed(2)}`}
+                  disabled={isLocked('collection')}
+                  value={isLocked('collection') ? '0.00' : undefined}
+                  className={`text-center ${isLocked('collection') ? 'opacity-40' : ''}`}
                 />
               </div>
             </div>
@@ -184,7 +248,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   placeholder="0.00"
                   register={register('payment_ua_sp')}
                   onChange={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
-                  className="text-center"
+                  disabled={isLocked('payment_ua_sp')}
+                  value={isLocked('payment_ua_sp') ? '0.00' : undefined}
+                  className={`text-center ${isLocked('payment_ua_sp') ? 'opacity-40' : ''}`}
                 />
               </div>
             </div>
@@ -224,7 +290,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   placeholder="0.00"
                   register={register('advanced_payment')}
                   onChange={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
-                  className="text-center"
+                  disabled={isLocked('advanced_payment')}
+                  value={isLocked('advanced_payment') ? '0.00' : undefined}
+                  className={`text-center ${isLocked('advanced_payment') ? 'opacity-40' : ''}`}
                 />
               </div>
             </div>
@@ -265,6 +333,28 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
             </div>
 
+            {/* Interest — auto-calculated from the payment box above, but editable.
+                Placed at the bottom (office decision 2026-06-26) so operators never
+                need to enter a Collection just to make interest appear: entering
+                Advanced Payment / Payment UA/SP (Collection 0) still fills it, and it
+                can be typed over by hand. */}
+            <div className="flex flex-col 2xl:flex-row 2xl:items-center">
+              <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
+                Interest
+              </div>
+              <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
+                <input
+                  className={`block p-2 border w-full text-center border-stroke dark:border-strokedark bg-white dark:bg-form-input text-black dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-xs sm:text-sm`}
+                  type="text"
+                  inputMode="decimal"
+                  id="udi"
+                  placeholder="0.00"
+                  value={watch('interest') ?? ''}
+                  onChange={(e) => { interestTouched.current = true; setValue('interest', e.target.value.replace(/[^0-9.]/g, '')); }}
+                />
+              </div>
+            </div>
+
             {/* Collection Date */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
               <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
@@ -286,6 +376,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
             </div>
 
             {/* Submit Button */}
+            {principalError && (
+              <p className="px-2 sm:px-4 text-sm font-medium text-center" style={{ color: '#DC2626' }}>{principalError}</p>
+            )}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
               <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2"></div>
               <div className="2xl:w-3/5 px-2 py-2 sm:px-4 sm:py-2 text-gray-900">
