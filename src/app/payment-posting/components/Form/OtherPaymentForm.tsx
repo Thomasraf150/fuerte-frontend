@@ -126,7 +126,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // A payment must go into exactly one of the three boxes; block an empty save.
     const totalPrincipal = num(data.collection) + num(data.advanced_payment) + num(data.payment_ua_sp);
     if (totalPrincipal <= 0) {
-      setPrincipalError('Enter the payment in Collection, Advanced Payment, or Payment UA/SP.');
+      setPrincipalError('Enter the cash payment in Collection.');
       return;
     }
     // Defense-in-depth: the UI lock already prevents this, but never let two boxes through.
@@ -205,10 +205,12 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
             </div>
 
-            {/* One-box rule hint */}
-            <div className="px-2 sm:px-4 py-1 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-              Record the payment in <span className="font-semibold">only one</span> of Collection,
-              Advanced Payment, or Payment UA/SP. Filling one locks the other two.
+            {/* Stopgap (2026-06-26): Advanced Payment / Payment UA/SP are disabled until
+                they correctly settle the due AND post to the ledger. All cash goes in Collection,
+                which already does both. See OtherPaymentForm history / project memory. */}
+            <div className="px-2 sm:px-4 py-1 text-[11px] leading-snug text-amber-600 dark:text-amber-400">
+              Enter the cash payment in <span className="font-semibold">Collection</span>. Advanced Payment and
+              Payment UA/SP are temporarily unavailable — record all cash (over-the-counter or ATM) in Collection for now.
             </div>
 
             {/* Collection */}
@@ -248,9 +250,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   placeholder="0.00"
                   register={register('payment_ua_sp')}
                   onChange={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
-                  disabled={isLocked('payment_ua_sp')}
-                  value={isLocked('payment_ua_sp') ? '0.00' : undefined}
-                  className={`text-center ${isLocked('payment_ua_sp') ? 'opacity-40' : ''}`}
+                  disabled={true}
+                  value={'0.00'}
+                  className="text-center opacity-40"
                 />
               </div>
             </div>
@@ -290,9 +292,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   placeholder="0.00"
                   register={register('advanced_payment')}
                   onChange={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
-                  disabled={isLocked('advanced_payment')}
-                  value={isLocked('advanced_payment') ? '0.00' : undefined}
-                  className={`text-center ${isLocked('advanced_payment') ? 'opacity-40' : ''}`}
+                  disabled={true}
+                  value={'0.00'}
+                  className="text-center opacity-40"
                 />
               </div>
             </div>
