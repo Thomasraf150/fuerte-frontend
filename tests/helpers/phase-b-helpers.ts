@@ -41,3 +41,36 @@ export function paymentAmount(scheduleId: string | number, description: string):
 export function softDeletePaymentsForSchedule(scheduleId: string | number): void {
   dockerPhp(['cleanup', String(scheduleId)]);
 }
+
+/** Remaining amortization on a schedule as the Payment Posting screen computes it
+ *  (Collection settles; Advanced Payment / Payment UA/SP do NOT). '0.00' = fully settled. */
+export function remainingAmort(scheduleId: string | number): string {
+  return dockerPhp(['remaining', String(scheduleId)]);
+}
+
+/** Number of General Ledger entries linked to this schedule's active payments (>=1 = booked). */
+export function glEntryCount(scheduleId: string | number): number {
+  return parseInt(dockerPhp(['gl', String(scheduleId)]), 10);
+}
+
+/** Soft-delete ALL active payments + accounting entries for an entire loan (idempotent reset). */
+export function cleanupLoan(loanId: string | number): void {
+  dockerPhp(['cleanup-loan', String(loanId)]);
+}
+
+export interface AccessibleLoan {
+  loanId: string;
+  scheduleId: string;
+  dueDate: string; // YYYY-MM-DD
+  amort: string;
+  udi: string;
+}
+
+/** Find a fully-clean, open loan in a branch_sub the test user can access, with a UDI-bearing
+ *  schedule. Returns null if none — lets the spec skip gracefully instead of hard-failing. */
+export function findAccessibleLoan(branchSubId: string | number): AccessibleLoan | null {
+  const out = dockerPhp(['find-loan', String(branchSubId)]);
+  if (!out.includes('|')) return null;
+  const [loanId, scheduleId, dueDate, amort, udi] = out.split('|');
+  return { loanId, scheduleId, dueDate, amort, udi };
+}

@@ -205,14 +205,6 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
             </div>
 
-            {/* Stopgap (2026-06-26): Advanced Payment / Payment UA/SP are disabled until
-                they correctly settle the due AND post to the ledger. All cash goes in Collection,
-                which already does both. See OtherPaymentForm history / project memory. */}
-            <div className="px-2 sm:px-4 py-1 text-[11px] leading-snug text-amber-600 dark:text-amber-400">
-              Enter the cash payment in <span className="font-semibold">Collection</span>. Advanced Payment and
-              Payment UA/SP are temporarily unavailable — record all cash (over-the-counter or ATM) in Collection for now.
-            </div>
-
             {/* Collection */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
               <div className="2xl:w-2/5 px-2 py-2 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">
