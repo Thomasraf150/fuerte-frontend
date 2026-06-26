@@ -1,19 +1,18 @@
 /**
- * Other Payment form — STOPGAP behaviour (2026-06-26).
+ * Other Payment form — REAL FIX (2026-06-26): Advanced Payment / Payment UA/SP are cash
+ * (Heidi), so a payment via ANY of the three boxes must settle the due AND post to the GL.
  *
- * Heidi confirmed Advanced Payment / Payment UA/SP are cash, so they MUST settle the due
- * and post to the GL like Collection. Today only Collection does that, so those two boxes
- * are temporarily DISABLED and all cash is recorded in Collection. This suite proves:
+ * The backend folds Advanced Payment / Payment UA/SP into Collection at posting time, so the
+ * payment runs through the proven Collection path (settles + books). The three boxes stay
+ * mutually exclusive (one-box lock) so the same money can never be booked twice.
  *
- *   - Advanced Payment / Payment UA/SP inputs are disabled; Collection + Bank Charge usable.
- *   - Interest auto-fills from Collection (net of bank charge), is editable, and a hand-edit
- *     is NOT clobbered by a later bank-charge change.
- *   - An empty save (no Collection) is blocked.
- *   - A Collection payment ACTUALLY SETTLES the schedule (remaining → 0.00) AND posts to the
- *     General Ledger (>=1 acctg entry). This is the end-to-end check that was missing before.
+ * This suite proves, for EACH of Collection / Advanced Payment / Payment UA/SP:
+ *   - the payment SETTLES the schedule (remaining amortization -> 0.00), and
+ *   - it POSTS to the General Ledger (>=1 acctg entry), and
+ *   - it is recorded as a Collection (the fold), with NO leftover marker row.
+ * Plus: one-box lock works, interest auto-fills + editable + not clobbered, empty save blocked.
  *
- * The suite auto-discovers a fully-clean, admin-accessible loan (branch_sub 1 / Marikina) and
- * cleans up everything it creates, so it is idempotent and safe to re-run on the live copy.
+ * Auto-discovers a fully-clean, admin-accessible loan (branch_sub 1) and self-cleans (idempotent).
  */
 
 import { test, expect, Page, Locator } from '@playwright/test';
@@ -28,24 +27,20 @@ import {
   AccessibleLoan,
 } from '../../helpers/phase-b-helpers';
 
-const ADMIN_BRANCH_SUB = '1'; // admin@gmail.com (loginToApp) is branch_sub 1 (Marikina)
+const ADMIN_BRANCH_SUB = '1';
 
 let loan: AccessibleLoan | null = null;
 
-test.describe('Other Payment form — stopgap (cash via Collection)', () => {
-  // These tests share one loan and write/clean the DB — run them serially.
+test.describe('Other Payment form — real fix (all three boxes settle + book)', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test.beforeAll(() => {
-    loan = findAccessibleLoan(ADMIN_BRANCH_SUB);
-  });
+  test.beforeAll(() => { loan = findAccessibleLoan(ADMIN_BRANCH_SUB); });
 
   test.beforeEach(async ({ page }) => {
     test.skip(!loan, 'no fully-clean open loan in branch_sub 1 to test against');
     await loginToApp(page);
   });
 
-  /** Open the Other Payment form on the discovered clean schedule (matched by due date). */
   async function openForm(page: Page): Promise<void> {
     await navigateToPage(page, `/payment-posting/${loan!.loanId}`);
     await page.waitForSelector('button:has-text("Other")', { timeout: 15000 });
@@ -57,8 +52,8 @@ test.describe('Other Payment form — stopgap (cash via Collection)', () => {
       const due = (await rows.nth(i).locator('p').nth(0).textContent())?.trim()?.slice(0, 10);
       if (due === loan!.dueDate) { target = rows.nth(i); break; }
     }
-    expect(target, `schedule row for due date ${loan!.dueDate}`).not.toBeNull();
-    await target!.locator('button').nth(0).click(); // "Other Payments"
+    expect(target, `schedule row for due ${loan!.dueDate}`).not.toBeNull();
+    await target!.locator('button').nth(0).click();
     await page.waitForSelector('h3:has-text("Other Payment")', { timeout: 5000 });
     await page.waitForTimeout(500);
   }
@@ -66,15 +61,59 @@ test.describe('Other Payment form — stopgap (cash via Collection)', () => {
   const val = async (page: Page, id: string) => (await page.locator(`input#${id}`).inputValue());
   const numVal = async (page: Page, id: string) => parseFloat((await val(page, id)).replace(/,/g, ''));
 
-  test('Advanced Payment + Payment UA/SP are disabled; Collection is usable', async ({ page }) => {
+  /** Pay the full amortization via one box, then assert it settled + booked + folded to Collection. */
+  async function payViaBoxAndAssert(page: Page, boxId: 'collection' | 'advanced_payment' | 'payment_ua_sp') {
+    const sched = loan!.scheduleId;
+    const amort = parseFloat(loan!.amort);
+    expect(countActivePayments(sched), 'schedule starts clean').toBe(0);
+    let saved = false;
+    try {
+      await openForm(page);
+      await page.locator('input#bank_charge').fill('0');
+      await page.locator(`input#${boxId}`).fill(amort.toFixed(2));
+      await page.locator('input#collection_date').fill(new Date().toISOString().slice(0, 10));
+      await page.waitForTimeout(300);
+      await page.locator('button:has-text("Pay Now")').click();
+      await page.waitForSelector('.Toastify__toast--success', { timeout: 20000 });
+      saved = true;
+      await page.waitForTimeout(900);
+
+      const remaining = remainingAmort(sched);
+      const collection = paymentAmount(sched, 'Collection');
+      const advanced = paymentAmount(sched, 'Advanced Payment');
+      const ua = paymentAmount(sched, 'Payment UA/SP');
+      const gl = glEntryCount(sched);
+      console.log(`   [${boxId}] remaining=${remaining} collection=${collection} adv=${advanced} uasp=${ua} gl=${gl}`);
+
+      expect(remaining, `${boxId}: Due Date settled to 0`).toBe('0.00');
+      expect(gl, `${boxId}: posted to the General Ledger`).toBeGreaterThanOrEqual(1);
+      // Folded to Collection: the cash is a Collection row of the full amount, no marker row left.
+      expect(collection, `${boxId}: recorded as a Collection`).not.toBeNull();
+      expect(parseFloat(collection!)).toBeCloseTo(amort, 2);
+      expect(advanced, `${boxId}: no Advanced Payment marker row`).toBeNull();
+      expect(ua, `${boxId}: no Payment UA/SP marker row`).toBeNull();
+    } finally {
+      if (saved) {
+        cleanupLoan(loan!.loanId);
+        expect(countActivePayments(sched), 'cleanup restores clean schedule').toBe(0);
+      }
+    }
+  }
+
+  test('One-box lock: typing Collection disables Advanced Payment + Payment UA/SP; clearing re-enables', async ({ page }) => {
     await openForm(page);
-    expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced_payment disabled').toBe(true);
-    expect(await page.locator('input#payment_ua_sp').isDisabled(), 'payment_ua_sp disabled').toBe(true);
-    expect(await page.locator('input#collection').isDisabled(), 'collection usable').toBe(false);
-    expect(await page.locator('input#bank_charge').isDisabled(), 'bank_charge usable').toBe(false);
+    expect(await page.locator('input#advanced_payment').isDisabled()).toBe(false);
+    expect(await page.locator('input#payment_ua_sp').isDisabled()).toBe(false);
+    await page.locator('input#collection').fill('100');
+    await page.waitForTimeout(400);
+    expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced locks').toBe(true);
+    expect(await page.locator('input#payment_ua_sp').isDisabled(), 'ua_sp locks').toBe(true);
+    await page.locator('input#collection').fill('');
+    await page.waitForTimeout(400);
+    expect(await page.locator('input#advanced_payment').isDisabled(), 'advanced re-enables').toBe(false);
   });
 
-  test('Bank Charges is the first editable input; Interest sits at the bottom', async ({ page }) => {
+  test('Bank Charges is first; Interest sits at the bottom', async ({ page }) => {
     await openForm(page);
     const form = page.locator('form').filter({ has: page.locator('h3:has-text("Other Payment")') });
     const ids = await form.locator('input[id]').evaluateAll((els) =>
@@ -82,71 +121,42 @@ test.describe('Other Payment form — stopgap (cash via Collection)', () => {
     console.log(`   editable order: ${ids.join(' → ')}`);
     expect(ids[0]).toBe('bank_charge');
     expect(ids[1]).toBe('collection');
-    expect(ids.indexOf('udi')).toBeGreaterThan(ids.indexOf('commission_fee')); // interest moved to bottom
+    expect(ids.indexOf('udi')).toBeGreaterThan(ids.indexOf('commission_fee'));
   });
 
-  test('Interest auto-fills from Collection, is editable, and survives a later bank-charge edit', async ({ page }) => {
+  test('Interest auto-fills, is editable, and survives a later bank-charge edit', async ({ page }) => {
     await openForm(page);
-    const monthly = parseFloat(loan!.amort);
     await page.locator('input#bank_charge').fill('0');
-    await page.locator('input#collection').fill(monthly.toFixed(2));
+    await page.locator('input#collection').fill(parseFloat(loan!.amort).toFixed(2));
     await page.waitForTimeout(400);
-    expect(await numVal(page, 'udi'), 'interest auto-fills').toBeGreaterThan(0);
-
-    // editable + sticks
+    expect(await numVal(page, 'udi')).toBeGreaterThan(0);
     expect(await page.locator('input#udi').isEditable()).toBe(true);
     await page.locator('input#udi').fill('123.45');
     await page.waitForTimeout(150);
     expect(await val(page, 'udi')).toBe('123.45');
-
-    // a later bank-charge edit must NOT clobber the manual interest
     await page.locator('input#bank_charge').fill('25');
     await page.waitForTimeout(300);
     expect(await val(page, 'udi'), 'manual interest preserved').toBe('123.45');
   });
 
-  test('Empty save (no Collection) is blocked', async ({ page }) => {
+  test('Empty save (no payment) is blocked', async ({ page }) => {
     await openForm(page);
-    const today = new Date().toISOString().slice(0, 10);
-    await page.locator('input#collection_date').fill(today);
+    await page.locator('input#collection_date').fill(new Date().toISOString().slice(0, 10));
     await page.locator('button:has-text("Pay Now")').click();
-    await expect(page.getByText('Enter the cash payment in Collection.', { exact: true })).toBeVisible({ timeout: 5000 });
-    expect(countActivePayments(loan!.scheduleId), 'nothing saved').toBe(0);
+    await expect(page.getByText('Enter the payment in Collection, Advanced Payment, or Payment UA/SP.', { exact: true }))
+      .toBeVisible({ timeout: 5000 });
+    expect(countActivePayments(loan!.scheduleId)).toBe(0);
   });
 
-  test('Collection payment SETTLES the schedule AND posts to the General Ledger', async ({ page }) => {
-    const sched = loan!.scheduleId;
-    const amort = parseFloat(loan!.amort);
-    expect(countActivePayments(sched), 'schedule starts clean').toBe(0);
+  test('Collection payment settles + books', async ({ page }) => {
+    await payViaBoxAndAssert(page, 'collection');
+  });
 
-    let saved = false;
-    try {
-      await openForm(page);
-      await page.locator('input#bank_charge').fill('0');
-      await page.locator('input#collection').fill(amort.toFixed(2));
-      const today = new Date().toISOString().slice(0, 10);
-      await page.locator('input#collection_date').fill(today);
-      await page.waitForTimeout(300);
-      await page.locator('button:has-text("Pay Now")').click();
-      await page.waitForSelector('.Toastify__toast--success', { timeout: 20000 });
-      saved = true;
-      await page.waitForTimeout(900); // let the transaction commit
+  test('Advanced Payment (Collection 0) settles + books — recorded as Collection', async ({ page }) => {
+    await payViaBoxAndAssert(page, 'advanced_payment');
+  });
 
-      // ── the checks that were missing before ──────────────────────────────
-      const remaining = remainingAmort(sched);
-      const collected = paymentAmount(sched, 'Collection');
-      const gl = glEntryCount(sched);
-      console.log(`   remaining=${remaining}  collection=${collected}  glEntries=${gl}`);
-
-      expect(remaining, 'Due Date must be settled to 0').toBe('0.00');
-      expect(collected, 'Collection row persisted').not.toBeNull();
-      expect(parseFloat(collected!)).toBeCloseTo(amort, 2);
-      expect(gl, 'payment must post to the General Ledger').toBeGreaterThanOrEqual(1);
-    } finally {
-      if (saved) {
-        cleanupLoan(loan!.loanId);
-        expect(countActivePayments(sched), 'cleanup restores clean schedule').toBe(0);
-      }
-    }
+  test('Payment UA/SP (Collection 0) settles + books — recorded as Collection', async ({ page }) => {
+    await payViaBoxAndAssert(page, 'payment_ua_sp');
   });
 });

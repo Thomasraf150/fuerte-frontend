@@ -126,7 +126,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // A payment must go into exactly one of the three boxes; block an empty save.
     const totalPrincipal = num(data.collection) + num(data.advanced_payment) + num(data.payment_ua_sp);
     if (totalPrincipal <= 0) {
-      setPrincipalError('Enter the cash payment in Collection.');
+      setPrincipalError('Enter the payment in Collection, Advanced Payment, or Payment UA/SP.');
       return;
     }
     // Defense-in-depth: the UI lock already prevents this, but never let two boxes through.
@@ -242,9 +242,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   placeholder="0.00"
                   register={register('payment_ua_sp')}
                   onChange={(e: any) => { return handleDecimal(e, 'payment_ua_sp'); }}
-                  disabled={true}
-                  value={'0.00'}
-                  className="text-center opacity-40"
+                  disabled={isLocked('payment_ua_sp')}
+                  value={isLocked('payment_ua_sp') ? '0.00' : undefined}
+                  className={`text-center ${isLocked('payment_ua_sp') ? 'opacity-40' : ''}`}
                 />
               </div>
             </div>
@@ -284,9 +284,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   placeholder="0.00"
                   register={register('advanced_payment')}
                   onChange={(e: any) => { return handleDecimal(e, 'advanced_payment'); }}
-                  disabled={true}
-                  value={'0.00'}
-                  className="text-center opacity-40"
+                  disabled={isLocked('advanced_payment')}
+                  value={isLocked('advanced_payment') ? '0.00' : undefined}
+                  className={`text-center ${isLocked('advanced_payment') ? 'opacity-40' : ''}`}
                 />
               </div>
             </div>
