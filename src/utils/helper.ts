@@ -104,6 +104,21 @@ export const formatToTwoDecimalPlaces = (value: string) => {
 };
 
 /**
+ * Today's date as a LOCAL-timezone 'YYYY-MM-DD' string.
+ *
+ * Use this instead of `new Date().toISOString().slice(0,10)` when building a
+ * business-date filter: toISOString() is UTC, so in Asia/Manila (UTC+8) it
+ * returns YESTERDAY between 00:00–07:59 local, sending the wrong `?date=` to
+ * date-keyed screens (e.g. Collection List drill-down against a DATE column).
+ */
+export const todayLocalISO = (): string => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
+
+/**
  * Parse a numeric input that may contain thousands-separator commas
  * (e.g. "1,234.56") into a finite number. Returns 0 for null/undefined/empty
  * strings or non-numeric input — never NaN.

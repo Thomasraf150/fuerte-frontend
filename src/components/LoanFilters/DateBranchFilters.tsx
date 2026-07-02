@@ -113,6 +113,7 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
         {/* Month Dropdown */}
         <div className="relative">
           <select
+            aria-label="Filter by release month"
             value={month ?? ""}
             onChange={(e) => {
               const value = e.target.value === "" ? null : parseInt(e.target.value, 10);
@@ -132,6 +133,7 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
         {/* Year Dropdown */}
         <div className="relative">
           <select
+            aria-label="Filter by release year"
             value={year ?? ""}
             onChange={(e) => {
               const value = e.target.value === "" ? null : parseInt(e.target.value, 10);
@@ -151,6 +153,7 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
         {/* Branch Dropdown */}
         <div className="relative">
           <select
+            aria-label="Filter by branch"
             value={branchSubId ?? ""}
             onChange={(e) => {
               const value = e.target.value === "" ? null : parseInt(e.target.value, 10);

@@ -48,7 +48,12 @@ const useBorrower = () => {
     }
 
     if (!result.data || !result.data.getBorrowers) {
-      throw new Error('No data returned from server - check if API is running');
+      // A well-formed GraphQL envelope whose getBorrowers field is null. Transient
+      // 5xx/HTML/maintenance bodies are already caught upstream by graphqlFetch's
+      // parseGraphQLResponse guard with an honest, status-specific message, so this
+      // only fires on a true null field. Give the same honest copy rather than the
+      // misleading "check if API is running" (the API is reachable — it answered).
+      throw new Error('The server returned no borrower data (the getBorrowers field was null). Please retry; if it persists, report it to your administrator.');
     }
 
     return {

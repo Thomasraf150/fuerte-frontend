@@ -1,24 +1,11 @@
-import React from 'react';
-import DefaultLayout from '@/components/Layouts/DefaultLayout';
-import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import AuditLogList from './components/AuditLogList';
-import './styles.css';
+import { redirect } from 'next/navigation';
 
-export const metadata = {
-  title: "Areas",
-  description: "",
-};
-
-const AuditLogs: React.FC = () => {
-  return (
-    <DefaultLayout>
-      <div className="mx-auto">
-        <Breadcrumb pageName="Audit Logs" />
-      </div>
-      <AuditLogList />
-    </DefaultLayout>
-  );
-};
-
-export default AuditLogs;
-  
+// The /audit-logs page was a copy-paste of the Areas CRUD (it queried getAreas,
+// rendered Area rows under Company/Address/Contact/Email headers, and its Delete
+// button soft-deleted REAL areas via deleteArea -> AreaMutation@updateArea, which
+// cascades to sub_areas). There is no audit-log backend yet, so the screen was
+// both misleading and destructive. Redirect away until a real read-only audit
+// page is built. The nav links are also hidden (Sidebar / SidebarOwner).
+export default function AuditLogs() {
+  redirect('/');
+}

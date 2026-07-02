@@ -417,7 +417,8 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/file-types" className={subLinkClass(pathname === "/file-types")}>File Types</Link></li>
                         <li><Link href="/other-company-charges" className={subLinkClass(pathname === "/other-company-charges")}>Other Company Charges</Link></li>
                         <li><Link href="/for-new-loans" className={subLinkClass(pathname === "/for-new-loans")}>For New Loans</Link></li>
-                        <li><Link href="/audit-logs" className={subLinkClass(pathname === "/audit-logs")}>Audit Trail</Link></li>
+                        {/* Audit Trail hidden: /audit-logs is a mislabeled Areas-CRUD clone whose
+                            Delete soft-deletes real areas. Re-enable when a real audit-log page ships. */}
                         <li><Link href="/accounting/vendors" className={subLinkClass(pathname === "/accounting/vendors")}>Vendors</Link></li>
                         <li><Link href="/accounting/coa" className={subLinkClass(pathname === "/accounting/coa")}>Chart of Accounts</Link></li>
                         <li><Link href="/accounting/loan-proceed-settings" className={subLinkClass(pathname === "/accounting/loan-proceed-settings")}>Loan Proceed Settings</Link></li>

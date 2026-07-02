@@ -126,6 +126,56 @@ export function generateTwiceMonthOtherWeekSchedule(
   return dates;
 }
 
+// --- Thrice a Month (three fixed cutoff days, e.g. 1/11/21) ---
+
+export function getNextThriceMonthlyDate(
+  refDate: Date,
+  day1: number,
+  day2: number,
+  day3: number
+): Date {
+  const days = [day1, day2, day3].sort((a, b) => a - b);
+  const refDay = refDate.getDate();
+  const firstOfMonth = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
+
+  for (const d of days) {
+    if (refDay <= d) return clampDay(firstOfMonth, d);
+  }
+  // refDate is past the last cutoff — roll to the first cutoff of next month.
+  return clampDay(addMonths(firstOfMonth, 1), days[0]);
+}
+
+export function generateThriceMonthlySchedule(
+  refDate: Date,
+  day1: number,
+  day2: number,
+  day3: number,
+  termMonths: number
+): string[] {
+  const days = [day1, day2, day3].sort((a, b) => a - b);
+  const firstDate = getNextThriceMonthlyDate(refDate, days[0], days[1], days[2]);
+  const totalDates = termMonths * 3;
+  const dates: string[] = [];
+
+  // Which of the three cutoff days does firstDate land on? Start the cycle there
+  // (clamp-aware so a custom triple containing day 30/31 still aligns in Feb).
+  const firstDay = firstDate.getDate();
+  let startIdx = days.findIndex(
+    (d) => Math.min(d, getDaysInMonth(firstDate)) === firstDay
+  );
+  if (startIdx < 0) startIdx = 0;
+
+  const currentMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+  for (let i = startIdx; dates.length < totalDates; i++) {
+    const monthOffset = Math.floor(i / 3);
+    const dayIdx = i % 3;
+    const month = addMonths(currentMonth, monthOffset);
+    dates.push(format(clampDay(month, days[dayIdx]), DATE_FORMAT));
+  }
+
+  return dates;
+}
+
 export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 
 export const SEMI_MONTHLY_PRESETS = [
@@ -135,3 +185,6 @@ export const SEMI_MONTHLY_PRESETS = [
 ] as const;
 
 export const DAY_OF_MONTH_OPTIONS = [1, 5, 10, 15, 20, 25, 30] as const;
+
+// Magnolia Company and similar every-10-days clients collect on the 1st/11th/21st.
+export const THRICE_MONTHLY_PRESET = { label: '1/11/21', day1: 1, day2: 11, day3: 21 } as const;

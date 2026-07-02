@@ -250,9 +250,18 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
         : [];
 
       if ((statusMatches && branchMatches && searchMatches) || filteredChildren.length > 0) {
+        // When a parent matches but NONE of its children do, only fall back to
+        // the full (unfiltered) child list if the sole active filter is search
+        // — that preserves "search a parent → see its whole subtree". Under a
+        // status or branch filter, showing the unfiltered children would leak
+        // active accounts into the "Inactive" view or other-branch children
+        // under a matching parent, so show none.
+        const keepAllChildren = status === 'all' && branch === 'all';
         filtered.push({
           ...account,
-          subAccounts: filteredChildren.length > 0 ? filteredChildren : account.subAccounts
+          subAccounts: filteredChildren.length > 0
+            ? filteredChildren
+            : (keepAllChildren ? account.subAccounts : [])
         });
       }
 

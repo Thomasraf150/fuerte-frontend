@@ -12,6 +12,7 @@ import {
 import CustomDatatable from "@/components/CustomDatatable";
 import ProblemAccountsSummary from "./ProblemAccountsSummary";
 import { problemAccountsColumns } from "./ProblemAccountsColumns";
+import { todayLocalISO } from "@/utils/helper";
 
 interface Option {
   value: string;
@@ -114,7 +115,7 @@ const ProblemAccountsList: React.FC = () => {
       toast.info("No unpaid schedule found for this loan.");
       return;
     }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayLocalISO();
     router.push(
       `/collection-list/${row.oldest_unpaid_schedule_id}?date=${today}&ref=${encodeURIComponent(row.loan_ref)}`
     );

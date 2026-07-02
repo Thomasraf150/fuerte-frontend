@@ -45,8 +45,11 @@ const BankList: React.FC = () => {
       'Yes delete it!',
     );
     if (isConfirmed) {
-      handleDeleteBank(row);
-      fetchDataBank(10, 1);
+      // Await the delete (avoids the refetch racing the soft-delete) and
+      // refetch the same page size the list mounts with (100) — refetching
+      // with 10 collapsed the table to 10 rows after any delete.
+      await handleDeleteBank(row);
+      fetchDataBank(100, 1);
     }
   }
 

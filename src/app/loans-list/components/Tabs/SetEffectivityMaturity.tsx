@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import OnceAMonth from '../TabForm/OnceAMonth';
 import TwiceAMonth from '../TabForm/TwiceAMonth';
+import ThriceAMonth from '../TabForm/ThriceAMonth';
 import DayOfTheWeek from '../TabForm/DayOfTheWeek';
 import TwiceAMonthOtherWeek from '../TabForm/TwiceAMonthOtherWeek';
 import ManualDate from '../TabForm/ManualDate';
@@ -163,7 +164,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       </div>
       </div>
       <h3 className="text-md font-semibold mb-3">Payment Method</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       <div>
         <label
           htmlFor="once_a_month"
@@ -204,6 +205,28 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             id="twice_a_month"
             className="h-5 w-5 border-gray-300 text-blue-500"
             checked={selectedOption === 'twice_a_month'}
+            onChange={handleOptionChange}
+          />
+        </label>
+      </div>
+      <div>
+        <label
+          htmlFor="thrice_a_month"
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
+            selectedOption === 'thrice_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          }`}
+        >
+          <div>
+            <p className="text-gray-700">Thrice a month</p>
+          </div>
+
+          <input
+            type="radio"
+            name="thrice_a_month"
+            value="thrice_a_month"
+            id="thrice_a_month"
+            className="h-5 w-5 border-gray-300 text-blue-500"
+            checked={selectedOption === 'thrice_a_month'}
             onChange={handleOptionChange}
           />
         </label>
@@ -283,6 +306,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       {[
         { key: 'once_a_month', title: 'Payment for Once a Month', Component: OnceAMonth },
         { key: 'twice_a_month', title: 'Payment for twice a month', Component: TwiceAMonth },
+        { key: 'thrice_a_month', title: 'Payment for thrice a month (e.g. 1/11/21)', Component: ThriceAMonth },
         { key: 'day_of_the_week', title: 'Payment for day of the week (weekly)', Component: DayOfTheWeek },
         { key: 'manual_date', title: 'Payment for manual date', Component: ManualDate },
         { key: 'twice_a_month_oth_week', title: 'Payment for twice a month other week', Component: TwiceAMonthOtherWeek },

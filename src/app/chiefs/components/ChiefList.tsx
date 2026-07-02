@@ -17,8 +17,13 @@ const ChiefList: React.FC = () => {
   const [showSubForm, setShowSubForm] = useState<boolean>(false);
   const [showSubBranch, setShowSubBranch] = useState<boolean>(false);
   // const { selectedRow } = useBranchListsStore.getState();
-  const { dataChief, fetchDataChief, handleDeleteChief, chiefFetchLoading } = useChiefs();
-  
+  const { dataChief, fetchDataChief, handleDeleteChief, chiefFetchLoading, chiefPaginator } = useChiefs();
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  const handlePageChange = (p: number) => { setPage(p); fetchDataChief(pageSize, p); };
+  const handlePageSizeChange = (s: number) => { setPageSize(s); setPage(1); fetchDataChief(s, 1); };
+
   const [initialFormData, setInitialFormData] = useState<DataChief | null>(null);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
@@ -45,8 +50,9 @@ const ChiefList: React.FC = () => {
       'Yes delete it!',
     );
     if (isConfirmed) {
-      handleDeleteChief(row);
-      fetchDataChief(10, 1);
+      // Await the delete so the refetch runs after the soft-delete commits.
+      await handleDeleteChief(row);
+      fetchDataChief(pageSize, page);
     }
   }
 
@@ -73,9 +79,22 @@ const ChiefList: React.FC = () => {
                 </button>
                 <CustomDatatable
                   apiLoading={chiefFetchLoading}
-                  title="Branch List"
+                  title="Chief List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
                   data={dataChief || []}
+                  serverSidePagination={{
+                    totalRecords: chiefPaginator?.total ?? 0,
+                    currentPage: chiefPaginator?.currentPage ?? page,
+                    pageSize: chiefPaginator?.perPage ?? pageSize,
+                    totalPages: chiefPaginator?.lastPage ?? 1,
+                    hasNextPage: chiefPaginator?.hasMorePages ?? false,
+                    hasPreviousPage: (chiefPaginator?.currentPage ?? page) > 1,
+                    onPageChange: handlePageChange,
+                    onPageSizeChange: handlePageSizeChange,
+                    recordType: 'chief',
+                    recordTypePlural: 'chiefs',
+                    enableSearch: false,
+                  }}
                 />
               </div>
             </div>

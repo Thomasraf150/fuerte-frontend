@@ -51,16 +51,22 @@ const useLoans = () => {
   // responses (rapid typing) overwriting fresher results.
   const latestProductSearchId = useRef(0);
 
-  // Pagination wrapper function for server-side pagination
+  // Pagination wrapper function for server-side pagination.
+  // Date/branch filters arrive via usePagination's extraFilters pass-through —
+  // they must NOT be separate positional params (usePagination only forwards
+  // what it knows about; extra positional args were silently dropped, which is
+  // exactly how the release-date filter shipped broken).
   const fetchLoansForPagination = useCallback(async (
     first: number,
     page: number,
     search?: string,
     statusFilter?: string,
-    releaseMonth?: number | null,
-    releaseYear?: number | null,
-    branchSubId?: number | null
+    extraFilters?: Record<string, unknown>
   ) => {
+    const releaseMonth = (extraFilters?.releaseMonth ?? null) as number | null;
+    const releaseYear = (extraFilters?.releaseYear ?? null) as number | null;
+    const branchSubId = (extraFilters?.branchSubId ?? null) as number | null;
+
     console.log('[useLoans] fetchLoansForPagination called:', {
       first,
       page,
@@ -995,7 +1001,8 @@ const useLoans = () => {
   } = usePagination<BorrLoanRowData>({
     fetchFunction: fetchLoansForPagination,
     config: { initialPageSize: 20 },
-    statusFilter
+    statusFilter,
+    extraFilters: { releaseMonth: month, releaseYear: year, branchSubId }
   });
 
   // NEW: Filter change handlers
@@ -1020,13 +1027,8 @@ const useLoans = () => {
     setStatusFilter('all');
   }, [setSearchQuery]);
 
-  // NEW: Auto-refetch when filters change
-  useEffect(() => {
-    if (refresh) {
-      refresh();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [month, year, branchSubId]);
+  // NOTE: refetch-on-filter-change now lives inside usePagination (extraFilters
+  // effect, resets to page 1). A refresh() here would double-fetch and race it.
 
    // Fetch data on component mount if id exists
   useEffect(() => {

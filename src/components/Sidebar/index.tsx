@@ -849,17 +849,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               For New Loans
                             </Link>
                           </li>
-                          <li>
-                            <Link
-                              href="/audit-logs"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/audit-logs" &&
-                                "text-white"
-                              }`}
-                            >
-                              Audit Trail
-                            </Link>
-                          </li>
+                          {/* Audit Trail hidden: /audit-logs is a mislabeled clone of the Areas
+                              CRUD — it renders Area rows (capped at 20) and its Delete soft-deletes
+                              REAL areas (deleteArea -> AreaMutation@updateArea, cascades to sub_areas).
+                              Re-enable once a real read-only audit-log page is built. */}
                           
                         </ul>
                       </div>

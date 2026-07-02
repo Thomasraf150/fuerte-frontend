@@ -14,6 +14,8 @@ import {
   getNextWeekdayDate,
   generateWeeklySchedule,
   generateTwiceMonthOtherWeekSchedule,
+  getNextThriceMonthlyDate,
+  generateThriceMonthlySchedule,
 } from '../../../src/utils/effectivityDateUtils';
 
 test.describe('effectivityDateUtils — getNextSemiMonthlyDate', () => {
@@ -164,6 +166,96 @@ test.describe('effectivityDateUtils — generateWeeklySchedule', () => {
       const diffDays = (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
       expect(diffDays).toBe(7);
     }
+  });
+});
+
+test.describe('effectivityDateUtils — getNextThriceMonthlyDate (1/11/21)', () => {
+  test('refDate before day1 → returns day1 of current month', () => {
+    // July 1 with cutoffs 1/11/21 → July 1 (refDay == 1 <= 1)
+    const result = getNextThriceMonthlyDate(new Date(2026, 6, 1), 1, 11, 21);
+    expect(result.getMonth()).toBe(6);
+    expect(result.getDate()).toBe(1);
+  });
+
+  test('refDate between day1 and day2 → returns day2', () => {
+    // July 2 → next cutoff is the 11th
+    const result = getNextThriceMonthlyDate(new Date(2026, 6, 2), 1, 11, 21);
+    expect(result.getDate()).toBe(11);
+  });
+
+  test('refDate between day2 and day3 → returns day3', () => {
+    // July 15 → next cutoff is the 21st
+    const result = getNextThriceMonthlyDate(new Date(2026, 6, 15), 1, 11, 21);
+    expect(result.getDate()).toBe(21);
+  });
+
+  test('refDate after day3 → rolls to day1 of next month', () => {
+    // July 25 → next cutoff is Aug 1
+    const result = getNextThriceMonthlyDate(new Date(2026, 6, 25), 1, 11, 21);
+    expect(result.getMonth()).toBe(7);
+    expect(result.getDate()).toBe(1);
+  });
+
+  test('days given out of order → still sorts correctly', () => {
+    const result = getNextThriceMonthlyDate(new Date(2026, 6, 2), 21, 1, 11);
+    expect(result.getDate()).toBe(11);
+  });
+});
+
+test.describe('effectivityDateUtils — generateThriceMonthlySchedule (1/11/21)', () => {
+  test('1/11/21 from July 1 generates a clean 2-month sequence', () => {
+    const dates = generateThriceMonthlySchedule(new Date(2026, 6, 1), 1, 11, 21, 2);
+    expect(dates).toEqual([
+      '07/01/2026',
+      '07/11/2026',
+      '07/21/2026',
+      '08/01/2026',
+      '08/11/2026',
+      '08/21/2026',
+    ]);
+  });
+
+  test('starting mid-cycle (refDate July 2) begins on the 11th and keeps 3/month cadence', () => {
+    const dates = generateThriceMonthlySchedule(new Date(2026, 6, 2), 1, 11, 21, 2);
+    expect(dates).toEqual([
+      '07/11/2026',
+      '07/21/2026',
+      '08/01/2026',
+      '08/11/2026',
+      '08/21/2026',
+      '09/01/2026',
+    ]);
+  });
+
+  test('total date count = termMonths × 3', () => {
+    const dates = generateThriceMonthlySchedule(new Date(2026, 0, 1), 1, 11, 21, 6);
+    expect(dates.length).toBe(18);
+  });
+
+  test('every date lands on one of the three cutoff days', () => {
+    const dates = generateThriceMonthlySchedule(new Date(2026, 6, 5), 1, 11, 21, 4);
+    for (const d of dates) {
+      const day = parseInt(d.split('/')[1], 10);
+      expect([1, 11, 21]).toContain(day);
+    }
+  });
+
+  test('consecutive dates are ~10 days apart (ascending order preserved)', () => {
+    const dates = generateThriceMonthlySchedule(new Date(2026, 6, 1), 1, 11, 21, 3);
+    for (let i = 1; i < dates.length; i++) {
+      const [m1, d1, y1] = dates[i - 1].split('/').map(Number);
+      const [m2, d2, y2] = dates[i].split('/').map(Number);
+      const prev = new Date(y1, m1 - 1, d1);
+      const cur = new Date(y2, m2 - 1, d2);
+      const diffDays = (cur.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+      expect(diffDays).toBeGreaterThan(0); // strictly ascending → maturity = last date
+      expect(diffDays).toBeLessThanOrEqual(11); // 21→next 1 is 10-11 days
+    }
+  });
+
+  test('custom triple (5/15/25) works', () => {
+    const dates = generateThriceMonthlySchedule(new Date(2026, 6, 1), 5, 15, 25, 1);
+    expect(dates).toEqual(['07/05/2026', '07/15/2026', '07/25/2026']);
   });
 });
 

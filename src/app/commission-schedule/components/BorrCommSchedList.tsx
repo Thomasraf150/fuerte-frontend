@@ -48,10 +48,18 @@ const SoaList: React.FC = () => {
 
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
+      // If the new start is after the current end, clear the end date (which
+      // disables Load More); otherwise refetch page 1 for the new range so the
+      // table, months header and totals actually update. Previously this only
+      // set state, leaving stale data on screen (and Load More could then
+      // append page 2 of the new range onto page 1 of the old one).
+      const keepEnd = endDate && date <= endDate ? endDate : undefined;
       setStartDate(date);
-      // Reset end date if it's before the new start date
       if (endDate && date > endDate) {
         setEndDate(undefined);
+      }
+      if (keepEnd) {
+        debouncedFetch(date, keepEnd, searchTerm, true);
       }
     } else {
       setStartDate(undefined);

@@ -17,7 +17,13 @@
 import { test, expect, Page } from '@playwright/test';
 import { uiLogin, findLoanByStatus } from '../../helpers/e2e-helpers';
 
-const ADMIN = { email: 'test.admin@fuerte.test', password: 'TestPass2026!' };
+// Credentials are env-overridable so this suite can run either against the
+// seeded test admin (DeletionApprovalTestUsersSeeder) or a real dev login,
+// e.g.  E2E_ADMIN_EMAIL=owner@example.com E2E_ADMIN_PASSWORD=... npx playwright test
+const ADMIN = {
+  email: process.env.E2E_ADMIN_EMAIL ?? 'test.admin@fuerte.test',
+  password: process.env.E2E_ADMIN_PASSWORD ?? 'TestPass2026!',
+};
 const FRONTEND = 'http://localhost:3000';
 
 function parseDateMM(dateStr: string): Date {
@@ -176,6 +182,63 @@ test.describe('Effectivity Date — Auto-snap schedule generation', () => {
     for (const txt of dates) {
       const d = parseDateMM(txt);
       expect(d.getDay(), `date ${txt} should be a Tuesday`).toBe(2);
+    }
+  });
+
+  test('Thrice a Month — 1/11/21 preset generates dates only on 1st, 11th, 21st', async ({ page }) => {
+    await setupLoanPage(page, loanId);
+
+    await page.locator('label[for="thrice_a_month"]').click();
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: '1/11/21', exact: true }).click();
+    await page.waitForTimeout(1000);
+
+    // Capture the rendered screen for visual confirmation
+    await page.locator('[data-testid="set-effectivity-section"]').screenshot({
+      path: 'test-results/thrice-a-month-1-11-21.png',
+    });
+
+    const dates = await getPreviewDates(page);
+    expect(dates.length, `expected dates but got: ${JSON.stringify(dates)}`).toBeGreaterThan(0);
+    // 3 installments per month
+    expect(dates.length % 3, 'thrice-a-month should produce a multiple of 3 dates').toBe(0);
+
+    for (const txt of dates) {
+      const d = parseDateMM(txt);
+      expect([1, 11, 21], `date ${txt} should be on the 1st/11th/21st`).toContain(d.getDate());
+    }
+
+    // Strictly ascending → maturity = last date is correct
+    for (let i = 1; i < dates.length; i++) {
+      expect(
+        parseDateMM(dates[i]).getTime(),
+        `dates must be ascending: ${dates[i - 1]} -> ${dates[i]}`,
+      ).toBeGreaterThan(parseDateMM(dates[i - 1]).getTime());
+    }
+  });
+
+  test('Thrice a Month — Custom triple (5/15/25) generates dates on 5th, 15th, 25th', async ({ page }) => {
+    await setupLoanPage(page, loanId);
+
+    await page.locator('label[for="thrice_a_month"]').click();
+    await page.waitForTimeout(500);
+
+    await page.getByRole('button', { name: 'Custom', exact: true }).click();
+    await page.waitForTimeout(300);
+
+    await page.locator('[data-testid="custom-day1"]').fill('5');
+    await page.locator('[data-testid="custom-day2"]').fill('15');
+    await page.locator('[data-testid="custom-day3"]').fill('25');
+    await page.waitForTimeout(1000);
+
+    const dates = await getPreviewDates(page);
+    expect(dates.length).toBeGreaterThan(0);
+    expect(dates.length % 3).toBe(0);
+
+    for (const txt of dates) {
+      const d = parseDateMM(txt);
+      expect([5, 15, 25]).toContain(d.getDate());
     }
   });
 

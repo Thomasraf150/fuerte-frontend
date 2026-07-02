@@ -1,6 +1,6 @@
 const GET_BALANCE_SHEET: string = `
-  query GetBalanceSheet($startDate: String, $endDate: String, $branch_sub_id: String){
-    getBalanceSheet(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id) {
+  query GetBalanceSheet($startDate: String, $endDate: String, $branch_sub_id: String, $branch_id: String){
+    getBalanceSheet(startDate: $startDate, endDate: $endDate, branch_sub_id: $branch_sub_id, branch_id: $branch_id) {
         assets {
             number
             account_name

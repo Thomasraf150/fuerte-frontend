@@ -15,6 +15,7 @@ const useChiefs = () => {
           DELETE_CHIEF_MUTATION } = ChiefQueryMutations;
   
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
+  const [chiefPaginator, setChiefPaginator] = useState<any>(undefined);
   const [chiefLoading, setChiefLoading] = useState<boolean>(false);
   const [chiefFetchLoading, setChiefFetchLoading] = useState<boolean>(false);
   // Function to fetchdata
@@ -27,6 +28,9 @@ const useChiefs = () => {
         orderBy: [{ column: "id", order: 'DESC' }],
       });
       setDataChief(result.data.getChief.data);
+      // Expose paginatorInfo so the list can drive server-side pagination
+      // (previously discarded, so only the first 10 chiefs were ever reachable).
+      setChiefPaginator(result.data.getChief.paginatorInfo);
     } catch (error) {
       console.error('fetchDataChief error:', error);
     } finally {
@@ -105,6 +109,7 @@ const useChiefs = () => {
   return {
     fetchDataChief,
     dataChief,
+    chiefPaginator,
     onSubmitChief,
     handleDeleteChief,
     chiefLoading,

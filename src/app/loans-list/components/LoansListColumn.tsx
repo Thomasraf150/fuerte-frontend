@@ -35,6 +35,11 @@ const borrLoanCol = (
     sortable: true,
   },
   {
+    name: 'Release Date',
+    cell: row => (row.released_date ? String(row.released_date).slice(0, 10) : '—'),
+    sortable: false,
+  },
+  {
     name: 'Loan Proceeds',
     cell: row => formatNumber(Number(row.loan_proceeds)),
     sortable: true,

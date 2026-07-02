@@ -7,11 +7,14 @@ import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { loanStatus } from '@/utils/helper';
 
+// SERVER-paginated list — CustomDatatable in server mode does not wire
+// sortServer/onSort, so a header click would only reorder the current page.
+// Columns are therefore NOT marked sortable (was advertising a broken sort).
 const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn<BorrLoanRowData>[] => [
   {
     name: 'Loan Product',
     cell: row => row.loan_product.description,
-    sortable: true,
+    sortable: false,
     style: {
       minWidth: '350px',
     },
@@ -20,7 +23,7 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
   {
     name: 'Terms',
     cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
-    sortable: true,
+    sortable: false,
     style: {
       minWidth: '100px',
     },
@@ -29,7 +32,7 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
   {
     name: 'Borrower',
     cell: row => row?.borrower.lastname + ', ' + row.borrower.firstname,
-    sortable: true,
+    sortable: false,
     style: {
       minWidth: '270px',
     },
@@ -38,17 +41,17 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
   {
     name: 'Loan Ref#',
     cell: row => row.loan_ref,
-    sortable: true,
+    sortable: false,
   },
   {
     name: 'Loan Proceeds',
     cell: row => formatNumber(Number(row.loan_proceeds)),
-    sortable: true,
+    sortable: false,
   },
   {
     name: 'PN Amount',
     cell: row => formatNumber(Number(row.pn_amount)),
-    sortable: true,
+    sortable: false,
   },
   {
     name: 'Loan Status',
@@ -74,7 +77,7 @@ const soaListCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColumn
       {row.custom_status}
       </span>
     ),
-    sortable: true,
+    sortable: false,
   },
   // {
   //   name: 'Action',

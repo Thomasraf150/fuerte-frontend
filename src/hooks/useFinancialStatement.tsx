@@ -164,7 +164,7 @@ const useFinancialStatement = () => {
     setIncomeTaxData(undefined);
   };
  
-  const fetchBalanceSheetData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string) => {
+  const fetchBalanceSheetData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string, branch_id?: string) => {
     // Validate dates before API call
     if (!startDate || !endDate) {
       toast.warning('Please select start and end dates');
@@ -182,10 +182,13 @@ const useFinancialStatement = () => {
     setLoading(true);
 
     try {
-      const variables: { startDate: string, endDate: string, branch_sub_id: string } = {
+      const variables: { startDate: string, endDate: string, branch_sub_id: string, branch_id?: string } = {
         startDate: formattedStartDate,
         endDate: formattedEndDate,
-        branch_sub_id
+        branch_sub_id,
+        // Forward the selected main branch so "Branch + All Sub-Branches" scopes
+        // to that branch's sub-branches instead of leaking company-wide data.
+        ...(branch_id ? { branch_id } : {})
       };
 
       const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {

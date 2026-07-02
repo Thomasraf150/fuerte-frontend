@@ -50,8 +50,17 @@ const BalanceSheetList: React.FC = () => {
   
   const handleEndDateChange = (date: Date | null) => {
     setEndDate(date || undefined);
-    // fetchSummaryTixReport(startDate, endDate);
   };
+
+  // Refetch when the date range changes IF a (sub-)branch scope is already
+  // chosen. Previously the date pickers only mutated state — the report kept
+  // showing figures for the OLD range while the pickers displayed the new one.
+  useEffect(() => {
+    if (branchSubId) {
+      fetchBalanceSheetData(startDate, endDate, branchSubId, branchId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate]);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -60,7 +69,9 @@ const BalanceSheetList: React.FC = () => {
 
   const handleBranchSubChange = (branch_sub_id: string) => {
     setBranchSubId(branch_sub_id);
-    fetchBalanceSheetData(startDate, endDate, branch_sub_id);
+    // Pass the selected main branch so "All Sub-Branches" scopes to that
+    // branch's sub-branches (previously it leaked company-wide figures).
+    fetchBalanceSheetData(startDate, endDate, branch_sub_id, branchId);
   };
 
   useEffect(()=>{

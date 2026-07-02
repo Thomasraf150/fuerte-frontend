@@ -44,7 +44,8 @@ const BorrowerAttachments: React.FC<BorrAttProps> = ({ singleData: BorrowerData 
       'Yes delete it!',
     );
     if (isConfirmed) {
-      handleDeleteAttm(row);
+      // Await the delete so the refetch runs AFTER the soft-delete commits.
+      await handleDeleteAttm(row);
       fetchDataBorrAttachments(100, 1, Number(BorrowerData?.id));
     }
   }

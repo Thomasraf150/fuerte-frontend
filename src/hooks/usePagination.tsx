@@ -22,7 +22,13 @@ export interface PaginationConfig {
 }
 
 export interface UsePaginationProps {
-  fetchFunction: (first: number, page: number, search?: string, statusFilter?: string) => Promise<{
+  fetchFunction: (
+    first: number,
+    page: number,
+    search?: string,
+    statusFilter?: string,
+    extraFilters?: Record<string, unknown>
+  ) => Promise<{
     data: any[];
     paginatorInfo?: {
       total: number;
@@ -33,6 +39,9 @@ export interface UsePaginationProps {
   }>;
   config?: PaginationConfig;
   statusFilter?: string;
+  // Additional server-side filters (e.g. release month/year, branch) forwarded
+  // to fetchFunction on EVERY fetch. Changing them refetches from page 1.
+  extraFilters?: Record<string, unknown>;
 }
 
 export interface UsePaginationReturn<T> {
@@ -69,7 +78,8 @@ export interface UsePaginationReturn<T> {
 export function usePagination<T = any>({
   fetchFunction,
   config = {},
-  statusFilter = 'all'
+  statusFilter = 'all',
+  extraFilters
 }: UsePaginationProps): UsePaginationReturn<T> {
 
   // Configuration with defaults (enforcing max limits)
@@ -104,6 +114,12 @@ export function usePagination<T = any>({
   // "wrong results until I retype" race).
   const latestRequestId = useRef<number>(0);
 
+  // Extra filters live in a ref so every fetch — including ones fired from
+  // memoized callbacks (goToPage/refresh) — always sends the CURRENT values
+  // instead of stale-closured ones.
+  const extraFiltersRef = useRef<Record<string, unknown> | undefined>(extraFilters);
+  extraFiltersRef.current = extraFilters;
+
   // Debounce search query to avoid excessive API calls
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -127,7 +143,7 @@ export function usePagination<T = any>({
     try {
       // Trim search query to handle whitespace-only searches
       const trimmedSearch = search?.trim();
-      const response = await fetchFunction(pageSize, page, trimmedSearch || undefined, status);
+      const response = await fetchFunction(pageSize, page, trimmedSearch || undefined, status, extraFiltersRef.current);
 
       // Discard this response if a newer request has since started — prevents an
       // out-of-order stale response from overwriting the latest results.
@@ -172,7 +188,11 @@ export function usePagination<T = any>({
 
   // Action: Go to specific page
   const goToPage = useCallback(async (page: number) => {
-    if (page < 1 || page > pagination.totalPages) {
+    // Only enforce the upper bound once we know the page count. While
+    // totalPages is still 0 (initial fetch in flight or errored), a
+    // filter-driven goToPage(1) must NOT be dropped — otherwise the filter
+    // change is silently swallowed and the stale/unfiltered list is shown.
+    if (page < 1 || (pagination.totalPages > 0 && page > pagination.totalPages)) {
       return;
     }
     await fetchData(page, pagination.pageSize, debouncedSearchQuery, statusFilter);
@@ -190,7 +210,7 @@ export function usePagination<T = any>({
     await fetchData(pagination.currentPage, pagination.pageSize, debouncedSearchQuery, statusFilter);
   }, [pagination.currentPage, pagination.pageSize, debouncedSearchQuery, statusFilter]);
 
-  // Auto-fetch when search query or status filter changes (after debounce)
+  // Auto-fetch when the search query changes (after debounce).
   useEffect(() => {
     if (debouncedSearchQuery !== '') {
       // Only reset to page 1 if there's an actual search query
@@ -199,7 +219,35 @@ export function usePagination<T = any>({
       // If search is cleared, refresh current page
       fetchData(pagination.currentPage, pagination.pageSize, '', statusFilter);
     }
-  }, [debouncedSearchQuery, statusFilter]); // Auto-refetch when status filter changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchQuery]);
+
+  // Auto-fetch when the status filter changes. Always reset to page 1 —
+  // otherwise a user on page N of a broad set who narrows to a status with
+  // fewer pages lands on an out-of-range page and sees an empty table.
+  const isFirstStatusRun = useRef<boolean>(true);
+  useEffect(() => {
+    if (isFirstStatusRun.current) {
+      isFirstStatusRun.current = false;
+      return; // initial mount handled by the initial-fetch effect below
+    }
+    fetchData(1, pagination.pageSize, debouncedSearchQuery, statusFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter]);
+
+  // Auto-fetch when extra filters change (deep-compared by value). Always reset
+  // to page 1: staying on page N of a now-smaller filtered result set would
+  // render an empty table.
+  const extraFiltersKey = JSON.stringify(extraFilters ?? null);
+  const isFirstExtraFiltersRun = useRef<boolean>(true);
+  useEffect(() => {
+    if (isFirstExtraFiltersRun.current) {
+      isFirstExtraFiltersRun.current = false;
+      return; // initial mount is handled by the initial-fetch effect below
+    }
+    fetchData(1, pagination.pageSize, debouncedSearchQuery, statusFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extraFiltersKey]);
 
   // Initial data fetch
   useEffect(() => {

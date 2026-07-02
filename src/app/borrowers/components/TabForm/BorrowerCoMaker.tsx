@@ -38,7 +38,9 @@ const BorrowerCoMaker: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) =
       'Yes delete it!',
     );
     if (isConfirmed) {
-      handleDeleteComaker(row);
+      // Await the delete so the refetch runs AFTER the soft-delete commits —
+      // otherwise the parallel refetch can still return the just-deleted row.
+      await handleDeleteComaker(row);
       fetchDataBorrCoMaker(100, 1, Number(BorrowerData?.id));
     }
   }
