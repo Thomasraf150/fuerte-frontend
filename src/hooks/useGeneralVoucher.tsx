@@ -56,7 +56,7 @@ const useGeneralVoucher = () => {
       throw new Error(result.errors[0].message || 'GraphQL error');
     }
     if (!result.data?.getCheckVoucher) {
-      throw new Error('getCheckVoucher returned no data — backend schema may be out of sync. Clear Lighthouse cache.');
+      throw new Error('Server returned no voucher data (the getCheckVoucher field was null). If this started right after a deploy, re-run ./docker.sh prod-deploy to rebuild the backend image — do not hand-clear the Lighthouse cache.');
     }
 
     // Return the expected format for usePagination

@@ -40,7 +40,7 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
       throw new Error(result.errors[0].message || 'GraphQL error');
     }
     if (!result.data?.getJournal) {
-      throw new Error('getJournal returned no data — backend schema may be out of sync. Clear Lighthouse cache.');
+      throw new Error('Server returned no journal data (the getJournal field was null). If this started right after a deploy, re-run ./docker.sh prod-deploy to rebuild the backend image — do not hand-clear the Lighthouse cache.');
     }
 
     return {

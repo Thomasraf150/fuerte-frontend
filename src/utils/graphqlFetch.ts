@@ -25,6 +25,29 @@ export class GraphQLConnectionError extends Error {
 let sessionExpiredHandled = false;
 
 /**
+ * Honest, status-specific copy for a JSON body that is NOT a GraphQL envelope
+ * (a Laravel error page: 503 maintenance, 500, 429 throttle, etc.).
+ *
+ * These bodies carry a `message`/`exception` shape and NEITHER `data` nor
+ * `errors`. They used to slip through parsing and get misreported downstream as
+ * "backend schema may be out of sync — clear Lighthouse cache" — a false lead
+ * that sent operators chasing the wrong fix. This maps the HTTP status to what
+ * actually happened and what to actually do.
+ */
+function statusMessage(status: number): string {
+  if (status === 503) {
+    return 'The system is temporarily unavailable — a restart or maintenance is in progress. Wait a moment, then retry. Your data is safe.';
+  }
+  if (status === 429) {
+    return 'Too many requests at once — the server is throttling. Wait a few seconds, then retry.';
+  }
+  if (status >= 500) {
+    return `The server hit an internal error (HTTP ${status}). Retry once; if it persists this is a backend problem to report to IT — not your browser or cache.`;
+  }
+  return `The server sent an unexpected response (HTTP ${status}) instead of data. Please retry; if it keeps happening, report it to your administrator.`;
+}
+
+/**
  * Shared response-parsing logic used by both `graphqlFetch` and the legacy
  * `fetchWithRecache` helper. Detects auth failures (401/419), non-JSON
  * responses (HTML error pages, maintenance mode), and JSON parse failures —
@@ -48,14 +71,35 @@ export async function parseGraphQLResponse<T = any>(
     );
   }
 
+  let body: GraphQLResponse<T>;
   try {
-    return (await response.json()) as GraphQLResponse<T>;
+    body = (await response.json()) as GraphQLResponse<T>;
   } catch {
     throw new GraphQLConnectionError(
       'Received an invalid response from the server. Please retry.',
       response.status,
     );
   }
+
+  // A well-formed GraphQL response ALWAYS carries `data` and/or `errors`. A JSON
+  // body with neither is a Laravel error page (503 maintenance, 500, 429) that
+  // happens to be application/json — common during a deploy/restart window.
+  // Reject it here with an honest, status-specific message so no downstream
+  // hook mistakes it for "no data → schema out of sync → clear Lighthouse
+  // cache". This one guard covers every graphqlFetch/fetchWithRecache caller.
+  // (Kept OUTSIDE the JSON-parse try/catch above so this throw isn't swallowed.)
+  if (
+    body && typeof body === 'object' &&
+    !('data' in body) && !('errors' in body)
+  ) {
+    console.error('[graphqlFetch] Non-GraphQL response body', {
+      status: response.status,
+      body,
+    });
+    throw new GraphQLConnectionError(statusMessage(response.status), response.status);
+  }
+
+  return body;
 }
 
 /**
