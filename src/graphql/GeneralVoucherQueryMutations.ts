@@ -30,6 +30,7 @@ const GET_GV_QUERY: string = `
         journal_date
         posted_date
         check_no
+        display_check_no
         document_no
         reference_no
         journal_desc
@@ -101,6 +102,7 @@ const GET_VOUCHER_BY_ID: string = `
       journal_date
       posted_date
       check_no
+      display_check_no
       document_no
       reference_no
       journal_desc

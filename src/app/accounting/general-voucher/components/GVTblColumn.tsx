@@ -42,7 +42,8 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
   },
   {
     name: 'Check #',
-    cell: row => row?.check_no,
+    // Real bank check for loan-release vouchers; check_no is the auto-counter.
+    cell: row => row?.display_check_no ?? row?.check_no,
     sortable: true,
   },
   {

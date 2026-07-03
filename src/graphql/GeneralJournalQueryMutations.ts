@@ -12,6 +12,7 @@ const GET_GJ_QUERY: string = `
         journal_date
         posted_date
         check_no
+        display_check_no
         document_no
         reference_no
         journal_desc
@@ -63,6 +64,7 @@ const GET_JOURNAL_ENTRY_BY_ID: string = `
       journal_date
       posted_date
       check_no
+      display_check_no
       document_no
       reference_no
       journal_desc

@@ -51,7 +51,10 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       setValue('vendor_id', singleData?.vendor_id ?? '');
       setValue('acctg_details', singleData?.acctg_details ?? '');
       setValue('journal_date', moment(singleData?.journal_date).format('YYYY-MM-DD') ?? '');
-      setValue('check_no', singleData?.check_no ?? '');
+      // Show the REAL bank check (loans.check_no) for loan-release vouchers, not
+      // the auto-generated acctg_entries.check_no counter. display_check_no is
+      // resolved server-side; fall back to check_no if the field is absent.
+      setValue('check_no', singleData?.display_check_no ?? singleData?.check_no ?? '');
       setValue('journal_desc', singleData?.journal_desc ?? '');
       setRows(singleData?.acctg_details);
       setDataPayee(singleData?.vendor);

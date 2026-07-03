@@ -812,6 +812,9 @@ export interface RowAcctgEntry {
   amount: string;
   journal_name: string;
   check_no: string;
+  // Real bank check for loan-release vouchers (loans.check_no); check_no is the
+  // auto-generated counter and must not be shown to users. See backend accessor.
+  display_check_no?: string;
   journal_desc: string;
   is_cancelled: boolean;
   acctg_details: RowAcctgDetails[];
