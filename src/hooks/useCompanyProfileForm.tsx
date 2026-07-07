@@ -6,6 +6,7 @@ import { DataCompanyFormValues } from '@/utils/DataTypes';
 import SAVE_COMPANY_PROFILE_MUTATION from '@/graphql/SaveCompanyProfileMutation';
 import GET_COMPANY_PROFILE_QUERY from '@/graphql/GetCompanyProfileQuery';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { useAuthStore } from '@/store';
 import { toast } from "react-toastify";
 
 const useCompanyProfileForm = (initialValues?: DataCompanyFormValues) => {
@@ -67,8 +68,10 @@ const useCompanyProfileForm = (initialValues?: DataCompanyFormValues) => {
       formData.append('map', JSON.stringify({ 'file': ['variables.file'] }));
       formData.append('file', data.company_logo[0]);
 
+      const token = useAuthStore.getState().GET_AUTH_TOKEN();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: formData,
       });
 

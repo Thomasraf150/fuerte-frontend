@@ -136,5 +136,8 @@ export const toCamelCase = (str: string) => {
 };
 
 export const formatNumberComma = (num: number) => {
-  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Guard non-finite input (undefined/NaN from optional-chained fields) so a
+  // missing money value renders "0.00" instead of throwing or printing "NaN".
+  const n = Number(num);
+  return (Number.isFinite(n) ? n : 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };

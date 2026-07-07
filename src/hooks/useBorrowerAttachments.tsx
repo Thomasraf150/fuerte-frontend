@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { useAuthStore } from '@/store';
 
 import { BorrAttachmentsFormValues, BorrAttachmentsRowData } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
@@ -40,8 +41,10 @@ const useBorrowerAttachments = () => {
       formData.append('map', JSON.stringify({ 'file': ['variables.file'] }));
       formData.append('file', data.file[0]);
       
+      const token = useAuthStore.getState().GET_AUTH_TOKEN();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
         method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: formData
       });
       
