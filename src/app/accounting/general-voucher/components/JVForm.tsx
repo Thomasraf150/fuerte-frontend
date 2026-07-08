@@ -376,9 +376,9 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
               type="button"
               onClick={() => setShowForm(false)}
             >
-              Cancel
+              Back
             </button>
-            {singleData !== undefined && singleData?.journal_name !== 'Journal Voucher' && singleData?.reference_no === '' && (
+            {singleData !== undefined && singleData?.is_cancelled === false && (
               <button
                 className="flex justify-center rounded border bg-danger border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-rose-400 dark:text-white"
                 type="button"
