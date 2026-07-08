@@ -20,6 +20,7 @@ export const showConfirmationModal = async (
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     confirmButtonText: confText,
+    cancelButtonText: 'Back',
   });
 
   return result.isConfirmed;
