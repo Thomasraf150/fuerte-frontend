@@ -166,7 +166,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You won\'t be able to revert this!',
-      'Yes it is!',
+      'Yes, save it',
     );
     if (isConfirmed) {
       const result = await createGV(data);
@@ -182,7 +182,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     const isConfirmed = await showConfirmationModal(
       '<p style="line-height: 1.4"> Are you sure you want to cancel this entry? </p>',
       'You won\'t be able to revert this!',
-      'Yes it is!',
+      'Yes, cancel it',
     );
     if (isConfirmed) {
       // Assuming createGV can also handle cancellation logic.
@@ -200,7 +200,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     const isConfirmed = await showConfirmationModal(
       '<p style="line-height: 1.4"> Are you sure you want to update date? </p>',
       'You won\'t be able to revert this!',
-      'Yes it is!',
+      'Yes, update it',
     );
     if (isConfirmed) {
       const result = await updateGV(data, journal_date);

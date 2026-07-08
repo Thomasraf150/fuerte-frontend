@@ -122,7 +122,7 @@ const AEForm: React.FC<ParentFormBr> = ({
     const isConfirmed = await showConfirmationModal(
       'Are you sure?',
       'You won\'t be able to revert this!',
-      'Yes it is!',
+      'Yes, save it',
     );
     if (isConfirmed) {
       const result = await createAe(data);
@@ -138,7 +138,7 @@ const AEForm: React.FC<ParentFormBr> = ({
     const isConfirmed = await showConfirmationModal(
       '<p style="line-height: 1.4"> Are you sure you want  to cancel this entry? </p>',
       'You won\'t be able to revert this!',
-      'Yes it is!',
+      'Yes, cancel it',
     );
     if (isConfirmed) {
       // createGV(data);
