@@ -1,5 +1,6 @@
-import { Camera, Home, Save, RotateCw } from 'react-feather';
+import { Camera, Home, Save, RotateCw, Search } from 'react-feather';
 import FormInput from '@/components/FormInput';
+import { checkBorrowerNow } from '@/utils/borrowerDuplicateCheck';
 import FormLabel from '@/components/FormLabel';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
@@ -206,6 +207,28 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     // Form stays open on errors for user to fix and retry
   }
 
+  // Manual "Check Borrower" — advisory duplicate + cross-branch + problem-account
+  // check the encoder can run after entering just the identity fields, before
+  // completing the rest of the form. Never blocks or saves.
+  const [checking, setChecking] = useState(false);
+  const handleCheckBorrower = async () => {
+    setChecking(true);
+    try {
+      await checkBorrowerNow({
+        firstname: watch('firstname'),
+        middlename: watch('middlename'),
+        lastname: watch('lastname'),
+        contact_no: watch('contact_no'),
+        email: watch('email'),
+        dob: watch('dob'),
+        id: singleData?.id,
+        branch_sub_id: watch('branch_sub_id' as any),
+      } as any);
+    } finally {
+      setChecking(false);
+    }
+  };
+
   const [logoPreview, setLogoPreview] = useState('/images/user/user-06.png'); // State for image preview
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -364,6 +387,94 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
 
         {/* Form Containers - All full width and aligned */}
         <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          {/* Identity block first: name + contact + email, then the Check
+              button — so an encoder can verify a borrower (own-branch duplicate,
+              cross-branch match, problem account) before filling everything. */}
+          <div className="w-full">
+            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
+                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
+                  Check for Existing Borrower
+                </h3>
+              </div>
+              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div>
+                    <FormInput
+                      label="Firstname"
+                      id="firstname"
+                      type="text"
+                      icon={Home}
+                      register={register('firstname', { required: true })}
+                      error={errors.firstname && "This field is required"}
+                      required={true}
+                    />
+                  </div>
+                  <div>
+                    <FormInput
+                      label="Middlename"
+                      id="middlename"
+                      type="text"
+                      icon={Home}
+                      register={register('middlename')}
+                      error={errors.middlename?.message}
+                    />
+                  </div>
+                  <div>
+                    <FormInput
+                      label="Lastname"
+                      id="lastname"
+                      type="text"
+                      icon={Home}
+                      register={register('lastname', { required: true })}
+                      error={errors.lastname && "This field is required"}
+                      required={true}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div>
+                    <FormInput
+                      label="Contact No."
+                      id="contact_no"
+                      type="text"
+                      icon={Home}
+                      register={register('contact_no', { required: true })}
+                      error={errors.contact_no && "This field is required"}
+                      formatType="contact"
+                      required={true}
+                    />
+                  </div>
+                  <div>
+                    <FormInput
+                      label="Email"
+                      id="email"
+                      type="text"
+                      icon={Home}
+                      register={register('email', { required: false })}
+                      error={errors.email?.message}
+                      required={false}
+                    />
+                  </div>
+                </div>
+                {!singleData?.id && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCheckBorrower}
+                      disabled={checking}
+                      className="flex items-center justify-center gap-2 rounded bg-primary px-5 py-2 font-medium text-white transition hover:bg-opacity-90 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto"
+                    >
+                      {checking
+                        ? <RotateCw size={16} className="animate-spin" />
+                        : <Search size={16} />}
+                      <span>{checking ? 'Checking…' : 'Check Borrower'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="w-full">
             <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
@@ -422,40 +533,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('purpose', { required: true })}
                       error={errors.purpose && "This field is required"}
-                      required={true}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  <div>
-                    <FormInput
-                      label="Firstname"
-                      id="firstname"
-                      type="text"
-                      icon={Home}
-                      register={register('firstname', { required: true })}
-                      error={errors.firstname && "This field is required"}
-                      required={true}
-                    />
-                  </div>
-                  <div>
-                    <FormInput
-                      label="Middlename"
-                      id="middlename"
-                      type="text"
-                      icon={Home}
-                      register={register('middlename')}
-                      error={errors.middlename?.message}
-                    />
-                  </div>
-                  <div>
-                    <FormInput
-                      label="Lastname"
-                      id="lastname"
-                      type="text"
-                      icon={Home}
-                      register={register('lastname', { required: true })}
-                      error={errors.lastname && "This field is required"}
                       required={true}
                     />
                   </div>
@@ -628,31 +705,6 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       register={register('age', { required: true })}
                       error={errors.age && "This field is required"}
-                      required={true}
-                    />
-                  </div>
-                  <div>
-                    <FormInput
-                      label="Email"
-                      id="email"
-                      type="text"
-                      icon={Home}
-                      register={register('email', { required: false })}
-                      error={errors.email?.message}
-                      required={false}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div>
-                    <FormInput
-                      label="Contact No."
-                      id="contact_no"
-                      type="text"
-                      icon={Home}
-                      register={register('contact_no', { required: true })}
-                      error={errors.contact_no && "This field is required"}
-                      formatType="contact"
                       required={true}
                     />
                   </div>

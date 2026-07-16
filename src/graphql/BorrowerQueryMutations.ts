@@ -370,7 +370,46 @@ const CHECK_BORROWER_DUPLICATE: string = `
           contact_no
         }
       }
+      duplicateProblem {
+        isProblem
+        shortfall
+        cutoffsMissed
+        uaCutoffs
+        problemLoanCount
+        oldestUnpaidDueDate
+      }
       message
+    }
+  }
+`;
+
+// Minimal-disclosure cross-branch existence check for the create-borrower
+// "Check" button. Returns only aggregates (branch names + a problem flag),
+// never a borrower row — so an encoder can be warned without seeing another
+// branch's client list.
+const CHECK_BORROWER_CROSS_BRANCH: string = `
+  query CheckBorrowerCrossBranch(
+    $firstname: String
+    $middlename: String
+    $lastname: String
+    $contact_no: String
+  ) {
+    checkBorrowerCrossBranch(
+      firstname: $firstname
+      middlename: $middlename
+      lastname: $lastname
+      contact_no: $contact_no
+    ) {
+      existsElsewhere
+      branches
+      isProblem
+      worstCutoffsMissed
+      matchCount
+      existsInMyBranches
+      myBranches
+      myBranchIsProblem
+      myBranchWorstCutoffs
+      myBranchMatchCount
     }
   }
 `;
@@ -386,7 +425,8 @@ const BorrowerQueryMutations = {
   SAVE_BORROWER_CO_MAKER,
   DELETE_BORROWER_CO_MAKER,
   DELETE_BORROWER_MUTATION,
-  CHECK_BORROWER_DUPLICATE
+  CHECK_BORROWER_DUPLICATE,
+  CHECK_BORROWER_CROSS_BRANCH
 };
 
 export default BorrowerQueryMutations;
