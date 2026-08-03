@@ -210,50 +210,25 @@ export function usePagination<T = any>({
     await fetchData(pagination.currentPage, pagination.pageSize, debouncedSearchQuery, statusFilter);
   }, [pagination.currentPage, pagination.pageSize, debouncedSearchQuery, statusFilter]);
 
-  // Auto-fetch when the search query changes (after debounce).
-  useEffect(() => {
-    if (debouncedSearchQuery !== '') {
-      // Only reset to page 1 if there's an actual search query
-      fetchData(1, pagination.pageSize, debouncedSearchQuery, statusFilter);
-    } else {
-      // If search is cleared, refresh current page
-      fetchData(pagination.currentPage, pagination.pageSize, '', statusFilter);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchQuery]);
-
-  // Auto-fetch when the status filter changes. Always reset to page 1 —
-  // otherwise a user on page N of a broad set who narrows to a status with
-  // fewer pages lands on an out-of-range page and sees an empty table.
-  const isFirstStatusRun = useRef<boolean>(true);
-  useEffect(() => {
-    if (isFirstStatusRun.current) {
-      isFirstStatusRun.current = false;
-      return; // initial mount handled by the initial-fetch effect below
-    }
-    fetchData(1, pagination.pageSize, debouncedSearchQuery, statusFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter]);
-
-  // Auto-fetch when extra filters change (deep-compared by value). Always reset
-  // to page 1: staying on page N of a now-smaller filtered result set would
-  // render an empty table.
+  // THE auto-fetch effect. Mount, search (debounced), status filter and extra
+  // filters all want the same thing: page 1 with the current arguments. One
+  // effect covers all four.
+  //
+  // This replaced four separate mount-time effects, three of which needed a
+  // first-run ref guard to stop them duplicating the fourth. The search effect
+  // was missing its guard, so every list page in the app fired TWO identical
+  // POSTs of its heaviest query on mount — `latestRequestId` discarded the
+  // duplicate response, but both requests were dispatched and both ran
+  // server-side. That doubled API load against a rate-limit bucket the whole
+  // office shared, and helped surface HTTP 429s on /borrowers.
+  //
+  // Resetting to page 1 on every change is intentional: staying on page N of a
+  // result set that just got smaller renders an empty table.
   const extraFiltersKey = JSON.stringify(extraFilters ?? null);
-  const isFirstExtraFiltersRun = useRef<boolean>(true);
   useEffect(() => {
-    if (isFirstExtraFiltersRun.current) {
-      isFirstExtraFiltersRun.current = false;
-      return; // initial mount is handled by the initial-fetch effect below
-    }
     fetchData(1, pagination.pageSize, debouncedSearchQuery, statusFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [extraFiltersKey]);
-
-  // Initial data fetch
-  useEffect(() => {
-    fetchData(1, safeInitialPageSize, '', statusFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Intentionally empty - run only once on mount
+  }, [debouncedSearchQuery, statusFilter, extraFiltersKey]);
 
   // Utility computed values
   const canGoNext = pagination.hasNextPage && !loading;

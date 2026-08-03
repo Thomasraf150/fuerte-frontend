@@ -98,6 +98,12 @@ const useGeneralVoucher = () => {
   // closure issue with the wrapped fetchFunction). Resetting to page 1 on
   // filter change is also the expected UX. First mount is skipped because
   // usePagination already fires an initial fetch.
+  // Keyed by VALUE, not object identity — see the matching note in
+  // useGeneralJournal. VoucherFilters' mount effect emits a fresh object literal
+  // holding the same empty values as the initial state, which re-fired this
+  // effect after its first-run guard was spent and produced a second, identical
+  // list query on every mount of the voucher screens.
+  const filtersKey = JSON.stringify(filters);
   const isFirstFilterRun = useRef(true);
   useEffect(() => {
     if (isFirstFilterRun.current) {
@@ -106,7 +112,7 @@ const useGeneralVoucher = () => {
     }
     goToPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filtersKey]);
 
   // Backward-compat: existing forms call setDateFilters({ startDate, endDate })
   const setDateFilters = (val: { startDate: string; endDate: string }) => {

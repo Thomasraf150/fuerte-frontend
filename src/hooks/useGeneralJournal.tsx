@@ -76,6 +76,14 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
   // Auto-refresh on filter change. usePagination only auto-refreshes on
   // search/status, so we fire goToPage(1) when filters change. Skip the
   // very first render because usePagination already fires an initial fetch.
+  // Keyed by VALUE, not object identity. VoucherFilters emits onChange({...})
+  // from its own mount effect, handing back a fresh object literal whose values
+  // are identical to the initial state above. Keying on `filters` therefore
+  // re-fired this effect right after the first-run guard had been spent, firing
+  // a second, byte-identical list query on every mount of this screen. Comparing
+  // the serialized value makes that no-op emit a no-op — same pattern
+  // usePagination already uses for extraFiltersKey.
+  const filtersKey = JSON.stringify(filters);
   const isFirstFilterRun = useRef(true);
   useEffect(() => {
     if (isFirstFilterRun.current) {
@@ -84,7 +92,7 @@ const useGeneralJournal = (journalType: string = 'CRJ') => {
     }
     goToPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filtersKey]);
 
   // Server-side pagination props for CustomDatatable
   const serverSidePaginationProps = {
