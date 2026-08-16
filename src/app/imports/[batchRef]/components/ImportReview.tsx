@@ -5,6 +5,7 @@ import { CheckCircle, AlertTriangle, XCircle, RotateCcw } from 'react-feather';
 import { useImport, ImportBatchPayload, ImportRowPayload } from '@/hooks/useImport';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import StatusPill from '../../components/StatusPill';
 
 
 /**
@@ -333,25 +334,6 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
   );
 }
 
-
-function StatusPill({ status }: { status: string }) {
-  // DB status -> what a clerk reads. "reversed" especially is developer
-  // vocabulary; the office knows this action as cancelling a posting.
-  const map: Record<string, { cls: string; label: string }> = {
-    uploaded: { cls: 'bg-whiten text-body', label: 'Uploaded' },
-    validated: { cls: 'bg-blue-100 text-blue-700', label: 'Checked' },
-    committing: { cls: 'bg-amber-100 text-amber-700', label: 'Posting…' },
-    committed: { cls: 'bg-green-100 text-green-700', label: 'Posted' },
-    reversed: { cls: 'bg-rose-100 text-rose-700', label: 'Cancelled' },
-    failed: { cls: 'bg-danger/10 text-danger', label: 'Failed' },
-  };
-  const s = map[status] ?? { cls: 'bg-whiten text-body', label: status };
-  return (
-    <span className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${s.cls}`}>
-      {s.label}
-    </span>
-  );
-}
 
 function OutcomePill({ outcome }: { outcome: string }) {
   const map: Record<string, [string, string]> = {

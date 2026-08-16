@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import { Eye, Upload } from 'react-feather';
 import { formatCurrency } from '@/utils/formatCurrency';
+import StatusPill from './StatusPill';
 import ImportDialog from '@/components/ImportDialog';
 import { useAuthStore } from '@/store';
 import type { ImportBatchPayload } from '@/hooks/useImport';
@@ -97,23 +98,7 @@ export default function ImportsList() {
                       {b.ok_count}/{b.row_count}
                     </td>
                     <td className="py-3 pr-3">
-                      {(() => {
-                        // DB status -> clerk language; keep in sync with ImportReview's StatusPill.
-                        const s =
-                          {
-                            uploaded: { cls: 'bg-whiten text-body', label: 'Uploaded' },
-                            validated: { cls: 'bg-blue-100 text-blue-700', label: 'Checked' },
-                            committing: { cls: 'bg-amber-100 text-amber-700', label: 'Posting…' },
-                            committed: { cls: 'bg-green-100 text-green-700', label: 'Posted' },
-                            reversed: { cls: 'bg-rose-100 text-rose-700', label: 'Cancelled' },
-                            failed: { cls: 'bg-danger/10 text-danger', label: 'Failed' },
-                          }[b.status] ?? { cls: 'bg-whiten text-body', label: b.status };
-                        return (
-                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide ${s.cls}`}>
-                            {s.label}
-                          </span>
-                        );
-                      })()}
+                      <StatusPill status={b.status} size="sm" />
                     </td>
                     <td className="py-3 pr-3 text-xs text-body dark:text-bodydark">{b.created_at}</td>
                     <td className="py-3">
