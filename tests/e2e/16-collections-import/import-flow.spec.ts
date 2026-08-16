@@ -5,7 +5,7 @@ import * as path from 'path';
 /**
  * End-to-end proof of the collections import feature, through the real UI:
  *
- *   payment-posting -> Import button -> dialog -> upload the REAL trial file
+ *   sidebar Imports -> Import Spreadsheet -> dialog -> upload the REAL trial file
  *   (typed by the office) -> review page auto-validates -> typed confirm gate
  *   -> commit -> persistent result -> CANCEL (leaves the dev DB clean).
  *
@@ -14,7 +14,8 @@ import * as path from 'path';
  */
 
 const ADMIN = { email: 'admin@gmail.com', password: '123456' };
-const TRIAL = 'C:/Users/Rafael/Desktop/Fuerte-Import-Templates/Fuerte_Daily_Collections_Trial.xlsx';
+const TRIAL = process.env.IMPORT_TRIAL_FILE
+  ?? path.resolve(__dirname, 'fixtures/Fuerte_Daily_Collections_Trial.xlsx');
 const SHOTS = 'test-results/import-flow';
 
 test('collections import: upload, validate, confirm, commit, reverse', async ({ page, request }) => {

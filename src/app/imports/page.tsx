@@ -8,9 +8,9 @@ export const metadata = {
 
 /**
  * The general entrance to bulk imports: batch history + start-a-new-import.
- * Per-screen Import buttons (e.g. Payment Posting) are shortcuts into the
- * same flow; this page is where every batch — whoever started it — can be
- * found again, resumed, or reversed.
+ * One destination rather than a button per screen: staff learn a single
+ * habit, and every batch — whoever started it — can be found again here,
+ * resumed by URL, or reversed.
  */
 export default function ImportsPage() {
   return (

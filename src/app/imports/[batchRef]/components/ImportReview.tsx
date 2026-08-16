@@ -45,20 +45,28 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
   }, [batchRef, show]);
 
   // On first open: if the batch is still 'uploaded', run validation, then load.
+  // load() runs whatever validation returned — on failure the batch comes back
+  // as 'failed' carrying summary.fatal, which the page renders. Skipping it
+  // left a checked-looking page with no message and nothing to retry.
   useEffect(() => {
     (async () => {
       const res = await show(batchRef);
       if (!res) return;
       if (res.batch.status === 'uploaded') {
         await validate(batchRef);
-        await load();
-      } else {
-        setBatch(res.batch);
-        setRows(res.rows);
       }
+      await load();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchRef]);
+
+  // A batch someone else is validating/posting settles on its own; without a
+  // poll, reloading mid-run pins the page on that pill until a manual refresh.
+  useEffect(() => {
+    if (batch?.status !== 'validating' && batch?.status !== 'committing') return;
+    const id = setInterval(load, 4000);
+    return () => clearInterval(id);
+  }, [batch?.status, load]);
 
   const doCommit = useCallback(async () => {
     if (!batch) return;
@@ -66,7 +74,10 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
     // are still sent so the server can refuse if the batch changed server-side
     // between this page loading and the click (stale-tab protection).
     const res = await commit(batchRef, batch.ok_count, batch.total_amount);
-    if (res) await load();
+    // Reload either way: a refusal means our counts are stale, and retrying
+    // with the same stale numbers would fail identically forever.
+    await load();
+    if (!res) setChecked(false);
   }, [batch, batchRef, commit, load]);
 
   const doReverse = useCallback(async () => {
@@ -100,6 +111,15 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
 
   return (
     <div className="space-y-4">
+      {/* Page-level errors. Previously the only error block lived inside the
+          'validated' branch, so a failed cancel — a money operation — reported
+          nothing at all. */}
+      {error && (
+        <div className="rounded-sm border border-danger/40 bg-danger/10 px-7 py-4 text-sm text-danger">
+          {error}
+        </div>
+      )}
+
       {/* header card */}
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex flex-wrap items-center justify-between gap-2">
@@ -130,7 +150,12 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                   <XCircle size={15} className="mt-0.5 shrink-0 text-danger" />
                   <span>
                     <strong>{g.count}×</strong> {g.message}
-                    <span className="text-body dark:text-bodydark"> — rows {g.rows.join(', ')}</span>
+                    <span className="text-body dark:text-bodydark">
+                      {' — rows '}{g.rows.join(', ')}
+                      {/* the server caps the row list at 25; say so rather than
+                          silently showing a short list beside a bigger count */}
+                      {g.count > g.rows.length && ` and ${g.count - g.rows.length} more`}
+                    </span>
                   </span>
                 </li>
               ))}

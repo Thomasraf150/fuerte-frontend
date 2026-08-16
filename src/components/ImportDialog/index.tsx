@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, X, FileText, Download } from 'react-feather';
 import { useImport } from '@/hooks/useImport';
@@ -27,12 +27,30 @@ export default function ImportDialog({
   const [dragOver, setDragOver] = useState(false);
   const [tplBusy, setTplBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // The overlay's onKeyDown never fired: focus stays on the trigger outside
+  // the dialog, so the key event was never in its subtree. Move focus in on
+  // open and listen at the document instead — the dialog claims aria-modal,
+  // so Escape has to actually work.
+  useEffect(() => {
+    if (!open) return;
+    panelRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && busy === null) onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, busy, onClose]);
 
   const pick = useCallback((f: File | null) => {
     setError(null);
     if (!f) return;
-    const ok = /\.(xlsx|csv)$/i.test(f.name);
-    if (!ok) {
+    if (!/\.(xlsx|csv)$/i.test(f.name)) {
+      // Clear the previous pick too: leaving it selected kept "Upload & check"
+      // enabled, so the rejection message described one file while the button
+      // would have uploaded an earlier, different one.
+      setFile(null);
       setError('Only .xlsx or .csv files can be imported.');
       return;
     }
@@ -56,12 +74,11 @@ export default function ImportDialog({
       role="dialog"
       aria-modal="true"
       aria-label="Import Spreadsheet from a file"
-      onKeyDown={(e) => e.key === 'Escape' && busy === null && onClose()}
     >
       {/* min-w-0 + max-w-full: without them the dialog keeps its intrinsic
           width in the flex row and gets clipped off-screen on narrow windows
           instead of shrinking. max-h/overflow keeps it usable when short. */}
-      <div className="w-full min-w-0 max-w-full sm:max-w-xl my-auto max-h-full overflow-y-auto rounded-t-lg sm:rounded-lg bg-white dark:bg-boxdark border border-stroke dark:border-strokedark shadow-default">
+      <div ref={panelRef} tabIndex={-1} className="w-full min-w-0 max-w-full sm:max-w-xl my-auto max-h-full overflow-y-auto rounded-t-lg sm:rounded-lg bg-white dark:bg-boxdark border border-stroke dark:border-strokedark shadow-default">
         <div className="flex items-center justify-between border-b border-stroke dark:border-strokedark px-6 py-4">
           <h3 className="font-medium text-black dark:text-white">Import Spreadsheet</h3>
           <button
@@ -101,7 +118,10 @@ export default function ImportDialog({
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                URL.revokeObjectURL(url);
+                // Revoking synchronously can abort the download before the
+                // browser has read the blob (Firefox, Android WebView — and
+                // budget Android is the target here).
+                setTimeout(() => URL.revokeObjectURL(url), 60_000);
               } catch (e: any) {
                 setError(e?.message ?? 'Template download failed');
               } finally {

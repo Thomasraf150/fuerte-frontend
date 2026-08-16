@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
+import Link from 'next/link';
 import { Eye, Upload } from 'react-feather';
 import { formatCurrency } from '@/utils/formatCurrency';
 import StatusPill from './StatusPill';
@@ -102,7 +103,16 @@ export default function ImportsList() {
                     </td>
                     <td className="py-3 pr-3 text-xs text-body dark:text-bodydark">{b.created_at}</td>
                     <td className="py-3">
-                      <Eye size={16} className="text-cyan-400 cursor-pointer" aria-label="Open batch" />
+                      {/* A real link, not just the row's onClick: gives keyboard
+                          users a way in and supports open-in-new-tab. */}
+                      <Link
+                        href={`/imports/${b.batch_ref}`}
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Open batch ${b.batch_ref}`}
+                        className="inline-flex min-h-[24px] items-center text-cyan-400 hover:text-cyan-500"
+                      >
+                        <Eye size={16} />
+                      </Link>
                     </td>
                   </tr>
                 ))}

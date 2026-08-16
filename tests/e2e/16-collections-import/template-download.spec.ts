@@ -30,7 +30,7 @@ test('template download from the import dialog', async ({ page, request }) => {
   if (download) {
     console.log('DOWNLOAD OK:', download.suggestedFilename());
   } else {
-    const err = await page.locator('.text-red-700').textContent().catch(() => null);
+    const err = await page.locator('.text-danger').textContent().catch(() => null);
     console.log('NO DOWNLOAD. Dialog error text:', err);
   }
   expect(download, 'a download should have started').toBeTruthy();
