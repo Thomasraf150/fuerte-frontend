@@ -197,6 +197,21 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
 
+              {/* Imports */}
+              <li>
+                <Link
+                  href="/imports"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    pathname.includes("imports") && "bg-graydark dark:bg-meta-4"
+                  }`}
+                >
+                  <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="" />
+                  </svg>
+                  Imports
+                </Link>
+              </li>
+
               {/* <!-- Reports Item Settings --> */}
               <SidebarLinkGroup
                   activeCondition={
