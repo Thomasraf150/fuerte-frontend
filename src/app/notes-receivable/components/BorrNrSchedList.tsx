@@ -23,6 +23,30 @@ interface Option {
   hidden?: boolean;
 }
 
+/**
+ * Per-month sub-columns, in render order. Single source of truth for the month
+ * header colSpan, the sub-header labels, the data cells and the empty-month
+ * placeholders — these were four separate hardcoded lists that had to be kept in
+ * sync by hand.
+ *
+ * udi_slice / net_target come from loan_udi_schedules: the interest falling due
+ * that period, and the principal portion once it is netted off the gross target.
+ */
+const MONTH_FIELDS = [
+  { key: 'current_target',          label: 'Current Target' },
+  { key: 'udi_slice',               label: 'UDI Due' },
+  { key: 'net_target',              label: 'Net Target' },
+  { key: 'actual_collection',       label: 'Actual Collection' },
+  { key: 'ua_sp',                   label: 'UA/SP' },
+  { key: 'past_due_target_ua_sp',   label: 'Past Due Target UA/SP' },
+  { key: 'actual_col_ua_sp',        label: 'Actual Collection UA/SP' },
+  { key: 'past_due_balance_ua_sp',  label: 'Past Due Balance UA/SP' },
+  { key: 'advanced_payment',        label: 'Advanced Payment' },
+  { key: 'ob_closed',               label: 'OB Closed' },
+  { key: 'early_full_payments',     label: 'Early Full Payments' },
+  { key: 'adjustments',             label: 'Adjustments' },
+] as const;
+
 const BorrNrSchedList: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -380,7 +404,10 @@ const BorrNrSchedList: React.FC = () => {
                         return sum + collection;
                       }, 0);
 
-                      const pnAmount = parseFloat(item.pn_amount) || 0;
+                      // Schedule-derived, not the static loans.pn_amount header.
+                      const pnAmount = parseFloat(item.pn_scheduled) || 0;
+                      const udiAmount = parseFloat(item.udi_scheduled) || 0;
+                      const netReceivable = parseFloat(item.net_receivable) || 0;
                       const balance = pnAmount - totalCollected;
                       const isSelected = selectedRow === index;
 
@@ -406,6 +433,14 @@ const BorrNrSchedList: React.FC = () => {
                               <p className="font-medium text-sm">{pnAmount.toFixed(2)}</p>
                             </div>
                             <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">UDI</p>
+                              <p className="font-medium text-sm">{udiAmount.toFixed(2)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Net Receivable</p>
+                              <p className="font-medium text-sm">{netReceivable.toFixed(2)}</p>
+                            </div>
+                            <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Balance</p>
                               <p className="font-medium text-sm">{balance.toFixed(2)}</p>
                             </div>
@@ -427,13 +462,15 @@ const BorrNrSchedList: React.FC = () => {
                           <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
                           <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
                           <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>UDI</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Net Receivable</th>
                           {months?.map(
                             (month) => (
                               <th
                                 key={month}
                                 className="px-1 md:px-2 py-2 text-center text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden xl:table-cell bg-white dark:bg-boxdark"
                                 style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
-                                colSpan={10}
+                                colSpan={MONTH_FIELDS.length}
                               >
                                 {month}
                               </th>
@@ -445,25 +482,14 @@ const BorrNrSchedList: React.FC = () => {
                         <tr>
                           {Array(months?.length)
                             .fill(null)
-                            .flatMap(() =>
-                              [
-                                "Current Target",
-                                "Actual Collection", 
-                                "UA/SP",
-                                "Past Due Target UA/SP",
-                                "Actual Collection UA/SP",
-                                "Past Due Balance UA/SP",
-                                "Advanced Payment",
-                                "OB Closed",
-                                "Early Full Payments",
-                                "Adjustments",
-                              ].map((field, idx1) => (
+                            .flatMap((_, monthIdx) =>
+                              MONTH_FIELDS.map(({ label }, idx1) => (
                                 <th
-                                  key={`${field}-${idx1}`}
+                                  key={`${monthIdx}-${label}-${idx1}`}
                                   className="px-1 md:px-2 py-1 text-center text-xs text-gray-500 dark:text-bodydark font-bold w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden xl:table-cell bg-white dark:bg-boxdark"
                                   style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 >
-                                  {field}
+                                  {label}
                                 </th>
                               ))
                             )}
@@ -478,7 +504,10 @@ const BorrNrSchedList: React.FC = () => {
                                 return sum + collection;
                               }, 0);
 
-                              const pnAmount = parseFloat(item.pn_amount) || 0;
+                              // Schedule-derived, not the static loans.pn_amount header.
+                              const pnAmount = parseFloat(item.pn_scheduled) || 0;
+                              const udiAmount = parseFloat(item.udi_scheduled) || 0;
+                              const netReceivable = parseFloat(item.net_receivable) || 0;
                               const balance = pnAmount - totalCollected;
 
                               return (
@@ -494,6 +523,12 @@ const BorrNrSchedList: React.FC = () => {
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {pnAmount.toFixed(2)}
                                 </td>
+                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                  {udiAmount.toFixed(2)}
+                                </td>
+                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                  {netReceivable.toFixed(2)}
+                                </td>
 
                                 {months?.map((month: any, monthIndex: number) => {
                                   const monthlyData = item.trans_per_month.find(
@@ -501,27 +536,16 @@ const BorrNrSchedList: React.FC = () => {
                                   );
 
                                   return monthlyData ? (
-                                    [
-                                      "current_target",
-                                      "actual_collection",
-                                      "ua_sp",
-                                      "past_due_target_ua_sp",
-                                      "actual_col_ua_sp",
-                                      "past_due_balance_ua_sp",
-                                      "advanced_payment",
-                                      "ob_closed",
-                                      "early_full_payments",
-                                      "adjustments",
-                                    ].map((field, fieldIndex) => (
+                                    MONTH_FIELDS.map(({ key }, fieldIndex) => (
                                       <td
                                         key={`${monthIndex}-${fieldIndex}`}
                                         className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
-                                        {monthlyData[field]}
+                                        {monthlyData[key]}
                                       </td>
                                     ))
                                   ) : (
-                                    Array(10).fill(null).map((_, emptyIndex) => (
+                                    Array(MONTH_FIELDS.length).fill(null).map((_, emptyIndex) => (
                                       <td
                                         key={`${monthIndex}-empty-${emptyIndex}`}
                                         className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"

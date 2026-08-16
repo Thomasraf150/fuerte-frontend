@@ -166,7 +166,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
 
   const series = [
     {
-      name: "NR (Net Receivables)",
+      name: "NR (Gross)",
       data: nrData,
     },
     {
@@ -197,7 +197,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
           <span className="flex h-4 w-4 items-center justify-center rounded-full border border-primary">
             <span className="block h-2.5 w-2.5 rounded-full bg-primary"></span>
           </span>
-          <p className="font-semibold text-primary">NR (Net Receivables)</p>
+          <p className="font-semibold text-primary">NR (Gross)</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="flex h-4 w-4 items-center justify-center rounded-full border border-[#F97316]">

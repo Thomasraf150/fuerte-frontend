@@ -61,7 +61,7 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading,
     <div className={`grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 ${gridCols} 2xl:gap-7.5`}>
       {/* Total NR */}
       <CardDataStats
-        title="Total NR (Net Receivables)"
+        title="Total NR (Gross)"
         total={formatCurrency(summary.total_nr)}
         rate={formatPercent(summary.nr_change_percent)}
         levelUp={isPositive(summary.nr_change_percent)}
@@ -94,7 +94,7 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading,
       {/* Total Outstanding - Owner only */}
       {isOwner && (
         <CardDataStats
-          title="Total Outstanding (NR + UDI)"
+          title="Net Receivable (NR − UDI)"
           total={formatCurrency(summary.total_outstanding)}
           rate={formatPercent(summary.outstanding_change_percent)}
           levelUp={isPositive(summary.outstanding_change_percent)}

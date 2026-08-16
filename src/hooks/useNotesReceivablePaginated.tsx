@@ -8,7 +8,12 @@ import { graphqlFetch } from '@/utils/graphqlFetch';
 // Types
 interface NrTransPerMonth {
   month: string;
+  /** Gross amortization due this month (from loan_schedules) */
   current_target: string;
+  /** Unearned interest due this month (from loan_udi_schedules) */
+  udi_slice: string;
+  /** Principal portion: current_target - udi_slice */
+  net_target: string;
   actual_collection: string;
   ua_sp: string;
   past_due_target_ua_sp: string;
@@ -28,7 +33,16 @@ interface NrDataItem {
   released_date: string;
   from: string;
   to: string;
+  /** Static creation-time header amount, kept for comparison */
   pn_amount: string;
+  /** Gross NR derived from the amortization schedule */
+  pn_scheduled: string;
+  /** Total unearned interest derived from the UDI schedule */
+  udi_scheduled: string;
+  /** Net Receivable = pn_scheduled - udi_scheduled */
+  net_receivable: string;
+  /** pn_scheduled - (pn_amount + addon_amount); non-zero without an add-on means drift */
+  pn_variance: string;
   terms: string;
   trans_per_month: NrTransPerMonth[];
 }

@@ -10,10 +10,16 @@ const NR_SCHEDULE_LIST: string = `
         from
         to
         pn_amount
+        pn_scheduled
+        udi_scheduled
+        net_receivable
+        pn_variance
         terms
         trans_per_month {
           month
           current_target
+          udi_slice
+          net_target
           actual_collection
           ua_sp
           past_due_target_ua_sp
@@ -42,10 +48,16 @@ const NR_SCHEDULE_BATCH: string = `
         from
         to
         pn_amount
+        pn_scheduled
+        udi_scheduled
+        net_receivable
+        pn_variance
         terms
         trans_per_month {
           month
           current_target
+          udi_slice
+          net_target
           actual_collection
           ua_sp
           past_due_target_ua_sp

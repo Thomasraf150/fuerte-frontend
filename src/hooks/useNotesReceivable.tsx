@@ -18,10 +18,16 @@ interface NrProps {
     from: string;
     to: string;
     pn_amount: string;
+    pn_scheduled: string;
+    udi_scheduled: string;
+    net_receivable: string;
+    pn_variance: string;
     terms: string;
     trans_per_month: { 
       month: string;
       current_target: string;
+      udi_slice: string;
+      net_target: string;
       actual_collection: string;
       ua_sp: string;
       past_due_target_ua_sp: string;
