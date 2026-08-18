@@ -14,8 +14,8 @@
  *   2. every returned row honors the filter,
  *   3. the result matches an independent direct-API query with the same filter.
  */
-import { test, expect, Page } from '@playwright/test';
-import { uiLogin, restLogin, gqlAs } from '../../helpers/e2e-helpers';
+import { test, expect, Page, APIRequestContext } from '@playwright/test';
+import { restLogin, gqlAs } from '../../helpers/e2e-helpers';
 
 const ADMIN_EMAIL = 'admin@gmail.com';
 const ADMIN_PASSWORD = '123456';
@@ -28,6 +28,18 @@ const IDS_QUERY = `
       paginatorInfo { total }
     }
   }`;
+
+/**
+ * One login for the whole file. /api/login allows 5 per minute per account, and
+ * this suite needs auth in every test plus every direct-API cross-check.
+ */
+let sharedAuth: { token: string; user: any } | null = null;
+async function getSharedAuth(request: APIRequestContext) {
+  if (!sharedAuth) {
+    sharedAuth = await restLogin(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+  }
+  return sharedAuth;
+}
 
 /**
  * Register a response listener for the next getLoans call whose request
@@ -50,7 +62,7 @@ async function actAndCaptureGetLoans(
         return false;
       }
     },
-    { timeout: 30000 },
+    { timeout: 90000 },
   );
   await act();
   const resp = await respPromise;
@@ -71,17 +83,29 @@ async function actAndCaptureGetLoans(
 test.describe('Loans List — filter wiring (server-side)', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
     // Each test fires many sequential server-paginated getLoans calls. On a cold
     // dev backend (OPcache re-validating files over the Docker Desktop Windows
     // bind-mount) a single call can take ~10s, so the default 60s per-test
     // budget is not enough for the 7-capture status-chip test. This is purely an
     // environment allowance — the queries themselves are milliseconds when warm.
     test.setTimeout(240000);
-    await uiLogin(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // Authenticate by seeding the store, NOT by driving the login form.
+    // /api/login is rate limited to 5/min PER ACCOUNT
+    // (RouteServiceProvider::boot, 'login' limiter). This suite used to log in
+    // once per test plus once per direct-API check — about 7 for one account —
+    // which stayed under the limit only because the tests were slow enough to
+    // spread across minutes. Run beside another suite it tripped the throttle
+    // and every test failed with "login did not redirect". One login, cached.
+    const auth = await getSharedAuth(request);
+    await page.addInitScript((state) => {
+      localStorage.setItem('authStore', state as string);
+    }, JSON.stringify({ state: { user: auth.user, authToken: auth.token }, version: 0 }));
+
     await page.goto('/loans-list', { waitUntil: 'domcontentloaded' });
     // Initial unfiltered load must complete before we start flipping filters.
-    await page.waitForSelector('select[aria-label="Filter by release month"]', { timeout: 20000 });
+    await page.waitForSelector('select[aria-label="Filter by release month"]', { timeout: 90000 });
     await page.waitForLoadState('networkidle').catch(() => {});
   });
 
@@ -108,7 +132,7 @@ test.describe('Loans List — filter wiring (server-side)', () => {
     }
 
     // Independent direct-API cross-check with identical filters.
-    const { token } = await restLogin(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const { token } = await getSharedAuth(request);
     const api = await gqlAs(request, token, IDS_QUERY, { first: 100, page: 1, releaseMonth: 5, releaseYear: 2026 });
     expect(api.errors).toBeUndefined();
     expect(total).toBe(api.data.getLoans.paginatorInfo.total);
@@ -152,23 +176,52 @@ test.describe('Loans List — filter wiring (server-side)', () => {
   });
 
   test('branch filter parameterizes the query and matches direct API', async ({ page, request }) => {
-    const branchSelect = page.locator('select[aria-label="Filter by branch"]');
-    await expect(branchSelect).toBeEnabled({ timeout: 20000 });
+    // The branch picker is a searchable react-select (~60 flat sub-branches made
+    // the native select unusable), so there are no <option value="id"> nodes to
+    // read the expected id from.
+    // Build a label -> id map from a DIRECT API call, independent of anything the
+    // page does. Reading the expected id back out of the request under test would
+    // make the assertion circular and blind to "user picked X, UI sent Y".
+    const { token } = await getSharedAuth(request);
+    const branchList = await gqlAs(request, token, `query { getAllBranch { id name } }`, {});
+    expect(branchList.errors, 'getAllBranch failed').toBeUndefined();
+    const branchIdByLabel = new Map<string, number>(
+      (branchList.data.getAllBranch ?? []).map((b: any) => [String(b.name).trim(), Number(b.id)]),
+    );
+    expect(branchIdByLabel.size, 'getAllBranch returned no branches').toBeGreaterThan(0);
 
-    // Pick the first real branch option (skip the "All Branches" placeholder).
-    const firstBranch = branchSelect.locator('option:not([value=""])').first();
-    const branchValue = await firstBranch.getAttribute('value');
-    expect(branchValue, 'branch dropdown has no options — getAllBranch failed?').toBeTruthy();
+    const branchInput = page.locator('input[aria-label="Filter by branch"]');
+    await expect(branchInput).toBeEnabled({ timeout: 90000 });
+
+    // Open the menu and pick the first real branch (skip the "All Branches" entry).
+    // Click the control, not the input — react-select's empty input is ~2px wide.
+    const branchControl = page
+      .locator('[class*="react-select__control"]')
+      .filter({ has: page.locator('input[aria-label="Filter by branch"]') })
+      .first();
+    await branchControl.click();
+    await page.waitForSelector('[class*="react-select__option"]', { timeout: 30000 });
+    const branchOption = page
+      .locator('[class*="react-select__option"]')
+      .filter({ hasNotText: 'All Branches' })
+      .first();
+    await expect(branchOption, 'branch dropdown has no options — getAllBranch failed?').toBeVisible();
+
+    const pickedLabel = (await branchOption.textContent())?.trim() ?? '';
+    const expectedId = branchIdByLabel.get(pickedLabel);
+    expect(expectedId, `no id captured for branch "${pickedLabel}" from getAllBranch`).toBeDefined();
 
     const { vars, rows, total } = await actAndCaptureGetLoans(
       page,
-      () => branchSelect.selectOption(branchValue!),
-      (v) => v.branchSubId === Number(branchValue),
+      () => branchOption.click(),
+      (v) => typeof v.branchSubId === 'number',
     );
     expect(vars.page).toBe(1);
+    // The real assertion: the UI sent the branch the user actually clicked.
+    expect(Number(vars.branchSubId), `picked "${pickedLabel}" but the query sent a different branch`).toBe(expectedId);
+    const branchValue = Number(vars.branchSubId);
 
-    const { token } = await restLogin(request, ADMIN_EMAIL, ADMIN_PASSWORD);
-    const api = await gqlAs(request, token, IDS_QUERY, { first: 100, page: 1, branchSubId: Number(branchValue) });
+    const api = await gqlAs(request, token, IDS_QUERY, { first: 100, page: 1, branchSubId: branchValue });
     expect(api.errors).toBeUndefined();
     expect(total).toBe(api.data.getLoans.paginatorInfo.total);
     const apiIds = new Set(api.data.getLoans.data.map((r: any) => String(r.id)));

@@ -21,7 +21,7 @@ const useArea = () => {
   const [areaLoading, setAreaLoading] = useState<boolean>(false);
 
   // Fetch sub-branches for form dropdown
-  const fetchDataSubBranch = async (orderBy = 'id_desc') => {
+  const fetchDataSubBranch = async (orderBy = 'name_asc') => {
     const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
     setBranchSubData(result.data.getAllBranch);
   };

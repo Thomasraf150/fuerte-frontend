@@ -13,7 +13,6 @@ import { useDebounce } from '@/hooks/useDebounce';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import useSummaryTicket from '@/hooks/useSummaryTicket';
 import useBranches from '@/hooks/useBranches';
 
 // const column = soaListColumn;
@@ -58,7 +57,7 @@ const BorrNrSchedList: React.FC = () => {
   const [endDate, setEndDate] = useState<Date | null>(moment('2025-01-15').toDate());
   
   // Branch state
-  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
+  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
@@ -102,8 +101,6 @@ const BorrNrSchedList: React.FC = () => {
     }
   );
 
-  // Legacy hook for backward compatibility (can be removed later)
-  const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket } = useSummaryTicket();
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -132,28 +129,41 @@ const BorrNrSchedList: React.FC = () => {
     setEndDate(date);
   };
 
+  /**
+   * Apply the current filters. Callers pass overrides for the value they just
+   * changed, because a setState from the same event handler has not landed yet
+   * and reading it here would search with the previous selection.
+   */
+  const runSearch = (overrides?: { branchId?: string; branchSubId?: string }) => {
+    if (!startDate || !endDate) return;
+    setFilters({
+      startDate,
+      endDate,
+      branchId: (overrides?.branchId ?? selectedBranchId) || undefined,
+      branchSubId: (overrides?.branchSubId ?? branchSubId) || undefined,
+      searchTerm: debouncedSearchTerm || undefined,
+    });
+  };
+
   const handleBranchChange = (branch_id: string) => {
     setSelectedBranchId(branch_id);
-    fetchSubDataList('id_desc', Number(branch_id));
+    // Clear the sub-branch whenever the parent branch changes. The options list
+    // is about to be refetched for the new branch, so a sub-branch id carried
+    // over from the previous branch would filter to a sub-branch the user can
+    // no longer see selected — silently returning zero rows.
+    setBranchSubId('');
+    setValue('branch_sub_id', '');
+    fetchSubDataList('name_asc', Number(branch_id));
+    // Picking a branch searches straight away, like the Summary Ticket does.
+    runSearch({ branchId: branch_id, branchSubId: '' });
   };
 
   const handleBranchSubChange = (branch_sub_id: string) => {
     setBranchSubId(branch_sub_id);
-    if (startDate && endDate) {
-      fetchSummaryTixReport(startDate, endDate, branch_sub_id);
-    }
+    runSearch({ branchSubId: branch_sub_id });
   };
 
-  const handleSearch = () => {
-    if (startDate && endDate) {
-      setFilters({
-        startDate,
-        endDate,
-        branchId: selectedBranchId || undefined,
-        searchTerm: debouncedSearchTerm || undefined,
-      });
-    }
-  };
+  const handleSearch = () => runSearch();
 
   // Auto-search when debounced search term changes (if auto-search is enabled)
   useEffect(() => {
@@ -229,7 +239,7 @@ const BorrNrSchedList: React.FC = () => {
                 <div className="rounded-lg bg-gray-200 dark:bg-boxdark mb-4 p-6 relative z-20">
                   <label className="mb-6 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range and Filters:</label>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-x-6 gap-y-4 items-end">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-x-6 gap-y-4 items-end">
                     {/* Start Date */}
                     <div className="flex flex-col">
                       <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
@@ -266,7 +276,7 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Enhanced Search Input (Loan Ref + Name) */}
-                    <div className="flex flex-col min-w-[220px]">
+                    <div className="flex flex-col">
                       <div className="flex items-center justify-between mb-1">
                         <label htmlFor="searchTerm" className="text-sm font-medium text-gray-700 dark:text-bodydark">
                           Search:
@@ -305,7 +315,7 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Branch Select */}
-                    <div className="flex flex-col min-w-[200px]">
+                    <div className="flex flex-col">
                       <label htmlFor="branchSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         Branch:
                       </label>
@@ -318,6 +328,8 @@ const BorrNrSchedList: React.FC = () => {
                             {...field}
                             options={optionsBranch}
                             placeholder="Select a branch..."
+                            isLoading={loadingBranches}
+                            loadingMessage={() => 'Loading branches...'}
                             onChange={(selectedOption) => {
                               field.onChange(selectedOption?.value);
                               handleBranchChange(selectedOption?.value ?? '');
@@ -329,7 +341,7 @@ const BorrNrSchedList: React.FC = () => {
                     </div>
 
                     {/* Sub Branch Select */}
-                    <div className="flex flex-col min-w-[200px]">
+                    <div className="flex flex-col">
                       <label htmlFor="subBranchSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
                         Sub Branch:
                       </label>
@@ -342,6 +354,15 @@ const BorrNrSchedList: React.FC = () => {
                             {...field}
                             options={optionsSubBranch}
                             placeholder="Select a sub branch..."
+                            isDisabled={!selectedBranchId}
+                            isLoading={loadingSubBranches}
+                            loadingMessage={() => 'Loading sub-branches...'}
+                            // Without this react-select shows a bare "No options"
+                            // while the fetch is still in flight, which reads as
+                            // "this branch has none".
+                            noOptionsMessage={() =>
+                              selectedBranchId ? 'No sub-branches found' : 'Select a branch first'
+                            }
                             onChange={(selectedOption) => {
                               field.onChange(selectedOption?.value);
                               handleBranchSubChange(selectedOption?.value ?? '');

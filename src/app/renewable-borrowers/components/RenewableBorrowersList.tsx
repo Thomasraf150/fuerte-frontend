@@ -10,11 +10,27 @@ import {
   RenewableBorrowerRow,
 } from "@/hooks/useRenewableBorrowersPaginated";
 import CustomDatatable from "@/components/CustomDatatable";
+import ReactSelect from "@/components/ReactSelect";
 
 interface Option {
   value: string;
   label: string;
 }
+
+// "" means "no filter" — kept as its own option so the control never renders blank.
+const ALL_BRANCHES_OPTION: Option = { value: "", label: "All branches" };
+const ALL_SUB_BRANCHES_OPTION: Option = { value: "", label: "All sub-branches" };
+
+/**
+ * react-select shows a blank control for a null value, so map the current filter
+ * string back onto its option ("" -> the "All ..." entry).
+ */
+const findOption = (
+  options: Option[],
+  value: string,
+  fallback: Option
+): Option | null =>
+  options.find((o) => o.value === value) ?? (value === "" ? fallback : null);
 
 const peso = (raw: string | number | null | undefined): string => {
   const n = Number(raw ?? 0);
@@ -44,7 +60,7 @@ const StandingBadge: React.FC<{ row: RenewableBorrowerRow }> = ({ row }) => {
 
 const RenewableBorrowersList: React.FC = () => {
   const router = useRouter();
-  const { dataBranch, dataBranchSub, fetchSubDataList } = useBranches();
+  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
   const [branchId, setBranchId] = useState<string>("");
   const [branchSubId, setBranchSubId] = useState<string>("");
   const [searchInput, setSearchInput] = useState<string>("");
@@ -72,7 +88,7 @@ const RenewableBorrowersList: React.FC = () => {
   const branchOptions: Option[] = useMemo(() => {
     if (!dataBranch || !Array.isArray(dataBranch)) return [];
     return [
-      { value: "", label: "All branches" },
+      ALL_BRANCHES_OPTION,
       ...dataBranch.map((b) => ({ value: String(b.id), label: b.name })),
     ];
   }, [dataBranch]);
@@ -80,7 +96,7 @@ const RenewableBorrowersList: React.FC = () => {
   const subBranchOptions: Option[] = useMemo(() => {
     if (!dataBranchSub || !Array.isArray(dataBranchSub)) return [];
     return [
-      { value: "", label: "All sub-branches" },
+      ALL_SUB_BRANCHES_OPTION,
       ...dataBranchSub.map((bs) => ({ value: String(bs.id), label: bs.name })),
     ];
   }, [dataBranchSub]);
@@ -88,7 +104,7 @@ const RenewableBorrowersList: React.FC = () => {
   const handleBranchChange = (value: string) => {
     setBranchId(value);
     setBranchSubId("");
-    if (value) fetchSubDataList("id_desc", Number(value));
+    if (value) fetchSubDataList("name_asc", Number(value));
   };
 
   const columns: TableColumn<RenewableBorrowerRow>[] = useMemo(
@@ -138,36 +154,29 @@ const RenewableBorrowersList: React.FC = () => {
         <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border-b border-stroke dark:border-strokedark">
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Branch</label>
-            <select
-              value={branchId}
-              onChange={(e) => handleBranchChange(e.target.value)}
-              className="border border-stroke dark:border-strokedark rounded px-3 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white text-sm"
-            >
-              {branchOptions.length === 0 ? (
-                <option value="">All branches</option>
-              ) : (
-                branchOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))
-              )}
-            </select>
+            <ReactSelect
+              options={branchOptions}
+              value={findOption(branchOptions, branchId, ALL_BRANCHES_OPTION)}
+              onChange={(option) => handleBranchChange(option?.value ?? "")}
+              placeholder="All branches"
+              isLoading={loadingBranches}
+              loadingMessage={() => "Loading branches..."}
+              menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+            />
           </div>
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Sub-Branch</label>
-            <select
-              value={branchSubId}
-              onChange={(e) => setBranchSubId(e.target.value)}
-              disabled={!branchId}
-              className="border border-stroke dark:border-strokedark rounded px-3 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white text-sm disabled:opacity-60"
-            >
-              {subBranchOptions.length === 0 ? (
-                <option value="">All sub-branches</option>
-              ) : (
-                subBranchOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))
-              )}
-            </select>
+            <ReactSelect
+              options={subBranchOptions}
+              value={findOption(subBranchOptions, branchSubId, ALL_SUB_BRANCHES_OPTION)}
+              onChange={(option) => setBranchSubId(option?.value ?? "")}
+              placeholder="All sub-branches"
+              isLoading={loadingSubBranches}
+              loadingMessage={() => "Loading sub-branches..."}
+              noOptionsMessage={() => (branchId ? "No sub-branches found" : "Select a branch first")}
+              isDisabled={!branchId}
+              menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+            />
           </div>
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Search</label>

@@ -25,14 +25,14 @@ const useCoa = () => {
   const [coaLoading, setCoaLoading] = useState<boolean>(false);
   const [branchSubData, setBranchSubData] = useState<DataSubBranches[] | undefined>(undefined);
 
-  const fetchDataSubBranch = useCallback(async (orderBy = 'id_desc') => {
+  const fetchDataSubBranch = useCallback(async (orderBy = 'name_asc') => {
     const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
     setBranchSubData(result.data.getAllBranch);
   }, [GET_ALL_SUB_BRANCH_QUERY]);
   
   // Initialize data on mount (following useUsers pattern)
   useEffect(() => {
-    fetchDataSubBranch("id_desc");
+    fetchDataSubBranch("name_asc");
     fetchCoaDataTable();
   }, []);
 

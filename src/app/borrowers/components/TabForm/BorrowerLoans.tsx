@@ -84,7 +84,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
 
   useEffect(() => {
     if (BorrowerData?.id) {
-      fetchSubDataList('id_desc', Number(BorrowerData?.borrower_work_background?.area?.branch_sub?.branch_id));
+      fetchSubDataList('name_asc', Number(BorrowerData?.borrower_work_background?.area?.branch_sub?.branch_id));
     }
     if (!showForm) {
       fetchLoans(100000, 1, Number(BorrowerData?.id));

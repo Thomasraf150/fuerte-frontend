@@ -82,8 +82,10 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
         value: String(bSub.id),
         label: bSub.name, // assuming `name` is the key you want to use as label
       }));
+      // NOTE: despite the state name, these are MAIN branches — this is the
+      // parent picker for the sub-branch being created (FA/FB/FC/FD).
       setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
+        { value: '', label: 'Select a Branch', hidden: true },
         ...dynaOpt,
       ]);
       
@@ -95,7 +97,7 @@ const FormAddSubBranch: React.FC<ParentFormBr> = ({ setShowForm, selectedBranchI
 
     // Only close form on successful submission
     if (result.success) {
-      fetchSubDataList('id_desc', selectedBranchId);
+      fetchSubDataList('name_asc', selectedBranchId);
       setShowForm(false);
     }
     // Form stays open on errors for user to fix and retry

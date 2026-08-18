@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import BranchQueryMutations from "@/graphql/BranchQueryMutation";
 import { useAuthStore } from "@/store";
+import ReactSelect from "@/components/ReactSelect";
+import { SelectOption } from "@/utils/DataTypes";
+
+/** Sentinel option: empty value === "no branch filter". */
+const ALL_BRANCHES_OPTION: SelectOption = { value: "", label: "All Branches" };
 
 interface BranchFilterProps {
   branchSubId: number | null;
@@ -42,7 +47,7 @@ const BranchFilter: React.FC<BranchFilterProps> = ({
             body: JSON.stringify({
               query: BranchQueryMutations.GET_ALL_SUB_BRANCH_QUERY,
               variables: {
-                orderBy: "name",
+                orderBy: "name_asc",
               },
             }),
           }
@@ -75,9 +80,27 @@ const BranchFilter: React.FC<BranchFilterProps> = ({
     fetchBranches();
   }, []);
 
-  const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value === "" ? null : parseInt(e.target.value, 10);
-    onBranchSubIdChange(value);
+  // "All Branches" first, then every sub-branch. Values are strings because
+  // SelectOption.value is a string; they're parsed back to numbers on change.
+  const branchOptions = useMemo<SelectOption[]>(
+    () => [
+      ALL_BRANCHES_OPTION,
+      ...branches.map((branch) => ({
+        value: String(branch.id),
+        label: branch.name,
+      })),
+    ],
+    [branches]
+  );
+
+  // Never render blank: an unset filter maps back to the "All Branches" option.
+  const selectedOption =
+    branchOptions.find((option) => option.value === String(branchSubId ?? "")) ??
+    ALL_BRANCHES_OPTION;
+
+  const handleBranchChange = (option: SelectOption | null) => {
+    const rawValue = option?.value ?? "";
+    onBranchSubIdChange(rawValue === "" ? null : parseInt(rawValue, 10));
   };
 
   return (
@@ -85,50 +108,20 @@ const BranchFilter: React.FC<BranchFilterProps> = ({
       <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
         Branch/Area
       </label>
-      <div className="relative z-20 bg-transparent dark:bg-form-input">
-        <select
-          value={branchSubId ?? ""}
-          onChange={handleBranchChange}
-          disabled={loading || !!error}
-          className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
-            branchSubId
-              ? "text-black dark:text-white"
-              : "text-body dark:text-bodydark"
-          } ${loading || error ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          <option value="" className="text-body dark:text-bodydark">
-            {loading ? "Loading branches..." : error ? "Error loading branches" : "All Branches"}
-          </option>
-          {!loading && !error && branches.map((branch) => (
-            <option
-              key={branch.id}
-              value={branch.id}
-              className="text-body dark:text-bodydark"
-            >
-              {branch.name}
-            </option>
-          ))}
-        </select>
-        <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
-          <svg
-            className="fill-current"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g opacity="0.8">
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
-                fill=""
-              ></path>
-            </g>
-          </svg>
-        </span>
-      </div>
+      <ReactSelect
+        aria-label="Filter by branch"
+        options={branchOptions}
+        value={selectedOption}
+        onChange={handleBranchChange}
+        placeholder="All Branches"
+        isDisabled={loading || !!error}
+        isLoading={loading}
+        loadingMessage={() => "Loading branches..."}
+        noOptionsMessage={() =>
+          error ? "Error loading branches" : "No branches found"
+        }
+        menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+      />
       {error && (
         <p className="mt-1 text-sm text-red-500 dark:text-red-400">
           {error}

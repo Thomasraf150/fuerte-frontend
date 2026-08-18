@@ -3,12 +3,17 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
-import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
+import { DataChartOfAccountList, DataSubBranches, SelectOption } from '@/utils/DataTypes';
+import ReactSelect from '@/components/ReactSelect';
 import BranchBadge from '@/components/BranchBadge';
 import { GitBranch, Printer, Search, Edit2, Trash2, RefreshCw, Eye } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
 import Swal from 'sweetalert2';
+
+// 'all' is this screen's no-filter sentinel (not '') — kept as a real option so
+// the control never renders blank.
+const COA_ALL_BRANCHES_OPTION: SelectOption = { value: 'all', label: 'All Branches' };
 
 // Memoized AccountRow component to prevent unnecessary re-renders
 interface AccountRowProps {
@@ -153,6 +158,14 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
+
+  const coaBranchOptions: SelectOption[] = useMemo(
+    () => [
+      COA_ALL_BRANCHES_OPTION,
+      ...(branchSubData ?? []).map((b: DataSubBranches) => ({ value: String(b.id), label: b.name })),
+    ],
+    [branchSubData],
+  );
 
   const handleEdit = useCallback((account: DataChartOfAccountList) => {
     onOpenForm('Edit Account', true, account);
@@ -385,18 +398,19 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                 />
               </div>
               <div className="mb-3">
-                <select
-                  value={branchFilter}
-                  onChange={(e) => setBranchFilter(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md border border-stroke bg-white dark:bg-form-input text-gray-900 dark:text-white dark:border-strokedark focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">All Branches</option>
-                  {branchSubData && branchSubData.map((branch) => (
-                    <option key={branch.id} value={String(branch.id)}>
-                      {branch.name}
-                    </option>
-                  ))}
-                </select>
+                <ReactSelect
+                  aria-label="Filter by branch"
+                  options={coaBranchOptions}
+                  value={
+                    coaBranchOptions.find((o) => o.value === String(branchFilter)) ??
+                    COA_ALL_BRANCHES_OPTION
+                  }
+                  onChange={(option) => setBranchFilter(option?.value ?? 'all')}
+                  placeholder="All Branches"
+                  isLoading={!branchSubData}
+                  loadingMessage={() => 'Loading branches...'}
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                />
               </div>
               <div className="flex flex-wrap gap-2">
                 <button

@@ -28,7 +28,7 @@ const useBranches = () => {
   const [loadingSubBranches, setLoadingSubBranches] = useState<boolean>(false);
   const [loadingMyAccessibleBranches, setLoadingMyAccessibleBranches] = useState<boolean>(false);
   // Function to fetchdata
-  const fetchDataList = async (orderBy = 'id_desc') => {
+  const fetchDataList = async (orderBy = 'name_asc') => {
     setLoadingBranches(true);
     try {
       const result = await graphqlFetch(GET_BRANCH_QUERY, { orderBy });
@@ -38,7 +38,7 @@ const useBranches = () => {
     }
   };
 
-  const fetchSubDataList = async (orderBy = 'id_desc', branch_id: number) => {
+  const fetchSubDataList = async (orderBy = 'name_asc', branch_id: number) => {
     setLoadingSubBranches(true);
     try {
       const result = await graphqlFetch(GET_SUB_BRANCH_QUERY, { orderBy, branch_id });

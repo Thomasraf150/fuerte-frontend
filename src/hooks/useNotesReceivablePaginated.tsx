@@ -62,6 +62,8 @@ interface NotesReceivableFilters {
   startDate: Date | null;
   endDate: Date | null;
   branchId?: string;
+  /** Narrows to a single sub-branch; ANDed server-side with branchId */
+  branchSubId?: string;
   searchTerm?: string;
 }
 
@@ -156,7 +158,9 @@ export function useNotesReceivablePaginated(
   // Generate cache key
   const generateCacheKey = useCallback((page: number, filters: NotesReceivableFilters, perPageValue: number) => {
     const batchStartPage = Math.floor((page - 1) / pagesPerBatch) * pagesPerBatch + 1;
-    return `${moment(filters.startDate).format('YYYY-MM-DD')}_${moment(filters.endDate).format('YYYY-MM-DD')}_${filters.branchId || ''}_${filters.searchTerm || ''}_${batchStartPage}_${perPageValue}`;
+    // Every filter that changes the result set must be in this key — omitting
+    // branchSubId would serve one sub-branch's cached rows for another.
+    return `${moment(filters.startDate).format('YYYY-MM-DD')}_${moment(filters.endDate).format('YYYY-MM-DD')}_${filters.branchId || ''}_${filters.branchSubId || ''}_${filters.searchTerm || ''}_${batchStartPage}_${perPageValue}`;
   }, [pagesPerBatch]);
 
   // Clear cache
@@ -196,6 +200,7 @@ export function useNotesReceivablePaginated(
         startDate: moment(currentFilters.startDate).format('YYYY-MM-DD'),
         endDate: moment(currentFilters.endDate).format('YYYY-MM-DD'),
         branchId: currentFilters.branchId || null,
+        branchSubId: currentFilters.branchSubId || null,
         searchTerm: currentFilters.searchTerm || null,
         page: batchStartPage,
         perPage: perPageValue,
@@ -216,9 +221,22 @@ export function useNotesReceivablePaginated(
             startDate: variables.input.startDate,
             endDate: variables.input.endDate,
             branchId: variables.input.branchId,
+            branchSubId: variables.input.branchSubId,
             searchTerm: variables.input.searchTerm,
           }
         });
+        // Surface GraphQL errors instead of degrading to an empty list. A rejected
+
+        // field (frontend ahead of backend, or a stale Lighthouse schema cache in
+
+        // prod) would otherwise render a confident "0 records".
+
+        if (legacyResult.errors) {
+
+          throw new Error(legacyResult.errors[0]?.message || "Failed to fetch notes receivable");
+
+        }
+
         const legacyData = legacyResult.data?.getNrSchedule || { data: [], months: [] };
         
         // Create pagination info for legacy data
@@ -265,9 +283,22 @@ export function useNotesReceivablePaginated(
               startDate: variables.input.startDate,
               endDate: variables.input.endDate,
               branchId: variables.input.branchId,
+              branchSubId: variables.input.branchSubId,
               searchTerm: variables.input.searchTerm,
             }
           });
+          // Surface GraphQL errors instead of degrading to an empty list. A rejected
+
+          // field (frontend ahead of backend, or a stale Lighthouse schema cache in
+
+          // prod) would otherwise render a confident "0 records".
+
+          if (legacyResult.errors) {
+
+            throw new Error(legacyResult.errors[0]?.message || "Failed to fetch notes receivable");
+
+          }
+
           const legacyData = legacyResult.data?.getNrSchedule || { data: [], months: [] };
 
           const totalRecords = legacyData.data.length;

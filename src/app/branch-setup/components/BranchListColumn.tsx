@@ -17,12 +17,15 @@ const branchListCol = (
   {
     name: 'User',
     cell: row => {
+      // Most branches have no manager assigned (branches.user_id is NULL for 10
+      // of 13), so this must not dereference a missing relation — it crashed the
+      // whole page before the optional chaining was added.
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.user.name}</span>
+                <span className='d-block font-weight-semibold'>{row.user?.name ?? '—'}</span>
             </div>
-        </div> 
+        </div>
       )
     },
     sortable: true,

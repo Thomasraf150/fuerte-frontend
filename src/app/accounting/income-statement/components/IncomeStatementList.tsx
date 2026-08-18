@@ -235,7 +235,7 @@ const IncomeStatementList: React.FC = () => {
 
       if (branch_id && branch_id !== '') {
         // Fetch sub-branches for the selected branch
-        fetchSubDataList('id_desc', Number(branch_id));
+        fetchSubDataList('name_asc', Number(branch_id));
       }
     }
   };

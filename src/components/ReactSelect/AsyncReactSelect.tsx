@@ -3,6 +3,7 @@ import { StylesConfig } from 'react-select';
 import { FC, useRef, useCallback, useEffect } from 'react';
 import { useSelectTheme } from '@/hooks/useSelectTheme';
 import { SelectOption } from '@/utils/DataTypes';
+import { composeStyles } from '@/components/ReactSelect';
 
 interface AsyncReactSelectProps {
   loadOptions: (inputValue: string) => Promise<SelectOption[]>;
@@ -47,9 +48,9 @@ const AsyncReactSelect: FC<AsyncReactSelectProps> = ({
     };
   }, []);
 
-  const mergedStyles = customStyles
-    ? { ...themeStyles, ...customStyles }
-    : themeStyles;
+  // Same per-key composition as ReactSelect, so a caller's `control` extends the
+  // themed one instead of replacing it and losing dark mode.
+  const mergedStyles = composeStyles(themeStyles, customStyles);
 
   // Promise-based debounced load options (300ms delay)
   const debouncedLoadOptions = useCallback(

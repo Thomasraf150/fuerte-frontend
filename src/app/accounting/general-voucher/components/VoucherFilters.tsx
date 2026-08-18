@@ -78,7 +78,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
     } else {
       setValue('branch_sub_id', '');
       setBranchSubId('');
-      fetchSubDataList('id_desc', Number(branch_id));
+      fetchSubDataList('name_asc', Number(branch_id));
     }
   };
 

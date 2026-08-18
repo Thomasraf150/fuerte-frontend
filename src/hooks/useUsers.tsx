@@ -206,7 +206,7 @@ const useUsers = () => {
 
   // Sub-branch list + roles are static dropdown data, fetched once on mount.
   useEffect(() => {
-    fetchSubBranch("id_desc");
+    fetchSubBranch("name_asc");
     fetchRoles();
   }, []);
 

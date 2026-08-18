@@ -10,6 +10,11 @@ import { PeriodOption } from "@/types/dashboard";
 import { useAuthStore } from "@/store";
 import BranchQueryMutations from "@/graphql/BranchQueryMutation";
 import { graphqlFetch } from "@/utils/graphqlFetch";
+import ReactSelect from "@/components/ReactSelect";
+import { SelectOption } from "@/utils/DataTypes";
+
+// "" means "no branch filter" — a real option so the control never renders blank.
+const ALL_BRANCHES_OPTION: SelectOption = { value: "", label: "All Branches" };
 
 interface Branch {
   id: number;
@@ -36,6 +41,12 @@ const AcctDefaultPage: React.FC = () => {
   const [branchesLoading, setBranchesLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
 
+  // "" means no branch filter; kept as a real option so the control never blanks.
+  const branchOptions: SelectOption[] = React.useMemo(
+    () => [ALL_BRANCHES_OPTION, ...branches.map((b) => ({ value: String(b.id), label: b.name }))],
+    [branches],
+  );
+
   useEffect(() => {
     const { user } = useAuthStore.getState() as any;
     setIsOwner(user?.role?.code === 'OWN');
@@ -51,7 +62,7 @@ const AcctDefaultPage: React.FC = () => {
       try {
         const result = await graphqlFetch(
           BranchQueryMutations.GET_BRANCH_QUERY,
-          { orderBy: "id_asc" },
+          { orderBy: "name_asc" },
         );
         if (result.data?.getBranch) {
           const activeBranches = result.data.getBranch.filter(
@@ -125,23 +136,25 @@ const AcctDefaultPage: React.FC = () => {
 
           {/* Branch Selector (Owner Only) */}
           {isOwner && (
-            <select
-              value={selectedBranchId || ""}
-              onChange={(e) =>
-                setSelectedBranchId(
-                  e.target.value ? parseInt(e.target.value) : null
-                )
-              }
-              disabled={branchesLoading}
-              className="rounded border border-stroke bg-white px-4 py-2 text-black outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-white"
-            >
-              <option value="">All Branches</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
+            <div className="min-w-[200px]">
+              <ReactSelect
+                aria-label="Filter by branch"
+                options={branchOptions}
+                value={
+                  branchOptions.find(
+                    (o) => o.value === String(selectedBranchId ?? "")
+                  ) ?? ALL_BRANCHES_OPTION
+                }
+                onChange={(option) =>
+                  setSelectedBranchId(option?.value ? parseInt(option.value) : null)
+                }
+                placeholder="All Branches"
+                isDisabled={branchesLoading}
+                isLoading={branchesLoading}
+                loadingMessage={() => "Loading branches..."}
+                menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+              />
+            </div>
           )}
         </div>
       </div>

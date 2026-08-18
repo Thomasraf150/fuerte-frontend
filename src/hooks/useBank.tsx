@@ -20,7 +20,7 @@ const useBank = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [bankLoading, setBankLoading] = useState<boolean>(false);
   // Function to fetchdata
-  const fetchDataSubBranch = async (orderBy = 'id_desc') => {
+  const fetchDataSubBranch = async (orderBy = 'name_asc') => {
     const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
     setBranchSubData(result.data.getAllBranch);
   };

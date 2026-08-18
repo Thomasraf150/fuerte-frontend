@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import BranchQueryMutations from "@/graphql/BranchQueryMutation";
 import { useAuthStore } from "@/store";
+import ReactSelect from "@/components/ReactSelect";
+import { SelectOption } from "@/utils/DataTypes";
+
+/** Sentinel option: empty value === "no branch filter". */
+const ALL_BRANCHES_OPTION: SelectOption = { value: "", label: "All Branches" };
 
 interface DateBranchFiltersProps {
   month: number | null;
@@ -89,6 +94,9 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
         }
       } catch (err) {
         console.error('[DateBranchFilters] Failed to fetch branches:', err);
+        // Without this the dropdown reports "No branches found" on a network
+        // failure, which reads as "there are none" rather than "we could not ask".
+        setError(err instanceof Error ? err.message : 'Failed to fetch branches');
       } finally {
         setLoading(false);
       }
@@ -96,6 +104,29 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
 
     fetchBranches();
   }, []);
+
+  // "All Branches" first, then every sub-branch. Values are strings because
+  // SelectOption.value is a string; they're parsed back to numbers on change.
+  const branchOptions = useMemo<SelectOption[]>(
+    () => [
+      ALL_BRANCHES_OPTION,
+      ...branches.map((branch) => ({
+        value: String(branch.id),
+        label: branch.name,
+      })),
+    ],
+    [branches]
+  );
+
+  // Never render blank: an unset filter maps back to the "All Branches" option.
+  const selectedBranchOption =
+    branchOptions.find((option) => option.value === String(branchSubId ?? "")) ??
+    ALL_BRANCHES_OPTION;
+
+  const handleBranchChange = (option: SelectOption | null) => {
+    const rawValue = option?.value ?? "";
+    onBranchSubIdChange(rawValue === "" ? null : parseInt(rawValue, 10));
+  };
 
   const hasActiveFilters = month !== null || year !== null || branchSubId !== null;
 
@@ -152,23 +183,20 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
 
         {/* Branch Dropdown */}
         <div className="relative">
-          <select
+          <ReactSelect
             aria-label="Filter by branch"
-            value={branchSubId ?? ""}
-            onChange={(e) => {
-              const value = e.target.value === "" ? null : parseInt(e.target.value, 10);
-              onBranchSubIdChange(value);
-            }}
-            disabled={loading || !!error}
-            className="w-full rounded border border-stroke bg-white dark:bg-boxdark dark:border-strokedark px-3 py-2 text-sm outline-none transition focus:border-primary active:border-primary dark:focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="">{loading ? "Loading..." : error ? "Error loading branches" : "All Branches"}</option>
-            {!loading && !error && branches.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {branch.name}
-              </option>
-            ))}
-          </select>
+            options={branchOptions}
+            value={selectedBranchOption}
+            onChange={handleBranchChange}
+            placeholder="All Branches"
+            isDisabled={loading || !!error}
+            isLoading={loading}
+            loadingMessage={() => "Loading..."}
+            noOptionsMessage={() =>
+              error ? "Error loading branches" : "No branches found"
+            }
+            menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+          />
           {error && (
             <p className="mt-1 text-sm text-red-500 dark:text-red-400">
               {error}

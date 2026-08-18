@@ -80,7 +80,7 @@ const BranchLists: React.FC = () => {
   const handleSubViewRowClick = (id: number) => {
     console.log('View Subs');
     setShowSubBranch(true);
-    fetchSubDataList('id_desc', id);
+    fetchSubDataList('name_asc', id);
   };
 
   const handleUpdateSubRowClick = (row: DataSubBranches) => {
@@ -112,7 +112,7 @@ const BranchLists: React.FC = () => {
     // `onAfterRequest` callback refreshes the pending-deletion badges
     // BEFORE the submitting spinner closes, so the row updates atomically.
     await handleDeleteSubBranch(Number(row?.id), refreshPendingSub);
-    fetchSubDataList('id_desc', row?.branch_id);
+    fetchSubDataList('name_asc', row?.branch_id);
   }
 
   useEffect(() => {

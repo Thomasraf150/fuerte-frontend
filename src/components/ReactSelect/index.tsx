@@ -1,7 +1,32 @@
 import Select, { StylesConfig } from 'react-select';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { useSelectTheme } from '@/hooks/useSelectTheme';
 import { SelectOption } from '@/utils/DataTypes';
+
+type Styles = StylesConfig<SelectOption, false>;
+
+/**
+ * Compose caller styles ON TOP OF the theme's, per style key.
+ *
+ * A plain object spread would let a caller's `control` (or any other key)
+ * REPLACE the theme's, silently dropping dark-mode colours — the caller only
+ * spreads react-select's `base`, which knows nothing about our theme. Chaining
+ * the two functions instead means the caller extends the themed result.
+ */
+export function composeStyles(themeStyles: Styles, customStyles?: Styles): Styles {
+  if (!customStyles) return themeStyles;
+
+  const merged: Styles = { ...themeStyles };
+  (Object.keys(customStyles) as (keyof Styles)[]).forEach((key) => {
+    const custom = customStyles[key] as ((base: any, state: any) => any) | undefined;
+    if (!custom) return;
+    const themed = themeStyles[key] as ((base: any, state: any) => any) | undefined;
+    (merged as Record<string, unknown>)[key as string] = themed
+      ? (base: any, state: any) => custom(themed(base, state), state)
+      : custom;
+  });
+  return merged;
+}
 
 interface ReactSelectComponentProps {
   options: SelectOption[];
@@ -15,6 +40,8 @@ interface ReactSelectComponentProps {
   isLoading?: boolean;
   loadingMessage?: () => string;
   noOptionsMessage?: (obj: { inputValue: string }) => string | null;
+  /** Accessible name for the underlying combobox input (react-select forwards it). */
+  'aria-label'?: string;
 }
 
 const ReactSelect: FC<ReactSelectComponentProps> = ({
@@ -29,14 +56,15 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
   isLoading = false,
   loadingMessage = () => 'Loading options...',
   noOptionsMessage,
+  'aria-label': ariaLabel,
 }) => {
   // Get theme-aware styles and theme config
   const { styles: themeStyles, theme } = useSelectTheme<SelectOption>();
 
-  // Merge custom styles with theme styles (custom takes precedence)
-  const mergedStyles = customStyles
-    ? { ...themeStyles, ...customStyles }
-    : themeStyles;
+  const mergedStyles = useMemo(
+    () => composeStyles(themeStyles, customStyles),
+    [themeStyles, customStyles],
+  );
 
   return (
     <Select
@@ -54,6 +82,7 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
       isLoading={isLoading}
       loadingMessage={loadingMessage}
       noOptionsMessage={noOptionsMessage}
+      aria-label={ariaLabel}
     />
   );
 };
