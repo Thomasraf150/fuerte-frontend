@@ -13,10 +13,38 @@ import { test, expect, Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const AUTH = fs.readFileSync(
-  path.resolve(__dirname, '../../../../fuerte-backend/dev/_scratch/auth_payload.json'),
-  'utf8',
+/**
+ * These screens only render their branch pickers for an OWNER, and no owner
+ * password is committed anywhere — so auth comes from a locally minted token.
+ * The fixture is gitignored (it holds a live bearer token). Generate it from the
+ * repo root before the first run, substituting your own owner account:
+ *
+ *   docker exec fuerte-app-1 php artisan tinker --execute="\$u=App\Models\User::
+ *   where('email','fuerterafael@gmail.com')->firstOrFail(); \$u->load('branchSub.
+ *   branch','role'); \$t=\$u->createToken('e2e')->plainTextToken; \$u->
+ *   assignedBranchSubIds=app(App\Services\BranchAccessService::class)->
+ *   getSwitcherBranchSubIds(\$u); file_put_contents('/var/www/html/dev/_scratch/
+ *   auth_payload.json', json_encode(['state'=>['user'=>\$u->toArray(),
+ *   'authToken'=>\$t],'version'=>0]));"
+ *
+ * That writes the exact /api/login payload shape this suite seeds into
+ * localStorage. Logging in through the form instead would trip the 5-per-minute
+ * per-account limit on /api/login once the suite grows.
+ */
+const AUTH_FIXTURE = path.resolve(
+  __dirname,
+  '../../../../fuerte-backend/dev/_scratch/auth_payload.json',
 );
+
+if (!fs.existsSync(AUTH_FIXTURE)) {
+  throw new Error(
+    `Missing auth fixture: ${AUTH_FIXTURE}\n` +
+      'Generate it first (see the comment above this check) — it is gitignored ' +
+      'because it contains a live bearer token.',
+  );
+}
+
+const AUTH = fs.readFileSync(AUTH_FIXTURE, 'utf8');
 
 /** Pages that must simply render for an owner without blowing up. */
 const SCREENS: Array<{ path: string; name: string }> = [
