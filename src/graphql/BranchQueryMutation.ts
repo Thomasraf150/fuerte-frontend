@@ -13,17 +13,36 @@ const UPDATE_BRANCH_MUTATION: string = `
   }
 `;
 
+// branch_group_id is optional: omit it for every branch (legacy behaviour),
+// pass a group id to get only that group's branches (FA/FB/FC/FD).
 const GET_BRANCH_QUERY: string = `
-  query GetBranches($orderBy: String) {
-    getBranch(orderBy: $orderBy) {
+  query GetBranches($orderBy: String, $branch_group_id: Int) {
+    getBranch(orderBy: $orderBy, branch_group_id: $branch_group_id) {
       id
       name
+      branch_group_id
       user_id
       is_deleted
       user {
         name
         email
       }
+      branch_group {
+        id
+        name
+        code
+      }
+    }
+  }
+`;
+
+const GET_BRANCH_GROUPS_QUERY: string = `
+  query GetBranchGroups {
+    getBranchGroups {
+      id
+      name
+      code
+      sort_order
     }
   }
 `;
@@ -145,6 +164,7 @@ const GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY: string = `
 
 const BranchQueryMutations = {
   GET_BRANCH_QUERY,
+  GET_BRANCH_GROUPS_QUERY,
   DELETE_BRANCH_MUTATION,
   SAVE_BRANCH_MUTATION,
   UPDATE_BRANCH_MUTATION,

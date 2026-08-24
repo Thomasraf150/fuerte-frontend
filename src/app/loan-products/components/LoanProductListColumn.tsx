@@ -4,6 +4,7 @@ import { TableColumn } from 'react-data-table-component';
 import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
+import { formatMoneyOrBlank } from '@/utils/helper';
 
 const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => void): TableColumn<DataRowLoanProducts>[] => [
   {
@@ -40,37 +41,37 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
   },
   {
     name: 'Interest Rate',
-    cell: row => row.interest_rate,
+    cell: row => formatMoneyOrBlank(row.interest_rate),
     sortable: true,
   },
   {
     name: 'Processing',
-    cell: row => row.processing,
+    cell: row => formatMoneyOrBlank(row.processing),
     sortable: true,
   },
   {
     name: 'Agent Fee',
-    cell: row => row.agent_fee,
+    cell: row => formatMoneyOrBlank(row.agent_fee),
     sortable: true,
   },
   {
     name: 'Insurance',
-    cell: row => row.insurance,
+    cell: row => formatMoneyOrBlank(row.insurance),
     sortable: true,
   },
   {
     name: 'Insurance MFee',
-    cell: row => row.insurance_fee,
+    cell: row => formatMoneyOrBlank(row.insurance_fee),
     sortable: true,
   },
   {
     name: 'Collection',
-    cell: row => row.collection,
+    cell: row => formatMoneyOrBlank(row.collection),
     sortable: true,
   },
   {
     name: 'Notarial',
-    cell: row => row.notarial,
+    cell: row => formatMoneyOrBlank(row.notarial),
     sortable: true,
   },
   {

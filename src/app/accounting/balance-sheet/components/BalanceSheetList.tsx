@@ -24,14 +24,16 @@ interface Option {
 const BalanceSheetList: React.FC = () => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<any>();
   const { onSubmitCoa, branchSubData } = useCoa();
-  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
+  const { dataBranch, dataBranchGroup, dataBranchSub, fetchDataList, fetchBranchGroupList, fetchSubDataList, loadingBranches, loadingBranchGroups, loadingSubBranches } = useBranches();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
+  const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
+  const [optionsGroup, setOptionsGroup] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
   const { balanceSheetData, fetchBalanceSheetData, loading } = useFinancialStatement();
@@ -82,11 +84,28 @@ const BalanceSheetList: React.FC = () => {
       }));
       setOptionsBranch([
         { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
-        { value: 'all', label: 'All Main Branches' }, // Add "All" option
+        // "All Main Branches" spans every group, so it only makes sense while no
+        // single group is selected — the report cannot aggregate one group.
+        ...(branchGroupId === 'all' ? [{ value: 'all', label: 'All Main Branches' }] : []),
         ...dynaOpt,
       ]);
     }
-  }, [dataBranch])
+  }, [dataBranch, branchGroupId])
+
+  // The four groups are static data — fetch them once when the screen mounts.
+  useEffect(() => {
+    fetchBranchGroupList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(()=>{
+    if (dataBranchGroup && Array.isArray(dataBranchGroup)) {
+      setOptionsGroup([
+        { value: 'all', label: 'All Groups' },
+        ...dataBranchGroup.map(g => ({ value: String(g.id), label: g.name })),
+      ]);
+    }
+  }, [dataBranchGroup])
 
   useEffect(()=>{
     if (dataBranchSub && Array.isArray(dataBranchSub)) {
@@ -101,6 +120,21 @@ const BalanceSheetList: React.FC = () => {
       ]);
     }
   }, [dataBranchSub])
+
+  /**
+   * Group (FA/FB/FC/FD) only narrows which branches are offered below — it
+   * never changes what the report aggregates. Picking a group therefore clears
+   * the branch/sub-branch selection rather than silently leaving the report on
+   * a branch from another group.
+   */
+  const handleGroupChange = (branch_group_id: string) => {
+    setBranchGroupId(branch_group_id);
+    setValue('branch_id', '');
+    setValue('branch_sub_id', '');
+    setBranchId('');
+    setBranchSubId('');
+    fetchDataList('name_asc', branch_group_id === 'all' ? undefined : Number(branch_group_id));
+  };
 
   const handleBranchChange = (branch_id: string) => {
     setBranchId(branch_id);
@@ -153,6 +187,28 @@ const BalanceSheetList: React.FC = () => {
                       minDate={startDate} // Prevent selecting an end date before start date
                       placeholderText="End Date"
                       className="w-full border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  {/* Group Select — FA/FB/FC/FD; narrows the Branch list beside it */}
+                  <div className="w-full sm:w-auto sm:flex-1">
+                    <Controller
+                      name="branch_group_id"
+                      control={control}
+                      defaultValue="all"
+                      render={({ field }) => (
+                        <ReactSelect
+                          {...field}
+                          options={optionsGroup}
+                          placeholder="Select a group..."
+                          isLoading={loadingBranchGroups}
+                          loadingMessage={() => 'Loading groups...'}
+                          onChange={(selectedOption) => {
+                            field.onChange(selectedOption?.value);
+                            handleGroupChange(selectedOption?.value ?? 'all');
+                          }}
+                          value={optionsGroup.find(option => String(option.value) === String(field.value)) || null}
+                        />
+                      )}
                     />
                   </div>
                   <div className="w-full sm:w-auto sm:flex-1">

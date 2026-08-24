@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { formatToTwoDecimalPlaces, formatDateRange } from '@/utils/helper';
+import { formatToTwoDecimalPlaces, formatDateRange, formatCount } from '@/utils/helper';
 import { toCamelCase, formatNumberComma } from '@/utils/helper';
 
 // Display order for summary ticket rows
@@ -78,9 +78,11 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate, isOw
                   Number of Borrowers
                 </td>
                 <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark font-semibold">
-                  {sumTixData?.summary_tix?.find(
-                    (item: any) => item.description?.trim().toLowerCase() === 'notes receivable'
-                  )?.ccount ?? 0}
+                  {formatCount(
+                    sumTixData?.summary_tix?.find(
+                      (item: any) => item.description?.trim().toLowerCase() === 'notes receivable'
+                    )?.ccount ?? 0
+                  )}
                 </td>
                 <td className="border-b text-center border-[#eee] px-4 py-3 dark:border-strokedark">
                 </td>

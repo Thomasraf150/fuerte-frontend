@@ -6,6 +6,7 @@ import { useImport, ImportBatchPayload, ImportRowPayload } from '@/hooks/useImpo
 import { formatCurrency } from '@/utils/formatCurrency';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import StatusPill from '../../components/StatusPill';
+import { formatNumberComma } from '@/utils/helper';
 
 
 /**
@@ -204,9 +205,9 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                 <tr key={r.sheet_row} className="border-b border-stroke dark:border-strokedark last:border-0">
                   <td className="py-2 pr-3 tabular-nums">{r.sheet_row}</td>
                   <td className="py-2 pr-3 font-mono text-xs">{r.loan_ref ?? '—'}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{r.amount ?? '—'}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{r.remaining_before ?? '—'}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{r.interest ?? '—'}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums">{r.amount === null || r.amount === undefined ? '—' : formatNumberComma(Number(r.amount))}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums">{r.remaining_before === null || r.remaining_before === undefined ? '—' : formatNumberComma(Number(r.remaining_before))}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums">{r.interest === null || r.interest === undefined ? '—' : formatNumberComma(Number(r.interest))}</td>
                   <td className="py-2"><OutcomePill outcome={r.outcome} /></td>
                 </tr>
               ))}

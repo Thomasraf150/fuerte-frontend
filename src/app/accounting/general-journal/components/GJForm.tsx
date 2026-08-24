@@ -10,6 +10,7 @@ import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData } from '@/utils/DataTypes';
+import { formatNumberComma } from '@/utils/helper';
 interface ParentFormBr {
   setShowForm: (b: boolean) => void;
   actionLbl: string;
@@ -260,8 +261,8 @@ const GJForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, lo
                 <tfoot>
                   <tr className="font-bold bg-gray-50">
                     <th className="p-2 border text-right">TOTAL</th>
-                    <th className="p-2 border text-right">{calculateTotal("debit")}</th>
-                    <th className="p-2 border text-right">{calculateTotal("credit")}</th>
+                    <th className="p-2 border text-right">{formatNumberComma(Number(calculateTotal("debit")))}</th>
+                    <th className="p-2 border text-right">{formatNumberComma(Number(calculateTotal("credit")))}</th>
                     <th className="p-2 border"></th>
                   </tr>
                 </tfoot>

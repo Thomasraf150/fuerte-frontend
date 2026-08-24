@@ -10,6 +10,11 @@ const branchListCol = (
     handleSubViewRowClick: (id: number) => void, 
     handleDeleteRow: (id: number) => void): TableColumn<DataBranches>[] => [
   {
+    name: 'Group',
+    cell: row => row.branch_group?.code ?? '—',
+    sortable: true,
+  },
+  {
     name: 'Branch',
     cell: row => row.name,
     sortable: true,

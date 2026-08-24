@@ -3,6 +3,7 @@
 import React from "react";
 import { SubBranchBreakdown } from "@/types/dashboard";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCount } from '@/utils/helper';
 
 interface SubBranchBreakdownTableProps {
   breakdown: SubBranchBreakdown[];
@@ -141,7 +142,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
                 </td>
                 <td className="p-2 text-center sm:p-3">
                   <p className="font-bold text-black dark:text-white text-xs sm:text-sm">
-                    {totals.loan_count}
+                    {formatCount(totals.loan_count)}
                   </p>
                 </td>
                 <td className="p-2 text-right sm:p-3">

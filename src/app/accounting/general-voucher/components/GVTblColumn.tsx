@@ -4,6 +4,7 @@ import { TableColumn } from 'react-data-table-component';
 import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { RowAcctgEntry } from '@/utils/DataTypes';
+import { formatMoneyOrBlank } from '@/utils/helper';
 
 const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
   {
@@ -48,7 +49,7 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
   },
   {
     name: 'Amount',
-    cell: row => row?.amount,
+    cell: row => formatMoneyOrBlank(row?.amount),
     sortable: true,
   },
   {

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { OtherCollectionFormValues } from '@/utils/DataTypes';
-import { formatToTwoDecimalPlaces, parseNumericInput as num } from '@/utils/helper';
+import { formatToTwoDecimalPlaces, parseNumericInput as num, formatNumberComma } from '@/utils/helper';
 import { Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import moment from 'moment';
@@ -181,7 +181,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 Remaining Due:
               </div>
               <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white text-center 2xl:text-left text-xs sm:text-sm">
-                {Number(selectedMoSchedOthPay?.amount).toFixed(2)}
+                {formatNumberComma(Number(selectedMoSchedOthPay?.amount))}
               </div>
             </div>
 

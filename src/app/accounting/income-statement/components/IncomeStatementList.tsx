@@ -28,6 +28,7 @@ interface Option {
 }
 
 interface IncomeStatementFormData {
+  branch_group_id: string;
   branch_id: string;
   branch_sub_id: string;
 }
@@ -35,7 +36,7 @@ interface IncomeStatementFormData {
 const IncomeStatementList: React.FC = () => {
   const { setValue, control } = useForm<IncomeStatementFormData>();
   // const { onSubmitCoa, branchSubData } = useCoa();
-  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
+  const { dataBranch, dataBranchGroup, dataBranchSub, fetchDataList, fetchBranchGroupList, fetchSubDataList, loadingBranches, loadingBranchGroups, loadingSubBranches } = useBranches();
 
   const {
     // Aggregated data
@@ -62,15 +63,36 @@ const IncomeStatementList: React.FC = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
+  const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
 
+  const optionsGroup: Option[] = useMemo(
+    () => [
+      { value: 'all', label: 'All Groups' },
+      ...(Array.isArray(dataBranchGroup)
+        ? dataBranchGroup.map(g => ({ value: String(g.id), label: g.name }))
+        : []),
+    ],
+    [dataBranchGroup]
+  );
   const optionsBranch: Option[] = useMemo(
-    () => buildSelectOptions(dataBranch, { placeholderLabel: 'Select a Branch', allLabel: 'All Main Branches' }),
-    [dataBranch]
+    () => buildSelectOptions(dataBranch, {
+      placeholderLabel: 'Select a Branch',
+      // "All Main Branches" spans every group, so it only makes sense while no
+      // single group is selected — the report cannot aggregate one group.
+      allLabel: branchGroupId === 'all' ? 'All Main Branches' : undefined,
+    }),
+    [dataBranch, branchGroupId]
   );
   const optionsSubBranch: Option[] = useMemo(
     () => buildSelectOptions(dataBranchSub, { placeholderLabel: 'Select a Sub Branch', allLabel: 'All Sub-Branches' }),
     [dataBranchSub]
   );
+
+  // The four groups are static data — fetch them once when the screen mounts.
+  useEffect(() => {
+    fetchBranchGroupList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Two-phase reveal: keeps spinner visible until browser has painted the hidden content.
   // Phase 1: loading=false → content renders hidden (opacity-0) → browser paints
@@ -220,6 +242,23 @@ const IncomeStatementList: React.FC = () => {
     await printIncomeStatement(startDate, endDate, branchSubId, showBreakdown, branchId);
   };
 
+  /**
+   * Group (FA/FB/FC/FD) only narrows which branches are offered below — it
+   * never changes what the report aggregates. Picking a group therefore clears
+   * the branch/sub-branch selection rather than silently leaving the report on
+   * a branch from another group.
+   */
+  const handleGroupChange = (branch_group_id: string) => {
+    setBranchGroupId(branch_group_id);
+    setValue('branch_id', '');
+    setValue('branch_sub_id', '');
+    setBranchId('');
+    setBranchSubId('');
+    setShowBreakdown(false);
+    clearBreakdownData();
+    fetchDataList('name_asc', branch_group_id === 'all' ? undefined : Number(branch_group_id));
+  };
+
   const handleBranchChange = (branch_id: string) => {
     setBranchId(branch_id);
 
@@ -251,7 +290,7 @@ const IncomeStatementList: React.FC = () => {
               <h3 className="font-medium text-black dark:text-white">Report Filters</h3>
             </div>
             <div className="p-7">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Start Date */}
                 <div className="flex flex-col relative z-50">
                   <label className="mb-2 text-sm font-medium text-black dark:text-white">Start Date</label>
@@ -280,6 +319,34 @@ const IncomeStatementList: React.FC = () => {
                     placeholderText="Select end date"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     popperPlacement="bottom-start"
+                  />
+                </div>
+
+                {/* Group Select — FA/FB/FC/FD; narrows the Branch list below */}
+                <div className="flex flex-col">
+                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Group</label>
+                  <Controller
+                    name="branch_group_id"
+                    control={control}
+                    defaultValue="all"
+                    render={({ field }) => (
+                      <ReactSelect
+                        {...field}
+                        options={optionsGroup}
+                        placeholder="Select a group..."
+                        isLoading={loadingBranchGroups}
+                        loadingMessage={() => 'Loading groups...'}
+                        onChange={(selectedOption) => {
+                          field.onChange(selectedOption?.value);
+                          handleGroupChange(selectedOption?.value ?? 'all');
+                        }}
+                        value={optionsGroup.find(option => String(option.value) === String(field.value)) || null}
+                        menuPortalTarget={document.body}
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                        }}
+                      />
+                    )}
                   />
                 </div>
 

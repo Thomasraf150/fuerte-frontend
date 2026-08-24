@@ -6,12 +6,13 @@ import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
-import { DataBranches, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
+import { DataBranches, DataBranchGroup, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 const useBranches = () => {
   const {
     SAVE_BRANCH_MUTATION,
     GET_BRANCH_QUERY,
+    GET_BRANCH_GROUPS_QUERY,
     UPDATE_BRANCH_MUTATION,
     GET_SUB_BRANCH_QUERY,
     SAVE_SUB_BRANCH_MUTATION,
@@ -20,21 +21,54 @@ const useBranches = () => {
     DELETE_SUB_BRANCH_MUTATION,
     GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY } = BranchQueryMutations;
   const [dataBranch, setDataBranch] = useState<DataBranches[] | undefined>(undefined);
+  const [dataBranchGroup, setDataBranchGroup] = useState<DataBranchGroup[] | undefined>(undefined);
   const [dataBranchSub, setDataBranchSub] = useState<DataSubBranches[] | undefined>(undefined);
   const [myAccessibleBranchSubs, setMyAccessibleBranchSubs] = useState<DataSubBranches[] | undefined>(undefined);
   const [selectedBranchID, setSelectedBranchID] = useState<number>();
+  const [selectedBranchGroupID, setSelectedBranchGroupID] = useState<number>();
   const [branchLoading, setBranchLoading] = useState<boolean>(false);
   const [loadingBranches, setLoadingBranches] = useState<boolean>(false);
+  const [loadingBranchGroups, setLoadingBranchGroups] = useState<boolean>(false);
   const [loadingSubBranches, setLoadingSubBranches] = useState<boolean>(false);
   const [loadingMyAccessibleBranches, setLoadingMyAccessibleBranches] = useState<boolean>(false);
-  // Function to fetchdata
-  const fetchDataList = async (orderBy = 'name_asc') => {
+  /**
+   * Branches, optionally narrowed to one group (FA/FB/FC/FD).
+   * Omit branchGroupId and it behaves exactly as before — every branch.
+   */
+  const fetchDataList = async (orderBy = 'name_asc', branchGroupId?: number) => {
     setLoadingBranches(true);
+    // Drop the previous list before fetching. Otherwise, for the ~seconds the
+    // request is in flight, the Branch dropdown keeps rendering the OLD options
+    // — so right after picking group FA it still offers FB, FC and FD. Clearing
+    // first means the control shows its "Loading branches..." state instead of
+    // options that are about to be wrong.
+    setDataBranch(undefined);
     try {
-      const result = await graphqlFetch(GET_BRANCH_QUERY, { orderBy });
+      const result = await graphqlFetch(GET_BRANCH_QUERY, {
+        orderBy,
+        branch_group_id: branchGroupId ?? null,
+      });
       setDataBranch(result.data.getBranch);
+      setSelectedBranchGroupID(branchGroupId);
     } finally {
       setLoadingBranches(false);
+    }
+  };
+
+  // The four groups (FA/FB/FC/FD). Static data — fetch once per screen.
+  const fetchBranchGroupList = async () => {
+    setLoadingBranchGroups(true);
+    try {
+      const result = await graphqlFetch(GET_BRANCH_GROUPS_QUERY);
+      if (result.data?.getBranchGroups) {
+        setDataBranchGroup(result.data.getBranchGroups);
+      } else if (result.errors) {
+        console.error('GraphQL errors fetching branch groups:', result.errors);
+      }
+    } catch (error) {
+      console.error('Error fetching branch groups:', error);
+    } finally {
+      setLoadingBranchGroups(false);
     }
   };
 
@@ -77,15 +111,23 @@ const useBranches = () => {
       let variables: { input: any } = {
         input: {
           name: data.name,
-          user_id: userData?.user?.id
+          // Blank means "not chosen"; send null rather than 0 so the column
+          // stays NULL instead of pointing at a group id that does not exist.
+          branch_group_id: data.branch_group_id ? Number(data.branch_group_id) : null,
         },
       };
 
       if (data.id) {
         mutation = UPDATE_BRANCH_MUTATION;
         variables.input.id = data.id;
+        // Deliberately NOT sending user_id on update. branches.user_id is the
+        // legacy branch-manager grant — BranchAccessService hands whoever is
+        // named there every sub-branch under the branch — so the backend now
+        // rejects it from anyone but the Owner. Renaming a branch must not
+        // quietly reassign who manages it to whoever opened the form.
       } else {
         mutation = SAVE_BRANCH_MUTATION;
+        variables.input.user_id = userData?.user?.id;
       }
 
       const result = await graphqlFetch(mutation, variables);
@@ -219,18 +261,22 @@ const useBranches = () => {
 
   return {
     dataBranch,
+    dataBranchGroup,
     dataBranchSub,
     myAccessibleBranchSubs,
     onSubmitBranch,
     fetchDataList,
+    fetchBranchGroupList,
     fetchSubDataList,
     fetchMyAccessibleBranchSubs,
     selectedBranchID,
+    selectedBranchGroupID,
     onSubmitSubBranch,
     handleDeleteBranch,
     handleDeleteSubBranch,
     branchLoading,
     loadingBranches,
+    loadingBranchGroups,
     loadingSubBranches,
     loadingMyAccessibleBranches
   };

@@ -23,6 +23,14 @@ interface Option {
 // "" means "no filter" — kept as its own option so the control never renders blank.
 const ALL_BRANCHES_OPTION: Option = { value: "", label: "All branches" };
 const ALL_SUB_BRANCHES_OPTION: Option = { value: "", label: "All sub-branches" };
+// Group (FA/FB/FC/FD) uses "all" as its no-filter value — it only narrows the
+// Branch list below, it is never sent to the query.
+const ALL_GROUPS_OPTION: Option = { value: "all", label: "All groups" };
+/**
+ * Once a group is picked, "" still spans every group, so the branch no-filter
+ * entry stops claiming "All branches" and asks for an explicit branch instead.
+ */
+const SELECT_BRANCH_OPTION: Option = { value: "", label: "Select a branch" };
 
 /**
  * react-select shows a blank control for a null value, so map the current filter
@@ -45,7 +53,18 @@ const SORT_OPTIONS: Option[] = [
 const ProblemAccountsList: React.FC = () => {
   const router = useRouter();
 
-  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
+  const {
+    dataBranch,
+    dataBranchGroup,
+    dataBranchSub,
+    fetchDataList,
+    fetchBranchGroupList,
+    fetchSubDataList,
+    loadingBranches,
+    loadingBranchGroups,
+    loadingSubBranches,
+  } = useBranches();
+  const [branchGroupId, setBranchGroupId] = useState<string>("all");
   const [branchId, setBranchId] = useState<string>("");
   const [branchSubId, setBranchSubId] = useState<string>("");
   const [searchInput, setSearchInput] = useState<string>("");
@@ -74,13 +93,30 @@ const ProblemAccountsList: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchId, branchSubId, debouncedSearch, sortBy]);
 
+  // The four groups are static data — fetch once.
+  useEffect(() => {
+    fetchBranchGroupList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const groupOptions: Option[] = useMemo(() => {
+    if (!dataBranchGroup || !Array.isArray(dataBranchGroup)) return [ALL_GROUPS_OPTION];
+    return [
+      ALL_GROUPS_OPTION,
+      ...dataBranchGroup.map((g) => ({ value: String(g.id), label: g.name })),
+    ];
+  }, [dataBranchGroup]);
+
+  const branchNoFilterOption =
+    branchGroupId === "all" ? ALL_BRANCHES_OPTION : SELECT_BRANCH_OPTION;
+
   const branchOptions: Option[] = useMemo(() => {
     if (!dataBranch || !Array.isArray(dataBranch)) return [];
     return [
-      ALL_BRANCHES_OPTION,
+      branchGroupId === "all" ? ALL_BRANCHES_OPTION : SELECT_BRANCH_OPTION,
       ...dataBranch.map((b) => ({ value: String(b.id), label: b.name })),
     ];
-  }, [dataBranch]);
+  }, [dataBranch, branchGroupId]);
 
   const subBranchOptions: Option[] = useMemo(() => {
     if (!dataBranchSub || !Array.isArray(dataBranchSub)) return [];
@@ -89,6 +125,18 @@ const ProblemAccountsList: React.FC = () => {
       ...dataBranchSub.map((bs) => ({ value: String(bs.id), label: bs.name })),
     ];
   }, [dataBranchSub]);
+
+  /**
+   * Group only narrows which branches are offered below — it never filters the
+   * list itself. Picking one therefore clears the branch/sub-branch filters
+   * rather than leaving a branch from another group selected.
+   */
+  const handleGroupChange = (value: string) => {
+    setBranchGroupId(value);
+    setBranchId("");
+    setBranchSubId("");
+    fetchDataList("name_asc", value === "all" ? undefined : Number(value));
+  };
 
   const handleBranchChange = (value: string) => {
     setBranchId(value);
@@ -148,14 +196,28 @@ const ProblemAccountsList: React.FC = () => {
       />
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 border-b border-stroke dark:border-strokedark">
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 border-b border-stroke dark:border-strokedark">
+          <div className="flex flex-col">
+            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
+              Group
+            </label>
+            <ReactSelect
+              options={groupOptions}
+              value={findOption(groupOptions, branchGroupId, ALL_GROUPS_OPTION)}
+              onChange={(option) => handleGroupChange(option?.value ?? "all")}
+              placeholder="All groups"
+              isLoading={loadingBranchGroups}
+              loadingMessage={() => "Loading groups..."}
+              menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+            />
+          </div>
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
               Branch
             </label>
             <ReactSelect
               options={branchOptions}
-              value={findOption(branchOptions, branchId, ALL_BRANCHES_OPTION)}
+              value={findOption(branchOptions, branchId, branchNoFilterOption)}
               onChange={(option) => handleBranchChange(option?.value ?? "")}
               placeholder="All branches"
               isLoading={loadingBranches}

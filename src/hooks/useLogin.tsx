@@ -33,7 +33,21 @@ const useLogin = () => {
         router.push('/');
         return { success: true, data: res };
       } else {
-        const errorMessage = "Invalid credentials! Please check your email and password.";
+        // Don't blame the password for every failure. /api/login is rate limited
+        // to 5 attempts per minute per account (RouteServiceProvider's 'login'
+        // limiter), and reporting that lockout as "Invalid credentials" pushes
+        // the user to retry — which extends the lockout.
+        let errorMessage = "Invalid credentials! Please check your email and password.";
+        if (response.status === 429) {
+          // Retry-After is cross-origin here and may be hidden, so don't promise
+          // a precise number we cannot read.
+          const retryAfter = Number(response.headers.get('retry-after'));
+          errorMessage = Number.isFinite(retryAfter) && retryAfter > 0
+            ? `Too many login attempts. Please wait ${retryAfter} seconds and try again.`
+            : 'Too many login attempts. Please wait about a minute and try again.';
+        } else if (response.status >= 500) {
+          errorMessage = 'The server could not be reached. Please try again in a moment.';
+        }
         toast.error(errorMessage);
         return { success: false, error: errorMessage };
       }

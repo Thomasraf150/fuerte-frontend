@@ -275,10 +275,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                             <tr className="bg-gray-100 font-semibold">
                               <td className="px-4 py-2 border text-right bg-slate-50" colSpan={2}>Total:</td>
                               <td className="px-4 py-2 border text-right bg-slate-50">
-                                {dataUtb?.reduce((acc, item) => acc + (Number(item?.total_debit) || 0), 0).toFixed(2)}
+                                {formatNumberComma(dataUtb?.reduce((acc, item) => acc + (Number(item?.total_debit) || 0), 0) ?? 0)}
                               </td>
                               <td className="px-4 py-2 border text-right bg-slate-50">
-                                {dataUtb?.reduce((acc, item) => acc + (Number(item?.total_credit) || 0), 0).toFixed(2)}
+                                {formatNumberComma(dataUtb?.reduce((acc, item) => acc + (Number(item?.total_credit) || 0), 0) ?? 0)}
                               </td>
                             </tr>
                           </tfoot> */}

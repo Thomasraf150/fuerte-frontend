@@ -95,6 +95,37 @@ export const fetchWithRecache = async (
 };
 
 
+/**
+ * Money for DISPLAY: thousand separators, two decimals, and a blank string
+ * for anything non-numeric.
+ *
+ * Deliberately separate from formatToTwoDecimalPlaces() below, which looks
+ * similar but is an INPUT normaliser — the payment forms feed its output
+ * straight back into a text field, so commas there would be re-parsed as
+ * part of the number. Adding separators to that function to fix a table
+ * would silently corrupt every payment amount typed on those forms.
+ *
+ * Blank (not "0.00") for a missing value, matching what the ledger already
+ * showed: an empty cell means the column does not apply to that row, which
+ * a zero would misrepresent as a real posted amount.
+ */
+/**
+ * A whole-number COUNT for display: separators, no decimals.
+ *
+ * Separate from formatNumberComma because that one forces two decimals —
+ * correct for pesos, wrong for "1,204 borrowers", which must not read as
+ * "1,204.00 borrowers".
+ */
+export const formatCount = (value: unknown): string => {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.round(n).toLocaleString('en-US') : '0';
+};
+
+export const formatMoneyOrBlank = (value: unknown): string => {
+  const n = parseFloat(String(value));
+  return Number.isFinite(n) ? formatNumberComma(n) : '';
+};
+
 export const formatToTwoDecimalPlaces = (value: string) => {
   const num = parseFloat(value);
   if (!isNaN(num)) {

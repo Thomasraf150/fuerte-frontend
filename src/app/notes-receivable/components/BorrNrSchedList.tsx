@@ -14,6 +14,7 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import useBranches from '@/hooks/useBranches';
+import { formatNumberComma, formatMoneyOrBlank } from '@/utils/helper';
 
 // const column = soaListColumn;
 interface Option {
@@ -57,10 +58,12 @@ const BorrNrSchedList: React.FC = () => {
   const [endDate, setEndDate] = useState<Date | null>(moment('2025-01-15').toDate());
   
   // Branch state
-  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
+  const { dataBranch, dataBranchGroup, dataBranchSub, fetchDataList, fetchBranchGroupList, fetchSubDataList, loadingBranches, loadingBranchGroups, loadingSubBranches } = useBranches();
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
+  const [optionsGroup, setOptionsGroup] = useState<Option[]>([]);
   const [optionsSubBranch, setOptionsSubBranch] = useState<Option[]>([]);
 
   // Debounced search
@@ -145,6 +148,24 @@ const BorrNrSchedList: React.FC = () => {
     });
   };
 
+  /**
+   * Group (FA/FB/FC/FD) only narrows which branches are offered below — it is
+   * never sent to the backend, so unlike Branch/Sub Branch it deliberately does
+   * NOT re-run the search. It does clear the branch/sub-branch selection, so a
+   * branch from another group cannot stay selected against the narrowed list.
+   */
+  const handleGroupChange = (branch_group_id: string) => {
+    // react-select still fires onChange when the already-selected option is
+    // re-picked; bailing keeps that from wiping a branch the user just chose.
+    if (branch_group_id === branchGroupId) return;
+    setBranchGroupId(branch_group_id);
+    setSelectedBranchId('');
+    setBranchSubId('');
+    setValue('branch_id', '');
+    setValue('branch_sub_id', '');
+    fetchDataList('name_asc', branch_group_id === 'all' ? undefined : Number(branch_group_id));
+  };
+
   const handleBranchChange = (branch_id: string) => {
     setSelectedBranchId(branch_id);
     // Clear the sub-branch whenever the parent branch changes. The options list
@@ -194,6 +215,22 @@ const BorrNrSchedList: React.FC = () => {
     }
   }, [dataBranch])
 
+  // The four groups are static — fetch once on mount.
+  useEffect(()=>{
+    fetchBranchGroupList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(()=>{
+    if (dataBranchGroup && Array.isArray(dataBranchGroup)) {
+      setOptionsGroup([
+        { value: 'all', label: 'All Groups' },
+        ...dataBranchGroup.map(g => ({ value: String(g.id), label: g.name })),
+      ]);
+
+    }
+  }, [dataBranchGroup])
+
   useEffect(()=>{
     if (dataBranchSub && Array.isArray(dataBranchSub)) {
       const dynaOpt: Option[] = dataBranchSub?.map(bSub => ({
@@ -239,7 +276,13 @@ const BorrNrSchedList: React.FC = () => {
                 <div className="rounded-lg bg-gray-200 dark:bg-boxdark mb-4 p-6 relative z-20">
                   <label className="mb-6 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range and Filters:</label>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-x-6 gap-y-4 items-end">
+                  {/*
+                    Seven controls, capped at four columns so they deliberately
+                    wrap onto TWO rows (4 + 3). Fitting all seven on one row
+                    squeezed each below a usable width and clipped the helper
+                    text under Search.
+                  */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-4 items-end">
                     {/* Start Date */}
                     <div className="flex flex-col">
                       <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
@@ -312,6 +355,32 @@ const BorrNrSchedList: React.FC = () => {
                       <div className="text-xs text-gray-500 dark:text-bodydark mt-1">
                         Loan ref or borrower name
                       </div>
+                    </div>
+
+                    {/* Group Select — FA/FB/FC/FD; narrows the Branch list below */}
+                    <div className="flex flex-col">
+                      <label htmlFor="groupSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                        Group:
+                      </label>
+                      <Controller
+                        name="branch_group_id"
+                        control={control}
+                        defaultValue="all"
+                        render={({ field }) => (
+                          <ReactSelect
+                            {...field}
+                            options={optionsGroup}
+                            placeholder="Select a group..."
+                            isLoading={loadingBranchGroups}
+                            loadingMessage={() => 'Loading groups...'}
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption?.value);
+                              handleGroupChange(selectedOption?.value ?? 'all');
+                            }}
+                            value={optionsGroup.find(option => String(option.value) === String(field.value)) || null}
+                          />
+                        )}
+                      />
                     </div>
 
                     {/* Branch Select */}
@@ -451,23 +520,23 @@ const BorrNrSchedList: React.FC = () => {
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Notes Receivable</p>
-                              <p className="font-medium text-sm">{pnAmount.toFixed(2)}</p>
+                              <p className="font-medium text-sm">{formatNumberComma(pnAmount)}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">UDI</p>
-                              <p className="font-medium text-sm">{udiAmount.toFixed(2)}</p>
+                              <p className="font-medium text-sm">{formatNumberComma(udiAmount)}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Net Receivable</p>
-                              <p className="font-medium text-sm">{netReceivable.toFixed(2)}</p>
+                              <p className="font-medium text-sm">{formatNumberComma(netReceivable)}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Balance</p>
-                              <p className="font-medium text-sm">{balance.toFixed(2)}</p>
+                              <p className="font-medium text-sm">{formatNumberComma(balance)}</p>
                             </div>
                             <div className="col-span-2">
                               <p className="text-xs text-gray-500 uppercase tracking-wide">Total Collected</p>
-                              <p className="font-medium text-sm">{totalCollected.toFixed(2)}</p>
+                              <p className="font-medium text-sm">{formatNumberComma(totalCollected)}</p>
                             </div>
                           </div>
                         </div>
@@ -542,13 +611,13 @@ const BorrNrSchedList: React.FC = () => {
                                 </td>
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {pnAmount.toFixed(2)}
+                                  {formatNumberComma(pnAmount)}
                                 </td>
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {udiAmount.toFixed(2)}
+                                  {formatNumberComma(udiAmount)}
                                 </td>
                                 <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {netReceivable.toFixed(2)}
+                                  {formatNumberComma(netReceivable)}
                                 </td>
 
                                 {months?.map((month: any, monthIndex: number) => {
@@ -562,7 +631,7 @@ const BorrNrSchedList: React.FC = () => {
                                         key={`${monthIndex}-${fieldIndex}`}
                                         className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
-                                        {monthlyData[key]}
+                                        {formatMoneyOrBlank(monthlyData[key])}
                                       </td>
                                     ))
                                   ) : (
@@ -578,10 +647,10 @@ const BorrNrSchedList: React.FC = () => {
                                 })}
 
                                 <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {totalCollected.toFixed(2)}
+                                  {formatNumberComma(totalCollected)}
                                 </td>
                                 <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
-                                  {balance.toFixed(2)}
+                                  {formatNumberComma(balance)}
                                 </td>
                               </tr>
                             );

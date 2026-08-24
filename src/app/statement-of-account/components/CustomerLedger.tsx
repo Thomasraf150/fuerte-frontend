@@ -4,7 +4,7 @@
 
 import React, { useEffect } from 'react';
 import { CustomerLedgerData, BorrLoanRowData } from '@/utils/DataTypes';
-import { formatToTwoDecimalPlaces } from '@/utils/helper';
+import { formatMoneyOrBlank, formatNumberComma } from '@/utils/helper';
 
 interface OMProps {
   custLedgerData: CustomerLedgerData[] | undefined;
@@ -61,21 +61,21 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
             ) : (
               custLedgerData && custLedgerData.map((item, i) => (
                 <tr key={i} className="bg-white dark:bg-gray-800">
-                  <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.debit)}</th>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-24 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.credit)}</td>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-44 bg-white dark:bg-gray-800">{formatToTwoDecimalPlaces(item.running_balance)}</td>
+                  <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-800">{formatMoneyOrBlank(item.debit)}</th>
+                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-24 bg-white dark:bg-gray-800">{formatMoneyOrBlank(item.credit)}</td>
+                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-44 bg-white dark:bg-gray-800">{formatMoneyOrBlank(item.running_balance)}</td>
                   <td className="px-4 py-4 text-left whitespace-nowrap left-64">{item.due_date}</td>
                   <td className="px-4 py-4 text-left">{item.date_paid}</td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.collection)}</td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.penalty)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.collection)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.penalty)}</td>
                   <td className="px-4 py-4 text-center"></td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.bank_charge)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.bank_charge)}</td>
                   <td className="px-4 py-4 text-center"></td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.ap_refund)}</td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.payment_ua_sp)}</td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.penalty_ua_sp)}</td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.ua_sp)}</td>
-                  <td className="px-4 py-4 text-center">{formatToTwoDecimalPlaces(item.advance_payment)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.ap_refund)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.payment_ua_sp)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.penalty_ua_sp)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.ua_sp)}</td>
+                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.advance_payment)}</td>
                 </tr>
               ))
             )}
@@ -87,16 +87,16 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                 <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-gray-700"></td>
                 <td className="px-4 py-3 text-left left-64">Total</td>
                 <td className="px-4 py-3 text-center"></td>
-                <td className="px-4 py-3 text-center">{totalCollection}</td>
-                <td className="px-4 py-3 text-center">{totalPenalty}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalCollection)}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalPenalty)}</td>
                 <td className="px-4 py-3 text-center"></td>
-                <td className="px-4 py-3 text-center">{totalBankCharge}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalBankCharge)}</td>
                 <td className="px-4 py-3 text-center"></td>
-                <td className="px-4 py-3 text-center">{totalApRefund}</td>
-                <td className="px-4 py-3 text-center">{totalPaymentUaSp}</td>
-                <td className="px-4 py-3 text-center">{totalPenaltyUaSp}</td>
-                <td className="px-4 py-3 text-center">{totalUaSp}</td>
-                <td className="px-4 py-3 text-center">{totalAdvancePayment}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalApRefund)}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalPaymentUaSp)}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalPenaltyUaSp)}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalUaSp)}</td>
+                <td className="px-4 py-3 text-center">{formatNumberComma(totalAdvancePayment)}</td>
               </tr>
             </tfoot>
           </table>

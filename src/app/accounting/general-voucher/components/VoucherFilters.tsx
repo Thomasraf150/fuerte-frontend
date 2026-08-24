@@ -17,6 +17,7 @@ export interface VoucherFiltersValue {
 }
 
 interface VoucherFiltersFormData {
+  branch_group_id: string;
   branch_id: string;
   branch_sub_id: string;
 }
@@ -28,22 +29,48 @@ interface VoucherFiltersProps {
 const normalize = (val: string) => (val && val !== 'all' ? val : '');
 
 const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
-  const { dataBranch, dataBranchSub, fetchSubDataList, loadingBranches, loadingSubBranches } = useBranches();
+  const {
+    dataBranch,
+    dataBranchGroup,
+    dataBranchSub,
+    fetchDataList,
+    fetchBranchGroupList,
+    fetchSubDataList,
+    loadingBranches,
+    loadingBranchGroups,
+    loadingSubBranches,
+  } = useBranches();
   const { control, setValue } = useForm<VoucherFiltersFormData>();
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
   const [branchId, setBranchId] = useState<string>('');
   const [branchSubId, setBranchSubId] = useState<string>('');
 
+  const optionsGroup = useMemo(
+    () => buildSelectOptions(dataBranchGroup, { placeholderLabel: 'Select a Group', allLabel: 'All Groups' }),
+    [dataBranchGroup]
+  );
   const optionsBranch = useMemo(
-    () => buildSelectOptions(dataBranch, { placeholderLabel: 'Select a Branch', allLabel: 'All Main Branches' }),
-    [dataBranch]
+    () => buildSelectOptions(dataBranch, {
+      placeholderLabel: 'Select a Branch',
+      // "All Main Branches" spans every group, so it only makes sense while no
+      // single group is narrowing the list below it.
+      allLabel: branchGroupId === 'all' ? 'All Main Branches' : undefined,
+    }),
+    [dataBranch, branchGroupId]
   );
   const optionsSubBranch = useMemo(
     () => buildSelectOptions(dataBranchSub, { placeholderLabel: 'Select a Sub Branch', allLabel: 'All Sub-Branches' }),
     [dataBranchSub]
   );
+
+  // The four groups are static — fetch once per screen.
+  useEffect(() => {
+    fetchBranchGroupList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Notify parent whenever any filter value changes. "all"/empty become empty
   // strings so the backend treats them as "no filter" (BranchAccessService still
@@ -70,6 +97,24 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
     setEndDate(date || undefined);
   };
 
+  /**
+   * Group (FA/FB/FC/FD) only narrows which branches are offered below — it is
+   * never sent to the backend and never filters vouchers by itself. Picking a
+   * group therefore clears the branch/sub-branch selection rather than leaving
+   * a branch from another group silently applied.
+   */
+  const handleGroupChange = (branch_group_id: string) => {
+    // react-select still fires onChange when the already-selected option is
+    // re-picked; bailing keeps that from wiping a branch the user just chose.
+    if (branch_group_id === branchGroupId) return;
+    setBranchGroupId(branch_group_id);
+    setValue('branch_id', '');
+    setValue('branch_sub_id', '');
+    setBranchId('');
+    setBranchSubId('');
+    fetchDataList('name_asc', branch_group_id === 'all' ? undefined : Number(branch_group_id));
+  };
+
   const handleBranchChange = (branch_id: string) => {
     setBranchId(branch_id);
     if (branch_id === 'all' || branch_id === '') {
@@ -93,6 +138,13 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
     setBranchSubId('');
     setValue('branch_id', '');
     setValue('branch_sub_id', '');
+    // Only touch the group when it is actually narrowing something, so a Clear
+    // with no group picked costs no extra branch fetch.
+    if (branchGroupId !== 'all') {
+      setBranchGroupId('all');
+      setValue('branch_group_id', 'all');
+      fetchDataList('name_asc');
+    }
   };
 
   return (
@@ -108,7 +160,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
         </button>
       </div>
       <div className="p-7">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Start Date */}
           <div className="flex flex-col relative z-50">
             <label className="mb-2 text-sm font-medium text-black dark:text-white">Start Date</label>
@@ -137,6 +189,32 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
               placeholderText="Select end date"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               popperPlacement="bottom-start"
+            />
+          </div>
+
+          {/* Group — narrows the Branch list below; not a filter of its own */}
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm font-medium text-black dark:text-white">Group</label>
+            <Controller
+              name="branch_group_id"
+              control={control}
+              defaultValue="all"
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={optionsGroup}
+                  placeholder="Select a group..."
+                  isLoading={loadingBranchGroups}
+                  loadingMessage={() => 'Loading groups...'}
+                  onChange={(selectedOption: any) => {
+                    field.onChange(selectedOption?.value);
+                    handleGroupChange(selectedOption?.value ?? 'all');
+                  }}
+                  value={optionsGroup.find(option => String(option.value) === String(field.value)) || null}
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={{ menuPortal: (base: any) => ({ ...base, zIndex: 9999 }) }}
+                />
+              )}
             />
           </div>
 

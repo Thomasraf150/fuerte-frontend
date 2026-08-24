@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
-import { loanStatus } from '@/utils/helper';
+import { loanStatus, formatNumberComma } from '@/utils/helper';
 import { CheckCircle, CreditCard, RefreshCcw, Save, RotateCw } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
 import PaymentCollectionForm from './Form/PaymentCollectionForm';
@@ -167,11 +167,11 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                     <p className="text-xs sm:text-sm text-black dark:text-white">{item?.due_date}</p>
                   </div>
                   <div className="hidden sm:flex items-center">
-                    <p className="text-xs sm:text-sm text-black dark:text-white">{item?.amount}</p>
+                    <p className="text-xs sm:text-sm text-black dark:text-white">{formatNumberComma(Number(item?.amount))}</p>
                   </div>
                   <div className="flex items-center">
                     <p className="text-xs sm:text-sm text-black dark:text-white">
-                      {Number(loanSingleData?.loan_udi_schedules[i]?.amount).toFixed(2)}
+                      {formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
                     </p>
                   </div>
 

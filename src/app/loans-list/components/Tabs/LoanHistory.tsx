@@ -5,6 +5,7 @@ import { formatDate } from '@/utils/formatDate';
 import { fetchWithRecache } from '@/utils/helper';
 import { Clock } from 'react-feather';
 import { useAuthStore } from '@/store';
+import { formatNumberComma } from '@/utils/helper';
 
 interface LoanHistoryProps {
   loanId: number;
@@ -110,6 +111,23 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
     fetchHistory();
   }, [loanId]);
 
+  /**
+   * The subset of audited fields that hold money. The diff below prints raw
+   * before/after values, which for these read as a wall of digits next to the
+   * formatted figures the rest of the loan screens show.
+   */
+  const MONEY_FIELDS = new Set([
+    'pn_amount', 'loan_proceeds', 'monthly', 'pn_balance', 'udi_balance',
+  ]);
+
+  /** Render an audited value, comma-formatting it when the field is money. */
+  const renderAuditValue = (key: string, value: any): string => {
+    if (value === null || value === undefined || value === '') return 'N/A';
+    if (!MONEY_FIELDS.has(key)) return String(value);
+    const n = Number(value);
+    return Number.isFinite(n) ? formatNumberComma(n) : String(value);
+  };
+
   const fieldLabels: Record<string, string> = {
     status: 'Status',
     pn_amount: 'PN Amount',
@@ -201,11 +219,11 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
               {fieldLabels[key] || key}:
             </span>
             <span className="text-red-600 dark:text-red-400 line-through">
-              {oldData[key] || 'N/A'}
+              {renderAuditValue(key, oldData[key])}
             </span>
             <span className="dark:text-gray-400">→</span>
             <span className="text-green-600 dark:text-green-400 font-semibold">
-              {newData[key] || 'N/A'}
+              {renderAuditValue(key, newData[key])}
             </span>
           </div>
         );

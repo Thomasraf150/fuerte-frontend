@@ -122,12 +122,21 @@ export interface Role {
   name: string;
   code: number;
 }
+/** The tier above Branch: FA, FB, FC, FD. */
+export interface DataBranchGroup {
+  id?: string;
+  name: string;
+  code: string;
+  sort_order?: number;
+}
 export interface DataBranches {
   id?: string;
   name: string;
+  branch_group_id?: number | null;
   user_id: number;
   is_deleted: boolean;
   user: User;
+  branch_group?: DataBranchGroup | null;
 }
 export interface DataSubBranches {
   id?: string;
@@ -176,6 +185,7 @@ export interface DataFormSubBranches {
 export interface DataFormBranch {
   id: string;
   name: string;
+  branch_group_id?: string;
   user_id: number;
 }
 export interface DataFormUser {

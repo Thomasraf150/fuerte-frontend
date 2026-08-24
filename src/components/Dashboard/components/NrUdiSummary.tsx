@@ -4,6 +4,7 @@ import React from "react";
 import CardDataStats from "@/components/CardDataStats";
 import { AccountingDashboardSummary, PreviousPeriodSummary } from "@/types/dashboard";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCount } from '@/utils/helper';
 
 interface NrUdiSummaryProps {
   summary: AccountingDashboardSummary;
@@ -84,7 +85,7 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading,
       {/* Released Loans */}
       <CardDataStats
         title="Released Loans"
-        total={summary.active_loan_count}
+        total={formatCount(summary.active_loan_count)}
         rate={formatPercent(summary.loan_count_change_percent)}
         levelUp={isPositive(summary.loan_count_change_percent)}
         levelDown={!isPositive(summary.loan_count_change_percent)}
