@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { CornerUpLeft } from 'react-feather';
+import { CornerUpLeft, Lock } from 'react-feather';
 import BorrowerDetails from './TabForm/BorrowerDetails'
 import BorrowerAttachments from './TabForm/BorrowerAttachments'
 import BorrowerCoMaker from './TabForm/BorrowerCoMaker'
@@ -25,6 +25,23 @@ interface BorrInfoProps {
   fetchDataSubArea: (v1: number) => void;
   fetchDataBorrCompany: (v1: number, v2: number) => void;
 }
+
+// Loans, Co-Maker and Attachments all key off a borrower id. On an unsaved
+// (draft) borrower there is none, so they stay locked — otherwise staff can
+// fill in a whole loan and only find out at the final Save that the borrower
+// was never persisted.
+const BORROWER_TABS = [
+  { key: 'tab1', label: 'Details', requiresSavedBorrower: false },
+  { key: 'tab2', label: 'Loans', requiresSavedBorrower: true },
+  { key: 'tab3', label: 'Co-Maker', requiresSavedBorrower: true },
+  { key: 'tab4', label: 'Attachments', requiresSavedBorrower: true },
+] as const;
+
+const tabClasses = (locked: boolean, isActive: boolean): string => {
+  if (locked) return 'border-transparent text-bodydark2 opacity-60 cursor-not-allowed';
+  if (isActive) return 'border-blue-500 text-blue-500';
+  return 'border-transparent text-body dark:text-bodydark hover:border-blue-500 hover:text-blue-500';
+};
 
 const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
@@ -51,39 +68,30 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             </h5>
           </div> */}
           <div className="flex justify-around border-b dark:border-strokedark">
-            <button
-              className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab1' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 dark:text-bodydark hover:border-blue-500 hover:text-blue-500'
-              }`}
-              onClick={() => handleTabClick('tab1')}
-            >
-              Details
-            </button>
-            <button
-              className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab2' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 dark:text-bodydark hover:border-blue-500 hover:text-blue-500'
-              }`}
-              onClick={() => handleTabClick('tab2')}
-            >
-              Loans
-            </button>
-            <button
-              className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab3' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 dark:text-bodydark hover:border-blue-500 hover:text-blue-500'
-              }`}
-              onClick={() => handleTabClick('tab3')}
-            >
-              Co-Maker
-            </button>
-            <button
-              className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab4' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 dark:text-bodydark hover:border-blue-500 hover:text-blue-500'
-              }`}
-              onClick={() => handleTabClick('tab4')}
-            >
-              Attachments
-            </button>
+            {BORROWER_TABS.map(({ key, label, requiresSavedBorrower }) => {
+              const locked = requiresSavedBorrower && !singleData?.id;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={locked}
+                  aria-disabled={locked}
+                  title={locked ? 'Save the borrower first to unlock this tab' : undefined}
+                  className={`flex items-center gap-1.5 p-4 focus:outline-none border-b-2 ${tabClasses(locked, activeTab === key)}`}
+                  onClick={() => handleTabClick(key)}
+                >
+                  {locked && <Lock size={13} />}
+                  {label}
+                </button>
+              );
+            })}
           </div>
+          {!singleData?.id && (
+            <div className="border-b border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-black dark:text-white">
+              <span className="font-medium">Draft borrower.</span>{' '}
+              Save the details below to unlock Loans, Co-Maker and Attachments.
+            </div>
+          )}
 
           <div className="p-2 sm:p-4">
             {activeTab === 'tab1' && (
