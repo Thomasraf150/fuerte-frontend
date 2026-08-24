@@ -19,6 +19,8 @@ interface AsyncReactSelectProps {
   loadingMessage?: () => string;
   noOptionsMessage?: (obj: { inputValue: string }) => string | null;
   cacheOptions?: boolean;
+  /** Forwarded to react-select so an external <label htmlFor> can bind to it. */
+  inputId?: string;
 }
 
 const AsyncReactSelect: FC<AsyncReactSelectProps> = ({
@@ -35,6 +37,7 @@ const AsyncReactSelect: FC<AsyncReactSelectProps> = ({
   loadingMessage = () => 'Searching...',
   noOptionsMessage = () => 'No options found',
   cacheOptions = true,
+  inputId,
 }) => {
   const { styles: themeStyles, theme } = useSelectTheme<SelectOption>();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -79,6 +82,7 @@ const AsyncReactSelect: FC<AsyncReactSelectProps> = ({
       value={value}
       placeholder={placeholder}
       className="w-full"
+      inputId={inputId}
       classNamePrefix="react-select"
       styles={mergedStyles}
       theme={theme}

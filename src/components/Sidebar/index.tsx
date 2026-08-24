@@ -313,7 +313,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             {/* <!-- Menu Item Loans --> */}
             <SidebarLinkGroup
                 activeCondition={
-                  pathname === "/loans" || pathname.includes("loans")
+                  pathname === "/loans" || pathname === "/loan-calculator" || pathname.includes("loans")
                 }
               >
                 {(handleClick, open) => {
@@ -389,6 +389,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               }`}
                             >
                               Loans List
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/loan-calculator"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/loan-calculator" && "text-white"
+                              }`}
+                            >
+                              Loan Calculator
                             </Link>
                           </li>
                           {/* <li>
@@ -548,17 +558,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Advanced Payment
                             </Link>
                           </li> */}
-                          <li>
-                            <Link
-                              href="/forms/form-elements"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/notes-receivable" &&
-                                "text-white"
-                              }`}
-                            >
-                              Remove Data
-                            </Link>
-                          </li>
                         </ul>
                       </div>
                       {/* <!-- Dropdown Menu End --> */}

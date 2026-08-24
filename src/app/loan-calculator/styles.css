@@ -1,0 +1,141 @@
+/*
+ * Loan Calculator — route styles.
+ *
+ * Two jobs:
+ *  1. A print stylesheet, so the operator can hand the borrower a paper quote.
+ *     The app has no other client-side print path (no window.print(), no
+ *     @media print anywhere in src/) — the six existing print flows all go
+ *     through backend DomPDF. This is deliberately client-side only: nothing
+ *     about a quote is saved, so there is nothing for a server to render.
+ *  2. A staggered reveal for the result panel. framer-motion is not a project
+ *     dependency, so this is CSS keyframes.
+ */
+
+/* ---------- Result reveal ---------- */
+
+@keyframes lc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lc-reveal {
+  animation: lc-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Stagger the result blocks so the eye lands on the headline figure first. */
+.lc-reveal-1 { animation-delay: 0ms; }
+.lc-reveal-2 { animation-delay: 70ms; }
+.lc-reveal-3 { animation-delay: 140ms; }
+.lc-reveal-4 { animation-delay: 210ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-reveal {
+    animation: none;
+  }
+}
+
+/* Hairline rule used between figure rows — thinner than a Tailwind border. */
+.lc-rule {
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    currentColor 12%,
+    currentColor 88%,
+    transparent
+  );
+  opacity: 0.18;
+  height: 1px;
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+  /* Collapse the app chrome — sidebar, header, toasts, and every control. */
+  aside,
+  header,
+  .Toastify,
+  .lc-no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* DefaultLayout uses h-screen + overflow-hidden, which clips a long schedule
+     to a single page. Unwind it for print. */
+  body * {
+    overflow: visible !important;
+  }
+
+  body .lc-print-root,
+  body .lc-print-root * {
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Deliberately NOT position:absolute. Once the sidebar, header and controls
+     are hidden the quote already starts at the top of the page, and absolute
+     positioning made it paint on top of whatever chrome remained (the
+     breadcrumb) while also breaking multi-page pagination for long schedules. */
+  .lc-print-area {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* Force the dark headline panel to ink-friendly monochrome. */
+  .lc-print-area,
+  .lc-print-area * {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #999999 !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+
+  .lc-print-area .lc-rule {
+    background-image: none !important;
+    background: #999999 !important;
+    opacity: 1 !important;
+  }
+
+  /* Keep the schedule from splitting a row across pages. */
+  .lc-print-area tr {
+    page-break-inside: avoid;
+  }
+
+  .lc-print-area thead {
+    display: table-header-group;
+  }
+
+  /* The on-screen schedule scrolls in a fixed-height box; print it whole. */
+  .lc-schedule-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .lc-print-only {
+    display: block !important;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}
+
+/* Shown only on paper — the quote's provenance line. */
+.lc-print-only {
+  display: none;
+}
