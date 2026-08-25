@@ -48,8 +48,18 @@ const useBranches = () => {
         orderBy,
         branch_group_id: branchGroupId ?? null,
       });
-      setDataBranch(result.data.getBranch);
-      setSelectedBranchGroupID(branchGroupId);
+      // Guarded deliberately. An unguarded `result.data.getBranch` is exactly
+      // how the 2026-08-25 outage stayed invisible for a day: when the backend
+      // rejects the whole operation (e.g. a backend predating branch_group),
+      // there is no `data` key, this threw an unhandled promise rejection, and
+      // every Branch dropdown just sat empty with nothing in the UI saying why.
+      if (result.data?.getBranch) {
+        setDataBranch(result.data.getBranch);
+        setSelectedBranchGroupID(branchGroupId);
+      } else {
+        console.error('GraphQL errors fetching branches:', result.errors);
+        toast.error(`Could not load branches: ${result.errors?.[0]?.message ?? 'unknown error'}`);
+      }
     } finally {
       setLoadingBranches(false);
     }
@@ -62,8 +72,9 @@ const useBranches = () => {
       const result = await graphqlFetch(GET_BRANCH_GROUPS_QUERY);
       if (result.data?.getBranchGroups) {
         setDataBranchGroup(result.data.getBranchGroups);
-      } else if (result.errors) {
+      } else {
         console.error('GraphQL errors fetching branch groups:', result.errors);
+        toast.error(`Could not load groups: ${result.errors?.[0]?.message ?? 'unknown error'}`);
       }
     } catch (error) {
       console.error('Error fetching branch groups:', error);
@@ -76,8 +87,14 @@ const useBranches = () => {
     setLoadingSubBranches(true);
     try {
       const result = await graphqlFetch(GET_SUB_BRANCH_QUERY, { orderBy, branch_id });
-      setDataBranchSub(result.data.getBranchSub);
-      setSelectedBranchID(branch_id)
+      // Same guard as fetchDataList — see the note there.
+      if (result.data?.getBranchSub) {
+        setDataBranchSub(result.data.getBranchSub);
+        setSelectedBranchID(branch_id);
+      } else {
+        console.error('GraphQL errors fetching sub-branches:', result.errors);
+        toast.error(`Could not load sub-branches: ${result.errors?.[0]?.message ?? 'unknown error'}`);
+      }
     } finally {
       setLoadingSubBranches(false);
     }
