@@ -3,6 +3,15 @@ import fs from 'fs';
 import path from 'path';
 
 const SHOT_DIR = path.resolve(__dirname, '../../../.playwright-mcp/summary-ticket');
+// NOTE (2026-08-27): this points at a FROZEN historical file.
+//
+// Printing no longer writes anything to storage/app/public/pdf — the mutation
+// returns a short-lived signed link and the PDF renders when that link is
+// redeemed. The file below survives only because it was written before that
+// change, and it disappears the moment the ~9GB backlog is swept.
+//
+// To make this spec self-sufficient, mint a link with printSummaryDetails and
+// GET that, instead of hard-coding a path.
 const PDF_URL = 'http://localhost:8080/storage/pdf/Summary_Ticket_All_Branches_Jan_01_2024_to_May_26_2026.pdf';
 
 test('Capture PDF page showing borrower counts in headers', async ({ browser }) => {

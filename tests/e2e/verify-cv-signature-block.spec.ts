@@ -46,7 +46,12 @@ test.describe('Check Voucher signature footer', () => {
       { input: { journal_ref: journalRef } },
     );
     const pdfUrl = printResp?.data?.printAcctgEntries as string;
-    expect(pdfUrl, 'printAcctgEntries returned no URL').toContain('/storage/pdf/');
+    // Print no longer writes a file under /storage/pdf. The mutation returns a
+    // short-lived SIGNED link and the PDF is rendered when that link is
+    // redeemed, so the assertion is on the signed-route shape instead.
+    expect(pdfUrl, 'printAcctgEntries returned no URL').toContain('/api/pdf/voucher');
+    expect(pdfUrl, 'print URL is not signed').toMatch(/[?&]signature=[a-f0-9]{64}/);
+    expect(pdfUrl, 'print URL has no expiry').toMatch(/[?&]expires=\d+/);
 
     // Save a copy of the PDF for manual review (helpful if assertions fail)
     const pdfFull = `http://localhost:8080${pdfUrl}`;

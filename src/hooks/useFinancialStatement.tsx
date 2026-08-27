@@ -438,8 +438,13 @@ const useFinancialStatement = () => {
         return null;
       }
 
-      // Redirect window to PDF URL
-      newWindow.location.href = pdfResult.url;
+      // Prefix BASE_URL so the popup goes STRAIGHT to Laravel, matching the
+      // other print flows. The bare relative path resolves against the Next
+      // origin and leans on the /api/pdf rewrite, whose dev proxy
+      // intermittently drops binary responses (ECONNRESET). Prod is unaffected
+      // — nginx routes /api to PHP-FPM before Next sees it — but a dev-only
+      // flake is the worst kind to leave in.
+      newWindow.location.href = `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}${pdfResult.url}`;
       toast.success('Income Statement PDF generated successfully!', { autoClose: 3000 });
       return pdfResult.url;
 

@@ -276,9 +276,19 @@ const useCoa = () => {
       if (result.data?.printChartOfAccounts) {
         const { url, filename } = result.data.printChartOfAccounts;
 
-        // Redirect the opened window to the PDF URL
+        // Prefix BASE_URL so the popup goes STRAIGHT to Laravel, the way the
+        // other four print flows already do.
+        //
+        // Navigating to the bare relative path resolves against the Next
+        // origin and relies on the /api/pdf rewrite to proxy it. That works,
+        // but Next's dev proxy intermittently drops binary responses
+        // ("Failed to proxy ... socket hang up / ECONNRESET" — reproduced
+        // 2026-08-27 on the 237KB Chart of Accounts PDF, while the same URL
+        // fetched directly returned 200). Production never hits it, because
+        // nginx routes /api to PHP-FPM before Next sees it — so this was a
+        // dev-only flake, which is the worst kind to leave in.
         if (pdfWindow) {
-          pdfWindow.location.href = url;
+          pdfWindow.location.href = `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}${url}`;
         }
 
         toast.success(`Chart of Accounts PDF generated: ${filename}`);
