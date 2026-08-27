@@ -40,6 +40,10 @@ const AcctDefaultPage: React.FC = () => {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [branchesLoading, setBranchesLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  // Offer the branch filter to anyone who can actually reach more than one
+  // sub-branch, not just Owner. GROUP_ADMIN and BRANCH_ADMIN were shown a bare
+  // 'Viewing: All Branches' with no control to narrow it.
+  const [canPickBranch, setCanPickBranch] = useState(false);
 
   // "" means no branch filter; kept as a real option so the control never blanks.
   const branchOptions: SelectOption[] = React.useMemo(
@@ -50,12 +54,14 @@ const AcctDefaultPage: React.FC = () => {
   useEffect(() => {
     const { user } = useAuthStore.getState() as any;
     setIsOwner(user?.role?.code === 'OWN');
+    const assigned = Array.isArray(user?.assignedBranchSubIds) ? user.assignedBranchSubIds : [];
+    setCanPickBranch(user?.role?.code === 'OWN' || assigned.length > 1);
   }, []);
 
   // Fetch branches for admin dropdown
   useEffect(() => {
     const fetchBranches = async () => {
-      if (!isOwner) return;
+      if (!canPickBranch) return;
 
       setBranchesLoading(true);
 
@@ -78,7 +84,7 @@ const AcctDefaultPage: React.FC = () => {
     };
 
     fetchBranches();
-  }, [isOwner]);
+  }, [canPickBranch]);
 
   const periodOptions: { value: PeriodOption; label: string }[] = [
     { value: "1month", label: "Last 1 Month" },
@@ -135,7 +141,7 @@ const AcctDefaultPage: React.FC = () => {
           )}
 
           {/* Branch Selector (Owner Only) */}
-          {isOwner && (
+          {canPickBranch && (
             <div className="min-w-[200px]">
               <ReactSelect
                 aria-label="Filter by branch"

@@ -46,6 +46,11 @@ const DefaultPage: React.FC = () => {
 
   // Role-based access: determine if current user is OWNER
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  // Whether to offer branch pickers at all. Owner always; anyone else only when
+  // they can actually reach more than one sub-branch. This used to be isOwner,
+  // which locked GROUP_ADMIN (30 sub-branches) and BRANCH_ADMIN (up to 14) to a
+  // static label showing their home branch, with no way to look at the rest.
+  const [canPickBranch, setCanPickBranch] = useState<boolean>(false);
   const [userBranchLabel, setUserBranchLabel] = useState<string>('');
   const [userBranchSubId, setUserBranchSubId] = useState<string>('');
 
@@ -55,6 +60,8 @@ const DefaultPage: React.FC = () => {
       const userData = JSON.parse(storedAuthStore)['state'];
       const roleCode = userData?.user?.role?.code;
       setIsOwner(roleCode === 'OWN');
+      const assigned = Array.isArray(userData?.user?.assignedBranchSubIds) ? userData.user.assignedBranchSubIds : [];
+      setCanPickBranch(roleCode === 'OWN' || assigned.length > 1);
 
       if (roleCode !== 'OWN' && userData?.user) {
         const branchSub = userData.user.branch_sub || userData.user.branchSub;
@@ -158,10 +165,10 @@ const DefaultPage: React.FC = () => {
   // Non-OWNER: auto-fetch when both dates are selected (branch is already locked)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!isOwner && userBranchSubId && startDate && endDate) {
+    if (!canPickBranch && userBranchSubId && startDate && endDate) {
       fetchSummaryTixReport(startDate, endDate, userBranchSubId, false, '');
     }
-  }, [isOwner, userBranchSubId, startDate, endDate]);
+  }, [canPickBranch, userBranchSubId, startDate, endDate]);
 
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsGroup, setOptionsGroup] = useState<Option[]>([]);
@@ -177,7 +184,10 @@ const DefaultPage: React.FC = () => {
         { value: '', label: 'Select a Branch', hidden: true }, // retain the default "Select a branch" option
         // "All Main Branches" spans every group, so it only makes sense while no
         // single group is selected — the reports cannot aggregate one group.
-        ...(branchGroupId === 'all' ? [{ value: 'all', label: 'All Main Branches' }] : []),
+        // Only OWNER aggregates across branches. SummaryTicketQuery clamps every
+        // non-Owner 'all' back to a single sub-branch, so offering 'all' here would
+        // print one sub-branch's figures under an 'All' heading.
+        ...(isOwner && branchGroupId === 'all' ? [{ value: 'all', label: 'All Main Branches' }] : []),
         ...dynaOpt,
       ]);
 
@@ -186,11 +196,11 @@ const DefaultPage: React.FC = () => {
 
   // Owners are the only role that picks a branch at all, so only they need groups.
   useEffect(() => {
-    if (isOwner) {
+    if (canPickBranch) {
       fetchBranchGroupList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOwner])
+  }, [canPickBranch])
 
   useEffect(()=>{
     if (dataBranchGroup && Array.isArray(dataBranchGroup)) {
@@ -209,7 +219,8 @@ const DefaultPage: React.FC = () => {
       }));
       setOptionsSubBranch([
         { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
-        { value: 'all', label: 'All Sub-Branches' }, // Add "All" option
+        // Same clamp as above — 'All Sub-Branches' is only truthful for OWNER.
+        ...(isOwner ? [{ value: 'all', label: 'All Sub-Branches' }] : []),
         ...dynaOpt,
       ]);
 
@@ -259,7 +270,7 @@ const DefaultPage: React.FC = () => {
           </div>
 
           {/* OWNER: Branch/Sub-Branch dropdowns | Non-OWNER: Static branch label */}
-          {isOwner ? (
+          {canPickBranch ? (
             <>
               {/* Group Select — FA/FB/FC/FD; narrows the Branch list below */}
               <div className="flex flex-col min-w-[200px]">

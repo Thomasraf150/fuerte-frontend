@@ -22,7 +22,7 @@ const ROLE_NAME = (user: any): string => {
 
 const IS_APPROVER_ROLE = (roleName: string): boolean => {
   const r = (roleName || "").toUpperCase();
-  return r === "ADMIN" || r === "OWNER" || r === "BRANCH_ADMIN";
+  return r === "ADMIN" || r === "OWNER" || r === "BRANCH_ADMIN" || r === "GROUP_ADMIN";
 };
 
 // "All decisions" status filter — `superseded` is an internal auto-state and
