@@ -213,11 +213,13 @@ export default function ImportDialog({
           )}
 
           {active && !active.can_upload ? (
-            // No upload step to describe yet, so do not walk the clerk through
-            // one — the "download only" note below carries the whole story.
+            // A type only reaches production once its importer is ready, so in
+            // prod this branch is unreachable and there is nothing to warn
+            // about. It exists for dev, where a template ships ahead of its
+            // handler — one quiet line, not a banner, and it also explains why
+            // there is no drop zone below.
             <p className="text-sm text-body dark:text-bodydark">
-              Download the template below and fill it in. Keep the finished file
-              safe until uploading is switched on.
+              Download the template below and fill it in.
             </p>
           ) : (
             <ol className="text-sm text-body dark:text-bodydark space-y-1 list-decimal pl-5">
@@ -264,13 +266,6 @@ export default function ImportDialog({
             record, so it cannot change anything if you upload it by mistake.
           </p>
 
-          {active && !active.can_upload && (
-            <p className="rounded border border-warning/40 bg-warning/5 px-3 py-2 text-xs leading-snug text-black dark:text-white">
-              <span className="font-medium">Download only for now.</span>{' '}
-              {active.label} files cannot be uploaded yet — the template is here
-              so your office can start filling it in while that is built.
-            </p>
-          )}
 
           {(active ? active.can_upload : true) && (
           <div
