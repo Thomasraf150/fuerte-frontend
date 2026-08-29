@@ -34,4 +34,21 @@ test('template download from the import dialog', async ({ page, request }) => {
     console.log('NO DOWNLOAD. Dialog error text:', err);
   }
   expect(download, 'a download should have started').toBeTruthy();
+  expect(download!.suggestedFilename()).toContain('TEMPLATE');
+
+  // The filled worked example is a second variant of the same endpoint
+  // (?example=1). Asserted in this test rather than its own: every test here
+  // calls restLogin, and POST /api/login is throttled to 5 per window.
+  const dl2 = page.waitForEvent('download', { timeout: 30_000 }).catch(() => null);
+  await page.getByRole('button', { name: 'Download a filled-in example' }).click();
+
+  const example = await dl2;
+  if (!example) {
+    const err = await page.locator('.text-danger').textContent().catch(() => null);
+    console.log('NO EXAMPLE DOWNLOAD. Dialog error text:', err);
+  } else {
+    console.log('EXAMPLE OK:', example.suggestedFilename());
+  }
+  expect(example, 'the example download should have started').toBeTruthy();
+  expect(example!.suggestedFilename()).toContain('EXAMPLE');
 });
