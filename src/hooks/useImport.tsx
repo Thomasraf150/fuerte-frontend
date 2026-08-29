@@ -40,6 +40,28 @@ export type ImportBatchPayload = {
   created_at: string | null;
 };
 
+/**
+ * The on-screen sample grid, built server-side from the same column definitions
+ * the .xlsx is generated from — so the picture and the file cannot drift, and a
+ * new import type needs no frontend change to get its own sample.
+ */
+export type ImportSample = {
+  columns: { letter: string; name: string; optional: boolean; numeric: boolean }[];
+  rows: (string | null)[][];
+  /** Excel row of the first typed row — 2, because the header is row 1. */
+  firstDataRow: number;
+};
+
+export type ImportTypePayload = {
+  type: string;
+  label: string;
+  description: string;
+  /** False for a type whose template exists but whose importer does not yet. */
+  can_upload: boolean;
+  has_template: boolean;
+  sample: ImportSample | null;
+};
+
 export type ImportRowPayload = {
   sheet_row: number;
   outcome: string;
@@ -83,13 +105,25 @@ export function useImport() {
     }
   }, []);
 
+  /** Which import types this user may use, with their samples and capabilities. */
+  const listTypes = useCallback(
+    () =>
+      run('types', async () => {
+        const res = await fetch(`${API}/imports/types`, { headers: authHeaders() });
+        const json = await asJson(res);
+        if (json?.status !== true) throw new Error(json?.message ?? 'Could not load import types');
+        return json.types as ImportTypePayload[];
+      }),
+    [run],
+  );
+
   /** Step 1: multipart upload. Returns { batch_ref, warning }. */
   const upload = useCallback(
-    (file: File) =>
+    (file: File, type: string) =>
       run('upload', async () => {
         const fd = new FormData();
         fd.append('file', file);
-        const res = await fetch(`${API}/imports/collections`, {
+        const res = await fetch(`${API}/imports/${type}`, {
           method: 'POST',
           headers: authHeaders(), // no Content-Type — the browser sets the multipart boundary
           body: fd,
@@ -159,5 +193,5 @@ export function useImport() {
     [run],
   );
 
-  return { upload, validate, show, commit, reverse, busy, error, setError };
+  return { listTypes, upload, validate, show, commit, reverse, busy, error, setError };
 }

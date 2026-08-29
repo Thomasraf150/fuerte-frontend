@@ -6,6 +6,7 @@ import { Upload, X, FileText, Download } from 'react-feather';
 import { useImport } from '@/hooks/useImport';
 import { useAuthStore } from '@/store';
 import SampleSheet from './SampleSheet';
+import type { ImportTypePayload } from '@/hooks/useImport';
 
 /**
  * Step 1-3 of the import flow: pick the file, upload, hand off to the review
@@ -19,29 +20,31 @@ import SampleSheet from './SampleSheet';
 /** Which of the two .xlsx variants the endpoint should return. */
 type Variant = 'template' | 'example';
 
-const FILENAMES: Record<Variant, string> = {
-  template: 'Fuerte_Daily_Collections_TEMPLATE.xlsx',
-  example: 'Fuerte_Daily_Collections_EXAMPLE.xlsx',
-};
-
 /**
  * Authenticated fetch -> blob -> anchor: a bare <a download> cannot carry the
  * Bearer token this endpoint requires. Shared by both download buttons so the
  * token, the revoke delay and the failure message stay in one place.
+ *
+ * The filename comes from Content-Disposition rather than a local table: the
+ * server already names each type's file, and duplicating that here would mean
+ * every new import type needs a frontend edit to be downloadable.
  */
-async function downloadVariant(variant: Variant): Promise<void> {
+async function downloadVariant(type: string, variant: Variant): Promise<void> {
   const token = useAuthStore.getState().GET_AUTH_TOKEN();
   const qs = variant === 'example' ? '?example=1' : '';
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/imports/collections/template${qs}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/imports/${type}/template${qs}`,
     { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
   );
   if (!res.ok) throw new Error(`Download failed (${res.status})`);
 
+  const disposition = res.headers.get('Content-Disposition') ?? '';
+  const named = /filename="?([^";]+)"?/.exec(disposition)?.[1];
+
   const url = URL.createObjectURL(await res.blob());
   const a = document.createElement('a');
   a.href = url;
-  a.download = FILENAMES[variant];
+  a.download = named ?? `Fuerte_${type}_${variant}.xlsx`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -57,13 +60,36 @@ export default function ImportDialog({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { upload, busy, error, setError } = useImport();
+  const { listTypes, upload, busy, error, setError } = useImport();
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   // Which variant is downloading, so only that button shows its pending label.
   const [tplBusy, setTplBusy] = useState<Variant | null>(null);
+  const [types, setTypes] = useState<ImportTypePayload[] | null>(null);
+  const [selected, setSelected] = useState<string>('collections');
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const active = types?.find((t) => t.type === selected) ?? null;
+
+  // Load the type list once per opening. Types the user's role cannot use are
+  // already filtered out server-side, so whatever arrives is safe to offer.
+  useEffect(() => {
+    if (!open || types) return;
+    let cancelled = false;
+    listTypes().then((list) => {
+      if (cancelled || !list) return;
+      setTypes(list);
+      // Keep the current selection if it survived, else fall back to the first
+      // type this user actually has.
+      if (!list.some((t) => t.type === selected) && list[0]) {
+        setSelected(list[0].type);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, types, listTypes, selected]);
 
   // The overlay's onKeyDown never fired: focus stays on the trigger outside
   // the dialog, so the key event was never in its subtree. Move focus in on
@@ -98,24 +124,24 @@ export default function ImportDialog({
       setError(null);
       setTplBusy(variant);
       try {
-        await downloadVariant(variant);
+        await downloadVariant(selected, variant);
       } catch (e: any) {
         setError(e?.message ?? 'Download failed');
       } finally {
         setTplBusy(null);
       }
     },
-    [setError],
+    [setError, selected],
   );
 
   const start = useCallback(async () => {
     if (!file) return;
-    const res = await upload(file);
+    const res = await upload(file, selected);
     if (res?.batch_ref) {
       onClose();
       router.push(`/imports/${res.batch_ref}`);
     }
-  }, [file, upload, onClose, router]);
+  }, [file, upload, onClose, router, selected]);
 
   if (!open) return null;
 
@@ -152,16 +178,61 @@ export default function ImportDialog({
         </div>
 
         <div className="px-6 py-5 space-y-4">
-          <ol className="text-sm text-body dark:text-bodydark space-y-1 list-decimal pl-5">
-            <li>Fill in the collections template (one row per installment paid).</li>
-            <li>Upload it here — nothing is posted yet.</li>
-            <li>Review what the system found, then confirm.</li>
-          </ol>
+          {/* Only shown once there is a genuine choice — a select with one
+              option in it is worse than no select. */}
+          {types && types.length > 1 && (
+            <div className="space-y-1">
+              <label
+                htmlFor="import-type"
+                className="block text-sm font-medium text-black dark:text-white"
+              >
+                What are you importing?
+              </label>
+              <select
+                id="import-type"
+                value={selected}
+                disabled={busy !== null || tplBusy !== null}
+                onChange={(e) => {
+                  setSelected(e.target.value);
+                  // A file chosen for one type must not survive into another.
+                  setFile(null);
+                  setError(null);
+                }}
+                className="min-h-[48px] w-full rounded-lg border border-stroke bg-white px-3 text-sm text-black focus:border-primary focus:outline-none disabled:opacity-50 dark:border-strokedark dark:bg-form-input dark:text-white"
+              >
+                {types.map((t) => (
+                  <option key={t.type} value={t.type}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+              {active && (
+                <p className="text-xs text-body dark:text-bodydark">{active.description}</p>
+              )}
+            </div>
+          )}
 
-          {/* Shown before the download button on purpose: the clerk learns the
+          {active && !active.can_upload ? (
+            // No upload step to describe yet, so do not walk the clerk through
+            // one — the "download only" note below carries the whole story.
+            <p className="text-sm text-body dark:text-bodydark">
+              Download the template below and fill it in. Keep the finished file
+              safe until uploading is switched on.
+            </p>
+          ) : (
+            <ol className="text-sm text-body dark:text-bodydark space-y-1 list-decimal pl-5">
+              <li>Fill in the template below.</li>
+              <li>Upload it here — nothing is posted yet.</li>
+              <li>Review what the system found, then confirm.</li>
+            </ol>
+          )}
+
+          {/* Shown before the download buttons on purpose: the clerk learns the
               shape first, so "Download the template" reads as "get this file,
-              already in that shape" rather than as a leap of faith. */}
-          <SampleSheet />
+              already in that shape" rather than as a leap of faith.
+              The grid is served by the backend from the same column definitions
+              the workbook is built from, so it cannot drift from the file. */}
+          {active?.sample && <SampleSheet sample={active.sample} />}
 
           {/* Stacked full-width on a phone: side by side, the two labels wrap
               to three lines each and orphan their icons. */}
@@ -186,14 +257,22 @@ export default function ImportDialog({
 
           <p className="text-xs leading-snug text-body dark:text-bodydark">
             The <span className="text-black dark:text-white">template</span> is
-            empty and ready to type into — that is the one you fill in and
-            upload. The{' '}
+            empty and ready to type into — that is the one you fill in. The{' '}
             <span className="text-black dark:text-white">example</span> holds
-            the three rows shown above, already filled in, so you can open it
-            beside your own file and compare. Its loan references do not exist
-            on purpose, so it cannot post anything if you upload it by mistake.
+            the rows shown above, already filled in, so you can open it beside
+            your own file and compare. Nothing in the example points at a real
+            record, so it cannot change anything if you upload it by mistake.
           </p>
 
+          {active && !active.can_upload && (
+            <p className="rounded border border-warning/40 bg-warning/5 px-3 py-2 text-xs leading-snug text-black dark:text-white">
+              <span className="font-medium">Download only for now.</span>{' '}
+              {active.label} files cannot be uploaded yet — the template is here
+              so your office can start filling it in while that is built.
+            </p>
+          )}
+
+          {(active ? active.can_upload : true) && (
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -230,6 +309,7 @@ export default function ImportDialog({
               onChange={(e) => pick(e.target.files?.[0] ?? null)}
             />
           </div>
+          )}
 
           {error && (
             <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -251,7 +331,7 @@ export default function ImportDialog({
           </button>
           <button
             onClick={start}
-            disabled={!file || busy !== null}
+            disabled={!file || busy !== null || !(active ? active.can_upload : true)}
             className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload size={14} />
