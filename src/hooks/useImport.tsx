@@ -30,7 +30,19 @@ export type ImportBatchPayload = {
   summary: {
     error_groups?: { message: string; count: number; rows: number[] }[];
     mapping?: Record<string, number>;
-    commit?: { committed: number; failed: number; accounts_swept: number };
+    // accounts_swept is collections-only (the GL balance sweep); created and
+    // updated come from types that match against existing records.
+    commit?: {
+      committed?: number;
+      failed?: number;
+      accounts_swept?: number;
+      created?: number;
+      updated?: number;
+    };
+    will_create?: number;
+    will_update?: number;
+    unchanged?: number;
+    reverse?: { removed?: number; note?: string };
     fatal?: string;
     sweep_failed?: boolean;
   } | null;

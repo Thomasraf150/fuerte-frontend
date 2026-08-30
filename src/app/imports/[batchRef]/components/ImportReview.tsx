@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, RotateCcw } from 'react-feather';
+import { CheckCircle, AlertTriangle, XCircle, RotateCcw, Download } from 'react-feather';
 import { useImport, ImportBatchPayload, ImportRowPayload } from '@/hooks/useImport';
+import { useAuthStore } from '@/store';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import StatusPill from '../../components/StatusPill';
@@ -83,6 +84,34 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
     await load();
     if (!res) setChecked(false);
   }, [batch, batchRef, commit, load]);
+
+  /**
+   * Authenticated fetch -> blob -> anchor, same as the import dialog: a bare
+   * <a download> cannot carry the Bearer token this endpoint needs.
+   */
+  const getReceipt = useCallback(async () => {
+    setError(null);
+    try {
+      const token = useAuthStore.getState().GET_AUTH_TOKEN();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/imports/${batchRef}/receipt`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error(`Could not build the ID list (${res.status})`);
+
+      const disposition = res.headers.get('Content-Disposition') ?? '';
+      const named = /filename="?([^";]+)"?/.exec(disposition)?.[1];
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = named ?? `Fuerte_Borrower_IDs_${batchRef}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (e: any) {
+      setError(e?.message ?? 'Could not build the ID list');
+    }
+  }, [batchRef, setError]);
 
   const doReverse = useCallback(async () => {
     // The system-wide SweetAlert confirmation, same as every other screen.
@@ -368,14 +397,42 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
           <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
             <CheckCircle size={18} />
             <span className="font-medium">
-              Posted {batch.summary?.commit?.committed ?? batch.committed_count} collections
+              {hasMoney
+                ? `Posted ${batch.summary?.commit?.committed ?? batch.committed_count} collections`
+                : `Imported ${batch.committed_count} record${batch.committed_count === 1 ? '' : 's'}`}
               {batch.summary?.commit?.failed ? ` — ${batch.summary.commit.failed} failed` : ''}
             </span>
           </div>
           <p className="text-sm text-black dark:text-white max-w-xl">
-            Journal entries were created and account balances updated
-            ({batch.summary?.commit?.accounts_swept ?? '—'} accounts). Committed {batch.committed_at}.
+            {hasMoney ? (
+              <>
+                Journal entries were created and account balances updated
+                ({batch.summary?.commit?.accounts_swept ?? '—'} accounts). Committed {batch.committed_at}.
+              </>
+            ) : (
+              <>
+                {typeof batch.summary?.commit?.created === 'number' && (
+                  <>{batch.summary.commit.created} added, {batch.summary.commit.updated ?? 0} updated. </>
+                )}
+                Nothing was posted to the ledger. Committed {batch.committed_at}.
+              </>
+            )}
           </p>
+
+          {/* The borrower ids live nowhere else, and the loans sheet needs them.
+              Offered on reversed batches too — the ids of rows this batch merely
+              matched are still valid, and losing the file should not mean
+              re-uploading to get them back. */}
+          {!hasMoney && (
+            <button
+              onClick={getReceipt}
+              disabled={busy !== null}
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-green-600/40 bg-white px-5 py-2.5 text-sm text-black transition hover:border-green-600 disabled:opacity-50 dark:bg-boxdark dark:text-white"
+            >
+              <Download size={14} />
+              Download the ID list for the loans sheet
+            </button>
+          )}
           {batch.summary?.sweep_failed && (
             <div className="flex max-w-xl items-start gap-2 rounded border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-900/10 dark:text-amber-400">
               <AlertTriangle size={15} className="mt-0.5 shrink-0" />
