@@ -178,6 +178,21 @@ export default function ImportDialog({
         </div>
 
         <div className="px-6 py-5 space-y-4">
+          {/* Until the types arrive there is no picker, but `selected` already
+              defaults to collections and the upload button is live — so a quick
+              clerk could drop a borrowers file and post it to the collections
+              importer without ever seeing a choice. That happened in real use.
+              Hold the space and say why. */}
+          {!types && (
+            <div className="flex min-h-[48px] items-center gap-2 rounded-lg border border-stroke px-3 text-sm text-body dark:border-strokedark dark:text-bodydark">
+              <span
+                className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
+                aria-hidden
+              />
+              Loading the list of things you can import…
+            </div>
+          )}
+
           {/* Only shown once there is a genuine choice — a select with one
               option in it is worse than no select. */}
           {types && types.length > 1 && (
@@ -267,7 +282,7 @@ export default function ImportDialog({
           </p>
 
 
-          {(active ? active.can_upload : true) && (
+          {types !== null && (active ? active.can_upload : true) && (
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -326,7 +341,7 @@ export default function ImportDialog({
           </button>
           <button
             onClick={start}
-            disabled={!file || busy !== null || !(active ? active.can_upload : true)}
+            disabled={!file || busy !== null || types === null || !(active ? active.can_upload : true)}
             className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload size={14} />
