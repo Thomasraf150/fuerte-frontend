@@ -47,6 +47,11 @@ test('collections import: upload, validate, confirm, commit, reverse', async ({ 
   await expect(dialog).toBeVisible();
   await page.screenshot({ path: `${SHOTS}/2-dialog.png` });
 
+  // The type picker has no default, and the drop zone does not exist until a
+  // type is chosen — a pre-filled dropdown put a borrowers file into the
+  // collections importer three times in real use.
+  await page.selectOption('#import-type', 'collections');
+
   await dialog.locator('input[type="file"]').setInputFiles(path.resolve(TRIAL));
   await expect(dialog.getByText('Fuerte_Daily_Collections_Trial.xlsx')).toBeVisible();
 

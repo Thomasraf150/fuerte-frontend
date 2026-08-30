@@ -66,7 +66,19 @@ export default function ImportDialog({
   // Which variant is downloading, so only that button shows its pending label.
   const [tplBusy, setTplBusy] = useState<Variant | null>(null);
   const [types, setTypes] = useState<ImportTypePayload[] | null>(null);
-  const [selected, setSelected] = useState<string>('collections');
+  /**
+   * Deliberately EMPTY, with no default.
+   *
+   * This defaulted to 'collections' and a borrowers file was posted to the
+   * collections importer three times in a row by three different routes: before
+   * the picker rendered, and twice after — because a pre-filled dropdown is not
+   * a decision, it is a thing you scroll past. The clerk was never wrong; the
+   * form answered for them.
+   *
+   * The cost is one extra click for the daily-collections user. The cost of the
+   * default was a file in the wrong importer, every time.
+   */
+  const [selected, setSelected] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -80,16 +92,15 @@ export default function ImportDialog({
     listTypes().then((list) => {
       if (cancelled || !list) return;
       setTypes(list);
-      // Keep the current selection if it survived, else fall back to the first
-      // type this user actually has.
-      if (!list.some((t) => t.type === selected) && list[0]) {
-        setSelected(list[0].type);
-      }
+      // No auto-selection, even when only one type is available: the choice is
+      // the safeguard, and quietly making it is how files ended up in the wrong
+      // importer. The one exception would be a single-type install, and there
+      // is no such install.
     });
     return () => {
       cancelled = true;
     };
-  }, [open, types, listTypes, selected]);
+  }, [open, types, listTypes]);
 
   // The overlay's onKeyDown never fired: focus stays on the trigger outside
   // the dialog, so the key event was never in its subtree. Move focus in on
@@ -193,9 +204,7 @@ export default function ImportDialog({
             </div>
           )}
 
-          {/* Only shown once there is a genuine choice — a select with one
-              option in it is worse than no select. */}
-          {types && types.length > 1 && (
+          {types && types.length > 0 && (
             <div className="space-y-1">
               <label
                 htmlFor="import-type"
@@ -213,8 +222,17 @@ export default function ImportDialog({
                   setFile(null);
                   setError(null);
                 }}
-                className="min-h-[48px] w-full rounded-lg border border-stroke bg-white px-3 text-sm text-black focus:border-primary focus:outline-none disabled:opacity-50 dark:border-strokedark dark:bg-form-input dark:text-white"
+                className={`min-h-[48px] w-full rounded-lg border bg-white px-3 text-sm focus:outline-none disabled:opacity-50 dark:bg-form-input dark:text-white ${
+                  selected === ''
+                    ? 'border-primary text-body dark:border-primary dark:text-bodydark'
+                    : 'border-stroke text-black focus:border-primary dark:border-strokedark'
+                }`}
               >
+                {/* Placeholder, and it stays selectable-from but not
+                    re-selectable: an empty value is what keeps upload disabled. */}
+                <option value="" disabled>
+                  Choose one…
+                </option>
                 {types.map((t) => (
                   <option key={t.type} value={t.type}>
                     {t.label}
@@ -227,7 +245,12 @@ export default function ImportDialog({
             </div>
           )}
 
-          {active && !active.can_upload ? (
+          {types && active === null ? (
+            <p className="text-sm text-body dark:text-bodydark">
+              Choose what you are importing above. The template, the example and
+              the upload all change to match.
+            </p>
+          ) : active && !active.can_upload ? (
             // A type only reaches production once its importer is ready, so in
             // prod this branch is unreachable and there is nothing to warn
             // about. It exists for dev, where a template ships ahead of its
@@ -255,7 +278,7 @@ export default function ImportDialog({
               to three lines each and orphan their icons. */}
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <button
-              disabled={tplBusy !== null}
+              disabled={tplBusy !== null || active === null}
               onClick={() => getFile('template')}
               className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-stroke dark:border-strokedark px-5 py-2.5 text-sm text-black dark:text-white hover:border-primary disabled:opacity-50 disabled:cursor-wait sm:w-auto"
             >
@@ -263,7 +286,7 @@ export default function ImportDialog({
               {tplBusy === 'template' ? 'Preparing template…' : 'Download the template'}
             </button>
             <button
-              disabled={tplBusy !== null}
+              disabled={tplBusy !== null || active === null}
               onClick={() => getFile('example')}
               className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-stroke dark:border-strokedark px-5 py-2.5 text-sm text-black dark:text-white hover:border-primary disabled:opacity-50 disabled:cursor-wait sm:w-auto"
             >
@@ -282,7 +305,7 @@ export default function ImportDialog({
           </p>
 
 
-          {types !== null && (active ? active.can_upload : true) && (
+          {active !== null && active.can_upload && (
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -341,7 +364,7 @@ export default function ImportDialog({
           </button>
           <button
             onClick={start}
-            disabled={!file || busy !== null || types === null || !(active ? active.can_upload : true)}
+            disabled={!file || busy !== null || active === null || !active.can_upload}
             className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload size={14} />

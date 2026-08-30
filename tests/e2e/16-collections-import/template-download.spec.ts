@@ -23,6 +23,11 @@ test('template download from the import dialog', async ({ page, request }) => {
   await page.goto('http://localhost:3000/imports', { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.getByRole('button', { name: 'Import Spreadsheet' }).click();
 
+  // The type picker has no default — a pre-filled dropdown put a borrowers file
+  // into the collections importer three times in real use, so the choice is now
+  // required and everything downstream of it is disabled until it is made.
+  await page.selectOption('#import-type', 'collections');
+
   const dl = page.waitForEvent('download', { timeout: 30_000 }).catch(() => null);
   await page.getByRole('button', { name: 'Download the template' }).click();
 
