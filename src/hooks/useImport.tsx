@@ -157,7 +157,13 @@ export function useImport() {
         const res = await fetch(`${API}/imports/${batchRef}`, { headers: authHeaders() });
         const json = await asJson(res);
         if (json?.status !== true) throw new Error(json?.message ?? 'Could not load batch');
-        return json as { batch: ImportBatchPayload; rows: ImportRowPayload[] };
+        // review_fields is field => column label, chosen by the import type's
+        // handler. Absent on batches created before it existed, hence optional.
+        return json as {
+          batch: ImportBatchPayload;
+          rows: ImportRowPayload[];
+          review_fields?: Record<string, string>;
+        };
       }),
     [run],
   );

@@ -25,6 +25,8 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
   const { validate, show, commit, reverse, busy, error, setError } = useImport();
   const [batch, setBatch] = useState<ImportBatchPayload | null>(null);
   const [rows, setRows] = useState<ImportRowPayload[]>([]);
+  // field => column label, supplied by the import type's handler.
+  const [reviewFields, setReviewFields] = useState<Record<string, string> | null>(null);
   const [checked, setChecked] = useState(false);
   // Elapsed-seconds counter for the long operations (commit/reverse write
   // journal entries then recompute balances — tens of seconds for big files).
@@ -42,6 +44,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
     if (res) {
       setBatch(res.batch);
       setRows(res.rows);
+      setReviewFields(res.review_fields ?? null);
     }
   }, [batchRef, show]);
 
@@ -108,6 +111,22 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
     (r) => r.outcome === 'ok' && (r.messages ?? []).some((m) => m[0] === 'warning'),
   );
   const canCommit = batch.status === 'validated' && batch.ok_count > 0;
+  const summary = batch.summary as
+    | { will_create?: number; will_update?: number; unchanged?: number }
+    | null;
+  // Collections carries a peso total to restate; borrowers and master data do
+  // not, and showing them "Total to post: P0.00" is noise at best.
+  const hasMoney = Number(batch.total_amount) > 0;
+  // Falls back to the collections shape so an older batch, or a handler that
+  // sends nothing, renders exactly as it did before.
+  const columns = Object.entries(
+    reviewFields ?? {
+      loan_ref: 'Loan',
+      amount: 'Amount',
+      remaining_before: 'Remaining before',
+      interest: 'Interest',
+    },
+  );
   const confirmOk = checked;
 
   return (
@@ -189,14 +208,19 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
 
         {/* the rows themselves */}
         <div className="px-7 py-5 overflow-x-auto">
+          {/* Columns come from the handler, not from here. They used to be
+              hardcoded to collections (Loan / Amount / Remaining / Interest),
+              so a borrowers batch rendered five dashes per row. The server
+              already sends review_fields; this just honours it. */}
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-body dark:text-bodydark border-b border-stroke dark:border-strokedark">
                 <th className="py-2 pr-3">Row</th>
-                <th className="py-2 pr-3">Loan</th>
-                <th className="py-2 pr-3 text-right">Amount</th>
-                <th className="py-2 pr-3 text-right">Remaining before</th>
-                <th className="py-2 pr-3 text-right">Interest</th>
+                {columns.map(([field, label]) => (
+                  <th key={field} className={`py-2 pr-3 ${isNumeric(field) ? 'text-right' : ''}`}>
+                    {label}
+                  </th>
+                ))}
                 <th className="py-2">Result</th>
               </tr>
             </thead>
@@ -204,10 +228,22 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
               {rows.map((r) => (
                 <tr key={r.sheet_row} className="border-b border-stroke dark:border-strokedark last:border-0">
                   <td className="py-2 pr-3 tabular-nums">{r.sheet_row}</td>
-                  <td className="py-2 pr-3 font-mono text-xs">{r.loan_ref ?? '—'}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{r.amount === null || r.amount === undefined ? '—' : formatNumberComma(Number(r.amount))}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{r.remaining_before === null || r.remaining_before === undefined ? '—' : formatNumberComma(Number(r.remaining_before))}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{r.interest === null || r.interest === undefined ? '—' : formatNumberComma(Number(r.interest))}</td>
+                  {columns.map(([field]) => {
+                    const value = (r as Record<string, unknown>)[field];
+                    const blank = value === null || value === undefined || value === '';
+                    return (
+                      <td
+                        key={field}
+                        className={`py-2 pr-3 ${isNumeric(field) ? 'text-right tabular-nums' : 'font-mono text-xs'}`}
+                      >
+                        {blank
+                          ? '—'
+                          : isNumeric(field)
+                            ? formatNumberComma(Number(value))
+                            : String(value)}
+                      </td>
+                    );
+                  })}
                   <td className="py-2"><OutcomePill outcome={r.outcome} /></td>
                 </tr>
               ))}
@@ -225,7 +261,9 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
           </h4>
           {canCommit ? (
             <p className="text-sm text-black dark:text-white max-w-xl">
-              Nothing has been posted yet. Check these numbers against the paper collection sheet, then tick the box.
+              {hasMoney
+                ? 'Nothing has been posted yet. Check these numbers against the paper collection sheet, then tick the box.'
+                : 'Nothing has been saved yet. Check the list above — especially anything marked "Will update" — then tick the box.'}
             </p>
           ) : (
             <p className="text-sm text-black dark:text-white max-w-xl">
@@ -248,10 +286,34 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                 {batch.error_count}
               </dd>
             </div>
-            <div className="flex justify-between px-4 py-2.5">
-              <dt className="text-body dark:text-bodydark">Total to post</dt>
-              <dd className="tabular-nums font-medium text-black dark:text-white">{formatCurrency(batch.total_amount)}</dd>
-            </div>
+            {/* Types that carry no money total (borrowers, master data) would
+                otherwise show a meaningless "Total to post: P0.00". */}
+            {hasMoney && (
+              <div className="flex justify-between px-4 py-2.5">
+                <dt className="text-body dark:text-bodydark">Total to post</dt>
+                <dd className="tabular-nums font-medium text-black dark:text-white">{formatCurrency(batch.total_amount)}</dd>
+              </div>
+            )}
+            {/* Set by types that match against existing records, so the clerk
+                can see at a glance how much of the file is genuinely new. */}
+            {typeof summary?.will_create === 'number' && (
+              <div className="flex justify-between px-4 py-2.5">
+                <dt className="text-body dark:text-bodydark">New — will be added</dt>
+                <dd className="tabular-nums text-black dark:text-white">{summary.will_create}</dd>
+              </div>
+            )}
+            {typeof summary?.will_update === 'number' && (
+              <div className="flex justify-between px-4 py-2.5">
+                <dt className="text-body dark:text-bodydark">Already there — will be updated</dt>
+                <dd className="tabular-nums text-black dark:text-white">{summary.will_update}</dd>
+              </div>
+            )}
+            {typeof summary?.unchanged === 'number' && (
+              <div className="flex justify-between px-4 py-2.5">
+                <dt className="text-body dark:text-bodydark">Already there — nothing to change</dt>
+                <dd className="tabular-nums text-black dark:text-white">{summary.unchanged}</dd>
+              </div>
+            )}
           </dl>
           {canCommit && busy === 'commit' && (
             <div className="flex max-w-xl items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-5 py-4">
@@ -278,7 +340,9 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                   onChange={(e) => setChecked(e.target.checked)}
                   className="mt-1"
                 />
-                These match the paper collection sheet.
+                {hasMoney
+                  ? 'These match the paper collection sheet.'
+                  : 'I have checked the list above.'}
               </label>
               {error && (
                 <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</div>
@@ -289,7 +353,9 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                 className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <CheckCircle size={15} />
-                {`Post ${batch.ok_count} collections`}
+                {hasMoney
+                  ? `Post ${batch.ok_count} collections`
+                  : `Import ${batch.ok_count} record${batch.ok_count === 1 ? '' : 's'}`}
               </button>
             </>
           )}
@@ -361,9 +427,16 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
 }
 
 
+/** Right-align and comma-format the columns that hold money or counts. */
+function isNumeric(field: string): boolean {
+  return /amount|remaining|interest|net|paid|balance|total/i.test(field);
+}
+
 function OutcomePill({ outcome }: { outcome: string }) {
   const map: Record<string, [string, string]> = {
     ok: ['Ready', 'bg-green-100 text-green-700'],
+    update: ['Will update', 'bg-amber-100 text-amber-700'],
+    unchanged: ['Already there', 'bg-whiten text-body'],
     error: ['Rejected', 'bg-danger/10 text-danger'],
     committed: ['Posted', 'bg-green-100 text-green-700'],
     failed: ['Failed', 'bg-danger/10 text-danger'],
