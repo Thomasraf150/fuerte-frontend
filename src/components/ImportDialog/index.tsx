@@ -66,6 +66,7 @@ export default function ImportDialog({
   // Which variant is downloading, so only that button shows its pending label.
   const [tplBusy, setTplBusy] = useState<Variant | null>(null);
   const [types, setTypes] = useState<ImportTypePayload[] | null>(null);
+  const [typesFailed, setTypesFailed] = useState(false);
   /**
    * Deliberately EMPTY, with no default.
    *
@@ -89,8 +90,16 @@ export default function ImportDialog({
   useEffect(() => {
     if (!open || types) return;
     let cancelled = false;
+    setTypesFailed(false);
     listTypes().then((list) => {
-      if (cancelled || !list) return;
+      if (cancelled) return;
+      if (!list) {
+        // Without this the dialog sat on its spinner forever: no picker, no
+        // hint, no drop zone and every button disabled, with nothing saying
+        // why. A failed list has to be visible and retryable.
+        setTypesFailed(true);
+        return;
+      }
       setTypes(list);
       // No auto-selection, even when only one type is available: the choice is
       // the safeguard, and quietly making it is how files ended up in the wrong
@@ -194,7 +203,19 @@ export default function ImportDialog({
               clerk could drop a borrowers file and post it to the collections
               importer without ever seeing a choice. That happened in real use.
               Hold the space and say why. */}
-          {!types && (
+          {typesFailed && (
+            <div className="space-y-2 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+              <p>The list of things you can import could not be loaded.</p>
+              <button
+                type="button"
+                onClick={() => { setTypesFailed(false); setTypes(null); }}
+                className="inline-flex min-h-[48px] items-center rounded-lg border border-danger/40 px-4 py-2 text-sm hover:bg-danger/10"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+          {!types && !typesFailed && (
             <div className="flex min-h-[48px] items-center gap-2 rounded-lg border border-stroke px-3 text-sm text-body dark:border-strokedark dark:text-bodydark">
               <span
                 className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
