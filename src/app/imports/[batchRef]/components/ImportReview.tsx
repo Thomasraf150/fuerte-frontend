@@ -165,7 +165,17 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
   // batches validated before it did.
   const noun = summary?.noun ?? (hasMoney ? 'collections' : 'records');
   const postsToLedger = summary?.posts_to_ledger ?? hasMoney;
-  const countOf = (n: number) => `${n} ${noun === 'records' ? `record${n === 1 ? '' : 's'}` : noun}`;
+  // Singular matters: the handler nouns are plural ('loans', 'payments',
+  // 'setup records', 'corrected payment dates'), so a one-row file read
+  // "Import 1 loans" on the primary button. Trim a trailing 's' from the LAST
+  // word only, so 'corrected payment dates' becomes 'corrected payment date'.
+  const countOf = (n: number) => {
+    if (n !== 1) return `${n} ${noun}`;
+    const words = noun.split(' ');
+    const last = words[words.length - 1];
+    words[words.length - 1] = last.endsWith('s') ? last.slice(0, -1) : last;
+    return `1 ${words.join(' ')}`;
+  };
   // Falls back to the collections shape so an older batch, or a handler that
   // sends nothing, renders exactly as it did before.
   const columns = Object.entries(
