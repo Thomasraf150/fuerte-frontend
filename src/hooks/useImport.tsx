@@ -38,10 +38,19 @@ export type ImportBatchPayload = {
       accounts_swept?: number;
       created?: number;
       updated?: number;
+      /** Loans: how many payment-schedule rows the batch wrote. */
+      installments?: number;
+      counters_advanced?: number;
+      loans_affected?: number;
     };
     will_create?: number;
     will_update?: number;
     unchanged?: number;
+    installments?: number;
+    noun?: string;
+    posts_to_ledger?: boolean;
+    /** Loan-reference counters this batch would move forward. Irreversible. */
+    counter_moves?: { branch: string; from: number; to: number; skipped: number }[];
     reverse?: { removed?: number; note?: string };
     fatal?: string;
     sweep_failed?: boolean;
@@ -175,6 +184,8 @@ export function useImport() {
           batch: ImportBatchPayload;
           rows: ImportRowPayload[];
           review_fields?: Record<string, string>;
+          /** Only some types produce a receipt workbook (borrowers today). */
+          has_receipt?: boolean;
         };
       }),
     [run],
