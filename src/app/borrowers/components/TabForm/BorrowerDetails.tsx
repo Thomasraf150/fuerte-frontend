@@ -125,11 +125,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     name: "reference"
   });
     
-  useEffect(() => {
-    fetchDataChief(1000, 1); 
-    fetchDataArea(1000, 1);
-    fetchDataBorrCompany(1000, 1);
-  }, []);
+  // The three reference dropdowns are fetched by the PARENT
+  // (src/app/borrowers/[id]/page.tsx) and arrive here as props, so the
+  // duplicate fetch that used to sit here was dead weight: it asked for 1,000
+  // rows, which the schema's cap now refuses, and the resulting TypeError was
+  // swallowed while the props kept the dropdowns populated. Deleted rather
+  // than re-capped — re-capping would just have duplicated the parent's call.
 
   const [optionsChief, setOptionsChief] = useState<SelectOption[]>([]);
   const [optionsArea, setOptionsArea] = useState<SelectOption[]>([]);

@@ -4,6 +4,7 @@ import { Lock } from 'react-feather';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import CustomDatatable from '@/components/CustomDatatable';
 import borrLoanCol from './BorrLoanCol';
+import { MAX_PAGE_SIZE } from '@/constants/pagination';
 import FormLoans from './FormLoans'
 import LoanComputation from '@/components/LoanComputation'
 import useLoans from '@/hooks/useLoans';
@@ -95,7 +96,10 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     }
     fetchSubDataList('name_asc', Number(BorrowerData?.borrower_work_background?.area?.branch_sub?.branch_id));
     if (!showForm) {
-      fetchLoans(100000, 1, Number(BorrowerData.id));
+      // Was 100000, which getLoans' max now refuses. The busiest borrower in
+      // the database has 27 loans and none exceeds 100, so the standard page
+      // size has 4x headroom.
+      fetchLoans(MAX_PAGE_SIZE, 1, Number(BorrowerData.id));
     }
   }, [BorrowerData, showForm]);
 

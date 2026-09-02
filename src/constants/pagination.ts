@@ -11,6 +11,18 @@ export const MAX_PAGE_SIZE = 100;
 // Maximum records for dropdown/reference data queries (loan codes, products, clients)
 export const MAX_DROPDOWN_SIZE = 200;
 
+/**
+ * The borrower-company dropdown only. 891 live company_borrowers rows already
+ * exceed MAX_DROPDOWN_SIZE, so capping it there would silently show 200 of 891
+ * — worse than an error. graphql/companyborrower.graphql raises getBorrCompanies
+ * to match, and carries the same note.
+ *
+ * This is documented debt, not a pattern to copy. The proper fix is server-side
+ * search (getBorrCompanies already accepts `search`), because 891 options in one
+ * <select> is poor on the budget Android phones this app targets.
+ */
+export const MAX_COMPANY_DROPDOWN_SIZE = 1000;
+
 // Default page size when not specified
 export const DEFAULT_PAGE_SIZE = 20;
 

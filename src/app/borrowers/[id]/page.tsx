@@ -1,5 +1,6 @@
 'use client';
 
+import { MAX_COMPANY_DROPDOWN_SIZE, MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
@@ -50,9 +51,13 @@ const BorrowerDetailPage: React.FC = () => {
       try {
         setLoading(true);
         await Promise.all([
-          fetchDataChief(100, 1),
-          fetchDataArea(100, 1),
-          fetchDataBorrCompany(100, 1),
+          // Chiefs (9 live rows) and Areas (66) fit inside MAX_DROPDOWN_SIZE.
+          // Companies do NOT — 891 live rows — and asking for 100 silently
+          // showed 100 of 891 on a REQUIRED field, with no error anywhere.
+          // That truncation is why getBorrCompanies carries a raised cap.
+          fetchDataChief(MAX_DROPDOWN_SIZE, 1),
+          fetchDataArea(MAX_DROPDOWN_SIZE, 1),
+          fetchDataBorrCompany(MAX_COMPANY_DROPDOWN_SIZE, 1),
           fetchMyAccessibleBranchSubs(),
         ]);
         setLoading(false);
