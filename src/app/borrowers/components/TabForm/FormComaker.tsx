@@ -1,4 +1,5 @@
 "use client"
+import { MIN_DATE_OF_BIRTH, maxDateOfBirth } from '@/constants/dateBounds';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown, Save, RotateCw, Check } from 'react-feather';
@@ -120,6 +121,12 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             id="birthdate"
             type="date"
             icon={Home}
+            // Upper bound is TODAY: nobody is born in the future. 124 borrower_details
+            // rows already carry truncated years, 18 of them dated 2026 (infants).
+            // Deliberately NOT a minimum lending age — that is a business rule nobody
+            // has stated, and guessing it would silently reject real borrowers.
+            min={MIN_DATE_OF_BIRTH}
+            max={maxDateOfBirth()}
             register={register('birthdate', { required: true })}
             error={errors.birthdate && "This field is required"}
           />

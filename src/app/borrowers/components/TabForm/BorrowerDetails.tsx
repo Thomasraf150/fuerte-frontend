@@ -1,3 +1,4 @@
+import { MIN_DATE_OF_BIRTH, maxDateOfBirth } from '@/constants/dateBounds';
 import { Camera, Home, Save, RotateCw, Search } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { checkBorrowerNow } from '@/utils/borrowerDuplicateCheck';
@@ -680,6 +681,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="dob"
                       type="date"
                       icon={Home}
+                      // Upper bound is TODAY: nobody is born in the future. 124 borrower_details
+                      // rows already carry truncated years, 18 of them dated 2026 (infants).
+                      // Deliberately NOT a minimum lending age — that is a business rule nobody
+                      // has stated, and guessing it would silently reject real borrowers.
+                      min={MIN_DATE_OF_BIRTH}
+                      max={maxDateOfBirth()}
                       register={register('dob', { required: true })}
                       error={errors.dob && "This field is required"}
                       required={true}

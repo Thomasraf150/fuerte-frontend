@@ -130,11 +130,25 @@ const useGeneralVoucher = () => {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
       let mutation;
+
+      // createGvEntry has two paths and they need different inputs. With an
+      // `id` it CANCELS the entry, and the reversing entry it writes is dated
+      // server-side with now() — the journal_date we send is read by nothing.
+      // Without an id it creates a new voucher, and journal_date is required.
+      //
+      // Sending it on the cancel path was harmless until the schema started
+      // bounding business dates: 24 live Check Vouchers hold years like 0026,
+      // so echoing their stored date back made them IMPOSSIBLE TO CANCEL —
+      // refused on a value the server would have thrown away. Omitted rather
+      // than exempted in the schema, because weakening the rule to accommodate
+      // a field nobody reads would be the wrong trade.
+      const isCancelling = row?.id !== undefined && row?.id !== null;
+
       let variables: { input: any } = {
         input: {
           id: row?.id,
           user_id: String(userData?.user?.id),
-          journal_date: row?.journal_date,
+          ...(isCancelling ? {} : { journal_date: row?.journal_date }),
           vendor_id: row?.vendor_id,
           journal_name: row?.journal_name,
           check_no: row?.check_no,

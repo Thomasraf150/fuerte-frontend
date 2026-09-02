@@ -1,4 +1,5 @@
 "use client"
+import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Printer, Edit3, ChevronDown, Plus, Trash2, Save, RotateCw } from 'react-feather';
@@ -248,6 +249,11 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                 id="journal_date"
                 type="date"
                 icon={Edit3}
+                // A native date input commits a zero-padded partial year on the first year
+                // keystroke (0026-01-15, reported as valid). With min/max the browser blocks
+                // the submit before any request. See src/constants/dateBounds.ts.
+                min={MIN_BUSINESS_DATE}
+                max={maxBusinessDate()}
                 register={register('journal_date', { required: true })}
                 error={errors.journal_date && "Date is required"}
               /> 

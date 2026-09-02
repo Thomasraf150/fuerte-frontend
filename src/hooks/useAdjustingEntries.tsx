@@ -76,11 +76,22 @@ const useAdjustingEntries = () => {
       const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
       const userData = JSON.parse(storedAuthStore)['state'];
       let mutation;
+
+      // Same two-path shape as createGvEntry: with an `id` this CANCELS, and
+      // AdjustingEntriesMutation::cancelEntry dates its reversal with now(),
+      // so the journal_date we send is read by nothing. Without an id it
+      // creates, and journal_date is required.
+      //
+      // Echoing the stored date back made any entry holding a malformed year
+      // impossible to cancel once the schema began bounding business dates —
+      // refused on a value the server would have discarded.
+      const isCancelling = row?.id !== undefined && row?.id !== null;
+
       let variables: { input: any } = {
         input: {
           id: row?.id,
           user_id: String(userData?.user?.id),
-          journal_date: row?.journal_date,
+          ...(isCancelling ? {} : { journal_date: row?.journal_date }),
           vendor_id: row?.vendor_id,
           journal_name: row?.journal_name,
           reference_no: row?.reference_no,

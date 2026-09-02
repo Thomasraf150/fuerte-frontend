@@ -19,6 +19,7 @@
  * re-quoting.
  */
 
+import { MIN_BUSINESS_DATE } from '@/constants/dateBounds';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import AsyncReactSelect from '@/components/ReactSelect/AsyncReactSelect';
@@ -382,6 +383,10 @@ const LoanCalculator: React.FC = () => {
               </label>
               <input
                 id="lc-start"
+                // Floor only. This page persists nothing, so the bound is purely to stop a
+                // native date input's zero-padded partial year (0026-…) producing a
+                // nonsense quote. No ceiling: quoting a future scenario is legitimate here.
+                min={MIN_BUSINESS_DATE}
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
