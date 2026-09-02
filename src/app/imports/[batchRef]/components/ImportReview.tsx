@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, RotateCcw, Download } from 'react-feather';
+import { AlertTriangle, CheckCircle, Download, Eye, RotateCcw, XCircle } from 'react-feather';
 import { useImport, ImportBatchPayload, ImportRowPayload } from '@/hooks/useImport';
 import { useAuthStore } from '@/store';
 import { formatCurrency } from '@/utils/formatCurrency';
@@ -32,6 +33,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
   // "has no peso total" instead put the button on schedule corrections, whose
   // handler has no receipt endpoint — so it could only ever fail.
   const [hasReceipt, setHasReceipt] = useState(false);
+  const [hasOpeningBalance, setHasOpeningBalance] = useState(false);
   const [checked, setChecked] = useState(false);
   const [receiptBusy, setReceiptBusy] = useState(false);
   // Elapsed-seconds counter for the long operations (commit/reverse write
@@ -52,6 +54,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
       setRows(res.rows);
       setReviewFields(res.review_fields ?? null);
       setHasReceipt(res.has_receipt === true);
+      setHasOpeningBalance(res.has_opening_balance === true);
     }
   }, [batchRef, show]);
 
@@ -526,6 +529,19 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
               )}
               {receiptBusy ? 'Building the ID list…' : 'Download the ID list for the loans sheet'}
             </button>
+          )}
+          {/* The paragraph above tells the reader these loans are NOT in the
+              accounting reports. This is the only route to seeing what would
+              put them there, so it belongs beside that sentence rather than in
+              a menu. A link, not a button: it navigates and posts nothing. */}
+          {hasOpeningBalance && (
+            <Link
+              href={`/imports/${batch.batch_ref}/opening-balance`}
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-primary/40 bg-white px-5 py-2.5 text-sm text-black transition hover:border-primary dark:bg-boxdark dark:text-white"
+            >
+              <Eye size={14} />
+              See the opening balance this book would post
+            </Link>
           )}
           {batch.summary?.sweep_failed && (
             <div className="flex max-w-xl items-start gap-2 rounded border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-900/10 dark:text-amber-400">

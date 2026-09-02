@@ -17,6 +17,41 @@ import { useAuthStore } from '@/store';
 
 const API = process.env.NEXT_PUBLIC_API_URL; // e.g. http://localhost:8080/api
 
+/**
+ * One journal line of a previewed opening-balance entry.
+ *
+ * Amounts are STRINGS end to end — they are BCMath output on the backend and
+ * must not pass through a JS number on the way to the screen.
+ */
+export type OpeningBalanceLine = {
+  account: string;
+  name: string;
+  debit: string;
+  credit: string;
+};
+
+/** What posting a legacy loan book WOULD write. Nothing here has been written. */
+export type OpeningBalancePreview = {
+  entries: {
+    loan_ref: string;
+    borrower: string;
+    branch_sub_id: number;
+    branch: string;
+    released_date: string | null;
+    lines: OpeningBalanceLine[];
+  }[];
+  /** Loans the preview refuses to state, with the reason, grouped by nothing. */
+  skipped: { loan_ref: string; reason: string }[];
+  totals: {
+    loans: number;
+    notes_receivable: string;
+    unearned_interest: string;
+    equity: string;
+  };
+  /** Things a human has to resolve before any of this could be posted. */
+  problems: string[];
+};
+
 export type ImportBatchPayload = {
   batch_ref: string;
   type: string;
@@ -186,6 +221,33 @@ export function useImport() {
           review_fields?: Record<string, string>;
           /** Only some types produce a receipt workbook (borrowers today). */
           has_receipt?: boolean;
+          /** Only a committed legacy-loans batch can state a GL opening balance. */
+          has_opening_balance?: boolean;
+        };
+      }),
+    [run],
+  );
+
+  /**
+   * What posting this legacy loan book to the general ledger would write.
+   *
+   * Read only. There is deliberately no matching post() — the contra account is
+   * a chart-of-accounts decision and nothing may be written until it is settled.
+   */
+  const openingBalance = useCallback(
+    (batchRef: string) =>
+      run('openingBalance', async () => {
+        const res = await fetch(`${API}/imports/${batchRef}/opening-balance`, {
+          headers: authHeaders(),
+        });
+        const json = await asJson(res);
+        if (json?.status !== true) {
+          throw new Error(json?.message ?? 'Could not work out the opening balance');
+        }
+        return json as {
+          batch: ImportBatchPayload;
+          preview: OpeningBalancePreview;
+          contra_account: string;
         };
       }),
     [run],
@@ -222,5 +284,5 @@ export function useImport() {
     [run],
   );
 
-  return { listTypes, upload, validate, show, commit, reverse, busy, error, setError };
+  return { listTypes, upload, validate, show, openingBalance, commit, reverse, busy, error, setError };
 }
