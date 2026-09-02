@@ -1,3 +1,4 @@
+import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { OtherCollectionFormValues } from '@/utils/DataTypes';
@@ -360,6 +361,13 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   type="date"
                   id="collection_date"
                   placeholder="mm/dd/YYYY"
+                  // A real gate, not decoration: a native date input commits a
+                  // zero-padded partial year on the first year keystroke (0026-01-15,
+                  // reported as valid), and with min/max the browser blocks the submit
+                  // before any request. This is the Cash Receipts path that produced 43
+                  // of the 67 corrupt journal_dates.
+                  min={MIN_BUSINESS_DATE}
+                  max={maxBusinessDate()}
                   {...register('collection_date', { required: "Collection Date is required!" })}
                   onBlur={(e: any) => { return handleDate(e, 'collection_date'); }}
                 />

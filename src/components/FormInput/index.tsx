@@ -24,6 +24,16 @@ interface FormInputProps {
   readOnly?: boolean;
   value?: string;
   maxLength?: number;
+  /**
+   * Forwarded to the native input. For type="date" these are a real gate:
+   * the browser refuses to submit an out-of-range value BEFORE any network
+   * call, which is the only thing that stops a native date input's
+   * zero-padded partial year (0026-01-15) from ever leaving the page.
+   * Deliberately NOT defaulted — a posting date and a date of birth do not
+   * share bounds. See src/constants/dateBounds.ts.
+   */
+  min?: string;
+  max?: string;
   formatType?: 'number' | 'contact' | 'currency' | 'none';
   required?: boolean;
   isLoading?: boolean;
@@ -124,6 +134,8 @@ const FormInput: React.FC<FormInputProps> = ({
   icon: IconComponent,
   register,
   maxLength,
+  min,
+  max,
   error,
   options,
   placeholder,
@@ -325,6 +337,8 @@ const FormInput: React.FC<FormInputProps> = ({
             readOnly={readOnly}
             value={formatType === 'number' || formatType === 'currency' ? displayValue : value}
             maxLength={maxLength}
+            min={min}
+            max={max}
           />
         )}
         {type !== 'checkbox' && type !== 'file' && type !== 'select' && (

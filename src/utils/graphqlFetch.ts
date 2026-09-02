@@ -99,7 +99,48 @@ export async function parseGraphQLResponse<T = any>(
     throw new GraphQLConnectionError(statusMessage(response.status), response.status);
   }
 
+  surfaceValidationMessages(body);
+
   return body;
+}
+
+/**
+ * Replace Lighthouse's opaque validation message with the per-field reason.
+ *
+ * A failed @rules check arrives as:
+ *   message:    "Validation failed for the field [paymentPosting]."
+ *   extensions: { validation: { "input.collection_date": ["The input.collection
+ *                 date field must be a date after or equal to 2022-01-01."] } }
+ *
+ * 94 call sites across this app read `errors[0].message` and none reads
+ * `extensions.validation`, so every rule reported itself as that first line and
+ * nothing else. An operator whose date field held a malformed year saw a red
+ * toast naming the mutation, no field error, and the bad value still in the box
+ * — unfixable without a developer.
+ *
+ * Rewritten centrally, exactly like the non-GraphQL-body guard above, so all 94
+ * callers get the real reason with no change of their own. This only became
+ * reachable when ValidateDirective was added to the backend's field_middleware:
+ * before that no @rules ever executed, so this path had never once run.
+ */
+function surfaceValidationMessages(body: unknown): void {
+  const errors = (body as { errors?: unknown })?.errors;
+  if (!Array.isArray(errors)) return;
+
+  for (const error of errors) {
+    const validation = (error as { extensions?: { validation?: unknown } })?.extensions?.validation;
+    if (!validation || typeof validation !== 'object') continue;
+
+    // { field: string[] } — flattened in declaration order, deduped, because a
+    // single field can fail several rules at once.
+    const messages = Object.values(validation as Record<string, unknown>)
+      .flatMap((v) => (Array.isArray(v) ? v : [v]))
+      .filter((m): m is string => typeof m === 'string' && m.trim() !== '');
+
+    if (messages.length === 0) continue;
+
+    (error as { message: string }).message = Array.from(new Set(messages)).join(' ');
+  }
 }
 
 /**
