@@ -1,5 +1,5 @@
 "use client"
-import { MIN_DATE_OF_BIRTH, maxDateOfBirth } from '@/constants/dateBounds';
+import { MIN_DATE_OF_BIRTH, boundsAllowing, maxDateOfBirth } from '@/constants/dateBounds';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown, Save, RotateCw, Check } from 'react-feather';
@@ -52,6 +52,14 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
       setValue('contact_no', coMakerData.contact_no);
     }
   }, [coMakerData])
+
+  // Widened to admit the stored value: a native bound blocks the whole form,
+  // and both existing borrower_comakers rows carry an out-of-range birthdate.
+  const birthdateBounds = boundsAllowing(
+    coMakerData?.birthdate,
+    MIN_DATE_OF_BIRTH,
+    maxDateOfBirth(),
+  );
 
   return (
 
@@ -125,8 +133,8 @@ const FormComaker: React.FC<ParentFormBr> = ({ createCoMaker, singleData: Borrow
             // rows already carry truncated years, 18 of them dated 2026 (infants).
             // Deliberately NOT a minimum lending age — that is a business rule nobody
             // has stated, and guessing it would silently reject real borrowers.
-            min={MIN_DATE_OF_BIRTH}
-            max={maxDateOfBirth()}
+            min={birthdateBounds.min}
+            max={birthdateBounds.max}
             register={register('birthdate', { required: true })}
             error={errors.birthdate && "This field is required"}
           />

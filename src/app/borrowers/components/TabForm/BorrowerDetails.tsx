@@ -1,4 +1,4 @@
-import { MIN_DATE_OF_BIRTH, maxDateOfBirth } from '@/constants/dateBounds';
+import { MIN_DATE_OF_BIRTH, boundsAllowing, maxDateOfBirth } from '@/constants/dateBounds';
 import { Camera, Home, Save, RotateCw, Search } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { checkBorrowerNow } from '@/utils/borrowerDuplicateCheck';
@@ -146,6 +146,14 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   // Sub-area is only optional when an area is selected, loading finished, and no sub-areas exist
   const areaId = watch('area_id');
   const subAreaNotRequired = !!areaId && !subAreaLoading && optionsSubArea.length === 0;
+
+  // Never let a date the operator did not type block the form. See
+  // boundsAllowing() in src/constants/dateBounds.ts.
+  const dobBounds = boundsAllowing(
+    singleData?.borrower_details?.dob,
+    MIN_DATE_OF_BIRTH,
+    maxDateOfBirth(),
+  );
 
   // Spouse details only apply when the borrower is Married or Live-in.
   // Case-insensitive match so legacy free-text values ("married", "MARRIED")
@@ -685,8 +693,14 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       // rows already carry truncated years, 18 of them dated 2026 (infants).
                       // Deliberately NOT a minimum lending age — that is a business rule nobody
                       // has stated, and guessing it would silently reject real borrowers.
-                      min={MIN_DATE_OF_BIRTH}
-                      max={maxDateOfBirth()}
+                      //
+                      // Widened to admit whatever this record already holds. A native bound
+                      // blocks the WHOLE FORM, not the field, so bounding a prefilled value
+                      // made 95 of 4,516 existing borrowers unsaveable: changing only a phone
+                      // number raised a native bubble on a birthdate nobody touched, with no
+                      // request sent and no message rendered.
+                      min={dobBounds.min}
+                      max={dobBounds.max}
                       register={register('dob', { required: true })}
                       error={errors.dob && "This field is required"}
                       required={true}

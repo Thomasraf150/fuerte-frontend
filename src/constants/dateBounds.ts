@@ -73,3 +73,39 @@ export function maxDateOfBirth(): string {
 
 /** Floor for a date of birth. Generous on purpose — this is a typo guard. */
 export const MIN_DATE_OF_BIRTH = '1900-01-01';
+
+/**
+ * Bounds for a date field that is PREFILLED from a stored record.
+ *
+ * A native min/max blocks the whole form, not just the field: the browser
+ * refuses to submit, onSubmit never runs, no request is sent and react-hook-form
+ * renders nothing (its errors only fire on the rules it owns). So bounding a
+ * prefilled field punishes records that were already bad — 95 of 4,516
+ * borrower_details rows hold a dob outside this window, and 2 of 2
+ * borrower_comakers do. Before this helper, opening one of those borrowers and
+ * changing only a phone number could not be saved: a native bubble appeared on
+ * a birthdate the operator never touched, with nothing explaining it.
+ *
+ * This widens the window just far enough to admit the value already on the
+ * record, so a stored bad date is never what stops an unrelated edit, while a
+ * NEWLY typed year is still gated. Same principle as omitting journal_date when
+ * cancelling a voucher: never refuse a write on a value the user did not enter.
+ *
+ * Repairing those 95 rows is a separate data question, not a form question.
+ */
+export function boundsAllowing(
+  storedValue: string | null | undefined,
+  min: string,
+  max: string,
+): { min: string; max: string } {
+  const stored = (storedValue ?? '').slice(0, 10);
+  // Lexicographic comparison is exact for yyyy-mm-dd, and safe for the
+  // zero-padded years (0001-01-01) this is here to tolerate.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(stored)) {
+    return { min, max };
+  }
+  return {
+    min: stored < min ? stored : min,
+    max: stored > max ? stored : max,
+  };
+}
