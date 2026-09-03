@@ -35,7 +35,7 @@ const CoaForm: React.FC<CoaFormProps> = ({
   onClose,
   onReady
 }) => {
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataChartOfAccountList>();
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataChartOfAccountList>();
 
   const [selectedPlacement, setSelectedPlacement] = useState<string>("");
 
@@ -201,12 +201,19 @@ const CoaForm: React.FC<CoaFormProps> = ({
         required={true}
       />
 
+      {/* value={watch(...)} is REQUIRED on a formatted FormInput. It renders
+          formatType="number"/"currency" as CONTROLLED on its own displayValue
+          (FormInput/index.tsx:338), and displayValue is only seeded from the
+          value/defaultValue props — so setValue('balance', …) at line 94 wrote
+          form state that React then overwrote with an empty string, and every
+          EDIT showed a blank Balance while the real figure sat in form state. */}
       <FormInput
         label="Balance"
         id="balance"
         type="text"
         icon={Edit3}
         formatType="number"
+        value={watch('balance') ? String(watch('balance')) : ''}
         register={register('balance')}
         error={errors.balance?.message}
         className='mt-2'

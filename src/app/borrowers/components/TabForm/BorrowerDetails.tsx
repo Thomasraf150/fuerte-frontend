@@ -521,12 +521,22 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
+                    {/* value={watch(...)} IS REQUIRED on a formatted FormInput, not optional.
+                    FormInput renders formatType="number"/"currency" fields as CONTROLLED on its
+                    own displayValue (FormInput/index.tsx:338), and displayValue is only ever
+                    seeded from the value/defaultValue props. So setValue() writes
+                    react-hook-form state, RHF pushes it to the DOM through its ref, and React
+                    immediately overwrites it with an empty displayValue. The field then shows
+                    its 0.00 placeholder on every EDIT while the real figure sits in form state
+                    — which is why saving preserved the value even though the box looked empty.
+                    FormLoanComputation.tsx already does this correctly; these six never did. */}
                     <FormInput
                       label="Amount Applied For"
                       id="amount_applied"
                       type="text"
                       icon={Home}
                       placeholder="0.00"
+                      value={watch('amount_applied') ? String(watch('amount_applied')) : ''}
                       register={register('amount_applied', { required: true })}
                       error={errors.amount_applied && "This field is required"}
                       defaultValue=""
@@ -606,6 +616,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="est_monthly_fam_inc"
                       type="text"
                       icon={Home}
+                      value={watch('est_monthly_fam_inc') ? String(watch('est_monthly_fam_inc')) : ''}
                       register={register('est_monthly_fam_inc', { required: true })}
                       error={errors.est_monthly_fam_inc && "This field is required"}
                       formatType="number"
@@ -843,6 +854,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="salary"
                     type="text"
                     icon={Home}
+                    value={watch('salary') ? String(watch('salary')) : ''}
                     register={register('salary', { required: requiresSpouse })}
                     error={errors.salary && "This field is required"}
                     formatType="number"
@@ -1050,6 +1062,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="monthly_gross"
                       type="text"
                       icon={Home}
+                      value={watch('monthly_gross') ? String(watch('monthly_gross')) : ''}
                       register={register('monthly_gross', { required: true })}
                       error={errors.monthly_gross && "This field is required"}
                       formatType="number"
@@ -1064,6 +1077,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="monthly_net"
                       type="text"
                       icon={Home}
+                      value={watch('monthly_net') ? String(watch('monthly_net')) : ''}
                       register={register('monthly_net', { required: true })}
                       error={errors.monthly_net && "This field is required"}
                       formatType="number"
@@ -1186,6 +1200,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="salary"
                     type="text"
                     icon={Home}
+                    value={watch('company_salary') ? String(watch('company_salary')) : ''}
                     register={register('company_salary', { required: true })}
                     error={errors.salary && "This field is required"}
                     formatType="number"
