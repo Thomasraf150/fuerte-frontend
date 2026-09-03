@@ -263,6 +263,19 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
           />
         </div>
         <div>
+          {/* value={watch(...)} is REQUIRED on a formatted FormInput: it
+              renders formatType="number"/"currency" as CONTROLLED on its own
+              displayValue (FormInput/index.tsx:338), and displayValue is only
+              ever seeded from the value/defaultValue props. So the
+              setValue('insurance_fee', …) on line 89 wrote form state that
+              React then painted over with an empty string, and EDITING a loan
+              product showed a blank Insurance Fee while the real figure sat
+              in form state — saving silently rewrote it.
+
+              Audited the other 18 money FormInputs while here: this was the
+              only remaining one that is both formatted AND prefilled. The
+              rest are fresh-entry fields, where binding a value would make an
+              uncontrolled input controlled for no gain. */}
           <FormInput
             label="Insurance Manual Fee"
             id="insurance_fee"
@@ -271,6 +284,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             register={register('insurance_fee')}
             error={errors.insurance_fee && "This field is required"}
             formatType="number"
+            value={watch('insurance_fee') ? String(watch('insurance_fee')) : ''}
           />
         </div>
         <div>
