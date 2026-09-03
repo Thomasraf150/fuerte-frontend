@@ -6,7 +6,7 @@ import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList, DataSubBranches, SelectOption } from '@/utils/DataTypes';
 import ReactSelect from '@/components/ReactSelect';
 import BranchBadge from '@/components/BranchBadge';
-import { GitBranch, Printer, Search, Edit2, Trash2, RefreshCw, Eye } from 'react-feather';
+import { ChevronDown, ChevronRight, Edit2, Eye, GitBranch, Printer, RefreshCw, Search, Trash2 } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
 import Swal from 'sweetalert2';
@@ -22,6 +22,12 @@ interface AccountRowProps {
   parentId: string | null;
   isActive: boolean;
   rowClassName: string;
+  /** Direct children. 0 renders a spacer so every name keeps the same left edge. */
+  childCount: number;
+  /** Whether this row's children are currently rendered. */
+  isExpanded: boolean;
+  /** Omitted while a filter is active, when the tree is force-expanded. */
+  onToggle?: (id: string) => void;
   onEdit: (account: DataChartOfAccountList) => void;
   onDelete: (account: DataChartOfAccountList) => void;
   onReactivate: (account: DataChartOfAccountList) => void;
@@ -33,6 +39,9 @@ const AccountRow = React.memo<AccountRowProps>(({
   parentId,
   isActive,
   rowClassName,
+  childCount,
+  isExpanded,
+  onToggle,
   onEdit,
   onDelete,
   onReactivate
@@ -44,6 +53,9 @@ const AccountRow = React.memo<AccountRowProps>(({
     router.push(`/accounting/coa/${account.id}`);
   };
 
+  // The toggle's only content is an icon, so it needs a real accessible name.
+  const toggleLabel = `${isExpanded ? 'Collapse' : 'Expand'} ${account.account_name}, ${childCount} ${childCount === 1 ? 'sub-account' : 'sub-accounts'}`;
+
   return (
     <tr
       className={`border-b dark:border-strokedark hover:bg-opacity-90 ${rowClassName}`}
@@ -53,10 +65,32 @@ const AccountRow = React.memo<AccountRowProps>(({
     >
       <td className="px-6 py-2 text-sm font-medium" style={{ paddingLeft: `${level * 20}px` }}>
         <div className="flex items-center gap-2">
+          {/* Fixed-width slot whether or not the row has children, so every
+              account name in the tree keeps the same left edge. */}
+          {childCount > 0 && onToggle ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onToggle(String(account.id)); }}
+              className="-my-2 flex min-h-[44px] w-6 shrink-0 items-center justify-center transition-opacity hover:opacity-70"
+              aria-expanded={isExpanded}
+              aria-label={toggleLabel}
+              title={toggleLabel}
+            >
+              {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            </button>
+          ) : (
+            <span className="w-6 shrink-0" aria-hidden />
+          )}
           <span>
             {account.account_name}
             {!isActive && <span className="ml-2 text-xs text-danger">(Inactive)</span>}
           </span>
+          {/* How much is hidden, so expanding is an informed click. */}
+          {childCount > 0 && !isExpanded && (
+            <span className="shrink-0 rounded-full bg-black bg-opacity-10 px-2 py-0.5 text-xs font-medium tabular-nums">
+              {childCount}
+            </span>
+          )}
         </div>
       </td>
       <td className="px-6 py-2 text-sm font-medium">{account.number}</td>
@@ -72,7 +106,7 @@ const AccountRow = React.memo<AccountRowProps>(({
         <div className="flex items-center justify-center space-x-2">
           <button
             onClick={handleView}
-            className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
+            className="text-body hover:text-black dark:text-bodydark dark:hover:text-white transition-colors"
             title="View Details"
           >
             <Eye size={16} />
@@ -87,7 +121,7 @@ const AccountRow = React.memo<AccountRowProps>(({
           {isActive ? (
             <button
               onClick={() => onDelete(account)}
-              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+              className="text-danger transition-opacity hover:opacity-70"
               title="Deactivate Account"
             >
               <Trash2 size={16} />
@@ -95,7 +129,7 @@ const AccountRow = React.memo<AccountRowProps>(({
           ) : (
             <button
               onClick={() => onReactivate(account)}
-              className="text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+              className="text-green-600 transition-opacity hover:opacity-70 dark:text-green-400"
               title="Reactivate Account"
             >
               <RefreshCw size={16} />
@@ -122,6 +156,9 @@ const AccountRow = React.memo<AccountRowProps>(({
     prevProps.account.id === nextProps.account.id &&
     prevProps.isActive === nextProps.isActive &&
     prevProps.level === nextProps.level &&
+    // Without these the chevron never flips and children never appear.
+    prevProps.isExpanded === nextProps.isExpanded &&
+    prevProps.childCount === nextProps.childCount &&
     prevProps.account.account_name === nextProps.account.account_name &&
     prevProps.account.balance === nextProps.account.balance &&
     prevProps.account.number === nextProps.account.number &&
@@ -154,10 +191,33 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
   branchSubData,
   printChartOfAccounts
 }) => {
+  // COLLAPSED BY DEFAULT. This tree is 1,406 accounts over 4 levels with only 5
+  // roots, and it used to render every one of them: 36,849 DOM nodes, 76,742px
+  // of table in a 900px viewport, and a ~1.9s blocking main-thread task on any
+  // re-render — enough to stall the whole machine on the office PCs this runs on.
+  // Holding only the OPEN ids (rather than the closed ones) means the default is
+  // 5 rows and costs nothing to represent.
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  }, []);
+
   const [searchTerm, setSearchTerm] = useState<string>('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
+
+  // Apply filter to get filtered accounts (debounced search term prevents filtering on every keystroke)
+  // A filter is the user asking to SEE something. filterAccounts has already
+  // pruned the tree to matches plus their ancestors, so collapse is ignored while
+  // one is active — otherwise a search would return rows the user cannot see.
+  // Safe for the render cost too: a filtered tree is small by construction.
+  const isFiltering = debouncedSearchTerm.trim() !== '' || statusFilter !== 'all' || branchFilter !== 'all';
 
   const coaBranchOptions: SelectOption[] = useMemo(
     () => [
@@ -322,8 +382,11 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
 
   const renderAccounts = useCallback((accounts: DataChartOfAccountList[], level: number = 1, parentId: string | null = null): React.ReactNode => {
     return accounts.map((account) => {
-      const hasChildren = account.subAccounts && account.subAccounts.length > 0;
+      const childCount = account.subAccounts?.length ?? 0;
+      const hasChildren = childCount > 0;
       const rowClassName = getLevelColorClass(level, hasChildren, account.is_active);
+      // Filtering force-expands; otherwise only what the user opened.
+      const isExpanded = isFiltering || expandedIds.has(String(account.id));
 
       return (
         <React.Fragment key={account.id}>
@@ -333,17 +396,20 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
             parentId={parentId}
             isActive={account.is_active}
             rowClassName={rowClassName}
+            childCount={childCount}
+            isExpanded={isExpanded}
+            onToggle={isFiltering ? undefined : toggleExpanded}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onReactivate={handleReactivate}
           />
-          {hasChildren && renderAccounts(account.subAccounts!, level + 1, String(account.id))}
+          {hasChildren && isExpanded && renderAccounts(account.subAccounts!, level + 1, String(account.id))}
         </React.Fragment>
       );
     });
-  }, [handleEdit, handleDelete, handleReactivate, getLevelColorClass]);
+  }, [handleEdit, handleDelete, handleReactivate, getLevelColorClass, expandedIds, isFiltering, toggleExpanded]);
 
-  // Apply filter to get filtered accounts (debounced search term prevents filtering on every keystroke)
+
   const filteredAccounts = useMemo(() =>
     filterAccounts(coaDataAccount || [], debouncedSearchTerm.toLowerCase().trim(), statusFilter, branchFilter),
     [coaDataAccount, debouncedSearchTerm, statusFilter, branchFilter, filterAccounts]

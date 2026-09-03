@@ -530,48 +530,60 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
               {receiptBusy ? 'Building the ID list…' : 'Download the ID list for the loans sheet'}
             </button>
           )}
-          {/* The paragraph above tells the reader these loans are NOT in the
-              accounting reports. This is the only route to seeing what would
-              put them there, so it belongs beside that sentence rather than in
-              a menu. A link, not a button: it navigates and posts nothing. */}
-          {hasOpeningBalance && (
-            <Link
-              href={`/imports/${batch.batch_ref}/opening-balance`}
-              className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-primary/40 bg-white px-5 py-2.5 text-sm text-black transition hover:border-primary dark:bg-boxdark dark:text-white"
-            >
-              <Eye size={14} />
-              See the opening balance this book would post
-            </Link>
-          )}
           {batch.summary?.sweep_failed && (
             <div className="flex max-w-xl items-start gap-2 rounded border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-900/10 dark:text-amber-400">
               <AlertTriangle size={15} className="mt-0.5 shrink-0" />
               <span>Balances could not be recomputed — ask a developer to run the balance sweep.</span>
             </div>
           )}
-          {busy === 'reverse' ? (
-            <div className="flex max-w-xl items-center gap-3 rounded-lg border border-danger/30 bg-danger/5 px-5 py-4">
-              <span
-                className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-danger border-t-transparent"
-                aria-hidden
-              />
-              <div className="text-sm text-black dark:text-white">
-                <p className="font-medium">Cancelling this posting…{elapsed > 0 ? ` ${elapsed}s` : ''}</p>
-                <p className="mt-0.5 text-xs text-body dark:text-bodydark">
-                  Removing payments, voiding journal entries and recomputing balances. Keep this tab open.
-                </p>
+          {/* Grouped in ONE flex row with a real gap. Both actions were
+              inline-flex inside a space-y-3 parent, so they flowed onto the same
+              line with NO horizontal separation — the cancel button sat flush
+              against the link. flex-wrap keeps them stacked on a narrow phone. */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* The paragraph above tells the reader these loans are NOT in the
+                accounting reports. This is the only route to seeing what would
+                put them there, so it belongs beside that sentence rather than
+                in a menu.
+
+                Filled primary, and deliberately the heavier of the two. It was
+                an outline link sitting beside a filled red "Cancel this
+                posting", which made the DESTRUCTIVE action the visually
+                dominant one — backwards for the action a user should reach for
+                first. Still a <Link>: it navigates and posts nothing. */}
+            {hasOpeningBalance && (
+              <Link
+                href={`/imports/${batch.batch_ref}/opening-balance`}
+                className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-default transition hover:bg-opacity-90"
+              >
+                <Eye size={14} />
+                See the opening balance this book would post
+              </Link>
+            )}
+            {busy === 'reverse' ? (
+              <div className="flex max-w-xl items-center gap-3 rounded-lg border border-danger/30 bg-danger/5 px-5 py-4">
+                <span
+                  className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-danger border-t-transparent"
+                  aria-hidden
+                />
+                <div className="text-sm text-black dark:text-white">
+                  <p className="font-medium">Cancelling this posting…{elapsed > 0 ? ` ${elapsed}s` : ''}</p>
+                  <p className="mt-0.5 text-xs text-body dark:text-bodydark">
+                    Removing payments, voiding journal entries and recomputing balances. Keep this tab open.
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <button
-              onClick={doReverse}
-              disabled={busy !== null}
-              className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-danger px-5 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RotateCcw size={14} />
-              Cancel this posting
-            </button>
-          )}
+            ) : (
+              <button
+                onClick={doReverse}
+                disabled={busy !== null}
+                className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-danger px-5 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RotateCcw size={14} />
+                Cancel this posting
+              </button>
+            )}
+          </div>
         </div>
       )}
 
