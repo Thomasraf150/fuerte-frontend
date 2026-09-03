@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
@@ -15,6 +15,13 @@ const COA: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [selectedAccount, setSelectedAccount] = useState<DataChartOfAccountList | null>(null);
   const [modalLoading, setModalLoading] = useState<boolean>(false);
+
+  // The form renders in the RIGHT COLUMN of the grid, which starts at the top
+  // of the page — while the account list beside it is ~76,000px tall and
+  // unpaginated. Click Edit after scrolling down and the form opens tens of
+  // thousands of pixels ABOVE the viewport, so nothing appears to happen and
+  // the Save button is never on screen. Measured at ~30,000px off-screen.
+  const formColumnRef = useRef<HTMLDivElement | null>(null);
   const {
     coaDataAccount,
     fetchCoaDataTable,
@@ -50,6 +57,29 @@ const COA: React.FC = () => {
   const handleFormReady = useCallback(() => {
     // Called by CoaForm when it has fully mounted and rendered
     setModalLoading(false);
+
+    // Scroll the content area back to the TOP, where this form column begins.
+    //
+    // The page scrolls an inner DefaultLayout div holding 76,742px of rows in a
+    // 900px viewport, and the form renders in the right-hand grid column, which
+    // starts at the very top. So clicking Edit part-way down the list opened the
+    // form far above the viewport with the Save button nowhere on screen —
+    // measured from scrollTop 12,000, the form sat at -16,908px and the
+    // container then drifted to 17,180 on its own as the 1,406 rows relayouted.
+    //
+    // A fixed target rather than scrollIntoView() on the form, deliberately:
+    // the relayout moves the element while a scroll is in flight, so anything
+    // relative to it is a race. Top is where the column is, always.
+    let node: HTMLElement | null = formColumnRef.current?.parentElement ?? null;
+    while (node) {
+      const overflowY = getComputedStyle(node).overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+        node.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      node = node.parentElement;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleCloseForm = useCallback(() => handleOpenForm('', false), [handleOpenForm]);
@@ -76,7 +106,7 @@ const COA: React.FC = () => {
         </div>
 
         {showForm && (
-          <div className="fade-in col-span-1">
+          <div ref={formColumnRef} className="fade-in col-span-1">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">

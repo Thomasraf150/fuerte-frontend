@@ -55,7 +55,7 @@ const AccountRow = React.memo<AccountRowProps>(({
         <div className="flex items-center gap-2">
           <span>
             {account.account_name}
-            {!isActive && <span className="ml-2 text-xs text-red-500">(Inactive)</span>}
+            {!isActive && <span className="ml-2 text-xs text-danger">(Inactive)</span>}
           </span>
         </div>
       </td>

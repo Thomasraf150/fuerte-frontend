@@ -92,9 +92,17 @@ const CoaForm: React.FC<CoaFormProps> = ({
       // Handle null branch for root/general accounts (branch is optional)
       setValue('branch_sub_id', selectedAccount.branch_sub_id ? String(selectedAccount.branch_sub_id) : '');
       setValue('balance', selectedAccount.balance || '0');
-      setValue('is_debit', selectedAccount.is_debit);
       setValue('parent_account_id', selectedAccount.parent_account_id ? String(selectedAccount.parent_account_id) : '');
-      setSelectedPlacement(selectedAccount.is_debit || '');
+      // Derive both from ONE normalised value. The column only ever holds 0
+      // or 1, so anything that is not '1' is credit — which keeps a radio
+      // checked even if the field ever arrives as '', 0, false or null again.
+      // The Account model's boolean cast used to make every credit account
+      // arrive as '', leaving BOTH radios unchecked; because they carry a
+      // `required` rule, react-hook-form then refused the submit and Save did
+      // nothing at all. 553 of 1,406 accounts were uneditable for ~7 months.
+      const placement = String(selectedAccount.is_debit) === '1' ? '1' : '0';
+      setValue('is_debit', placement);
+      setSelectedPlacement(placement);
     } else {
       // Reset form when creating new account
       reset();
@@ -187,7 +195,14 @@ const CoaForm: React.FC<CoaFormProps> = ({
             <span className="text-gray-700 dark:text-gray-300">Credit</span>
           </label>
         </div>
-        {errors && <p className="mt-2 text-sm text-red-600">{errors.is_debit && "Placement is required!"}</p>}
+        {/* text-danger, NOT text-red-600. tailwind.config.ts defines `red` as a flat
+                    hex string, so every red-<shade> class is dead and rendered this in body
+                    grey (measured: rgb(100,116,139), identical to body text) — which is why
+                    a blocked Save looked like nothing happening. Only rendered when the
+                    error exists, so an empty grey line no longer occupies the slot. */}
+                {errors.is_debit && (
+                  <p className="mt-2 text-sm font-medium text-danger">Placement is required!</p>
+                )}
       </div>
       
       <FormInput
