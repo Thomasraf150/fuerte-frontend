@@ -120,8 +120,22 @@ const useGeneralVoucher = () => {
   };
 
   // Legacy fetchGV function for backward compatibility (called by CV/JV forms after save)
+  //
+  // goToPage(1) is NOT redundant with the filtersKey effect above — it is the only
+  // thing that actually refreshes the list here. Every caller passes ("", "") purely
+  // to mean "reload", never to set a date filter (5 call sites: CVForm save/cancel/
+  // update-date, JVForm save/cancel). When no date filter is active, startDate and
+  // endDate are ALREADY "", so filtersKey is unchanged, the value-keyed effect never
+  // fires, and a newly saved voucher did not appear until the user searched or
+  // reloaded the page.
+  //
+  // If a date filter WAS active, this fires one redundant query: goToPage closes over
+  // the pre-update filters, then the filtersKey effect re-fetches with the cleared
+  // ones. Correct result, one extra request — preferred over leaving the common case
+  // silently broken.
   const fetchGV = async (_branch_sub_id: string, startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
+    goToPage(1);
   };
 
   const createGV = async (row: RowAcctgEntry) => {
