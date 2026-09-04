@@ -1,19 +1,21 @@
 "use client"
 import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Plus, Trash2, Printer, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
 import PayeeView from './PayeeView';
+import PayeeSelect from '@/components/PayeeSelect';
+import usePayee from '@/hooks/usePayee';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { toast } from "react-toastify";
 
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
-import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData } from '@/utils/DataTypes';
+import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData, SelectOption } from '@/utils/DataTypes';
 import {
   parseFinancialAmount,
   addAmounts,
@@ -41,7 +43,14 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
   // const { createGV, fetchGV, loading } = useGeneralVoucher();
   const [ showPayee, setShowPayee ] = useState<boolean>(false);
-  const [ dataPayee, setDataPayee ] = useState<RowVendorsData>();
+  // Partial<> because an inline-created payee is only { id, name } — the picker
+  // still hands back a full vendor row, which remains assignable.
+  const [ dataPayee, setDataPayee ] = useState<Partial<RowVendorsData>>();
+  // An existing voucher opened from the list — not a new one being drafted.
+  const isSavedVoucher = singleData !== undefined;
+  // Skipped for a saved voucher: the control is read-only there, so pulling the
+  // whole payee list would be a wasted round-trip on every voucher merely opened.
+  const { payees, createPayee, loading: payeeLoading, creating: payeeCreating, loadFailed: payeeLoadFailed } = usePayee(!isSavedVoucher);
   const [activeInput, setActiveInput] = useState<{ index: number; field: 'debit' | 'credit' } | null>(null);
 
   useEffect(() => {
@@ -62,6 +71,31 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   useEffect(() => {
     setValue('vendor_id', dataPayee?.id ?? '');
   }, [dataPayee]);
+
+  const payeeOptions = useMemo<SelectOption[]>(
+    () => payees.map((p) => ({ value: p.id, label: p.name })),
+    [payees],
+  );
+
+  /**
+   * What the combobox shows. Falls back to the borrower's name for entries that
+   * carry a borrower_id and no vendor — the same precedence the read-only input
+   * used. Display-only: it has no id, so vendor_id stays empty.
+   */
+  const selectedPayeeOption = useMemo<SelectOption | null>(() => {
+    if (dataPayee?.name) return { value: dataPayee.id ?? '', label: dataPayee.name };
+    if (singleData?.borrower_full_name) return { value: '', label: singleData.borrower_full_name };
+    return null;
+  }, [dataPayee, singleData]);
+
+  const handleSelectPayee = (option: SelectOption | null) => {
+    setDataPayee(option ? { id: option.value, name: option.label } : undefined);
+  };
+
+  const handleCreatePayee = async (name: string) => {
+    const created = await createPayee(name);
+    if (created) setDataPayee({ id: created.id, name: created.name });
+  };
 
   const flattenAccountsToOptions = (
     accounts: DataChartOfAccountList[],
@@ -244,30 +278,39 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
               />
             </div>
 
-            <div>
-              <div className="grid grid-cols-4 gap-2">
-                <div className="col-span-3">
-                  <FormInput
-                    label="Payee"
-                    id="vendor_id"
-                    type="text"
-                    icon={Edit3}
-                    error={errors.vendor_id && "journal desc is required"}
-                    className='mt-2'
-                    value={dataPayee?.name || singleData?.borrower_full_name}
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <button
-                    className="flex justify-center mt-10 bg-orange-300 rounded border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
-                    type="button"
-                    onClick={ () => { setShowPayee(true); } }
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
+            <div className='mt-2'>
+              <label
+                className="mb-3 block text-sm font-medium text-black dark:text-white"
+                htmlFor="vendor_id"
+              >
+                Payee
+              </label>
+              <PayeeSelect
+                inputId="vendor_id"
+                options={payeeOptions}
+                value={selectedPayeeOption}
+                onChange={handleSelectPayee}
+                onCreate={handleCreatePayee}
+                isLoading={payeeLoading}
+                isCreating={payeeCreating}
+                // Hide "Add new payee" when the payee list failed to load —
+                // there would be nothing to check a new name against.
+                canCreate={!payeeLoadFailed}
+                // Read-only once saved: updateGvEntry never sends vendor_id, so a
+                // payee changed here would silently fail to save. Same reasoning
+                // as CVForm.
+                isDisabled={isSavedVoucher}
+              />
+              {!isSavedVoucher && (
+                <button
+                  className="mt-2 text-sm font-medium text-primary underline-offset-2 hover:underline disabled:opacity-50"
+                  type="button"
+                  onClick={() => { setShowPayee(true); }}
+                  disabled={payeeCreating}
+                >
+                  Browse by category
+                </button>
+              )}
             </div>
             <div className='col-span-3'>
               <FormInput
