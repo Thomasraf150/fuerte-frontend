@@ -15,7 +15,7 @@ const GeneralLedgerList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const { fetchGL, dataGl } = useGeneralLedger();
+  const { fetchGL, dataGl, loading } = useGeneralLedger();
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -74,7 +74,56 @@ const GeneralLedgerList: React.FC = () => {
                           </thead>
                           {/* Table Body */}
                           <tbody className="text-sm text-gray-900 dark:text-bodydark">
-                            {filteredData && filteredData.map((item, i) => (
+                            {/*
+                              Skeleton mirrors the real row: four bordered cells at the
+                              same height, with bar widths that stand in for the shape of
+                              the data — a long account name, a shorter number, two narrow
+                              right-aligned figures. Reserving the true layout is why this
+                              is a skeleton and not a spinner: nothing shifts on arrival.
+
+                              bg-stroke / dark:bg-strokedark, NOT bg-gray-200 — this
+                              project's tailwind config defines `gray` as a single string,
+                              so every `gray-<shade>` class in this file renders nothing.
+                            */}
+                            {loading && Array.from({ length: 8 }).map((_, i) => (
+                              <tr key={`skeleton-${i}`} className="animate-pulse">
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
+                                  <div className="h-3 w-48 max-w-full rounded bg-stroke dark:bg-strokedark" />
+                                </td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
+                                  <div className="mx-auto h-3 w-24 rounded bg-stroke dark:bg-strokedark" />
+                                </td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
+                                  <div className="ml-auto h-3 w-16 rounded bg-stroke dark:bg-strokedark" />
+                                </td>
+                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
+                                  <div className="ml-auto h-3 w-16 rounded bg-stroke dark:bg-strokedark" />
+                                </td>
+                              </tr>
+                            ))}
+
+                            {/*
+                              An empty result used to render as a bare white box, which
+                              reads identically to "still loading" and to "the page is
+                              broken". Naming which of the two it is — nothing here at all,
+                              or nothing matching this search — is the whole point.
+                            */}
+                            {!loading && filteredData?.length === 0 && (
+                              <tr>
+                                <td colSpan={4} className="px-4 py-10 text-center border border-stroke dark:border-strokedark">
+                                  <p className="font-medium text-black dark:text-white">
+                                    {searchTerm ? 'No matching accounts' : 'No ledger accounts to show'}
+                                  </p>
+                                  <p className="mt-1 text-sm text-bodydark2 dark:text-bodydark">
+                                    {searchTerm
+                                      ? <>Nothing matches &ldquo;{searchTerm}&rdquo;. Search by account name or number — journal references like CRJ-… are not searched here.</>
+                                      : 'The ledger returned no accounts.'}
+                                  </p>
+                                </td>
+                              </tr>
+                            )}
+
+                            {!loading && filteredData && filteredData.map((item, i) => (
                               <tr
                                 key={i}
                                 className={`hover:bg-gray-100 dark:hover:bg-graydark cursor-pointer ${
@@ -93,11 +142,14 @@ const GeneralLedgerList: React.FC = () => {
                           <tfoot className="bg-gray-200 dark:bg-meta-4 text-gray-700 dark:text-bodydark text-sm sticky bottom-0">
                             <tr className="bg-gray-100 dark:bg-boxdark font-semibold">
                               <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark" colSpan={2}>Total:</td>
+                              {/* While loading these would read 0.00 off an empty array —
+                                  a real-looking figure for a total nobody has computed yet.
+                                  An em dash says "not known", which is the truth. */}
                               <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark">
-                                {formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
+                                {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
                               </td>
                               <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark">
-                                {formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
+                                {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
                               </td>
                             </tr>
                           </tfoot>

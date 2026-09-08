@@ -30,9 +30,18 @@ const useGeneralLedger = () => {
     mutation = GET_GL_QUERY;
     setLoading(true);
 
-    const result = await graphqlFetch(mutation, variables);
-    setDataGl(result?.data.getGL);
-    setLoading(false);
+    // finally, not a trailing call: a throw here used to leave `loading` true
+    // forever, which the list ignored. Now that the list renders a skeleton off
+    // this flag, a failed fetch would otherwise shimmer for eternity.
+    try {
+      const result = await graphqlFetch(mutation, variables);
+      setDataGl(result?.data.getGL);
+    } catch (error) {
+      toast.error('Failed to load the general ledger. Please try again.');
+      setDataGl([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
    // Fetch data on component mount if id exists
