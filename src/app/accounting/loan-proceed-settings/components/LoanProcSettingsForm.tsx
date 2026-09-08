@@ -80,6 +80,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         if (item?.description === 'cash in bank') {
           setValue('cib_id', item?.account_id);
         }
+        if (item?.description === 'cash on hand') {
+          setValue('coh_id', item?.account_id);
+        }
       });
     }
   }, [lpsSingleData, actionLbl])
@@ -187,6 +190,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'addon_id' as const, label: 'Addon Amount' },
           { name: 'addon_udi_id' as const, label: 'Addon UDI' },
           { name: 'cib_id' as const, label: 'Cash in Bank' },
+          { name: 'coh_id' as const, label: 'Cash on Hand' },
         ].map(({ name, label }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">
             <label className="mb-3 block text-sm font-medium text-black dark:text-white">{label} <span style={{ color: '#ef4444' }}>*</span></label>

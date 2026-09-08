@@ -804,6 +804,7 @@ export interface DataLoanProceedList {
   addon_udi_id: string;
   addon_total_id: string;
   cib_id: string;
+  coh_id: string;
 }
 export interface RowAcctgDetails {
   acctg_entries_id: string;

@@ -23,6 +23,14 @@ import {
   isValidFinancialInput,
   CURRENCY_PRECISION
 } from '@/utils/financial';
+
+/**
+ * Chart-of-accounts number for the Notes Receivable parent. Its whole subtree is
+ * what payment posting already credits on a collection, and therefore what a
+ * voucher must not credit a second time.
+ */
+const NOTES_RECEIVABLE_ROOT = '010201';
+
 interface ParentFormBr {
   setShowForm: (b: boolean) => void;
   actionLbl: string;
@@ -135,6 +143,44 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
   const optionsCoaData = getAccountOptions(coaDataAccount ?? []);
 
+  /**
+   * Every account number under 010201 Notes Receivable.
+   *
+   * Walked from the COA tree rather than matched on a "0102" prefix, because that
+   * prefix is not a reliable proxy: the Deposit in Transit accounts are parented
+   * under Notes Receivable by mistake and share it, while being ordinary cash
+   * clearing accounts. They are excluded by name so the warning below stays
+   * trustworthy — one that fires on innocent entries is one people learn to click
+   * past.
+   */
+  const notesReceivableNumbers = useMemo(() => {
+    const findByNumber = (
+      accounts: DataChartOfAccountList[],
+    ): DataChartOfAccountList | undefined => {
+      for (const account of accounts) {
+        if (String(account.number) === NOTES_RECEIVABLE_ROOT) return account;
+        const found = account.subAccounts ? findByNumber(account.subAccounts) : undefined;
+        if (found) return found;
+      }
+      return undefined;
+    };
+
+    const collect = (accounts: DataChartOfAccountList[], into: Set<string>): Set<string> => {
+      accounts.forEach((account) => {
+        if (!account.account_name?.toLowerCase().startsWith('deposit in transit')) {
+          into.add(String(account.number));
+        }
+        if (account.subAccounts) collect(account.subAccounts, into);
+      });
+      return into;
+    };
+
+    const root = findByNumber(coaDataAccount ?? []);
+    if (!root) return new Set<string>();
+
+    return collect(root.subAccounts ?? [], new Set<string>([NOTES_RECEIVABLE_ROOT]));
+  }, [coaDataAccount]);
+
   const addRow = () => {
     setRows([...rows, { acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   };
@@ -197,6 +243,44 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
         `Debit and credit are not equal! Difference: ${formatWithThousandsSeparator(validation.difference, CURRENCY_PRECISION)}`
       );
       return;
+    }
+
+    // Payment posting already credits Notes Receivable for every collection, so a
+    // voucher that credits it again reduces the same receivable twice — the fault
+    // accounting reported on 2026-09-04. A deposit of collected cash should credit
+    // the branch's Cash on Hand instead; NR was already relieved when the client
+    // paid. Warn rather than block: a handful of NR credits are legitimate
+    // (hand-keyed pensioner releases, write-offs), so this must not become a wall.
+    const nrCreditRows = rows.filter(
+      (row) =>
+        notesReceivableNumbers.has(String(row.acctnumber)) &&
+        parseFinancialAmount(row.credit || '0').gt(0),
+    );
+
+    if (nrCreditRows.length > 0) {
+      // Resolved from the account options, NOT from row.accountLabel: that field is
+      // reassigned on every cell edit, so typing the amount after picking the account
+      // blanks it and the warning would name a bare account number.
+      const accountList = nrCreditRows
+        .map((row) => {
+          const option = optionsCoaData.find((opt) => opt.value === String(row.acctnumber));
+          return option ? option.label.replace(/^—+\s*/, '').trim() : String(row.acctnumber);
+        })
+        .join(', ');
+
+      const proceed = await showConfirmationModal(
+        'Crediting Notes Receivable?',
+        `<p style="line-height:1.5;text-align:left">This voucher credits <b>${accountList}</b>.<br/><br/>` +
+          'Payment posting already reduces Notes Receivable when a collection is posted. ' +
+          'Crediting it here as well deducts the same amount twice.<br/><br/>' +
+          'To record a deposit of collected cash, credit the branch\'s <b>Cash on Hand</b> account instead.</p>',
+        'Credit it anyway',
+        true,
+        // showConfirmationModal renders `text` verbatim unless this last flag is set.
+        true,
+      );
+
+      if (!proceed) return;
     }
 
     const isConfirmed = await showConfirmationModal(
