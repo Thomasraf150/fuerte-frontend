@@ -352,6 +352,12 @@ export interface DataSubArea {
   is_deleted: boolean;
   area: DataArea
 }
+/** Good-payer pill value; mirrors the GraphQL `PayerStanding` enum. */
+export type PayerStanding = 'GOOD' | 'PROBLEM' | 'NONE';
+
+/** Borrowers-list Payer filter: one standing, or 'all' for no filter. */
+export type PayerFilter = 'all' | PayerStanding;
+
 export interface BorrowerRowInfo {
   id?: string;
   user_id: number;
@@ -379,6 +385,7 @@ export interface BorrowerRowInfo {
   borrower_reference: BorrowerReference;
   chief: DataChief
   user: User
+  payer_standing?: PayerStanding | null;
 }
 export interface LoanAcctgDetail {
   id: string;

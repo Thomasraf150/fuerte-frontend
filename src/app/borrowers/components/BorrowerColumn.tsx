@@ -5,6 +5,7 @@ import { Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 import BranchBadge from '@/components/BranchBadge';
+import PayerBadge from '@/components/PayerBadge';
 import PendingDeletionBadge from '@/components/PendingDeletion/PendingDeletionBadge';
 import type { PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 
@@ -15,6 +16,7 @@ const borrowerColumn = (
   onPendingClick: (row: BorrowerRowInfo, info: PendingDeletionInfo) => void = () => {},
 ): TableColumn<BorrowerRowInfo>[] => [
   {
+    id: 1,
     name: 'Branch',
     cell: row => {
       const branchSub = row.branch_sub
@@ -29,36 +31,53 @@ const borrowerColumn = (
     sortable: false,
   },
   {
+    // Explicit ids keep every other column's data-column-id at its old
+    // position-based value. app/borrowers/styles.css hides 3 (Middle Name) and
+    // 6 (Chief) on phones, and that CSS also reaches the tables on the borrower
+    // page, so it must not be renumbered.
+    id: 'payer',
+    name: 'Payer',
+    cell: row => <PayerBadge standing={row.payer_standing} borrowerId={row.id} />,
+    sortable: false,
+  },
+  {
+    id: 2,
     name: 'First Name',
     cell: row => row.firstname,
     sortable: true,
   },
   {
+    id: 3,
     name: 'Middle Name',
     cell: row => row.middlename,
     sortable: true,
   },
   {
+    id: 4,
     name: 'Last Name',
     cell: row => row.lastname,
     sortable: true,
   },
   {
+    id: 5,
     name: 'Residence Address',
     cell: row => row.residence_address,
     sortable: true,
   },
   {
+    id: 6,
     name: 'Chief',
     cell: row => row.chief.name,
     sortable: true,
   },
   {
+    id: 7,
     name: 'Date of Birth',
     cell: row => row.borrower_details.dob,
     sortable: true,
   },
   {
+    id: 8,
     name: 'Action',
     cell: row => {
       const info = pendingByEntityId.get(Number(row.id));

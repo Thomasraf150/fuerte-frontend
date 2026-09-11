@@ -8,6 +8,7 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import BranchBadge from '@/components/BranchBadge';
+import PayerBadge from '@/components/PayerBadge';
 import useBorrowerDetail from '@/hooks/useBorrowerDetail';
 import useBranches from '@/hooks/useBranches';
 import BorrowerInfo from '../components/BorrowerInfo';
@@ -162,13 +163,16 @@ const BorrowerDetailPage: React.FC = () => {
             { label: borrowerTitle }
           ]}
         />
-        {singleData?.branch_sub?.branch?.name && (
-          <div className="-mt-3 mb-4">
-            <BranchBadge
-              branchName={singleData.branch_sub.branch.name}
-              subBranchName={singleData.branch_sub.name}
-              size="lg"
-            />
+        {(singleData?.branch_sub?.branch?.name || singleData?.payer_standing) && (
+          <div className="-mt-3 mb-4 flex flex-wrap items-center gap-3">
+            {singleData?.branch_sub?.branch?.name && (
+              <BranchBadge
+                branchName={singleData.branch_sub.branch.name}
+                subBranchName={singleData.branch_sub.name}
+                size="lg"
+              />
+            )}
+            <PayerBadge standing={singleData?.payer_standing} borrowerId={singleData?.id} size="lg" />
           </div>
         )}
       </div>

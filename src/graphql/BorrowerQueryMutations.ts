@@ -1,8 +1,9 @@
 const GET_BORROWER_QUERY: string = `
-    query GetBorrowers($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String){
-      getBorrowers(first: $first, page: $page, orderBy: $orderBy, search: $search) {
+    query GetBorrowers($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String, $payer: PayerStanding){
+      getBorrowers(first: $first, page: $page, orderBy: $orderBy, search: $search, payer: $payer) {
         data {
           id
+          payer_standing
           user_id
           chief_id
           amount_applied
@@ -110,6 +111,7 @@ const GET_SINGLE_BORROWER_QUERY: string = `
     query GetBorrower($id: ID!){
       getBorrower(id: $id) {
         id
+        payer_standing
         user_id
         chief_id
         amount_applied

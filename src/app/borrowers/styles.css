@@ -47,6 +47,38 @@
   [data-column-id="6"] {
     display: none !important;
   }
+
+  /* Borrowers list only — the one table with a Payer column; these ids repeat in
+     the borrower page's tables, which load this file too. Only ~2 columns fit on
+     a phone, so lead with who the borrower is, then their standing: First Name
+     moves in front of Payer; Branch and Residence Address are dropped like Middle
+     Name and Chief. The table sizes its columns alike, and long addresses
+     stretched them until the "Problem ›" stamp ran off the table edge at 360px
+     (measured 2026-09-11); without Address it clears by ~45px. */
+  .rdt_Table:has([data-column-id="payer"]) [data-column-id="1"],
+  .rdt_Table:has([data-column-id="payer"]) [data-column-id="5"] {
+    display: none !important;
+  }
+  .rdt_Table:has([data-column-id="payer"]) [data-column-id="2"] {
+    order: -1;
+  }
+  /* The narrower columns would ellipsize a long name; let names wrap instead
+     (two lines still fit the 48px row). */
+  .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="2"],
+  .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="2"] > div,
+  .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="4"],
+  .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="4"] > div {
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+  }
+  /* Same for the header labels ("FIRST NA…" otherwise): they wrap to two lines,
+     which costs the header row ~17px at 360px. */
+  .rdt_Table:has([data-column-id="payer"]) .rdt_TableHeadRow .rdt_TableCol,
+  .rdt_Table:has([data-column-id="payer"]) .rdt_TableHeadRow .rdt_TableCol * {
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
   
   /* Better spacing for action buttons on mobile */
   .rdt_TableCell:last-child {

@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
+import PayerFilterChips from '@/components/PayerFilterChips';
 import borrowerColumn from './BorrowerColumn';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 import useBorrower from '@/hooks/useBorrower';
@@ -19,6 +20,8 @@ const BorrowerList: React.FC = () => {
       handleRmBorrower,
       serverSidePaginationProps,
       borrowerError,
+      payerFilter,
+      setPayerFilter,
       refresh } = useBorrower();
 
   const entityIds = useMemo(
@@ -89,6 +92,7 @@ const BorrowerList: React.FC = () => {
                     </button>
                   </div>
                 )}
+                <PayerFilterChips value={payerFilter} onChange={setPayerFilter} />
                 <CustomDatatable
                   apiLoading={paginationLoading || pendingLoading}
                   columns={borrowerColumn(handleRowClick, handleRowRmBorrClick, pendingByEntityId, handlePendingClick)}

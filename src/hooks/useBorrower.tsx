@@ -1,13 +1,13 @@
 "use client"
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { usePagination } from './usePagination';
 import useBorrowerBase from './useBorrowerBase';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
-import { BorrowerInfo, BorrowerRowInfo } from '@/utils/DataTypes';
+import { BorrowerInfo, BorrowerRowInfo, PayerFilter } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
 
 /**
@@ -30,16 +30,22 @@ const useBorrower = () => {
     fetchDataBorrCompany,
   } = useBorrowerBase();
 
+  // The Payer filter rides on usePagination's statusFilter slot, so changing it
+  // refetches page 1 exactly like a search does. 'all' sends no filter.
+  const [payerFilter, setPayerFilter] = useState<PayerFilter>('all');
+
   // Wrapper function to adapt existing API for usePagination hook
   const fetchBorrowersForPagination = useCallback(async (
     first: number,
     page: number,
-    search?: string
+    search?: string,
+    payer?: string
   ) => {
     const result = await graphqlFetch(GET_BORROWER_QUERY, {
       first,
       page,
       ...(search && { search }),
+      ...(payer && payer !== 'all' ? { payer } : {}),
       orderBy: [{ column: "id", order: 'DESC' }]
     });
 
@@ -83,6 +89,7 @@ const useBorrower = () => {
   } = usePagination<BorrowerRowInfo>({
     fetchFunction: fetchBorrowersForPagination,
     config: { initialPageSize: 20 },
+    statusFilter: payerFilter,
   });
 
   // Legacy fetchDataBorrower function for backward compatibility
@@ -140,6 +147,8 @@ const useBorrower = () => {
 
     // Pagination functionality
     pagination,
+    payerFilter,
+    setPayerFilter,
     searchQuery,
     goToPage,
     changePageSize,
