@@ -9,11 +9,71 @@ import BranchBadge from '@/components/BranchBadge';
 import { ChevronDown, ChevronRight, Edit2, Eye, GitBranch, Printer, RefreshCw, Search, Trash2 } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
+import useCoaGroupView from '@/hooks/useCoaGroupView';
 import Swal from 'sweetalert2';
 
 // 'all' is this screen's no-filter sentinel (not '') — kept as a real option so
 // the control never renders blank.
 const COA_ALL_BRANCHES_OPTION: SelectOption = { value: 'all', label: 'All Branches' };
+
+/**
+ * Group / Branch cell for a company-wide account (blank branch): shared by every
+ * branch. Mirrors BranchBadge's small layout, but takes the row's own text
+ * colour so it reads on the dark-blue header rows and the white rows alike.
+ */
+const CompanyWideBadge = () => (
+  <div className="flex items-center gap-2" title="Company-wide: shared by every branch">
+    <span className="inline-flex shrink-0 items-center rounded-full border border-current px-2 py-0.5 text-xs font-bold opacity-80">
+      ALL
+    </span>
+    <span className="text-xs opacity-80">All groups &amp; branches</span>
+  </div>
+);
+
+/**
+ * Group / Branch cell: the group pill (BranchBadge's FA/FB/FC/FD colours) and
+ * the exact branch. FB, FC and FD are one branch each, so the sub-branch alone
+ * says it ("FC Main"); FA spans several branches, so both levels show
+ * ("Marikina FA › Manila", "MB › MB 1"), collapsing when they share a name.
+ */
+const GroupBranchCell = ({ branchSub }: { branchSub?: DataChartOfAccountList['branch_sub'] | null }) => {
+  if (!branchSub) {
+    return <CompanyWideBadge />;
+  }
+  const branch = branchSub.branch?.name ?? '';
+  const sub = branchSub.name ?? '';
+  const where = /^F[BCD]$/.test(branch) || !branch ? sub : (sub && sub !== branch ? `${branch} › ${sub}` : branch);
+
+  return (
+    <div className="flex items-center gap-2" title={where}>
+      <BranchBadge branchName={branch || sub} />
+      <span className="text-xs">{where}</span>
+    </div>
+  );
+};
+
+/**
+ * Removes the group view's hidden accounts from the tree. A hidden parent stays
+ * while it still has a visible descendant, so no visible account loses its path
+ * to a root. Returns the pruned tree and how many accounts it actually removed.
+ */
+function pruneHiddenAccounts(
+  accounts: DataChartOfAccountList[],
+  hidden: ReadonlySet<string>,
+): { tree: DataChartOfAccountList[]; removed: number } {
+  let removed = 0;
+  const walk = (list: DataChartOfAccountList[]): DataChartOfAccountList[] =>
+    list.reduce((kept: DataChartOfAccountList[], account) => {
+      const children = account.subAccounts?.length ? walk(account.subAccounts) : [];
+      if (hidden.has(String(account.id)) && children.length === 0) {
+        removed += 1;
+        return kept;
+      }
+      kept.push({ ...account, subAccounts: children });
+      return kept;
+    }, []);
+  return { tree: walk(accounts), removed };
+}
 
 // Memoized AccountRow component to prevent unnecessary re-renders
 interface AccountRowProps {
@@ -94,7 +154,7 @@ const AccountRow = React.memo<AccountRowProps>(({
         </div>
       </td>
       <td className="px-6 py-2 text-sm font-medium">{account.number}</td>
-      <td className="px-6 py-2 text-sm font-medium"><BranchBadge branchName={account?.branch_sub?.branch?.name} subBranchName={account?.branch_sub?.name} /></td>
+      <td className="px-6 py-2 text-sm font-medium"><GroupBranchCell branchSub={account?.branch_sub} /></td>
       <td className="px-6 py-2 text-sm text-center">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
       <td className="px-6 py-2 text-sm text-center">
         {Number(account.balance).toLocaleString('en-US', {
@@ -211,6 +271,21 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
+
+  // BRANCH LOCK. Non-Owners see only their own branch's accounts plus
+  // company-wide ones (the owner's rule); the server decides which to hide from
+  // the Branch column, and Owners get nothing hidden. It deliberately does NOT
+  // count towards isFiltering below; that flag force-expands the tree, and a
+  // large expanded tree is the main-thread stall described above.
+  const { hiddenIds } = useCoaGroupView();
+  const groupPrune = useMemo(
+    () => (hiddenIds.size > 0 && coaDataAccount ? pruneHiddenAccounts(coaDataAccount, hiddenIds) : null),
+    [coaDataAccount, hiddenIds],
+  );
+  const visibleAccounts = useMemo(
+    () => (groupPrune ? groupPrune.tree : (coaDataAccount || [])),
+    [groupPrune, coaDataAccount],
+  );
 
   // Apply filter to get filtered accounts (debounced search term prevents filtering on every keystroke)
   // A filter is the user asking to SEE something. filterAccounts has already
@@ -411,8 +486,8 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
 
 
   const filteredAccounts = useMemo(() =>
-    filterAccounts(coaDataAccount || [], debouncedSearchTerm.toLowerCase().trim(), statusFilter, branchFilter),
-    [coaDataAccount, debouncedSearchTerm, statusFilter, branchFilter, filterAccounts]
+    filterAccounts(visibleAccounts, debouncedSearchTerm.toLowerCase().trim(), statusFilter, branchFilter),
+    [visibleAccounts, debouncedSearchTerm, statusFilter, branchFilter, filterAccounts]
   );
 
   // Memoize the rendered account tree to prevent re-creating 1000+ JSX elements on keystroke re-renders.
@@ -517,7 +592,7 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                   <tr>
                     <th scope="col" className="px-6 py-3">Account Name</th>
                     <th scope="col" className="px-6 py-3">Account #</th>
-                    <th scope="col" className="px-6 py-3">Branch</th>
+                    <th scope="col" className="px-6 py-3">Group / Branch</th>
                     <th scope="col" className="px-6 py-3 text-center">Is Debit</th>
                     <th scope="col" className="px-6 py-3 text-center">Balance</th>
                     <th scope="col" className="px-6 py-3 text-center">Actions</th>
@@ -538,7 +613,9 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                   ) : (
                     <tr>
                       <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                        {searchTerm ? 'No accounts found matching your search.' : 'No accounts available.'}
+                        {searchTerm && groupPrune
+                          ? "No matches in your branch's accounts."
+                          : searchTerm ? 'No accounts found matching your search.' : 'No accounts available.'}
                       </td>
                     </tr>
                   )}

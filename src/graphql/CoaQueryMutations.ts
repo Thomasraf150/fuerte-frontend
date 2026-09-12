@@ -215,7 +215,20 @@ const GET_ACCOUNT_TRANSACTIONS_QUERY: string = `
     }
 `;
 
+// Display-only group view for the Chart of Accounts page. Deliberately NOT part
+// of COA_TABLE_QUERY: that query feeds every account picker and must stay
+// company-wide.
+const COA_GROUP_VIEW_QUERY: string = `
+    query GetCoaGroupView {
+      getCoaGroupView {
+        group_code
+        hidden_account_ids
+      }
+    }
+`;
+
 const CoaQueryMutations = {
+  COA_GROUP_VIEW_QUERY,
   COA_TABLE_QUERY,
   UPDATE_COA_MUTATION,
   SAVE_COA_MUTATION,

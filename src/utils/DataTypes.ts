@@ -746,6 +746,12 @@ export interface DataChartOfAccountList {
   branch_sub: DataSubBranches;
   subAccounts: DataChartOfAccountList[];
 }
+/** The Chart of Accounts page's group view (FA/FB/FC/FD); display only. */
+export interface DataCoaGroupView {
+  /** The caller's group code, or null when they have none (Owner): nothing is hidden. */
+  group_code: string | null;
+  hidden_account_ids: string[];
+}
 export interface DataReLsRenewal {
   ua_sp: DataReLsRenewalDetails[];
   ob: DataReLsRenewalDetails[];
