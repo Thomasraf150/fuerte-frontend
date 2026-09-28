@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarLinkGroup from "./SidebarLinkGroup";
+import ApplicationsMenuItem from "./ApplicationsMenuItem";
+import { useAuthStore } from "@/store/authStore";
+import { useStore } from "zustand";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -22,6 +25,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === "true",
   );
+
+  // UI only. Safe during render: persist rehydrates synchronously, and DefaultLayout renders this after mount.
+  const isCallCenter = useStore(useAuthStore, (s) => s.user?.role?.code === "CALLCTR");
 
   // close on click outside
   useEffect(() => {
@@ -67,7 +73,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <Link href="/">
+        <Link href={isCallCenter ? "/applications" : "/"}>
           <Image
             width={0}
             height={0}
@@ -107,6 +113,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         {/* <!-- Sidebar Menu --> */}
         <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
+          {/* Call Center sees only Applications; withAuth redirects it away from
+              every other page. UI only: neither is a security control. */}
+          {isCallCenter ? (
+            <div>
+              <ul className="mb-6 flex flex-col gap-1.5">
+                <ApplicationsMenuItem pathname={pathname} />
+              </ul>
+            </div>
+          ) : (
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
               DASBOARD
@@ -253,6 +268,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   Borrowers
                 </Link>
               </li>
+
+              {/* <!-- Menu Item Applications --> */}
+              <ApplicationsMenuItem pathname={pathname} />
 
               {/* <!-- Menu Item Approvals --> */}
               <li>
@@ -946,6 +964,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
              {/* <!-- Menu Item Reports --> */}
           </div>
+          )}
 
         </nav>
         {/* <!-- Sidebar Menu --> */}

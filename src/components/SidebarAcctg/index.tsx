@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarLinkGroup from "./SidebarLinkGroup";
+import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
 import { Server } from 'react-feather';
 
 interface SidebarProps {
@@ -181,6 +182,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   );
                 }}
               </SidebarLinkGroup>
+
+              {/* Applications */}
+              <ApplicationsMenuItem pathname={pathname} />
 
               {/* Approvals */}
               <li>

@@ -318,7 +318,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           setValue('lastname', singleData.lastname);
           setValue('terms_of_payment', singleData.terms_of_payment);
           setValue('residence_address', singleData.residence_address);
-          setValue('is_rent', (singleData.is_rent !== '0' ? 1 : 0));
+          // GraphQL sends is_rent as a Boolean although the type says string; comparing it to
+          // '0' opened every borrower as Rent. Read true/1/'1' as Rent, anything else as Own.
+          const rent = String(singleData.is_rent);
+          setValue('is_rent', rent === 'true' || rent === '1' ? 1 : 0);
           setValue('other_source_of_inc', singleData.other_source_of_inc);
           setValue('est_monthly_fam_inc', singleData.est_monthly_fam_inc);
           setValue('employment_position', singleData.employment_position);
@@ -404,7 +407,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
             <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
                 <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  Check for Existing Borrower
+                  {singleData?.id ? 'Name & Contact' : 'Check for Existing Borrower'}
                 </h3>
               </div>
               <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">

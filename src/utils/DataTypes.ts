@@ -940,3 +940,35 @@ export interface LoanHistoryPaginator {
     hasMorePages: boolean;
   };
 }
+
+// ---------------------------------------------------------------------------
+// Loan applications (/applications) — Google Form intake and walk-ins.
+// ---------------------------------------------------------------------------
+
+export type LoanApplicationStatus = 'for_interview' | 'interviewed' | 'declined' | 'borrower_created';
+
+export interface LoanApplicationRow {
+  id: string;
+  source: 'google_form' | 'manual';
+  /** "Y-m-d H:i:s", Manila wall-clock with no zone: the form's timestamp, or when a typed-in application was saved. Null only for a row inserted outside Eloquent. */
+  submitted_at: string | null;
+  /** The form's branch answer as typed — a location, not a Fuerte branch. */
+  location: string | null;
+  /** The assigned Fuerte branch; null until someone places the application. */
+  branch_sub: { id: string; name: string } | null;
+  status: LoanApplicationStatus;
+  full_name: string;
+  contact_no: string | null;
+  /** Money as a string ("2500.00"), never a float. */
+  amount_applied: string | null;
+  purpose: string | null;
+  intake_flags: string[];
+}
+
+/** POST /api/applications/upload → {status: true, ...this}. */
+export interface ApplicationUploadResult {
+  added: number;
+  already_here: number;
+  skipped: { row: number; reason: string }[];
+  flagged: { row: number; note: string }[];
+}

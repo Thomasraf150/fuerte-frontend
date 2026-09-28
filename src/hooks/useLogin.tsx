@@ -30,7 +30,7 @@ const useLogin = () => {
         const res = await response.json();
         SET_AUTH_DATA(res.user, res.token);
         toast.success("You're logged in!");
-        router.push('/');
+        router.push(res.user?.role?.code === 'CALLCTR' ? '/applications' : '/');
         return { success: true, data: res };
       } else {
         // Don't blame the password for every failure. /api/login is rate limited

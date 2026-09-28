@@ -7,6 +7,13 @@ import { handleSessionExpired } from '@/utils/graphqlFetch';
 const TOKEN_VALIDATION_TTL_MS = 5 * 60 * 1000;
 let lastValidatedAt = 0;
 
+// "/applications" or a page under it, never a sibling like "/applications-archive".
+const isApplicationsPath = (p: string) => p === '/applications' || p.startsWith('/applications/');
+
+// Where Call Center must go from path p, or null when it may stay.
+const callCenterTarget = (p: string) =>
+  useAuthStore.getState().user?.role?.code === 'CALLCTR' && !isApplicationsPath(p) ? '/applications' : null;
+
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): ComponentType<P> => {
   const AuthWrapper: React.FC<P> = (props: P) => {
     const router = useRouter();
@@ -23,6 +30,16 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): Compone
 
         if (IS_AUTHENTICATED() && isOnSignIn) {
           router.push('/');
+          return;
+        }
+
+        // Call Center (CALLCTR, role 8) works the Applications page only, so keep
+        // it there. UI routing, NOT a security control: BranchAccessService gives
+        // role 8 no branches, but that covers branch-scoped reads only; most
+        // mutations are still open to it (known gap in the applications-page spec).
+        const target = IS_AUTHENTICATED() ? callCenterTarget(window.location.pathname) : null;
+        if (target) {
+          router.replace(target);
           return;
         }
 
