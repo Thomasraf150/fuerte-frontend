@@ -3,10 +3,11 @@ import { Camera, Home, Save, RotateCw, Search } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { checkBorrowerNow } from '@/utils/borrowerDuplicateCheck';
 import FormLabel from '@/components/FormLabel';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, type Control, type FieldErrors, type UseFormRegister } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
 import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies, DataSubBranches, SelectOption } from '@/utils/DataTypes';
 import { useAuthStore } from "@/store";
+import { BORROWER_REQUIRED_FIELDS } from '@/utils/borrowerRequiredFields';
 import { useEffect, useMemo, useState, useRef } from "react";
 
 interface BorrInfoProps {
@@ -31,9 +32,21 @@ interface BorrInfoProps {
   fetchDataArea: (v1: number, v2: number) => void;
   fetchDataSubArea: (v1: number) => void;
   fetchDataBorrCompany: (v1: number, v2: number) => void;
+  /** Which fields must be filled. Undefined = New Borrower's own set (today's rules). */
+  requiredFields?: ReadonlySet<string>;
+  /** Values to start from (e.g. an application). Merged over the defaults; never sets `id`. */
+  initialValues?: Partial<BorrowerInfo>;
+  /** Branch choices that replace the assigned-branch picker; when given, the picker always shows. For creating; with singleData (edit) the picker would show too, so edit pages must not pass it. */
+  branchChoices?: SelectOption[];
+  /** Extra fields rendered at the top of "Borrower Information", bound to this same form. */
+  renderExtraFields?: (form: { control: Control<any>; register: UseFormRegister<any>; errors: FieldErrors<any> }) => React.ReactNode;
+  /** 'application' hides the profile photo and the Check Borrower button and titles the identity block "Name & Contact". */
+  variant?: 'borrower' | 'application';
+  /** Start the branch picker on the user's home branch when it is a choice. False = the user must pick. */
+  preselectHomeBranch?: boolean;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, requiredFields, initialValues, branchChoices, renderExtraFields, variant = 'borrower', preselectHomeBranch = true }) => {
   const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -86,15 +99,24 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     photo: ""
   };
   
+  // Starting values (an application's, say) go over the defaults. `id` is never taken
+  // from them, so a create stays a create.
+  const seed: Partial<BorrowerInfo> = { ...initialValues };
+  delete seed.id;
+
   const { register, control, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrowerInfo>({
-    defaultValues
+    defaultValues: { ...defaultValues, ...seed }
   });
+
+  // Whether a field must be filled: New Borrower's own set unless the caller gives one.
+  const req = (name: string) => (requiredFields ?? BORROWER_REQUIRED_FIELDS).has(name);
 
   // Multi-branch picker state. The dropdown only renders when (a) the
   // user has more than one accessible sub-branch, AND (b) we're on the
   // CREATE flow (no singleData). EDITs never expose the picker because
   // the backend strips branch_sub_id from update payloads to prevent
-  // accidental cross-branch moves.
+  // accidental cross-branch moves. Branch choices from the caller replace
+  // the assigned sub-branches and always show the picker.
   const { assignedBranchSubIds, homeBranchSubId } = useMemo(() => {
     const u = useAuthStore.getState().user as { assignedBranchSubIds?: number[]; branch_sub_id?: number } | undefined;
     return {
@@ -102,24 +124,25 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
       homeBranchSubId: u?.branch_sub_id ? String(u.branch_sub_id) : '',
     };
   }, []);
-  const showBranchPicker = assignedBranchSubIds.length > 1 && !singleData?.id;
+  const showBranchPicker = !!branchChoices || (assignedBranchSubIds.length > 1 && !singleData?.id);
 
   const branchOptions: SelectOption[] = useMemo(() => {
+    if (branchChoices) return branchChoices;
     if (!myAccessibleBranchSubs) return [];
     return myAccessibleBranchSubs
       .filter((b) => assignedBranchSubIds.includes(Number(b.id)))
       .map((b) => ({ value: String(b.id), label: b.name }));
-  }, [myAccessibleBranchSubs, assignedBranchSubIds]);
+  }, [branchChoices, myAccessibleBranchSubs, assignedBranchSubIds]);
 
   // Default the dropdown to the user's home branch on first render so a
   // multi-branch user filing in their own branch doesn't have to pick
   // every time.
   useEffect(() => {
-    if (!showBranchPicker || watch('branch_sub_id')) return;
+    if (!preselectHomeBranch || !showBranchPicker || watch('branch_sub_id')) return;
     if (homeBranchSubId && branchOptions.some((o) => String(o.value) === homeBranchSubId)) {
       setValue('branch_sub_id', homeBranchSubId as any);
     }
-  }, [showBranchPicker, branchOptions, homeBranchSubId, setValue, watch]);
+  }, [preselectHomeBranch, showBranchPicker, branchOptions, homeBranchSubId, setValue, watch]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -204,6 +227,15 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
       setSubAreaLoading(false);
     }
   }, [dataSubArea])
+
+  // A starting area comes with its sub-areas, as picking it would. Once, on mount:
+  // the form reads its starting values once.
+  useEffect(() => {
+    if (!initialValues?.area_id) return;
+    setSubAreaLoading(true);
+    fetchDataSubArea(Number(initialValues.area_id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchDataSubArea is a new function on every render
+  }, []);
 
   const onSubmit = async (data: BorrowerInfo) => {
     data.age = parseInt(data.age as unknown as string, 10); // Ensure age is a number
@@ -375,6 +407,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
       <form onSubmit={handleSubmit(onSubmit)}>
 
         {/* Profile Photo - Centered at top */}
+        {variant !== 'application' && (
         <div className="flex justify-center mb-6">
           <div className="relative drop-shadow-2">
             <img
@@ -397,6 +430,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
             </label>
           </div>
         </div>
+        )}
 
         {/* Form Containers - All full width and aligned */}
         <div className="grid grid-cols-1 gap-4 sm:gap-6">
@@ -407,7 +441,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
             <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
                 <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  {singleData?.id ? 'Name & Contact' : 'Check for Existing Borrower'}
+                  {(singleData?.id || variant === 'application') ? 'Name & Contact' : 'Check for Existing Borrower'}
                 </h3>
               </div>
               <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
@@ -418,9 +452,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="firstname"
                       type="text"
                       icon={Home}
-                      register={register('firstname', { required: true })}
+                      register={register('firstname', { required: req('firstname') })}
                       error={errors.firstname && "This field is required"}
-                      required={true}
+                      required={req('firstname')}
                     />
                   </div>
                   <div>
@@ -439,9 +473,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="lastname"
                       type="text"
                       icon={Home}
-                      register={register('lastname', { required: true })}
+                      register={register('lastname', { required: req('lastname') })}
                       error={errors.lastname && "This field is required"}
-                      required={true}
+                      required={req('lastname')}
                     />
                   </div>
                 </div>
@@ -452,10 +486,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="contact_no"
                       type="text"
                       icon={Home}
-                      register={register('contact_no', { required: true })}
+                      register={register('contact_no', { required: req('contact_no') })}
                       error={errors.contact_no && "This field is required"}
                       formatType="contact"
-                      required={true}
+                      required={req('contact_no')}
                     />
                   </div>
                   <div>
@@ -464,13 +498,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="email"
                       type="text"
                       icon={Home}
-                      register={register('email', { required: false })}
+                      register={register('email', { required: req('email') })}
                       error={errors.email?.message}
-                      required={false}
+                      required={req('email')}
                     />
                   </div>
                 </div>
-                {!singleData?.id && (
+                {!singleData?.id && variant !== 'application' && (
                   <div className="flex justify-end">
                     <button
                       type="button"
@@ -496,27 +530,31 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 </h3>
               </div>
               <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+                {renderExtraFields?.({ control, register, errors })}
                 {showBranchPicker && (
                   <div data-testid="borrower-branch-picker">
-                    <FormLabel title="Branch" />
+                    {/* The application variant marks it required and names the control (neither FormLabel
+                        nor ReactSelect takes an id to pair them). New Borrower's picker is unchanged. */}
+                    <FormLabel title="Branch" required={variant === 'application' && req('branch_sub_id')} />
                     <Controller
                       name={"branch_sub_id" as any}
                       control={control}
-                      rules={{ required: 'Branch is required' }}
+                      rules={{ required: req('branch_sub_id') ? 'Branch is required' : false }}
                       render={({ field }) => (
                         <ReactSelect
                           {...field}
                           options={branchOptions}
-                          placeholder="Select the branch this borrower belongs to..."
+                          placeholder={variant === 'application' ? 'Select the branch for this application...' : 'Select the branch this borrower belongs to...'}
                           onChange={(selectedOption: any) => field.onChange(selectedOption?.value)}
                           value={branchOptions.find((o) => String(o.value) === String(field.value)) || null}
                           isLoading={loadingMyAccessibleBranches}
                           loadingMessage={() => "Loading accessible branches..."}
+                          aria-label={variant === 'application' ? 'Branch' : undefined}
                         />
                       )}
                     />
                     {(errors as any).branch_sub_id && (
-                      <p className="mt-2 text-sm text-red-600">
+                      <p className="mt-2 text-sm text-danger">
                         {String((errors as any).branch_sub_id?.message ?? 'Branch is required')}
                       </p>
                     )}
@@ -540,11 +578,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       icon={Home}
                       placeholder="0.00"
                       value={watch('amount_applied') ? String(watch('amount_applied')) : ''}
-                      register={register('amount_applied', { required: true })}
+                      register={register('amount_applied', { required: req('amount_applied') })}
                       error={errors.amount_applied && "This field is required"}
                       defaultValue=""
                       formatType="number"
-                      required={true}
+                      required={req('amount_applied')}
                       fallbackValue={0}
                     />
                   </div>
@@ -554,9 +592,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="purpose"
                       type="text"
                       icon={Home}
-                      register={register('purpose', { required: true })}
+                      register={register('purpose', { required: req('purpose') })}
                       error={errors.purpose && "This field is required"}
-                      required={true}
+                      required={req('purpose')}
                     />
                   </div>
                 </div>
@@ -567,9 +605,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="terms_of_payment"
                       type="text"
                       icon={Home}
-                      register={register('terms_of_payment', { required: true })}
+                      register={register('terms_of_payment', { required: req('terms_of_payment') })}
                       error={errors.terms_of_payment && "This field is required"}
-                      required={true}
+                      required={req('terms_of_payment')}
                     />
                   </div>
                   <div>
@@ -578,9 +616,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="residence_address"
                       type="text"
                       icon={Home}
-                      register={register('other_source_of_inc', { required: true })}
+                      register={register('other_source_of_inc', { required: req('other_source_of_inc') })}
                       error={errors.other_source_of_inc && "This field is required"}
-                      required={true}
+                      required={req('other_source_of_inc')}
                     />
                   </div>
                 </div>
@@ -591,9 +629,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="terms_of_payment"
                       type="text"
                       icon={Home}
-                      register={register('residence_address', { required: true })}
+                      register={register('residence_address', { required: req('residence_address') })}
                       error={errors.residence_address && "This field is required"}
-                      required={true}
+                      required={req('residence_address')}
                     />
                   </div>
                   <div>
@@ -602,7 +640,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="is_rent"
                       type="select"
                       icon={Home}
-                      register={register('is_rent', { required: 'Type of Residency is required' })}
+                      register={register('is_rent', { required: req('is_rent') ? 'Type of Residency is required' : false })}
                       error={errors.is_rent?.message}
                       options={[
                         { value: '', label: 'Type of Residency', hidden: true },
@@ -620,10 +658,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       type="text"
                       icon={Home}
                       value={watch('est_monthly_fam_inc') ? String(watch('est_monthly_fam_inc')) : ''}
-                      register={register('est_monthly_fam_inc', { required: true })}
+                      register={register('est_monthly_fam_inc', { required: req('est_monthly_fam_inc') })}
                       error={errors.est_monthly_fam_inc && "This field is required"}
                       formatType="number"
-                      required={true}
+                      required={req('est_monthly_fam_inc')}
                       defaultValue=""
                     />
                   </div>
@@ -633,9 +671,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="employment_position"
                       type="text"
                       icon={Home}
-                      register={register('employment_position', { required: true })}
+                      register={register('employment_position', { required: req('employment_position') })}
                       error={errors.employment_position && "This field is required"}
-                      required={true}
+                      required={req('employment_position')}
                     />
                   </div>
                 </div>
@@ -643,12 +681,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   <div>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="chief_id">
                       Chief
-                      <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
+                      {req('chief_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
                     </label>
                     <Controller
                       name="chief_id"
                       control={control}
-                      rules={{ required: 'Chief is required' }}
+                      rules={{ required: req('chief_id') ? 'Chief is required' : false }}
                       render={({ field }) => (
                         <ReactSelect
                           options={optionsChief}
@@ -672,14 +710,14 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="gender"
                       type="select"
                       icon={Home}
-                      register={register('gender', { required: 'Gender is required' })}
+                      register={register('gender', { required: req('gender') ? 'Gender is required' : false })}
                       error={errors.gender?.message}
                       options={[
                         { value: '', label: 'Select Gender', hidden: true },
                         { value: 'Male', label: 'Male' },
                         { value: 'Female', label: 'Female' },
                       ]}
-                      required={true}
+                      required={req('gender')}
                     />
                   </div>
                 </div>
@@ -715,9 +753,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       // request sent and no message rendered.
                       min={dobBounds.min}
                       max={dobBounds.max}
-                      register={register('dob', { required: true })}
+                      register={register('dob', { required: req('dob') })}
                       error={errors.dob && "This field is required"}
-                      required={true}
+                      required={req('dob')}
                     />
                   </div>
                   <div>
@@ -726,9 +764,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="place_of_birth"
                       type="text"
                       icon={Home}
-                      register={register('place_of_birth', { required: true })}
+                      register={register('place_of_birth', { required: req('place_of_birth') })}
                       error={errors.place_of_birth && "This field is required"}
-                      required={true}
+                      required={req('place_of_birth')}
                     />
                   </div>
                 </div>
@@ -739,9 +777,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="age"
                       type="text"
                       icon={Home}
-                      register={register('age', { required: true })}
+                      register={register('age', { required: req('age') })}
                       error={errors.age && "This field is required"}
-                      required={true}
+                      required={req('age')}
                     />
                   </div>
                   <div>
@@ -750,7 +788,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="civil_status"
                       type="select"
                       icon={Home}
-                      register={register('civil_status', { required: 'Civil Status is required' })}
+                      register={register('civil_status', { required: req('civil_status') ? 'Civil Status is required' : false })}
                       error={errors.civil_status?.message}
                       options={[
                         { value: '', label: 'Select Civil Status', hidden: true },
@@ -760,7 +798,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         { value: 'Widowed', label: 'Widowed' },
                         { value: 'Separated', label: 'Separated' },
                       ]}
-                      required={true}
+                      required={req('civil_status')}
                     />
                   </div>
                 </div>
@@ -785,9 +823,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="work_address"
                     type="text"
                     icon={Home}
-                    register={register('work_address', { required: requiresSpouse })}
+                    register={register('work_address', { required: requiresSpouse && req('work_address') })}
                     error={errors.work_address && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('work_address')}
                   />
                 </div>
                 <div>
@@ -796,9 +834,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="occupation"
                     type="text"
                     icon={Home}
-                    register={register('occupation', { required: requiresSpouse })}
+                    register={register('occupation', { required: requiresSpouse && req('occupation') })}
                     error={errors.occupation && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('occupation')}
                   />
                 </div>
               </div>
@@ -809,9 +847,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="fullname"
                     type="text"
                     icon={Home}
-                    register={register('fullname', { required: requiresSpouse })}
+                    register={register('fullname', { required: requiresSpouse && req('fullname') })}
                     error={errors.fullname && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('fullname')}
                   />
                 </div>
                 <div>
@@ -820,9 +858,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="company"
                     type="text"
                     icon={Home}
-                    register={register('company', { required: requiresSpouse })}
+                    register={register('company', { required: requiresSpouse && req('company') })}
                     error={errors.company && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('company')}
                   />
                 </div>
               </div>
@@ -833,9 +871,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="dept_branch"
                     type="text"
                     icon={Home}
-                    register={register('dept_branch', { required: requiresSpouse })}
+                    register={register('dept_branch', { required: requiresSpouse && req('dept_branch') })}
                     error={errors.dept_branch && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('dept_branch')}
                   />
                 </div>
                 <div>
@@ -844,9 +882,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="length_of_service"
                     type="text"
                     icon={Home}
-                    register={register('length_of_service', { required: requiresSpouse })}
+                    register={register('length_of_service', { required: requiresSpouse && req('length_of_service') })}
                     error={errors.length_of_service && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('length_of_service')}
                   />
                 </div>
               </div>
@@ -858,10 +896,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     type="text"
                     icon={Home}
                     value={watch('salary') ? String(watch('salary')) : ''}
-                    register={register('salary', { required: requiresSpouse })}
+                    register={register('salary', { required: requiresSpouse && req('salary') })}
                     error={errors.salary && "This field is required"}
                     formatType="number"
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('salary')}
                     defaultValue=""
                   />
                 </div>
@@ -871,9 +909,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="company_contact_person"
                     type="text"
                     icon={Home}
-                    register={register('company_contact_person', { required: requiresSpouse })}
+                    register={register('company_contact_person', { required: requiresSpouse && req('company_contact_person') })}
                     error={errors.company_contact_person && "This field is required"}
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('company_contact_person')}
                   />
                 </div>
               </div>
@@ -884,10 +922,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="spouse_contact_no"
                     type="text"
                     icon={Home}
-                    register={register('spouse_contact_no', { required: requiresSpouse })}
+                    register={register('spouse_contact_no', { required: requiresSpouse && req('spouse_contact_no') })}
                     error={errors.spouse_contact_no && "This field is required"}
                     formatType="contact"
-                    required={requiresSpouse}
+                    required={requiresSpouse && req('spouse_contact_no')}
                     defaultValue="N/A"
                   />
                 </div>
@@ -912,12 +950,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     <div>
                       <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="company_borrower_id">
                         Office Where Currently Employed
-                        <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
+                        {req('company_borrower_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
                       </label>
                       <Controller
                         name="company_borrower_id"
                         control={control}
-                        rules={{ required: 'Office is required' }}
+                        rules={{ required: req('company_borrower_id') ? 'Office is required' : false }}
                         render={({ field }) => (
                           <ReactSelect
                             {...field}
@@ -943,21 +981,21 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="employment_number"
                       type="text"
                       icon={Home}
-                      register={register('employment_number', { required: true })}
+                      register={register('employment_number', { required: req('employment_number') })}
                       error={errors.employment_number && "This field is required"}
-                      required={true}
+                      required={req('employment_number')}
                     />
                   </div>
                 </div>                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="area_id">
                       Area
-                      <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
+                      {req('area_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
                     </label>
                     <Controller
                       name="area_id"
                       control={control}
-                      rules={{ required: 'Area is required' }}
+                      rules={{ required: req('area_id') ? 'Area is required' : false }}
                       render={({ field }) => (
                         <ReactSelect
                           options={optionsArea}
@@ -979,12 +1017,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   <div>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="sub_area_id">
                       Sub Area
-                      {!subAreaNotRequired && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+                      {!subAreaNotRequired && req('sub_area_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
                     </label>
                     <Controller
                       name="sub_area_id"
                       control={control}
-                      rules={{ required: subAreaNotRequired ? false : 'Sub Area is required' }}
+                      rules={{ required: !subAreaNotRequired && req('sub_area_id') ? 'Sub Area is required' : false }}
                       render={({ field }) => (
                         <ReactSelect
                           options={optionsSubArea}
@@ -1011,9 +1049,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="station"
                       type="text"
                       icon={Home}
-                      register={register('station', { required: true })}
+                      register={register('station', { required: req('station') })}
                       error={errors.station && "This field is required"}
-                      required={true}
+                      required={req('station')}
                     />
                   </div>
                   <div>
@@ -1022,9 +1060,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="term_in_service"
                       type="text"
                       icon={Home}
-                      register={register('term_in_service', { required: true })}
+                      register={register('term_in_service', { required: req('term_in_service') })}
                       error={errors.term_in_service && "This field is required"}
-                      required={true}
+                      required={req('term_in_service')}
                     />
                   </div>
                 </div>
@@ -1035,7 +1073,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="employment_status"
                       type="select"
                       icon={Home}
-                      register={register('employment_status', { required: 'Employee Status is required' })}
+                      register={register('employment_status', { required: req('employment_status') ? 'Employee Status is required' : false })}
                       error={errors.employment_status?.message}
                       options={[
                         { value: '', label: 'Select Area', hidden: true },
@@ -1043,7 +1081,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         { value: 'Permanent', label: 'Permanent' },
                         { value: 'Agency', label: 'Agency' },
                       ]}
-                      required={true}
+                      required={req('employment_status')}
                     />
                   </div>
                   <div>
@@ -1052,9 +1090,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="division"
                       type="text"
                       icon={Home}
-                      register={register('division', { required: true })}
+                      register={register('division', { required: req('division') })}
                       error={errors.division && "This field is required"}
-                      required={true}
+                      required={req('division')}
                     />
                   </div>
                 </div>
@@ -1066,11 +1104,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       type="text"
                       icon={Home}
                       value={watch('monthly_gross') ? String(watch('monthly_gross')) : ''}
-                      register={register('monthly_gross', { required: true })}
+                      register={register('monthly_gross', { required: req('monthly_gross') })}
                       error={errors.monthly_gross && "This field is required"}
                       formatType="number"
                       defaultValue=""
-                      required={true}
+                      required={req('monthly_gross')}
                       fallbackValue={0}
                     />
                   </div>
@@ -1081,11 +1119,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       type="text"
                       icon={Home}
                       value={watch('monthly_net') ? String(watch('monthly_net')) : ''}
-                      register={register('monthly_net', { required: true })}
+                      register={register('monthly_net', { required: req('monthly_net') })}
                       error={errors.monthly_net && "This field is required"}
                       formatType="number"
                       defaultValue=""
-                      required={true}
+                      required={req('monthly_net')}
                       fallbackValue={0}
                     />
                   </div>
@@ -1097,9 +1135,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       id="office_address"
                       type="text"
                       icon={Home}
-                      register={register('office_address', { required: true })}
+                      register={register('office_address', { required: req('office_address') })}
                       error={errors.office_address && "This field is required"}
-                      required={true}
+                      required={req('office_address')}
                     />
                   </div>
                 </div>
@@ -1125,9 +1163,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           id={`reference.${index}.occupation`}
                           type="text"
                           icon={Home}
-                          register={register(`reference.${index}.occupation`, { required: true })}
+                          register={register(`reference.${index}.occupation`, { required: req('reference') })}
                           error={errors.reference?.[index]?.occupation && "This field is required"}
-                          required={true}
+                          required={req('reference')}
                         />
                       </div>
                       <div>
@@ -1136,9 +1174,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           id={`reference.${index}.name`}
                           type="text"
                           icon={Home}
-                          register={register(`reference.${index}.name`, { required: true })}
+                          register={register(`reference.${index}.name`, { required: req('reference') })}
                           error={errors.reference?.[index]?.name && "This field is required"}
-                          required={true}
+                          required={req('reference')}
                         />
                       </div>
                       <div>
@@ -1147,10 +1185,10 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           id={`reference.${index}.contact_no`}
                           type="text"
                           icon={Home}
-                          register={register(`reference.${index}.contact_no`, { required: true })}
+                          register={register(`reference.${index}.contact_no`, { required: req('reference') })}
                           error={errors.reference?.[index]?.contact_no && "This field is required"}
                           formatType="contact"
-                          required={true}
+                          required={req('reference')}
                         />
                       </div>
                       <div className="col-span-1 md:col-span-3 flex justify-end">
@@ -1192,9 +1230,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="employer"
                     type="text"
                     icon={Home}
-                    register={register('employer', { required: true })}
+                    register={register('employer', { required: req('employer') })}
                     error={errors.employer && "This field is required"}
-                    required={true}
+                    required={req('employer')}
                   />
                 </div>
                 <div>
@@ -1204,11 +1242,11 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     type="text"
                     icon={Home}
                     value={watch('company_salary') ? String(watch('company_salary')) : ''}
-                    register={register('company_salary', { required: true })}
+                    register={register('company_salary', { required: req('company_salary') })}
                     error={errors.salary && "This field is required"}
                     formatType="number"
                     defaultValue=""
-                    required={true}
+                    required={req('company_salary')}
                     fallbackValue={0}
                   />
                 </div>
@@ -1218,9 +1256,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     id="contract_duration"
                     type="text"
                     icon={Home}
-                    register={register('contract_duration', { required: true })}
+                    register={register('contract_duration', { required: req('contract_duration') })}
                     error={errors.contract_duration && "This field is required"}
-                    required={true}
+                    required={req('contract_duration')}
                   />
                 </div>
               </div>

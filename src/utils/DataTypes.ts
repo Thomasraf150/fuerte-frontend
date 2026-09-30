@@ -947,10 +947,16 @@ export interface LoanHistoryPaginator {
 
 export type LoanApplicationStatus = 'for_interview' | 'interviewed' | 'declined' | 'borrower_created';
 
+/** "Saan galing": where an application came from. Keep in sync with LoanApplication::CHANNELS (backend). */
+export type LoanApplicationChannel = 'google_form' | 'facebook' | 'walk_in' | 'phone';
+
 export interface LoanApplicationRow {
   id: string;
-  source: 'google_form' | 'manual';
-  /** "Y-m-d H:i:s", Manila wall-clock with no zone: the form's timestamp, or when a typed-in application was saved. Null only for a row inserted outside Eloquent. */
+  /** 'pdf': added from one response saved as a PDF, which carries no submission time. */
+  source: 'google_form' | 'manual' | 'pdf';
+  /** Saan galing. Uploads, pastes and PDFs are 'google_form'; a typed-in application has the one staff picked. */
+  channel: LoanApplicationChannel | null;
+  /** "Y-m-d H:i:s", Manila wall-clock with no zone: the form's timestamp, or when a typed-in or PDF application was saved (until a download or paste of the same response supplies the form's). Null only for a row inserted outside Eloquent. */
   submitted_at: string | null;
   /** The form's branch answer as typed — a location, not a Fuerte branch. */
   location: string | null;
@@ -965,7 +971,7 @@ export interface LoanApplicationRow {
   intake_flags: string[];
 }
 
-/** POST /api/applications/upload → {status: true, ...this}. */
+/** POST /api/applications/upload, /pdf and /paste → {status: true, ...this}. */
 export interface ApplicationUploadResult {
   added: number;
   already_here: number;

@@ -3,8 +3,10 @@
 import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { LoanApplicationRow } from '@/utils/DataTypes';
+import { CHANNEL_SHORT_LABELS } from '@/utils/applicationForm';
 import { formatMoneyOrBlank } from '@/utils/helper';
 import ApplicationStatusPill, { IntakeFlagMark } from './ApplicationStatusPill';
+import { CHANNEL_ICONS } from './channelIcons';
 
 /*
  * `hide` removes a column at viewport widths up to and including the number.
@@ -78,6 +80,32 @@ const BranchCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   );
 };
 
+/**
+ * The name, and under it where the application came from (Saan galing): the
+ * source's icon and short label, muted. No coloured dot: dots mean status on this
+ * page. A row without a channel shows the name alone.
+ */
+const NameCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
+  const channel = row.channel && row.channel in CHANNEL_SHORT_LABELS ? row.channel : null;
+  const ChannelIcon = channel ? CHANNEL_ICONS[channel] : null;
+  return (
+    <span className="flex min-w-0 flex-col">
+      <CellText title={row.full_name} className="font-medium text-black dark:text-white">
+        {row.full_name}
+      </CellText>
+      {channel && ChannelIcon && (
+        <span className="flex min-w-0 items-center gap-1 text-xs text-body dark:text-bodydark">
+          <ChannelIcon aria-hidden="true" size={12} className="shrink-0" />
+          <CellText>
+            <span className="sr-only">Saan galing: </span>
+            {CHANNEL_SHORT_LABELS[channel]}
+          </CellText>
+        </span>
+      )}
+    </span>
+  );
+};
+
 const StatusCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   const flags = row.intake_flags ?? [];
   return (
@@ -98,11 +126,7 @@ export const applicationColumns: TableColumn<LoanApplicationRow>[] = [
   {
     id: 'name',
     name: 'Name',
-    cell: row => (
-      <CellText title={row.full_name} className="font-medium text-black dark:text-white">
-        {row.full_name}
-      </CellText>
-    ),
+    cell: row => <NameCell row={row} />,
   },
   {
     id: 'mobile',

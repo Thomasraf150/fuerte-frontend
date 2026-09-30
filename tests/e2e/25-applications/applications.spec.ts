@@ -13,6 +13,17 @@
  *   7. Sign-in sends Call Center straight to /applications, everyone else to /.
  *   8. Part 1 borrower-form fixes: Residency reads Own when is_rent is false, and
  *      an existing borrower's first card is "Name & Contact".
+ *   9. Rows pasted from the responses Sheet go to /applications/paste exactly as
+ *      pasted, tabs and line breaks included, and show the tally as "Paste finished".
+ *      The upload button ignores clicks while they are being added, and a Cancel
+ *      pressed meanwhile keeps focus where staff move it. A refused paste reads
+ *      "Paste failed". A 401 on either JSON endpoint ends the session.
+ *  10. One response saved as a PDF is read in the browser: only its answers go to
+ *      /applications/pdf, never the file, and a second PDF in the same visit is read
+ *      too. A PDF that is not a response, a damaged one and one longer than 20 pages
+ *      show the reader's message and send nothing, and a read that stalls is given
+ *      up after a minute (on a faked clock) with the worker replaced. The PDFs are
+ *      drawn in the test with jsPDF from the fictional layout in googleFormFixture.ts.
  *
  * NO CREDENTIALS AND NO BACKEND. Auth on this app is client side: withAuth and
  * DefaultLayout read the persisted zustand store (localStorage 'authStore'), and
@@ -24,6 +35,9 @@
  *   PWTEST_HEADLESS=1 npx playwright test tests/e2e/25-applications --reporter=list
  */
 import { test as base, expect, Locator, Page, Route } from '@playwright/test';
+import { NOT_A_FORM_MESSAGE } from '../../../src/utils/googleFormPdf/layout';
+import { FIXTURE_ANSWERS, loadLayout, tickOther } from './googleFormFixture';
+import { layoutToPdf, plainPdf } from './googleFormPdfFile';
 
 const APP = 'http://localhost:3000';
 /** Where the dev build points: NEXT_PUBLIC_API_URL=<BACKEND>/api, NEXT_PUBLIC_API_GRAPHQL=<BACKEND>/fuerte-api. */
@@ -32,7 +46,14 @@ const FAKE_TOKEN = 'e2e-fake-token';
 const FAKE_LOGIN = { email: 'e2e.signin@example.test', password: 'Not-a-real-password-1' };
 
 const UPLOAD_BUTTON = 'Upload Google Form responses';
-const FILE_INPUT_LABEL = 'Google Form responses file (.zip or .csv)';
+const FILE_INPUT_LABEL = 'Google Form responses file (.zip, .csv or .pdf)';
+const PASTE_TOGGLE = 'Paste rows from the Sheet';
+const PASTE_BOX_LABEL = 'Rows from the responses Sheet';
+/** Two fictional rows as the Sheet copies them: tab between cells, empty cells kept, a line per row. */
+const PASTED_ROWS = [
+  '29/09/2026 19:17:09\tSample Town, Rizal\tNabasa ko po at sumasang-ayon ako\tFactory Worker\t\t\tE2E Applicant Five\t09170000005',
+  '29/09/2026 19:20:41\tSample Town, Rizal\tNabasa ko po at sumasang-ayon ako\tEmpleyado sa pribadong kompanya\t\t\tE2E Applicant Six\t09170000006\t',
+].join('\n');
 const CSV = 'Timestamp,Full name,Mobile\n9/21/2026 9:15:00,E2E Applicant Four,09170000004\n';
 
 // ---------------------------------------------------------------------------
@@ -102,6 +123,16 @@ interface UploadCall {
   body: string;
 }
 
+/** A JSON POST to /api/applications/paste or /api/applications/pdf. */
+interface JsonPost {
+  path: string;
+  contentType: string;
+  authorization: string;
+  body: unknown;
+}
+
+const NOTHING_NEW = { status: true, added: 0, already_here: 0, skipped: [], flagged: [] };
+
 /** A cross-origin response (3000 -> 8080) must allow the page's origin, with credentials for /login. */
 const CORS = { 'Access-Control-Allow-Origin': APP, 'Access-Control-Allow-Credentials': 'true' };
 
@@ -115,15 +146,18 @@ class FakeBackend {
   /** Who POST /api/login signs in. */
   loginRole: RoleCode = 'CALLCTR';
   /** What POST /api/applications/upload answers. */
-  upload: { status: number; body: unknown } = {
-    status: 200,
-    body: { status: true, added: 0, already_here: 0, skipped: [], flagged: [] },
-  };
+  upload: { status: number; body: unknown } = { status: 200, body: NOTHING_NEW };
+  /** What POST /api/applications/paste and /api/applications/pdf answer. */
+  paste: { status: number; body: unknown } = { status: 200, body: NOTHING_NEW };
+  pdf: { status: number; body: unknown } = { status: 200, body: NOTHING_NEW };
+  /** When set, the paste answer waits for this, so a test can look at the page mid-paste. */
+  pasteHold: Promise<void> | null = null;
   /** Extra GraphQL answers by root field, for pages beyond /applications. */
   readonly extraGraphql = new Map<string, (variables: Record<string, unknown>) => unknown>();
 
   readonly graphql: GraphqlCall[] = [];
   readonly uploads: UploadCall[] = [];
+  readonly jsonPosts: JsonPost[] = [];
   readonly logins: unknown[] = [];
   readonly unstubbed: string[] = [];
   readonly pageErrors: string[] = [];
@@ -163,6 +197,18 @@ class FakeBackend {
         body: request.postDataBuffer()?.toString('latin1') ?? '',
       });
       return json(route, this.upload.status, this.upload.body);
+    }
+    if (method === 'POST' && (path === '/api/applications/paste' || path === '/api/applications/pdf')) {
+      const headers = request.headers();
+      this.jsonPosts.push({
+        path,
+        contentType: headers['content-type'] ?? '',
+        authorization: headers['authorization'] ?? '',
+        body: request.postDataJSON(),
+      });
+      const reply = path.endsWith('/paste') ? this.paste : this.pdf;
+      if (path.endsWith('/paste') && this.pasteHold) await this.pasteHold;
+      return json(route, reply.status, reply.body);
     }
     if (method === 'POST' && path === '/fuerte-api') {
       const { query = '', variables = {} } = request.postDataJSON() ?? {};
@@ -620,5 +666,305 @@ test.describe('8. Borrower form, Part 1 fixes', () => {
     await expect(page.getByRole('heading', { name: 'Check for Existing Borrower', exact: true })).toBeVisible({ timeout: 90_000 });
     await expect(page.getByRole('heading', { name: 'Name & Contact' })).toHaveCount(0);
     expect(backend.graphql.map((call) => call.field), 'a new borrower is never fetched').not.toContain('getBorrower');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 9. Rows pasted from the responses Sheet
+// ---------------------------------------------------------------------------
+
+/** Opens the paste box from its toggle, which reports itself expanded and hands the cursor to the box. */
+async function openPasteBox(section: Locator): Promise<Locator> {
+  const toggle = section.getByRole('button', { name: PASTE_TOGGLE });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  const box = section.getByLabel(PASTE_BOX_LABEL);
+  await expect(box).toBeFocused();
+  return box;
+}
+
+test.describe('9. Paste rows from the Sheet', () => {
+  test('the rows are posted exactly as pasted, the tally shows, and the box closes', async ({ page, backend }) => {
+    backend.paste = {
+      status: 200,
+      body: { status: true, added: 1, already_here: 1, skipped: [{ row: 3, reason: 'No mobile number' }], flagged: [] },
+    };
+    let release = () => {};
+    backend.pasteHold = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const before = backend.applicationCalls().length;
+    const section = uploadSection(page);
+
+    const box = await openPasteBox(section);
+    const add = section.getByRole('button', { name: 'Add pasted rows' });
+    await expect(add).toBeDisabled();
+    await box.fill(PASTED_ROWS);
+    await expect(add).toBeEnabled();
+    await add.click();
+
+    // While the rows are being added, the upload button says so and ignores clicks: no file picker opens.
+    const upload = section.getByRole('button', { name: UPLOAD_BUTTON });
+    await expect(section.getByRole('button', { name: 'Adding…' })).toBeVisible();
+    await expect(upload).toHaveAttribute('aria-disabled', 'true');
+    const picker = page.waitForEvent('filechooser', { timeout: 1_500 }).then(() => true, () => false);
+    await upload.click({ force: true }); // force: Playwright itself treats aria-disabled as disabled
+    expect(await picker, 'a file picker opened while rows were being added').toBe(false);
+    release();
+
+    const panel = section.getByRole('status');
+    await expect(panel).toContainText('Paste finished', { timeout: 30_000 });
+    await expect(panel).toContainText('Pasted rows');
+    await expect(upload).toHaveAttribute('aria-disabled', 'false');
+    await expect(figure(panel, 'New')).toHaveText('1');
+    await expect(figure(panel, 'Already here')).toHaveText('1');
+    await expect(listUnder(panel, 'Skipped')).toHaveText(['Row 3: No mobile number']);
+    // Cleared and closed, and the cursor is back on the toggle.
+    await expect(section.getByLabel(PASTE_BOX_LABEL)).toHaveCount(0);
+    await expect(section.getByRole('button', { name: PASTE_TOGGLE })).toBeFocused();
+    await expect.poll(() => backend.applicationCalls().length, { timeout: 30_000 }).toBeGreaterThan(before);
+
+    // One JSON POST with the (fake) token, its text byte for byte: tabs, empty cells and line breaks survive.
+    expect(backend.jsonPosts).toHaveLength(1);
+    expect(backend.jsonPosts[0].path).toBe('/api/applications/paste');
+    expect(backend.jsonPosts[0].contentType).toMatch(/^application\/json/);
+    expect(backend.jsonPosts[0].authorization).toBe(`Bearer ${FAKE_TOKEN}`);
+    expect(backend.jsonPosts[0].body).toEqual({ text: PASTED_ROWS });
+    expect(backend.uploads).toHaveLength(0);
+  });
+
+  test('a refused paste shows the server message, and the rows stay for another try', async ({ page, backend }) => {
+    const message = 'Paste fewer rows at a time, or upload the Google Forms download instead.';
+    backend.paste = { status: 422, body: { status: false, message } };
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    const box = await openPasteBox(section);
+    await box.fill(PASTED_ROWS);
+    await section.getByRole('button', { name: 'Add pasted rows' }).click();
+
+    const alert = section.getByRole('alert');
+    await expect(alert).toContainText('Paste failed', { timeout: 30_000 });
+    await expect(alert.getByText(message, { exact: true })).toBeVisible();
+    await expect(section.getByRole('status')).toBeEmpty();
+    await expect(box).toHaveValue(PASTED_ROWS);
+    expect(backend.jsonPosts).toHaveLength(1);
+  });
+
+  test('a 429 from the rate limit says to wait a minute, not "Too Many Attempts."', async ({ page, backend }) => {
+    backend.paste = { status: 429, body: { message: 'Too Many Attempts.' } };
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    const box = await openPasteBox(section);
+    await box.fill(PASTED_ROWS);
+    await section.getByRole('button', { name: 'Add pasted rows' }).click();
+
+    const alert = section.getByRole('alert');
+    await expect(alert).toContainText('Paste failed', { timeout: 30_000 });
+    await expect(alert).toContainText('Too many uploads and pastes in one minute. Wait a minute, then try again — nothing from this one was saved.');
+    await expect(alert).not.toContainText('Too Many Attempts.');
+    await expect(box).toHaveValue(PASTED_ROWS);
+  });
+
+  test('Cancel during an add closes the box, and the finished add leaves focus where staff put it', async ({ page, backend }) => {
+    let release = () => {};
+    backend.pasteHold = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    const box = await openPasteBox(section);
+    await box.fill(PASTED_ROWS);
+    await section.getByRole('button', { name: 'Add pasted rows' }).click();
+    await section.getByRole('button', { name: 'Cancel' }).click();
+    await expect(box).toHaveCount(0);
+    // Staff move on while the rows are still being added.
+    const allChip = page.getByRole('group', { name: 'Filter applications by status' }).getByRole('button', { name: 'All', exact: true });
+    await allChip.focus();
+    release();
+
+    await expect(section.getByRole('status')).toContainText('Paste finished', { timeout: 30_000 });
+    await expect(allChip).toBeFocused();
+  });
+});
+
+test.describe('9b. A 401 on the JSON endpoints', () => {
+  for (const way of ['paste', 'pdf'] as const) {
+    test(`a 401 on /applications/${way} ends the session and goes to sign-in`, async ({ page, backend }) => {
+      backend[way] = { status: 401, body: { message: 'Unauthenticated.' } };
+      const paths = trackPaths(page);
+      await signedInAs(page, backend, 'CALLCTR');
+      await openApplications(page);
+      const section = uploadSection(page);
+
+      if (way === 'paste') {
+        const box = await openPasteBox(section);
+        await box.fill(PASTED_ROWS);
+        await section.getByRole('button', { name: 'Add pasted rows' }).click();
+      } else {
+        await chooseFile(page, section, 'response.pdf', layoutToPdf(loadLayout()));
+      }
+
+      await expect.poll(() => paths, { timeout: 90_000 }).toContain('/auth/signin');
+      expect(backend.jsonPosts.map((post) => post.path)).toEqual([`/api/applications/${way}`]);
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// 10. One response saved as a PDF
+// ---------------------------------------------------------------------------
+
+/** Chooses a file through the upload button, as staff do. */
+async function chooseFile(page: Page, section: Locator, name: string, buffer: Buffer): Promise<void> {
+  const [chooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    section.getByRole('button', { name: UPLOAD_BUTTON }).click(),
+  ]);
+  await chooser.setFiles({ name, mimeType: 'application/pdf', buffer });
+}
+
+test.describe('10. One response as a PDF', () => {
+  test('the PDF is read in the browser and only its answers are posted', async ({ page, backend }) => {
+    backend.pdf = { status: 200, body: { status: true, added: 1, already_here: 0, skipped: [], flagged: [] } };
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const before = backend.applicationCalls().length;
+    const section = uploadSection(page);
+
+    await chooseFile(page, section, 'Juana Dela Cruz - response.pdf', layoutToPdf(loadLayout()));
+
+    const panel = section.getByRole('status');
+    // pdf.js loads on this first PDF, and the dev server may compile its chunk.
+    await expect(panel).toContainText('Upload finished', { timeout: 90_000 });
+    await expect(panel).toContainText('Juana Dela Cruz - response.pdf');
+    await expect(figure(panel, 'New')).toHaveText('1');
+    await expect.poll(() => backend.applicationCalls().length, { timeout: 30_000 }).toBeGreaterThan(before);
+
+    expect(backend.uploads, 'the file itself is never sent').toHaveLength(0);
+    expect(backend.jsonPosts).toHaveLength(1);
+    const [post] = backend.jsonPosts;
+    expect(post.path).toBe('/api/applications/pdf');
+    expect(post.authorization).toBe(`Bearer ${FAKE_TOKEN}`);
+    expect(post.body).toEqual({ file_name: 'Juana Dela Cruz - response.pdf', answers: FIXTURE_ANSWERS });
+  });
+
+  test('a PDF that is not a form response shows the reader message, and nothing is posted', async ({ page, backend }) => {
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    await chooseFile(page, section, 'receipt.pdf', plainPdf('Official receipt no. 0001'));
+
+    const alert = section.getByRole('alert');
+    await expect(alert).toContainText('Upload failed', { timeout: 90_000 });
+    await expect(alert.getByText(NOT_A_FORM_MESSAGE, { exact: true })).toBeVisible();
+    await expect(section.getByRole('status')).toBeEmpty();
+    expect(backend.jsonPosts).toHaveLength(0);
+    expect(backend.uploads).toHaveLength(0);
+  });
+
+  test('a second PDF in the same visit is read too', async ({ page, backend }) => {
+    backend.pdf = { status: 200, body: { status: true, added: 1, already_here: 0, skipped: [], flagged: [] } };
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+    const panel = section.getByRole('status');
+    const purpose = 'Para saan po ang loan?';
+    const second = loadLayout();
+    tickOther(second, purpose, 'Pambili ng tricycle');
+
+    await chooseFile(page, section, 'first.pdf', layoutToPdf(loadLayout()));
+    await expect(panel).toContainText('first.pdf', { timeout: 90_000 });
+    await chooseFile(page, section, 'second.pdf', layoutToPdf(second));
+    await expect(panel).toContainText('second.pdf', { timeout: 60_000 });
+
+    expect(backend.jsonPosts.map((post) => post.path)).toEqual(['/api/applications/pdf', '/api/applications/pdf']);
+    expect(backend.jsonPosts[1].body).toEqual({
+      file_name: 'second.pdf',
+      answers: FIXTURE_ANSWERS.map((entry) => (entry.question === purpose ? { question: purpose, answer: 'Pambili ng tricycle' } : entry)),
+    });
+  });
+
+  test('a PDF of more than 20 pages is not read as one response, and nothing is posted', async ({ page, backend }) => {
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    // The fictional response on its 7 pages, then blank pages up to 21.
+    await chooseFile(page, section, 'responses.pdf', layoutToPdf(loadLayout(), 21));
+
+    const alert = section.getByRole('alert');
+    await expect(alert).toContainText('Upload failed', { timeout: 90_000 });
+    await expect(alert.getByText(NOT_A_FORM_MESSAGE, { exact: true })).toBeVisible();
+    expect(backend.jsonPosts).toHaveLength(0);
+  });
+
+  test('a PDF that stalls the reader is given up after a minute, and the next PDF gets a fresh worker', async ({ page, backend }) => {
+    // Fake time, so the one-minute watchdog can be passed without waiting a minute.
+    await page.clock.install();
+    // A stand-in for the pdf.js worker that says "ready" and then never answers: the read stalls.
+    await page.addInitScript(() => {
+      const stall = { terminated: 0, realWorker: window.Worker };
+      class StalledWorker extends EventTarget {
+        constructor() {
+          super();
+          const ready = { sourceName: 'worker', targetName: 'main', action: 'ready', data: null };
+          queueMicrotask(() => this.dispatchEvent(new MessageEvent('message', { data: ready })));
+        }
+        postMessage(): void {}
+        terminate(): void {
+          stall.terminated += 1;
+        }
+      }
+      Object.assign(window, { Worker: StalledWorker, e2eStall: stall });
+    });
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+    const alert = section.getByRole('alert');
+    const stall = () => page.evaluate(() => (window as unknown as { e2eStall: { terminated: number } }).e2eStall.terminated);
+
+    await chooseFile(page, section, 'stalls.pdf', layoutToPdf(loadLayout()));
+    await expect(section.getByRole('button', { name: 'Uploading…' })).toBeVisible({ timeout: 30_000 });
+    // Jump the clock ahead until the watchdog fires; the read starts a moment after "Uploading…".
+    await expect(async () => {
+      await page.clock.fastForward(15_000);
+      await expect(alert).toContainText('This PDF could not be opened.', { timeout: 1_000 });
+    }).toPass({ timeout: 60_000 });
+    await expect(alert).toContainText('Upload failed');
+    await expect(section.getByRole('button', { name: UPLOAD_BUTTON })).toHaveAttribute('aria-disabled', 'false');
+    expect(await stall(), 'the stalled worker was not stopped').toBe(1);
+    expect(backend.jsonPosts).toHaveLength(0);
+
+    // The stalled worker was forgotten: with the real worker back, the next PDF starts a fresh one and reads.
+    await page.evaluate(() => {
+      const w = window as unknown as { Worker: typeof Worker; e2eStall: { realWorker: typeof Worker } };
+      w.Worker = w.e2eStall.realWorker;
+    });
+    await chooseFile(page, section, 'next.pdf', layoutToPdf(loadLayout()));
+    await expect(section.getByRole('status')).toContainText('next.pdf', { timeout: 90_000 });
+    expect(backend.jsonPosts.map((post) => post.body)).toEqual([{ file_name: 'next.pdf', answers: FIXTURE_ANSWERS }]);
+  });
+
+  test('a damaged PDF says it could not be opened, and nothing is posted', async ({ page, backend }) => {
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    await chooseFile(page, section, 'response.pdf', Buffer.from('This is not a PDF at all.'));
+
+    const alert = section.getByRole('alert');
+    await expect(alert).toContainText('This PDF could not be opened.', { timeout: 90_000 });
+    expect(backend.jsonPosts).toHaveLength(0);
+    expect(backend.uploads).toHaveLength(0);
   });
 });

@@ -1,28 +1,18 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Inbox } from 'react-feather';
+import Link from 'next/link';
+import { CheckCircle, Inbox, Plus } from 'react-feather';
 import CustomDatatable from '@/components/CustomDatatable';
 import useLoanApplications, { ApplicationStatusFilter, LoadedApplications } from '@/hooks/useLoanApplications';
-import { useAuthStore } from '@/store/authStore';
 import { formatCount } from '@/utils/helper';
 import { applicationColumns } from './ApplicationColumns';
 import { APPLICATION_STATUS_DOT, APPLICATION_STATUS_LABEL } from './ApplicationStatusPill';
+import LoadError from './LoadError';
 import UploadResponses from './UploadResponses';
-
-/** Mirrors the backend's ApplicationAccessPolicy::canUpload: Admin, Owner and Call Center. */
-const UPLOAD_ROLE_CODES = new Set(['ADM', 'OWN', 'CALLCTR']);
+import { useCanUpload } from './useCanUpload';
 
 const FILTERS: ApplicationStatusFilter[] = ['all', 'for_interview', 'interviewed', 'declined', 'borrower_created'];
-
-/** Who may upload. Read after mount: the persisted auth store only exists in the browser, never during SSR. */
-const useCanUpload = (): boolean => {
-  const [canUpload, setCanUpload] = useState(false);
-  useEffect(() => {
-    setCanUpload(UPLOAD_ROLE_CODES.has(useAuthStore.getState().user?.role?.code));
-  }, []);
-  return canUpload;
-};
 
 /** Nothing exists at all for this user: an unfiltered, unsearched fetch came back empty. */
 const isNothingYet = (loaded: LoadedApplications | null): boolean =>
@@ -99,45 +89,75 @@ const NothingYet: React.FC<{ canUpload: boolean }> = ({ canUpload }) => (
   </div>
 );
 
-const LoadError: React.FC<{ message: string; onRetry: () => void }> = ({ message, onRetry }) => (
-  <div role="alert" className="flex flex-col gap-3 rounded-sm border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-black dark:text-white sm:flex-row sm:items-center sm:justify-between">
-    <p className="min-w-0 break-words">{message}</p>
-    <button
-      type="button"
-      onClick={onRetry}
-      className="min-h-12 shrink-0 rounded bg-danger px-5 font-medium text-white transition-colors hover:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark md:min-h-9"
+/** The title, and the page's primary action. On phones the button takes the full width, under the title. */
+const ListHeader: React.FC = () => (
+  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
+    <h3 className="font-medium text-black dark:text-white">Applications</h3>
+    <Link
+      href="/applications/new"
+      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark sm:w-auto md:min-h-10"
     >
-      Retry
-    </button>
+      <Plus aria-hidden="true" size={18} className="shrink-0" />
+      New application
+    </Link>
   </div>
 );
 
+/**
+ * "Na-save ang application." when New application has just saved one: it opens
+ * /applications?saved=1. The query is then dropped, so a refresh does not say it again.
+ * Read from window.location on mount, not useSearchParams: on Next 14.2.3 that fails
+ * `next build` without a <Suspense> boundary.
+ */
+const useSavedNote = (): string => {
+  const [note, setNote] = useState('');
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('saved') !== '1') return;
+    setNote('Na-save ang application.');
+    window.history.replaceState(null, '', '/applications');
+  }, []);
+  return note;
+};
+
 const ApplicationList: React.FC = () => {
-  const { applications, loading, error, refresh, loaded, statusFilter, setStatusFilter, uploading, uploadResponses, serverSidePaginationProps } =
-    useLoanApplications();
-  const canUpload = useCanUpload();
+  const {
+    applications, loading, error, refresh, loaded, statusFilter, setStatusFilter,
+    uploading, uploadResponses, pasting, pasteRows, serverSidePaginationProps,
+  } = useLoanApplications();
+  const canUpload = useCanUpload(); // null until read: treated as "not an upload role" meanwhile
+  const savedNote = useSavedNote();
   // While a load has failed, say nothing about rows: the alert above the table is the news.
   const shown = error ? null : loaded;
   const nothingYet = isNothingYet(shown);
 
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
-        <h3 className="font-medium text-black dark:text-white">Applications</h3>
-      </div>
+      <ListHeader />
       {/*
         px-3 on phones leaves the table 302px at 360px. Three columns fit there only
         through the app-wide table-fit settings: useDatatableTheme's tableWrapper
         display:block plus the 80px column floor in app/styles.css.
       */}
       <div className="space-y-5 px-3 py-5 sm:px-5 md:p-7">
-        {canUpload && <UploadResponses uploading={uploading} onUpload={uploadResponses} onUploaded={refresh} />}
+        {canUpload && (
+          <UploadResponses uploading={uploading} pasting={pasting} onUpload={uploadResponses} onPaste={pasteRows} onUploaded={refresh} />
+        )}
         <StatusFilter value={statusFilter} onChange={setStatusFilter} />
         {error && <LoadError message={error} onRetry={refresh} />}
         <div>
+          {/* In the page from the start, empty, so a screen reader announces the note when it fills. */}
+          {/* Dark text for contrast (text-success is ~3.8:1 on white); the green lives in the icon. */}
+          <p role="status" className="mb-2 flex items-center gap-1.5 text-sm font-medium text-black empty:mb-0 dark:text-white">
+            {savedNote && (
+              <>
+                <CheckCircle size={16} aria-hidden="true" className="shrink-0 text-success" />
+                {savedNote}
+              </>
+            )}
+          </p>
           <div role="status" aria-busy={loading}>
             {!shown && !error && <p className="text-sm text-body dark:text-bodydark">Loading applications…</p>}
-            {shown && (nothingYet ? <NothingYet canUpload={canUpload} /> : <ResultLine loaded={shown} />)}
+            {shown && (nothingYet ? <NothingYet canUpload={canUpload === true} /> : <ResultLine loaded={shown} />)}
           </div>
           {!nothingYet && (
             <div className="mt-3">
