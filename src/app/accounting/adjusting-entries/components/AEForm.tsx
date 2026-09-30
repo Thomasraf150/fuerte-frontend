@@ -207,7 +207,7 @@ const AEForm: React.FC<ParentFormBr> = ({
                 </div>
                 <div>
                   <button
-                    className="flex justify-center mt-10 bg-orange-300 rounded border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
+                    className="flex items-center justify-center min-h-12 md:min-h-0 mt-10 bg-orange-300 rounded border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
                     type="button"
                     onClick={ () => { setShowPayee(true); } }
                   >

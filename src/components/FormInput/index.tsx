@@ -169,6 +169,18 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   }, [value, defaultValue, formatType]);
 
+  // react-hook-form finds the field by event.target.name. The formatted branches below build
+  // their event by spreading the input, which copies none of its prototype getters (name,
+  // type), so the form ignored every keystroke; a number field caught up only on blur, and
+  // Enter posted the value from before. The form gets the typed value, unformatted, with the
+  // field's name. Not the fallback: an emptied field must stay empty, so `required` stops it.
+  // The form gets exactly what the field shows, without the thousands commas:
+  // never a character the display dropped. A stray "m" typed before Enter
+  // would otherwise post "20000m", and payment posting reads that as 0.
+  const updateForm = (shown: string) => {
+    if (register) register.onChange({ target: { name: register.name, value: shown.replace(/,/g, '') }, type: 'change' });
+  };
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
     const inputValue = event.target.value;
 
@@ -184,8 +196,9 @@ const FormInput: React.FC<FormInputProps> = ({
 
       setDisplayValue(formatted);
       setRawValue(finalValue);
+      updateForm(formatted);
 
-      // Create synthetic event with final value (with fallback applied) for form registration
+      // Synthetic event with the final value (fallback applied) for the caller's onChange
       const syntheticEvent = {
         ...event,
         target: {
@@ -194,9 +207,6 @@ const FormInput: React.FC<FormInputProps> = ({
         }
       };
 
-      if (register?.onChange) {
-        register.onChange(syntheticEvent as any);
-      }
       if (onChange) {
         onChange(syntheticEvent as any);
       }
@@ -212,8 +222,9 @@ const FormInput: React.FC<FormInputProps> = ({
 
       setDisplayValue(formatted);
       setRawValue(finalValue);
+      updateForm(formatted);
 
-      // Create synthetic event with final value (with fallback applied) for form registration
+      // Synthetic event with the final value (fallback applied) for the caller's onChange
       const syntheticEvent = {
         ...event,
         target: {
@@ -222,9 +233,6 @@ const FormInput: React.FC<FormInputProps> = ({
         }
       };
 
-      if (register?.onChange) {
-        register.onChange(syntheticEvent as any);
-      }
       if (onChange) {
         onChange(syntheticEvent as any);
       }
@@ -296,7 +304,7 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         ) : type === 'select' ? (
           <select
-            className={`h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
+            className={`h-12 md:h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
             id={id}
             {...register}
             onChange={(e) => {
@@ -325,7 +333,7 @@ const FormInput: React.FC<FormInputProps> = ({
           </select>
         ) : (
           <input
-            className={`w-full ${type === 'file' ? '' : 'mb-0'} h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
+            className={`w-full ${type === 'file' ? '' : 'mb-0'} h-12 md:h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
             type={type}
             id={id}
             placeholder={placeholder}
@@ -342,7 +350,8 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         )}
         {type !== 'checkbox' && type !== 'file' && type !== 'select' && (
-          <span className={`absolute top-3 left-4.5`}>
+          // The field is 48px tall on phones (a touch target) and 40px from md up; the icon keeps to its centre.
+          <span className={`absolute top-4 left-4.5 md:top-3`}>
             <IconComponent size="18" />
           </span>
         )}

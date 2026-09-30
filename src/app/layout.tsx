@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 import { useRouter } from 'nextjs-toploader/app';
 import useMaintenanceRedirect from '@/hooks/useMaintenanceRedirect';
 import NextTopLoader from 'nextjs-toploader';
+import { ToastContainer } from 'react-toastify';
 
 
 const poppins = Poppins({
@@ -84,6 +85,21 @@ export default function RootLayout({
           {loading ? <Loader /> : ''}
           {children}
         </div>
+        {/* The app's one toast container. Each page layout used to mount its own, so a toast
+            fired just before a page change (a save that returns to the list, sign-in) was
+            unmounted with the page that fired it. */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </body>
     </html>
   );

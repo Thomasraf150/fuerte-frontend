@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, ReactNode } from "react";
-import { ToastContainer } from 'react-toastify';
 
 export default function BlankLayout({
   children,
@@ -26,7 +25,7 @@ export default function BlankLayout({
         </div>
         {/* <!-- ===== Content Area End ===== --> */}
       </div>
-      <ToastContainer/>
+      {/* Toasts: the one ToastContainer is in src/app/layout.tsx, so they outlive a page change. */}
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </>
   );

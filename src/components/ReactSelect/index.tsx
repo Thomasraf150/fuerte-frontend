@@ -1,5 +1,5 @@
-import Select, { StylesConfig } from 'react-select';
-import { FC, useMemo } from 'react';
+import Select, { SelectInstance, StylesConfig } from 'react-select';
+import { forwardRef, useMemo } from 'react';
 import { useSelectTheme } from '@/hooks/useSelectTheme';
 import { SelectOption } from '@/utils/DataTypes';
 
@@ -44,7 +44,11 @@ interface ReactSelectComponentProps {
   'aria-label'?: string;
 }
 
-const ReactSelect: FC<ReactSelectComponentProps> = ({
+/**
+ * The ref reaches react-select itself: a Controller's `{...field}` carries one, and with
+ * it react-hook-form can put the cursor here when the field fails validation.
+ */
+const ReactSelect = forwardRef<SelectInstance<SelectOption, false>, ReactSelectComponentProps>(({
   options,
   onChange,
   value,
@@ -57,7 +61,7 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
   loadingMessage = () => 'Loading options...',
   noOptionsMessage,
   'aria-label': ariaLabel,
-}) => {
+}, ref) => {
   // Get theme-aware styles and theme config
   const { styles: themeStyles, theme } = useSelectTheme<SelectOption>();
 
@@ -68,6 +72,7 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
 
   return (
     <Select
+      ref={ref}
       options={options}
       onChange={onChange}
       value={value}
@@ -85,6 +90,8 @@ const ReactSelect: FC<ReactSelectComponentProps> = ({
       aria-label={ariaLabel}
     />
   );
-};
+});
+
+ReactSelect.displayName = 'ReactSelect';
 
 export default ReactSelect;

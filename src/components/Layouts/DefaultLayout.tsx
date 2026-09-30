@@ -5,7 +5,6 @@ import SidebarAcctg from "@/components/SidebarAcctg";
 import SidebarOwner from "@/components/SidebarOwner";
 import Header from "@/components/Header";
 import withAuth from '@/hoc/withAuth';
-import { ToastContainer } from 'react-toastify';
 import useLogin from '@/hooks/useLogin';
 interface DefaultLayoutProps {
   children: ReactNode;
@@ -62,18 +61,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           {/* <!-- ===== Main Content End ===== --> */}
         </div>
         {/* <!-- ===== Content Area End ===== --> */}
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+        {/* Toasts: the one ToastContainer is in src/app/layout.tsx, so they outlive a page change. */}
       </div>
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </>
