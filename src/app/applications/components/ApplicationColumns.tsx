@@ -25,20 +25,24 @@ const HIDE_ON_PHONE = 599;
 const HIDE_BELOW_TABLET = 767;
 const HIDE_BELOW_LAPTOP = 1139;
 
-/** "2026-09-21 20:05:31" (Manila wall-clock from the server) → "Sep 21, 2026, 8:05 PM", in any browser zone. */
+/**
+ * "2026-09-21 20:05:31" (Manila wall-clock from the server) → "Sep 21, 2026, 8:05 PM", in any
+ * browser zone. Exactly midnight is a row pasted from the Sheet with only its day ("10/1/2026"),
+ * so it shows the date alone, "Oct 1, 2026", until Google's download gives it the time.
+ */
 const formatSubmitted = (value: string | null): string => {
   if (!value) return '';
   // The server's string carries no zone. Pin it to Manila (+08:00, no daylight
   // saving) and format in Manila, so the digits shown are the digits stored.
   const date = new Date(`${value.replace(' ', 'T')}+08:00`);
   if (Number.isNaN(date.getTime())) return value;
+  const time: Intl.DateTimeFormatOptions = value.endsWith(' 00:00:00') ? {} : { hour: 'numeric', minute: '2-digit' };
   return date.toLocaleString('en-PH', {
     timeZone: 'Asia/Manila',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+    ...time,
   });
 };
 

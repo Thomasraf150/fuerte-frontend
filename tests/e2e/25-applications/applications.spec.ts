@@ -462,6 +462,24 @@ test('4. status chips send status to getLoanApplications, and All sends none', a
   }
 });
 
+/**
+ * A row pasted from the Sheet with only its day ("10/1/2026") is stored at
+ * midnight: the Submitted column shows the date alone, not "12:00 AM".
+ * Every other time shows as it is.
+ */
+test('4b. Submitted shows the time, and a row pasted with only its day shows the date alone', async ({ page, backend }) => {
+  const rows = APPLICATIONS.map((row) => (row.id === '2' ? { ...row, submitted_at: '2026-10-01 00:00:00' } : row));
+  backend.extraGraphql.set('getLoanApplications', () => ({
+    getLoanApplications: { data: rows, paginatorInfo: { total: rows.length, currentPage: 1, lastPage: 1, hasMorePages: false } },
+  }));
+  await signedInAs(page, backend, 'CALLCTR');
+  await openApplications(page);
+
+  await expect(page.getByRole('cell', { name: /^Sep 21, 2026, 9:15\sAM$/ })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Oct 1, 2026', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: /^Oct 1, 2026,/ })).toHaveCount(0);
+});
+
 // ---------------------------------------------------------------------------
 // 5. Upload result
 // ---------------------------------------------------------------------------
