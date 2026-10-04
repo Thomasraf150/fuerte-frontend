@@ -84,7 +84,7 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
         {hasPanel && <GoogleFormPanel flags={flags} answers={answers} />}
         <div className={`min-w-0 ${hasPanel ? 'xl:col-start-1 xl:row-start-1' : ''}`}>
           {converted ? (
-            <ConvertedApplication record={record} />
+            <ConvertedApplication record={record} canOpenBorrower={!isCallCenter} />
           ) : (
             <ApplicationForm
               key={record.id}

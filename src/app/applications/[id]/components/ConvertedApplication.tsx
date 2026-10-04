@@ -27,9 +27,10 @@ const Blank: React.FC = () => (
 /**
  * An application that has become a borrower is a record, not a form: there is nothing left
  * to edit (the server refuses it). The page says so, points at the borrower, and keeps
- * the application's basics in view for Print and for reference.
+ * the application's basics in view for Print and for reference. Call Center gets no pointer
+ * (`canOpenBorrower` false): the borrower's page is not its to open, and the server refuses it.
  */
-const ConvertedApplication: React.FC<{ record: LoanApplicationRecord }> = ({ record }) => {
+const ConvertedApplication: React.FC<{ record: LoanApplicationRecord; canOpenBorrower: boolean }> = ({ record, canOpenBorrower }) => {
   const titleId = useId();
   const amount = formatMoneyOrBlank(record.amount_applied);
   return (
@@ -50,13 +51,15 @@ const ConvertedApplication: React.FC<{ record: LoanApplicationRecord }> = ({ rec
             </div>
           </div>
           {record.borrower_id ? (
-            <Link
-              href={`/borrowers/${record.borrower_id}`}
-              className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark md:min-h-10"
-            >
-              Open the borrower
-              <ArrowRight aria-hidden="true" size={16} className="shrink-0" />
-            </Link>
+            canOpenBorrower && (
+              <Link
+                href={`/borrowers/${record.borrower_id}`}
+                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark md:min-h-10"
+              >
+                Open the borrower
+                <ArrowRight aria-hidden="true" size={16} className="shrink-0" />
+              </Link>
+            )
           ) : (
             <p className="text-sm text-body dark:text-bodydark">The borrower is not linked to this application.</p>
           )}

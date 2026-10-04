@@ -218,7 +218,7 @@ type FakeUser = ReturnType<typeof fakeUser>;
 const CORS = { 'Access-Control-Allow-Origin': APP, 'Access-Control-Allow-Credentials': 'true' };
 
 /** The first field of the operation's selection set: "getLoanApplication", "setLoanApplicationStatus", ... */
-const rootField = (query: string): string =>
+export const rootField = (query: string): string =>
   query.slice(query.indexOf('{') + 1).match(/^\s*([A-Za-z_]\w*)/)?.[1] ?? '(unparsed)';
 
 const json = (route: Route, status: number, body: unknown) =>

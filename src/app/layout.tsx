@@ -7,6 +7,7 @@ import "@/css/satoshi.css";
 import "@/css/style.css";
 import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
+import CallCenterGuard from "@/components/Guards/CallCenterGuard";
 import './styles.css'; // Include your global styles
 import { Poppins } from 'next/font/google';
 import Pusher from "pusher-js";
@@ -83,7 +84,7 @@ export default function RootLayout({
         />
         <div className="dark:bg-boxdark-2 dark:text-bodydark">
           {loading ? <Loader /> : ''}
-          {children}
+          <CallCenterGuard>{children}</CallCenterGuard>
         </div>
         {/* The app's one toast container. Each page layout used to mount its own, so a toast
             fired just before a page change (a save that returns to the list, sign-in) was

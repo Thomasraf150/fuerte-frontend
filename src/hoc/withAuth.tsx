@@ -10,8 +10,8 @@ let lastValidatedAt = 0;
 // "/applications" or a page under it, never a sibling like "/applications-archive".
 const isApplicationsPath = (p: string) => p === '/applications' || p.startsWith('/applications/');
 
-// Where Call Center must go from path p, or null when it may stay.
-const callCenterTarget = (p: string) =>
+// Where Call Center must go from path p, or null when it may stay. Shared with CallCenterGuard.
+export const callCenterTarget = (p: string) =>
   useAuthStore.getState().user?.role?.code === 'CALLCTR' && !isApplicationsPath(p) ? '/applications' : null;
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): ComponentType<P> => {
@@ -33,10 +33,12 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): Compone
           return;
         }
 
-        // Call Center (CALLCTR, role 8) works the Applications page only, so keep
-        // it there. UI routing, NOT a security control: BranchAccessService gives
-        // role 8 no branches, but that covers branch-scoped reads only; most
-        // mutations are still open to it (known gap in the applications-page spec).
+        // Call Center (CALLCTR, role 8) works the Applications pages only, so keep
+        // it there. UI routing, NOT a security control: the server refuses a Call
+        // Center account everything else ("This is not available to Call Center
+        // accounts."). This effect runs too late to keep a page from asking: that
+        // is CallCenterGuard's job (root layout, above every page), which has
+        // already held such a page back, so this is only a fallback.
         const target = IS_AUTHENTICATED() ? callCenterTarget(window.location.pathname) : null;
         if (target) {
           router.replace(target);
