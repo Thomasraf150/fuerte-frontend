@@ -7,6 +7,7 @@ import BorrowerAttachments from './TabForm/BorrowerAttachments'
 import BorrowerCoMaker from './TabForm/BorrowerCoMaker'
 import BorrowerLoans from './TabForm/BorrowerLoans'
 import { BorrowerRowInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, DataSubBranches } from '@/utils/DataTypes'
+import type { BorrowerInfo as BorrowerFormValues, SelectOption } from '@/utils/DataTypes'
 interface BorrInfoProps {
   setShowForm: (v: boolean) => void;
   dataChief?: DataChief[] | undefined;
@@ -24,6 +25,10 @@ interface BorrInfoProps {
   fetchDataArea: (v1: number, v2: number) => void;
   fetchDataSubArea: (v1: number) => void;
   fetchDataBorrCompany: (v1: number, v2: number) => void;
+  /** Values the Details form starts from (an application's, on Create as borrower). Passed to BorrowerDetails, which reads them once, at mount. */
+  initialValues?: Partial<BorrowerFormValues>;
+  /** Branch choices that replace the assigned-branch picker (the application's one branch, on Create as borrower). Passed to BorrowerDetails, which then always shows the picker: creating only, never with singleData. */
+  branchChoices?: SelectOption[];
 }
 
 // Loans, Co-Maker and Attachments all key off a borrower id. On an unsaved
@@ -43,7 +48,7 @@ const tabClasses = (locked: boolean, isActive: boolean): string => {
   return 'border-transparent text-body dark:text-bodydark hover:border-blue-500 hover:text-blue-500';
 };
 
-const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading }) => {
+const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, initialValues, branchChoices }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
   const [showBorrAttForm, setShowBorrAttForm] = useState<boolean>(false);
 
@@ -113,6 +118,8 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
                   fetchDataArea={fetchDataArea}
                   fetchDataSubArea={fetchDataSubArea}
                   fetchDataBorrCompany={fetchDataBorrCompany}
+                  initialValues={initialValues}
+                  branchChoices={branchChoices}
                 />
               </div>
             )}

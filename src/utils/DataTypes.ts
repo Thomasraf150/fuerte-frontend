@@ -971,10 +971,187 @@ export interface LoanApplicationRow {
   intake_flags: string[];
 }
 
+/*
+ * One application, whole (getLoanApplication). Its stored form is `details`: six groups
+ * shaped like the createLoanApplication input (fuerte-backend/graphql/loanapplication.graphql),
+ * with the same field names. A field nobody filled in is null, and so is a group
+ * nobody filled in (a Google Form row stores only the few it has), so every field
+ * here is nullable. Money is a string ("15000.00"), never a float.
+ */
+
+/** details.info: "Borrower Information". `is_rent` is Own (0) or Rent (1). */
+export interface LoanApplicationInfo {
+  firstname: string | null;
+  middlename: string | null;
+  lastname: string | null;
+  amount_applied: string | null;
+  purpose: string | null;
+  chief_id: number | null;
+  terms_of_payment: string | null;
+  residence_address: string | null;
+  is_rent: number | null;
+  other_source_of_inc: string | null;
+  est_monthly_fam_inc: string | null;
+  employment_position: string | null;
+  gender: string | null;
+}
+
+/** details.detail: "Borrower Details". `dob` is Y-m-d. */
+export interface LoanApplicationDetail {
+  contact_no: string | null;
+  email: string | null;
+  dob: string | null;
+  place_of_birth: string | null;
+  age: number | null;
+  civil_status: string | null;
+}
+
+/** details.spouse */
+export interface LoanApplicationSpouse {
+  work_address: string | null;
+  occupation: string | null;
+  fullname: string | null;
+  company: string | null;
+  dept_branch: string | null;
+  length_of_service: string | null;
+  salary: string | null;
+  company_contact_person: string | null;
+  contact_no: string | null;
+}
+
+/** details.work: "Work Background". */
+export interface LoanApplicationWork {
+  company_borrower_id: number | null;
+  employment_number: string | null;
+  area_id: number | null;
+  sub_area_id: number | null;
+  station: string | null;
+  term_in_service: string | null;
+  employment_status: string | null;
+  division: string | null;
+  monthly_gross: string | null;
+  monthly_net: string | null;
+  office_address: string | null;
+}
+
+/** details.company: "Company Information". */
+export interface LoanApplicationCompany {
+  employer: string | null;
+  salary: string | null;
+  contract_duration: string | null;
+}
+
+/** One of details.references. `occupation` is the Position column. */
+export interface LoanApplicationReference {
+  occupation: string | null;
+  name: string | null;
+  contact_no: string | null;
+}
+
+export interface LoanApplicationDetails {
+  info: LoanApplicationInfo | null;
+  detail: LoanApplicationDetail | null;
+  spouse: LoanApplicationSpouse | null;
+  work: LoanApplicationWork | null;
+  company: LoanApplicationCompany | null;
+  references: LoanApplicationReference[] | null;
+}
+
+/** One question of the Google Form and the answer given, in the order asked. */
+export interface LoanApplicationAnswer {
+  question: string;
+  answer: string;
+}
+
+/** getLoanApplication: the list's row, plus the ids, when it was saved, the stored form and the Google Form's answers. */
+export interface LoanApplicationRecord extends LoanApplicationRow {
+  /** The assigned Fuerte branch's id (`branch_sub` has its name). */
+  branch_sub_id: number | null;
+  /** Set once the application has become a borrower. */
+  borrower_id: number | null;
+  /** When the row was saved. */
+  created_at: string | null;
+  /** Never null itself: an application with no stored form has an object whose groups are all null. */
+  details: LoanApplicationDetails;
+  /** Empty for an application typed in by staff. */
+  form_answers: LoanApplicationAnswer[];
+  /**
+   * True when Google's download gave the exact time of the response (the application has a key).
+   * False for a row from a Sheet paste or a PDF, whose date applied may be off: staff can correct the day.
+   */
+  exact_time: boolean;
+}
+
+/**
+ * getLoanApplicationBorrowerMatch: whether the applicant already has a borrower in Fuerte, found by the
+ * New Borrower name check (the application's first and last name, and its mobile number) across ALL
+ * branches. The `my*` fields are what sits in the user's own branches, by branch name and count; the
+ * rest is the other branches, by branch name only. A repeat applicant is a fraud signal for staff: it
+ * warns and never blocks. The query answers null for Call Center, which is never asked.
+ */
+export interface LoanApplicationBorrowerMatch {
+  existsInMyBranches: boolean;
+  /** Branch names. */
+  myBranches: string[];
+  myBranchMatchCount: number;
+  myBranchIsProblem: boolean;
+  /** The most cut-offs a matching problem account has missed. */
+  myBranchWorstCutoffs: number;
+  existsElsewhere: boolean;
+  /** Branch names. */
+  branches: string[];
+  isProblem: boolean;
+  /** The most cut-offs a matching problem account has missed. */
+  worstCutoffsMissed: number;
+}
+
+/**
+ * getApplicationSourceCounts: how many applications came in by one channel. `channel` is a
+ * LoanApplicationChannel or, for applications with none, "unknown" (the backend may return it),
+ * so it is typed string.
+ */
+export interface ApplicationSourceCount {
+  channel: string;
+  count: number;
+}
+
+/** One group of an application input: only the fields that were filled in. Text is text, ids and Age are numbers. */
+export type LoanApplicationInputGroup = Record<string, string | number>;
+
+/**
+ * updateLoanApplication's `input`: createLoanApplication's without the channel, and the
+ * branch optional. Built by toApplicationUpdateInput (src/utils/applicationForm.ts).
+ * A section the input leaves out keeps what is stored; one sent empty ({} or []) is cleared.
+ */
+export interface LoanApplicationUpdateInput {
+  /** Included only when a branch is chosen. */
+  branch_sub_id?: number;
+  /**
+   * Y-m-d: the day applied, corrected. Included only when the day was changed in the form, and only
+   * for a Google Form application without an exact time (the server refuses it otherwise). It is
+   * stored at 00:00.
+   */
+  submitted_on?: string;
+  info: LoanApplicationInputGroup & { firstname: string; lastname: string };
+  detail: LoanApplicationInputGroup & { contact_no: string };
+  spouse?: LoanApplicationInputGroup;
+  work?: LoanApplicationInputGroup;
+  company?: LoanApplicationInputGroup;
+  references?: LoanApplicationInputGroup[];
+}
+
+/** An application an upload, a PDF or a paste has just added: where to open it, and whose it is. */
+export interface NewApplicationRef {
+  id: number;
+  full_name: string;
+}
+
 /** POST /api/applications/upload, /pdf and /paste → {status: true, ...this}. */
 export interface ApplicationUploadResult {
   added: number;
   already_here: number;
   skipped: { row: number; reason: string }[];
   flagged: { row: number; note: string }[];
+  /** What was just added, in the order the input had it (oldest first). Empty when nothing was; an answer without the field is read as empty. */
+  new_applications: NewApplicationRef[];
 }

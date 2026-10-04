@@ -165,9 +165,13 @@ test('B. the toast of a save that goes back to the list is still on screen on th
 
   await saveButton(form).click();
 
+  // Hold the toast's 3s timer (pauseOnHover) while the list loads: on the dev server the first
+  // move to /borrowers in a freshly loaded page can take longer than the toast lives (measured
+  // 3.9s, 2026-10-02). A per-page ToastContainer, the bug this pins, still unmounts it with the page.
+  const toast = page.getByRole('alert').filter({ hasText: SAVED_TOAST });
+  await toast.hover();
   await expect(page).toHaveURL(`${APP}/borrowers`, { timeout: 30_000 });
   await expect(page.getByRole('heading', { name: 'Borrowers', exact: true, level: 2 })).toBeVisible();
-  const toast = page.getByRole('alert').filter({ hasText: SAVED_TOAST });
   await expect(toast).toBeVisible();
   await expect(toast).toHaveCount(1);
 });

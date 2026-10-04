@@ -533,8 +533,8 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 {renderExtraFields?.({ control, register, errors })}
                 {showBranchPicker && (
                   <div data-testid="borrower-branch-picker">
-                    {/* The application variant marks it required and names the control (neither FormLabel
-                        nor ReactSelect takes an id to pair them). New Borrower's picker is unchanged. */}
+                    {/* The application variant marks it required. Both variants name the control "Branch"
+                        (neither FormLabel nor ReactSelect takes an id to pair them). */}
                     <FormLabel title="Branch" required={variant === 'application' && req('branch_sub_id')} />
                     <Controller
                       name={"branch_sub_id" as any}
@@ -549,7 +549,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           value={branchOptions.find((o) => String(o.value) === String(field.value)) || null}
                           isLoading={loadingMyAccessibleBranches}
                           loadingMessage={() => "Loading accessible branches..."}
-                          aria-label={variant === 'application' ? 'Branch' : undefined}
+                          aria-label="Branch"
                         />
                       )}
                     />
@@ -690,7 +690,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       render={({ field }) => (
                         <ReactSelect
                           options={optionsChief}
-                          placeholder="Select a Chief..."
+                          placeholder="Select a Chief..." aria-label="Chief"
                           isLoading={!dataChief}
                           loadingMessage={() => 'Loading chiefs...'}
                           onChange={(selectedOption) => {
@@ -960,7 +960,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                           <ReactSelect
                             {...field}
                             options={optionsBorrComp}
-                            placeholder="Select a Company..."
+                            placeholder="Select a Company..." aria-label="Office Where Currently Employed"
                             isLoading={!dataBorrCompany}
                             loadingMessage={() => 'Loading companies...'}
                             onChange={(selectedOption) => {
@@ -999,7 +999,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       render={({ field }) => (
                         <ReactSelect
                           options={optionsArea}
-                          placeholder="Select an Area..."
+                          placeholder="Select an Area..." aria-label="Area"
                           isLoading={!dataArea}
                           loadingMessage={() => 'Loading areas...'}
                           onChange={(selectedOption) => {
@@ -1026,7 +1026,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       render={({ field }) => (
                         <ReactSelect
                           options={optionsSubArea}
-                          placeholder="Select a Sub Area..."
+                          placeholder="Select a Sub Area..." aria-label="Sub Area"
                           isLoading={subAreaLoading}
                           loadingMessage={() => 'Loading sub areas...'}
                           noOptionsMessage={() => 'No sub-areas for this area'}

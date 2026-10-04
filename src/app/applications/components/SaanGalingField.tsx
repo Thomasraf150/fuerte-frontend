@@ -5,17 +5,9 @@ import { Check } from 'react-feather';
 import type { FieldErrors, UseFormRegister, UseFormRegisterReturn } from 'react-hook-form';
 import { CHANNELS, CHANNEL_LABELS } from '@/utils/applicationForm';
 import type { LoanApplicationChannel } from '@/utils/DataTypes';
-import { CHANNEL_ICONS } from './channelIcons';
+import { CHANNEL_ICONS, TINTS } from './channelIcons';
 
 export const CHANNEL_ERROR = 'Piliin kung saan galing ang application.';
-
-/** The icon bubble's tint: meta colours the status dots do not use, so a source never reads as a status. */
-const TINTS: Readonly<Record<LoanApplicationChannel, string>> = {
-  google_form: 'bg-meta-10/15 text-meta-10',
-  facebook: 'bg-meta-5/15 text-meta-5',
-  walk_in: 'bg-meta-8/15 text-meta-8',
-  phone: 'bg-meta-3/15 text-meta-3',
-};
 
 const HINTS: Readonly<Record<LoanApplicationChannel, string>> = {
   google_form: 'Sumagot sa form online',

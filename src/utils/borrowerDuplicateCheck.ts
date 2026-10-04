@@ -82,7 +82,8 @@ const goodStandingHtml = (): string =>
  */
 /**
  * Match inside the caller's OWN accessible branches, found by the looser
- * first+last probe. This exists because the strict duplicate check requires an
+ * first+last probe (which also matches on the mobile number alone, so the
+ * message says both). This exists because the strict duplicate check requires an
  * exact middlename too — so "Alma Yubos" missed "Alma ABANSE Yubos" and the
  * modal wrongly reported "safe to continue".
  */
@@ -94,8 +95,8 @@ const inMyBranchesHtml = (c: CrossBranchResult | null | undefined, alreadyShownA
   const where = c.myBranches.length ? `<strong>${c.myBranches.join(', ')}</strong>` : 'your branch';
   return (
     `<div style="margin-top:10px;padding:10px 12px;border-radius:6px;background:#FFFBEB;border-left:4px solid #D97706;">` +
-      `<strong style="color:#B45309;">⚠ Similar name already in your branch</strong><br/>` +
-      `${c.myBranchMatchCount} existing borrower${c.myBranchMatchCount === 1 ? '' : 's'} in ${where} ${c.myBranchMatchCount === 1 ? 'matches' : 'match'} this first + last name.` +
+      `<strong style="color:#B45309;">⚠ Possible match already in your branch</strong><br/>` +
+      `${c.myBranchMatchCount} existing borrower${c.myBranchMatchCount === 1 ? '' : 's'} in ${where} ${c.myBranchMatchCount === 1 ? 'has' : 'have'} the same first and last name, or the same mobile number.` +
       problemLine +
       `<br/><em style="font-size:0.85em;color:#6B7280;">Middle name may differ — open Borrowers and verify before creating.</em>` +
     `</div>`

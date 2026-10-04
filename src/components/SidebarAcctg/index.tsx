@@ -184,7 +184,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </SidebarLinkGroup>
 
               {/* Applications */}
-              <ApplicationsMenuItem pathname={pathname} />
+              <ApplicationsMenuItem pathname={pathname} compact />
 
               {/* Approvals */}
               <li>

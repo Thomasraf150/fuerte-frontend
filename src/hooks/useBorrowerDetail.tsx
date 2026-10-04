@@ -2,6 +2,7 @@
 
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { BorrowerInfo } from '@/utils/DataTypes';
+import type { ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
 import useBorrowerBase from './useBorrowerBase';
@@ -28,13 +29,15 @@ const useBorrowerDetail = () => {
   } = useBorrowerBase();
 
   /**
-   * Submit borrower with optional refresh callback
+   * Submit borrower with optional refresh callback. `conversion` is given only when New
+   * Borrower was opened from an application (see useBorrowerBase.submitBorrower).
    */
   const onSubmitBorrower = async (
     data: BorrowerInfo,
-    refreshCallback?: () => void
+    refreshCallback?: () => void,
+    conversion?: ApplicationConversion
   ): Promise<{ success: boolean; error?: string; data?: any }> => {
-    return submitBorrower(data, refreshCallback);
+    return submitBorrower(data, refreshCallback, conversion);
   };
 
   /**

@@ -31,10 +31,17 @@ const TINT: Record<LoanApplicationStatus, string> = {
   borrower_created: 'bg-success/10 ring-success/40',
 };
 
+/*
+ * data-tag="allowRowEvents" makes a click on the pill, or on the flag mark below, open
+ * the row in the Applications list: see CellText in ApplicationColumns. Its dot and
+ * label let clicks through to it (pointer-events-none), and the pill's own tooltip
+ * still shows. Anywhere else the pill is shown the attribute does nothing.
+ */
 const ApplicationStatusPill: React.FC<{ status: LoanApplicationStatus }> = ({ status }) => {
   const label = APPLICATION_STATUS_LABEL[status] ?? status;
   return (
     <span
+      data-tag="allowRowEvents"
       title={label}
       className={`inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-xs font-medium text-black ring-1 ring-inset dark:text-white sm:px-2.5 ${
         TINT[status] ?? 'bg-whiten ring-stroke dark:bg-meta-4 dark:ring-strokedark'
@@ -46,9 +53,9 @@ const ApplicationStatusPill: React.FC<{ status: LoanApplicationStatus }> = ({ st
         column floor in app/styles.css). The dot and some padding give their width back
         to the label.
       */}
-      <span aria-hidden="true" className={`hidden h-1.5 w-1.5 shrink-0 rounded-full sm:inline-block ${APPLICATION_STATUS_DOT[status] ?? 'bg-body'}`} />
+      <span aria-hidden="true" className={`pointer-events-none hidden h-1.5 w-1.5 shrink-0 rounded-full sm:inline-block ${APPLICATION_STATUS_DOT[status] ?? 'bg-body'}`} />
       {/* A narrow column ellipsizes the label rather than clipping the pill. */}
-      <span className="min-w-0 overflow-hidden text-ellipsis">{label}</span>
+      <span className="pointer-events-none min-w-0 overflow-hidden text-ellipsis">{label}</span>
     </span>
   );
 };
@@ -61,6 +68,7 @@ const ApplicationStatusPill: React.FC<{ status: LoanApplicationStatus }> = ({ st
  */
 export const IntakeFlagMark: React.FC<{ label?: string }> = ({ label }) => (
   <span
+    data-tag="allowRowEvents"
     {...(label ? { role: 'img', 'aria-label': label, title: label } : { 'aria-hidden': true })}
     className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-warning text-[10px] font-bold leading-none text-black"
   >

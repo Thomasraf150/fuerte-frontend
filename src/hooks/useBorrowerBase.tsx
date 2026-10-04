@@ -7,6 +7,7 @@ import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } from '@/utils/DataTypes';
 import { checkBorrowerDuplicates, getAuthUserData } from '@/utils/borrowerDuplicateCheck';
+import { withApplication, type ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
 
@@ -15,7 +16,7 @@ import { toast } from "react-toastify";
  * Used by useBorrower (list) and useBorrowerDetail (detail page)
  */
 const useBorrowerBase = () => {
-  const { SAVE_BORROWER_MUTATION } = BorrowerQueryMutations;
+  const { SAVE_BORROWER_MUTATION, SAVE_BORROWER_FROM_APPLICATION_MUTATION } = BorrowerQueryMutations;
   const { GET_CHIEF_QUERY } = ChiefQueryMutations;
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
@@ -94,10 +95,14 @@ const useBorrowerBase = () => {
    * Submit borrower (create or update)
    * @param data - Borrower form data
    * @param onSuccess - Optional callback on success
+   * @param conversion - Create as borrower: the application this borrower comes from, and
+   *   its branch. Only given on New Borrower opened from an application; without it the
+   *   save is exactly the plain one.
    */
   const submitBorrower = async (
     data: BorrowerInfo,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    conversion?: ApplicationConversion
   ): Promise<{ success: boolean; error?: string; data?: any }> => {
     setBorrowerLoading(true);
 
@@ -126,7 +131,11 @@ const useBorrowerBase = () => {
           String(data.branch_sub_id);
       }
 
-      const result = await graphqlFetch(SAVE_BORROWER_MUTATION, variables);
+      // Converting an application is its own operation (application_id, and the application's
+      // branch for everyone), so the plain query and variables above stay as they were.
+      const result = conversion
+        ? await graphqlFetch(SAVE_BORROWER_FROM_APPLICATION_MUTATION, withApplication(variables, conversion))
+        : await graphqlFetch(SAVE_BORROWER_MUTATION, variables);
 
       // Handle GraphQL errors
       if (result.errors) {

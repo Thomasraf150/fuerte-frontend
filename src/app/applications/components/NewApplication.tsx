@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'nextjs-toploader/app';
 import { toast } from 'react-toastify';
 import { ArrowLeft } from 'react-feather';
 import BorrowerDetails from '@/app/borrowers/components/TabForm/BorrowerDetails';
-import { MAX_COMPANY_DROPDOWN_SIZE, MAX_DROPDOWN_SIZE } from '@/constants/pagination';
-import useBorrowerBase from '@/hooks/useBorrowerBase';
 import useNewApplication from '@/hooks/useNewApplication';
 import {
   APPLICATION_REQUIRED_FIELDS, hasBlankBasic, toApplicationInput, type ApplicationFormValues, type LoanApplicationInput,
 } from '@/utils/applicationForm';
 import type { LoanApplicationChannel } from '@/utils/DataTypes';
 import LoadError from './LoadError';
+import { NAME_INPUTS_IN_CAPITALS } from './nameInputs';
 import SaanGalingField from './SaanGalingField';
+import { useApplicationPicklists } from './useApplicationPicklists';
 import { useCanUpload } from './useCanUpload';
 
 const LIST = '/applications';
@@ -41,30 +41,6 @@ const NewApplicationHeader: React.FC = () => (
     </p>
   </div>
 );
-
-/**
- * The Chief, Area, Sub Area and Office lists, loaded as New Borrower loads them
- * (borrowers/[id]/page.tsx). None is required here, so a list that fails does not
- * stop the basics from being saved.
- */
-const useApplicationPicklists = () => {
-  const { dataChief, dataArea, dataSubArea, dataBorrCompany, fetchDataChief, fetchDataArea, fetchDataSubArea, fetchDataBorrCompany } =
-    useBorrowerBase();
-  useEffect(() => {
-    Promise.allSettled([
-      fetchDataChief(MAX_DROPDOWN_SIZE, 1),
-      fetchDataArea(MAX_DROPDOWN_SIZE, 1),
-      fetchDataBorrCompany(MAX_COMPANY_DROPDOWN_SIZE, 1),
-    ]).then((results) => {
-      const failed = results.filter((result) => result.status === 'rejected').length;
-      if (!failed) return;
-      console.error('[NewApplication] picklists did not load', { failed });
-      toast.error('The Chief, Area or Office list did not load. The basics can still be saved.');
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once: the fetchers are new functions on every render
-  }, []);
-  return { dataChief, dataArea, dataSubArea, dataBorrCompany, fetchDataChief, fetchDataArea, fetchDataSubArea, fetchDataBorrCompany };
-};
 
 /**
  * Saving, then back to the list. BorrowerDetails closes the form (setShowForm(false))
@@ -106,7 +82,7 @@ const NewApplication: React.FC = () => {
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <NewApplicationHeader />
-      <div className="py-3 sm:p-3 md:p-5">
+      <div className={`py-3 sm:p-3 md:p-5 ${NAME_INPUTS_IN_CAPITALS}`}>
         {branchError && (
           <div className="mx-2 mb-2 sm:mx-3">
             <LoadError message={branchError} onRetry={loadBranches} />

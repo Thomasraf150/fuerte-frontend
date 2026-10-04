@@ -1,10 +1,12 @@
 /**
  * Applications page, step 1: the user-facing behaviour.
  *
- *   1. Call Center (CALLCTR) sees one menu link, Applications, is sent back to
- *      /applications from any other page, and can upload.
- *   2. Every other sidebar variant (Owner, Accounting, default) carries the link,
- *      it opens /applications and marks itself as the current page there.
+ *   1. Call Center (CALLCTR) sees one menu, the Applications dropdown (Applications
+ *      and Source tracker), is sent back to /applications from any other page, and
+ *      can upload.
+ *   2. The sidebar carries the Applications dropdown, and its Applications link opens
+ *      /applications. One smoke test: every sidebar variant, the open and current-page
+ *      rules and Source tracker are tested in tests/e2e/27-application-page.
  *   3. The upload control is shown to Admin, Owner and Call Center only.
  *   4. The status chips send `status` to getLoanApplications, and All sends none.
  *   5. A finished upload shows its tally, the skipped and flagged rows, and
@@ -24,6 +26,19 @@
  *      show the reader's message and send nothing, and a read that stalls is given
  *      up after a minute (on a faked clock) with the worker replaced. The PDFs are
  *      drawn in the test with jsPDF from the fictional layout in googleFormFixture.ts.
+ *  11. The list opens an application: the Name is a link to /applications/<id>, reachable
+ *      by Tab and shown with a focus ring, and a click anywhere else in the row (text, the
+ *      channel line and its icon, the status pill, the flag mark) opens the same page, unless
+ *      text is selected (a drag to copy a number) and, with ctrl or cmd held, in a new tab.
+ *      A ctrl-click on the link is left to the browser. The page itself is tested in
+ *      tests/e2e/27-application-page; here only the URL is asserted.
+ *
+ *  12. What an upload, a paste or a PDF just added can be opened from its result: one new
+ *      application gets a link ("Open the new application: #000228 NAME", the name in
+ *      capitals), two to five a short list, newest first, and more than five the newest five
+ *      and "and N more at the top of the list." Nothing new, no field, or an entry that is
+ *      not a usable one: no link. The links are reachable by keyboard, show a focus ring and
+ *      are 48px tall on a phone.
  *
  * NO CREDENTIALS AND NO BACKEND. Auth on this app is client side: withAuth and
  * DefaultLayout read the persisted zustand store (localStorage 'authStore'), and
@@ -298,20 +313,13 @@ async function openApplications(page: Page): Promise<void> {
 }
 
 const menu = (page: Page): Locator => page.locator('aside nav');
+/** Applications is a dropdown: this button opens it. */
+const applicationsToggle = (page: Page): Locator =>
+  menu(page).getByRole('button', { name: 'Applications', exact: true });
+/** The dropdown's first item, the link to /applications. Out of reach (display:none) while it is closed, as it is away from /applications. */
 const applicationsLink = (page: Page): Locator =>
   menu(page).getByRole('link', { name: 'Applications', exact: true });
 const uploadSection = (page: Page): Locator => page.getByRole('region', { name: 'Google Form responses' });
-
-/** Which of the three sidebar components rendered, told apart by links only one of them has. */
-async function sidebarVariant(page: Page): Promise<string> {
-  const has = async (href: string) => (await page.locator(`aside a[href="${href}"]`).count()) > 0;
-  if (await has('/accounting-dashboard')) return 'SidebarOwner';
-  const accounting = await has('/accounting/coa');
-  const borrowers = await has('/borrowers');
-  if (accounting && !borrowers) return 'SidebarAcctg';
-  if (borrowers && !accounting) return 'Sidebar';
-  return 'unknown';
-}
 
 /** Every path the main frame commits, including client-side (history API) navigations. */
 function trackPaths(page: Page): string[] {
@@ -335,15 +343,21 @@ const listUnder = (panel: Locator, heading: string): Locator =>
 // ---------------------------------------------------------------------------
 
 test.describe('1. Call Center', () => {
-  test('the sidebar menu holds exactly one link: Applications', async ({ page, backend }) => {
+  test('the sidebar menu holds one group, Applications, with its two links', async ({ page, backend }) => {
     await signedInAs(page, backend, 'CALLCTR');
     await openApplications(page);
 
+    // The one menu is the Applications dropdown, open on /applications: its toggle, then
+    // Applications and Source tracker. Nothing else is in it.
+    await expect(menu(page).getByRole('button')).toHaveCount(1);
+    await expect(applicationsToggle(page)).toHaveAttribute('aria-expanded', 'true');
     const links = menu(page).getByRole('link');
-    await expect(links).toHaveCount(1);
-    await expect(links).toHaveText('Applications');
-    await expect(links).toHaveAttribute('href', '/applications');
-    await expect(links).toHaveAttribute('aria-current', 'page');
+    await expect(links).toHaveCount(2);
+    await expect(links).toHaveText(['Applications', 'Source tracker']);
+    await expect(links.nth(0)).toHaveAttribute('href', '/applications');
+    await expect(links.nth(0)).toHaveAttribute('aria-current', 'page');
+    await expect(links.nth(1)).toHaveAttribute('href', '/applications/tracker');
+    await expect(links.nth(1)).not.toHaveAttribute('aria-current', 'page');
     // The logo would otherwise send Call Center to "/" only to be bounced back.
     await expect(page.locator('aside').getByRole('link', { name: 'Logo' })).toHaveAttribute('href', '/applications');
   });
@@ -365,34 +379,24 @@ test.describe('1. Call Center', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 2. The Applications link on every other sidebar variant
+// 2. The Applications dropdown outside Call Center's menu
 // ---------------------------------------------------------------------------
 
-test.describe('2. Applications link in every sidebar', () => {
-  const VARIANTS: { code: RoleCode; sidebar: string }[] = [
-    { code: 'OWN', sidebar: 'SidebarOwner' },
-    { code: 'ACCTG', sidebar: 'SidebarAcctg' },
-    { code: 'ADM', sidebar: 'Sidebar' },
-    { code: 'PROC', sidebar: 'Sidebar' },
-  ];
+// A smoke test only. Every sidebar variant (Owner, Accounting, default), the open and
+// current-page rules and Source tracker are tested in tests/e2e/27-application-page/source-tracker.spec.ts.
+test.describe('2. Applications dropdown in the sidebar', () => {
+  test('the sidebar carries the dropdown, and its Applications link opens /applications', async ({ page, backend }) => {
+    await signedInAs(page, backend, 'ADM');
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 120_000 });
 
-  for (const { code, sidebar } of VARIANTS) {
-    test(`${code} (${sidebar}): the link opens /applications and is marked current there`, async ({ page, backend }) => {
-      await signedInAs(page, backend, code);
-      await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    // Away from /applications the dropdown is closed: open it to reach the link.
+    await expect(applicationsToggle(page)).toBeVisible({ timeout: 90_000 });
+    await applicationsToggle(page).click();
+    await applicationsLink(page).click();
 
-      const link = applicationsLink(page);
-      await expect(link).toBeVisible({ timeout: 90_000 });
-      expect(await sidebarVariant(page), `${code} rendered the wrong sidebar`).toBe(sidebar);
-      await expect(link).not.toHaveAttribute('aria-current', 'page');
-
-      await link.click();
-
-      await expect(page).toHaveURL(`${APP}/applications`, { timeout: 90_000 });
-      await expect(page.getByRole('group', { name: 'Filter applications by status' })).toBeVisible({ timeout: 90_000 });
-      await expect(link).toHaveAttribute('aria-current', 'page');
-    });
-  }
+    await expect(page).toHaveURL(`${APP}/applications`, { timeout: 90_000 });
+    await expect(page.getByRole('group', { name: 'Filter applications by status' })).toBeVisible({ timeout: 90_000 });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -595,7 +599,7 @@ test.describe('7. Sign-in landing', () => {
 
     await expect(page).toHaveURL(`${APP}/`, { timeout: 90_000 });
     // The layout (and so withAuth) has mounted, and the Owner stays put.
-    await expect(applicationsLink(page)).toBeVisible({ timeout: 90_000 });
+    await expect(applicationsToggle(page)).toBeVisible({ timeout: 90_000 });
     await expect(page).toHaveURL(`${APP}/`);
     expect(backend.logins).toEqual([FAKE_LOGIN]);
     expect(paths).toContain('/');
@@ -984,5 +988,540 @@ test.describe('10. One response as a PDF', () => {
     await expect(alert).toContainText('This PDF could not be opened.', { timeout: 90_000 });
     expect(backend.jsonPosts).toHaveLength(0);
     expect(backend.uploads).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 11. A row opens its application
+// ---------------------------------------------------------------------------
+
+/**
+ * The same three applications, each with the channel it came in by, so every kind of
+ * thing a row holds is there to click: the name, the channel line and its icon, the
+ * status pill, and (row 2) the intake-flag mark.
+ */
+const APPLICATIONS_BY_CHANNEL = [
+  { ...APPLICATIONS[0], channel: 'facebook' },
+  { ...APPLICATIONS[1], channel: 'walk_in' },
+  { ...APPLICATIONS[2], channel: 'phone' },
+];
+
+/**
+ * What /applications/<id> asks for, in the shape of the backend's LoanApplicationRecord.
+ * The page asks for it once it opens. These tests assert only the URL; the page itself is tested in tests/e2e/27-application-page.
+ */
+function stubApplicationRecords(backend: FakeBackend): void {
+  backend.extraGraphql.set('getLoanApplication', (variables) => {
+    const row = APPLICATIONS_BY_CHANNEL.find((application) => application.id === String(variables.id));
+    if (!row) return { getLoanApplication: null };
+    return {
+      getLoanApplication: {
+        ...row,
+        branch_sub_id: row.branch_sub ? Number(row.branch_sub.id) : null,
+        borrower_id: null,
+        created_at: row.submitted_at,
+        // An application with no stored form: details is an object whose groups are all null.
+        details: { info: null, detail: null, spouse: null, work: null, company: null, references: null },
+        form_answers: [],
+      },
+    };
+  });
+}
+
+/**
+ * RootLayout's loader (app/layout.tsx): for the first second after a page loads, a full-screen
+ * overlay takes every click. Wait it out before a click that must land on the list.
+ */
+const bootOverlay = (page: Page): Locator => page.locator('div.fixed.inset-0.z-9999');
+
+/** Opens the list as Call Center, with the channel on every row and the application page's data stubbed. */
+async function openListWithChannels(page: Page, backend: FakeBackend): Promise<void> {
+  backend.extraGraphql.set('getLoanApplications', () => ({
+    getLoanApplications: {
+      data: APPLICATIONS_BY_CHANNEL,
+      paginatorInfo: { total: APPLICATIONS_BY_CHANNEL.length, currentPage: 1, lastPage: 1, hasMorePages: false },
+    },
+  }));
+  stubApplicationRecords(backend);
+  await signedInAs(page, backend, 'CALLCTR');
+  await openApplications(page);
+  await expect(bootOverlay(page)).toHaveCount(0, { timeout: 10_000 });
+}
+
+const nameLink = (page: Page, name: string): Locator => page.getByRole('link', { name, exact: true });
+const rowOf = (page: Page, name: string): Locator => page.getByRole('row').filter({ hasText: name });
+
+/**
+ * The requests this page makes for /applications/<id>, as they happen. A router push asks for the
+ * page at once, so "no request" says no navigation was started, without waiting for it to land: a
+ * push to a page that is not built yet takes seconds to land, and a fixed wait would pass first.
+ */
+function watchRequestsFor(page: Page, id: string): string[] {
+  const seen: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === `/applications/${id}`) seen.push(`${request.resourceType()} ${request.method()}`);
+  });
+  return seen;
+}
+
+/**
+ * Records what each click lands on ("a" for a link or something inside one, else the tag), as
+ * the click happens, so it survives the navigation the click causes. The Name link and the row's
+ * own click open the same page, so the URL alone cannot say which of the two did it.
+ */
+async function recordClicks(page: Page): Promise<string[]> {
+  const landed: string[] = [];
+  await page.exposeFunction('reportClick', (kind: string) => landed.push(kind));
+  await page.evaluate(() => {
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element;
+      (window as unknown as { reportClick: (kind: string) => void }).reportClick(target.closest('a') ? 'a' : target.tagName.toLowerCase());
+    }, true);
+  });
+  return landed;
+}
+
+/** What a click can land on in a row besides the name link: each must open the row's application. */
+const OTHER_ROW_TARGETS: { what: string; applicant: string; id: string; target: (row: Locator) => Locator; force?: boolean }[] = [
+  // Not exact: this cell also holds the screen-reader text "Not assigned. The form says: ".
+  { what: 'a cell of text', applicant: 'E2E Applicant One', id: '1', target: (row) => row.getByText('Marikina') },
+  { what: 'the amount', applicant: 'E2E Applicant Three', id: '3', target: (row) => row.getByText('₱5,000.00', { exact: true }) },
+  { what: 'the channel line', applicant: 'E2E Applicant One', id: '1', target: (row) => row.getByText('Messenger') },
+  // The icon lets clicks through to its line (pointer-events-none), so Playwright would wait forever
+  // for a click that "never reaches" it: force the click onto its pixels, as a thumb or a mouse does.
+  { what: 'the channel icon', applicant: 'E2E Applicant Two', id: '2', target: (row) => row.locator('[data-column-id="name"] svg'), force: true },
+  { what: 'the status pill', applicant: 'E2E Applicant Three', id: '3', target: (row) => row.getByTitle('Declined', { exact: true }) },
+  { what: 'the intake-flag mark', applicant: 'E2E Applicant Two', id: '2', target: (row) => row.getByRole('img', { name: /^Check: / }) },
+];
+
+// Applicant names are filed in capitals, but a row that came in from the Google Form holds them as the
+// applicant typed them. The list draws them in capitals (CSS only): the text is not rewritten.
+test('10b. a name stored in lowercase is drawn in CAPITALS in the list, and its text is left as stored', async ({ page, backend }) => {
+  const [first, ...others] = APPLICATIONS_BY_CHANNEL;
+  const rows = [{ ...first, full_name: 'maria dela peña' }, ...others];
+  backend.extraGraphql.set('getLoanApplications', () => ({
+    getLoanApplications: { data: rows, paginatorInfo: { total: rows.length, currentPage: 1, lastPage: 1, hasMorePages: false } },
+  }));
+  stubApplicationRecords(backend);
+  await signedInAs(page, backend, 'CALLCTR');
+  await openApplications(page);
+
+  const link = nameLink(page, 'maria dela peña');
+  await expect(link).toBeVisible();
+  await expect(link).toHaveText('maria dela peña');
+  await expect(link).toHaveAttribute('title', 'maria dela peña');
+  expect(await link.evaluate((element) => getComputedStyle(element).textTransform)).toBe('uppercase');
+  // What it is drawn as: the capitals are really on the page, not just a class.
+  expect(await link.evaluate((element) => (element as HTMLElement).innerText)).toBe('MARIA DELA PEÑA');
+  // The line under the name (where it came from) is not a name.
+  const source = rowOf(page, 'maria dela peña').getByText('Messenger');
+  expect(await source.evaluate((element) => getComputedStyle(element).textTransform)).toBe('none');
+});
+
+test.describe('11. A row opens its application', () => {
+  test('the name is a link to /applications/<id>; a click opens it, and Back is the list', async ({ page, backend }) => {
+    await openListWithChannels(page, backend);
+    const link = nameLink(page, 'E2E Applicant Two');
+    await expect(link).toHaveAttribute('href', '/applications/2');
+
+    await link.click();
+
+    await expect(page).toHaveURL(`${APP}/applications/2`, { timeout: 90_000 });
+    // One history entry for the page, not two: Back is the list.
+    await page.goBack();
+    await expect(page).toHaveURL(`${APP}/applications`);
+  });
+
+  /*
+   * No double navigation. A click on the link already navigates, so the row's own click
+   * (onRowClicked) must not run for it too. RDT runs the row click only for a target that
+   * carries data-tag="allowRowEvents" (see CellText in ApplicationColumns), so the link,
+   * and what is inside it, must not carry one. The effect cannot be seen on a plain click:
+   * Next drops the second push to the same URL. It shows with a ctrl- or cmd-click: the
+   * link leaves that to the browser (its own new tab), while a row click opens the
+   * application in a new tab of the page's own, so a row click that ran anyway would open
+   * a second one.
+   */
+  test('the name link and what is in it carry no data-tag, so the row never navigates for it as well', async ({ page, backend }) => {
+    await openListWithChannels(page, backend);
+
+    const tagged = await nameLink(page, 'E2E Applicant Two').evaluate(
+      (link) => link.matches('[data-tag]') || link.querySelector('[data-tag]') !== null,
+    );
+    expect(tagged).toBe(false);
+  });
+
+  for (const { what, applicant, id, target, force } of OTHER_ROW_TARGETS) {
+    test(`a click on ${what} in ${applicant}'s row opens /applications/${id}`, async ({ page, backend }) => {
+      await openListWithChannels(page, backend);
+      const landed = await recordClicks(page);
+      const row = rowOf(page, applicant);
+      // Hovering a row reveals what its cells cut off (app/styles.css), which reflows it: a name that
+      // wrapped now pushes the channel line down. Hover first, so the click is aimed at the row as it is
+      // with the pointer on it, not at the spot where the target used to be (the Name link, say).
+      await row.hover();
+
+      await target(row).click({ force });
+
+      await expect(page).toHaveURL(`${APP}/applications/${id}`, { timeout: 90_000 });
+      expect(landed, 'the click landed on the Name link, which opens the same page for another reason').toHaveLength(1);
+      expect(landed).not.toContain('a');
+    });
+  }
+
+  // Call Center drag-selects a mobile number to copy it: the click that ends the drag must not open the row.
+  test('a drag across a number selects it and stays on the list; a plain click elsewhere in the row then opens the application', async ({ page, backend }) => {
+    await openListWithChannels(page, backend);
+    const asked = watchRequestsFor(page, '1');
+    const row = rowOf(page, 'E2E Applicant One');
+    await row.hover(); // the row reflows on hover: read the box as it is with the pointer on it
+    const mobile = row.getByText('09170000001', { exact: true });
+    const box = (await mobile.boundingBox())!;
+    const y = box.y + box.height / 2;
+
+    await page.mouse.move(box.x + 2, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 2, y, { steps: 8 });
+    await page.mouse.up();
+
+    // The premise: the drag did select some of the number.
+    expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).not.toBe('');
+    // Its click (RDT runs the row click for it: it ends on the cell) did not start a navigation.
+    await page.waitForTimeout(1_000);
+    expect(asked, 'the click that ended the drag opened the application').toEqual([]);
+    await expect(page).toHaveURL(`${APP}/applications`);
+
+    // The check is about the selection, not the row: a click elsewhere in it first drops the selection
+    // (a click on the selected text itself is still taken as working with the selection), and opens.
+    await row.getByText('Store capital', { exact: true }).click();
+    await expect(page).toHaveURL(`${APP}/applications/1`, { timeout: 90_000 });
+  });
+
+  for (const modifier of ['Control', 'Meta'] as const) {
+    test(`a ${modifier}-click on a row, outside the link, opens the application in a new tab and leaves this one on the list`, async ({ page, context, backend }) => {
+      // The new tab has no page.route of its own: answer the backend for the whole context, as for this page.
+      await context.route(`${BACKEND}/**`, (route) => backend.handle(route));
+      await openListWithChannels(page, backend);
+      const row = rowOf(page, 'E2E Applicant Two');
+      await row.hover();
+
+      const [tab] = await Promise.all([
+        context.waitForEvent('page'),
+        row.getByText('Tuition', { exact: true }).click({ modifiers: [modifier] }),
+      ]);
+
+      await expect(tab).toHaveURL(`${APP}/applications/2`, { timeout: 90_000 });
+      await expect(page).toHaveURL(`${APP}/applications`);
+      await tab.close();
+    });
+  }
+
+  test('keyboard: Tab reaches the name link, it shows a focus ring, and Enter opens the application', async ({ page, backend }) => {
+    await openListWithChannels(page, backend);
+    const link = nameLink(page, 'E2E Applicant One');
+    const isFocused = () => link.evaluate((element) => element === document.activeElement);
+
+    // Tab on from the status filter until the first row's link has the focus.
+    await page.getByRole('group', { name: 'Filter applications by status' }).getByRole('button', { name: 'All', exact: true }).focus();
+    for (let presses = 0; presses < 15 && !(await isFocused()); presses += 1) await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    // The ring is a box-shadow in the primary colour (rgb(60, 80, 224)); at rest the shadow is transparent.
+    await expect(link).toHaveCSS('box-shadow', /rgb\(60, 80, 224\)/);
+
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(`${APP}/applications/1`, { timeout: 90_000 });
+  });
+
+  // The behaviour behind the data-tag check above: a row click that ran for the link would open the
+  // application in a tab of the page's own (as a ctrl-click on a row does), on top of the browser's.
+  test('a ctrl-click on the name is left to the browser: this tab does not navigate, and the page opens no tab of its own', async ({ page, context, backend }) => {
+    await openListWithChannels(page, backend);
+    // Stop the browser opening its own new tab for the link (it would not have the fake backend).
+    // A tab that opens anyway is one the page opened itself.
+    await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault()));
+    // The page opens its tab with window.open, inside the click: record the calls. The browser reports a
+    // tab the page opened only once that page has started (about two seconds on the dev server, past the
+    // wait below), so the count of new pages is the backstop, and this is the check that sees it at once.
+    await page.evaluate(() => {
+      const opens: string[] = [];
+      const open = window.open.bind(window);
+      window.open = (...args: Parameters<typeof window.open>) => {
+        opens.push(String(args[0]));
+        return open(...args);
+      };
+      (window as unknown as { __opens: string[] }).__opens = opens;
+    });
+    const opened: string[] = [];
+    context.on('page', (tab) => opened.push(tab.url()));
+    const asked = watchRequestsFor(page, '2');
+
+    await nameLink(page, 'E2E Applicant Two').click({ modifiers: ['Control'] });
+    await page.waitForTimeout(1_000);
+
+    const calls = await page.evaluate(() => (window as unknown as { __opens: string[] }).__opens);
+    expect(calls, 'a ctrl-click on the name made the page call window.open').toEqual([]);
+    expect(opened, 'a ctrl-click on the name opened a tab of the page\'s own').toEqual([]);
+    expect(asked, 'a ctrl-click started a navigation in this tab').toEqual([]);
+    await expect(page).toHaveURL(`${APP}/applications`);
+  });
+
+  test('the column ids are unchanged', async ({ page, backend }) => {
+    await openListWithChannels(page, backend);
+
+    const ids = await page.getByRole('columnheader').evaluateAll((headers) => headers.map((header) => header.getAttribute('data-column-id')));
+    expect(ids).toEqual(['submitted', 'name', 'mobile', 'branch', 'amount', 'purpose', 'status']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 12. What was just added can be opened from the result
+// ---------------------------------------------------------------------------
+
+/** What an intake answers when it added these, in the order the input had them (oldest first). */
+const added = (...people: [number, string][]) => ({
+  status: true,
+  added: people.length,
+  already_here: 0,
+  skipped: [],
+  flagged: [],
+  new_applications: people.map(([id, full_name]) => ({ id, full_name })),
+});
+
+/** The links in the result panel that go to an application. */
+const applicationLinks = (panel: Locator): Locator => panel.locator('a[href^="/applications/"]');
+
+/** Upload the CSV and wait for the result panel. */
+async function finishedUpload(page: Page, backend: FakeBackend, body: unknown): Promise<Locator> {
+  backend.upload = { status: 200, body };
+  stubApplicationRecords(backend);
+  await signedInAs(page, backend, 'CALLCTR');
+  await openApplications(page);
+  const section = uploadSection(page);
+  await section.getByLabel(FILE_INPUT_LABEL).setInputFiles({ name: 'responses.csv', mimeType: 'text/csv', buffer: Buffer.from(CSV) });
+  const panel = section.getByRole('status');
+  await expect(panel).toContainText('Upload finished', { timeout: 30_000 });
+  return panel;
+}
+
+const textTransform = (locator: Locator): Promise<string> => locator.evaluate((element) => getComputedStyle(element).textTransform);
+
+test.describe('12. What was just added can be opened from the result', () => {
+  test('one new application: one clear link to it, with its number and its name in capitals', async ({ page, backend }) => {
+    const panel = await finishedUpload(page, backend, added([228, 'e2e applicant seven']));
+
+    const link = applicationLinks(panel);
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAttribute('href', '/applications/228');
+    // The words, the number to six digits (as everywhere), and the name drawn in capitals (the text is as the server sent it).
+    await expect(link).toHaveText('Open the new application: #000228 e2e applicant seven');
+    expect(await link.evaluate((element) => (element as HTMLElement).innerText)).toBe('Open the new application: #000228 E2E APPLICANT SEVEN');
+    expect(await textTransform(link.locator('span.uppercase'))).toBe('uppercase');
+    expect(await textTransform(link)).toBe('none');
+    await expect(link).toHaveAccessibleName('Open the new application: #000228 e2e applicant seven');
+    // One link is not a list: no heading.
+    await expect(panel.getByRole('heading', { name: 'New applications' })).toHaveCount(0);
+
+    await link.click();
+
+    await expect(page).toHaveURL(`${APP}/applications/228`, { timeout: 90_000 });
+  });
+
+  test('two new applications: a short list of two links, the newest first', async ({ page, backend }) => {
+    const panel = await finishedUpload(page, backend, added([229, 'e2e applicant eight'], [230, 'e2e applicant nine']));
+
+    await expect(panel.getByRole('heading', { name: 'New applications', exact: true })).toBeVisible();
+    await expect(panel.getByText('Newest first.', { exact: true })).toBeVisible();
+    const links = applicationLinks(panel);
+    await expect(links).toHaveCount(2);
+    // The input had 229 then 230; the list shows the newest at the top, so does the panel.
+    expect(await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual(['/applications/230', '/applications/229']);
+    // ("Open" is for screen readers, and is in the text a reader gets; the sighted see the number and the name.)
+    expect(await links.evaluateAll((items) => items.map((item) => (item as HTMLElement).innerText.replace(/\s+/g, ' ')))).toEqual([
+      'Open #000230 E2E APPLICANT NINE',
+      'Open #000229 E2E APPLICANT EIGHT',
+    ]);
+    expect(await links.first().locator('span.sr-only').evaluate((element) => element.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await expect(links.first()).toHaveAccessibleName('Open #000230 e2e applicant nine');
+    await expect(panel.getByText(/more at the top of the list/)).toHaveCount(0);
+  });
+
+  test('five new applications: all five, newest first, and nothing about more', async ({ page, backend }) => {
+    const people = [301, 302, 303, 304, 305].map((id): [number, string] => [id, `E2E Applicant ${id}`]);
+    const panel = await finishedUpload(page, backend, added(...people));
+
+    expect(await applicationLinks(panel).evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual([
+      '/applications/305', '/applications/304', '/applications/303', '/applications/302', '/applications/301',
+    ]);
+    await expect(panel.getByText(/more at the top of the list/)).toHaveCount(0);
+  });
+
+  test('seven new applications: the newest five are linked, and "and 2 more at the top of the list." says the rest', async ({ page, backend }) => {
+    const people = [401, 402, 403, 404, 405, 406, 407].map((id): [number, string] => [id, `E2E Applicant ${id}`]);
+    const panel = await finishedUpload(page, backend, added(...people));
+
+    expect(await applicationLinks(panel).evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual([
+      '/applications/407', '/applications/406', '/applications/405', '/applications/404', '/applications/403',
+    ]);
+    await expect(panel.getByText('and 2 more at the top of the list.', { exact: true })).toBeVisible();
+    // The tally still counts them all.
+    await expect(figure(panel, 'New')).toHaveText('7');
+  });
+
+  test('six new applications: five links and "and 1 more at the top of the list."', async ({ page, backend }) => {
+    const people = [501, 502, 503, 504, 505, 506].map((id): [number, string] => [id, `E2E Applicant ${id}`]);
+    const panel = await finishedUpload(page, backend, added(...people));
+
+    await expect(applicationLinks(panel)).toHaveCount(5);
+    await expect(panel.getByText('and 1 more at the top of the list.', { exact: true })).toBeVisible();
+  });
+
+  test('nothing new: no links, whether the list is empty, the field is missing, or what is in it is not usable', async ({ page, backend }) => {
+    const unusable = [null, 7, 'x', {}, { id: 'abc', full_name: 'E2E Not A Number' }, { id: 0, full_name: 'E2E Zero' }, { id: -4, full_name: 'E2E Negative' }, { id: 1.5, full_name: 'E2E Fraction' }, { id: 12 }, { id: 13, full_name: 99 }];
+    const bodies: { name: string; body: Record<string, unknown> }[] = [
+      { name: 'an empty list', body: { ...added(), already_here: 3 } },
+      { name: 'no field at all (an answer from before it existed)', body: { status: true, added: 2, already_here: 0, skipped: [], flagged: [] } },
+      { name: 'a field that is not a list', body: { ...added(), new_applications: 'none' } },
+      { name: 'entries that are not applications', body: { ...added(), new_applications: unusable } },
+    ];
+    stubApplicationRecords(backend);
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    for (let index = 0; index < bodies.length; index += 1) {
+      const { name, body } = bodies[index];
+      backend.upload = { status: 200, body };
+      const section = uploadSection(page);
+      // A file of its own each time, so the result waited for is this one's and not the last one's.
+      const file = `nothing-new-${index}.csv`;
+      await section.getByLabel(FILE_INPUT_LABEL).setInputFiles({ name: file, mimeType: 'text/csv', buffer: Buffer.from(CSV) });
+      const panel = section.getByRole('status');
+      await expect(panel).toContainText(file, { timeout: 30_000 });
+
+      await expect(applicationLinks(panel), name).toHaveCount(0);
+      await expect(panel.getByText(/Open the new application|more at the top of the list/), name).toHaveCount(0);
+      await expect(panel.getByRole('heading', { name: 'New applications' }), name).toHaveCount(0);
+      await expect(panel.getByText('Already here', { exact: true }), name).toBeVisible();
+    }
+  });
+
+  test('an entry that is not usable is left out; the usable ones around it are linked', async ({ page, backend }) => {
+    const panel = await finishedUpload(page, backend, {
+      ...added(),
+      added: 3,
+      new_applications: [{ id: 601, full_name: 'E2E Applicant 601' }, { id: 'abc', full_name: 'E2E Broken' }, { id: '602', full_name: 'E2E Applicant 602' }],
+    });
+
+    // A whole id as text is a whole id; the broken one is gone.
+    expect(await applicationLinks(panel).evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual([
+      '/applications/602', '/applications/601',
+    ]);
+  });
+
+  test('a paste shows them too, under "Paste finished"', async ({ page, backend }) => {
+    backend.paste = { status: 200, body: added([701, 'e2e applicant 701'], [702, 'e2e applicant 702']) };
+    stubApplicationRecords(backend);
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    const box = await openPasteBox(section);
+    await box.fill(PASTED_ROWS);
+    await section.getByRole('button', { name: 'Add pasted rows' }).click();
+
+    const panel = section.getByRole('status');
+    await expect(panel).toContainText('Paste finished', { timeout: 30_000 });
+    expect(await applicationLinks(panel).evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual([
+      '/applications/702', '/applications/701',
+    ]);
+    await expect(applicationLinks(panel).first()).toHaveAccessibleName('Open #000702 e2e applicant 702');
+  });
+
+  test('a PDF shows it too, under "Upload finished"', async ({ page, backend }) => {
+    backend.pdf = { status: 200, body: added([801, 'e2e applicant 801']) };
+    stubApplicationRecords(backend);
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    await chooseFile(page, section, 'Juana Dela Cruz - response.pdf', layoutToPdf(loadLayout()));
+
+    const panel = section.getByRole('status');
+    // pdf.js loads on the first PDF of a visit, and the dev server may compile its chunk.
+    await expect(panel).toContainText('Upload finished', { timeout: 90_000 });
+    await expect(panel).toContainText('Juana Dela Cruz - response.pdf');
+    const link = applicationLinks(panel);
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAttribute('href', '/applications/801');
+    await expect(link).toHaveText('Open the new application: #000801 e2e applicant 801');
+  });
+
+  test('the next try replaces the links: they belong to the last result only', async ({ page, backend }) => {
+    const panel = await finishedUpload(page, backend, added([901, 'e2e applicant 901']));
+    await expect(applicationLinks(panel)).toHaveCount(1);
+
+    backend.upload = { status: 200, body: added() };
+    await uploadSection(page).getByLabel(FILE_INPUT_LABEL).setInputFiles({ name: 'again.csv', mimeType: 'text/csv', buffer: Buffer.from(CSV) });
+
+    await expect(panel).toContainText('again.csv', { timeout: 30_000 });
+    await expect(applicationLinks(panel)).toHaveCount(0);
+  });
+
+  test('a failed upload shows no links', async ({ page, backend }) => {
+    backend.upload = { status: 422, body: { status: false, message: 'This is not a Google Form download.', new_applications: [{ id: 5, full_name: 'E2E Should Not Show' }] } };
+    stubApplicationRecords(backend);
+    await signedInAs(page, backend, 'CALLCTR');
+    await openApplications(page);
+    const section = uploadSection(page);
+
+    await section.getByLabel(FILE_INPUT_LABEL).setInputFiles({ name: 'responses.csv', mimeType: 'text/csv', buffer: Buffer.from(CSV) });
+
+    await expect(section.getByRole('alert')).toContainText('Upload failed', { timeout: 30_000 });
+    await expect(applicationLinks(section)).toHaveCount(0);
+  });
+
+  test('keyboard: Tab reaches a link, it shows a focus ring, and Enter opens the application', async ({ page, backend }) => {
+    const panel = await finishedUpload(page, backend, added([951, 'e2e applicant 951'], [952, 'e2e applicant 952']));
+    const links = applicationLinks(panel);
+    const first = links.first();
+    const isFocused = () => first.evaluate((element) => element === document.activeElement);
+
+    await uploadSection(page).getByRole('button', { name: PASTE_TOGGLE }).focus();
+    for (let presses = 0; presses < 10 && !(await isFocused()); presses += 1) await page.keyboard.press('Tab');
+    await expect(first).toBeFocused();
+    // The ring is a box-shadow in the primary colour (rgb(60, 80, 224)).
+    await expect(first).toHaveCSS('box-shadow', /rgb\(60, 80, 224\)/);
+    // Tab goes on to the next link, in the order they are drawn.
+    await page.keyboard.press('Tab');
+    await expect(links.nth(1)).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(first).toBeFocused();
+
+    await page.keyboard.press('Enter');
+
+    await expect(page).toHaveURL(`${APP}/applications/952`, { timeout: 90_000 });
+  });
+
+  test('at 360px each link is 48px tall, and a very long name wraps inside the panel instead of widening the page', async ({ page, backend }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    const long = 'Napakahabangpangalanngsangsangayngbangkonawalangputolputolparangtalagangsinasadyakungmaaringlumabasngkahon';
+    // A short name too: it fits on one line, so only the link's own height makes it 48px.
+    const panel = await finishedUpload(page, backend, added([961, long], [962, 'ab'], [963, `${long} ${long}`]));
+    const links = applicationLinks(panel);
+    await expect(links).toHaveCount(3);
+
+    const frame = (await panel.boundingBox())!;
+    for (let index = 0; index < 3; index += 1) {
+      const box = (await links.nth(index).boundingBox())!;
+      expect(box.height, `link ${index} is under 48px`).toBeGreaterThanOrEqual(47.5);
+      expect(box.x + box.width, `link ${index} leaves the panel`).toBeLessThanOrEqual(frame.x + frame.width + 0.5);
+      const cut = await links.nth(index).evaluate((element) => element.scrollWidth > element.clientWidth);
+      expect(cut, `link ${index} cuts its name`).toBe(false);
+    }
+    const scrolled = await page.evaluate(() => {
+      let shell = document.querySelector('main')?.parentElement ?? null;
+      while (shell && shell !== document.body && !['auto', 'scroll'].includes(getComputedStyle(shell).overflowX)) shell = shell.parentElement;
+      const over = shell && shell !== document.body ? shell.scrollWidth - shell.clientWidth : 0;
+      return Math.max(over, document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    });
+    expect(scrolled, 'the page scrolled sideways').toBeLessThanOrEqual(0);
   });
 });

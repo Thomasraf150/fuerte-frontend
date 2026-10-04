@@ -262,7 +262,7 @@ test('3. the basics and Facebook Messenger post exactly toApplicationInput\'s ou
     input: {
       channel: 'facebook',
       branch_sub_id: 9102,
-      info: { firstname: 'Juana', lastname: 'Dela Cruz', amount_applied: '15000', purpose: 'Store capital' },
+      info: { firstname: 'JUANA', lastname: 'DELA CRUZ', amount_applied: '15000', purpose: 'Store capital' },
       detail: { contact_no: '09170000051' },
     },
   });
@@ -272,6 +272,37 @@ test('3. the basics and Facebook Messenger post exactly toApplicationInput\'s ou
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page.getByText(`${LIST_ROWS.length} applications`, { exact: true })).toBeVisible({ timeout: 90_000 });
   await expect(page.getByText(SAVED_NOTE)).toHaveCount(0);
+});
+
+// The applicant's names are filed in capitals, as Fuerte's borrowers are. The inputs show them so; Save sends them so.
+test('3a. the three name inputs show capitals, and a name typed in lowercase is posted in capitals; the spouse and a reference keep their case', async ({ page, backend }) => {
+  stubApplications(backend);
+  await signedInAs(page, backend, 'CALLCTR');
+  const form = await openNewApplication(page);
+  await fillBasics(form);
+  await form.locator('input[name="firstname"]').fill('juana maría');
+  await form.locator('input[name="middlename"]').fill('santos');
+  await form.locator('input[name="lastname"]').fill('dela Peña');
+  await form.locator('select[name="civil_status"]').selectOption('Married');
+  await form.locator('input[name="fullname"]').fill('Pedro dela Cruz');
+  await form.locator('input[name="reference.0.name"]').fill('Ana de los Santos');
+
+  const textTransform = (name: string) => form.locator(`input[name="${name}"]`).evaluate((el) => getComputedStyle(el).textTransform);
+  for (const name of ['firstname', 'middlename', 'lastname']) expect(await textTransform(name), name).toBe('uppercase');
+  for (const name of ['purpose', 'fullname', 'reference.0.name', 'email']) expect(await textTransform(name), name).toBe('none');
+  // CSS only: what was typed is still in the field.
+  await expect(form.locator('input[name="firstname"]')).toHaveValue('juana maría');
+
+  await saveButton(form).click();
+
+  await expect(page.getByRole('status').filter({ hasText: SAVED_NOTE })).toBeVisible({ timeout: 90_000 });
+  const posted = backend.calls('createLoanApplication');
+  expect(posted).toHaveLength(1);
+  const input = posted[0].variables.input as { info: Record<string, unknown>; spouse?: Record<string, unknown>; references?: Record<string, unknown>[] };
+  expect(input.info).toMatchObject({ firstname: 'JUANA MARÍA', middlename: 'SANTOS', lastname: 'DELA PEÑA' });
+  expect(input.spouse).toEqual({ fullname: 'Pedro dela Cruz' });
+  // (The first row's Position is the form's own preset.)
+  expect(input.references).toEqual([{ occupation: 'Supervisor/Princpal', name: 'Ana de los Santos' }]);
 });
 
 // The amount used to reach react-hook-form only on blur, so Enter posted the form's 0.

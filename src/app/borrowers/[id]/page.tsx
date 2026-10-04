@@ -11,7 +11,9 @@ import BranchBadge from '@/components/BranchBadge';
 import PayerBadge from '@/components/PayerBadge';
 import useBorrowerDetail from '@/hooks/useBorrowerDetail';
 import useBranches from '@/hooks/useBranches';
+import useConvertApplication, { isStop } from '@/hooks/useConvertApplication';
 import BorrowerInfo from '../components/BorrowerInfo';
+import { ConvertBanner, ConvertStop } from '../components/ConvertFromApplication';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 
 const BorrowerDetailPage: React.FC = () => {
@@ -46,6 +48,10 @@ const BorrowerDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Create as borrower: /borrowers/new?application=<id> opens the form on that application.
+  // Without a usable ?application= (or on an existing borrower) this is all inert.
+  const convert = useConvertApplication(borrowerId === 'new');
+
   // Fetch reference data on mount
   useEffect(() => {
     const fetchReferenceData = async () => {
@@ -77,9 +83,16 @@ const BorrowerDetailPage: React.FC = () => {
     router.push('/borrowers');
   };
 
+  // Where the form closes to: its Back buttons, and a successful save (BorrowerDetails calls
+  // setShowForm(false) after one, and the save's own callback runs first, so both must agree).
+  // Converting an application goes back to it, never to the list.
+  const closeForm = () => {
+    router.push(convert.conversion ? `/applications/${convert.conversion.applicationId}` : '/borrowers');
+  };
+
   const handleShowForm = (show: boolean) => {
     if (!show) {
-      handleBack();
+      closeForm();
     }
   };
 
@@ -113,8 +126,9 @@ const BorrowerDetailPage: React.FC = () => {
     : 'New Borrower';
   const borrowerTitle = borrowerId === 'new' ? 'New Borrower' : `Borrower: ${borrowerName}`;
 
-  // Loading state
-  if (loading) {
+  // Loading state (and, on Create as borrower, until the application is read and loaded:
+  // the form takes its starting values once, so it must not open before them)
+  if (loading || convert.pending) {
     return (
       <DefaultLayout>
         <div className="mx-auto">
@@ -178,30 +192,37 @@ const BorrowerDetailPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-6">
-        <BorrowerInfo
-          setShowForm={handleShowForm}
-          singleData={singleData}
-          setSingleData={setSingleData}
-          dataChief={dataChief}
-          dataArea={dataArea}
-          dataSubArea={dataSubArea}
-          dataBorrCompany={dataBorrCompany}
-          myAccessibleBranchSubs={myAccessibleBranchSubs}
-          loadingMyAccessibleBranches={loadingMyAccessibleBranches}
-          onSubmitBorrower={async (data) => {
-            const result = await onSubmitBorrower(data, () => {
-              // Refresh callback - navigate back to list
-              router.push('/borrowers');
-            });
-            return result;
-          }}
-          borrowerLoading={borrowerLoading}
-          fetchDataBorrower={async () => {}} // Not needed on detail page
-          fetchDataChief={fetchDataChief}
-          fetchDataArea={fetchDataArea}
-          fetchDataSubArea={fetchDataSubArea}
-          fetchDataBorrCompany={fetchDataBorrCompany}
-        />
+        {convert.state.kind === 'ready' && <ConvertBanner applicationId={convert.state.id} focusOnMount={convert.retried} />}
+        {isStop(convert.state) ? (
+          // Create as borrower, but the application cannot become one (yet): the reason, not the form
+          <ConvertStop state={convert.state} onRetry={convert.retry} focusOnMount={convert.retried} />
+        ) : (
+          <BorrowerInfo
+            setShowForm={handleShowForm}
+            singleData={singleData}
+            setSingleData={setSingleData}
+            dataChief={dataChief}
+            dataArea={dataArea}
+            dataSubArea={dataSubArea}
+            dataBorrCompany={dataBorrCompany}
+            myAccessibleBranchSubs={myAccessibleBranchSubs}
+            // Converting: the picker offers the application's branch alone, which needs no fetch.
+            loadingMyAccessibleBranches={loadingMyAccessibleBranches && !convert.branchChoices}
+            initialValues={convert.initialValues}
+            branchChoices={convert.branchChoices}
+            onSubmitBorrower={async (data) => {
+              // On success: navigate back to the list (or, converting an application, to it).
+              const result = await onSubmitBorrower(data, closeForm, convert.conversion);
+              return result;
+            }}
+            borrowerLoading={borrowerLoading}
+            fetchDataBorrower={async () => {}} // Not needed on detail page
+            fetchDataChief={fetchDataChief}
+            fetchDataArea={fetchDataArea}
+            fetchDataSubArea={fetchDataSubArea}
+            fetchDataBorrCompany={fetchDataBorrCompany}
+          />
+        )}
       </div>
     </DefaultLayout>
   );

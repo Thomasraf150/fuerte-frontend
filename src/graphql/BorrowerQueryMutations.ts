@@ -277,6 +277,43 @@ const SAVE_BORROWER_MUTATION: string = `
     }
 `;
 
+/**
+ * Create as borrower: the same save as SAVE_BORROWER_MUTATION, from an application. It
+ * adds the one top-level argument `application_id`, which makes the server check the
+ * application and mark it converted in the same transaction. A SEPARATE operation on
+ * purpose, so the plain save above, and the variables New Borrower posts, stay as they
+ * were. Built from the variables by withApplication (src/utils/convertApplication.ts).
+ *
+ * The variable is declared NON-NULL (Int!) although the server's argument is optional: this
+ * operation exists only to convert, so an id that goes missing on the way (a dropped
+ * undefined, a NaN that JSON turns into null) must fail GraphQL's own validation, with
+ * nothing saved, rather than turn into a plain save that creates an unlinked borrower.
+ */
+const SAVE_BORROWER_FROM_APPLICATION_MUTATION: string = `
+    mutation SaveBorrowerFromApplication(
+      $inputBorrInfo: BorrowerInput!,
+      $inputBorrDetail: BorrowerDetailsInput!,
+      $inputBorrSpouseDetail: BorrowerSpouseDetailsInput!,
+      $inputBorrWorkBg: BorrowerWorkBgInput!,
+      $inputBorrReference: BorrowerReferenceInput!,
+      $inputBorrCompInfo: BorrowerCompInfoInput!,
+      $application_id: Int!
+    ){
+      saveBorrower(
+        inputBorrInfo: $inputBorrInfo,
+        inputBorrDetail: $inputBorrDetail,
+        inputBorrSpouseDetail: $inputBorrSpouseDetail,
+        inputBorrWorkBg: $inputBorrWorkBg,
+        inputBorrReference: $inputBorrReference,
+        inputBorrCompInfo: $inputBorrCompInfo,
+        application_id: $application_id
+      ) {
+        success
+        message
+      }
+    }
+`;
+
 const GET_BORROWER_CO_MAKER: string = `
   query GetBorrCoMaker($first: Int, $page: Int, $orderBy: [OrderByClause!], $borrower_id: Int){
     getBorrCoMaker(first: $first,
@@ -421,6 +458,7 @@ const BorrowerQueryMutations = {
   GET_SINGLE_BORROWER_QUERY,
   GET_BORROWER_ATTACHMENTS_QUERY,
   SAVE_BORROWER_MUTATION,
+  SAVE_BORROWER_FROM_APPLICATION_MUTATION,
   SAVE_BORROWER_ATTACHMENTS_QUERY,
   UPDATE_BORROWER_ATTACHMENTS_QUERY,
   GET_BORROWER_CO_MAKER,

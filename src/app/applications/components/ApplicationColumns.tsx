@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import { TableColumn } from 'react-data-table-component';
 import { LoanApplicationRow } from '@/utils/DataTypes';
 import { CHANNEL_SHORT_LABELS } from '@/utils/applicationForm';
@@ -30,7 +31,7 @@ const HIDE_BELOW_LAPTOP = 1139;
  * browser zone. Exactly midnight is a row pasted from the Sheet with only its day ("10/1/2026"),
  * so it shows the date alone, "Oct 1, 2026", until Google's download gives it the time.
  */
-const formatSubmitted = (value: string | null): string => {
+export const formatSubmitted = (value: string | null): string => {
   if (!value) return '';
   // The server's string carries no zone. Pin it to Manila (+08:00, no daylight
   // saving) and format in Manila, so the digits shown are the digits stored.
@@ -56,13 +57,21 @@ const formatAmount = (value: string | null): string => {
  * where text-overflow cannot apply, so the text needs a box of its own.
  * white-space is inherited from the cell (nowrap), which keeps the app's
  * row-hover reveal in app/styles.css working.
+ *
+ * data-tag="allowRowEvents" is what makes a click here open the row. RDT runs
+ * onRowClicked only when the click's target element carries it: its own cells
+ * do, but the content a custom `cell` renders does not, so without it a click on
+ * a cell's text opens nothing. Every element in a row that is not a control
+ * carries it (see also NameCell, StatusCell and ApplicationStatusPill). The Name
+ * link does not: it navigates by itself, and tagged, the row would navigate a
+ * second time.
  */
 const CellText: React.FC<{ children: React.ReactNode; title?: string; className?: string }> = ({
   children,
   title,
   className = '',
 }) => (
-  <span title={title} className={`min-w-0 overflow-hidden text-ellipsis ${className}`}>
+  <span data-tag="allowRowEvents" title={title} className={`min-w-0 overflow-hidden text-ellipsis ${className}`}>
     {children}
   </span>
 );
@@ -84,22 +93,38 @@ const BranchCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   );
 };
 
+/*
+ * The name as a link. At rest it is the plain name, so a column of them still scans;
+ * the underline arrives on hover and a ring on keyboard focus (the page's own focus
+ * ring; white on the dark rows, where primary is too dim). The py-0.5 and the thin,
+ * close underline keep the line inside the box: overflow-hidden, needed for the
+ * ellipsis, would clip it. Same truncation as CellText, but no data-tag.
+ */
+const NAME_LINK =
+  'overflow-hidden text-ellipsis uppercase rounded-sm py-0.5 font-medium text-black underline decoration-1 decoration-transparent underline-offset-[3px] transition-colors hover:decoration-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 dark:text-white dark:hover:decoration-white dark:focus-visible:ring-white dark:focus-visible:ring-offset-boxdark';
+
 /**
- * The name, and under it where the application came from (Saan galing): the
- * source's icon and short label, muted. No coloured dot: dots mean status on this
- * page. A row without a channel shows the name alone.
+ * The name, a link to the application, and under it where the application came from
+ * (Saan galing): the source's icon and short label, muted. No coloured dot: dots mean
+ * status on this page. A row without a channel shows the name alone.
+ *
+ * The link is the keyboard and screen-reader way in (one tab stop a row), and a
+ * ctrl-click still opens a new tab. Clicking anywhere else in the row opens the
+ * same page (ApplicationList's onRowClicked). prefetch is off: a page holds up to 100
+ * rows, and a prefetch each is far more traffic than one click needs.
  */
 const NameCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   const channel = row.channel && row.channel in CHANNEL_SHORT_LABELS ? row.channel : null;
   const ChannelIcon = channel ? CHANNEL_ICONS[channel] : null;
   return (
     <span className="flex min-w-0 flex-col">
-      <CellText title={row.full_name} className="font-medium text-black dark:text-white">
+      <Link href={`/applications/${row.id}`} prefetch={false} title={row.full_name} className={NAME_LINK}>
         {row.full_name}
-      </CellText>
+      </Link>
       {channel && ChannelIcon && (
-        <span className="flex min-w-0 items-center gap-1 text-xs text-body dark:text-bodydark">
-          <ChannelIcon aria-hidden="true" size={12} className="shrink-0" />
+        <span data-tag="allowRowEvents" className="flex min-w-0 items-center gap-1 text-xs text-body dark:text-bodydark">
+          {/* A decoration: pointer-events-none lets a click on it reach the tagged line, so it opens the row too. */}
+          <ChannelIcon aria-hidden="true" size={12} className="pointer-events-none shrink-0" />
           <CellText>
             <span className="sr-only">Saan galing: </span>
             {CHANNEL_SHORT_LABELS[channel]}
@@ -113,7 +138,7 @@ const NameCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
 const StatusCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   const flags = row.intake_flags ?? [];
   return (
-    <span className="flex min-w-0 items-center gap-1 sm:gap-1.5">
+    <span data-tag="allowRowEvents" className="flex min-w-0 items-center gap-1 sm:gap-1.5">
       <ApplicationStatusPill status={row.status} />
       {flags.length > 0 && <IntakeFlagMark label={`Check: ${flags.join('; ')}`} />}
     </span>

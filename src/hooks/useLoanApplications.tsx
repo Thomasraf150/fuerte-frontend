@@ -6,7 +6,7 @@ import { graphqlFetch, handleSessionExpired } from '@/utils/graphqlFetch';
 import { useAuthStore } from '@/store/authStore';
 import type { ServerSidePaginationProps } from '@/components/CustomDatatable';
 import { usePagination } from './usePagination';
-import { ApplicationUploadResult, LoanApplicationRow, LoanApplicationStatus } from '@/utils/DataTypes';
+import { ApplicationUploadResult, LoanApplicationRow, LoanApplicationStatus, NewApplicationRef } from '@/utils/DataTypes';
 import { readGoogleFormPdf } from '@/utils/googleFormPdf/readGoogleFormPdf';
 
 const API = process.env.NEXT_PUBLIC_API_URL; // e.g. http://localhost:8080/api
@@ -42,6 +42,8 @@ interface UploadBody {
   already_here?: number;
   skipped?: ApplicationUploadResult['skipped'];
   flagged?: ApplicationUploadResult['flagged'];
+  /** Read with readNewApplications: an answer from before this field existed has none. */
+  new_applications?: unknown;
 }
 
 /** How a failure the server did not explain is worded, per way in. */
@@ -147,11 +149,25 @@ async function readJsonBody(res: Response, wording: Wording): Promise<UploadBody
   }
 }
 
+/**
+ * The applications the intake just added, as links need them: a whole id above zero and a name.
+ * No field, or something else in its place, reads as none; an entry that is not one is left out,
+ * so the panel never draws a link to nowhere.
+ */
+const readNewApplications = (value: unknown): NewApplicationRef[] => {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item: { id?: unknown; full_name?: unknown } | null) => {
+    const id = Number(item?.id);
+    return Number.isSafeInteger(id) && id > 0 && typeof item?.full_name === 'string' ? [{ id, full_name: item.full_name }] : [];
+  });
+};
+
 const toResult = (body: UploadBody): ApplicationUploadResult => ({
   added: Number(body.added) || 0,
   already_here: Number(body.already_here) || 0,
   skipped: body.skipped ?? [],
   flagged: body.flagged ?? [],
+  new_applications: readNewApplications(body.new_applications),
 });
 
 /** The server's answer to an upload, PDF or paste, or an Error whose message is safe to show as it is. */

@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'nextjs-toploader/app';
 import { CheckCircle, Inbox, Plus } from 'react-feather';
 import CustomDatatable from '@/components/CustomDatatable';
 import useLoanApplications, { ApplicationStatusFilter, LoadedApplications } from '@/hooks/useLoanApplications';
+import type { LoanApplicationRow } from '@/utils/DataTypes';
 import { formatCount } from '@/utils/helper';
 import { applicationColumns } from './ApplicationColumns';
 import { APPLICATION_STATUS_DOT, APPLICATION_STATUS_LABEL } from './ApplicationStatusPill';
@@ -126,6 +128,26 @@ const ApplicationList: React.FC = () => {
   } = useLoanApplications();
   const canUpload = useCanUpload(); // null until read: treated as "not an upload role" meanwhile
   const savedNote = useSavedNote();
+  const router = useRouter();
+  /*
+   * A click on a row opens its application, as the Name link in it does. RDT does not run
+   * this for a click on that link (it carries no data-tag; see CellText). Two exceptions,
+   * because in a table of numbers a click is not always a request to open:
+   *   - text is selected: Call Center drags across a mobile number to copy it, and the
+   *     click that ends the drag must not take the page away. (A click elsewhere in the
+   *     row drops the selection first, so it opens; a click on the selected text itself
+   *     does not.)
+   *   - ctrl or cmd is held: the application opens in a new tab, as a ctrl-click on the
+   *     link would, and this tab stays on the list.
+   * A double-click that selects a number still opens the application: its first click
+   * arrives before there is a selection.
+   */
+  const openApplication = (row: LoanApplicationRow, event: React.MouseEvent): void => {
+    if (window.getSelection()?.toString()) return;
+    const href = `/applications/${row.id}`;
+    if (event.ctrlKey || event.metaKey) window.open(href, '_blank', 'noopener');
+    else router.push(href);
+  };
   // While a load has failed, say nothing about rows: the alert above the table is the news.
   const shown = error ? null : loaded;
   const nothingYet = isNothingYet(shown);
@@ -168,6 +190,7 @@ const ApplicationList: React.FC = () => {
                 enableCustomHeader={true}
                 title={''}
                 serverSidePagination={serverSidePaginationProps}
+                onRowClicked={openApplication}
               />
             </div>
           )}

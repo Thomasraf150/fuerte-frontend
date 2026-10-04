@@ -6,6 +6,7 @@ import { ApplicationUploadResult } from '@/utils/DataTypes';
 import { formatCount } from '@/utils/helper';
 import { IntakeFlagMark } from './ApplicationStatusPill';
 import { MenuStep, Spinner } from './IntakeControls';
+import NewApplicationLinks from './NewApplicationLinks';
 import PasteBox from './PasteBox';
 
 interface UploadResponsesProps {
@@ -105,6 +106,7 @@ const UploadResult: React.FC<{ outcome: Outcome }> = ({ outcome: { way, source, 
       <Figure label="Already here" value={result.already_here} rule="border-t-bodydark2" />
       <Figure label="Skipped" value={result.skipped.length} rule={result.skipped.length > 0 ? 'border-t-danger' : 'border-t-stroke dark:border-t-strokedark'} />
     </dl>
+    <NewApplicationLinks added={result.new_applications} />
     {result.skipped.length > 0 && (
       <div className="border-t border-stroke px-4 py-3 dark:border-strokedark">
         <h5 className="text-sm font-semibold text-black dark:text-white">Skipped</h5>
