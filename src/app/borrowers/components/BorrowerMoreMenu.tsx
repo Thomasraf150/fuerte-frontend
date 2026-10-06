@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { ChevronDown, Trash2 } from "react-feather";
 import { useDeleteWithApproval } from "@/hooks/useDeleteWithApproval";
@@ -26,16 +26,19 @@ const closeDetails = (details: HTMLDetailsElement | null, returnFocus: boolean):
  * Escape and a click outside close an open <details>, which does neither by itself. Escape hands
  * the focus back to More only when it was inside the menu; elsewhere (an open picker in the form,
  * say) it just closes the menu and leaves the focus where it is.
+ *
+ * The listeners stay on for the menu's life and read details.open when the event arrives. They
+ * used to wait for React state set from the toggle event, which the browser fires a task later,
+ * so an Escape pressed right after opening reached no listener (seen as a flaky e2e, 2026-10-06).
  */
-const useDismissDetails = (menu: React.RefObject<HTMLDetailsElement>, open: boolean): void => {
+const useDismissDetails = (menu: React.RefObject<HTMLDetailsElement>): void => {
   useEffect(() => {
-    if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || !menu.current?.open) return;
       closeDetails(menu.current, !!menu.current?.contains(document.activeElement));
     };
     const onPointerDown = (event: PointerEvent) => {
-      if (!menu.current?.contains(event.target as Node)) closeDetails(menu.current, false);
+      if (menu.current?.open && !menu.current.contains(event.target as Node)) closeDetails(menu.current, false);
     };
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown);
@@ -43,7 +46,7 @@ const useDismissDetails = (menu: React.RefObject<HTMLDetailsElement>, open: bool
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown);
     };
-  }, [menu, open]);
+  }, [menu]);
 };
 
 /**
@@ -78,8 +81,7 @@ const useDeleteBorrower = (borrower: BorrowerRowInfo) => {
 /** "More ▾": the borrower actions that should not sit one tap away, today Delete borrower. A native <details>. */
 const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryClassName }) => {
   const menu = useRef<HTMLDetailsElement>(null);
-  const [open, setOpen] = useState(false);
-  useDismissDetails(menu, open);
+  useDismissDetails(menu);
   const { pending, startDelete } = useDeleteBorrower(borrower);
 
   const handleDelete = () => {
@@ -92,7 +94,6 @@ const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryCl
     <details
       ref={menu}
       className="group"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
       // Tabbing out of the menu closes it, without moving the focus. Only when the focus went somewhere:
       // a click elsewhere is the pointerdown handler's, and Safari gives a clicked button no focus.
       onBlur={(event) => {

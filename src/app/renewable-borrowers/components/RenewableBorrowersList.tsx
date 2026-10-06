@@ -250,9 +250,9 @@ const RenewableBorrowersList: React.FC = () => {
         </div>
 
         {error && (
-          <div className="m-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-between">
+          <div className="m-4 p-3 bg-danger/10 border border-danger text-danger rounded flex items-center justify-between">
             <span>Error loading renewable borrowers: {error}</span>
-            <button onClick={refresh} className="ml-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+            <button onClick={refresh} className="ml-2 px-3 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90">
               Retry
             </button>
           </div>

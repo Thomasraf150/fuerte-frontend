@@ -92,8 +92,14 @@ const HEAD_CELL_GEOMETRY = {
   paddingRight: '8px',
 };
 
-export function useDatatableTheme(): TableStyles {
+/**
+ * `interactive`: whether a click on a row does something (onRowClicked or rowHref). Only then
+ * do rows get the pointer and the hover tint -- a pointer on a row that opens nothing reads as
+ * broken. Defaults to true for callers that predate the flag.
+ */
+export function useDatatableTheme({ interactive = true }: { interactive?: boolean } = {}): TableStyles {
   const theme = useTheme();
+  const cursor = interactive ? ('pointer' as const) : ('default' as const);
 
   return useMemo(() => {
     if (theme === 'dark') {
@@ -115,12 +121,10 @@ export function useDatatableTheme(): TableStyles {
         },
         rows: {
           style: {
-            cursor: 'pointer' as const,
+            cursor,
             backgroundColor: '#2E2B20',
             borderBottomColor: '#3D3A2D',
-            '&:hover': {
-              backgroundColor: '#36332A'
-            }
+            ...(interactive ? { '&:hover': { backgroundColor: '#36332A' } } : {})
           },
         },
         headRow: {
@@ -172,12 +176,10 @@ export function useDatatableTheme(): TableStyles {
       },
       rows: {
         style: {
-          cursor: 'pointer' as const,
+          cursor,
           backgroundColor: '#FFFFFF',
           borderBottomColor: '#E4DED0',
-          '&:hover': {
-            backgroundColor: '#F6F1E7'
-          }
+          ...(interactive ? { '&:hover': { backgroundColor: '#F6F1E7' } } : {})
         },
       },
       headRow: {
@@ -208,5 +210,5 @@ export function useDatatableTheme(): TableStyles {
         }
       }
     };
-  }, [theme]);
+  }, [theme, interactive, cursor]);
 }

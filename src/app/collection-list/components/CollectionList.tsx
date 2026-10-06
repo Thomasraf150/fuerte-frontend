@@ -42,11 +42,11 @@ const CollectionList: React.FC = () => {
               </div>
               <div className="p-2 lg:p-4 overflow-x-auto">
                 {collectionListError && (
-                  <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading collection list: {collectionListError}
                     <button
                       onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
                     >
                       Retry
                     </button>
@@ -59,7 +59,7 @@ const CollectionList: React.FC = () => {
                   data={dataColListData || []}
                   enableCustomHeader={true}
                   title={''}
-                  serverSidePagination={serverSidePaginationProps}
+                  serverSidePagination={{ ...serverSidePaginationProps, recordType: 'loan', recordTypePlural: 'loans' }}
                 />
               </div>
             </div>

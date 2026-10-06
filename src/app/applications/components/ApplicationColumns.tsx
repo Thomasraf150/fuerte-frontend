@@ -22,7 +22,8 @@ import OutcomePill from './OutcomePill';
  *   - 768px and up: plus Submitted (6 columns);
  *   - 1140px and up: plus Purpose (7 columns, beside the 290px sidebar).
  * Ids are strings on purpose: borrowers/styles.css and payment-posting/styles.css
- * hide NUMERIC column ids on phones, and Next keeps page CSS loaded app-wide.
+ * hide NUMERIC column ids on phones. Since 2026-10-06 those rules are scoped to
+ * their own lists, but string ids keep this table immune whatever page CSS loads.
  */
 const HIDE_ON_PHONE = 599;
 const HIDE_BELOW_TABLET = 767;

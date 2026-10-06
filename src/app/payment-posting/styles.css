@@ -24,40 +24,38 @@
   }
 }
 
+/*
+ * Every table rule below is scoped to this page's own list root (.payment-posting-list).
+ * Next keeps a page's CSS loaded for the rest of the session, so unscoped
+ * [data-column-id] and .rdt_TableCell rules used to hide and restyle columns on
+ * EVERY table visited afterwards (SOA, Collection List, Loans, Users, the
+ * borrower page's tabs): audit bug 2, fixed 2026-10-06.
+ */
 /* Responsive table improvements */
-.responsive-table-container {
+.payment-posting-list .responsive-table-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .responsive-table-container {
+  .payment-posting-list .responsive-table-container {
     margin: 0 -1rem;
     padding: 0 1rem;
   }
 
   /* Hide less critical columns on mobile - Terms and Loan Proceeds */
-  [data-column-id="3"],
-  [data-column-id="5"] {
+  .payment-posting-list [data-column-id="3"],
+  .payment-posting-list [data-column-id="5"] {
     display: none !important;
   }
 
   /* Better spacing for action buttons on mobile */
-  .rdt_TableCell:last-child {
+  .payment-posting-list .rdt_TableCell:last-child {
     min-width: 100px;
   }
 
-  /* Improve touch targets */
-  .rdt_TableCell:last-child svg {
-    padding: 8px;
-    margin: 0 4px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-
-  .rdt_TableCell:last-child svg:hover {
-    background-color: rgba(6, 182, 212, 0.1);
-  }
+  /* No padding-on-svg touch-target rule here any more: the Action cell holds an
+     "Open loan" button that sets its own 48px target (LoansListColumn.tsx), and
+     that rule shrank its 20px icon to a 4px drawing area. */
 }

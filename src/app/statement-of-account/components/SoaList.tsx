@@ -57,7 +57,7 @@ const SoaList: React.FC = () => {
                   columns={column(handleRowClick)}
                   onRowClicked={handleRowClick}
                   data={dataLoans}
-                  serverSidePagination={soaSearchProps}
+                  serverSidePagination={{ ...soaSearchProps, recordType: 'loan', recordTypePlural: 'loans' }}
                   enableCustomHeader={true}
                   title={''}
                 />

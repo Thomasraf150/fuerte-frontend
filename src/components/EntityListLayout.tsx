@@ -135,11 +135,11 @@ function EntityListLayout<T extends object>({
                   <span>Create</span>
                 </button>
                 {error && (
-                  <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading {title.toLowerCase()}: {error}
                     <button
                       onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
                     >
                       Retry
                     </button>

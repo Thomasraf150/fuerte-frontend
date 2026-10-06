@@ -1140,9 +1140,10 @@ test.describe('11. A row opens its application', () => {
 
   /*
    * No double navigation. A click on the link already navigates, so the row's own click
-   * (onRowClicked) must not run for it too. RDT runs the row click only for a target that
-   * carries data-tag="allowRowEvents" (see CellText in ApplicationColumns), so the link,
-   * and what is inside it, must not carry one. The effect cannot be seen on a plain click:
+   * must not run for it too. The shared table's rowHref skips any click inside a link
+   * (rowOpen.ts isOwnClick); RDT's own row click, which runs only for a target carrying
+   * data-tag="allowRowEvents" (see CellText in ApplicationColumns), must not see the link
+   * either, so the link and what is inside it carry none. The effect cannot be seen on a plain click:
    * Next drops the second push to the same URL. It shows with a ctrl- or cmd-click: the
    * link leaves that to the browser (its own new tab), while a row click opens the
    * application in a new tab of the page's own, so a row click that ran anyway would open
@@ -1221,6 +1222,23 @@ test.describe('11. A row opens its application', () => {
       await tab.close();
     });
   }
+
+  // The shared table's rowHref (components/CustomDatatable/rowOpen.ts) reads the middle button as a new tab too.
+  test('a middle click on a row, outside the link, opens the application in a new tab and leaves this one on the list', async ({ page, context, backend }) => {
+    await context.route(`${BACKEND}/**`, (route) => backend.handle(route));
+    await openListWithChannels(page, backend);
+    const row = rowOf(page, 'E2E Applicant Two');
+    await row.hover();
+
+    const [tab] = await Promise.all([
+      context.waitForEvent('page'),
+      row.getByText('Tuition', { exact: true }).click({ button: 'middle' }),
+    ]);
+
+    await expect(tab).toHaveURL(`${APP}/applications/2`, { timeout: 90_000 });
+    await expect(page).toHaveURL(`${APP}/applications`);
+    await tab.close();
+  });
 
   test('keyboard: Tab reaches the name link, it shows a focus ring, and Enter opens the application', async ({ page, backend }) => {
     await openListWithChannels(page, backend);

@@ -33,8 +33,8 @@ const borrowerColumn = (
   {
     // Explicit ids keep every other column's data-column-id at its old
     // position-based value. app/borrowers/styles.css hides 3 (Middle Name) and
-    // 6 (Chief) on phones, and that CSS also reaches the tables on the borrower
-    // page, so it must not be renumbered.
+    // 6 (Chief) on phones, inside .borrowers-list (this list), so they must not
+    // be renumbered.
     id: 'payer',
     name: 'Payer',
     cell: row => <PayerBadge standing={row.payer_standing} borrowerId={row.id} />,

@@ -54,7 +54,7 @@ const BorrowerList: React.FC = () => {
     });
 
   return (
-    <div>
+    <div className="borrowers-list">
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
@@ -67,11 +67,11 @@ const BorrowerList: React.FC = () => {
               <div className="p-7">
                 <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90" onClick={handleCreateBorrower}>Create</button>
                 {borrowerError && (
-                  <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading borrowers: {borrowerError}
                     <button
                       onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
                     >
                       Retry
                     </button>

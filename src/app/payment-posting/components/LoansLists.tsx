@@ -33,7 +33,7 @@ const LoansLists: React.FC = () => {
   // Note: usePagination handles initial data loading automatically
 
   return (
-    <div>
+    <div className="payment-posting-list">
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
@@ -45,11 +45,11 @@ const LoansLists: React.FC = () => {
               </div>
               <div className="p-7">
                 {loansError && (
-                  <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading payment posting loans: {loansError}
                     <button
                       onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
                     >
                       Retry
                     </button>
@@ -62,7 +62,7 @@ const LoansLists: React.FC = () => {
                   data={dataLoans}
                   enableCustomHeader={true}
                   title={''}
-                  serverSidePagination={serverSidePaginationProps}
+                  serverSidePagination={{ ...serverSidePaginationProps, recordType: 'loan', recordTypePlural: 'loans' }}
                 />
               </div>
             </div>

@@ -74,7 +74,7 @@ const LoansLists: React.FC = () => {
                   apiLoading={loansLoading || pendingLoading}
                   columns={loansListColumn(handleRowClick, handleViewWholeLoan, pendingByEntityId, handlePendingClick)}
                   data={dataLoans}
-                  serverSidePagination={serverSidePaginationProps}
+                  serverSidePagination={{ ...serverSidePaginationProps, recordType: 'loan', recordTypePlural: 'loans' }}
                   enableCustomHeader={true}
                   title={''}
                   conditionalRowStyles={pendingDeletionRowStyles<BorrLoanRowData>(pendingByEntityId)}

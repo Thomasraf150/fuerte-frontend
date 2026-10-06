@@ -1,7 +1,7 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { ChevronRight } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
@@ -70,8 +70,17 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
       
       return (
         <>
-          <Tooltip text="Remove">
-            <Trash2 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+          {/* Opens the loan, as the row does (closed-loan toast included). It was a trash
+              icon labelled "Remove" that also only ever opened the loan. */}
+          <Tooltip text="Open">
+            <button
+              type="button"
+              aria-label={row.loan_ref ? `Open loan ${row.loan_ref}` : 'Open loan'}
+              onClick={() => handleRowClick(row)}
+              className="inline-flex h-12 w-12 items-center justify-center rounded text-primary transition-colors hover:bg-whiten focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:h-10 lg:w-10 dark:hover:bg-meta-4"
+            >
+              <ChevronRight size={20} aria-hidden="true" />
+            </button>
           </Tooltip>
         </>
       )

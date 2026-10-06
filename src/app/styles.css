@@ -78,12 +78,16 @@ aside nav ul ul a.text-white {
   overflow-wrap: anywhere;
 }
 
-/* React Data Table - Dark mode hover background color override */
-.dark .rdt_TableRow:hover {
-  background-color: #2A3647 !important;
+/*
+ * React Data Table row hover tint: only on a table whose rows open something.
+ * CustomDatatable puts `rows-open` on its root when it has onRowClicked or
+ * rowHref; a tint on a row that opens nothing reads as broken (shared table v2
+ * item 4). The colours are useDatatableTheme's brand hover tints.
+ */
+.dark .rows-open .rdt_TableRow:hover {
+  background-color: #36332A !important;
 }
 
-/* React Data Table - Light mode hover background color override */
-body:not(.dark) .rdt_TableRow:hover {
-  background-color: #F3F4F6 !important;
+body:not(.dark) .rows-open .rdt_TableRow:hover {
+  background-color: #F6F1E7 !important;
 }

@@ -1,29 +1,27 @@
 import React from 'react';
 
 /**
- * Custom loading component for react-data-table-component with dark mode support
- *
- * This component replaces the default white loading indicator that doesn't support dark mode.
- * It displays a centered loading spinner with appropriate colors for both light and dark themes.
- *
- * The component covers the entire table area during loading with proper dark mode styling.
+ * Loading rows shaped like the table (shared table v2 item 5): six rows of `columns` bars,
+ * instead of a 256px spinner that made every list jump. Screen readers hear "Loading…" once,
+ * from the status region. The bars stop pulsing for people who ask for reduced motion.
  */
-const DataTableLoadingComponent: React.FC = () => {
-  return (
-    <div className="w-full flex items-center justify-center py-32 bg-white dark:bg-boxdark">
-      <div className="text-center">
-        {/* Spinner */}
-        <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]">
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
+const DataTableLoadingComponent: React.FC<{ columns?: number }> = ({ columns = 4 }) => {
+  const cells = Array.from({ length: Math.max(1, Math.min(columns, 12)) });
 
-        {/* Loading text */}
-        <p className="mt-4 text-sm text-gray-600 dark:text-bodydark">
-          Loading data...
-        </p>
-      </div>
+  return (
+    <div role="status" className="w-full bg-white dark:bg-boxdark">
+      <span className="sr-only">Loading…</span>
+      {Array.from({ length: 6 }).map((_, row) => (
+        <div key={row} aria-hidden="true" className="flex h-12 items-center gap-4 border-b border-stroke px-2 dark:border-strokedark">
+          {cells.map((__, cell) => (
+            <div
+              key={cell}
+              className="h-3 flex-1 animate-pulse rounded bg-stroke motion-reduce:animate-none dark:bg-meta-4"
+              style={{ maxWidth: cell === 0 ? '40%' : undefined, animationDelay: `${row * 60}ms` }}
+            />
+          ))}
+        </div>
+      ))}
     </div>
   );
 };
