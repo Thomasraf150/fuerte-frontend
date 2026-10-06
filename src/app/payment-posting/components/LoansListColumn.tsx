@@ -12,28 +12,16 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
     name: 'Loan Product',
     cell: row => row.loan_product.description,
     sortable: true,
-    style: {
-      minWidth: '370px',
-    },
-    width: '370px'
   },
   {
     name: 'Borrower',
     cell: row => (row?.borrower?.lastname ?? '') + ', ' + (row?.borrower?.firstname ?? ''),
     sortable: true,
-    style: {
-      minWidth: '270px',
-    },
-    width: '270px'
   },
   {
     name: 'Terms',
     cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
     sortable: true,
-    style: {
-      minWidth: '100px',
-    },
-    width: '100px'
   },
   {
     name: 'Loan Ref#',
@@ -88,10 +76,6 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
         </>
       )
     },
-    style: {
-      minWidth: '120px',
-    },
-    width: '120px'
   },
 ];
 

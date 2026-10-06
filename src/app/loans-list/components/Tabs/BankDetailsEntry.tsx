@@ -361,7 +361,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
         </div>
         <div>
         <button
-          className="bg-purple-700 flex justify-between float-right items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm"
+          className="bg-primary flex justify-between float-right items-center text-white py-2 px-4 rounded hover:bg-primary/90 text-sm"
           type="submit"
           disabled={loanSingleData?.status === 1 ? false : true}
         >

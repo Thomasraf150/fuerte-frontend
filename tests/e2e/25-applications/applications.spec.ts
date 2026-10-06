@@ -109,17 +109,20 @@ const APPLICATIONS = [
     id: '1', source: 'google_form', submitted_at: '2026-09-21 09:15:00', location: 'Marikina',
     branch_sub: null, status: 'for_interview', full_name: 'E2E Applicant One',
     contact_no: '09170000001', amount_applied: '15000.00', purpose: 'Store capital', intake_flags: [],
+    outcome: 'for_interview', outcome_label: 'Waiting for interview', decline_reason: null,
   },
   {
     id: '2', source: 'google_form', submitted_at: '2026-09-22 14:40:00', location: 'Pasig',
     branch_sub: { id: '1', name: 'E2E Sub-branch' }, status: 'interviewed', full_name: 'E2E Applicant Two',
     contact_no: '09170000002', amount_applied: '20000.00', purpose: 'Tuition',
     intake_flags: ['Amount is above the usual limit'],
+    outcome: 'interviewed', outcome_label: 'Interviewed', decline_reason: null,
   },
   {
     id: '3', source: 'manual', submitted_at: '2026-09-23 10:05:00', location: null,
     branch_sub: { id: '1', name: 'E2E Sub-branch' }, status: 'declined', full_name: 'E2E Applicant Three',
     contact_no: '09170000003', amount_applied: '5000.00', purpose: 'Medical', intake_flags: [],
+    outcome: 'declined', outcome_label: 'Declined', decline_reason: 'E2E: hindi maabot',
   },
 ];
 
@@ -255,6 +258,9 @@ class FakeBackend {
       // The approval bell, for approver roles.
       case 'pendingDeletionRequestsForMe':
         return { pendingDeletionRequestsForMe: [] };
+      // The bell's Applications items, for Processing and Call Center: nothing.
+      case 'getApplicationNotifications':
+        return { getApplicationNotifications: [] };
       default:
         return {};
     }
@@ -1225,8 +1231,8 @@ test.describe('11. A row opens its application', () => {
     await page.getByRole('group', { name: 'Filter applications by status' }).getByRole('button', { name: 'All', exact: true }).focus();
     for (let presses = 0; presses < 15 && !(await isFocused()); presses += 1) await page.keyboard.press('Tab');
     await expect(link).toBeFocused();
-    // The ring is a box-shadow in the primary colour (rgb(60, 80, 224)); at rest the shadow is transparent.
-    await expect(link).toHaveCSS('box-shadow', /rgb\(60, 80, 224\)/);
+    // The ring is a box-shadow in the primary colour (rgb(90, 107, 44)); at rest the shadow is transparent.
+    await expect(link).toHaveCSS('box-shadow', /rgb\(90, 107, 44\)/);
 
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(`${APP}/applications/1`, { timeout: 90_000 });
@@ -1487,8 +1493,8 @@ test.describe('12. What was just added can be opened from the result', () => {
     await uploadSection(page).getByRole('button', { name: PASTE_TOGGLE }).focus();
     for (let presses = 0; presses < 10 && !(await isFocused()); presses += 1) await page.keyboard.press('Tab');
     await expect(first).toBeFocused();
-    // The ring is a box-shadow in the primary colour (rgb(60, 80, 224)).
-    await expect(first).toHaveCSS('box-shadow', /rgb\(60, 80, 224\)/);
+    // The ring is a box-shadow in the primary colour (rgb(90, 107, 44)).
+    await expect(first).toHaveCSS('box-shadow', /rgb\(90, 107, 44\)/);
     // Tab goes on to the next link, in the order they are drawn.
     await page.keyboard.press('Tab');
     await expect(links.nth(1)).toBeFocused();

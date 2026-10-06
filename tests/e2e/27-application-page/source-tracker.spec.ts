@@ -123,6 +123,12 @@ const counts = (google: number, facebook: number, walkIn: number, phone: number,
 
 const refusal = (message: string): GraphqlBody => ({ errors: [{ message }], data: null });
 
+/** A funnel with nothing in it. */
+const EMPTY_FUNNEL = Object.fromEntries(
+  ['applied', 'became_borrower', 'approved', 'loan_released', 'declined', 'rejected', 'loan_cancelled', 'for_interview', 'interviewed',
+    'borrower', 'approved_no_loan', 'loan_in_process', 'rejected_with_loan', 'released_without_approval', 'borrower_deleted'].map((key) => [key, 0]),
+);
+
 /** The server's rule: both ends inclusive, no reversed range, at most 366 days. */
 const refusesRange = ({ from, to }: DayRange): boolean => {
   const days = (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000 + 1;
@@ -198,6 +204,9 @@ class FakeBackend {
     switch (field) {
       case 'getApplicationSourceCounts':
         return this.sourceCounts(variables);
+      // The applicant funnel under the counts (tests/e2e/30-applicant-funnel tests it): nothing in it.
+      case 'getApplicationFunnel':
+        return { data: { getApplicationFunnel: { total: EMPTY_FUNNEL, by_channel: [] } } };
       // The root layout's probe on every page: never in maintenance.
       case 'maintenance':
         return { data: { maintenance: { data: { isMaintenanceModeOn: 0 } } } };
@@ -286,6 +295,8 @@ const toBox = (page: Page): Locator => page.getByLabel('To', { exact: true });
 const applyButton = (page: Page): Locator => page.getByRole('button', { name: 'Apply', exact: true });
 
 /** The big number under "Total", with its screen-reader unit: "24 applications". */
+/** The source counts' own card: the applicant funnel under it has headings and words of its own (tests/e2e/30-applicant-funnel). */
+const sources = (page: Page): Locator => page.getByRole('region', { name: 'Applications by source' });
 const total = (page: Page): Locator => page.getByText('Total', { exact: true }).locator('xpath=following-sibling::p[1]');
 /** One source's card: found by its heading. */
 const card = (page: Page, label: string): Locator =>
@@ -820,9 +831,9 @@ test.describe('3. Source tracker page', () => {
     await expect(card(page, 'Facebook Messenger')).toHaveText(/Facebook Messenger\s*6 applications\s*25% of the total/);
     await expect(card(page, 'Walk-in')).toHaveText(/Walk-in\s*4 applications\s*17% of the total/);
     await expect(card(page, 'Tawag o Text')).toHaveText(/Tawag o Text\s*2 applications\s*8% of the total/);
-    await expect(page.locator('main').getByRole('heading', { level: 4 })).toHaveText(['Google Form', 'Facebook Messenger', 'Walk-in', 'Tawag o Text']);
-    await expect(page.getByText('No applications in this period.')).toHaveCount(0);
-    await expect(page.getByText('Not recorded', { exact: true })).toHaveCount(0);
+    await expect(sources(page).getByRole('heading', { level: 4 })).toHaveText(['Google Form', 'Facebook Messenger', 'Walk-in', 'Tawag o Text']);
+    await expect(sources(page).getByText('No applications in this period.')).toHaveCount(0);
+    await expect(sources(page).getByText('Not recorded', { exact: true })).toHaveCount(0);
   });
 
   test('zeros show, and a source that is everything is 100%', async ({ page, backend }) => {
@@ -834,7 +845,7 @@ test.describe('3. Source tracker page', () => {
     await expect(card(page, 'Google Form')).toHaveText(/Google Form\s*0 applications\s*0% of the total/);
     await expect(card(page, 'Facebook Messenger')).toHaveText(/Facebook Messenger\s*0 applications\s*0% of the total/);
     await expect(card(page, 'Tawag o Text')).toHaveText(/Tawag o Text\s*0 applications\s*0% of the total/);
-    await expect(page.getByText('No applications in this period.')).toHaveCount(0);
+    await expect(sources(page).getByText('No applications in this period.')).toHaveCount(0);
   });
 
   test('a source with some applications is never 0%, nor 100% beside another with some', async ({ page, backend }) => {
@@ -850,7 +861,7 @@ test.describe('3. Source tracker page', () => {
     backend.sourceCounts = () => counts(0, 0, 0, 0);
     await openTracker(page, backend);
 
-    await expect(page.getByText('No applications in this period.')).toBeVisible();
+    await expect(sources(page).getByText('No applications in this period.')).toBeVisible();
     await expect(total(page)).toHaveText('0 applications');
     for (const label of ['Google Form', 'Facebook Messenger', 'Walk-in', 'Tawag o Text']) {
       await expect(card(page, label)).toHaveText(new RegExp(`${label}\\s*0 applications\\s*—`));
@@ -864,10 +875,10 @@ test.describe('3. Source tracker page', () => {
     await expect(total(page)).toHaveText('27 applications');
     // 12 of 27 is 44%: the shares are of everything, Not recorded included.
     await expect(card(page, 'Google Form')).toHaveText(/12 applications\s*44% of the total/);
-    const notRecorded = page.getByText('Not recorded', { exact: true });
+    const notRecorded = sources(page).getByText('Not recorded', { exact: true });
     await expect(notRecorded).toBeVisible();
     await expect(notRecorded.locator('xpath=..')).toHaveText(/Not recorded\s*3 applications\s*11% of the total\.\s*·\s*No source was saved with these\./);
-    await expect(page.getByText('No applications in this period.')).toHaveCount(0);
+    await expect(sources(page).getByText('No applications in this period.')).toHaveCount(0);
   });
 
   test('Not recorded alone is still a period with applications', async ({ page, backend }) => {
@@ -875,8 +886,8 @@ test.describe('3. Source tracker page', () => {
     await openTracker(page, backend);
 
     await expect(total(page)).toHaveText('5 applications');
-    await expect(page.getByText('No applications in this period.')).toHaveCount(0);
-    await expect(page.getByText('Not recorded', { exact: true })).toBeVisible();
+    await expect(sources(page).getByText('No applications in this period.')).toHaveCount(0);
+    await expect(sources(page).getByText('Not recorded', { exact: true })).toBeVisible();
     await expect(card(page, 'Google Form')).toHaveText(/Google Form\s*0 applications\s*0% of the total/);
   });
 

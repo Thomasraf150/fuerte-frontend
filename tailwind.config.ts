@@ -20,6 +20,7 @@
 // export default config;
 import type { Config } from "tailwindcss";
 import defaultTheme from "tailwindcss/defaultTheme";
+import { BRAND } from "./src/utils/brandColors";
 
 const config: Config = {
   content: [
@@ -42,7 +43,11 @@ const config: Config = {
   darkMode: "class",
   theme: {
     fontFamily: {
-      satoshi: ["Satoshi", "sans-serif"],
+      // Brand theme 2026-10-05: the token keeps its TailAdmin name (style.css applies
+      // `font-satoshi` to body); it now draws Hanken Grotesk, loaded in app/layout.tsx.
+      satoshi: ["var(--font-sans)", "Hanken Grotesk", "sans-serif"],
+      // Fraunces 600: page titles and record names.
+      display: ["var(--font-display)", "Fraunces", "Georgia", "serif"],
     },
     screens: {
       "2xsm": "375px",
@@ -51,44 +56,49 @@ const config: Config = {
       ...defaultTheme.screens,
     },
     extend: {
+      // Brand theme 2026-10-05 (docs/superpowers/specs/2026-10-05-brand-theme-design.md):
+      // the TailAdmin token NAMES are kept so no markup changes; their VALUES move to the
+      // Fuerte palette. The TailAdmin value each replaced is in the trailing comment.
       colors: {
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",
-        black: "#1C2434",
+        black: BRAND.ink, // #1C2434 (also the sidebar ground)
         red: "#FB5454",
-        "black-2": "#010101",
-        body: "#64748B",
-        bodydark: "#AEB7C0",
-        bodydark1: "#DEE4EE",
-        bodydark2: "#8A99AF",
-        primary: "#3C50E0",
+        "black-2": "#1C1A12", // #010101
+        body: BRAND.body, // #64748B
+        bodydark: "#BDB6A3", // #AEB7C0
+        bodydark1: "#EAE4D3", // #DEE4EE
+        bodydark2: "#A39D88", // #8A99AF
+        primary: BRAND.primary, // #3C50E0
+        accent: BRAND.accent, // new
+        ink: BRAND.ink, // new
         secondary: "#80CAEE",
-        stroke: "#E2E8F0",
-        gray: "#EFF4FB",
-        graydark: "#333A48",
-        "gray-2": "#F7F9FC",
-        "gray-3": "#FAFAFA",
-        whiten: "#F1F5F9",
-        whiter: "#F5F7FD",
-        boxdark: "#24303F",
-        "boxdark-2": "#1A222C",
-        strokedark: "#2E3A47",
-        "form-strokedark": "#3d4d60",
-        "form-input": "#1d2a39",
-        "meta-1": "#DC3545",
-        "meta-2": "#EFF2F7",
+        stroke: BRAND.stroke, // #E2E8F0
+        gray: "#FBF7EC", // #EFF4FB
+        graydark: "#3F4426", // #333A48 (sidebar hover and active item: a dark olive)
+        "gray-2": "#F8F3E8", // #F7F9FC
+        "gray-3": "#FBF8F1", // #FAFAFA
+        whiten: BRAND.cream, // #F1F5F9 (the page ground)
+        whiter: "#F6F1E7", // #F5F7FD
+        boxdark: "#2E2B20", // #24303F
+        "boxdark-2": "#1E1C14", // #1A222C
+        strokedark: "#3D3A2D", // #2E3A47
+        "form-strokedark": "#4D4939", // #3d4d60
+        "form-input": "#24221A", // #1d2a39
+        "meta-1": "#C62F3E", // #DC3545
+        "meta-2": "#F1EBDC", // #EFF2F7
         "meta-3": "#10B981",
-        "meta-4": "#313D4A",
+        "meta-4": "#3A3729", // #313D4A
         "meta-5": "#259AE6",
         "meta-6": "#FFBA00",
         "meta-7": "#FF6766",
         "meta-8": "#F0950C",
-        "meta-9": "#E5E7EB",
+        "meta-9": "#E6E0D1", // #E5E7EB
         "meta-10": "#0FADCF",
-        success: "#219653",
-        danger: "#D34053",
-        warning: "#FFA70B",
+        success: BRAND.success, // #219653
+        danger: BRAND.danger, // #B5372F
+        warning: "#F29A0E", // #FFA70B
       },
       fontSize: {
         "title-xxl": ["44px", "55px"],
@@ -269,7 +279,8 @@ const config: Config = {
         12: "12px",
       },
       boxShadow: {
-        default: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
+        // Brand theme: a warm soft shadow (was 0px 8px 13px -3px rgba(0, 0, 0, 0.07)).
+        default: "0 1px 2px rgba(40, 38, 26, 0.06), 0 8px 24px -16px rgba(40, 38, 26, 0.35)",
         card: "0px 1px 3px rgba(0, 0, 0, 0.12)",
         "card-2": "0px 1px 2px rgba(0, 0, 0, 0.05)",
         switcher:
@@ -361,6 +372,8 @@ const config: Config = {
         line3: "line 7s infinite linear",
       },
       borderRadius: {
+        // Brand theme: TailAdmin's card radius, a little softer (Tailwind's default is 2px).
+        sm: '6px',
         'custom-sm': '4px',
         'custom-md': '8px',
         'custom-lg': '17px',

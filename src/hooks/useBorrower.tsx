@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
+import { BORROWER_DELETE } from './borrowerDelete';
 import { usePagination } from './usePagination';
 import useBorrowerBase from './useBorrowerBase';
 import { graphqlFetch } from '@/utils/graphqlFetch';
@@ -15,7 +16,7 @@ import { toast } from "react-toastify";
  * Extends useBorrowerBase with pagination and delete functionality
  */
 const useBorrower = () => {
-  const { GET_BORROWER_QUERY, DELETE_BORROWER_MUTATION } = BorrowerQueryMutations;
+  const { GET_BORROWER_QUERY } = BorrowerQueryMutations;
 
   const {
     borrowerLoading,
@@ -105,18 +106,10 @@ const useBorrower = () => {
   };
 
   /**
-   * Delete a borrower. Bypass-eligible roles (ADMIN/OWNER/BRANCH_ADMIN)
-   * soft-delete immediately; everyone else files a request. The shared
-   * `useDeleteWithApproval` hook handles the spinner / branching / errors.
+   * Delete a borrower (BORROWER_DELETE). The shared `useDeleteWithApproval`
+   * hook handles the spinner / branching / errors.
    */
-  const submitDeleteBorrower = useDeleteWithApproval<{ id: string | number }>({
-    mutation: DELETE_BORROWER_MUTATION,
-    responseKey: 'deleteBorrower',
-    promptTitle: 'Delete this borrower?',
-    promptText: 'If you are an admin or owner, this happens immediately. Otherwise a branch admin will review your request.',
-    buildVariables: (args, reason) => ({ id: args.id, reason }),
-    errorLabel: 'Failed to delete borrower',
-  });
+  const submitDeleteBorrower = useDeleteWithApproval(BORROWER_DELETE);
 
   const handleRmBorrower = async (
     data: any,

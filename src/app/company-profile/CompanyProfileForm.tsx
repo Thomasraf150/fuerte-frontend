@@ -42,9 +42,20 @@ const CompanyProfileForm: React.FC = () => {
         required={false}
       />
 
+      {/* width/height stay as the intrinsic ratio Next needs, but the rendered
+          size is capped to the container: at 1024px the content area is ~652px,
+          so a hard 700px logo preview pushed the page 48px sideways. */}
       {logoPreview && (
         <div className="image-preview">
-          <Image src={logoPreview} alt="Preview" width={700} height={300} priority unoptimized={true}/>
+          <Image
+            src={logoPreview}
+            alt="Preview"
+            width={700}
+            height={300}
+            priority
+            unoptimized={true}
+            className="h-auto w-full max-w-[700px]"
+          />
         </div>
       )}
 

@@ -27,6 +27,12 @@ function getCode(branchName: string): 'FA' | 'FB' | 'FC' | 'FD' {
   return 'FA';
 }
 
+/** The sub-branch name without the chip's code in front ("FB Bataan" → "Bataan"), so the two never say "FB FB Bataan". */
+export function branchLabel(branchName: string, subBranchName?: string | null): string | null | undefined {
+  const code = getCode(branchName);
+  return subBranchName?.startsWith(code + ' ') ? subBranchName.slice(code.length + 1) : subBranchName;
+}
+
 const BranchBadge: React.FC<BranchBadgeProps> = ({ branchName, subBranchName, size = 'sm' }) => {
   if (!branchName) return null;
 
@@ -34,9 +40,7 @@ const BranchBadge: React.FC<BranchBadgeProps> = ({ branchName, subBranchName, si
   const styles = BRANCH_STYLES[code];
 
   // Strip the badge prefix from the sub-branch label to avoid "FB FB Bataan" → "FB Bataan"
-  const label = subBranchName?.startsWith(code + ' ')
-    ? subBranchName.slice(code.length + 1)
-    : subBranchName;
+  const label = branchLabel(branchName, subBranchName);
 
   const isLg = size === 'lg';
 

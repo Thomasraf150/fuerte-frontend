@@ -297,7 +297,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
             className={`flex justify-center items-center text-white py-2 px-4 rounded text-sm w-full sm:w-auto ${
               loanSingleData?.status === 3 || releaseLoading
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-purple-700 hover:bg-purple-800'
+                : 'bg-primary hover:bg-primary/90'
             }`}
             type="submit"
             disabled={loanSingleData?.status === 3 || releaseLoading}

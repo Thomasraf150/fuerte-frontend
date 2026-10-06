@@ -207,6 +207,12 @@ const useLoanDetail = () => {
           toast.error(response.errors[0].message);
           return { success: false, error: response.errors[0].message };
         }
+        // The server may refuse in the payload ({ success: false, message }), e.g. a rejected borrower.
+        const refusal = response.data?.saveLoanSchedule;
+        if (refusal?.success === false) {
+          toast.error(refusal.message || 'Could not save.');
+          return { success: false, error: refusal.message || 'Could not save.' };
+        }
 
         toast.success('Loan Schedule Saved!');
         handleRefetchLoanData();
@@ -261,6 +267,9 @@ const useLoanDetail = () => {
         });
         if (response.errors) {
           toast.error(response.errors[0].message);
+        } else if (response.data?.signPNLoan?.success === false) {
+          // Refused in the payload ({ success: false, message }), e.g. a rejected borrower.
+          toast.error(response.data.signPNLoan.message || 'Could not save.');
         } else {
           toast.success('PN is already been signed!');
           handleRefetchLoanData()
@@ -318,6 +327,12 @@ const useLoanDetail = () => {
         if (response.errors) {
           toast.error(response.errors[0].message);
           return { success: false, error: response.errors[0].message };
+        }
+        // The server may refuse in the payload ({ success: false, message }), e.g. a rejected borrower.
+        const refusal = response.data?.saveLoanBankDetails;
+        if (refusal?.success === false) {
+          toast.error(refusal.message || 'Could not save.');
+          return { success: false, error: refusal.message || 'Could not save.' };
         }
 
         toast.success('Bank Entry Saved!');
@@ -382,6 +397,11 @@ const useLoanDetail = () => {
         }
 
         const releaseData = response.data?.saveReleaseLoan;
+        // Refused in the payload ({ success: false, message }), e.g. a rejected borrower: not released.
+        if (releaseData?.success === false) {
+          toast.error(releaseData.message || 'Could not save.');
+          return { success: false, error: releaseData.message || 'Could not save.' };
+        }
         if (releaseData?.auto_posted) {
           toast.success('Loan released & accounting posted!');
         } else {

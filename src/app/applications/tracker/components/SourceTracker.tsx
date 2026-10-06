@@ -7,6 +7,7 @@ import { useCanUpload } from '@/app/applications/components/useCanUpload';
 import useApplicationSourceCounts from '@/hooks/useApplicationSourceCounts';
 import { formatCount } from '@/utils/helper';
 import { applicationsNoun, formatPeriod, presetRange, summarizeSources, type DayRange, type Period } from '@/utils/sourceTracker';
+import FunnelPanel from './FunnelPanel';
 import PeriodPicker from './PeriodPicker';
 import SourceResults from './SourceResults';
 
@@ -34,8 +35,9 @@ const MetaLine: React.FC<{ range: DayRange; scope: string | null }> = ({ range, 
 
 /**
  * Source tracker (/applications/tracker): how many applications came from each Saan
- * galing source in a period, with each source's share. This month to start; the
- * days on screen are `range`, and the chosen chip is `period`.
+ * galing source in a period, with each source's share, and under it the applicant funnel for
+ * the same days (FunnelPanel). This month to start; the days on screen are `range`, and the
+ * chosen chip is `period`.
  */
 const SourceTracker: React.FC = () => {
   const headingId = useId();
@@ -59,24 +61,27 @@ const SourceTracker: React.FC = () => {
       : '';
 
   return (
-    <section
-      aria-labelledby={headingId}
-      className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
-    >
-      <header className="border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
-        <h3 id={headingId} className="font-medium text-black dark:text-white">Applications by source</h3>
-        <p className="mt-0.5 text-sm text-body dark:text-bodydark">Counted by the day the person applied.</p>
-      </header>
-      {/* The same padding as the Applications list, so the two pages line up. */}
-      <div className="space-y-5 px-3 py-5 sm:px-5 md:p-7">
-        <PeriodPicker period={period} range={range} onSelect={select} onApplyCustom={setRange} />
-        <MetaLine range={range} scope={scope} />
-        <p role="status" className="sr-only">{status}</p>
-        <div aria-busy={loading}>
-          {error ? <LoadError message={error} onRetry={refresh} /> : <SourceResults summary={summary} />}
+    <div className="space-y-4 md:space-y-6">
+      <section
+        aria-labelledby={headingId}
+        className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+      >
+        <header className="border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
+          <h3 id={headingId} className="font-medium text-black dark:text-white">Applications by source</h3>
+          <p className="mt-0.5 text-sm text-body dark:text-bodydark">Counted by the day the person applied.</p>
+        </header>
+        {/* The same padding as the Applications list, so the two pages line up. */}
+        <div className="space-y-5 px-3 py-5 sm:px-5 md:p-7">
+          <PeriodPicker period={period} range={range} onSelect={select} onApplyCustom={setRange} />
+          <MetaLine range={range} scope={scope} />
+          <p role="status" className="sr-only">{status}</p>
+          <div aria-busy={loading}>
+            {error ? <LoadError message={error} onRetry={refresh} /> : <SourceResults summary={summary} />}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      <FunnelPanel range={range} />
+    </div>
   );
 };
 

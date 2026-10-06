@@ -29,7 +29,10 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
         </div>
       )}
 
-      <div className={`flex items-end justify-between ${children ? "mt-4" : ""}`}>
+      {/* `flex-wrap` so a long total and its change-rate badge stack instead of
+          one shoving the other out of the card. Nothing is hidden either way —
+          the card just gets one line taller on a narrow screen. */}
+      <div className={`flex flex-wrap items-end justify-between gap-x-2 gap-y-1 ${children ? "mt-4" : ""}`}>
         <div>
           <h4 className="text-title-md font-bold text-black dark:text-white">
             {total}
@@ -44,7 +47,14 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
         >
           {rate}
           {previousValue && (
-            <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 bg-boxdark text-white text-xs rounded py-2 px-3 whitespace-nowrap z-50 shadow-lg">
+            /* `hidden`, not `invisible`: a visibility-hidden box still takes
+               part in layout, so this `whitespace-nowrap` tooltip on the
+               right-hand stat card extended past the content area and added
+               ~99px to the dashboard's scroll width — the page scrolled
+               sideways because of a tooltip nobody could see. `display: none`
+               drops it out of the scroll calculation. The opacity transition
+               goes with it, since `display` cannot animate. */
+            <div className="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 bg-boxdark text-white text-xs rounded py-2 px-3 whitespace-nowrap z-50 shadow-lg">
               <div className="font-medium mb-1">Previous Period</div>
               <div>{previousValue}</div>
               <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-boxdark"></div>

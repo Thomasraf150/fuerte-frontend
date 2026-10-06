@@ -8,12 +8,14 @@ import { CHANNEL_SHORT_LABELS } from '@/utils/applicationForm';
 import { formatMoneyOrBlank } from '@/utils/helper';
 import ApplicationStatusPill, { IntakeFlagMark } from './ApplicationStatusPill';
 import { CHANNEL_ICONS } from './channelIcons';
+import OutcomePill from './OutcomePill';
 
 /*
  * `hide` removes a column at viewport widths up to and including the number.
  * These breakpoints rely on the app-wide table-fit settings: useDatatableTheme's
  * `tableWrapper` display:block, which sizes a table to its container rather than
- * its content, plus the 80px column floor in app/styles.css. With those and
+ * its content, and react-data-table-component's own 100px column default (three
+ * columns of 101px fill the 302px table at 360px). With those and
  * ApplicationList's padding:
  *   - up to 599px: Name, Branch, Status (3 columns; 302px of table at 360px);
  *   - 600px and up: plus Mobile and Amount (5 columns);
@@ -135,12 +137,23 @@ const NameCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   );
 };
 
+/**
+ * The status, and under it, once the application is a borrower, where it ended up (OutcomePill:
+ * "Loan released", "Rejected by Marketing"). Before that the outcome IS the status (For Interview,
+ * Interviewed, Declined), so it is not said twice. Stacked in the Status column rather than a
+ * column of its own: three columns already fill a phone, and a seventh would not fit beside the
+ * sidebar on a laptop.
+ */
 const StatusCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   const flags = row.intake_flags ?? [];
+  const showOutcome = row.status === 'borrower_created' && !!row.outcome;
   return (
-    <span data-tag="allowRowEvents" className="flex min-w-0 items-center gap-1 sm:gap-1.5">
-      <ApplicationStatusPill status={row.status} />
-      {flags.length > 0 && <IntakeFlagMark label={`Check: ${flags.join('; ')}`} />}
+    <span data-tag="allowRowEvents" className="flex min-w-0 flex-col items-start gap-1 py-1">
+      <span data-tag="allowRowEvents" className="flex min-w-0 max-w-full items-center gap-1 sm:gap-1.5">
+        <ApplicationStatusPill status={row.status} />
+        {flags.length > 0 && <IntakeFlagMark label={`Check: ${flags.join('; ')}`} />}
+      </span>
+      {showOutcome && <OutcomePill outcome={row.outcome} label={row.outcome_label} />}
     </span>
   );
 };

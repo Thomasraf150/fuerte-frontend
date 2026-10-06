@@ -38,8 +38,7 @@ export interface BorrowerMatchCheck {
 
 /**
  * The server's answer, or an Error. An answer without the field is not "no match", it is a
- * response to retry (as for the application itself). Null is the server's answer for Call
- * Center, which is never asked: there is nothing to show.
+ * response to retry (as for the application itself). Null means there is nothing to show.
  */
 async function fetchBorrowerMatch(id: number): Promise<LoanApplicationBorrowerMatch | null> {
   const result = await graphqlFetch<{ getLoanApplicationBorrowerMatch?: LoanApplicationBorrowerMatch | null }>(
@@ -57,9 +56,10 @@ async function fetchBorrowerMatch(id: number): Promise<LoanApplicationBorrowerMa
  * Borrower name check, run on the server across all branches). It is a warning for staff and
  * never blocks anything.
  *
- * Asked once when `enabled` first holds (the record has loaded, the application is not a
- * borrower yet, and the user is not Call Center), again after each saved edit (`saves`: the
- * name or the mobile number may have been corrected), and on retry. The answer on screen stays
+ * Asked once when `enabled` first holds (the record has loaded and the application is not a
+ * borrower yet; Call Center is asked too, and every match it gets is "elsewhere"), again after
+ * each saved edit (`saves`: the name or the mobile number may have been corrected), and on
+ * retry. The answer on screen stays
  * until the next one replaces it, so a re-check does not flicker. An answer that arrives after
  * the page has moved on is dropped. Logs carry the id only: a name or a mobile number is
  * never in them. `viaRetry` tells the answer to a Retry from every other.

@@ -112,6 +112,11 @@ const GET_SINGLE_BORROWER_QUERY: string = `
       getBorrower(id: $id) {
         id
         payer_standing
+        decision {
+          status
+          reason
+          decided_at
+        }
         user_id
         chief_id
         amount_applied
@@ -376,6 +381,23 @@ const DELETE_BORROWER_MUTATION: string = `
   }
 `;
 
+/**
+ * Approve or reject a borrower (the borrower page header). Each call adds a decision and the
+ * latest is the borrower's status. A rejected borrower cannot borrow until approved again (the
+ * server refuses new loans, renewals, approvals and releases; spec E §1). The server
+ * requires a reason for rejected, and answers "Borrower not found." for a borrower the user
+ * may not open.
+ */
+const SET_BORROWER_DECISION_MUTATION: string = `
+  mutation SetBorrowerDecision($borrower_id: Int!, $status: String!, $reason: String) {
+    setBorrowerDecision(borrower_id: $borrower_id, status: $status, reason: $reason) {
+      status
+      reason
+      decided_at
+    }
+  }
+`;
+
 const CHECK_BORROWER_DUPLICATE: string = `
   query CheckBorrowerDuplicate(
     $firstname: String!
@@ -465,6 +487,7 @@ const BorrowerQueryMutations = {
   SAVE_BORROWER_CO_MAKER,
   DELETE_BORROWER_CO_MAKER,
   DELETE_BORROWER_MUTATION,
+  SET_BORROWER_DECISION_MUTATION,
   CHECK_BORROWER_DUPLICATE,
   CHECK_BORROWER_CROSS_BRANCH
 };

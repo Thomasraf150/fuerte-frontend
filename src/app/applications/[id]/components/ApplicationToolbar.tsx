@@ -127,14 +127,19 @@ interface ApplicationToolbarProps {
    * and the status is fixed.
    */
   converted: boolean;
-  /** Everyone but Call Center, which never creates borrowers. */
+  /**
+   * The user may see the application but not change it (Marketing on another branch's application,
+   * the server's can_edit): the status is shown, fixed, with nothing to save. Print stays.
+   */
+  viewOnly: boolean;
+  /** Everyone but Call Center, which never creates borrowers, and a view-only reader. */
   canCreateBorrower: boolean;
   /** The branches the user may create a borrower in: an application on another branch cannot be converted by them. */
   branchAccess: BranchAccess;
   /** The form holds changes that are not saved, or a save is out. */
   unsaved: boolean;
   /** Posts a status; resolves once the server has answered. */
-  onStatus: (next: PickableStatus) => Promise<ActionResult>;
+  onStatus: (next: PickableStatus, reason?: string) => Promise<ActionResult>;
   printing: boolean;
   onPrint: () => void;
 }
@@ -152,7 +157,7 @@ interface ApplicationToolbarProps {
  * The status choice lives here, not in the select (useStatusDraft), because Create as borrower
  * has to know about it: while the choice differs from the saved status it says to save it.
  */
-export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint }) => {
+export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint }) => {
   const reasonId = useId();
   const statusErrorId = useId();
   const status = useStatusDraft(record.status, onStatus);
@@ -167,7 +172,7 @@ export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, 
     >
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap md:gap-4">
         <BackLink />
-        <StatusPicker status={record.status} draft={status} locked={converted} errorId={statusErrorId} />
+        <StatusPicker status={record.status} draft={status} locked={converted || viewOnly} errorId={statusErrorId} />
       </div>
       <div className="flex flex-col gap-2 md:ml-auto md:items-end">
         <div className="flex flex-col gap-2 md:flex-row md:gap-3">

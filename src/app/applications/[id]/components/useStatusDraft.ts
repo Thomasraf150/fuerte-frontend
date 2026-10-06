@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { APPLICATION_STATUS_LABEL } from '@/app/applications/components/ApplicationStatusPill';
+import { showDecisionNotePrompt } from '@/components/ConfirmationModal';
+import { CONFIRM_COLORS } from '@/utils/brandColors';
 import type { ActionResult, PickableStatus } from '@/hooks/useLoanApplication';
 import type { LoanApplicationStatus } from '@/utils/DataTypes';
 
@@ -28,6 +30,20 @@ export interface StatusDraft {
   save: () => Promise<void>;
 }
 
+/** The server's cap on a decline's reason. */
+export const DECLINE_REASON_MAX = 500;
+
+/**
+ * Asks why the application is declined, in the app's decision prompt (the borrower page's Reject
+ * uses the same one): a reason is required, 500 characters at most. Null when staff cancel.
+ */
+export const askDeclineReason = (): Promise<string | null> =>
+  showDecisionNotePrompt('Decline this application?', 'Why?', 'Decline', {
+    confirmColor: CONFIRM_COLORS.reject,
+    requiredMessage: 'Write why the application is declined.',
+    maxLength: DECLINE_REASON_MAX,
+  });
+
 /** A flag that is on for a moment and then goes off by itself; `clear` puts it off at once. */
 function useFlash(ms: number): { on: boolean; flash: () => void; clear: () => void } {
   const [on, setOn] = useState(false);
@@ -46,7 +62,9 @@ function useFlash(ms: number): { on: boolean; flash: () => void; clear: () => vo
 }
 
 /**
- * The status select is a draft, saved by a button of its own. Choosing only changes `shown`
+ * The status select is a draft, saved by a button of its own. Saving Declined first asks why (the
+ * reason goes with the post); cancelling that prompt posts nothing and puts the select back on the
+ * saved status. Choosing only changes `shown`
  * (a keyboard that steps through the options with every arrow press changes nothing on the
  * server); `save` posts the choice, exactly once, and a second press while it is out is
  * ignored (the ref answers at once, before a render could). On success the page's record
@@ -56,7 +74,7 @@ function useFlash(ms: number): { on: boolean; flash: () => void; clear: () => vo
  */
 export function useStatusDraft(
   saved: LoanApplicationStatus,
-  post: (next: PickableStatus) => Promise<ActionResult>,
+  post: (next: PickableStatus, reason?: string) => Promise<ActionResult>,
 ): StatusDraft {
   const [choice, setChoice] = useState<PickableStatus | null>(null);
   const [saving, setSaving] = useState(false);
@@ -77,11 +95,17 @@ export function useStatusDraft(
   const save = useCallback(async (): Promise<void> => {
     if (sending.current || choice === null || choice === saved) return;
     sending.current = true;
-    setSaving(true);
     setError('');
     clearSaved();
     try {
-      const result = await post(choice);
+      // Asked before "Saving…": nothing is out while the prompt is open.
+      const reason = choice === 'declined' ? await askDeclineReason() : undefined;
+      if (reason === null) {
+        setChoice(null);
+        return;
+      }
+      setSaving(true);
+      const result = await post(choice, reason);
       setAnnouncement(result.success ? `Status saved: ${APPLICATION_STATUS_LABEL[choice]}` : '');
       if (result.success) {
         setChoice(null);

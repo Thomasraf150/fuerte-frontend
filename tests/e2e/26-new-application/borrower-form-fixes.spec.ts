@@ -36,8 +36,8 @@ test.setTimeout(180_000);
 const APP = 'http://localhost:3000';
 const ONE_BRANCH = [9101];
 
-/** tailwind.config.ts `danger` (#D34053), as the browser reports it. */
-const DANGER = 'rgb(211, 64, 83)';
+/** tailwind.config.ts `danger` (BRAND.danger, #B5372F), as the browser reports it. */
+const DANGER = 'rgb(181, 55, 47)';
 
 /** Every text field New Borrower requires, for a fictional borrower. */
 const TYPED: Record<string, string> = {

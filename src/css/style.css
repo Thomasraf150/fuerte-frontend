@@ -181,14 +181,14 @@
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-    background: #3c50e0;
+    background: #5A6B2C; /* brand primary (was #3c50e0) */
     @apply !border-primary !bg-primary hover:!border-primary hover:!bg-primary;
 }
 
 .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
-    box-shadow: -10px 0 0 #3c50e0;
+    box-shadow: -10px 0 0 #5A6B2C; /* brand primary (was #3c50e0) */
 }
 
 /* Flatpickr Dark Mode - Using body.dark selector for portaled elements */
@@ -284,13 +284,13 @@ input[type="search"]::-webkit-search-cancel-button {
 .lbl-form {
     border: 1px solid #f0f0f0;
     padding: 17px;
-    background: #dee9ff;
+    background: #F1EBDC; /* brand meta-2 (was #dee9ff) */
 }
 
 /* Dark mode styles for form labels */
 .dark .lbl-form {
-    background: #313D4A;  /* meta-4 - matches form inputs */
-    border: 1px solid #2E3A47;  /* strokedark - consistent borders */
+    background: #3A3729;  /* meta-4 (brand; was #313D4A) - matches form inputs */
+    border: 1px solid #3D3A2D;  /* strokedark (brand; was #2E3A47) - consistent borders */
 }
 
 button {

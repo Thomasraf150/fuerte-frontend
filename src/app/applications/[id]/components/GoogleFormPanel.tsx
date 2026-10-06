@@ -87,14 +87,11 @@ interface GoogleFormPanelProps {
  * before the form (collapsed, one row), because the flags are the first thing to know and
  * the form is long: it is first in the page's order too (ApplicationPage renders it before the
  * form), not moved there by CSS, so a screen reader and the Tab key reach it first as well. From
- * 1280px it is placed in the right-hand column of ApplicationPage's grid, beside the form, and
- * follows the page as it scrolls.
+ * 1280px ApplicationPage's side column (with the Notes above it) sits beside the form and follows
+ * the page as it scrolls.
  */
 export const GoogleFormPanel: React.FC<GoogleFormPanelProps> = ({ flags, answers }) => (
-  <aside
-    aria-label="Google Form intake"
-    className="space-y-4 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-1 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto"
-  >
+  <aside aria-label="Google Form intake" className="space-y-4">
     {flags.length > 0 && <FlagNotes flags={flags} />}
     {answers.length > 0 && <AnswersPanel answers={answers} />}
   </aside>

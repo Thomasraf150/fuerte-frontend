@@ -258,7 +258,8 @@ const application = (over: Partial<LoanApplicationRecord> = {}): LoanApplication
   id: String(ID), source: 'manual', channel: 'walk_in', submitted_at: '2026-09-30 10:15:00', location: null,
   ...onBranch(0), status: 'interviewed', borrower_id: null, full_name: 'Maria Cruz Reyes', contact_no: '09170000041',
   amount_applied: '20000.00', purpose: 'Tuition', intake_flags: [], created_at: '2026-09-30 10:15:00',
-  details: DETAILS, form_answers: [], exact_time: false, ...over,
+  details: DETAILS, form_answers: [], exact_time: false, can_edit: true, borrower_decision: null,
+  outcome: 'interviewed', outcome_label: 'Interviewed', decline_reason: null, notes: [], ...over,
 });
 
 /** getLoanApplication answers with this application, or with whatever body is given. */
@@ -712,6 +713,8 @@ test('6. Back returns to the application, not the list', async ({ page, backend 
   await signedInAs(page, backend, [9101]);
   const seen = watch(page);
   const form = await openConversion(page);
+  // The page header's back link goes the same way, and says so.
+  await expect(page.getByRole('link', { name: 'Back to Application', exact: true })).toHaveAttribute('href', `/applications/${ID}`);
 
   seen.paths.length = 0;
   await form.getByRole('button', { name: 'Back', exact: true }).click();
@@ -767,6 +770,8 @@ test('8. an application that is not found gets a card, with a way back to Applic
   await expect(stop).toBeVisible({ timeout: 90_000 });
   await expect(stop).toContainText(`Application ${NUMBER}`);
   await expect(stop.getByRole('link', { name: 'Back to Applications', exact: true })).toHaveAttribute('href', '/applications');
+  // The page header's back link still names where the user came from, in this state too.
+  await expect(page.getByRole('link', { name: 'Back to Application', exact: true })).toHaveAttribute('href', `/applications/${ID}`);
   // Opening the page does not move focus: only a Retry does (8d).
   await expect(stop).not.toBeFocused();
   await expect(formOf(page)).toHaveCount(0);
@@ -1049,6 +1054,8 @@ const BORROWER = {
 test('11. on an existing borrower the parameter is ignored: its own page, no lookup, no banner, and the plain update', async ({ page, backend }) => {
   stubApplication(backend); // would answer if asked: the test asserts it is not
   backend.extraGraphql.set('getBorrower', () => ({ data: { getBorrower: BORROWER } }));
+  // The header's More menu asks whether a deletion is already pending for this borrower.
+  backend.extraGraphql.set('pendingDeletionsForEntities', () => ({ data: { pendingDeletionsForEntities: [] } }));
   stubSave(backend, false, 'E2E stub: nothing is saved.');
   // The borrower's photo is read from the backend's storage.
   await page.route('**/storage/**', (route) => route.fulfill({ status: 200, contentType: 'image/png', body: BLANK_PNG }));
@@ -1059,7 +1066,7 @@ test('11. on an existing borrower the parameter is ignored: its own page, no loo
   await expect(text(form, 'firstname')).toHaveValue('Juana', { timeout: 90_000 });
 
   // The borrower's own page: asked for by its id, titled by its name, with nothing of an application on it.
-  await expect(page.getByRole('heading', { name: 'Borrower: Dela Cruz, Juana', level: 2 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Dela Cruz, Juana S.', level: 2 })).toBeVisible();
   await expect(page.getByRole('note')).toHaveCount(0);
   await expect(page.getByText('Draft borrower.')).toHaveCount(0);
   expect(backend.calls('getBorrower').length).toBeGreaterThan(0);

@@ -7,14 +7,13 @@ import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
-import BranchBadge from '@/components/BranchBadge';
-import PayerBadge from '@/components/PayerBadge';
 import useBorrowerDetail from '@/hooks/useBorrowerDetail';
 import useBranches from '@/hooks/useBranches';
 import useConvertApplication, { isStop } from '@/hooks/useConvertApplication';
+import BorrowerHeader from '../components/BorrowerHeader';
 import BorrowerInfo from '../components/BorrowerInfo';
 import { ConvertBanner, ConvertStop } from '../components/ConvertFromApplication';
-import { BorrowerRowInfo } from '@/utils/DataTypes';
+import { BorrowerDecision, BorrowerRowInfo } from '@/utils/DataTypes';
 
 const BorrowerDetailPage: React.FC = () => {
   const params = useParams();
@@ -45,6 +44,13 @@ const BorrowerDetailPage: React.FC = () => {
   } = useBranches();
 
   const [singleData, setSingleData] = useState<BorrowerRowInfo | undefined>(undefined);
+  // The latest Approved / Rejected, held apart from singleData: the header's decision updates it, and
+  // a new singleData object would reload the Details form over unsaved edits. Re-read per borrower.
+  const [decision, setDecision] = useState<BorrowerDecision | null>(null);
+  useEffect(() => {
+    setDecision(singleData?.decision ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [singleData?.id]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,11 +89,18 @@ const BorrowerDetailPage: React.FC = () => {
     router.push('/borrowers');
   };
 
-  // Where the form closes to: its Back buttons, and a successful save (BorrowerDetails calls
-  // setShowForm(false) after one, and the save's own callback runs first, so both must agree).
-  // Converting an application goes back to it, never to the list.
+  // Where the page goes back to: the header's back link, the form's Back buttons, and a successful
+  // save (BorrowerDetails calls setShowForm(false) after one, and the save's own callback runs
+  // first, so all of them must agree). Opened from an application (New Borrower with a usable
+  // ?application=), it goes back to that application in every state: ready, and the cards that say
+  // why it cannot become a borrower yet. Never to the list.
+  const applicationId = 'id' in convert.state ? convert.state.id : null;
+  const back = applicationId !== null
+    ? { href: `/applications/${applicationId}`, label: 'Application' }
+    : { href: '/borrowers', label: 'Borrowers' };
+
   const closeForm = () => {
-    router.push(convert.conversion ? `/applications/${convert.conversion.applicationId}` : '/borrowers');
+    router.push(back.href);
   };
 
   const handleShowForm = (show: boolean) => {
@@ -121,10 +134,9 @@ const BorrowerDetailPage: React.FC = () => {
     fetchBorrowerData();
   }, [borrowerId]);
 
-  const borrowerName = singleData
-    ? `${singleData.lastname || ''}, ${singleData.firstname || ''}`.trim()
-    : 'New Borrower';
-  const borrowerTitle = borrowerId === 'new' ? 'New Borrower' : `Borrower: ${borrowerName}`;
+  // The header's title when there is no borrower: New Borrower ('Borrower' only if a saved
+  // borrower ever rendered without its record). A saved borrower's header carries its name.
+  const title = borrowerId === 'new' ? 'New Borrower' : 'Borrower';
 
   // Loading state (and, on Create as borrower, until the application is read and loaded:
   // the form takes its starting values once, so it must not open before them)
@@ -150,7 +162,7 @@ const BorrowerDetailPage: React.FC = () => {
         </div>
         <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-500 mb-4">
+            <h3 className="text-xl font-semibold text-danger mb-4">
               {error}
             </h3>
             <button
@@ -168,28 +180,7 @@ const BorrowerDetailPage: React.FC = () => {
   // Main content
   return (
     <DefaultLayout>
-      <div className="mx-auto">
-        <Breadcrumb
-          pageName={borrowerTitle}
-          items={[
-            { label: 'Dashboard', href: '/' },
-            { label: 'Borrowers', href: '/borrowers' },
-            { label: borrowerTitle }
-          ]}
-        />
-        {(singleData?.branch_sub?.branch?.name || singleData?.payer_standing) && (
-          <div className="-mt-3 mb-4 flex flex-wrap items-center gap-3">
-            {singleData?.branch_sub?.branch?.name && (
-              <BranchBadge
-                branchName={singleData.branch_sub.branch.name}
-                subBranchName={singleData.branch_sub.name}
-                size="lg"
-              />
-            )}
-            <PayerBadge standing={singleData?.payer_standing} borrowerId={singleData?.id} size="lg" />
-          </div>
-        )}
-      </div>
+      <BorrowerHeader key={singleData?.id ?? 'new'} borrower={singleData} back={back} title={title} onDecided={setDecision} />
 
       <div className="flex flex-col gap-6">
         {convert.state.kind === 'ready' && <ConvertBanner applicationId={convert.state.id} focusOnMount={convert.retried} />}
@@ -200,6 +191,7 @@ const BorrowerDetailPage: React.FC = () => {
           <BorrowerInfo
             setShowForm={handleShowForm}
             singleData={singleData}
+            decision={decision}
             setSingleData={setSingleData}
             dataChief={dataChief}
             dataArea={dataArea}

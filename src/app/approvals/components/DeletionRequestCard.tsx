@@ -8,6 +8,7 @@ import {
   showDecisionNotePrompt,
   showProcessingModal,
 } from "@/components/ConfirmationModal";
+import { CONFIRM_COLORS } from "@/utils/brandColors";
 
 interface Props {
   request: DeletionRequest;
@@ -76,7 +77,7 @@ const DeletionRequestCard: React.FC<Props> = ({
         "Approve",
         {
           text: `${kindLabel} — ${entityLabel}`,
-          confirmColor: "#16a34a",
+          confirmColor: CONFIRM_COLORS.approve,
           placeholder: "e.g. confirmed duplicate",
         }
       );
@@ -99,7 +100,7 @@ const DeletionRequestCard: React.FC<Props> = ({
         "Reject",
         {
           text: `${kindLabel} — ${entityLabel}`,
-          confirmColor: "#dc2626",
+          confirmColor: CONFIRM_COLORS.reject,
           placeholder: "e.g. wrong borrower, please re-check",
         }
       );
@@ -135,7 +136,12 @@ const DeletionRequestCard: React.FC<Props> = ({
 
   return (
     <article className={`appr-card is-${request.status}`}>
-      <div className="flex items-start gap-4">
+      {/* Details beside the actions from `sm` up, exactly as before. On a phone
+          they stack: side by side, the action column left the title so little
+          room that "Payment #44821 - DELOS SANTOS, JUSTINA BUMANLAG - PHP
+          4,320.00" wrapped over six lines. Stacked, the title gets the full
+          width and the buttons get a full-width row of their own. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center flex-wrap gap-2">
             <span className="appr-kind-pill">{kindLabel}</span>
@@ -175,7 +181,7 @@ const DeletionRequestCard: React.FC<Props> = ({
         </div>
 
         {(canDecide || canCancel) && request.status === "pending" && (
-          <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex flex-row gap-2 sm:flex-col sm:shrink-0">
             {canDecide && (
               <>
                 <button

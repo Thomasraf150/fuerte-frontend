@@ -11,19 +11,11 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
     name: 'Loan Code',
     cell: row => row.loan_code_id,
     sortable: true,
-    style: {
-      minWidth: '150px',
-    },
-    width: '150px'
   },
   {
     name: 'Description',
     cell: row => row.description,
     sortable: true,
-    style: {
-      minWidth: '520px',
-    },
-    width: '520px'
   },
   // {
   //   name: 'Loan Description',

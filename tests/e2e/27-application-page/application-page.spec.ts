@@ -53,7 +53,8 @@
  *  13. At 360px nothing scrolls sideways and every control is 48px or taller, the form's
  *      buttons and react-selects included (and every react-select has a name). From md up
  *      the branch list's Retry keeps its own 36px. The repeat-applicant card, with long
- *      branch names, and its failure note and Retry are measured too.
+ *      branch names, and its failure note and Retry are measured too, and so are Marketing's
+ *      view-only page and a converted application's decision with a long reason.
  *  14. React logs no warning while the page loads, saves and changes status.
  *  15. Unsaved changes: while the form differs from what is saved (a typed field, a pick in a
  *      react-select, a reference row added or removed) or a save is out, Print and Create
@@ -64,8 +65,9 @@
  *      was out, the page says "Save your changes first." and not "Saved." beside it.
  *  16. The repeat-applicant warning (a fraud signal: the applicant's name or mobile matches a
  *      borrower already in Fuerte). getLoanApplicationBorrowerMatch is asked once the record
- *      has loaded, again after each saved edit and on Retry; never for Call Center, nor for
- *      an application that is a borrower already. Shown only for a match (in my branches:
+ *      has loaded, again after each saved edit and on Retry; for Call Center too (which is told
+ *      to let the branch know, and whose matches are all "Branches"), and never for an
+ *      application that is a borrower already. Shown only for a match (in my branches:
  *      the count and the names; elsewhere: the names; a problem account: the worst cut-offs):
  *      loading and "no match" show nothing, ever an all-clear. A failed check is a quiet
  *      note with Retry, never "new". A labelled section under the actions, before the form
@@ -106,6 +108,8 @@ import {
   type GraphqlBody,
   type RoleCode,
   NOT_FOUND,
+  DECLINE_REASON,
+  answerDeclinePrompt,
   application,
   borrowerMatch,
   branchPicker,
@@ -232,7 +236,15 @@ const saveStatusButton = (page: Page): Locator => toolbar(page).getByRole('butto
 async function changeStatusTo(page: Page, value: string): Promise<void> {
   await statusSelect(page).selectOption(value);
   await saveStatusButton(page).click();
+  // Declined asks why first (tests/e2e/30-applicant-funnel covers the prompt itself).
+  if (value === 'declined') await answerDeclinePrompt(page);
   await expect(saveStatusButton(page)).toHaveText('Saved');
+}
+
+/** Save status, answering the Declined prompt when the choice is Declined. */
+async function saveDeclined(page: Page): Promise<void> {
+  await saveStatusButton(page).click();
+  await answerDeclinePrompt(page);
 }
 /** Print is free and the toolbar does not say to save: the form holds what is saved. */
 const expectNothingToSave = async (page: Page): Promise<void> => {
@@ -760,7 +772,9 @@ test.describe('5. Status', () => {
       await expect(pill(page, label)).toBeVisible();
       await expect(statusSelect(page)).toHaveValue(value);
       await expect(toolbar(page).getByRole('status')).toHaveText(`Status saved: ${label}`);
-      expect(backend.calls('setLoanApplicationStatus').at(-1)?.variables).toEqual({ id: 2, status: value });
+      expect(backend.calls('setLoanApplicationStatus').at(-1)?.variables).toEqual(
+        value === 'declined' ? { id: 2, status: value, reason: DECLINE_REASON } : { id: 2, status: value },
+      );
     }
     expect(backend.calls('setLoanApplicationStatus')).toHaveLength(steps.length);
   });
@@ -810,7 +824,7 @@ test.describe('5. Status', () => {
     backend.overrides.set('setLoanApplicationStatus', () => refusal(message));
     await statusSelect(page).selectOption('declined');
 
-    await saveStatusButton(page).click();
+    await saveDeclined(page);
 
     // The words are plain text under the controls: still there when the toast is gone, and the button's description.
     await expect(toolbar(page).getByText(message, { exact: true })).toBeVisible();
@@ -828,7 +842,7 @@ test.describe('5. Status', () => {
     expect(postedStatuses(backend), 'a refused choice was posted again by itself').toEqual(['declined']);
 
     backend.overrides.delete('setLoanApplicationStatus');
-    await saveStatusButton(page).click();
+    await saveDeclined(page);
 
     await expect(saveStatusButton(page)).toHaveText('Saved');
     expect(postedStatuses(backend)).toEqual(['declined', 'declined']);
@@ -842,7 +856,7 @@ test.describe('5. Status', () => {
     const message = 'You cannot change this application.';
     backend.overrides.set('setLoanApplicationStatus', () => refusal(message));
     await statusSelect(page).selectOption('declined');
-    await saveStatusButton(page).click();
+    await saveDeclined(page);
     await expect(toolbar(page).getByText(message, { exact: true })).toBeVisible();
 
     await statusSelect(page).selectOption('for_interview');
@@ -954,7 +968,7 @@ test.describe('5. Status', () => {
     const message = 'This application is already a borrower and can no longer be edited.';
     backend.overrides.set('setLoanApplicationStatus', () => refusal(message));
     await statusSelect(page).selectOption('declined');
-    await saveStatusButton(page).click();
+    await saveDeclined(page);
     await expect(toolbar(page).getByText(message, { exact: true })).toBeVisible();
     await expect(toastWith(page, message)).toBeVisible();
     // The refusal is the toast's to announce: the toolbar still has its one region, and the words are not in it.
@@ -1729,6 +1743,28 @@ test.describe('13. At 360px', () => {
       setup: (backend) => backend.overrides.set('getLoanApplicationBorrowerMatch', () => refusal(SERVER_CHECK_FAILED)),
       waitFor: checkNote,
     },
+    {
+      name: 'Marketing, another branch\'s application (view only: the note, the summary, the status fixed, Print)',
+      record: () => googleFormApplication({ can_edit: false, branch_sub_id: 9103, branch_sub: { id: '9103', name: 'E2E Sub-branch C Extension Office With A Longer Name' } }),
+      role: 'COL',
+      waitFor: (page) => page.getByText(/^View only: /),
+    },
+    {
+      name: 'a converted application with a rejected decision and a long reason',
+      record: () =>
+        googleFormApplication({
+          status: 'borrower_created',
+          borrower_id: 77,
+          can_edit: false,
+          borrower_decision: {
+            status: 'rejected',
+            reason: 'Napakahabangdahilannawalangputolputol1234567890: kulang ang income at may dalawang aktibong utang pa sa ibang lending',
+            decided_at: '2026-10-05 14:45:00',
+          },
+        }),
+      role: 'CALLCTR',
+      waitFor: (page) => page.locator('[data-decision="rejected"]'),
+    },
   ];
 
   for (const state of STATES) {
@@ -2420,16 +2456,25 @@ test.describe('16. The repeat-applicant warning', () => {
 
   // --- when it is asked ------------------------------------------------------
 
-  test('Call Center is never asked, and sees nothing', async ({ page, backend }) => {
-    backend.match = MINE;
+  test('Call Center is asked too: a problem account elsewhere shows the card, which says to let the branch know', async ({ page, backend }) => {
+    // Call Center has no branch of its own, so the server puts every match elsewhere (Rafael, 2026-10-05).
+    backend.match = ELSEWHERE_PROBLEM;
     await open(page, backend, application({ status: 'interviewed' }), 'CALLCTR');
-    await expect(field(page, 'firstname')).toHaveValue('E2E');
-    await page.waitForTimeout(1_000);
 
-    expect(checks(backend), 'Call Center sent the check').toHaveLength(0);
-    await expect(repeatCard(page)).toHaveCount(0);
-    await expect(checkNote(page)).toHaveCount(0);
-    await expect(announcer(page)).toHaveCount(0);
+    const card = repeatCard(page);
+    await expect(card).toBeVisible();
+    await expect(card.getByText(`${REPEAT_BODY.replace(' Check their record before you continue.', '')} Let the branch know before they continue.`, { exact: true })).toBeVisible();
+    await expect(card).not.toContainText('Check their record');
+    // "Branches", not "Other branches": Call Center has none of its own.
+    const branches = card.locator('dl > div').filter({ has: page.locator('dt', { hasText: /^Branches$/ }) });
+    await expect(branches.getByRole('listitem')).toHaveText(['E2E Sub-branch C']);
+    await expect(card.locator('dt', { hasText: /other branches/i })).toHaveCount(0);
+    await expect(row(page, 'Problem account')).toContainText('Worst: 3 cut-offs missed');
+    await expect(announcer(page)).toHaveText(`${REPEAT_TITLE}. Let the branch know before they continue.`);
+    expect(checks(backend).length).toBeGreaterThan(0);
+    for (const call of checks(backend)) expect(call.variables).toEqual({ id: 2 });
+    // The card changes nothing else: Call Center still has no Create as borrower.
+    await expect(createAsBorrower(page)).toHaveCount(0);
   });
 
   test('a converted application is never asked: not by its status, and not by a borrower linked whatever the status says', async ({ page, backend }) => {

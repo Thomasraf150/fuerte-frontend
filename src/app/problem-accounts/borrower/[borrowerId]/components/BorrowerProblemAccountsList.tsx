@@ -10,6 +10,9 @@ import {
 } from "@/hooks/useProblemAccountsPaginated";
 import CustomDatatable from "@/components/CustomDatatable";
 import ProblemAccountsSummary from "../../../components/ProblemAccountsSummary";
+import ProblemAccountsCards from "../../../components/ProblemAccountsCards";
+import ProblemAccountsLegend from "../../../components/ProblemAccountsLegend";
+import ProblemAccountsPager from "../../../components/ProblemAccountsPager";
 import { problemAccountsColumnsCompact } from "../../../components/ProblemAccountsColumns";
 import { todayLocalISO } from "@/utils/helper";
 
@@ -42,15 +45,23 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
 
   const columns = useMemo(() => problemAccountsColumnsCompact(), []);
 
+  /**
+   * Where a row leads — shared by the table's row click and the phone cards'
+   * links. `null` when the loan has no unpaid schedule to open.
+   */
+  const rowHref = (row: ProblemAccountRow): string | null => {
+    if (!row.oldest_unpaid_schedule_id) return null;
+    const today = todayLocalISO();
+    return `/collection-list/${row.oldest_unpaid_schedule_id}?date=${today}&ref=${encodeURIComponent(row.loan_ref)}`;
+  };
+
   const handleRowClick = (row: ProblemAccountRow) => {
-    if (!row.oldest_unpaid_schedule_id) {
+    const href = rowHref(row);
+    if (!href) {
       toast.info("No unpaid schedule found for this loan.");
       return;
     }
-    const today = todayLocalISO();
-    router.push(
-      `/collection-list/${row.oldest_unpaid_schedule_id}?date=${today}&ref=${encodeURIComponent(row.loan_ref)}`
-    );
+    router.push(href);
   };
 
   return (
@@ -66,9 +77,9 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
 
       <div className="rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-5 mb-4">
         {headerInfo ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-bodydark">
+              <p className="text-xs uppercase tracking-wide text-body dark:text-bodydark">
                 Borrower
               </p>
               <p className="mt-1 text-lg font-bold text-black dark:text-white">
@@ -76,7 +87,7 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-bodydark">
+              <p className="text-xs uppercase tracking-wide text-body dark:text-bodydark">
                 Branch
               </p>
               <p className="mt-1 text-sm font-medium text-black dark:text-white">
@@ -84,7 +95,7 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-bodydark">
+              <p className="text-xs uppercase tracking-wide text-body dark:text-bodydark">
                 Contact
               </p>
               <p className="mt-1 text-sm font-medium text-black dark:text-white">
@@ -92,7 +103,7 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-bodydark">
+              <p className="text-xs uppercase tracking-wide text-body dark:text-bodydark">
                 Address
               </p>
               <p className="mt-1 text-sm font-medium text-black dark:text-white break-words">
@@ -101,9 +112,9 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
             </div>
           </div>
         ) : loading ? (
-          <p className="text-sm text-gray-500 dark:text-bodydark">Loading borrower…</p>
+          <p className="text-sm text-body dark:text-bodydark">Loading borrower…</p>
         ) : (
-          <p className="text-sm text-gray-500 dark:text-bodydark">No data found for this borrower.</p>
+          <p className="text-sm text-body dark:text-bodydark">No data found for this borrower.</p>
         )}
       </div>
 
@@ -115,12 +126,14 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
         loading={loading && data.length === 0}
       />
 
+      {/* `red-<shade>` utilities are dead in this app's Tailwind config — see
+          the note in ProblemAccountsList. `danger` is the live token. */}
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-2 rounded border border-danger bg-danger/10 p-3 text-danger sm:flex-row sm:items-center sm:justify-between">
           <span>Error loading borrower&apos;s problem accounts: {error}</span>
           <button
             onClick={refresh}
-            className="ml-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+            className="shrink-0 rounded bg-danger px-3 py-1 text-sm text-white hover:bg-opacity-90"
           >
             Retry
           </button>
@@ -128,7 +141,25 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
       )}
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div className="p-2 lg:p-4 overflow-x-auto">
+        <ProblemAccountsLegend />
+
+        {/* Same breakpoint swap as the main list: cards on a phone, table above. */}
+        <div className="p-4 md:hidden">
+          <ProblemAccountsCards
+            rows={data}
+            hrefFor={rowHref}
+            onSelect={handleRowClick}
+            loading={loading}
+          />
+          <ProblemAccountsPager
+            currentPage={serverSidePaginationProps.currentPage}
+            totalPages={serverSidePaginationProps.totalPages}
+            totalRecords={serverSidePaginationProps.totalRecords}
+            onPageChange={serverSidePaginationProps.onPageChange}
+          />
+        </div>
+
+        <div className="hidden p-2 md:block lg:p-4">
           <CustomDatatable
             apiLoading={loading}
             columns={columns}

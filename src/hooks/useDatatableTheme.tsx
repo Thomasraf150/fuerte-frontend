@@ -17,63 +17,136 @@ import { useTheme } from './useTheme';
  * <DataTable customStyles={customStyles} {...props} />
  * ```
  */
+
+/**
+ * Size every table to its CONTAINER, not its content.
+ *
+ * react-data-table-component's default theme sets `tableWrapper.style.display`
+ * to `table`. A CSS table box is never narrower than its min-content width, so
+ * the `width: 100%` already on that wrapper was overridden upward and each
+ * table came out as wide as its widest row demanded — at every viewport. The
+ * longest borrower or branch name on the page decided the width, not the
+ * screen, which is why list pages scrolled sideways on smaller monitors. As a
+ * block, the wrapper takes the container's width, and the columns
+ * (`flex-basis: 0; flex-grow: n`, each with a `min-width` — the library's 100px
+ * unless the column sets `minWidth` or `width`) share it.
+ *
+ * Pages depend on this. The Applications list measures its `hide` breakpoints
+ * against it (app/applications/components/ApplicationColumns.tsx), and the
+ * Borrowers list relies on it to fit its screen. Change it and re-run their
+ * suites.
+ *
+ * When the visible columns' minimum widths add up to more than the container,
+ * the table still scrolls sideways, inside the library's own `overflow-x: auto`
+ * wrapper. This removes the content-driven overflow, not that fallback.
+ */
+const FIT_CONTAINER: Pick<TableStyles, 'tableWrapper'> = {
+  tableWrapper: {
+    style: { display: 'block', width: '100%' },
+  },
+};
+
+/**
+ * Body cells: one line each, and whatever does not fit is CLIPPED.
+ *
+ * Wrapping cell text was tried first. It fitted, but it broke what makes a
+ * dense table readable — a uniform row height: one residence address wrapped
+ * to five lines and every row in the list became a different height, so the
+ * table could no longer be scanned in one pass.
+ *
+ * Column widths come from the container, not from cell content (see
+ * FIT_CONTAINER), so a value too long for its column overflows the cell and
+ * `overflow: hidden` cuts it off. No "…" is drawn: the library's own ellipsis
+ * sits on the wrapper `<div>` it renders only for a column WITHOUT a `cell:`
+ * renderer (a plain `selector`). A `cell:` renderer's output goes straight into
+ * the flex cell, where `text-overflow` cannot apply (hence none here), so it
+ * clips hard — and in a `right: true` column it clips from the LEFT, so a money
+ * figure loses its leading digits.
+ *
+ * So: a list that needs "…" wraps its cell content in a truncating element (see
+ * `CellText` in app/applications/components/ApplicationColumns.tsx), and a money
+ * column needs a width that holds its largest figure.
+ *
+ * With a mouse, the row-hover rule in app/styles.css reveals clipped text that
+ * inherits the cell's `white-space`. Column HEADERS wrap instead of clipping —
+ * see app/styles.css.
+ */
+const CELL_GEOMETRY = {
+  whiteSpace: 'nowrap' as const,
+  overflow: 'hidden' as const,
+  // 8px instead of the library's 16px. Pure overhead: at 16px a side an
+  // eleven-column table spends 352px of its width on padding alone, and that
+  // width is what the values need.
+  paddingLeft: '8px',
+  paddingRight: '8px',
+};
+
+/** Header cells: the same 8px padding, and a tighter line for two-line labels. */
+const HEAD_CELL_GEOMETRY = {
+  textTransform: 'uppercase' as const,
+  fontSize: '14px',
+  lineHeight: '1.2',
+  borderBottomWidth: '5px',
+  borderBottomStyle: 'solid' as const,
+  paddingLeft: '8px',
+  paddingRight: '8px',
+};
+
 export function useDatatableTheme(): TableStyles {
   const theme = useTheme();
 
   return useMemo(() => {
     if (theme === 'dark') {
       return {
+        ...FIT_CONTAINER,
         headCells: {
           style: {
+            ...HEAD_CELL_GEOMETRY,
             color: '#FFFFFF',
-            backgroundColor: '#1A222C',
-            textTransform: 'uppercase' as const,
-            fontSize: '14px',
-            borderBottomWidth: '5px',
-            borderBottomStyle: 'solid',
-            borderBottomColor: '#2E3A47'
+            backgroundColor: '#1E1C14',
+            borderBottomColor: '#3D3A2D'
           },
         },
         cells: {
           style: {
-            whiteSpace: 'nowrap' as const,
-            color: '#AEB7C0'
+            ...CELL_GEOMETRY,
+            color: '#BDB6A3'
           }
         },
         rows: {
           style: {
             cursor: 'pointer' as const,
-            backgroundColor: '#24303F',
-            borderBottomColor: '#2E3A47',
+            backgroundColor: '#2E2B20',
+            borderBottomColor: '#3D3A2D',
             '&:hover': {
-              backgroundColor: '#2A3647'
+              backgroundColor: '#36332A'
             }
           },
         },
         headRow: {
           style: {
-            backgroundColor: '#1A222C',
-            borderBottomColor: '#2E3A47'
+            backgroundColor: '#1E1C14',
+            borderBottomColor: '#3D3A2D'
           }
         },
         pagination: {
           style: {
-            backgroundColor: '#24303F',
-            borderTopColor: '#2E3A47',
-            color: '#AEB7C0'
+            backgroundColor: '#2E2B20',
+            borderTopColor: '#3D3A2D',
+            color: '#BDB6A3'
           },
           pageButtonsStyle: {
             cursor: 'pointer',
-            color: '#AEB7C0',
-            fill: '#AEB7C0',
+            color: '#BDB6A3',
+            fill: '#BDB6A3',
             '&:hover:not(:disabled)': {
-              backgroundColor: '#333A48',
+              backgroundColor: '#3F4426',
               color: '#FFFFFF'
             },
             '&:disabled': {
               cursor: 'not-allowed',
-              color: '#8A99AF',
-              fill: '#8A99AF'
+              color: '#A39D88',
+              fill: '#A39D88'
             }
           }
         }
@@ -82,57 +155,55 @@ export function useDatatableTheme(): TableStyles {
 
     // Light mode (complete styling to match dark mode structure)
     return {
+      ...FIT_CONTAINER,
       headCells: {
         style: {
-          color: '#202431',
-          backgroundColor: '#FFFFFF',
-          textTransform: 'uppercase' as const,
-          fontSize: '14px',
-          borderBottomWidth: '5px',
-          borderBottomStyle: 'solid',
-          borderBottomColor: '#041e3c'
+          ...HEAD_CELL_GEOMETRY,
+          color: '#28261A',
+          backgroundColor: '#FBF7EC',
+          borderBottomColor: '#5A6B2C'
         },
       },
       cells: {
         style: {
-          whiteSpace: 'nowrap' as const,
-          color: '#202431'
+          ...CELL_GEOMETRY,
+          color: '#28261A'
         }
       },
       rows: {
         style: {
           cursor: 'pointer' as const,
           backgroundColor: '#FFFFFF',
-          borderBottomColor: '#E2E8F0',
+          borderBottomColor: '#E4DED0',
           '&:hover': {
-            backgroundColor: '#F3F4F6'
+            backgroundColor: '#F6F1E7'
           }
         },
       },
       headRow: {
         style: {
-          backgroundColor: '#FFFFFF',
-          borderBottomColor: '#E2E8F0'
+          backgroundColor: '#FBF7EC',
+          borderBottomColor: '#E4DED0'
         }
       },
       pagination: {
         style: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: '#E2E8F0',
-          color: '#202431'
+          borderTopColor: '#E4DED0',
+          color: '#28261A'
         },
         pageButtonsStyle: {
           cursor: 'pointer',
-          color: '#202431',
-          fill: '#202431',
+          color: '#28261A',
+          fill: '#28261A',
           '&:hover:not(:disabled)': {
-            backgroundColor: '#F3F4F6',
-            color: '#000000'
+            backgroundColor: '#F6F1E7',
+            color: '#28261A'
           },
           '&:disabled': {
             cursor: 'not-allowed',
-            color: '#9CA3AF',
-            fill: '#9CA3AF'
+            color: '#8C8672',
+            fill: '#8C8672'
           }
         }
       }

@@ -22,12 +22,14 @@ export type ActionResult = { success: true } | { success: false; message: string
 
 type SetRecord = Dispatch<SetStateAction<LoanApplicationRecord | null>>;
 
-/** What setLoanApplicationStatus returns: the status it set, and the borrower once there is one. */
-interface StatusReply {
-  id: string;
-  status: LoanApplicationStatus;
-  borrower_id: number | null;
-}
+/**
+ * What setLoanApplicationStatus returns: the status it set, the borrower once there is one, and
+ * what follows from them (the outcome, the decline's reason and the Notes panel's lines).
+ */
+type StatusReply = Pick<
+  LoanApplicationRecord,
+  'id' | 'status' | 'borrower_id' | 'outcome' | 'outcome_label' | 'decline_reason' | 'notes'
+>;
 
 /** The first GraphQL error's message. graphqlFetch has already put a failed @rules check's own reasons there. */
 const firstError = (errors: { message: string }[] | undefined, fallback: string): string | null =>
@@ -64,10 +66,11 @@ async function postUpdate(id: number, input: LoanApplicationUpdateInput): Promis
   return result.data.updateLoanApplication;
 }
 
-async function postStatus(id: number, status: PickableStatus): Promise<StatusReply> {
+/** `reason` goes only with declined: the server requires it there and clears it everywhere else. */
+async function postStatus(id: number, status: PickableStatus, reason?: string): Promise<StatusReply> {
   const result = await graphqlFetch<{ setLoanApplicationStatus: StatusReply | null }>(
     LoanApplicationQueries.SET_LOAN_APPLICATION_STATUS_MUTATION,
-    { id, status },
+    { id, status, ...(status === 'declined' ? { reason: reason?.trim() ?? '' } : {}) },
   );
   const refused = firstError(result.errors, STATUS_FAILED);
   if (refused) throw new Error(refused);
@@ -158,20 +161,30 @@ const useSaveApplication = (id: number | null, setRecord: SetRecord) => {
   return { saving, save, saves };
 };
 
+/** The status reply merged into the record on screen. A field the reply lacks keeps what was there. */
+const mergeStatusReply = (current: LoanApplicationRecord, reply: StatusReply): LoanApplicationRecord => ({
+  ...current,
+  status: reply.status,
+  borrower_id: reply.borrower_id ?? current.borrower_id,
+  outcome: reply.outcome ?? current.outcome,
+  outcome_label: reply.outcome_label ?? current.outcome_label,
+  decline_reason: reply.decline_reason === undefined ? current.decline_reason : reply.decline_reason,
+  notes: reply.notes ?? current.notes,
+});
+
 /**
- * Changing the status. The reply is only the status and the borrower id, so it is merged into
- * the record on screen. Each call posts: the select (StatusPicker) decides which choices are
- * sent, and never has two out at once.
+ * Changing the status. The reply is the status, the borrower id, the outcome and the notes, so it
+ * is merged into the record on screen (not the whole record: the form may hold unsaved edits).
+ * Each call posts: the select (StatusPicker) decides which choices are sent, and never has two
+ * out at once. A decline carries its reason (useStatusDraft asks for it). Logs never carry it.
  */
 const useApplicationStatus = (id: number | null, setRecord: SetRecord) => {
   const setStatus = useCallback(
-    async (status: PickableStatus): Promise<ActionResult> => {
+    async (status: PickableStatus, reason?: string): Promise<ActionResult> => {
       if (id === null) return { success: false, message: STATUS_FAILED };
       try {
-        const reply = await postStatus(id, status);
-        setRecord((current) =>
-          current && { ...current, status: reply.status, borrower_id: reply.borrower_id ?? current.borrower_id },
-        );
+        const reply = await postStatus(id, status, reason);
+        setRecord((current) => current && mergeStatusReply(current, reply));
         return { success: true };
       } catch (failure) {
         const message = errorText(failure, STATUS_FAILED);

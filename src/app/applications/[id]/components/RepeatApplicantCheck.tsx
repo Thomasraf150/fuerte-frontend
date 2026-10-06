@@ -6,12 +6,29 @@ import type { BorrowerMatchCheck } from '@/hooks/useApplicationBorrowerMatch';
 import useFocusOnMount from '@/hooks/useFocusOnMount';
 import type { LoanApplicationBorrowerMatch } from '@/utils/DataTypes';
 
+/**
+ * Who reads the card. Branch staff can open the borrower and check the record themselves. Call
+ * Center cannot open a borrower and has no branch of its own (every match is "elsewhere"): it
+ * tells the branch, and its matches are simply "Branches".
+ */
+export type CheckAudience = 'branch' | 'call-center';
+
 const TITLE = 'This applicant may already be a borrower';
-const BODY =
-  'Their name or mobile number matches a borrower already in Fuerte. They may be applying as a new borrower to get better rates. Check their record before you continue.';
+const BODY_LEAD =
+  'Their name or mobile number matches a borrower already in Fuerte. They may be applying as a new borrower to get better rates.';
+/** The card's last sentence: what to do about it. */
+const NEXT_STEP: Record<CheckAudience, string> = {
+  branch: 'Check their record before you continue.',
+  'call-center': 'Let the branch know before they continue.',
+};
+/** The label of the matches outside the user's own branches. */
+const ELSEWHERE_LABEL: Record<CheckAudience, string> = {
+  branch: 'Other branches',
+  'call-center': 'Branches',
+};
 const CHECK_FAILED = 'Could not check whether this applicant is already a borrower.';
 /** What a screen reader hears, once, when the card appears. */
-const ANNOUNCEMENT = `${TITLE}. Check their record before you continue.`;
+const announcement = (audience: CheckAudience): string => `${TITLE}. ${NEXT_STEP[audience]}`;
 
 /** Focusable by script only (tabIndex -1): the ring shows for a keyboard, not after a click. */
 const FOCUS_RING = 'rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark';
@@ -95,9 +112,13 @@ const ProblemAccount: React.FC<{ worst: number }> = ({ worst }) => (
  * real heading, not an alert: it is announced once by RepeatApplicantCheck, and read in its
  * place in the page. It warns and never blocks; nothing else on the page depends on it.
  * `focusOnMount`: the card is the answer to a Retry, so its heading takes the focus the Retry
- * button has just lost.
+ * button has just lost. `audience` picks its last sentence and the label of the other branches.
  */
-const RepeatApplicantCard: React.FC<{ match: LoanApplicationBorrowerMatch; focusOnMount: boolean }> = ({ match, focusOnMount }) => {
+const RepeatApplicantCard: React.FC<{ match: LoanApplicationBorrowerMatch; focusOnMount: boolean; audience: CheckAudience }> = ({
+  match,
+  focusOnMount,
+  audience,
+}) => {
   const titleId = useId();
   const ref = useRef<HTMLElement>(null);
   const unfolding = useRef<Animation | null>(null);
@@ -127,7 +148,7 @@ const RepeatApplicantCard: React.FC<{ match: LoanApplicationBorrowerMatch; focus
             <h3 ref={heading} id={titleId} tabIndex={-1} className={`text-title-xsm font-semibold text-black dark:text-white ${FOCUS_RING}`}>
               {TITLE}
             </h3>
-            <p className="mt-1 text-sm text-black dark:text-bodydark">{BODY}</p>
+            <p className="mt-1 text-sm text-black dark:text-bodydark">{`${BODY_LEAD} ${NEXT_STEP[audience]}`}</p>
           </div>
         </div>
         <dl className="mt-4 space-y-3 border-t border-warning/40 pt-4">
@@ -138,7 +159,7 @@ const RepeatApplicantCard: React.FC<{ match: LoanApplicationBorrowerMatch; focus
             </Detail>
           )}
           {match.existsElsewhere && (
-            <Detail label="Other branches">
+            <Detail label={ELSEWHERE_LABEL[audience]}>
               {elsewhere.length > 0 ? <BranchTags names={elsewhere} /> : <p className="text-sm text-black dark:text-white">Another branch</p>}
             </Detail>
           )}
@@ -199,18 +220,22 @@ const FocusAfterRetry: React.FC<{ target: React.RefObject<HTMLElement> }> = ({ t
  *
  * After a Retry that succeeds the focus goes to the card's heading, or, with no match, to
  * `fallbackFocus` (the page's heading): never after any other check.
+ *
+ * `audience` is who reads it: branch staff (the default), or Call Center, which is told to let
+ * the branch know instead of to check a record it cannot open.
  */
-export const RepeatApplicantCheck: React.FC<{ check: BorrowerMatchCheck; fallbackFocus: React.RefObject<HTMLElement> }> = ({
-  check,
-  fallbackFocus,
-}) => {
+export const RepeatApplicantCheck: React.FC<{
+  check: BorrowerMatchCheck;
+  fallbackFocus: React.RefObject<HTMLElement>;
+  audience?: CheckAudience;
+}> = ({ check, fallbackFocus, audience = 'branch' }) => {
   const match = hasMatch(check.match) ? check.match : null;
   return (
     <>
       <div role="status" className="sr-only">
-        {match ? ANNOUNCEMENT : ''}
+        {match ? announcement(audience) : ''}
       </div>
-      {match && <RepeatApplicantCard match={match} focusOnMount={check.viaRetry} />}
+      {match && <RepeatApplicantCard match={match} focusOnMount={check.viaRetry} audience={audience} />}
       {check.failed && <CheckFailedNote checking={check.checking} onRetry={check.retry} />}
       {check.viaRetry && !match && <FocusAfterRetry target={fallbackFocus} />}
     </>

@@ -61,7 +61,12 @@ const borrowerColumn = (
   {
     id: 5,
     name: 'Residence Address',
-    cell: row => row.residence_address,
+    // The one free-text column on this list, and much the longest: addresses
+    // like "62 ROSAL ST., PRK 5 NEW CALABAN, OLONGAPO CITY" cannot fit a shared
+    // column on a 1280px screen. It truncates like every other cell, but gets
+    // its own tooltip so the full address is one hover away without needing to
+    // hover the row.
+    cell: row => <span title={row.residence_address ?? ''}>{row.residence_address}</span>,
     sortable: true,
   },
   {

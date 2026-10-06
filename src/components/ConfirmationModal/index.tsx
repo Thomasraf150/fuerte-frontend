@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertCircle } from 'react-feather';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { CONFIRM_COLORS } from '@/utils/brandColors';
 
 const MySwal = withReactContent(Swal);
 
@@ -17,8 +18,8 @@ export const showConfirmationModal = async (
     ...(useHtml ? { html: text } : { text: text }),
     icon: 'warning',
     showCancelButton: showCancel,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
+    confirmButtonColor: CONFIRM_COLORS.confirm,
+    cancelButtonColor: CONFIRM_COLORS.reject,
     confirmButtonText: confText,
     cancelButtonText: 'Back',
   });
@@ -48,8 +49,8 @@ export const showDeletionRequestPrompt = async (
     inputPlaceholder: 'e.g. duplicate entry, wrong borrower, encoded by mistake',
     inputAttributes: { 'aria-label': 'Reason for deletion' },
     showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
+    confirmButtonColor: CONFIRM_COLORS.confirm,
+    cancelButtonColor: CONFIRM_COLORS.reject,
     confirmButtonText: confirmText,
   });
 
@@ -179,9 +180,9 @@ export const showAlreadyPendingModal = async (
     confirmButtonText: 'View in Approvals →',
     cancelButtonText: 'Close',
     denyButtonText: 'Delete request',
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#64748b',
-    denyButtonColor: '#dc2626',
+    confirmButtonColor: CONFIRM_COLORS.confirm,
+    cancelButtonColor: CONFIRM_COLORS.cancel,
+    denyButtonColor: CONFIRM_COLORS.reject,
     reverseButtons: false,
     background: '#ffffff',
   });
@@ -193,12 +194,15 @@ export const showAlreadyPendingModal = async (
 
 /**
  * Confirmation modal with an optional decision-note textarea.
- * Used by the approve / reject actions on the Approvals page so the
- * note prompts match Fuerte's modal language instead of the native
- * browser prompt.
+ * Used by the approve / reject actions on the Approvals page and on the
+ * borrower page header, so the note prompts match Fuerte's modal language
+ * instead of the native browser prompt.
  *
- * Returns the note string on confirm (empty string allowed), or null
- * if the user cancelled.
+ * `requiredMessage` makes the note required: confirming with nothing (or
+ * only spaces) keeps the modal open with that message under the textarea.
+ *
+ * Returns the note string on confirm (empty string allowed unless
+ * required), or null if the user cancelled.
  */
 export const showDecisionNotePrompt = async (
   title: string,
@@ -208,8 +212,12 @@ export const showDecisionNotePrompt = async (
     text?: string;
     confirmColor?: string;
     placeholder?: string;
+    requiredMessage?: string;
+    /** The most characters the note may hold (the textarea's maxlength). */
+    maxLength?: number;
   } = {}
 ): Promise<string | null> => {
+  const { requiredMessage, maxLength } = options;
   const result = await MySwal.fire({
     title,
     text: options.text ?? '',
@@ -217,12 +225,15 @@ export const showDecisionNotePrompt = async (
     input: 'textarea',
     inputLabel,
     inputPlaceholder: options.placeholder ?? '',
-    inputAttributes: { 'aria-label': inputLabel },
+    inputAttributes: { 'aria-label': inputLabel, ...(maxLength ? { maxlength: String(maxLength) } : {}) },
+    ...(requiredMessage
+      ? { inputValidator: (value: string) => (!value || !value.trim() ? requiredMessage : undefined) }
+      : {}),
     showCancelButton: true,
     confirmButtonText: confirmText,
     cancelButtonText: 'Cancel',
-    confirmButtonColor: options.confirmColor ?? '#3085d6',
-    cancelButtonColor: '#64748b',
+    confirmButtonColor: options.confirmColor ?? CONFIRM_COLORS.confirm,
+    cancelButtonColor: CONFIRM_COLORS.cancel,
     background: '#ffffff',
   });
 

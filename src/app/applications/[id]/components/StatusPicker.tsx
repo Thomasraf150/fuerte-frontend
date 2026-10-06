@@ -78,8 +78,9 @@ interface StatusPickerProps {
   draft: StatusDraft;
   /**
    * The application is a borrower already (the page's one check, notConvertibleReason: the
-   * status Borrower created, or a borrower linked). The server refuses every change of it, so
-   * the select is fixed on the status it has, and there is nothing to save.
+   * status Borrower created, or a borrower linked), or the user may only view it (Marketing on
+   * another branch's application). The server refuses every change of it, so the select is fixed
+   * on the status it has, and there is nothing to save.
    */
   locked: boolean;
   /** The id of the toolbar's paragraph that says why the last save was refused (it exists only while there is a refusal). */

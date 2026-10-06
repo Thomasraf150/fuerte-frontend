@@ -5,6 +5,7 @@ import { Clock, Home, type Icon } from 'react-feather';
 import { formatSubmitted } from '@/app/applications/components/ApplicationColumns';
 import ApplicationStatusPill, { APPLICATION_STATUS_DOT } from '@/app/applications/components/ApplicationStatusPill';
 import { CHANNEL_ICONS, TINTS } from '@/app/applications/components/channelIcons';
+import OutcomePill from '@/app/applications/components/OutcomePill';
 import { CHANNEL_SHORT_LABELS } from '@/utils/applicationForm';
 import { applicationNumber } from '@/utils/convertApplication';
 import type { LoanApplicationRecord } from '@/utils/DataTypes';
@@ -77,15 +78,22 @@ export const ApplicationHeader: React.FC<{ record: LoanApplicationRecord; headin
       <div className="px-5 py-4 pl-7 sm:px-8 sm:py-5">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <ApplicationNumber id={record.id} />
-          <span className="ml-auto">
+          <span className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <ApplicationStatusPill status={record.status} />
+            {/* Once it is a borrower, where it ended up. Before that the outcome is the status itself. */}
+            {record.status === 'borrower_created' && record.outcome && (
+              <span className="inline-flex min-w-0 items-center" data-testid="application-outcome">
+                <span className="sr-only">Outcome: </span>
+                <OutcomePill outcome={record.outcome} label={record.outcome_label} />
+              </span>
+            )}
           </span>
         </div>
         <h3
           ref={headingRef}
           id={titleId}
           tabIndex={-1}
-          className="mt-3 break-words rounded-sm text-title-sm2 font-semibold uppercase leading-tight text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:text-white dark:focus-visible:ring-offset-boxdark sm:text-title-md"
+          className="mt-3 break-words rounded-sm font-display text-title-sm2 font-semibold uppercase leading-tight text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:text-white dark:focus-visible:ring-offset-boxdark sm:text-title-md"
         >
           {record.full_name}
         </h3>

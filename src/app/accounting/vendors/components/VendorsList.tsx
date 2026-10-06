@@ -118,7 +118,7 @@ const VendorsList: React.FC = () => {
                 </div>
                 <div className="p-5">
                   <button 
-                    className="bg-purple-700 text-white py-2 px-4 mb-4 rounded hover:bg-purple-800 flex items-center space-x-2"
+                    className="bg-primary text-white py-2 px-4 mb-4 rounded hover:bg-primary/90 flex items-center space-x-2"
                     onClick={() => handleCreateVendor(true)}>
                     <GitBranch  size={14} /> 
                     <span>Create</span>

@@ -157,8 +157,8 @@ const RenewableBorrowersList: React.FC = () => {
 
   const columns: TableColumn<RenewableBorrowerRow>[] = useMemo(
     () => [
-      { name: "Borrower", cell: (r) => r.borrower_name, sortable: true, grow: 2, minWidth: "220px" },
-      { name: "Branch", cell: (r) => `${r.branch_name ?? "—"}${r.sub_branch_name ? " / " + r.sub_branch_name : ""}`, minWidth: "170px" },
+      { name: "Borrower", cell: (r) => r.borrower_name, sortable: true, grow: 2 },
+      { name: "Branch", cell: (r) => `${r.branch_name ?? "—"}${r.sub_branch_name ? " / " + r.sub_branch_name : ""}` },
       {
         name: "Renewable Loans",
         cell: (r) => (
@@ -167,11 +167,10 @@ const RenewableBorrowersList: React.FC = () => {
           </span>
         ),
         center: true,
-        minWidth: "130px",
       },
-      { name: "Total PN", cell: (r) => `₱${peso(r.total_pn_amount)}`, right: true, minWidth: "130px" },
-      { name: "Latest Released", cell: (r) => (r.latest_released_date ? String(r.latest_released_date).slice(0, 10) : "—"), minWidth: "130px" },
-      { name: "Standing", cell: (r) => <StandingBadge row={r} />, minWidth: "220px" },
+      { name: "Total PN", cell: (r) => `₱${peso(r.total_pn_amount)}`, right: true },
+      { name: "Latest Released", cell: (r) => (r.latest_released_date ? String(r.latest_released_date).slice(0, 10) : "—") },
+      { name: "Standing", cell: (r) => <StandingBadge row={r} /> },
     ],
     []
   );

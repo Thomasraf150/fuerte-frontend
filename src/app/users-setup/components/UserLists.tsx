@@ -6,7 +6,7 @@ import userListCol from './UsersListColumn';
 import FormAddUser from './FormAddUser';
 import { User, DataFormUser } from '@/utils/DataTypes';
 import useUsers from '@/hooks/useUsers';
-import { X } from 'react-feather';
+import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
 
 const column = userListCol;
 
@@ -23,6 +23,7 @@ const UserLists: React.FC = () => {
     refresh,
   } = useUsers();
   const [singleUserData, setSingleUserData] = useState<DataFormUser | undefined>(undefined);
+  const formPanelRef = useRevealFormWhenStacked<HTMLDivElement>(showForm, actionLbl, singleUserData);
 
   // Account creation is Owner-only (per CreateUser resolver). Hide the
   // "Create" button from everyone else so the UI doesn't expose an
@@ -56,10 +57,10 @@ const UserLists: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
 
-          <div className="col-span-1 md:col-span-1 lg:col-span-2">
+          <div className="col-span-1 xl:col-span-2">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
@@ -69,7 +70,7 @@ const UserLists: React.FC = () => {
               <div className="p-7">
                 {callerIsOwner && (
                   <button
-                    className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800"
+                    className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
                     onClick={() => handleShowForm('Create User', true)}
                   >
                     Create
@@ -99,15 +100,13 @@ const UserLists: React.FC = () => {
           </div>
 
           {showForm && (
-            <div className="fade-in col-span-1">
+            <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}
                   </h3>
-                  <span className="text-right cursor-pointer text-boxdark-2 lg:hidden" onClick={() => setShowForm(false)}>
-                    <X size={17}/>
-                  </span>
+                  <FormCloseButton onClose={() => setShowForm(false)} />
                 </div>
                 <div className="p-7">
                   <FormAddUser setShowForm={setShowForm} actionLbl={actionLbl} onSaved={refresh} singleUserData={singleUserData} />

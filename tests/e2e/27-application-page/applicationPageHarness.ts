@@ -14,7 +14,12 @@
  * the server would have sent back. A test that needs a different answer sets `overrides`.
  */
 import { test as base, expect, type Locator, type Page, type Route } from '@playwright/test';
-import type { LoanApplicationBorrowerMatch, LoanApplicationRecord, LoanApplicationUpdateInput } from '../../../src/utils/DataTypes';
+import type {
+  ApplicationNotification,
+  LoanApplicationBorrowerMatch,
+  LoanApplicationRecord,
+  LoanApplicationUpdateInput,
+} from '../../../src/utils/DataTypes';
 
 export const APP = 'http://localhost:3000';
 /** Where the dev build points: NEXT_PUBLIC_API_URL=<BACKEND>/api, NEXT_PUBLIC_API_GRAPHQL=<BACKEND>/fuerte-api, NEXT_PUBLIC_BASE_URL=<BACKEND>. */
@@ -53,7 +58,9 @@ const AREAS = [{ id: '9401', name: 'E2E Area With Sub-areas', sub_area: SUB_AREA
 /** Role ids and names mirror the roles table. */
 const ROLES = {
   ADM: { id: 1, name: 'ADMIN' },
+  COL: { id: 2, name: 'COLLECTION' },
   PROC: { id: 3, name: 'PROCESSING' },
+  ACCTG: { id: 4, name: 'ACCOUNTING' },
   OWN: { id: 5, name: 'OWNER' },
   CALLCTR: { id: 8, name: 'CALL_CENTER' },
 } as const;
@@ -62,7 +69,7 @@ export type RoleCode = keyof typeof ROLES;
 
 /**
  * The shape /api/login returns. Owner, Admin and Call Center may place an application on
- * any branch; Processing is branch staff, who may not.
+ * any branch; Processing and Collection (Marketing) are branch staff, who may not.
  */
 export const fakeUser = (code: RoleCode, assignedBranchSubIds: number[] = [], homeBranchSubId: number | null = null) => {
   const role = ROLES[code];
@@ -92,7 +99,8 @@ const EMPTY_INFO = {
 /**
  * What getLoanApplication returns, in the shape of the backend's LoanApplicationRecord:
  * a Facebook application for E2E Applicant Two, on Sub-branch A, still For Interview, with
- * the form's info and detail filled in and nothing else (the other groups are all null).
+ * the form's info and detail filled in and nothing else (the other groups are all null). The
+ * user may edit it (can_edit), and there is no borrower, so no decision.
  */
 export function application(overrides: Partial<LoanApplicationRecord> = {}): LoanApplicationRecord {
   return {
@@ -125,6 +133,13 @@ export function application(overrides: Partial<LoanApplicationRecord> = {}): Loa
     form_answers: [],
     // A typed-in application has no key from Google's download.
     exact_time: false,
+    can_edit: true,
+    borrower_decision: null,
+    // The server's outcome for an application still For Interview, and no notes yet.
+    outcome: 'for_interview',
+    outcome_label: 'Waiting for interview',
+    decline_reason: null,
+    notes: [],
     ...overrides,
   };
 }
@@ -227,6 +242,16 @@ const json = (route: Route, status: number, body: unknown) =>
 const refusal = (message: string): GraphqlBody => ({ errors: [{ message }] });
 
 export const NOT_FOUND = 'Application not found.';
+export const DECLINE_REASON_REQUIRED = 'Write why the application is declined.';
+/** When the fake server says a decline was saved (Manila wall clock). */
+export const DECLINED_AT = '2026-10-05 15:20:00';
+
+/** The role labels the Notes panel shows: never a person's name. */
+const ROLE_LABELS: Record<RoleCode, string> = {
+  ADM: 'Admin', COL: 'Marketing', PROC: 'Processing', ACCTG: 'Accounting', OWN: 'Owner', CALLCTR: 'Call Center',
+};
+
+const OUTCOME_LABELS = { for_interview: 'Waiting for interview', interviewed: 'Interviewed', declined: 'Declined' } as const;
 
 /** The record as the server would hold it after an update: the form's groups and the facts the list shows. */
 function updated(record: LoanApplicationRecord, input: LoanApplicationUpdateInput): LoanApplicationRecord {
@@ -255,8 +280,10 @@ export class FakeBackend {
   printHold: Promise<void> | null = null;
   /** When set, updateLoanApplication waits for it, so a test can look at the page while a save is out. */
   saveHold: Promise<void> | null = null;
-  /** What getLoanApplicationBorrowerMatch answers: nothing matched, until a test says what did (null is Call Center's answer). */
+  /** What getLoanApplicationBorrowerMatch answers: nothing matched, until a test says what did (null: nothing to show). */
   match: LoanApplicationBorrowerMatch | null = noBorrowerMatch();
+  /** What getApplicationNotifications answers (the header bell asks for Processing and Call Center): nothing, until a test says. */
+  notifications: ApplicationNotification[] = [];
   /** When set, getLoanApplicationBorrowerMatch waits for it, so a test can look at the page while the check is out. */
   matchHold: Promise<void> | null = null;
   /**
@@ -315,6 +342,9 @@ export class FakeBackend {
       // The approval bell, for approver roles.
       case 'pendingDeletionRequestsForMe':
         return { data: { pendingDeletionRequestsForMe: [] } };
+      // The bell's Applications items, for Processing and Call Center.
+      case 'getApplicationNotifications':
+        return { data: { getApplicationNotifications: this.notifications } };
       // BorrowerDetails' picklists.
       case 'getChief':
         return { data: { getChief: { data: CHIEFS } } };
@@ -357,7 +387,7 @@ export class FakeBackend {
       // The branch list New Borrower loads on mount; its form does not use it.
       case 'getBranch':
         return { data: { getBranch: [] } };
-      // Whether the applicant is a borrower already. The page never asks Call Center, nor for a converted application.
+      // Whether the applicant is a borrower already. The page never asks for a converted application.
       case 'getLoanApplicationBorrowerMatch':
         if (this.matchHold) await this.matchHold;
         return { data: { getLoanApplicationBorrowerMatch: this.match } };
@@ -374,10 +404,27 @@ export class FakeBackend {
     return { data: { updateLoanApplication: this.record } };
   }
 
+  /**
+   * As the server: a decline needs a reason (at most 500), which becomes the Notes panel's line with
+   * the actor's role; leaving declined clears it. The outcome of these three statuses is the status.
+   */
   private setStatus(variables: Record<string, any>): GraphqlBody {
     if (!this.record || String(this.record.id) !== String(variables.id)) return refusal(NOT_FOUND);
-    this.record = { ...this.record, status: variables.status };
-    return { data: { setLoanApplicationStatus: { id: this.record.id, status: this.record.status, borrower_id: this.record.borrower_id } } };
+    const status = variables.status as 'for_interview' | 'interviewed' | 'declined';
+    const reason = typeof variables.reason === 'string' ? variables.reason.trim() : '';
+    if (status === 'declined' && reason === '') return refusal(DECLINE_REASON_REQUIRED);
+    const others = (this.record.notes ?? []).filter((note) => note.kind !== 'declined');
+    const role = ROLE_LABELS[(this.user?.role.code ?? 'ADM') as RoleCode];
+    this.record = {
+      ...this.record,
+      status,
+      outcome: status,
+      outcome_label: OUTCOME_LABELS[status],
+      decline_reason: status === 'declined' ? reason : null,
+      notes: status === 'declined' ? [...others, { kind: 'declined', role_label: role, at: DECLINED_AT, reason }] : others,
+    };
+    const { id, borrower_id, outcome, outcome_label, decline_reason, notes } = this.record;
+    return { data: { setLoanApplicationStatus: { id, status, borrower_id, outcome, outcome_label, decline_reason, notes } } };
   }
 }
 
@@ -426,6 +473,21 @@ export async function signedInAs(
     },
     [backend.user, FAKE_TOKEN] as const,
   );
+}
+
+/** What the tests write when Declined asks why. Fictional, like everything here. */
+export const DECLINE_REASON = 'E2E: hindi maabot sa numero';
+
+/** The "Decline this application?" prompt (SweetAlert), its reason box and its two buttons. */
+export const declinePrompt = (page: Page): Locator => page.getByRole('dialog').filter({ hasText: 'Decline this application?' });
+
+/** Answer the Declined prompt with a reason (DECLINE_REASON unless given) and confirm it. */
+export async function answerDeclinePrompt(page: Page, reason: string = DECLINE_REASON): Promise<void> {
+  const dialog = declinePrompt(page);
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('textbox').fill(reason);
+  await dialog.getByRole('button', { name: 'Decline', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
 }
 
 /** The page's own actions, found by their group's name. */

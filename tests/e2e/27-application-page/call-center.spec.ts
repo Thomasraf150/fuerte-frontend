@@ -66,6 +66,11 @@ const ALLOWED_GRAPHQL: ReadonlySet<string> = new Set([
   'updateLoanApplication',
   'setLoanApplicationStatus',
   'printLoanApplication',
+  // The header bell's Applications items, and the repeat-applicant check on an application (2026-10-05).
+  'getApplicationNotifications',
+  'getLoanApplicationBorrowerMatch',
+  // The Source tracker's applicant funnel (2026-10-05, spec applicant-funnel-design).
+  'getApplicationFunnel',
 ]);
 
 /** The requests to the REST API a Call Center account may make, as "METHOD /path". MIRRORS the same backend list. */
@@ -248,7 +253,10 @@ test.describe('1. The contract: what each page asks for', () => {
 
     await expectAsked(
       seen,
-      ['getLoanApplication', 'getApplicationBranches', 'getChief', 'getAreas', 'getBorrCompanies', 'updateLoanApplication', 'setLoanApplicationStatus', 'printLoanApplication'],
+      [
+        'getLoanApplication', 'getApplicationBranches', 'getChief', 'getAreas', 'getBorrCompanies', 'updateLoanApplication', 'setLoanApplicationStatus', 'printLoanApplication',
+        'getLoanApplicationBorrowerMatch', 'getApplicationNotifications',
+      ],
       ['GET /api/user', 'GET /api/pdf/loan-application'],
     );
     expectInsideTheLists(seen);
@@ -259,12 +267,17 @@ test.describe('1. The contract: what each page asks for', () => {
     backend.overrides.set('getApplicationSourceCounts', () => ({
       data: { getApplicationSourceCounts: [{ channel: 'google_form', count: 12 }, { channel: 'facebook', count: 6 }] },
     }));
+    const none = Object.fromEntries(
+      ['applied', 'became_borrower', 'approved', 'loan_released', 'declined', 'rejected', 'loan_cancelled', 'for_interview', 'interviewed',
+        'borrower', 'approved_no_loan', 'loan_in_process', 'rejected_with_loan', 'released_without_approval', 'borrower_deleted'].map((key) => [key, 0]),
+    );
+    backend.overrides.set('getApplicationFunnel', () => ({ data: { getApplicationFunnel: { total: { ...none, applied: 18 }, by_channel: [] } } }));
     await signedInAs(page, backend, 'CALLCTR');
     await gotoPage(page, '/applications/tracker');
     await expect(page.getByRole('heading', { name: 'Applications by source' })).toBeVisible({ timeout: 90_000 });
     await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::p[1]')).toContainText('18', { timeout: 30_000 });
 
-    await expectAsked(seen, ['getApplicationSourceCounts']);
+    await expectAsked(seen, ['getApplicationSourceCounts', 'getApplicationFunnel']);
     expectInsideTheLists(seen);
     await expectNoErrorToast(page);
   });

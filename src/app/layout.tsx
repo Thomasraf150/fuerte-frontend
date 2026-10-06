@@ -9,7 +9,8 @@ import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import CallCenterGuard from "@/components/Guards/CallCenterGuard";
 import './styles.css'; // Include your global styles
-import { Poppins } from 'next/font/google';
+import { Fraunces, Hanken_Grotesk } from 'next/font/google';
+import { BRAND } from '@/utils/brandColors';
 import Pusher from "pusher-js";
 import { usePathname } from "next/navigation";
 import { useRouter } from 'nextjs-toploader/app';
@@ -18,11 +19,19 @@ import NextTopLoader from 'nextjs-toploader';
 import { ToastContainer } from 'react-toastify';
 
 
-const poppins = Poppins({
-  subsets: ['latin'], // Include subsets you need
-  weight: ['400', '500', '600', '700'], // Specify weights you want to use
-  style: ['normal', 'italic'], // Optional: Add styles like normal/italic
-  variable: '--font-poppins', // Use a CSS variable to apply globally
+// Brand theme 2026-10-05: Hanken Grotesk for the UI and body text (was Poppins), and
+// Fraunces 600 for page titles and record names (Tailwind `font-display`).
+const sans = Hanken_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-sans',
+});
+
+const display = Fraunces({
+  subsets: ['latin'],
+  weight: ['600'],
+  variable: '--font-display',
 });
 
 
@@ -71,16 +80,16 @@ export default function RootLayout({
       <head>
         <title>Fuerte Lending System</title>
       </head>
-      <body suppressHydrationWarning={true} className={poppins.variable}>
+      <body suppressHydrationWarning={true} className={`${sans.variable} ${display.variable}`}>
         {/* Top Loading Bar - Shows during page navigation */}
         <NextTopLoader
-          color="#2563eb"
+          color={BRAND.accent}
           height={3}
           showSpinner={false}
           speed={200}
           crawlSpeed={200}
           easing="ease"
-          shadow="0 0 10px #2563eb,0 0 5px #2563eb"
+          shadow={`0 0 10px ${BRAND.accent},0 0 5px ${BRAND.accent}`}
         />
         <div className="dark:bg-boxdark-2 dark:text-bodydark">
           {loading ? <Loader /> : ''}

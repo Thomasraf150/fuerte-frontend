@@ -8,7 +8,7 @@ import borrowerColumn from './BorrowerColumn';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 import useBorrower from '@/hooks/useBorrower';
 import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDeletions';
-import { showAlreadyPendingModal, showProcessingModal } from '@/components/ConfirmationModal';
+import { showPendingBorrowerDeletion } from '@/hooks/borrowerDelete';
 import useDeletionRequests from '@/hooks/useDeletionRequests';
 import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
 
@@ -46,27 +46,12 @@ const BorrowerList: React.FC = () => {
     await handleRmBorrower(data, refreshPending);
   }
 
-  const handlePendingClick = async (row: BorrowerRowInfo, info: PendingDeletionInfo) => {
-    const action = await showAlreadyPendingModal({
-      request_id: info.request_id,
-      requested_by_name: info.requested_by_name,
-      reason: info.reason,
-      created_at: info.created_at,
-      is_mine: info.is_mine,
-      entity_label: [row.firstname, row.middlename, row.lastname].filter(Boolean).join(' '),
+  const handlePendingClick = (row: BorrowerRowInfo, info: PendingDeletionInfo) =>
+    showPendingBorrowerDeletion(info, row, {
+      onView: () => router.push('/approvals'),
+      cancel: cancelDeletionRequest,
+      refresh: refreshPending,
     });
-    if (action === 'view') {
-      router.push('/approvals');
-    } else if (action === 'withdraw' && info.is_mine) {
-      const closeProcessing = showProcessingModal('Deleting request…');
-      try {
-        const ok = await cancelDeletionRequest(String(info.request_id));
-        if (ok) await refreshPending();
-      } finally {
-        closeProcessing();
-      }
-    }
-  };
 
   return (
     <div>
@@ -80,7 +65,7 @@ const BorrowerList: React.FC = () => {
                 </h3>
               </div>
               <div className="p-7">
-                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={handleCreateBorrower}>Create</button>
+                <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90" onClick={handleCreateBorrower}>Create</button>
                 {borrowerError && (
                   <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
                     Error loading borrowers: {borrowerError}

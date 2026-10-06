@@ -218,9 +218,9 @@ test('2. an empty Save flags exactly the basics, the branch and Saan galing, and
   expect(await requiredMarks(form)).toEqual(['(unplaced) Branch*', 'amount_applied', 'contact_no', 'firstname', 'lastname', 'purpose']);
   await expect(form.locator('fieldset legend')).toHaveText('Saan galing ang application?*');
   await expect(radio(form, 'Walk-in')).toHaveAccessibleDescription(`Pumunta mismo sa branch ${CHANNEL_ERROR}`);
-  // The branch error is drawn in tailwind.config.ts `danger` (#D34053).
+  // The branch error is drawn in tailwind.config.ts `danger` (BRAND.danger, #B5372F).
   const branchError = form.getByTestId('borrower-branch-picker').locator('p', { hasText: 'Branch is required' });
-  expect(await branchError.evaluate((p) => getComputedStyle(p).color)).toBe('rgb(211, 64, 83)');
+  expect(await branchError.evaluate((p) => getComputedStyle(p).color)).toBe('rgb(181, 55, 47)');
   expect(backend.calls('createLoanApplication')).toHaveLength(0);
 });
 

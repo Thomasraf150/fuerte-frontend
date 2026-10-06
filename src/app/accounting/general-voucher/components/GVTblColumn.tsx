@@ -11,17 +11,12 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     name: 'Name',
     cell: row => row?.journal_name,
     sortable: true,
-    style: {
-      minWidth: '150px',
-    },
-    width: '150px'
 
   },
   {
     name: 'Ref #',
     cell: row => row?.journal_ref,
     sortable: true,
-    width: '190px'
   },
   {
     name: 'Sub-Branch',
@@ -32,14 +27,12 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
     name: 'Loan Ref #',
     cell: row => row?.reference_no,
     sortable: true,
-    width: '150px'
   },
   {
     name: 'Payee',
     selector: row => row?.borrower_full_name === '' ? row?.vendor_full_name : row?.borrower_full_name,
     cell: row => row?.borrower_full_name === '' ? row?.vendor_full_name : row?.borrower_full_name,
     sortable: true,
-    width: '290px'
   },
   {
     name: 'Check #',

@@ -41,7 +41,15 @@ const LoadingSkeleton: React.FC = () => (
 
 const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading, isOwner = true }) => {
   const cardCount = isOwner ? 5 : 3;
-  const gridCols = isOwner ? 'xl:grid-cols-5' : 'xl:grid-cols-3';
+  /**
+   * Five across only from 2xl. At xl (1280px) the sidebar leaves 975px of
+   * content, so five cards got ~176px each and `px-7.5` padding took 60px of
+   * that — leaving 115px for a peso total that measures 167px at
+   * `text-title-md`. The total overflowed its card and pushed the change-rate
+   * badge 75px past the content area, which is what made the whole dashboard
+   * scroll sideways. Three across at xl gives each card ~293px.
+   */
+  const gridCols = isOwner ? 'xl:grid-cols-3 2xl:grid-cols-5' : 'xl:grid-cols-3';
 
   if (loading) {
     return (

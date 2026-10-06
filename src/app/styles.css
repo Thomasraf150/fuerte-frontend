@@ -1,21 +1,81 @@
-:root {
-  --font-poppins: 'Poppins', sans-serif;
-}
-
+/* Brand theme 2026-10-05: Hanken Grotesk (was Poppins). --font-sans is set on <body> by
+ * next/font in app/layout.tsx; the fallback here is for a page rendered without it. */
 body {
-  font-family: var(--font-poppins);
+  font-family: var(--font-sans, 'Hanken Grotesk'), sans-serif;
 }
 
-/* React Data Table - Text truncation with ellipsis by default */
+/* Figures line up down a column: every table cell draws tabular (equal-width) digits. */
 .rdt_TableCell {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  font-variant-numeric: tabular-nums;
 }
 
-/* React Data Table - Expand row and show full text on hover */
-.rdt_TableRow:hover .rdt_TableCell {
-  white-space: normal !important; /* Override CSS-in-JS nowrap */
+/* The sidebar's active item: the dark olive ground (Tailwind graydark) carries a gold edge,
+ * the castle's yellow, and the active sub-link is drawn in gold. Colour only: no markup moves. */
+aside nav .bg-graydark {
+  box-shadow: inset 3px 0 0 #E3A92E;
+}
+aside nav ul ul a.text-white {
+  color: #E3A92E;
+}
+
+/* Dark mode: olive text (links, the breadcrumb's current page, the active tab) is lifted to a
+ * light olive, 7.5:1 on boxdark, where #5A6B2C would read at 2.4:1. :where() keeps this at a
+ * utility's weight, so a `dark:text-…` on the same element still wins. Backgrounds keep the olive. */
+:where(.dark) .text-primary,
+:where(.dark) .hover\:text-primary:hover {
+  color: #B4C47A;
+}
+
+/* React Data Table - one line per cell; what does not fit is clipped.
+ *
+ * Agrees with CELL_GEOMETRY in hooks/useDatatableTheme.tsx, which explains it:
+ * one line per cell keeps the row height uniform, which is what makes a dense
+ * table scannable, and column widths come from the container — each column has
+ * `flex-basis: 0` and an explicit `min-width` — so a value too long for its
+ * column overflows the cell and is cut off. No "…" is drawn here: the cell is a
+ * flex container, where `text-overflow` cannot apply. A list that needs "…"
+ * truncates inside its cells (see CellText in
+ * app/applications/components/ApplicationColumns.tsx).
+ */
+.rdt_TableCell {
+  overflow: hidden;
+}
+
+/* Hovering a row with a mouse reveals what its cells clipped: the cell wraps
+ * and stops clipping, for content that inherits its `white-space` (an element
+ * with its own `nowrap`, such as Tailwind's `truncate`, stays on one line). It
+ * is the app's long-standing affordance and staff rely on it. Touch screens are
+ * left out: a tap leaves `:hover` stuck on the tapped row, so that row reflowed
+ * taller and the list shifted under the user's finger. */
+@media (hover: hover) and (pointer: fine) {
+  .rdt_TableRow:hover .rdt_TableCell {
+    white-space: normal;
+    overflow: visible;
+  }
+}
+
+/* React Data Table - column headers wrap instead of being cut off.
+ *
+ * The library hard-codes `white-space: nowrap; overflow: hidden;
+ * text-overflow: ellipsis` on the header label, but only when `column.name` is
+ * a plain string — which it is on virtually every list in this app. Once the
+ * columns share a narrower container that produced headers like "INTERES…" and
+ * "UNCOLLEC…", hiding what the column even is. There is no prop for this, and
+ * converting ~60 column files to ReactNode labels would be a far larger change,
+ * so the label is unwrapped here instead. The `!important`s keep these ahead
+ * of the library's runtime-injected styled-component rule whatever the
+ * injection order.
+ *
+ * `overflow-wrap: anywhere` is for a single word wider than its column: the
+ * label is unclipped, but its parent `.rdt_TableCol_Sortable` still has
+ * `overflow: hidden`, so without a mid-word break the word's end was cut off
+ * (its start, in a right-aligned column).
+ */
+.rdt_TableCol_Sortable > div {
+  white-space: normal !important;
+  text-overflow: clip !important;
   overflow: visible !important;
+  overflow-wrap: anywhere;
 }
 
 /* React Data Table - Dark mode hover background color override */

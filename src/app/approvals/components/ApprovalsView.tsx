@@ -134,14 +134,17 @@ const ApprovalsView: React.FC = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex items-center justify-between">
+      {/* Title and caption sit side by side from `sm` up, as before; on a phone
+          they stack so the caption is not squeezed into a narrow column. */}
+      <div className="border-b border-stroke px-4 py-4 dark:border-strokedark flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:px-7">
         <h3 className="font-medium text-black dark:text-white">Deletion Approvals</h3>
         <span className="text-xs text-slate-500 dark:text-slate-400">
           A record of requested deletions awaiting decision.
         </span>
       </div>
 
-      <div className="p-7">
+      {/* 28px of padding a side costs 56px of a 360px screen. */}
+      <div className="p-4 sm:p-7">
         {/* stat strip */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           <div className="appr-stat-card">
@@ -165,8 +168,12 @@ const ApprovalsView: React.FC = () => {
         </div>
 
         {/* tabs */}
+        {/* Three tabs at gap-6 need more than a 360px screen has, and the last
+            one ("All decisions") was running off the right edge. Wrapping keeps
+            every tab reachable — a scrolling tab strip would push one of them
+            out of sight. `sm:gap-6` keeps the desktop bar exactly as it was. */}
         <nav
-          className="flex items-center gap-6 border-b border-stroke dark:border-strokedark mb-5"
+          className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-6 border-b border-stroke dark:border-strokedark mb-5"
           aria-label="Approval views"
         >
           {isApprover && (
@@ -208,7 +215,8 @@ const ApprovalsView: React.FC = () => {
                     setAllFilter(s as DeletionRequestStatus | "");
                     setAllPage(1);
                   }}
-                  className={`text-xs px-3 py-1.5 rounded border transition-colors ${
+                  // 48px tall below `lg` (a touch target), 40px from `lg`.
+                  className={`min-h-[48px] lg:min-h-[40px] text-xs px-3 py-1.5 rounded border transition-colors ${
                     active
                       ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 dark:bg-transparent dark:text-slate-300 dark:border-slate-600 dark:hover:border-slate-400"

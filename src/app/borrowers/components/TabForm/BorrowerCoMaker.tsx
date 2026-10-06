@@ -61,7 +61,7 @@ const BorrowerCoMaker: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) =
       <div className="">
         {showForm === false ? (
           <div className="py-1">
-            <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800" onClick={() => { createCoMaker(true) }}>Add Co-Maker</button>
+            <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90" onClick={() => { createCoMaker(true) }}>Add Co-Maker</button>
 
             {/* Desktop/Tablet: Table View */}
             <div className="hidden sm:block">

@@ -49,9 +49,9 @@ const ApplicationStatusPill: React.FC<{ status: LoanApplicationStatus }> = ({ st
     >
       {/*
         On phones three columns share the table, which fits only through the app-wide
-        table-fit settings (useDatatableTheme's tableWrapper display:block plus the 80px
-        column floor in app/styles.css). The dot and some padding give their width back
-        to the label.
+        table-fit settings (useDatatableTheme's tableWrapper display:block) and the
+        library's 100px column default (3 x 101px in a 302px table). The dot and some
+        padding give their width back to the label.
       */}
       <span aria-hidden="true" className={`pointer-events-none hidden h-1.5 w-1.5 shrink-0 rounded-full sm:inline-block ${APPLICATION_STATUS_DOT[status] ?? 'bg-body'}`} />
       {/* A narrow column ellipsizes the label rather than clipping the pill. */}

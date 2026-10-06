@@ -27,36 +27,36 @@ export function useSelectTheme<T>(): {
       return {
         control: (provided, state) => ({
           ...provided,
-          backgroundColor: '#1d2a39',
-          borderColor: state.isFocused ? '#3C50E0' : '#3d4d60',
+          backgroundColor: '#24221A',
+          borderColor: state.isFocused ? '#5A6B2C' : '#4D4939',
           color: '#FFFFFF',
-          boxShadow: state.isFocused ? '0 0 0 1px #3C50E0' : 'none',
+          boxShadow: state.isFocused ? '0 0 0 1px #5A6B2C' : 'none',
           '&:hover': {
-            borderColor: '#3C50E0'
+            borderColor: '#5A6B2C'
           }
         }),
         menu: (provided) => ({
           ...provided,
-          backgroundColor: '#24303F',
-          border: '1px solid #2E3A47',
+          backgroundColor: '#2E2B20',
+          border: '1px solid #3D3A2D',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
         }),
         menuList: (provided) => ({
           ...provided,
-          backgroundColor: '#24303F',
+          backgroundColor: '#2E2B20',
           padding: 0
         }),
         option: (provided, state) => ({
           ...provided,
           backgroundColor: state.isSelected
-            ? '#3C50E0'
+            ? '#5A6B2C'
             : state.isFocused
-            ? '#313D4A'
-            : '#24303F',
+            ? '#3A3729'
+            : '#2E2B20',
           color: '#FFFFFF',
           cursor: 'pointer',
           '&:active': {
-            backgroundColor: '#3C50E0'
+            backgroundColor: '#5A6B2C'
           }
         }),
         singleValue: (provided) => ({
@@ -69,29 +69,29 @@ export function useSelectTheme<T>(): {
         }),
         placeholder: (provided) => ({
           ...provided,
-          color: '#8A99AF'
+          color: '#A39D88'
         }),
         indicatorSeparator: (provided) => ({
           ...provided,
-          backgroundColor: '#3d4d60'
+          backgroundColor: '#4D4939'
         }),
         dropdownIndicator: (provided, state) => ({
           ...provided,
-          color: state.isFocused ? '#3C50E0' : '#8A99AF',
+          color: state.isFocused ? '#5A6B2C' : '#A39D88',
           '&:hover': {
-            color: '#3C50E0'
+            color: '#5A6B2C'
           }
         }),
         clearIndicator: (provided) => ({
           ...provided,
-          color: '#8A99AF',
+          color: '#A39D88',
           '&:hover': {
             color: '#FFFFFF'
           }
         }),
         multiValue: (provided) => ({
           ...provided,
-          backgroundColor: '#313D4A'
+          backgroundColor: '#3A3729'
         }),
         multiValueLabel: (provided) => ({
           ...provided,
@@ -99,9 +99,9 @@ export function useSelectTheme<T>(): {
         }),
         multiValueRemove: (provided) => ({
           ...provided,
-          color: '#8A99AF',
+          color: '#A39D88',
           '&:hover': {
-            backgroundColor: '#DC3545',
+            backgroundColor: '#C62F3E',
             color: '#FFFFFF'
           }
         }),
@@ -129,28 +129,39 @@ export function useSelectTheme<T>(): {
           borderRadius: 6,
           colors: {
             ...baseTheme.colors,
-            primary: '#3C50E0',
-            primary75: '#5166E8',
-            primary50: '#7A8DEF',
-            primary25: '#313D4A',
-            danger: '#DC3545',
+            primary: '#5A6B2C',
+            primary75: '#6E8137',
+            primary50: '#8FA055',
+            primary25: '#3A3729',
+            danger: '#C62F3E',
             dangerLight: '#FF6B6B',
-            neutral0: '#1d2a39',
-            neutral5: '#24303F',
-            neutral10: '#2E3A47',
-            neutral20: '#3d4d60',
-            neutral30: '#64748B',
-            neutral40: '#8A99AF',
-            neutral50: '#AEB7C0',
-            neutral60: '#DEE4EE',
-            neutral70: '#E2E8F0',
+            neutral0: '#24221A',
+            neutral5: '#2E2B20',
+            neutral10: '#3D3A2D',
+            neutral20: '#4D4939',
+            neutral30: '#6B6553',
+            neutral40: '#A39D88',
+            neutral50: '#BDB6A3',
+            neutral60: '#EAE4D3',
+            neutral70: '#E4DED0',
             neutral80: '#FFFFFF',
             neutral90: '#FFFFFF'
           }
         };
       }
 
-      return baseTheme;
+      // Light mode: react-select's own look, with the brand olive for focus and selection
+      // in place of its default blue.
+      return {
+        ...baseTheme,
+        colors: {
+          ...baseTheme.colors,
+          primary: '#5A6B2C',
+          primary75: '#6E8137',
+          primary50: '#C9D1A8',
+          primary25: '#EEF0E3'
+        }
+      };
     };
   }, [themeMode]);
 

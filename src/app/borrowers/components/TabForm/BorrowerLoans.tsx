@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useRouter } from 'nextjs-toploader/app';
-import { Lock } from 'react-feather';
-import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
+import { Lock, XOctagon } from 'react-feather';
+import { BorrowerDecision, BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
+import { formatDecidedOn } from '@/components/DecisionPill';
 import CustomDatatable from '@/components/CustomDatatable';
 import borrLoanCol from './BorrLoanCol';
 import { MAX_PAGE_SIZE } from '@/constants/pagination';
@@ -12,6 +13,11 @@ import useBranches from '@/hooks/useBranches';
 
 interface BorrAttProps {
   singleData: BorrowerRowInfo | undefined;
+  /**
+   * The latest decision as the page holds it: the header's Approve / Reject update it, so the tab
+   * follows without a reload. Absent: the decision the borrower was loaded with.
+   */
+  decision?: BorrowerDecision | null;
 }
 interface OptionProps {
   value: string | undefined;
@@ -21,8 +27,34 @@ interface OptionProps {
 
 const column = borrLoanCol;
 
-const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => {
+/** "Rejected on Oct 5, 2026: Kulang ang income. Approve this borrower to give a loan." No reason, no colon. */
+export const rejectedLoanNote = (decision: BorrowerDecision): string => {
+  const date = formatDecidedOn(decision.decided_at);
+  // A reason that already ends in a full stop does not get a second one.
+  const reason = decision.reason?.trim().replace(/\.+$/, '');
+  return `Rejected${date ? ` on ${date}` : ''}${reason ? `: ${reason}` : ''}. Approve this borrower to give a loan.`;
+};
+
+/**
+ * Where a new loan or a renewal would start, for a borrower whose latest decision is Rejected: the
+ * server refuses every new loan, renewal, approval and release for them, so the buttons below are
+ * off and this says why and what lifts it. The loud danger fill matches the Rejected stamp in the header.
+ */
+const RejectedNote: React.FC<{ id: string; decision: BorrowerDecision }> = ({ id, decision }) => (
+  <p
+    id={id}
+    role="note"
+    data-testid="rejected-loan-note"
+    className="mb-3 flex items-start gap-2.5 rounded-sm border border-danger bg-danger/10 px-4 py-3 text-sm font-medium text-black dark:text-white"
+  >
+    <XOctagon aria-hidden="true" size={18} className="mt-px shrink-0 text-danger" />
+    <span className="min-w-0 break-words">{rejectedLoanNote(decision)}</span>
+  </p>
+);
+
+const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData, decision }) => {
   const router = useRouter();
+  const rejectedNoteId = useId();
   const { fetchSubDataList, dataBranchSub, myAccessibleBranchSubs, fetchMyAccessibleBranchSubs, loadingMyAccessibleBranches } = useBranches();
   const { loanData, fetchLoans, loading, fetchRerewalLoan, dataComputedRenewal } = useLoans();
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -119,14 +151,19 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) => 
     );
   }
 
+  // Rejected borrowers cannot borrow: the server refuses it, and the page says so before anyone tries.
+  const latest = decision === undefined ? BorrowerData.decision : decision;
+  const rejected = latest?.status === 'rejected' ? latest : null;
+
   return (
     <div className={showDetails ? 'grid grid-cols-1 md:grid-cols-3 gap-4' : 'grid grid-cols-1 gap-4'}>
       <div className={showDetails ? 'col-span-2' : ''}>
         {showForm === false ? (
           <div className="py-1">
+            {rejected && <RejectedNote id={rejectedNoteId} decision={rejected} />}
             <div className="flex flex-wrap gap-2 mb-3">
-              <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 w-full sm:w-auto" onClick={() => { createLoans(true) }}>Add Loans</button>
-              <button disabled={btnRenewal} className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
+              <button disabled={!!rejected} aria-describedby={rejected ? rejectedNoteId : undefined} className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto" onClick={() => { createLoans(true) }}>Add Loans</button>
+              <button disabled={btnRenewal || !!rejected} aria-describedby={rejected ? rejectedNoteId : undefined} className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto" onClick={() => { renewALoan(true) }}>Renew Selected Loan</button>
             </div>
             <CustomDatatable
               apiLoading={loading}

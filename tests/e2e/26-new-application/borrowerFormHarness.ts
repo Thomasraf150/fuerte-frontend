@@ -152,6 +152,12 @@ export class FakeBackend {
       // The approval bell, for approver roles.
       case 'pendingDeletionRequestsForMe':
         return { pendingDeletionRequestsForMe: [] };
+      // The bell's Applications items, for Processing and Call Center: nothing.
+      case 'getApplicationNotifications':
+        return { getApplicationNotifications: [] };
+      // A saved borrower's header (its More menu) asks whether a deletion is already pending: none.
+      case 'pendingDeletionsForEntities':
+        return { pendingDeletionsForEntities: [] };
       // useBranches() loads the branch list on mount; the Details form does not use it.
       case 'getBranch':
         return { getBranch: [] };

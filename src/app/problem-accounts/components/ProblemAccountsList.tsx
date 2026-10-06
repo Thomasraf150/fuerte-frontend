@@ -12,6 +12,9 @@ import {
 import CustomDatatable from "@/components/CustomDatatable";
 import ReactSelect from "@/components/ReactSelect";
 import ProblemAccountsSummary from "./ProblemAccountsSummary";
+import ProblemAccountsCards from "./ProblemAccountsCards";
+import ProblemAccountsLegend from "./ProblemAccountsLegend";
+import ProblemAccountsPager from "./ProblemAccountsPager";
 import { problemAccountsColumns } from "./ProblemAccountsColumns";
 import { todayLocalISO } from "@/utils/helper";
 
@@ -169,20 +172,28 @@ const ProblemAccountsList: React.FC = () => {
     [groupByLoanId]
   );
 
-  const handleRowClick = (row: ProblemAccountRow) => {
+  /**
+   * Where a row leads — shared by the table's row click and the phone cards'
+   * links, so the two cannot disagree. `null` when the loan has no unpaid
+   * schedule to open.
+   */
+  const rowHref = (row: ProblemAccountRow): string | null => {
     const group = groupByLoanId.get(row.loan_id);
     if (group && group.count > 1 && row.borrower_id) {
-      router.push(`/problem-accounts/borrower/${row.borrower_id}`);
-      return;
+      return `/problem-accounts/borrower/${row.borrower_id}`;
     }
-    if (!row.oldest_unpaid_schedule_id) {
+    if (!row.oldest_unpaid_schedule_id) return null;
+    const today = todayLocalISO();
+    return `/collection-list/${row.oldest_unpaid_schedule_id}?date=${today}&ref=${encodeURIComponent(row.loan_ref)}`;
+  };
+
+  const handleRowClick = (row: ProblemAccountRow) => {
+    const href = rowHref(row);
+    if (!href) {
       toast.info("No unpaid schedule found for this loan.");
       return;
     }
-    const today = todayLocalISO();
-    router.push(
-      `/collection-list/${row.oldest_unpaid_schedule_id}?date=${today}&ref=${encodeURIComponent(row.loan_ref)}`
-    );
+    router.push(href);
   };
 
   return (
@@ -196,7 +207,12 @@ const ProblemAccountsList: React.FC = () => {
       />
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 border-b border-stroke dark:border-strokedark">
+        {/*
+          Five filters only go side by side from 2xl. At `lg` the sidebar left
+          each control ~130px, which truncated both the sub-branch value and the
+          search placeholder.
+        */}
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 border-b border-stroke dark:border-strokedark">
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
               Group
@@ -271,19 +287,49 @@ const ProblemAccountsList: React.FC = () => {
           </div>
         </div>
 
+        <ProblemAccountsLegend />
+
+        {/*
+          `bg-red-100 border-red-400 text-red-700` rendered as an unstyled box:
+          tailwind.config.ts assigns `red` a bare string, which wipes out the
+          whole default shade scale, so every `red-<shade>` utility in this app
+          is dead. `danger` is the live token. Stacks on a phone so a long
+          message and the Retry button do not fight for one row.
+        */}
         {error && (
-          <div className="m-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-between">
+          <div className="m-4 flex flex-col gap-2 rounded border border-danger bg-danger/10 p-3 text-danger sm:flex-row sm:items-center sm:justify-between">
             <span>Error loading problem accounts: {error}</span>
             <button
               onClick={refresh}
-              className="ml-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+              className="shrink-0 rounded bg-danger px-3 py-1 text-sm text-white hover:bg-opacity-90"
             >
               Retry
             </button>
           </div>
         )}
 
-        <div className="p-2 lg:p-4 overflow-x-auto">
+        {/*
+          Below `md` the ten-column table (~1238px intrinsic) is swapped for one
+          card per loan. Above it, the table keeps its own responsive ladder via
+          the `hide` breakpoints in ProblemAccountsColumns.
+        */}
+        <div className="p-4 md:hidden">
+          <ProblemAccountsCards
+            rows={data}
+            groupByLoanId={groupByLoanId}
+            hrefFor={rowHref}
+            onSelect={handleRowClick}
+            loading={loading}
+          />
+          <ProblemAccountsPager
+            currentPage={serverSidePaginationProps.currentPage}
+            totalPages={serverSidePaginationProps.totalPages}
+            totalRecords={serverSidePaginationProps.totalRecords}
+            onPageChange={serverSidePaginationProps.onPageChange}
+          />
+        </div>
+
+        <div className="hidden p-2 md:block lg:p-4">
           <CustomDatatable
             apiLoading={loading}
             columns={columns}

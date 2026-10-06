@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { CornerUpLeft, Lock } from 'react-feather';
+import { Lock } from 'react-feather';
 import BorrowerDetails from './TabForm/BorrowerDetails'
 import BorrowerAttachments from './TabForm/BorrowerAttachments'
 import BorrowerCoMaker from './TabForm/BorrowerCoMaker'
 import BorrowerLoans from './TabForm/BorrowerLoans'
-import { BorrowerRowInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, DataSubBranches } from '@/utils/DataTypes'
+import { BorrowerDecision, BorrowerRowInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies, DataSubBranches } from '@/utils/DataTypes'
 import type { BorrowerInfo as BorrowerFormValues, SelectOption } from '@/utils/DataTypes'
 interface BorrInfoProps {
   setShowForm: (v: boolean) => void;
@@ -19,6 +19,8 @@ interface BorrInfoProps {
   onSubmitBorrower: (d: any) => Promise<{ success: boolean }>;
   borrowerLoading: boolean;
   singleData?: BorrowerRowInfo | undefined;
+  /** The borrower's latest decision as the page holds it (the header updates it): the Loans tab reads it. */
+  decision?: BorrowerDecision | null;
   setSingleData: (d: BorrowerRowInfo | undefined) => void;
   fetchDataBorrower: (v1: number, v2: number) => void;
   fetchDataChief: (v1: number, v2: number) => void;
@@ -44,11 +46,23 @@ const BORROWER_TABS = [
 
 const tabClasses = (locked: boolean, isActive: boolean): string => {
   if (locked) return 'border-transparent text-bodydark2 opacity-60 cursor-not-allowed';
-  if (isActive) return 'border-blue-500 text-blue-500';
-  return 'border-transparent text-body dark:text-bodydark hover:border-blue-500 hover:text-blue-500';
+  if (isActive) return 'border-primary text-primary';
+  return 'border-transparent text-body dark:text-bodydark hover:border-primary hover:text-primary';
 };
 
-const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, setShowForm, singleData, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, initialValues, branchChoices }) => {
+// One row at 360px: below `sm` the four labels drop to text-sm with tight padding and never
+// wrap ("Co-Maker" used to break in two and "Attachments" was cut off), and a locked tab drops
+// its lock icon (it stays disabled and greyed, and the draft note under the bar describes it),
+// so New Borrower's row fits as well as a saved borrower's. From `sm` up they are as they were.
+// Should the row still outgrow its card (a larger font), it scrolls inside its own row, never
+// the page: justify-between below `sm`, because an overflowing justify-around row cuts off its
+// left end.
+const TAB_BAR = 'flex justify-between overflow-x-auto border-b dark:border-strokedark sm:justify-around';
+/** The draft note under the tab bar, which also describes the locked tabs to a screen reader. */
+const DRAFT_NOTE_ID = 'borrower-draft-note';
+const TAB = 'flex min-h-[48px] shrink-0 items-center gap-1 whitespace-nowrap border-b-2 px-1.5 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:gap-1.5 sm:p-4 sm:text-base';
+
+const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, setShowForm, singleData, decision, setSingleData, onSubmitBorrower, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, initialValues, branchChoices }) => {
   const [activeTab, setActiveTab] = useState<string>('tab1');
   const [showBorrAttForm, setShowBorrAttForm] = useState<boolean>(false);
 
@@ -59,20 +73,14 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
   return (
     <div>
       <div className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-0">
-        <button
-          className="flex justify-center rounded border bg-white dark:bg-boxdark border-stroke px-6 py-4 mb-4 space-x-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-          type="button"
-          onClick={() => { setShowForm(false) }}
-        >
-         <CornerUpLeft size={15} />
-        </button>
+        {/* The way back is the page header's labelled back link (BorrowerHeader), New Borrower's too. */}
         <div className="max-w-12xl mx-auto bg-white dark:bg-boxdark rounded-xl shadow-md overflow-hidden">
           {/* <div className="p-4">
             <h5 className="text-lg font-medium text-black dark:text-white">
               Task title
             </h5>
           </div> */}
-          <div className="flex justify-around border-b dark:border-strokedark">
+          <div className={TAB_BAR}>
             {BORROWER_TABS.map(({ key, label, requiresSavedBorrower }) => {
               const locked = requiresSavedBorrower && !singleData?.id;
               return (
@@ -82,17 +90,18 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
                   disabled={locked}
                   aria-disabled={locked}
                   title={locked ? 'Save the borrower first to unlock this tab' : undefined}
-                  className={`flex items-center gap-1.5 p-4 focus:outline-none border-b-2 ${tabClasses(locked, activeTab === key)}`}
+                  aria-describedby={locked ? DRAFT_NOTE_ID : undefined}
+                  className={`${TAB} ${tabClasses(locked, activeTab === key)}`}
                   onClick={() => handleTabClick(key)}
                 >
-                  {locked && <Lock size={13} />}
+                  {locked && <Lock aria-hidden="true" size={13} className="hidden shrink-0 sm:block" />}
                   {label}
                 </button>
               );
             })}
           </div>
           {!singleData?.id && (
-            <div className="border-b border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-black dark:text-white">
+            <div id={DRAFT_NOTE_ID} className="border-b border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-black dark:text-white">
               <span className="font-medium">Draft borrower.</span>{' '}
               Save the details below to unlock Loans, Co-Maker and Attachments.
             </div>
@@ -125,7 +134,7 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
             )}
             {activeTab === 'tab2' && (
               <div id="content2">
-                <BorrowerLoans singleData={singleData} />
+                <BorrowerLoans singleData={singleData} decision={decision} />
               </div>
             )}
             {activeTab === 'tab3' && (

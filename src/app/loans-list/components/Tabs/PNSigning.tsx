@@ -31,7 +31,7 @@ const PNSigning: React.FC<OMProps> = ({ handleRefetchData, loanSingleData }) => 
         </div>
       )}
       <button
-        className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 text-sm disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed"
+        className="bg-primary flex justify-between items-center text-white py-2 px-4 rounded hover:bg-primary/90 text-sm disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed"
         onClick={() => { return handlePNSigning(loanSingleData); }}
         disabled={isSigned || !hasSchedule}>
         <span className="mr-1">

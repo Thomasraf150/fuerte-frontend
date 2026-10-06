@@ -66,7 +66,7 @@ const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
 
           <div className="flex justify-between items-center">
             <button
-              className="bg-purple-700 flex justify-between items-center text-white py-2 px-4 rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="bg-primary flex justify-between items-center text-white py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               onClick={() => { return handleApproveRelease(1); }}
               disabled={appBtnDisable || loading}>
               {loading ? (

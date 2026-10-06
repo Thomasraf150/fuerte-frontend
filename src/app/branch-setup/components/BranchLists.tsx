@@ -10,8 +10,9 @@ import FormAddBranch from './FormAddBranch';
 import FormAddSubBranch from './FormAddSubBranch';
 import { useBranchListsStore } from '../hooks/store';
 import useBranches from '@/hooks/useBranches';
-import { GitBranch, SkipBack, X } from 'react-feather';
+import { GitBranch, SkipBack } from 'react-feather';
 import { showConfirmationModal, showAlreadyPendingModal, showProcessingModal } from '@/components/ConfirmationModal';
+import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
 import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 import useDeletionRequests from '@/hooks/useDeletionRequests';
 import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
@@ -28,6 +29,8 @@ const BranchLists: React.FC = () => {
   const { dataBranch, dataBranchSub, selectedBranchID, fetchDataList, fetchSubDataList, handleDeleteBranch, handleDeleteSubBranch } = useBranches();
   const [initialFormData, setInitialFormData] = useState<DataBranches | null>(null);
   const [initialFormSubData, setInitialFormSubData] = useState<DataSubBranches | null>(null);
+  const formPanelRef = useRevealFormWhenStacked<HTMLDivElement>(showForm, actionLbl, initialFormData);
+  const subFormPanelRef = useRevealFormWhenStacked<HTMLDivElement>(showSubForm, actionLbl, initialFormSubData);
 
   const router = useRouter();
   const subBranchIds = useMemo(
@@ -121,9 +124,9 @@ const BranchLists: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {!showSubBranch && (
-          <div className={`col-span-1 md:col-span-1 lg:col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
+          <div className={`col-span-1 xl:col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
@@ -131,7 +134,7 @@ const BranchLists: React.FC = () => {
                 </h3>
               </div>
               <div className="p-7">
-                <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 flex items-center space-x-2" onClick={() => handleShowForm('Create Branch', true)}>
+                <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2" onClick={() => handleShowForm('Create Branch', true)}>
                   <GitBranch  size={14} /> 
                   <span>Create</span>
                 </button>
@@ -147,7 +150,7 @@ const BranchLists: React.FC = () => {
         )}
 
           {showSubBranch && (
-            <div className={`col-span-1 md:col-span-1 lg:col-span-2 ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
+            <div className={`col-span-1 xl:col-span-2 ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
@@ -167,7 +170,7 @@ const BranchLists: React.FC = () => {
                       <span>Back</span>
                     </button>
                     <button 
-                      className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800 flex items-center space-x-2" 
+                      className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2" 
                       onClick={() => handleCreateSubRowClick() }>
                       <GitBranch  size={14} /> 
                       <span>Create</span>
@@ -186,15 +189,13 @@ const BranchLists: React.FC = () => {
           )}
 
           {showForm && (
-            <div className="fade-in col-span-1">
+            <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}
                   </h3>
-                  <span className="text-right cursor-pointer text-boxdark-2 lg:hidden" onClick={() => setShowForm(false)}>
-                    <X size={17}/>
-                  </span>
+                  <FormCloseButton onClose={() => setShowForm(false)} />
                 </div>
                 <div className="p-7">
                   <FormAddBranch setShowForm={setShowForm} fetchDataList={fetchDataList} initialData={initialFormData} actionLbl={actionLbl} />
@@ -204,15 +205,13 @@ const BranchLists: React.FC = () => {
           )}
           
           {showSubForm && (
-            <div className="fade-in col-span-1">
+            <div ref={subFormPanelRef} className="fade-in col-span-1 scroll-mt-24">
               <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}
                   </h3>
-                  <span className="text-right cursor-pointer text-boxdark-2 lg:hidden" onClick={() => setShowSubForm(false)}>
-                    <X size={17}/>
-                  </span>
+                  <FormCloseButton onClose={() => setShowSubForm(false)} />
                 </div>
                 <div className="p-7">
                   <FormAddSubBranch setShowForm={setShowSubForm} selectedBranchId={selectedBranchID ?? 0} initialSubData={initialFormSubData} actionLbl={actionLbl} fetchSubDataList={fetchSubDataList}/>

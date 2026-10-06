@@ -6,7 +6,9 @@ import { graphqlFetch, handleSessionExpired } from '@/utils/graphqlFetch';
 import { useAuthStore } from '@/store/authStore';
 import type { ServerSidePaginationProps } from '@/components/CustomDatatable';
 import { usePagination } from './usePagination';
-import { ApplicationUploadResult, LoanApplicationRow, LoanApplicationStatus, NewApplicationRef } from '@/utils/DataTypes';
+import { ApplicationOutcome, ApplicationUploadResult, LoanApplicationRow, LoanApplicationStatus, NewApplicationRef } from '@/utils/DataTypes';
+import type { ListParams } from '@/utils/applicationOutcome';
+import type { DayRange } from '@/utils/sourceTracker';
 import { readGoogleFormPdf } from '@/utils/googleFormPdf/readGoogleFormPdf';
 
 const API = process.env.NEXT_PUBLIC_API_URL; // e.g. http://localhost:8080/api
@@ -27,7 +29,17 @@ export interface LoadedApplications {
   total: number;
   status: ApplicationStatusFilter;
   search: string;
+  outcome: ApplicationOutcome | null;
+  period: DayRange | null;
 }
+
+/** The outcome and the days applied, as getLoanApplications takes them: only what is set. */
+type OutcomeFilters = { outcome?: ApplicationOutcome; from?: string; to?: string };
+
+const toOutcomeFilters = (outcome: ApplicationOutcome | null, period: DayRange | null): OutcomeFilters => ({
+  ...(outcome ? { outcome } : {}),
+  ...(period ? { from: period.from, to: period.to } : {}),
+});
 
 interface ApplicationsPage {
   data: LoanApplicationRow[];
@@ -72,6 +84,7 @@ async function fetchApplicationsPage(
   page: number,
   search?: string,
   status?: string,
+  filters: OutcomeFilters = {},
 ): Promise<ApplicationsPage> {
   const result = await graphqlFetch<{ getLoanApplications: ApplicationsPage | null }>(
     LoanApplicationQueries.GET_LOAN_APPLICATIONS_QUERY,
@@ -81,6 +94,7 @@ async function fetchApplicationsPage(
       page,
       ...(search ? { search } : {}),
       ...(status && status !== 'all' ? { status } : {}),
+      ...filters,
     },
   );
   if (result.errors?.length) {
@@ -230,9 +244,15 @@ const useIntake = () => {
   return { uploading, uploadResponses, pasting, pasteRows };
 };
 
-/** The Applications list (server-side paging, search, status filter) and the ways to add applicants. */
-const useLoanApplications = () => {
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>('all');
+/**
+ * The Applications list (server-side paging, search, the status and outcome filters and the days
+ * applied) and the ways to add applicants. `initial` is what the page's URL asked for
+ * (`?outcome=&status=&from=&to=`, read by readListParams): the first fetch already carries it.
+ */
+const useLoanApplications = (initial: ListParams = { outcome: null, status: null, period: null }) => {
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>(initial.status ?? 'all');
+  const [outcome, setOutcome] = useState<ApplicationOutcome | null>(initial.outcome);
+  const [period, setPeriod] = useState<DayRange | null>(initial.period);
   const [loaded, setLoaded] = useState<LoadedApplications | null>(null);
   const intake = useIntake();
   // usePagination bumps its request id and calls this function in the same tick, once per
@@ -240,18 +260,32 @@ const useLoanApplications = () => {
   // response, so `loaded` always describes the rows on screen. Revisit if it ever retries or prefetches.
   const latestRequest = useRef(0);
 
-  const fetchApplications = useCallback(async (first: number, page: number, search?: string, status?: string) => {
-    const request = ++latestRequest.current;
-    const found = await fetchApplicationsPage(first, page, search, status);
-    if (request === latestRequest.current) {
-      const fetchedStatus = (status ?? 'all') as ApplicationStatusFilter;
-      setLoaded({ total: found.paginatorInfo.total, status: fetchedStatus, search: search ?? '' });
-    }
-    return found;
-  }, []);
+  const fetchApplications = useCallback(
+    async (first: number, page: number, search?: string, status?: string, extra?: Record<string, unknown>) => {
+      const request = ++latestRequest.current;
+      const filters = (extra ?? {}) as OutcomeFilters;
+      const found = await fetchApplicationsPage(first, page, search, status, filters);
+      if (request === latestRequest.current) {
+        setLoaded({
+          total: found.paginatorInfo.total,
+          status: (status ?? 'all') as ApplicationStatusFilter,
+          search: search ?? '',
+          outcome: filters.outcome ?? null,
+          period: filters.from && filters.to ? { from: filters.from, to: filters.to } : null,
+        });
+      }
+      return found;
+    },
+    [],
+  );
 
   const { data, loading, error, pagination, searchQuery, goToPage, changePageSize, setSearchQuery, refresh } =
-    usePagination<LoanApplicationRow>({ fetchFunction: fetchApplications, config: { initialPageSize: 20 }, statusFilter });
+    usePagination<LoanApplicationRow>({
+      fetchFunction: fetchApplications,
+      config: { initialPageSize: 20 },
+      statusFilter,
+      extraFilters: toOutcomeFilters(outcome, period),
+    });
 
   const serverSidePaginationProps: ServerSidePaginationProps = {
     ...pagination,
@@ -264,7 +298,7 @@ const useLoanApplications = () => {
 
   return {
     applications: data, loading, error, refresh, loaded,
-    statusFilter, setStatusFilter, serverSidePaginationProps, ...intake,
+    statusFilter, setStatusFilter, outcome, setOutcome, period, setPeriod, serverSidePaginationProps, ...intake,
   };
 };
 

@@ -423,6 +423,12 @@ const FULL_RECORD: LoanApplicationRecord = {
   details: FULL_DETAILS,
   form_answers: [{ question: 'Anong trabaho po ninyo?', answer: FORM_ANSWER }],
   exact_time: false,
+  can_edit: true,
+  borrower_decision: null,
+  outcome: 'for_interview',
+  outcome_label: 'Waiting for interview',
+  decline_reason: null,
+  notes: [],
 };
 
 /** Every group null: what the server sends for an application with no stored form. */

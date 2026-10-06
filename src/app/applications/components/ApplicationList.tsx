@@ -6,11 +6,14 @@ import { useRouter } from 'nextjs-toploader/app';
 import { CheckCircle, Inbox, Plus } from 'react-feather';
 import CustomDatatable from '@/components/CustomDatatable';
 import useLoanApplications, { ApplicationStatusFilter, LoadedApplications } from '@/hooks/useLoanApplications';
-import type { LoanApplicationRow } from '@/utils/DataTypes';
+import type { ApplicationOutcome, LoanApplicationRow } from '@/utils/DataTypes';
+import { listHref, outcomeLabel, type ListParams } from '@/utils/applicationOutcome';
 import { formatCount } from '@/utils/helper';
+import { formatPeriod, type DayRange } from '@/utils/sourceTracker';
 import { applicationColumns } from './ApplicationColumns';
 import { APPLICATION_STATUS_DOT, APPLICATION_STATUS_LABEL } from './ApplicationStatusPill';
 import LoadError from './LoadError';
+import OutcomeFilters from './OutcomeFilters';
 import UploadResponses from './UploadResponses';
 import { useCanUpload } from './useCanUpload';
 
@@ -18,7 +21,7 @@ const FILTERS: ApplicationStatusFilter[] = ['all', 'for_interview', 'interviewed
 
 /** Nothing exists at all for this user: an unfiltered, unsearched fetch came back empty. */
 const isNothingYet = (loaded: LoadedApplications | null): boolean =>
-  !!loaded && loaded.total === 0 && loaded.status === 'all' && loaded.search === '';
+  !!loaded && loaded.total === 0 && loaded.status === 'all' && loaded.search === '' && !loaded.outcome && !loaded.period;
 
 /*
  * The same chips as the Borrowers Payer filter, so the control is familiar, plus
@@ -49,12 +52,14 @@ const StatusFilter: React.FC<{ value: ApplicationStatusFilter; onChange: (value:
   </div>
 );
 
-/** "12 applications · Declined · matching “cruz”". The dots are for the eye; a screen reader hears commas. */
+/** "12 applications · Declined · Loan released · Applied Oct 1 – Oct 31, 2026 · matching “cruz”". The dots are for the eye; a screen reader hears commas. */
 const ResultLine: React.FC<{ loaded: LoadedApplications }> = ({ loaded }) => {
   const noun = loaded.total === 1 ? 'application' : 'applications';
   const parts = [
     loaded.total === 0 ? `No ${noun}` : `${formatCount(loaded.total)} ${noun}`,
     ...(loaded.status !== 'all' ? [APPLICATION_STATUS_LABEL[loaded.status]] : []),
+    ...(loaded.outcome ? [outcomeLabel(loaded.outcome)] : []),
+    ...(loaded.period ? [`Applied ${formatPeriod(loaded.period)}`] : []),
     ...(loaded.search ? [`matching “${loaded.search}”`] : []),
   ];
   return (
@@ -121,11 +126,37 @@ const useSavedNote = (): string => {
   return note;
 };
 
-const ApplicationList: React.FC = () => {
+/**
+ * The filters a link can set, kept in the address as they change, so the list on screen can be
+ * shared or reloaded as it is. replaceState, not a navigation: the page is already showing it.
+ */
+const linkedFilterActions = (list: ReturnType<typeof useLoanApplications>) => {
+  const write = (status: ApplicationStatusFilter, outcome: ApplicationOutcome | null, period: DayRange | null) =>
+    window.history.replaceState(null, '', listHref({ status: status === 'all' ? null : status, outcome, period }));
+  return {
+    changeStatus: (next: ApplicationStatusFilter) => {
+      list.setStatusFilter(next);
+      write(next, list.outcome, list.period);
+    },
+    changeOutcome: (next: ApplicationOutcome | null) => {
+      list.setOutcome(next);
+      write(list.statusFilter, next, list.period);
+    },
+    clearPeriod: () => {
+      list.setPeriod(null);
+      write(list.statusFilter, list.outcome, null);
+    },
+  };
+};
+
+/** `initial`: the filters the address asked for (page.tsx reads them with readListParams). */
+const ApplicationList: React.FC<{ initial?: ListParams }> = ({ initial }) => {
+  const list = useLoanApplications(initial);
   const {
-    applications, loading, error, refresh, loaded, statusFilter, setStatusFilter,
+    applications, loading, error, refresh, loaded, statusFilter, outcome, period,
     uploading, uploadResponses, pasting, pasteRows, serverSidePaginationProps,
-  } = useLoanApplications();
+  } = list;
+  const { changeStatus, changeOutcome, clearPeriod } = linkedFilterActions(list);
   const canUpload = useCanUpload(); // null until read: treated as "not an upload role" meanwhile
   const savedNote = useSavedNote();
   const router = useRouter();
@@ -158,13 +189,14 @@ const ApplicationList: React.FC = () => {
       {/*
         px-3 on phones leaves the table 302px at 360px. Three columns fit there only
         through the app-wide table-fit settings: useDatatableTheme's tableWrapper
-        display:block plus the 80px column floor in app/styles.css.
+        display:block, and the library's 100px column default (3 x 101px in 302px).
       */}
       <div className="space-y-5 px-3 py-5 sm:px-5 md:p-7">
         {canUpload && (
           <UploadResponses uploading={uploading} pasting={pasting} onUpload={uploadResponses} onPaste={pasteRows} onUploaded={refresh} />
         )}
-        <StatusFilter value={statusFilter} onChange={setStatusFilter} />
+        <StatusFilter value={statusFilter} onChange={changeStatus} />
+        <OutcomeFilters outcome={outcome} period={period} onOutcome={changeOutcome} onClearPeriod={clearPeriod} />
         {error && <LoadError message={error} onRetry={refresh} />}
         <div>
           {/* In the page from the start, empty, so a screen reader announces the note when it fills. */}

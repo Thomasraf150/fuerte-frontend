@@ -49,7 +49,7 @@ const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
       </nav>
 
       {/* Page Title - Full width below breadcrumbs */}
-      <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+      <h2 className="font-display text-title-md2 font-semibold text-black dark:text-white">
         {pageName}
       </h2>
     </div>

@@ -386,6 +386,41 @@ export interface BorrowerRowInfo {
   chief: DataChief
   user: User
   payer_standing?: PayerStanding | null;
+  /** The latest Approved / Rejected decision; null before the first one. Only getBorrower asks for it. */
+  decision?: BorrowerDecision | null;
+}
+
+/**
+ * A borrower's Approved / Rejected decision (borrower_decisions: one row per decision, the latest is
+ * the status). A borrower whose latest decision is Rejected cannot be given a loan: the server refuses
+ * every new loan, renewal, approval, PN signing and release until someone approves them again.
+ */
+export interface BorrowerDecision {
+  status: 'approved' | 'rejected';
+  /** Required for rejected, optional for approved. */
+  reason: string | null;
+  /** Manila wall-clock 'Y-m-d H:i:s'. */
+  decided_at: string;
+}
+
+/**
+ * getApplicationNotifications: one bell item. The server decides who gets what (Call Center: every
+ * status change and decision; Processing: "now a borrower" on its branches), never the user's own action.
+ */
+export interface ApplicationNotification {
+  /** Stable for one event: the bell remembers which ones it has shown. */
+  key: string;
+  kind: 'status' | 'decision';
+  application_id: number;
+  borrower_id: number | null;
+  full_name: string;
+  branch_name: string | null;
+  /** kind status: for_interview | interviewed | declined | borrower_created. kind decision: approved | rejected. */
+  status: string;
+  /** kind decision only. */
+  reason: string | null;
+  /** Manila wall-clock 'Y-m-d H:i:s'. */
+  at: string;
 }
 export interface LoanAcctgDetail {
   id: string;
@@ -969,6 +1004,64 @@ export interface LoanApplicationRow {
   amount_applied: string | null;
   purpose: string | null;
   intake_flags: string[];
+  /** Where the applicant ended up, computed by the server (see ApplicationOutcome). */
+  outcome: ApplicationOutcome;
+  /** The server's words for it: "Rejected by Marketing", "Loan released". */
+  outcome_label: string;
+  /** Why it was declined; set only while the status is declined. */
+  decline_reason: string | null;
+}
+
+/**
+ * The outcome of an application, by the server's precedence (spec 2026-10-05-applicant-funnel-design.md,
+ * part 3): declined, for_interview and interviewed follow the status; the rest is the borrower's fate.
+ */
+export type ApplicationOutcome =
+  | 'declined'
+  | 'for_interview'
+  | 'interviewed'
+  | 'borrower_deleted'
+  | 'rejected'
+  | 'rejected_with_loan'
+  | 'loan_released'
+  | 'loan_in_process'
+  | 'loan_cancelled'
+  | 'approved'
+  | 'borrower';
+
+/** One line of an application's Notes panel: its decline, or the latest Approved / Rejected on its borrower. */
+export interface ApplicationNote {
+  kind: 'declined' | 'borrower_approved' | 'borrower_rejected';
+  /** Who acted, by ROLE ("Call Center", "Marketing"), never by name. */
+  role_label: string | null;
+  /** Manila wall-clock 'Y-m-d H:i:s'. */
+  at: string;
+  reason: string | null;
+}
+
+/** getApplicationFunnel's counts for one group of applications: all of them, or one channel's. */
+export interface ApplicationFunnelCounts {
+  applied: number;
+  became_borrower: number;
+  approved: number;
+  loan_released: number;
+  declined: number;
+  rejected: number;
+  loan_cancelled: number;
+  for_interview: number;
+  interviewed: number;
+  borrower: number;
+  approved_no_loan: number;
+  loan_in_process: number;
+  rejected_with_loan: number;
+  released_without_approval: number;
+  borrower_deleted: number;
+}
+
+/** getApplicationFunnel: the whole period, and the same counts per Saan galing channel ("unknown" for none). */
+export interface ApplicationFunnel {
+  total: ApplicationFunnelCounts;
+  by_channel: { channel: string; counts: ApplicationFunnelCounts }[];
 }
 
 /*
@@ -1080,6 +1173,12 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
    * False for a row from a Sheet paste or a PDF, whose date applied may be off: staff can correct the day.
    */
   exact_time: boolean;
+  /** Whether the user may edit it now: false once it is a borrower, and for Marketing on another branch's application (view only). */
+  can_edit: boolean;
+  /** The latest decision on the borrower made from it; null until there is one (or no borrower yet). */
+  borrower_decision: BorrowerDecision | null;
+  /** The decline (while declined) and the borrower's latest decision, for the Notes panel; in no set order. */
+  notes: ApplicationNote[];
 }
 
 /**
@@ -1087,7 +1186,7 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
  * New Borrower name check (the application's first and last name, and its mobile number) across ALL
  * branches. The `my*` fields are what sits in the user's own branches, by branch name and count; the
  * rest is the other branches, by branch name only. A repeat applicant is a fraud signal for staff: it
- * warns and never blocks. The query answers null for Call Center, which is never asked.
+ * warns and never blocks. Call Center gets it too: it has no branches, so every match is "elsewhere".
  */
 export interface LoanApplicationBorrowerMatch {
   existsInMyBranches: boolean;
