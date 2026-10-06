@@ -11,6 +11,15 @@ import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDele
 import { showPendingBorrowerDeletion } from '@/hooks/borrowerDelete';
 import useDeletionRequests from '@/hooks/useDeletionRequests';
 import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
+import { useStore } from 'zustand';
+import { useAuthStore } from '@/store';
+import BorrowerPhoneRow from './BorrowerPhoneRow';
+
+/** Whether the user sees more than one branch's borrowers: the Owner, or more than one assigned branch. */
+const useSeesManyBranches = (): boolean =>
+  useStore(useAuthStore, (state) => state.user?.role?.code === 'OWN' || (state.user?.assignedBranchSubIds?.length ?? 0) > 1);
+
+const borrowerHref = (row: BorrowerRowInfo): string => `/borrowers/${row.id}`;
 
 const BorrowerList: React.FC = () => {
   const router = useRouter();
@@ -31,6 +40,7 @@ const BorrowerList: React.FC = () => {
 
   const { pendingByEntityId, loading: pendingLoading, refresh: refreshPending } = usePendingDeletions('borrower', entityIds);
   const { cancel: cancelDeletionRequest } = useDeletionRequests();
+  const seesManyBranches = useSeesManyBranches();
 
   const handleCreateBorrower = () => {
     router.push('/borrowers/new');
@@ -59,12 +69,8 @@ const BorrowerList: React.FC = () => {
         <div className="grid grid-cols-1 gap-4">
           <div className="">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Borrowers
-                </h3>
-              </div>
-              <div className="p-7">
+              {/* No card heading: the page title above already says "Borrowers" (B1). */}
+              <div className="p-3 md:p-7">
                 <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90" onClick={handleCreateBorrower}>Create</button>
                 {borrowerError && (
                   <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
@@ -77,7 +83,9 @@ const BorrowerList: React.FC = () => {
                     </button>
                   </div>
                 )}
-                <PayerFilterChips value={payerFilter} onChange={setPayerFilter} />
+                <div className="mb-3">
+                  <PayerFilterChips value={payerFilter} onChange={setPayerFilter} />
+                </div>
                 <CustomDatatable
                   apiLoading={paginationLoading || pendingLoading}
                   columns={borrowerColumn(handleRowClick, handleRowRmBorrClick, pendingByEntityId, handlePendingClick)}
@@ -86,6 +94,12 @@ const BorrowerList: React.FC = () => {
                   title={''}
                   serverSidePagination={serverSidePaginationProps}
                   conditionalRowStyles={pendingDeletionRowStyles<BorrowerRowInfo>(pendingByEntityId)}
+                  searchLabel="Search borrowers"
+                  searchPlaceholder="Name, mobile no. or chief"
+                  rowHref={borrowerHref}
+                  mobileRow={(row) => (
+                    <BorrowerPhoneRow row={row} showBranch={seesManyBranches} pendingDeletion={pendingByEntityId.has(Number(row.id))} />
+                  )}
                 />
               </div>
             </div>

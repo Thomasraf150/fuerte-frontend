@@ -57,6 +57,9 @@ interface CustomDatatableProps<T> {
   // Conditional row styling (optional)
   conditionalRowStyles?: ConditionalStyles<T>[];
 
+  // A visible label above the header search box (optional; otherwise it is named by aria-label).
+  searchLabel?: string;
+
   // Custom placeholder for the header search input. Works in both client-side
   // and server-side modes. When omitted, falls back to the existing defaults.
   searchPlaceholder?: string;
@@ -88,6 +91,7 @@ const CustomDatatable = <T extends object>({
   serverSidePagination,
   conditionalRowStyles,
   searchPlaceholder,
+  searchLabel,
   rowHref,
   mobileRow,
 }: CustomDatatableProps<T>): JSX.Element => {
@@ -118,6 +122,7 @@ const CustomDatatable = <T extends object>({
           enableSearch={serverSidePagination?.enableSearch !== false}
           placeholder={searchPlaceholder ?? serverSidePagination?.searchPlaceholder ?? (isServerSide ? 'Search...' : 'Search current page...')}
           plural={plural}
+          label={searchLabel}
         />
       )}
       {isServerSide && <ListFilters pagination={serverSidePagination} searchQuery={searchQuery} />}

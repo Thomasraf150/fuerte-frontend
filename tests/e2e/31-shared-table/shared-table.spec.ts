@@ -5,7 +5,7 @@
  *     "No borrowers", wrapping at 360 with no sideways scroll, 48px targets below lg and 40px from lg;
  *   - the header: a named search box, full width and 48px on phones;
  *   - no scrollbox inside the card, and the skeleton while loading;
- *   - the page-CSS leak: the Borrowers stylesheet no longer hides column ids outside its own list;
+ *   - the page-CSS leak: a page stylesheet (Payment Posting's) hides column ids only inside its own list;
  *   - Payment Posting's row action is a named "Open loan" button that opens the loan, not "Remove";
  *   - a pointer and a hover tint only on rows that open something.
  * Whole-row open (rowHref) is covered on Applications, in tests/e2e/25-applications (section 11).
@@ -176,17 +176,18 @@ test.describe('the header and the table body', () => {
 });
 
 test.describe('the page-CSS leak', () => {
-  test("the Borrowers stylesheet hides its phone columns only inside its own list, never on another table", async ({ page, backend }) => {
+  // Borrowers has no page table CSS any more (B1: phone rows); Payment Posting still hides its
+  // Terms (3) and Loan Proceeds (5) columns on phones, and must do it only on its own list.
+  test("Payment Posting's stylesheet hides its phone columns only inside its own list, never on another table", async ({ page, backend }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await openBorrowers(page, backend);
-    await expect(page.getByText(`1–20 of ${TOTAL} borrowers`)).toBeVisible({ timeout: 30_000 });
+    await openPaymentPosting(page, backend);
+    await expect(page.getByRole('button', { name: 'Open loan E2E-8801', exact: true })).toBeVisible({ timeout: 30_000 });
 
-    // Inside the Borrowers list, Middle Name (column id 3) is still hidden on a phone, as before.
-    const inside = await page.locator('.borrowers-list [data-column-id="3"]').first().evaluate((el) => getComputedStyle(el).display);
+    const inside = await page.locator('.payment-posting-list [data-column-id="3"]').first().evaluate((el) => getComputedStyle(el).display);
     expect(inside).toBe('none');
 
-    // Any other table: a column 3 outside the Borrowers list (as on the SOA list, which Next would
-    // render with this stylesheet still loaded) stays visible.
+    // Any other table: a column 3 outside that list (as on the SOA list, which Next would render
+    // with this stylesheet still loaded) stays visible, and its container keeps its own margins.
     const outside = await page.evaluate(() => {
       const probe = document.createElement('div');
       probe.innerHTML = '<div class="responsive-table-container"><div class="rdt_Table"><div class="rdt_TableRow"><div class="rdt_TableCell" data-column-id="3">Borrower</div><div class="rdt_TableCell" data-column-id="6">x</div></div></div></div>';
@@ -257,10 +258,13 @@ test.describe('Payment Posting', () => {
 });
 
 test.describe('pointer and hover', () => {
-  test('rows that open nothing (Borrowers, for now) get no pointer and no hover tint; rows that open (Payment Posting) get both', async ({ page, backend }) => {
+  test('rows that open nothing (Chiefs) get no pointer and no hover tint; rows that open (Payment Posting) get both', async ({ page, backend }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await openBorrowers(page, backend);
+    await signedInAs(page, backend, [9101]);
+    await page.goto('/chiefs', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('div.fixed.inset-0.z-9999')).toHaveCount(0, { timeout: 30_000 });
     const still = page.locator('.rdt_TableRow').first();
+    await expect(still).toBeVisible({ timeout: 30_000 });
     await still.hover();
     expect(await still.evaluate((row) => [getComputedStyle(row).cursor, getComputedStyle(row).backgroundColor])).toEqual(['default', 'rgb(255, 255, 255)']);
 

@@ -30,78 +30,8 @@
 }
 
 /*
- * Every table rule below is scoped to this page's own list root (.borrowers-list).
- * Next keeps a page's CSS loaded for the rest of the session, so unscoped
- * [data-column-id] and .rdt_TableCell rules used to hide and restyle columns on
- * EVERY table visited afterwards (SOA, Collection List, Loans, Users, the
- * borrower page's tabs): audit bug 2, fixed 2026-10-06.
+ * No table rules here any more (B1, 2026-10-06). Below `md` the Borrowers list is the shared
+ * table's phone rows (CustomDatatable mobileRow + BorrowerPhoneRow); from `md` its columns come
+ * and go with react-data-table-component's `hide` (BorrowerColumn.tsx). The old rules hid
+ * positional column ids and, unscoped, did it on every table in the app (audit bug 2).
  */
-/* Responsive table improvements */
-.borrowers-list .responsive-table-container {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .borrowers-list .responsive-table-container {
-    margin: 0 -1rem;
-    padding: 0 1rem;
-  }
-  
-  /* Hide less critical columns on mobile - Middle Name and Chief */
-  .borrowers-list [data-column-id="3"],
-  .borrowers-list [data-column-id="6"] {
-    display: none !important;
-  }
-
-  /* Borrowers list only — the one table with a Payer column; these ids repeat in
-     the borrower page's tables, which load this file too. Only ~2 columns fit on
-     a phone, so lead with who the borrower is, then their standing: First Name
-     moves in front of Payer; Branch and Residence Address are dropped like Middle
-     Name and Chief. The table sizes its columns alike, and long addresses
-     stretched them until the "Problem ›" stamp ran off the table edge at 360px
-     (measured 2026-09-11); without Address it clears by ~45px. */
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) [data-column-id="1"],
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) [data-column-id="5"] {
-    display: none !important;
-  }
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) [data-column-id="2"] {
-    order: -1;
-  }
-  /* The narrower columns would ellipsize a long name; let names wrap instead
-     (two lines still fit the 48px row). */
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="2"],
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="2"] > div,
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="4"],
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) .rdt_TableRow [data-column-id="4"] > div {
-    white-space: normal !important;
-    text-overflow: clip !important;
-    overflow-wrap: anywhere;
-  }
-  /* Same for the header labels ("FIRST NA…" otherwise): they wrap to two lines,
-     which costs the header row ~17px at 360px. */
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) .rdt_TableHeadRow .rdt_TableCol,
-  .borrowers-list .rdt_Table:has([data-column-id="payer"]) .rdt_TableHeadRow .rdt_TableCol * {
-    white-space: normal !important;
-    text-overflow: clip !important;
-  }
-  
-  /* Better spacing for action buttons on mobile */
-  .borrowers-list .rdt_TableCell:last-child {
-    min-width: 100px;
-  }
-  
-  /* Improve touch targets */
-  .borrowers-list .rdt_TableCell:last-child svg {
-    padding: 8px;
-    margin: 0 4px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-  
-  .borrowers-list .rdt_TableCell:last-child svg:hover {
-    background-color: rgba(6, 182, 212, 0.1);
-  }
-}
