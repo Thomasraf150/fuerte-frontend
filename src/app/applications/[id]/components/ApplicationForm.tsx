@@ -135,7 +135,7 @@ const useSaveAndStay = (
  */
 const SaveNotice: React.FC<{ notice: Notice | null }> = ({ notice }) =>
   notice && (
-    <div className="flex flex-col items-end px-4 pb-1 text-sm sm:px-7 lg:px-3">
+    <div className="flex flex-col items-end px-2 pb-1 text-sm sm:px-4 lg:px-0">
       {notice.ok ? (
         <p data-testid="save-note" data-state="saved" className="inline-flex items-center gap-1.5 font-medium text-black dark:text-white">
           <CheckCircle aria-hidden="true" size={16} className="shrink-0 text-success" />
@@ -188,9 +188,10 @@ const startingValues = (record: LoanApplicationRecord, day: string | null): Part
  * BorrowerDetails in its application variant (hidden photo and Check Borrower), started
  * from the saved application. It reads its starting values once, when it mounts, so the page
  * mounts this only after the record has loaded and keys it by the application.
- * BorrowerDetails keeps its own margins and padding (8 to 28px a side, by width, and 8 to
- * 12px above): the negative margins give them back, so its cards line up with the header
- * and the actions above and with the side panel beside it.
+ * BorrowerDetails' section cards are shared Cards (redesign Phase 1) with no outer margin, so
+ * they line up with the header, the actions above and the side panel beside it as they are;
+ * the negative margins that used to give back their old 8-12px margins are gone (2026-10-08).
+ * The save note and the load error use BorrowerDetails' own inset (px-2 sm:px-4 lg:px-0).
  *
  * `saved` is the form as it was last saved, as a snapshot string: as loaded to begin with,
  * then what each Save posted. The watcher, rendered through renderExtraFields (the only way
@@ -204,11 +205,17 @@ const ApplicationFormBody: React.FC<BodyProps> = ({ record, saving, save, branch
   // The picker starts on the application's own branch (fromApplicationRecord), as the text its options hold.
   const loaded = { branch: String(record.branch_sub_id ?? ''), day: dateApplied.loadedDay };
   const { notice, submit, close, edited } = useSaveAndStay(save, branches !== null, loaded, setSaved);
+  // The watcher's verdict also drives the save bar: it is reset by a save, isDirty is not.
+  const [unsaved, setUnsaved] = useState(false);
+  const dirtyChanged = useCallback((dirty: boolean): void => {
+    setUnsaved(dirty);
+    onDirtyChange(dirty);
+  }, [onDirtyChange]);
 
   return (
-    <div className={`-mx-4 -mt-2 sm:-mx-7 sm:-mt-3 lg:-mx-3 ${PHONE_TOUCH_TARGETS} ${NAME_INPUTS_IN_CAPITALS} ${branches ? '' : HIDE_BRANCH_PICKER}`}>
+    <div className={`${PHONE_TOUCH_TARGETS} ${NAME_INPUTS_IN_CAPITALS} ${branches ? '' : HIDE_BRANCH_PICKER}`}>
       {branches?.error && (
-        <div className="mx-4 mb-2 sm:mx-7 lg:mx-3">
+        <div className="mb-4 px-2 sm:px-4 lg:px-0">
           <LoadError message={branches.error} onRetry={branches.reload} />
         </div>
       )}
@@ -222,9 +229,10 @@ const ApplicationFormBody: React.FC<BodyProps> = ({ record, saving, save, branch
         loadingMyAccessibleBranches={branches ? branches.choices === undefined : false}
         // An unassigned application must stay unassigned until someone picks: the first save would assign a preselected home branch.
         preselectHomeBranch={false}
+        unsaved={unsaved}
         renderExtraFields={({ control, register, errors }) => (
           <>
-            <UnsavedChangesWatcher control={control} mayAssign={branches !== null} saved={saved} onBaseline={setSaved} onDirty={onDirtyChange} onEdit={edited} />
+            <UnsavedChangesWatcher control={control} mayAssign={branches !== null} saved={saved} onBaseline={setSaved} onDirty={dirtyChanged} onEdit={edited} />
             {dateApplied.shown && <DateAppliedField register={register} error={String(errors.submitted_on?.message ?? '') || undefined} {...dateApplied.bounds} />}
             {!branches && <ReadOnlyBranch name={record.branch_sub?.name ?? null} />}
           </>

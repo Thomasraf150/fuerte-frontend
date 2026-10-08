@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import Link from "next/link";
-import { Calendar, Check, ChevronLeft, Home, Phone, X } from "react-feather";
+import { Calendar, Check, ChevronLeft, Home, Phone, Slash, X } from "react-feather";
 import BranchBadge, { branchLabel } from "@/components/BranchBadge";
 import PayerBadge from "@/components/PayerBadge";
 import { showDecisionNotePrompt, showProcessingModal } from "@/components/ConfirmationModal";
@@ -10,7 +10,7 @@ import useBorrowerDecision from "@/hooks/useBorrowerDecision";
 import type { BorrowerDecision, BorrowerRowInfo } from "@/utils/DataTypes";
 import { manilaToday } from "@/utils/sourceTracker";
 import BorrowerMoreMenu from "./BorrowerMoreMenu";
-import DecisionPill, { decisionLine } from "@/components/DecisionPill";
+import DecisionPill, { decisionLine, formatDecidedOn } from "@/components/DecisionPill";
 import { CONFIRM_COLORS } from "@/utils/brandColors";
 
 type BackTo = { href: string; label: string };
@@ -145,6 +145,44 @@ const DesktopBreadcrumb: React.FC<{ name: string }> = ({ name }) => (
   </nav>
 );
 
+/**
+ * A rejected borrower, said where nobody can miss it (Rafael 2026-10-08: the one grey line was
+ * "super easy to miss"). Research (decision-banner-research): put the consequence in the heading,
+ * the reason in full, then what to do next (Atlassian: "Describe the issue and any action the person
+ * needs to take"); a business decision is not an error, so no red fill (GOV.UK: "Do not use error
+ * messages to tell a user that they are not eligible"): a red edge and icon on the page's own
+ * surface, the words carrying the meaning (WCAG 1.4.1). Present on page load, so a plain section
+ * with a heading, not a live region. Approved stays the quiet line: it blocks nothing.
+ */
+const RejectedNotice: React.FC<{ decision: BorrowerDecision }> = ({ decision }) => {
+  const titleId = useId();
+  const reason = decision.reason?.trim();
+  const day = formatDecidedOn(decision.decided_at);
+  return (
+    <section
+      aria-labelledby={titleId}
+      data-testid="borrower-rejected-notice"
+      className="mt-4 flex max-w-3xl gap-3 rounded-lg border border-stroke border-l-4 border-l-danger bg-white px-4 py-3.5 shadow-sm dark:border-strokedark dark:border-l-danger dark:bg-boxdark"
+    >
+      <Slash aria-hidden="true" size={20} strokeWidth={2.5} className="mt-0.5 shrink-0 text-danger" />
+      <div className="min-w-0 space-y-1.5">
+        <h3 id={titleId} className="text-base font-semibold text-black dark:text-white">
+          Rejected: no new loans for this borrower
+        </h3>
+        {reason && (
+          <p className="break-words text-[15px] leading-6 text-black dark:text-white">
+            <span className="font-semibold">Why: </span>&ldquo;{reason}&rdquo;
+          </p>
+        )}
+        <p className="text-sm text-body dark:text-bodydark">
+          {day ? <>Rejected on <span className="whitespace-nowrap">{day}</span>. </> : null}
+          To give a loan, approve this borrower first.
+        </p>
+      </div>
+    </section>
+  );
+};
+
 /** The branch as its small chip plus its name in plain text, the Payer stamp, the decision stamp, and the decision's line. */
 const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecision | null }> = ({ borrower, decision }) => {
   const branchName = borrower.branch_sub?.branch?.name ?? "";
@@ -165,7 +203,8 @@ const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecisi
         <PayerBadge standing={borrower.payer_standing} borrowerId={borrower.id} size="lg" />
         <DecisionPill decision={decision} />
       </div>
-      {decision && (
+      {decision?.status === "rejected" && <RejectedNotice decision={decision} />}
+      {decision && decision.status !== "rejected" && (
         <p data-testid="borrower-decision-line" className="mt-1.5 break-words text-sm text-black/70 dark:text-bodydark">
           {decisionLine(decision)}
         </p>

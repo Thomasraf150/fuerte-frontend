@@ -6,7 +6,7 @@ import type { BorrowerDecision } from "@/utils/DataTypes";
 
 interface DecisionPillProps {
   decision?: BorrowerDecision | null;
-  /** 'lg' (default): beside PayerBadge on the borrower page. 'sm': inline in a sentence (the converted application page). */
+  /** 'lg' (default): beside PayerBadge on the borrower page. 'sm': inline in a sentence. */
   size?: "sm" | "lg";
 }
 
@@ -30,9 +30,9 @@ const TONE: Record<BorrowerDecision["status"], string> = {
 };
 
 /**
- * A borrower's latest Approved / Rejected decision as a stamp: the borrower page header and the
- * converted application page use this one component, so both say it the same way. Nothing before
- * the first decision.
+ * A borrower's latest Approved / Rejected decision as a stamp, beside the borrower page header's
+ * other stamps (the converted application page leads with its own outcome card instead). Nothing
+ * before the first decision.
  */
 const DecisionPill: React.FC<DecisionPillProps> = ({ decision, size = "lg" }) => {
   if (!decision || !LABEL[decision.status]) return null;

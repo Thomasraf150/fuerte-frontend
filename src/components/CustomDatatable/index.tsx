@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { TableColumn, ConditionalStyles } from 'react-data-table-component';
 import { useDatatableTheme } from '@/hooks/useDatatableTheme';
 import ListFilters from './ListFilters';
@@ -139,7 +139,7 @@ const CustomDatatable = <T extends object>({
     else setLocalQuery(event.target.value);
   }, [isServerSide, serverSidePagination, setLocalQuery]);
   const searchQuery = isServerSide ? (serverSidePagination?.searchQuery || '') : localQuery;
-  const textColumns = withCellText(columns);
+  const textColumns = useMemo(() => withCellText(columns), [columns]);
   // A failed load keeps the search and filters (a bad filter may be the cause) but draws no rows,
   // no "No records to show." and no pager: the page's ErrorAlert says what happened.
   const showBody = !(loadFailed && rows.length === 0 && !apiLoading);

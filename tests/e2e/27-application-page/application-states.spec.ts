@@ -149,44 +149,49 @@ test.describe('3. A converted application shows the borrower\'s latest decision'
       return { background: style.backgroundColor, color: style.color, border: style.borderTopColor, borderWidth: style.borderTopWidth };
     });
 
-  test('Rejected is loud, with its date and the reason', async ({ page, backend }) => {
-    // 00:30 in Manila is still Oct 4 in Los Angeles: the day shown is Manila's.
-    await open(page, backend, converted({ status: 'rejected', reason: 'Kulang ang income', decided_at: '2026-10-05 00:30:00' }), 'CALLCTR');
+  // 2026-10-08 (Rafael: a green "Borrower created" card holding a red "Rejected" stamp was confusing):
+  // the outcome leads and sets the card's one colour, on its edge only; "Borrower created" is history.
+  const heading = (page: Page): Locator => card(page).getByRole('heading', { level: 3 });
+  const edge = (page: Page) => card(page).evaluate((element) => getComputedStyle(element).borderLeftColor);
 
-    await expect(card(page)).toContainText('Rejected Oct 5, 2026 · Kulang ang income');
-    const pill = card(page).locator('[data-decision="rejected"]');
-    await expect(pill).toHaveText('Rejected');
-    // Filled red with white words and a white x: the word says it too, never the colour alone.
-    expect(await styleOf(pill)).toMatchObject({ background: 'rgb(181, 55, 47)', color: 'rgb(255, 255, 255)' });
-    await expect(pill.locator('svg')).toHaveAttribute('aria-hidden', 'true');
-    // It sits under "Borrower created" and its sentence.
-    const sentence = card(page).getByText('This application is now a borrower and can no longer be edited.');
-    expect((await pill.boundingBox())!.y).toBeGreaterThan((await sentence.boundingBox())!.y);
+  test('Rejected leads: who rejected it, the reason in full, the day, and that Call Center need not act', async ({ page, backend }) => {
+    // 00:30 in Manila is still Oct 4 in Los Angeles: the day shown is Manila's.
+    await open(page, backend, { ...converted({ status: 'rejected', reason: 'Kulang ang income', decided_at: '2026-10-05 00:30:00' }), outcome: 'rejected', outcome_label: 'Rejected by Marketing' }, 'CALLCTR');
+
+    await expect(heading(page)).toHaveText('Rejected by Marketing: no new loans for this borrower');
+    await expect(card(page)).toContainText('Why: “Kulang ang income”');
+    await expect(card(page)).toContainText('Rejected on Oct 5, 2026.');
+    await expect(card(page)).toContainText("The branch can approve this borrower later. You don't need to do anything.");
+    await expect(card(page)).toContainText('This application is now a borrower and can no longer be edited.');
+    // A red edge, never a red fill: the card stays white.
+    expect(await edge(page)).toBe('rgb(181, 55, 47)');
+    expect(await card(page).evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgb(255, 255, 255)');
+    await expect(card(page).locator('svg').first()).toHaveAttribute('aria-hidden', 'true');
   });
 
-  test('Approved is quiet: an outline and a green check, and its reason only when there is one', async ({ page, backend }) => {
+  test('Approved is quiet: a green edge, its day, and its reason only when there is one', async ({ page, backend }) => {
     await open(page, backend, converted({ status: 'approved', reason: null, decided_at: '2026-10-05 14:45:00' }), 'OWN');
 
-    await expect(card(page)).toContainText('Approved Oct 5, 2026');
-    await expect(card(page)).not.toContainText('·');
-    const pill = card(page).locator('[data-decision="approved"]');
-    await expect(pill).toHaveText('Approved');
-    // A neutral outline (stroke) on white, ink words, and a green check.
-    expect(await styleOf(pill)).toMatchObject({ background: 'rgb(255, 255, 255)', color: 'rgb(40, 38, 26)', border: 'rgb(228, 222, 208)', borderWidth: '1px' });
-    expect(await styleOf(pill.locator('svg'))).toMatchObject({ color: 'rgb(43, 115, 68)' });
+    await expect(heading(page)).toHaveText('Approved');
+    await expect(card(page)).toContainText('Approved on Oct 5, 2026.');
+    await expect(card(page)).not.toContainText('Why:');
+    expect(await edge(page)).toBe('rgb(43, 115, 68)');
     // The Owner still has the link to the borrower beside it.
     await expect(card(page).getByRole('link', { name: 'Open the borrower' })).toHaveAttribute('href', '/borrowers/77');
 
     backend.record = converted({ status: 'approved', reason: 'Kumpleto ang requirements', decided_at: '2026-10-03 09:00:00' });
     await page.reload();
-    await expect(card(page)).toContainText('Approved Oct 3, 2026 · Kumpleto ang requirements', { timeout: 90_000 });
+    await expect(card(page)).toContainText('Why: “Kumpleto ang requirements”', { timeout: 90_000 });
+    await expect(card(page)).toContainText('Approved on Oct 3, 2026.');
   });
 
-  test('before the first decision nothing is said about one', async ({ page, backend }) => {
+  test('before the first decision it says Marketing will decide, in no colour', async ({ page, backend }) => {
     await open(page, backend, converted(null), 'CALLCTR');
 
+    await expect(heading(page)).toHaveText("Waiting for Marketing's decision");
     await expect(card(page)).toContainText('This application is now a borrower and can no longer be edited.');
-    await expect(page.locator('[data-decision]')).toHaveCount(0);
     await expect(card(page)).not.toContainText(/Approved|Rejected/);
+    expect(await edge(page)).not.toBe('rgb(181, 55, 47)');
+    expect(await edge(page)).not.toBe('rgb(43, 115, 68)');
   });
 });

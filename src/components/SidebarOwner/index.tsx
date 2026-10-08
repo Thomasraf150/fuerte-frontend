@@ -14,9 +14,11 @@ interface SidebarProps {
   setSidebarOpen: (arg: boolean) => void;
 }
 
-const ChevronIcon = () => (
+/** The group's arrow: points down when closed, up when open (it never turned before 2026-10-08: it was not told). */
+const ChevronIcon = ({ open }: { open: boolean }) => (
   <svg
-    className="absolute right-4 top-1/2 -translate-y-1/2 fill-current"
+    aria-hidden="true"
+    className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform duration-200 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
     width="20"
     height="20"
     viewBox="0 0 20 20"
@@ -122,7 +124,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <SidebarLinkGroup activeCondition={pathname === "/" || pathname.includes("dashboard")}>
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <svg className="fill-current" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6.10322 0.956299H2.53135C1.5751 0.956299 0.787598 1.7438 0.787598 2.70005V6.27192C0.787598 7.22817 1.5751 8.01567 2.53135 8.01567H6.10322C7.05947 8.01567 7.84697 7.22817 7.84697 6.27192V2.72817C7.8751 1.7438 7.0876 0.956299 6.10322 0.956299ZM6.60947 6.30005C6.60947 6.5813 6.38447 6.8063 6.10322 6.8063H2.53135C2.2501 6.8063 2.0251 6.5813 2.0251 6.30005V2.72817C2.0251 2.44692 2.2501 2.22192 2.53135 2.22192H6.10322C6.38447 2.22192 6.60947 2.44692 6.60947 2.72817V6.30005Z" fill="" />
                         <path d="M15.4689 0.956299H11.8971C10.9408 0.956299 10.1533 1.7438 10.1533 2.70005V6.27192C10.1533 7.22817 10.9408 8.01567 11.8971 8.01567H15.4689C16.4252 8.01567 17.2127 7.22817 17.2127 6.27192V2.72817C17.2127 1.7438 16.4252 0.956299 15.4689 0.956299ZM15.9752 6.30005C15.9752 6.5813 15.7502 6.8063 15.4689 6.8063H11.8971C11.6158 6.8063 11.3908 6.5813 11.3908 6.30005V2.72817C11.3908 2.44692 11.6158 2.22192 11.8971 2.22192H15.4689C15.7502 2.22192 15.9752 2.44692 15.9752 2.72817V6.30005Z" fill="" />
@@ -130,7 +132,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <path d="M15.4689 9.92822H11.8971C10.9408 9.92822 10.1533 10.7157 10.1533 11.672V15.2438C10.1533 16.2001 10.9408 16.9876 11.8971 16.9876H15.4689C16.4252 16.9876 17.2127 16.2001 17.2127 15.2438V11.7001C17.2127 10.7157 16.4252 9.92822 15.4689 9.92822ZM15.9752 15.272C15.9752 15.5532 15.7502 15.7782 15.4689 15.7782H11.8971C11.6158 15.7782 11.3908 15.5532 11.3908 15.272V11.7001C11.3908 11.4188 11.6158 11.1938 11.8971 11.1938H15.4689C15.7502 11.1938 15.9752 11.4188 15.9752 11.7001V15.272Z" fill="" />
                       </svg>
                       Dashboard
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -185,12 +187,12 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <SidebarLinkGroup activeCondition={pathname === "/loans-list" || pathname === "/loan-calculator" || pathname.includes("loans")}>
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <svg className="fill-current" fill="none" width="18" height="18" viewBox="0 4 14 10" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8.978 14.043a4.224 4.224 0 0 0 1.077.139h.032v1.03a.435.435 0 0 1-.434.433H1.094a.435.435 0 0 1-.434-.434V3.237a.435.435 0 0 1 .434-.434h8.559a.435.435 0 0 1 .434.434v1.38l-.55.002a1.334 1.334 0 0 0-.559.124v-.832h-7.21v10.626h7.21v-.494zM4.995 7.452a1.068 1.068 0 0 1 .264.702 1.044 1.044 0 0 1-.524.902 1.677 1.677 0 0 1-.525.219v.238a.396.396 0 1 1-.792 0V9.28a1.844 1.844 0 0 1-.341-.107 1.19 1.19 0 0 1-.457-.335.396.396 0 1 1 .599-.518.413.413 0 0 0 .152.118 1.089 1.089 0 0 0 .205.066 1.616 1.616 0 0 0 .223.027.975.975 0 0 0 .505-.14c.163-.105.163-.194.163-.237a.28.28 0 0 0-.069-.181.637.637 0 0 0-.167-.135.86.86 0 0 0-.208-.074.98.98 0 0 0-.204-.02 2.058 2.058 0 0 1-.344-.028 1.575 1.575 0 0 1-.444-.143 1.287 1.287 0 0 1-.422-.34 1.09 1.09 0 0 1-.25-.682 1.103 1.103 0 0 1 .548-.933 1.66 1.66 0 0 1 .511-.208v-.228a.396.396 0 0 1 .792 0v.239a1.904 1.904 0 0 1 .348.121 1.369 1.369 0 0 1 .4.276.396.396 0 0 1-.559.56.578.578 0 0 0-.166-.114 1.121 1.121 0 0 0-.212-.074l-.023-.005a1.057 1.057 0 0 0-.174-.03.977.977 0 0 0-.494.132.32.32 0 0 0-.18.264.31.31 0 0 0 .074.183.503.503 0 0 0 .161.13.796.796 0 0 0 .22.071 1.27 1.27 0 0 0 .214.017 1.774 1.774 0 0 1 .373.038 1.654 1.654 0 0 1 .407.148 1.423 1.423 0 0 1 .396.314zm.881 3.186a4.195 4.195 0 0 0 .274.95H2.399v-.95zm1.184 2.303a4.25 4.25 0 0 0 .656.537H2.4v-.95h4.298a4.28 4.28 0 0 0 .363.413zm1.291-7.974H5.885v.95H8.35zm-1.193 1.89q-.05.047-.098.095a4.229 4.229 0 0 0-.661.856h-.514v-.95zm5.51 1.099a3.285 3.285 0 1 1-3.088-1.26v-.259h-.038a.475.475 0 0 1-.002-.95l1.026-.003h.001a.475.475 0 0 1 .002.95h-.04v.262a3.266 3.266 0 0 1 1.46.595l.336-.336a.475.475 0 0 1 .671.672l-.328.328zm-1.056 3.519a.475.475 0 0 0 0-.672L10.53 9.72V8.067a.475.475 0 0 0-.95 0V9.92a.474.474 0 0 0 .174.368l1.186 1.186a.475.475 0 0 0 .672 0z" />
                       </svg>
                       Loans
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -206,12 +208,12 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <SidebarLinkGroup activeCondition={pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <svg className="fill-current" width="18" height="18" viewBox="2 3 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
                       </svg>
                       Payments
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -249,10 +251,10 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               >
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <Server size={14} />
                       Reports
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -284,10 +286,10 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               >
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <Server size={14} />
                       Vouchers
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -310,10 +312,10 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               >
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <Server size={14} />
                       Journal
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -350,12 +352,12 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <SidebarLinkGroup activeCondition={pathname === "/company-profile" || pathname === "/branch-setup" || pathname === "/users-setup"}>
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <svg className="fill-current" fill="none" width="18" height="18" viewBox="-3 1 17 15" xmlns="http://www.w3.org/2000/svg">
                         <path id="Path_133" data-name="Path 133" d="M323.5-192h-9a1.5,1.5,0,0,0-1.5,1.5V-176h12v-14.5A1.5,1.5,0,0,0,323.5-192ZM318-177v-3h2v3Zm6,0h-3v-3.5a.5.5,0,0,0-.5-.5h-3a.5.5,0,0,0-.5.5v3.5h-3v-13.5a.5.5,0,0,1,.5-.5h9a.5.5,0,0,1,.5.5Zm-8-12h2v2h-2Zm4,0h2v2h-2Zm-4,4h2v2h-2Zm4,0h2v2h-2Z" transform="translate(-313 192)" />
                       </svg>
                       Company
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
@@ -379,12 +381,12 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               }>
                 {(handleClick, open) => (
                   <React.Fragment>
-                    <Link href="#" className={groupHeadClass} onClick={groupClick(handleClick)}>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <svg className="fill-current" fill="none" width="18" height="18" viewBox="1 4 21 15" xmlns="http://www.w3.org/2000/svg">
                         <path d="M21.32,9.55l-1.89-.63.89-1.78A1,1,0,0,0,20.13,6L18,3.87a1,1,0,0,0-1.15-.19l-1.78.89-.63-1.89A1,1,0,0,0,13.5,2h-3a1,1,0,0,0-.95.68L8.92,4.57,7.14,3.68A1,1,0,0,0,6,3.87L3.87,6a1,1,0,0,0-.19,1.15l.89,1.78-1.89.63A1,1,0,0,0,2,10.5v3a1,1,0,0,0,.68.95l1.89.63-.89,1.78A1,1,0,0,0,3.87,18L6,20.13a1,1,0,0,0,1.15.19l1.78-.89.63,1.89a1,1,0,0,0,.95.68h3a1,1,0,0,0,.95-.68l.63-1.89,1.78.89A1,1,0,0,0,18,20.13L20.13,18a1,1,0,0,0,.19-1.15l-.89-1.78,1.89-.63A1,1,0,0,0,22,13.5v-3A1,1,0,0,0,21.32,9.55ZM20,12.78l-1.2.4A2,2,0,0,0,17.64,16l.57,1.14-1.1,1.1L16,17.64a2,2,0,0,0-2.79,1.16l-.4,1.2H11.22l-.4-1.2A2,2,0,0,0,8,17.64l-1.14.57-1.1-1.1L6.36,16A2,2,0,0,0,5.2,13.18L4,12.78V11.22l1.2-.4A2,2,0,0,0,6.36,8L5.79,6.89l1.1-1.1L8,6.36A2,2,0,0,0,10.82,5.2l.4-1.2h1.56l.4,1.2A2,2,0,0,0,16,6.36l1.14-.57,1.1,1.1L17.64,8a2,2,0,0,0,1.16,2.79l1.2.4ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
                       </svg>
                       System
-                      <ChevronIcon />
+                      <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">

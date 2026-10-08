@@ -134,6 +134,18 @@ async function openBorrower(page: Page): Promise<void> {
 const header = (page: Page) => page.locator('main header');
 const decisionStamp = (page: Page) => header(page).locator('[data-decision]');
 const decisionLine = (page: Page) => page.getByTestId('borrower-decision-line');
+/**
+ * A rejection is a notice, not a line (Rafael 2026-10-08: the line was "super easy to miss"): the
+ * consequence as its heading, the reason in full, the day and what to do next.
+ */
+const rejectedNotice = (page: Page) => page.getByTestId('borrower-rejected-notice');
+async function expectRejectedNotice(page: Page, day: string, reason: string): Promise<void> {
+  const notice = rejectedNotice(page);
+  await expect(notice.getByRole('heading', { name: 'Rejected: no new loans for this borrower' })).toBeVisible();
+  await expect(notice).toContainText(`Why: “${reason}”`);
+  await expect(notice).toContainText(`Rejected on ${day}. To give a loan, approve this borrower first.`);
+  await expect(decisionLine(page)).toHaveCount(0);
+}
 const moreSummary = (page: Page) => header(page).locator('summary', { hasText: 'More' });
 /** The tab row, and the white card it heads. */
 const tabBar = (page: Page) => page.getByRole('button', { name: 'Details', exact: true }).locator('xpath=..');
@@ -190,7 +202,7 @@ test('1b. a borrower already rejected opens with the Rejected stamp and its line
 
   await expect(decisionStamp(page)).toHaveAttribute('data-decision', 'rejected');
   await expect(decisionStamp(page)).toHaveText('Rejected');
-  await expect(decisionLine(page)).toHaveText('Rejected Oct 4, 2026 · Kulang ang income');
+  await expectRejectedNotice(page, 'Oct 4, 2026', 'Kulang ang income');
 
   const tel = header(page).getByRole('link', { name: 'Call 0917 000 0011' });
   await expect(tel).toHaveAttribute('href', 'tel:09170000011');
@@ -332,7 +344,7 @@ test('4. Reject will not post without a reason; with one it posts rejected and t
   expect(backend.calls('setBorrowerDecision')[0].variables).toEqual({ borrower_id: BORROWER_ID, status: 'rejected', reason: 'Kulang ang income' });
   await expect(decisionStamp(page)).toHaveAttribute('data-decision', 'rejected');
   await expect(decisionStamp(page)).toHaveText('Rejected');
-  await expect(decisionLine(page)).toHaveText('Rejected Oct 5, 2026 · Kulang ang income');
+  await expectRejectedNotice(page, 'Oct 5, 2026', 'Kulang ang income');
   await expect(page.getByText('Marked Rejected.')).toBeVisible();
 });
 

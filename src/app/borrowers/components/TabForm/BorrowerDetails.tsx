@@ -52,9 +52,15 @@ interface BorrInfoProps {
   offerCheckBorrower?: boolean;
   /** Start the branch picker on the user's home branch when it is a choice. False = the user must pick. */
   preselectHomeBranch?: boolean;
+  /**
+   * Whether the form holds unsaved changes, for a page that stays open after a save (the
+   * application page). react-hook-form's isDirty is never reset by a save there, so the save
+   * bar kept saying "Not saved yet" (Rafael 2026-10-08). Omitted: isDirty decides, as before.
+   */
+  unsaved?: boolean;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, requiredFields, initialValues, branchChoices, renderExtraFields, variant = 'borrower', preselectHomeBranch = true, offerCheckBorrower = false }) => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, requiredFields, initialValues, branchChoices, renderExtraFields, variant = 'borrower', preselectHomeBranch = true, offerCheckBorrower = false, unsaved }) => {
   const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -1248,7 +1254,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
           {/* The same Back and Save, kept on screen on this long form (UI modernisation B). It sits
               directly in the form's container: sticky only sticks within its parent. */}
           <div className="mx-2 mb-5 sm:mx-3 contents">
-            <StickyActions dirty={isDirty}>
+            <StickyActions dirty={unsaved ?? isDirty}>
               <Button variant="secondary" onClick={() => setShowForm(false)}>
                 Back
               </Button>

@@ -14,7 +14,7 @@ export const APPLICATION_STATUS_DOT: Record<LoanApplicationStatus, string> = {
   for_interview: 'bg-warning',
   interviewed: 'bg-primary',
   declined: 'bg-danger',
-  borrower_created: 'bg-success',
+  borrower_created: 'bg-body',
 };
 
 /*
@@ -28,7 +28,7 @@ const TINT: Record<LoanApplicationStatus, string> = {
   for_interview: 'bg-warning/15 ring-warning/50',
   interviewed: 'bg-primary/10 ring-primary/40',
   declined: 'bg-danger/10 ring-danger/40',
-  borrower_created: 'bg-success/10 ring-success/40',
+  borrower_created: 'bg-whiten ring-stroke dark:bg-meta-4 dark:ring-strokedark',
 };
 
 /*

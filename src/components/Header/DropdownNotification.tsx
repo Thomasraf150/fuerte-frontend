@@ -239,7 +239,7 @@ const DropdownNotification = () => {
   // Everything on the bell now, by id: the deletion ids and the Applications keys (prefixed by the
   // server, "status:…" and "decision:…", so they never collide with a deletion id).
   const currentIds = useMemo(() => [...pendingIds, ...applicationItems.map((item) => item.key)], [pendingIds, applicationItems]);
-  const { unseenCount, markAllSeen } = useSeenNotificationIds(currentIds);
+  const { unseenCount, markAllSeen } = useSeenNotificationIds(currentIds, authUser?.id);
   const notifications = useMemo(() => deletionNotifications(pendingCount), [pendingCount]);
 
   // Open the dropdown AND mark everything on it as seen; ids polled afterwards bring the badge back.

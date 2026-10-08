@@ -108,7 +108,8 @@ const panel = (page: Page): Locator => page.locator('header li:has(> a[aria-expa
 /** Its rows: each one link. */
 const rows = (page: Page): Locator => panel(page).locator('ul > li > a');
 
-const SEEN_KEY = 'fuerte.notif.seenIds';
+/** What the bell has seen, kept per user since 2026-10-08 (fakeUser's id is 90000 + the role id: Processing = 90003). */
+const SEEN_KEY = 'fuerte.notif.seenIds:90003';
 const seenIds = (page: Page): Promise<string[]> =>
   page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '[]'), SEEN_KEY);
 
@@ -338,6 +339,23 @@ test('5. a click on the bell while the focus is in the dropdown closes it, and d
   await expect(bell(page)).toHaveAttribute('aria-expanded', 'false');
   await page.waitForTimeout(300);
   await expect(panel(page)).toBeHidden();
+});
+
+// Rafael 2026-10-08: on one browser, Processing opening the bell hid the badge from Marketing logging in after it,
+// because the seen list was one for the whole browser. Each person now keeps their own.
+test('5. two people on one browser: one opening the bell does not hide the badge from the other', async ({ page, backend }) => {
+  backend.notifications = PROC_ITEMS;
+  await signedInAs(page, backend, 'PROC', [9101], 9101);
+  await openList(page, backend);
+  await expect(bell(page)).toHaveAttribute('aria-label', '2 new notification(s)');
+  await bell(page).click();
+  await expect(rows(page)).toHaveCount(2);
+  await expect(bell(page)).toHaveAttribute('aria-label', 'Notifications');
+
+  // Another person who is told of Applications items logs in on the same browser: their badge is their own.
+  await signedInAs(page, backend, 'CALLCTR');
+  await openList(page, backend);
+  await expect(bell(page)).toHaveAttribute('aria-label', '2 new notification(s)');
 });
 
 test('5. a corrupt seen list in localStorage does not break the bell: everything counts as unseen', async ({ page, backend }) => {

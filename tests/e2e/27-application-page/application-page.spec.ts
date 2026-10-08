@@ -385,6 +385,24 @@ test.describe('2. What is required', () => {
     expect(await requiredMarks(page)).toEqual(['contact_no', 'firstname', 'lastname']);
   });
 
+  // Rafael 2026-10-08: the page stays open after a save, so the save bar's "Not saved yet" must
+  // clear once the save went through (it read react-hook-form's isDirty, which no save resets).
+  test('after a save that went through, the save bar no longer says "Not saved yet"', async ({ page, backend }) => {
+    await open(page, backend);
+    const unsaved = page.getByRole('status').filter({ hasText: 'Not saved yet' });
+    await expect(unsaved).toHaveCount(0);
+
+    await field(page, 'purpose').fill('E2E edited purpose');
+    await expect(unsaved).toBeVisible();
+
+    await saveButton(page).click();
+    await expect(savedNote(page)).toBeVisible();
+    await expect(unsaved).toHaveCount(0);
+
+    await field(page, 'purpose').fill('E2E edited again');
+    await expect(unsaved).toBeVisible();
+  });
+
   test('an application with no amount and no purpose still saves', async ({ page, backend }) => {
     const base = application();
     await open(page, backend, application({
@@ -1772,7 +1790,7 @@ test.describe('13. At 360px', () => {
           },
         }),
       role: 'CALLCTR',
-      waitFor: (page) => page.locator('[data-decision="rejected"]'),
+      waitFor: (page) => page.locator('[data-outcome="rejected"]'),
     },
   ];
 
