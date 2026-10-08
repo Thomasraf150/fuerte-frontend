@@ -1,3 +1,4 @@
+import Button from '@/components/Button';
 import React, { useState } from 'react';
 import { CheckCircle, List, RotateCw } from 'react-feather';
 import DatePicker from 'react-datepicker';
@@ -55,43 +56,40 @@ const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
 
     return (
         <div className="p-4">
-          <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Enter count to pay</h3>
+          <h3 className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Enter count to pay</h3>
           <input
             type="number"
-            className="block w-full p-2 mb-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+            className="mb-2 h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             value={monthsInput}
             onChange={(e) => setMonthsInput(e.target.value)}
             placeholder="0"
           />
 
           <div className="flex justify-between items-center">
-            <button
-              className="bg-primary flex justify-between items-center text-white py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            <Button
+              variant="primary"
               onClick={() => { return handleApproveRelease(1); }}
               disabled={appBtnDisable || loading}>
               {loading ? (
                 <>
-                  <RotateCw size={16} className="animate-spin mr-1" />
+                  <RotateCw size={16} className="animate-spin" />
                   <span>Approving...</span>
                 </>
               ) : (
                 <>
-                  <span className="mr-1">
-                    <CheckCircle size={16}/>
-                  </span>
+                  <CheckCircle size={16}/>
                   <span>Approve</span>
                 </>
               )}
-            </button>
-            <button 
-              className="bg-boxdark-2 w-full text-center flex justify-between items-center mr-auto text-white py-2 px-4 rounded hover:bg-dark-800 text-sm"
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full"
               onClick={handleGenerate}
             >
-              <span className="mr-1">
-                <List size={16} />
-              </span>
+              <List size={16} />
               <span>Generate</span>
-            </button>
+            </Button>
           </div>
 
           <div className="mt-4">
@@ -101,7 +99,7 @@ const ManualDate: React.FC<OMProps> = ({ term, addon_term, selectedData, handleA
                   selected={date}
                   onChange={(date) => handleDateChange(i, date)}
                   dateFormat="MM/dd/yyyy"
-                  className="p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
+                  className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                   placeholderText={`Select date for month ${i + 1}`}
                 />
               </div>

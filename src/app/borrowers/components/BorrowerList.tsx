@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
+import { Card, CardBody, Toolbar } from '@/components/Card';
 import CustomDatatable from '@/components/CustomDatatable';
 import PayerFilterChips from '@/components/PayerFilterChips';
 import borrowerColumn from './BorrowerColumn';
@@ -68,12 +69,14 @@ const BorrowerList: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+            <Card>
               {/* No card heading: the page title above already says "Borrowers" (B1). */}
-              <div className="p-3 md:p-7">
-                <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90" onClick={handleCreateBorrower}>Create</button>
+              <CardBody>
+                <Toolbar>
+                  <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90" onClick={handleCreateBorrower}>Create</button>
+                </Toolbar>
                 {borrowerError && (
-                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading borrowers: {borrowerError}
                     <button
                       onClick={refresh}
@@ -83,9 +86,7 @@ const BorrowerList: React.FC = () => {
                     </button>
                   </div>
                 )}
-                <div className="mb-3">
-                  <PayerFilterChips value={payerFilter} onChange={setPayerFilter} />
-                </div>
+                <PayerFilterChips value={payerFilter} onChange={setPayerFilter} />
                 <CustomDatatable
                   apiLoading={paginationLoading || pendingLoading}
                   columns={borrowerColumn(handleRowClick, handleRowRmBorrClick, pendingByEntityId, handlePendingClick)}
@@ -101,8 +102,8 @@ const BorrowerList: React.FC = () => {
                     <BorrowerPhoneRow row={row} showBranch={seesManyBranches} pendingDeletion={pendingByEntityId.has(Number(row.id))} />
                   )}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>

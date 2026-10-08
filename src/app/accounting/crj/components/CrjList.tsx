@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import VoucherFilters from '@/app/accounting/general-voucher/components/VoucherFilters';
 import useGeneralJournal from '@/hooks/useGeneralJournal';
 import crjTblColumn from './CrjTblColumn';
@@ -26,13 +27,9 @@ const CrjList: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2 fade-in">
             <VoucherFilters onChange={setFilters} />
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Cash Receipts Journal
-                </h3>
-              </div>
-              <div className="px-4">
+            <Card>
+              <CardHeader title="Cash Receipts Journal" />
+              <CardBody>
                 <CustomDatatable
                   apiLoading={loading}
                   title=""
@@ -42,8 +39,8 @@ const CrjList: React.FC = () => {
                   data={dataGj || []}
                   serverSidePagination={serverSidePaginationProps}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>

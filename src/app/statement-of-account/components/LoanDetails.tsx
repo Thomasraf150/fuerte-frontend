@@ -4,6 +4,19 @@ import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
 import { Printer, RotateCw } from 'react-feather';
+import Button from '@/components/Button';
+
+/** One label and its figure (receipt row): the figure right-aligned in tabular numerals; `big` is the one key total. */
+const Row: React.FC<{ label: string; children: React.ReactNode; big?: boolean }> = ({ label, children, big = false }) => (
+  <div className={`flex items-baseline justify-between gap-4 py-1.5 ${big ? 'border-b border-stroke pb-2.5 text-base font-bold dark:border-strokedark' : 'text-sm'}`}>
+    <dt className={big ? 'text-black dark:text-white' : 'text-body dark:text-bodydark'}>{label}</dt>
+    <dd className="text-right tabular-nums text-black dark:text-white">{children}</dd>
+  </div>
+);
+
+const Panel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <dl className="rounded-lg border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">{children}</dl>
+);
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -23,98 +36,35 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onPrint, printing }) =
     <>
       {onPrint && (
         <div className="flex justify-end pb-3">
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={onPrint}
             disabled={printing || !loanSingleData?.id}
-            className="inline-flex items-center gap-2 rounded border border-teal-700 bg-teal-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {printing ? <RotateCw size={15} className="animate-spin" /> : <Printer size={15} />}
             <span>{printing ? 'Generating…' : 'Print Statement'}</span>
-          </button>
+          </Button>
         </div>
       )}
       <div className="grid grid-cols-1 pb-4 md:grid-cols-3 gap-4">
-        <div className="bg-gray-200 rounded">
-          <table className="min-w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Loan Reference</td>
-                <td className="px-4 py-2 text-gray-900">{loanSingleData?.loan_ref}</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Borrower</td>
-                <td className="px-4 py-2 text-gray-900">{loanSingleData?.borrower?.lastname?.toUpperCase() + ', ' + loanSingleData?.borrower?.firstname?.toUpperCase()}</td>
-              </tr>
-              <tr className="">
-              <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">PN Amount</td>
-                <td className="px-4 py-2 text-gray-900">{ formatNumber(Number(loanSingleData?.pn_amount)) }</td>
-              </tr>
-              <tr>
-              <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Status</td>
-                <td className="px-4 py-2 text-gray-900">{ loanStatus(loanSingleData?.status) }</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-gray-200 rounded">
-          <table className="min-w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Monthly</td>
-                <td className="px-4 py-2 text-gray-900">{formatNumber(Number(loanSingleData?.monthly))}</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Term</td>
-                <td className="px-4 py-2 text-gray-900">{loanSingleData?.term} Mo/s.</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Total Deduction</td>
-                <td className="px-4 py-2 text-gray-900">{formatNumber(totalDeduction)}</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Total Interest</td>
-                <td className="px-4 py-2 text-gray-900">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-gray-200 rounded">
-          <table className="min-w-full bg-gray-100 border-gray-300 border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-            <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Loan Proceeds</td>
-                <td className="px-4 py-2 text-gray-900">{formatNumber(Number(loanSingleData?.loan_proceeds))}</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Transaction Date</td>
-                <td className="px-4 py-2 text-gray-900">{formatDate(String(loanSingleData?.created_at))}</td>
-              </tr>
-              <tr className="">
-                <td className="px-4 py-2 font-semibold text-gray-700 bg-neutral-100 text-form-strokedark">Released Date</td>
-                <td className="px-4 py-2 text-gray-900">{formatDate(String(loanSingleData?.released_date))}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <Panel>
+          <Row label="Loan Reference">{loanSingleData?.loan_ref}</Row>
+          <Row label="Borrower">{loanSingleData?.borrower?.lastname?.toUpperCase() + ', ' + loanSingleData?.borrower?.firstname?.toUpperCase()}</Row>
+          <Row label="PN Amount">{ formatNumber(Number(loanSingleData?.pn_amount)) }</Row>
+          <Row label="Status">{ loanStatus(loanSingleData?.status) }</Row>
+        </Panel>
+        <Panel>
+          <Row label="Monthly">{formatNumber(Number(loanSingleData?.monthly))}</Row>
+          <Row label="Term">{loanSingleData?.term} Mo/s.</Row>
+          <Row label="Total Deduction">{formatNumber(totalDeduction)}</Row>
+          <Row label="Total Interest">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</Row>
+        </Panel>
+        <Panel>
+          <Row label="Loan Proceeds" big>{formatNumber(Number(loanSingleData?.loan_proceeds))}</Row>
+          <Row label="Transaction Date">{formatDate(String(loanSingleData?.created_at))}</Row>
+          <Row label="Released Date">{formatDate(String(loanSingleData?.released_date))}</Row>
+        </Panel>
    
         {/* Add more grid items as needed */}
       </div>

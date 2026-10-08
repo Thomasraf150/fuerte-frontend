@@ -197,7 +197,7 @@ export const checkBorrowerDuplicates = async (data: BorrowerInfo): Promise<boole
  * empty — the exact-match duplicate check alone is not enough to make that
  * promise, and claiming it wrongly is the worst thing this feature can do.
  */
-const buildCheckBody = (duplicate: any, cross: CrossBranchResult | undefined): string => {
+const buildCheckBody = (duplicate: any, cross: CrossBranchResult | undefined, crossBranchOnly = false): string => {
   const isExactDuplicate = Boolean(duplicate?.isDuplicate);
   const sameBranch = isExactDuplicate ? buildDuplicateBody(duplicate) : '';
   const myBranches = inMyBranchesHtml(cross, isExactDuplicate);
@@ -212,7 +212,8 @@ const buildCheckBody = (duplicate: any, cross: CrossBranchResult | undefined): s
     );
   }
 
-  const noExact = !sameBranch
+  // No same-branch check was asked on the cross-only path (Call Center has no branch): say nothing about one.
+  const noExact = !sameBranch && !crossBranchOnly
     ? `<p style="font-size:0.9em;color:#6B7280;">No exact duplicate (name + middle name + contact) in your branch — but see below.</p>`
     : '';
 
@@ -225,12 +226,16 @@ const buildCheckBody = (duplicate: any, cross: CrossBranchResult | undefined): s
 };
 
 /**
- * Manual "Check Borrower" button on the create-borrower form. Runs the
- * same-branch duplicate check (with problem badge) AND the minimal cross-branch
- * probe in parallel, then shows one informational modal. Purely advisory — it
- * never blocks or creates anything.
+ * Manual "Check Borrower" button on the create-borrower and New application forms. Runs the
+ * same-branch duplicate check (with problem badge) AND the minimal cross-branch probe in
+ * parallel, then shows one informational modal. Purely advisory — it never blocks or creates
+ * anything.
+ *
+ * `crossBranchOnly`: Call Center (New application) asks only the cross-branch probe — the
+ * server opens only that one to it (aggregates, no borrower row) — so the duplicate check is not
+ * sent. A probe that fails or is refused says so: it never reads as "No existing borrower found".
  */
-export const checkBorrowerNow = async (data: BorrowerInfo): Promise<void> => {
+export const checkBorrowerNow = async (data: BorrowerInfo, { crossBranchOnly = false }: { crossBranchOnly?: boolean } = {}): Promise<void> => {
   const { CHECK_BORROWER_DUPLICATE, CHECK_BORROWER_CROSS_BRANCH } = BorrowerQueryMutations;
   const { toast } = await import('react-toastify');
 
@@ -249,7 +254,7 @@ export const checkBorrowerNow = async (data: BorrowerInfo): Promise<void> => {
 
   try {
     const [dupRes, crossRes] = await Promise.all([
-      graphqlFetch(CHECK_BORROWER_DUPLICATE, {
+      crossBranchOnly ? Promise.resolve(null) : graphqlFetch(CHECK_BORROWER_DUPLICATE, {
         firstname,
         middlename: data.middlename || null,
         lastname,
@@ -267,10 +272,15 @@ export const checkBorrowerNow = async (data: BorrowerInfo): Promise<void> => {
       }),
     ]);
 
-    const duplicate = dupRes.data?.checkBorrowerDuplicate;
+    const duplicate = dupRes?.data?.checkBorrowerDuplicate;
     const cross: CrossBranchResult | undefined = crossRes.data?.checkBorrowerCrossBranch;
+    // Fail closed: without the probe's answer the modal would say "No existing borrower found".
+    if (crossRes.errors?.length || !cross || (!crossBranchOnly && dupRes?.errors?.length)) {
+      toast.warn('Borrower check failed — please try again.');
+      return;
+    }
 
-    await showConfirmationModal('Borrower Check', buildCheckBody(duplicate, cross), 'Close', false, true);
+    await showConfirmationModal('Borrower Check', buildCheckBody(duplicate, cross, crossBranchOnly), 'Close', false, true);
   } catch (error) {
     console.error('Borrower check error:', error);
     toast.warn('Borrower check failed — please try again.');

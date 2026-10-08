@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardBody } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import GLForm from './GLForm';
@@ -43,28 +44,21 @@ const GeneralLedgerList: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           {!showForm && (
             <div className={`col-span-2`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-boxdark dark:text-boxdark">
-                    General Ledger
-                  </h3>
-                </div>
-                <div className="p-5">
-                  <div className="mb-4">
+              <Card>
+                <CardBody>
+                  <div>
                     <input
                       type="text"
                       placeholder="Search by Account Name or Number..."
-                      className="w-full rounded-md border border-stroke p-2 bg-white dark:bg-form-input text-gray-900 dark:text-white dark:border-strokedark focus:outline-none focus:ring-2 focus:ring-primary"
+                      aria-label="Search by Account Name or Number" className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <div className="w-full mx-auto">
-                    <div className="shadow-md overflow-hidden">
-                      <div className="h-96 w-full overflow-auto">
+                  <div className="overflow-x-auto">
                         <table className="min-w-full border-collapse">
                           {/* Table Header */}
-                          <thead className="bg-gray-200 dark:bg-meta-4 text-gray-700 dark:text-bodydark text-sm sticky top-0">
+                          <thead className="bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark text-sm sticky top-0">
                             <tr>
                               <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Account Name</th>
                               <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Account Number</th>
@@ -73,7 +67,7 @@ const GeneralLedgerList: React.FC = () => {
                             </tr>
                           </thead>
                           {/* Table Body */}
-                          <tbody className="text-sm text-gray-900 dark:text-bodydark">
+                          <tbody className="text-sm text-black dark:text-bodydark">
                             {/*
                               Skeleton mirrors the real row: four bordered cells at the
                               same height, with bar widths that stand in for the shape of
@@ -126,8 +120,8 @@ const GeneralLedgerList: React.FC = () => {
                             {!loading && filteredData && filteredData.map((item, i) => (
                               <tr
                                 key={i}
-                                className={`hover:bg-gray-100 dark:hover:bg-graydark cursor-pointer ${
-                                  selectedItem?.number === item.number ? 'bg-blue-200 dark:bg-blue-700' : 'even:bg-gray-50 dark:even:bg-boxdark'
+                                className={`hover:bg-gray-2 dark:hover:bg-meta-4 cursor-pointer ${
+                                  selectedItem?.number === item.number ? 'bg-blue-200 dark:bg-blue-700' : 'even:bg-gray-3 dark:even:bg-boxdark'
                                 }`}
                                 onClick={() => handleRowClick(item)}
                               >
@@ -139,8 +133,8 @@ const GeneralLedgerList: React.FC = () => {
                             ))}
                           </tbody>
                           {/* Table Footer - Totals */}
-                          <tfoot className="bg-gray-200 dark:bg-meta-4 text-gray-700 dark:text-bodydark text-sm sticky bottom-0">
-                            <tr className="bg-gray-100 dark:bg-boxdark font-semibold">
+                          <tfoot className="bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark text-sm sticky bottom-0">
+                            <tr className="bg-gray-2 dark:bg-boxdark font-semibold">
                               <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark" colSpan={2}>Total:</td>
                               {/* While loading these would read 0.00 off an empty array —
                                   a real-looking figure for a total nobody has computed yet.
@@ -154,11 +148,9 @@ const GeneralLedgerList: React.FC = () => {
                             </tr>
                           </tfoot>
                         </table>
-                      </div>
-                    </div>
                   </div>
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
 

@@ -24,7 +24,7 @@ const noop = () => {};
 
 /** The back link, the title and the one-line promise: only the starred fields are needed. */
 const NewApplicationHeader: React.FC = () => (
-  <div className="border-b border-stroke px-3 pb-4 pt-2 dark:border-strokedark sm:px-5 md:px-7">
+  <div className="px-2 sm:px-4 lg:px-0">
     <Link
       href={LIST}
       className="-ml-2 inline-flex min-h-12 items-center gap-1.5 rounded px-2 text-sm font-medium text-primary transition-colors hover:text-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-bodydark1 dark:hover:text-white md:min-h-10"
@@ -80,17 +80,18 @@ const NewApplication: React.FC = () => {
   const canChooseAny = useCanUpload();
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="space-y-4">
       <NewApplicationHeader />
-      <div className={`py-3 sm:p-3 md:p-5 ${NAME_INPUTS_IN_CAPITALS}`}>
+      <div className={NAME_INPUTS_IN_CAPITALS}>
         {branchError && (
-          <div className="mx-2 mb-2 sm:mx-3">
+          <div className="mb-4">
             <LoadError message={branchError} onRetry={loadBranches} />
           </div>
         )}
         <BorrowerDetails
           {...picklists}
           variant="application"
+          offerCheckBorrower
           requiredFields={APPLICATION_REQUIRED_FIELDS}
           // Empty while loading, so New Borrower's assigned-branch picker never flashes.
           branchChoices={branchChoices ?? []}

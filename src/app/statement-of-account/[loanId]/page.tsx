@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { SkeletonBlock } from '@/components/LoadingStates';
+import Button from '@/components/Button';
 import useLoans from '@/hooks/useLoans';
 import useSoa from '@/hooks/useSoa';
 import LoanDetails from '../components/LoanDetails';
@@ -66,8 +67,8 @@ const SoaDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Loading..." />
         </div>
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner />
+        <div className="min-h-[400px] rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <SkeletonBlock rows={5} label="Loading the statement of account…" />
         </div>
       </DefaultLayout>
     );
@@ -80,17 +81,14 @@ const SoaDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Error" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="rounded-2xl border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-500 mb-4">
+            <h3 className="text-xl font-semibold text-danger mb-4">
               {error || 'Loan not found'}
             </h3>
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-            >
+            <Button variant="primary" onClick={handleBack}>
               Back to Statement of Account
-            </button>
+            </Button>
           </div>
         </div>
       </DefaultLayout>
@@ -119,14 +117,10 @@ const SoaDetailPage: React.FC = () => {
 
       <div className="flex flex-col gap-6">
         <div className="relative overflow-x-auto bg-white shadow-default dark:bg-boxdark p-4">
-          <button
-            className="flex justify-center rounded border bg-white border-stroke px-6 py-4 mb-4 space-x-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:bg-boxdark dark:text-white"
-            type="button"
-            onClick={handleBack}
-          >
+          <Button variant="secondary" className="mb-4" onClick={handleBack}>
             <CornerUpLeft size={15} />
             <span>Back</span>
-          </button>
+          </Button>
 
           <LoanDetails
             loanSingleData={loanSingleData}

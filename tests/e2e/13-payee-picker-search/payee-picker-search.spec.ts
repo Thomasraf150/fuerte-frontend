@@ -11,7 +11,7 @@
  *
  * Assertions:
  *   1. The picker now renders a search input (the core regression guard).
- *   2. A no-match query empties the table ("There are no records to display").
+ *   2. A no-match query empties the table ("No records to show.").
  *   3. Clearing the query restores the full loaded list.
  *   4. A token taken from a real row narrows (never widens) the list.
  *
@@ -78,7 +78,7 @@ test.describe('General Voucher — payee picker search', () => {
 
     // (2) No-match query empties the table.
     await searchBox.fill('zz-no-such-payee-zz');
-    await expect(page.getByText('There are no records to display')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/^No [a-z ]+ to show.$/)).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('.rdt_TableRow')).toHaveCount(0);
 
     // (3) Clearing restores the full loaded list.

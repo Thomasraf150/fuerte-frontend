@@ -6,14 +6,14 @@ import SidebarLinkGroup from "./SidebarLinkGroup";
 import { applicationsNav } from "./applicationsNav";
 
 /*
- * Classes match the other link groups (Loans, Payments), plus `min-h-12 lg:min-h-0` on
+ * Classes match the other link groups (Loans, Payments), plus `min-h-12 lg:min-h-10` on
  * every control: a 48px touch target while the sidebar is the phone/tablet drawer (below
- * lg), and the siblings' natural height once it is the static desktop column.
+ * lg), and 40px once it is the static desktop column.
  */
 const TOGGLE =
-  "group relative flex w-full items-center gap-2.5 rounded-sm px-4 py-2 text-left font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 min-h-12 lg:min-h-0";
+  "group relative flex w-full items-center gap-2.5 rounded-lg px-4 py-2 text-left font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 min-h-12 lg:min-h-10";
 const SUB_LINK =
-  "group relative flex items-center gap-2.5 rounded-md px-4 font-medium duration-300 ease-in-out hover:text-white min-h-12 lg:min-h-0";
+  "group relative flex items-center gap-2.5 rounded-lg px-4 py-2 font-medium duration-300 ease-in-out hover:text-white min-h-12 lg:min-h-10";
 
 /** The same document icon this menu item has always had. */
 const DocumentIcon = () => (
@@ -97,14 +97,14 @@ const ApplicationsMenuItem = ({ pathname, compact = false }: { pathname: string;
             aria-expanded={open}
             aria-controls={menuId}
             onClick={handleClick}
-            className={`${TOGGLE} ${nav.inGroup ? "bg-graydark dark:bg-meta-4" : ""}`}
+            className={`${TOGGLE} ${nav.inGroup ? "!bg-primary text-white" : ""}`}
           >
             <DocumentIcon />
             Applications
             <ChevronIcon open={open} />
           </button>
           <div id={menuId} className={`overflow-hidden ${open ? "" : "hidden"}`}>
-            <ul className={`mb-5.5 mt-4 flex flex-col gap-2.5 ${compact ? "pl-2" : "pl-6"}`}>
+            <ul className={`mb-3 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2 ${compact ? "ml-4" : "ml-6"}`}>
               <SubLink href="/applications" active={nav.list} compact={compact}>
                 Applications
               </SubLink>

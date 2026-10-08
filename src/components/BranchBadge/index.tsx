@@ -13,7 +13,8 @@ interface BranchBadgeProps {
 
 // Only FA/FB/FC/FD get badges — everything else defaults to FA
 const BRANCH_STYLES: Record<string, string> = {
-  FA: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  // sky, not blue: blue draws the olive brand scale (tailwind.config.ts), too close to FB's green.
+  FA: "bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200",
   FB: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
   FC: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
   FD: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",

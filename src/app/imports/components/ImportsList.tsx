@@ -1,5 +1,8 @@
 'use client';
 
+import { SkeletonBlock } from '@/components/LoadingStates';
+import { Card, CardBody, CardHeader } from '@/components/Card';
+import Button from '@/components/Button';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import Link from 'next/link';
@@ -41,32 +44,27 @@ export default function ImportsList() {
   }, [load]);
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h3 className="font-medium text-black dark:text-white">Bulk imports</h3>
-          <p className="text-xs text-body dark:text-bodydark mt-1">
-            Upload a filled-in template, check it, then post it. Every batch stays listed here and can be reversed.
-          </p>
-        </div>
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm text-white"
-        >
-          <Upload size={14} />
-          Import Spreadsheet
-        </button>
-      </div>
-
-      <div className="p-7">
+    <Card>
+      {/* "Bulk imports" is not a pure repeat of the page title, and the bar holds Import Spreadsheet. */}
+      <CardHeader
+        title="Bulk imports"
+        description="Upload a filled-in template, check it, then post it. Every batch stays listed here and can be reversed."
+        actions={
+          <Button variant="primary" onClick={() => setDialogOpen(true)}>
+            <Upload size={14} />
+            Import Spreadsheet
+          </Button>
+        }
+      />
+      <CardBody>
         {error && (
-          <div className="mb-4 rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+          <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
             {error}
-            <button onClick={load} className="ml-3 underline">Retry</button>
+            <Button variant="secondary" size="sm" className="ml-3" onClick={load}>Retry</Button>
           </div>
         )}
         {loading ? (
-          <p className="text-sm text-body dark:text-bodydark">Loading…</p>
+          <SkeletonBlock rows={4} label="Loading imports…" />
         ) : batches.length === 0 && !error ? (
           <p className="text-sm text-body dark:text-bodydark">
             No imports yet. Click “Import Spreadsheet” to start — nothing is posted until you confirm it on the review screen.
@@ -82,7 +80,7 @@ export default function ImportsList() {
                   <th className="py-2 pr-3 text-right">Rows</th>
                   <th className="py-2 pr-3">Status</th>
                   <th className="py-2 pr-3">Uploaded</th>
-                  <th className="py-2">Actions</th>
+                  <th className="min-w-[7rem] py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -108,10 +106,11 @@ export default function ImportsList() {
                       <Link
                         href={`/imports/${b.batch_ref}`}
                         onClick={(e) => e.stopPropagation()}
-                        aria-label={`Open batch ${b.batch_ref}`}
-                        className="inline-flex min-h-[24px] items-center text-cyan-400 hover:text-cyan-500"
+                        aria-label={`View batch ${b.batch_ref}`}
+                        className="inline-flex min-h-10 items-center gap-2 border border-field bg-white px-3 text-sm font-semibold text-black hover:border-primary hover:text-primary dark:border-field-dark dark:bg-boxdark dark:text-white dark:hover:border-olive-300 dark:hover:text-olive-300"
                       >
                         <Eye size={16} />
+                        View
                       </Link>
                     </td>
                   </tr>
@@ -120,9 +119,9 @@ export default function ImportsList() {
             </table>
           </div>
         )}
-      </div>
+      </CardBody>
 
       <ImportDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-    </div>
+    </Card>
   );
 }

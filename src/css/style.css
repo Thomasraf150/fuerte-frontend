@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -281,17 +279,8 @@ input[type="search"]::-webkit-search-cancel-button {
     display: none !important;
 }
 
-.lbl-form {
-    border: 1px solid #f0f0f0;
-    padding: 17px;
-    background: #F1EBDC; /* brand meta-2 (was #dee9ff) */
-}
-
-/* Dark mode styles for form labels */
-.dark .lbl-form {
-    background: #3A3729;  /* meta-4 (brand; was #313D4A) - matches form inputs */
-    border: 1px solid #3D3A2D;  /* strokedark (brand; was #2E3A47) - consistent borders */
-}
+/* FormLabel used to draw as a filled beige bar. UI modernisation B (2026-10-07): a plain bold
+   label like every field label, so no bar here. The class stays for any page CSS that targets it. */
 
 button {
     border-radius: 0 !important;
@@ -312,4 +301,87 @@ button {
 .nextui-calendar button {
   background-color: #f3f4f6 !important;
   color: #1f2937 !important;
+}
+/*
+ * SweetAlert2 dialogs, restyled (UI modernisation B, 2026-10-07). The SAME dialogs, texts and
+ * buttons; only the look changes. One filled button per dialog, its action ("Avoid using multiple
+ * default buttons", GOV.UK): Cancel / Back become outlined instead of a second, red, filled button.
+ * The !important wins over the inline background SweetAlert sets from confirmButtonColor /
+ * cancelButtonColor. Toasts (.swal2-toast) are left alone.
+ */
+.swal2-popup:not(.swal2-toast) {
+  font-family: var(--font-sans), "Hanken Grotesk", sans-serif;
+  border-radius: 12px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  color: #28261A;
+}
+.swal2-popup:not(.swal2-toast) .swal2-title {
+  font-family: var(--font-display), "Fraunces", Georgia, serif;
+  font-weight: 600;
+  font-size: 1.375rem;
+  color: #28261A;
+}
+.swal2-popup:not(.swal2-toast) .swal2-html-container {
+  color: #6B6553;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.swal2-popup:not(.swal2-toast) .swal2-actions {
+  gap: 0.5rem;
+}
+.swal2-popup:not(.swal2-toast) .swal2-styled {
+  margin: 0;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: none !important;
+}
+@media (min-width: 1024px) {
+  .swal2-popup:not(.swal2-toast) .swal2-styled { min-height: 40px; }
+}
+.swal2-popup:not(.swal2-toast) .swal2-styled:focus-visible {
+  outline: 2px solid #5A6B2C;
+  outline-offset: 2px;
+}
+.swal2-popup:not(.swal2-toast) .swal2-cancel,
+.swal2-popup:not(.swal2-toast) .swal2-deny {
+  background-color: #FFFFFF !important;
+  color: #28261A !important;
+  border: 1px solid #8F8873 !important;
+}
+.swal2-popup:not(.swal2-toast) .swal2-cancel:hover,
+.swal2-popup:not(.swal2-toast) .swal2-deny:hover {
+  border-color: #5A6B2C !important;
+  color: #5A6B2C !important;
+  background-image: none !important;
+}
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-warning {
+  border-color: #E3A92E;
+  color: #8A6312;
+}
+.swal2-popup:not(.swal2-toast) .swal2-input,
+.swal2-popup:not(.swal2-toast) .swal2-textarea,
+.swal2-popup:not(.swal2-toast) .swal2-select {
+  border: 1px solid #8F8873;
+  border-radius: 8px;
+  box-shadow: none;
+  font-size: 0.875rem;
+}
+.swal2-popup:not(.swal2-toast) .swal2-input:focus,
+.swal2-popup:not(.swal2-toast) .swal2-textarea:focus {
+  border-color: #5A6B2C;
+  box-shadow: 0 0 0 3px rgba(90, 107, 44, 0.3);
+}
+.dark .swal2-popup:not(.swal2-toast) {
+  background: #2E2B20;
+  color: #EAE4D3;
+}
+.dark .swal2-popup:not(.swal2-toast) .swal2-title { color: #FFFFFF; }
+.dark .swal2-popup:not(.swal2-toast) .swal2-html-container { color: #BDB6A3; }
+.dark .swal2-popup:not(.swal2-toast) .swal2-cancel,
+.dark .swal2-popup:not(.swal2-toast) .swal2-deny {
+  background-color: #2E2B20 !important;
+  color: #FFFFFF !important;
+  border-color: #7A735F !important;
 }

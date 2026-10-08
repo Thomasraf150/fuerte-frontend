@@ -5,6 +5,7 @@ import FormInput from '@/components/FormInput';
 import FormInputFile from '@/components/FormInputFile';
 import useCompanyProfileForm from '@/hooks/useCompanyProfileForm';
 import Image from 'next/image'; // Import next/image
+import Button from '@/components/Button';
 
 const CompanyProfileForm: React.FC = () => {
   const { register, handleSubmit, errors, onSubmit, companyLogo, companyProfileLoading } = useCompanyProfileForm(undefined);
@@ -26,7 +27,7 @@ const CompanyProfileForm: React.FC = () => {
   }, [companyLogo]);
 
   return (
-    <form onSubmit={handleSubmit(async (data) => {
+    <form className="space-y-4" onSubmit={handleSubmit(async (data) => {
       const result = await onSubmit(data);
       // Note: Company profile form doesn't close automatically since it's a standalone settings page
     })}>
@@ -154,18 +155,14 @@ const CompanyProfileForm: React.FC = () => {
 
       
      
-      <div className="flex justify-end gap-4.5">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-          type="button"
-        >
+      <div className="flex justify-end gap-2">
+        <Button variant="secondary"
+          type="button">
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${companyProfileLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={companyProfileLoading}
-        >
+          disabled={companyProfileLoading}>
           {companyProfileLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -177,7 +174,7 @@ const CompanyProfileForm: React.FC = () => {
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

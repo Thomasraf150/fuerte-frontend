@@ -1,4 +1,5 @@
 "use client"
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown } from 'react-feather';
@@ -21,7 +22,7 @@ const ClosingEntriesForm: React.FC<ParentFormBr> = ({ }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className='mt-2'>
           <FormInput
             label="Area"
@@ -57,7 +58,7 @@ const ClosingEntriesForm: React.FC<ParentFormBr> = ({ }) => {
             className='mt-2'
           />
         </div>
-        <div className='col-span-2'>
+        <div className='md:col-span-2'>
           <FormInput
             label="Particulars"
             id="balance"
@@ -71,18 +72,14 @@ const ClosingEntriesForm: React.FC<ParentFormBr> = ({ }) => {
       </div>
 
       <div className="flex justify-end gap-4.5">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-          type="button"
-        >
+        <Button variant="secondary"
+          type="button">
           Cancel
-        </button>
-        <button
-          className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
-          type="submit"
-        >
+        </Button>
+        <Button variant="primary"
+          type="submit">
           Save
-        </button>
+        </Button>
       </div>
     </form>
   );

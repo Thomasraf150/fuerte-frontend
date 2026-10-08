@@ -461,7 +461,7 @@ export async function queryGraphQL(query: string, variables: any = {}) {
 }
 
 export async function searchInList(page: Page, searchTerm: string) {
-  const searchInput = page.locator('input[type="search"], input[placeholder*="Search"]').first();
+  const searchInput = page.locator('main').locator('input[type="search"], input[placeholder*="Search"]').first();
   if (await searchInput.count() > 0) {
     await searchInput.fill(searchTerm);
 

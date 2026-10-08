@@ -23,6 +23,7 @@ const ERROR_PATTERNS = [
 ];
 const EMPTY_PATTERNS = [
   'no records to display',
+  'to show.', // the shared table's empty sentence since 2026-10-07: "No borrowers to show."
   'no data to display',
   'no records found',
 ];

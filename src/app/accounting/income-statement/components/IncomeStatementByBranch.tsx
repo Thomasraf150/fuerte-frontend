@@ -161,9 +161,9 @@ const IncomeStatementByBranch: React.FC<IncomeStatementByBranchProps> = ({
                     <tr
                       key={`${branchId}-${idx}`}
                       className={isHeader
-                        ? 'bg-gray-100 dark:bg-gray-800/50 font-medium'
+                        ? 'bg-gray-2 dark:bg-meta-4 font-medium'
                         : `border-b border-[#eee] dark:border-strokedark hover:bg-blue-50 dark:hover:bg-meta-4 ${
-                            idx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-900/30'
+                            idx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-3 dark:bg-meta-4'
                           }`
                       }
                     >
@@ -188,7 +188,7 @@ const IncomeStatementByBranch: React.FC<IncomeStatementByBranchProps> = ({
                 })}
 
                 {/* Branch subtotal row */}
-                <tr className="bg-gray-100 dark:bg-gray-700/50 border-b-2 border-stroke dark:border-strokedark">
+                <tr className="bg-gray-2 dark:bg-meta-4 border-b-2 border-stroke dark:border-strokedark">
                   <td className="px-4 py-2 font-semibold text-black dark:text-white">
                     Subtotal - {group.branch_name}
                   </td>

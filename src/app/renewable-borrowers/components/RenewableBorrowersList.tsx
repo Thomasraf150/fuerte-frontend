@@ -9,7 +9,9 @@ import {
   useRenewableBorrowersPaginated,
   RenewableBorrowerRow,
 } from "@/hooks/useRenewableBorrowersPaginated";
+import Button from '@/components/Button';
 import CustomDatatable from "@/components/CustomDatatable";
+import { Card, CardBody } from "@/components/Card";
 import ReactSelect from "@/components/ReactSelect";
 
 interface Option {
@@ -60,7 +62,7 @@ const StandingBadge: React.FC<{ row: RenewableBorrowerRow }> = ({ row }) => {
     );
   }
   return (
-    <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-900/40 dark:text-red-300">
+    <span className="inline-flex items-center rounded-full bg-danger/10 px-2.5 py-0.5 text-xs font-semibold text-danger dark:bg-danger/20 dark:text-danger">
       ⚠ {row.problem_cutoffs} cut-off{row.problem_cutoffs === 1 ? "" : "s"} · ₱{peso(row.problem_shortfall)}
     </span>
   );
@@ -162,7 +164,7 @@ const RenewableBorrowersList: React.FC = () => {
       {
         name: "Renewable Loans",
         cell: (r) => (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+          <span className="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">
             {r.renewable_loan_count}
           </span>
         ),
@@ -182,25 +184,25 @@ const RenewableBorrowersList: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <p className="text-xs font-medium uppercase text-gray-500 dark:text-bodydark">Renewable Borrowers</p>
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-2xl border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <p className="text-xs font-medium uppercase text-body dark:text-bodydark">Renewable Borrowers</p>
           <p className="mt-1 text-2xl font-bold text-black dark:text-white">
             {loading && data.length === 0 ? "—" : summary.total_renewable_borrowers.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <p className="text-xs font-medium uppercase text-gray-500 dark:text-bodydark">Problem Accounts (this page)</p>
-          <p className="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">
+        <div className="rounded-2xl border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <p className="text-xs font-medium uppercase text-body dark:text-bodydark">Problem Accounts (this page)</p>
+          <p className="mt-1 text-2xl font-bold text-danger dark:text-danger">
             {loading && data.length === 0 ? "—" : summary.total_problem_on_page.toLocaleString()}
           </p>
         </div>
       </div>
 
-      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <Card>
         <div className="p-4 grid grid-cols-1 md:grid-cols-4 gap-3 border-b border-stroke dark:border-strokedark">
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Group</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Group</label>
             <ReactSelect
               options={groupOptions}
               value={findOption(groupOptions, branchGroupId, ALL_GROUPS_OPTION)}
@@ -212,7 +214,7 @@ const RenewableBorrowersList: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Branch</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Branch</label>
             <ReactSelect
               options={branchOptions}
               value={findOption(branchOptions, branchId, branchNoFilterOption)}
@@ -224,7 +226,7 @@ const RenewableBorrowersList: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Sub-Branch</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Sub-Branch</label>
             <ReactSelect
               options={subBranchOptions}
               value={findOption(subBranchOptions, branchSubId, ALL_SUB_BRANCHES_OPTION)}
@@ -238,13 +240,13 @@ const RenewableBorrowersList: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">Search</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Search</label>
             <input
               type="text"
               placeholder="Borrower name or loan ref"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="border border-stroke dark:border-strokedark rounded px-3 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white text-sm"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             />
           </div>
         </div>
@@ -252,13 +254,13 @@ const RenewableBorrowersList: React.FC = () => {
         {error && (
           <div className="m-4 p-3 bg-danger/10 border border-danger text-danger rounded flex items-center justify-between">
             <span>Error loading renewable borrowers: {error}</span>
-            <button onClick={refresh} className="ml-2 px-3 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90">
+            <Button variant="secondary" size="sm" className="ml-2" onClick={refresh}>
               Retry
-            </button>
+            </Button>
           </div>
         )}
 
-        <div className="p-2 lg:p-4 overflow-x-auto">
+        <CardBody className="overflow-x-auto">
           <CustomDatatable
             apiLoading={loading}
             columns={columns}
@@ -268,8 +270,8 @@ const RenewableBorrowersList: React.FC = () => {
             title={""}
             serverSidePagination={serverSidePaginationProps}
           />
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 };

@@ -11,6 +11,8 @@ import { showAlreadyPendingModal, showProcessingModal } from '@/components/Confi
 import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 import useDeletionRequests from '@/hooks/useDeletionRequests';
 import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const LoanTypeList: React.FC = () => {
   const {
@@ -92,21 +94,17 @@ const LoanTypeList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className={`grid ${showForm ? 'grid-cols-5' : 'grid-cols-1'} gap-4`}>
-          <div className={showForm ? 'col-span-3' : ''}>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Loan Types
-                </h3>
-              </div>
-              <div className="p-7">
-                <button
-                  className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
-                  onClick={handleCreate}
-                >
-                  Create
-                </button>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div className={`col-span-1 ${showForm ? 'xl:col-span-2' : 'xl:col-span-3'}`}>
+            <Card>
+              <CardHeader title="Loan Types" />
+              <CardBody>
+                <Toolbar>
+                  <Button variant="primary"
+                    onClick={handleCreate}>
+                    Create
+                  </Button>
+                </Toolbar>
                 <CustomDatatable
                   apiLoading={loading || pendingLoading}
                   title=""
@@ -115,27 +113,23 @@ const LoanTypeList: React.FC = () => {
                   data={dataLoanTypes}
                   conditionalRowStyles={pendingDeletionRowStyles<DataRowLoanTypeList>(pendingByEntityId)}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
 
           {showForm && (
-            <div className="col-span-2">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {editData ? 'Update Loan Type' : 'Create Loan Type'}
-                  </h3>
-                </div>
-                <div className="p-7">
+            <div className="col-span-1">
+              <Card>
+                <CardHeader title={editData ? 'Update Loan Type' : 'Create Loan Type'} />
+                <CardBody>
                   <LoanTypeForm
                     onSubmit={handleFormSubmit}
                     onCancel={handleCancel}
                     initialData={editData}
                     submitting={submitting}
                   />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
         </div>

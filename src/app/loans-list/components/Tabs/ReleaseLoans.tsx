@@ -10,8 +10,10 @@ import moment from 'moment';
 import Link from 'next/link';
 import AcctgEntryForm from './AcctgEntryForm';
 import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
-import { LoadingSpinner } from '@/components/LoadingStates';
+import { LoadingSpinner, SkeletonBlock } from '@/components/LoadingStates';
+import Button from '@/components/Button';
 import { useStableLoading } from '@/hooks/useStableLoading';
+import { OLIVE } from '@/utils/brandColors';
 
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
@@ -98,6 +100,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
   // Watch bank selection to detect when "Cash on Hand" is selected
   const selectedBankId = watch('bank_id');
   const isCashSelected = isCashBank(selectedBankId);
+  const releaseCols = isCashSelected ? 'sm:grid-cols-2' : 'sm:grid-cols-3';
 
   const onSubmit: SubmitHandler<LoanReleaseFormValues> = async (data) => {
     setReleaseLoading(true);
@@ -211,18 +214,20 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
           <LoadingSpinner size="lg" message={tabBusyMessage} />
         </div>
       )}
-      <div className="w-full lg:w-3/4 xl:w-1/2">
+      <div className="w-full max-w-3xl">
       <form onSubmit={handleSubmit(onSubmit)} >
-      <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-1 sm:grid-cols-3 sm:gap-4">
-        <div className="flow-root border border-gray-100 py-3 shadow-sm">
-          <dl className="-my-3 divide-y divide-gray-100 text-sm">
-            <div className={`grid gap-1 p-3 sm:gap-4 bg-boxdark-2 text-lime-100 ${isCashSelected ? 'grid-cols-2 lg:grid-cols-2 sm:grid-cols-2' : 'grid-cols-2 lg:grid-cols-3 sm:grid-cols-3'}`}>
-              <dt className="font-medium text-center text-gray-900">Released Date</dt>
-              <dt className="font-medium text-center text-gray-900">Bank</dt>
-              {!isCashSelected && <dd className="text-gray-700 text-center">Check Number</dd>}
+      <div className="grid grid-cols-1 gap-4 p-3">
+        <div className="flow-root border border-stroke py-3 shadow-sm">
+          <dl className="-my-3 divide-y divide-stroke text-sm">
+            {/* Column titles from sm up; on phones the fields stack and each shows its own caption. */}
+            <div className={`hidden gap-4 p-3 bg-whiten dark:bg-meta-4 text-black dark:text-white sm:grid ${releaseCols}`}>
+              <dt className="font-medium text-center text-black dark:text-white">Released Date</dt>
+              <dt className="font-medium text-center text-black dark:text-white">Bank</dt>
+              {!isCashSelected && <dd className="text-black dark:text-white text-center">Check Number</dd>}
             </div>
-            <div className={`grid gap-1 p-3 sm:gap-4 ${isCashSelected ? 'grid-cols-2 lg:grid-cols-2 sm:grid-cols-2' : 'grid-cols-2 lg:grid-cols-3 sm:grid-cols-2'}`}>
-              <dt className="font-medium text-left text-gray-900">
+            <div className={`grid grid-cols-1 gap-4 p-3 ${releaseCols}`}>
+              <dt className="font-medium text-left text-black dark:text-white">
+                <label htmlFor="startDate" className="mb-1.5 block text-sm sm:sr-only">Released Date</label>
                 <div className="relative">
                   <Controller
                     control={control}
@@ -233,19 +238,21 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                         selected={field.value}
                         onChange={(date: any) => field.onChange(date)}
                         dateFormat="MM/dd/yyyy"
-                        className="p-2 border w-full border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-sm"
+                        wrapperClassName="w-full"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                         placeholderText="Select start date"
                         id="startDate"
                       />
                     )}
                   />
-                  <span className="absolute right-3 top-2.5 pointer-events-none">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                     <Calendar size="18" />
                   </span>
                 </div>
-                {errors.released_date && <p className="mt-2 text-sm text-red-600">{errors.released_date.message}</p>}
+                {errors.released_date && <p className="mt-2 text-sm text-danger">{errors.released_date.message}</p>}
               </dt>
-              <dd className="text-gray-700 dark:text-bodydark text-left">
+              <dd className="text-black dark:text-bodydark text-left">
+                <div aria-hidden="true" className="mb-1.5 text-sm font-medium text-black dark:text-white sm:hidden">Bank</div>
                 <div className="">
                   <Controller
                     name="bank_id"
@@ -254,6 +261,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                     render={({ field }) => (
                       <ReactSelect
                         {...field}
+                        aria-label="Bank"
                         options={bankOptions1}
                         placeholder="Select a Bank..."
                         isLoading={banksLoading}
@@ -266,23 +274,24 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                       />
                     )}
                   />
-                  {errors.bank_id && <p className="mt-2 text-sm text-red-600">{errors.bank_id.message}</p>}
+                  {errors.bank_id && <p className="mt-2 text-sm text-danger">{errors.bank_id.message}</p>}
                 </div>
               </dd>
               {!isCashSelected && (
-                <dt className="font-medium text-left text-gray-900">
+                <dt className="font-medium text-left text-black dark:text-white">
+                  <label htmlFor="check_no" className="mb-1.5 block text-sm sm:sr-only">Check Number</label>
                   <div className="relative">
                     <input
-                      className={`block p-2 w-full border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                      className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                       type="text"
                       id="check_no"
                       placeholder="Check Number"
                       {...register('check_no', { required: "Issued Card No. is required!" })}
                     />
-                    <span className="absolute right-3 top-2.5">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                       <Hash size="18" />
                     </span>
-                    {errors.check_no && <p className="mt-2 text-sm text-red-600">{errors.check_no.message}</p>}
+                    {errors.check_no && <p className="mt-2 text-sm text-danger">{errors.check_no.message}</p>}
                   </div>
                 </dt>
               )}
@@ -293,34 +302,29 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
 
         </div>
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:justify-end">
-          <button
-            className={`flex justify-center items-center text-white py-2 px-4 rounded text-sm w-full sm:w-auto ${
-              loanSingleData?.status === 3 || releaseLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-primary hover:bg-primary/90'
-            }`}
+          <Button
+            variant="primary"
+            className="w-full sm:w-auto"
             type="submit"
             disabled={loanSingleData?.status === 3 || releaseLoading}
           >
-            <span className="mt-1 mr-1">
-              {releaseLoading ? <RotateCw size={17} className="animate-spin" /> : <Save size={17} />}
-            </span>
+            {releaseLoading ? <RotateCw size={17} className="animate-spin" /> : <Save size={17} />}
             <span>{releaseLoading ? 'Releasing...' : 'Release'}</span>
-          </button>
-          <button
-            className="bg-green-600 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full sm:w-auto"
+          </Button>
+          <Button
+            variant="secondary"
+            className="w-full sm:w-auto"
             type="button"
             onClick={handleSaveChanges}
             disabled={loanSingleData?.status !== 3 || saveChangesLoading}
           >
-            <span className="mt-1 mr-1">
-              {saveChangesLoading ? <RotateCw size={17} className="animate-spin" /> : <Save size={17} />}
-            </span>
+            {saveChangesLoading ? <RotateCw size={17} className="animate-spin" /> : <Save size={17} />}
             <span>{saveChangesLoading ? 'Saving...' : 'Save Changes'}</span>
-          </button>
+          </Button>
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
-            <button
-              className={`bg-yellow-500 flex justify-center items-center text-white py-2 px-4 rounded hover:bg-yellow-400 text-sm w-full sm:w-auto ${postingLoading ? 'opacity-70' : ''}`}
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
               type="button"
               disabled={postingLoading}
               onClick={async () => {
@@ -328,11 +332,9 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
                 if (!posted && !postingBlocked) setShowAcctgEntry(true);
               }}
             >
-              <span className="mt-1 mr-1">
-                {postingLoading ? <RotateCw size={17} className="animate-spin" /> : <List size={17} />}
-              </span>
+              {postingLoading ? <RotateCw size={17} className="animate-spin" /> : <List size={17} />}
               <span>{postingLoading ? 'Posting...' : 'Post Accounting'}</span>
-            </button>
+            </Button>
           ) : ('')}
         </div>
       </div>
@@ -356,33 +358,31 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
     )}
     {loanSingleData?.status === 3 && loanSingleData?.acctg_entry === null && unmappedDetails.length === 0 && (
       <div
-        className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+        className="w-full max-w-3xl mt-4 rounded-lg p-4"
         style={{ backgroundColor: '#fff7ed', borderLeft: '5px solid #f59e0b', boxShadow: '0 1px 3px rgba(245,158,11,0.2)' }}
       >
         <div className="flex items-start gap-3">
           <AlertTriangle size={22} style={{ color: '#d97706', flexShrink: 0, marginTop: '2px' }} />
-          <div>
+          <div className="min-w-0">
             <p style={{ color: '#92400e', fontSize: '15px', fontWeight: 700 }}>
               Accounting Entry Not Yet Posted
             </p>
             <p style={{ color: '#b45309', fontSize: '13px', marginTop: '6px' }}>
               This loan has been released but has no accounting entry. Click &quot;Post Accounting&quot; to auto-post, or configure mappings first.
             </p>
-            <div className="flex gap-2 mt-3">
-              <button
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Button
                 type="button"
+                variant="secondary"
                 disabled={postingLoading}
                 onClick={handleRetryAutoPost}
-                className="inline-flex items-center gap-1.5 text-sm"
-                style={{ color: '#fff', backgroundColor: '#f59e0b', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, opacity: postingLoading ? 0.7 : 1 }}
               >
                 {postingLoading ? <RotateCw size={15} className="animate-spin" /> : <List size={15} />}
                 {postingLoading ? 'Posting...' : 'Post Accounting'}
-              </button>
+              </Button>
               <Link
                 href="/accounting/loan-proceed-settings"
-                className="inline-flex items-center gap-1.5 text-sm"
-                style={{ color: '#fff', backgroundColor: '#2563eb', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, textDecoration: 'none' }}
+                className="inline-flex min-h-12 items-center justify-center gap-2 border border-primary bg-primary px-4 text-sm font-semibold text-white hover:bg-olive-700 lg:min-h-10"
               >
                 Configure Mappings →
               </Link>
@@ -394,7 +394,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
     {unmappedDetails.length > 0 && loanSingleData?.acctg_entry === null && (
       postingBlocked ? (
         <div
-          className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+          className="w-full max-w-3xl mt-4 rounded-lg p-4"
           style={{ backgroundColor: '#fef2f2', borderLeft: '5px solid #dc2626', boxShadow: '0 1px 3px rgba(220,38,38,0.2)' }}
         >
           <div className="flex items-start gap-3">
@@ -413,8 +413,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
               </ul>
               <Link
                 href="/accounting/loan-proceed-settings"
-                className="inline-flex items-center gap-1.5 mt-3 text-sm"
-                style={{ color: '#fff', backgroundColor: '#2563eb', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, textDecoration: 'none' }}
+                className="mt-3 inline-flex min-h-12 items-center justify-center gap-2 border border-primary bg-primary px-4 text-sm font-semibold text-white hover:bg-olive-700 lg:min-h-10"
               >
                 Configure Mappings →
               </Link>
@@ -423,7 +422,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
         </div>
       ) : (
         <div
-          className="w-full lg:w-3/4 xl:w-1/2 mt-4 rounded-lg p-4"
+          className="w-full max-w-3xl mt-4 rounded-lg p-4"
           style={{ backgroundColor: '#fefce8', borderLeft: '5px solid #eab308', boxShadow: '0 1px 3px rgba(234,179,8,0.2)' }}
         >
           <div className="flex items-start gap-3">
@@ -443,7 +442,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
               <Link
                 href="/accounting/loan-proceed-settings"
                 className="inline-flex items-center gap-1.5 mt-3 text-sm"
-                style={{ color: '#1d4ed8', fontWeight: 500, textDecoration: 'underline' }}
+                style={{ color: OLIVE[700], fontWeight: 500, textDecoration: 'underline' }}
               >
                 Configure Mappings →
               </Link>
@@ -459,10 +458,7 @@ const ReleaseLoans: React.FC<OMProps> = ({ handleRefetchData, loanSingleData, on
         <div className="w-full">
           <FormLabel title="Review & Re-post Accounting Entry"/>
           {(lpsLoading || lpsSingleData === undefined) ? (
-            <div className="flex items-center gap-3 p-8 text-gray-500">
-              <RotateCw size={20} className="animate-spin" style={{ color: '#6b7280' }} />
-              <span style={{ fontSize: '14px' }}>Loading account mappings...</span>
-            </div>
+            <SkeletonBlock rows={3} label="Loading account mappings…" />
           ) : (
             <AcctgEntryForm
               branchSubData={branchSubData}

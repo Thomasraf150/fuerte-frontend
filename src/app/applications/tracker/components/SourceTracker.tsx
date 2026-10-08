@@ -2,6 +2,7 @@
 
 import React, { useId, useState } from 'react';
 import { Users } from 'react-feather';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import LoadError from '@/app/applications/components/LoadError';
 import { useCanUpload } from '@/app/applications/components/useCanUpload';
 import useApplicationSourceCounts from '@/hooks/useApplicationSourceCounts';
@@ -62,24 +63,18 @@ const SourceTracker: React.FC = () => {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <section
-        aria-labelledby={headingId}
-        className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
-      >
-        <header className="border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
-          <h3 id={headingId} className="font-medium text-black dark:text-white">Applications by source</h3>
-          <p className="mt-0.5 text-sm text-body dark:text-bodydark">Counted by the day the person applied.</p>
-        </header>
+      <Card aria-labelledby={headingId}>
+        <CardHeader id={headingId} title="Applications by source" description="Counted by the day the person applied." />
         {/* The same padding as the Applications list, so the two pages line up. */}
-        <div className="space-y-5 px-3 py-5 sm:px-5 md:p-7">
+        <CardBody>
           <PeriodPicker period={period} range={range} onSelect={select} onApplyCustom={setRange} />
           <MetaLine range={range} scope={scope} />
           <p role="status" className="sr-only">{status}</p>
           <div aria-busy={loading}>
             {error ? <LoadError message={error} onRetry={refresh} /> : <SourceResults summary={summary} />}
           </div>
-        </div>
-      </section>
+        </CardBody>
+      </Card>
       <FunnelPanel range={range} />
     </div>
   );

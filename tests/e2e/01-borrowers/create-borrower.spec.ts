@@ -251,7 +251,7 @@ test.describe('Create Borrower', () => {
     //   1. The search input is functional
     //   2. The newly created borrower is in the database
     //   3. The UI correctly displays filtered results
-    const searchInput = page.locator('input[type="search"], input[placeholder*="Search"]').first();
+    const searchInput = page.locator('main').locator('input[type="search"], input[placeholder*="Search"]').first();
     await searchInput.fill(testData.firstname);
     console.log(`   🔍 Searching for: ${testData.firstname}`);
 

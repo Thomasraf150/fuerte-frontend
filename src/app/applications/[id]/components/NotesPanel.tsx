@@ -2,6 +2,7 @@
 
 import React, { useId } from 'react';
 import { Check, X } from 'react-feather';
+import { Card, CardHeader } from '@/components/Card';
 import { formatDecidedOn } from '@/components/DecisionPill';
 import type { ApplicationNote } from '@/utils/DataTypes';
 
@@ -75,18 +76,13 @@ export const NotesPanel: React.FC<{ notes: readonly ApplicationNote[] | null | u
   const titleId = useId();
   if (!notes?.length) return null;
   return (
-    <section
-      aria-labelledby={titleId}
-      className="overflow-hidden rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
-    >
-      <h3 id={titleId} className="border-b border-stroke px-4 py-3 font-display text-lg font-semibold text-black dark:border-strokedark dark:text-white">
-        Notes
-      </h3>
+    <Card aria-labelledby={titleId} className="overflow-hidden">
+      <CardHeader id={titleId} title="Notes" />
       <ol className="divide-y divide-stroke dark:divide-strokedark">
         {newestFirst(notes).map((note) => (
           <NoteItem key={`${note.kind}-${note.at}`} note={note} />
         ))}
       </ol>
-    </section>
+    </Card>
   );
 };

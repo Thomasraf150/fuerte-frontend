@@ -7,6 +7,8 @@ import FormAddUser from './FormAddUser';
 import { User, DataFormUser } from '@/utils/DataTypes';
 import useUsers from '@/hooks/useUsers';
 import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = userListCol;
 
@@ -60,31 +62,25 @@ const UserLists: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
 
-          <div className="col-span-1 xl:col-span-2">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Users
-                </h3>
-              </div>
-              <div className="p-7">
+          <div className={`col-span-1 ${showForm ? 'xl:col-span-2' : 'xl:col-span-3'}`}>
+            <Card>
+              <CardHeader title="Users" />
+              <CardBody>
                 {callerIsOwner && (
-                  <button
-                    className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
-                    onClick={() => handleShowForm('Create User', true)}
-                  >
-                    Create
-                  </button>
+                  <Toolbar>
+                    <Button variant="primary"
+                      onClick={() => handleShowForm('Create User', true)}>
+                      Create
+                    </Button>
+                  </Toolbar>
                 )}
                 {usersError && (
-                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading users: {usersError}
-                    <button
-                      onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                    >
+                    <Button variant="secondary" size="sm" className="ml-2"
+                      onClick={refresh}>
                       Retry
-                    </button>
+                    </Button>
                   </div>
                 )}
                 <CustomDatatable
@@ -95,23 +91,18 @@ const UserLists: React.FC = () => {
                   enableCustomHeader={true}
                   serverSidePagination={serverSidePaginationProps}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
 
           {showForm && (
             <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                  <FormCloseButton onClose={() => setShowForm(false)} />
-                </div>
-                <div className="p-7">
+              <Card>
+                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => setShowForm(false)} />} />
+                <CardBody>
                   <FormAddUser setShowForm={setShowForm} actionLbl={actionLbl} onSaved={refresh} singleUserData={singleUserData} />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
 

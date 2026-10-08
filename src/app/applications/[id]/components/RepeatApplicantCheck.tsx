@@ -176,7 +176,7 @@ const RepeatApplicantCard: React.FC<{ match: LoanApplicationBorrowerMatch; focus
  * (aria-disabled, as Print does) so a keyboard user is not dropped.
  */
 const CheckFailedNote: React.FC<{ checking: boolean; onRetry: () => void }> = ({ checking, onRetry }) => (
-  <div className="flex flex-col gap-3 rounded-sm border border-stroke bg-whiten px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between dark:border-strokedark dark:bg-meta-4">
+  <div className="flex flex-col gap-3 rounded-2xl border border-stroke bg-whiten px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between dark:border-strokedark dark:bg-meta-4">
     <p className="flex min-w-0 items-start gap-2 text-black dark:text-bodydark">
       <HelpCircle aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-bodydark2" />
       <span className="min-w-0 break-words">{CHECK_FAILED}</span>

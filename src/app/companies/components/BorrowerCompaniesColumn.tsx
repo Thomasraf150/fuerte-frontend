@@ -2,8 +2,8 @@
 
 import { TableColumn } from 'react-data-table-component';
 import { DataBorrCompanies } from '@/utils/DataTypes';
-import { Eye, Edit3, Trash2 } from 'react-feather';
-import Tooltip from '@/components/Tooltip';
+import { Edit3, Trash2 } from 'react-feather';
+import Button from '@/components/Button';
 
 const borrowerCompaniesCol = (handleUpdateRowClick: (row: DataBorrCompanies) => void, handleDeleteRow: (row: DataBorrCompanies) => void): TableColumn<DataBorrCompanies>[] => [
   {
@@ -44,23 +44,15 @@ const borrowerCompaniesCol = (handleUpdateRowClick: (row: DataBorrCompanies) => 
   },
   {
     name: 'Action',
+    minWidth: '210px',
+    button: true,
     cell: row => {
-      
       return (
-        <>
-          {/* <Tooltip text="View Sub Branch">
-            <Eye onClick={() => handleUpdateSubRowClick(row)} size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `} */}
-          <Tooltip text="Edit">
-            <Edit3 onClick={() => handleUpdateRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `}
-          <Tooltip text="Remove">
-            <Trash2 size="16" onClick={() => handleDeleteRow(row)} className="text-cyan-400 ml-1 cursor-pointer"/>
-          </Tooltip>
-        </>
-      )
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => handleUpdateRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => handleDeleteRow(row)}><Trash2 size={16} aria-hidden="true" />Remove</Button>
+        </div>
+      );
     },
   },
 ];

@@ -5,12 +5,14 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { SkeletonBlock } from '@/components/LoadingStates';
 import useLoanProducts from '@/hooks/useLoanProducts';
 import LoanProductsQueryMutations from '@/graphql/LoanProductsQueryMutations';
 import FormAddLoanProduct from '../components/FormAddLoanProduct';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 const LoanProductDetailPage: React.FC = () => {
   const params = useParams();
@@ -90,9 +92,7 @@ const LoanProductDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Loading..." />
         </div>
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner />
-        </div>
+        <SkeletonBlock rows={4} label="Loading loan product…" />
       </DefaultLayout>
     );
   }
@@ -104,19 +104,17 @@ const LoanProductDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Error" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-500 mb-4">
+        <Card>
+          <CardBody className="text-center">
+            <h3 className="text-xl font-semibold text-danger">
               {error}
             </h3>
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-            >
+            <Button variant="primary"
+              onClick={handleBack}>
               Back to Loan Products
-            </button>
-          </div>
-        </div>
+            </Button>
+          </CardBody>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -141,21 +139,17 @@ const LoanProductDetailPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-            <h3 className="font-medium text-black dark:text-white">
-              {actionLbl}
-            </h3>
-          </div>
-          <div className="p-7">
+        <Card>
+          <CardHeader title={actionLbl} />
+          <CardBody>
             <FormAddLoanProduct
               setShowForm={handleShowForm}
               fetchLoanProducts={refresh}
               singleData={singleData}
               actionLbl={actionLbl}
             />
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </div>
     </DefaultLayout>
   );

@@ -3,11 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'react-feather';
+import { CARD_CLASS } from '@/components/Card';
 
 export const NOT_FOUND_TEXT = "This application doesn't exist or isn't yours to see.";
 
 const BAR = 'rounded bg-stroke dark:bg-meta-4';
-const CARD = 'rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark';
+const CARD = CARD_CLASS;
 
 /**
  * What shows while the application loads: the shape the page will have (header, actions,
@@ -26,7 +27,7 @@ export const ApplicationSkeleton: React.FC = () => (
       <div className={`${BAR} h-12 md:h-10 md:w-56`} />
       <div className={`${BAR} h-12 md:ml-auto md:h-10 md:w-44`} />
     </div>
-    <div className={`${CARD} space-y-4 p-5 sm:p-7`}>
+    <div className={`${CARD} space-y-4 p-4 sm:p-6`}>
       <div className={`${BAR} h-5 w-36`} />
       <div className="grid gap-3 sm:grid-cols-2">
         <div className={`${BAR} h-12 md:h-10`} />

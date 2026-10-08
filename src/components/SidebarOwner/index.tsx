@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "@/components/Sidebar/SidebarLinkGroup";
 import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
 import { Server } from 'react-feather';
@@ -75,13 +75,13 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   };
 
   const linkClass = (active: boolean) =>
-    `group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${active ? "bg-graydark dark:bg-meta-4" : ""}`;
+    `group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${active ? "!bg-primary text-white" : ""}`;
 
   const subLinkClass = (active: boolean) =>
-    `group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${active ? "text-white" : ""}`;
+    `group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${active ? "text-white" : ""}`;
 
   const subLinkSmClass = (active: boolean) =>
-    `group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${active ? "text-white" : ""}`;
+    `group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${active ? "text-white" : ""}`;
 
   return (
     <aside
@@ -91,17 +91,9 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       }`}
     >
       {/* SIDEBAR HEADER */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
         <Link href="/">
-          <Image
-            width={0}
-            height={0}
-            sizes="240px"
-            src={"/images/logo/fuerte-logo.png"}
-            alt="Logo"
-            priority
-            style={{ width: '240px', height: 'auto' }}
-          />
+          <BrandLockup />
         </Link>
         <button
           ref={trigger}
@@ -117,10 +109,10 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       </div>
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
+        <nav className="mt-2 px-4 py-4 lg:px-5">
           {/* ===== DASHBOARD ===== */}
           <div>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">DASHBOARD</h3>
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">DASHBOARD</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* Dashboard */}
               <SidebarLinkGroup activeCondition={pathname === "/" || pathname.includes("dashboard")}>
@@ -137,7 +129,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/" className={subLinkClass(pathname === "/")}>Summary</Link></li>
                         <li><Link href="/accounting-dashboard" className={subLinkClass(pathname === "/accounting-dashboard")}>Accounting Dashboard</Link></li>
                         <li><Link href="/notes-receivable" className={subLinkClass(pathname === "/notes-receivable")}>Notes Receivable</Link></li>
@@ -183,7 +175,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
 
             {/* ===== TRANSACTIONS ===== */}
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">TRANSACTIONS</h3>
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">TRANSACTIONS</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* Loans */}
               <SidebarLinkGroup activeCondition={pathname === "/loans-list" || pathname === "/loan-calculator" || pathname.includes("loans")}>
@@ -197,7 +189,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/loans-list" className={subLinkClass(pathname === "/loans-list")}>Loans List</Link></li>
                         <li><Link href="/loan-calculator" className={subLinkClass(pathname === "/loan-calculator")}>Loan Calculator</Link></li>
                       </ul>
@@ -218,7 +210,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/collection-list" className={subLinkClass(pathname === "/collection-list")}>Collection Lists</Link></li>
                         <li><Link href="/payment-posting" className={subLinkClass(pathname === "/payment-posting")}>Payment Posting</Link></li>
                         <li><Link href="/statement-of-account" className={subLinkClass(pathname === "/statement-of-account")}>Statement of Account</Link></li>
@@ -232,7 +224,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
 
             {/* ===== ACCOUNTING ===== */}
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">ACCOUNTING</h3>
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">ACCOUNTING</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* Accounting Reports */}
               <SidebarLinkGroup
@@ -272,7 +264,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                      <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/accounting/unadjusted-trial-balance" className={subLinkSmClass(pathname === "/accounting/unadjusted-trial-balance")}>Unadjusted Trial Balance</Link></li>
                         <li><Link href="/accounting/adjusting-entries" className={subLinkSmClass(pathname === "/accounting/adjusting-entries")}>Adjusting Entries</Link></li>
                         <li><Link href="/accounting/adjusted-trial-balance" className={subLinkSmClass(pathname === "/accounting/adjusted-trial-balance")}>Adjusted Trial Balance</Link></li>
@@ -311,7 +303,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                      <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/accounting/general-voucher" className={subLinkSmClass(pathname === "/accounting/general-voucher")}>General Voucher</Link></li>
                         <li><Link href="/accounting/debit-memo" className={subLinkSmClass(pathname === "/accounting/debit-memo")}>Debit Memo</Link></li>
                         <li><Link href="/accounting/credit-memo" className={subLinkSmClass(pathname === "/accounting/credit-memo")}>Credit Memo</Link></li>
@@ -341,7 +333,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                      <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/accounting/general-journal" className={subLinkSmClass(pathname === "/accounting/general-journal")}>General Journal</Link></li>
                         <li><Link href="/accounting/cdj" className={subLinkSmClass(pathname === "/accounting/cdj")}>Cash Disbursements Journal</Link></li>
                         <li><Link href="/accounting/crj" className={subLinkSmClass(pathname === "/accounting/crj")}>Cash Receipts Journal</Link></li>
@@ -369,7 +361,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
 
             {/* ===== SETTINGS ===== */}
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">SETTINGS</h3>
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">SETTINGS</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* Company */}
               <SidebarLinkGroup activeCondition={pathname === "/company-profile" || pathname === "/branch-setup" || pathname === "/users-setup"}>
@@ -383,7 +375,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/company-profile" className={subLinkClass(pathname === "/company-profile")}>Company Profile</Link></li>
                         <li><Link href="/branch-setup" className={subLinkClass(pathname === "/branch-setup")}>Branch Setup</Link></li>
                         <li><Link href="/users-setup" className={subLinkClass(pathname === "/users-setup")}>Users Setup</Link></li>
@@ -419,7 +411,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <ChevronIcon />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/borrower-process" className={subLinkClass(pathname === "/borrower-process")}>Borrower Process</Link></li>
                         <li><Link href="/loan-products" className={subLinkClass(pathname === "/loan-products")}>Loan Products</Link></li>
                         <li><Link href="/loan-codes" className={subLinkClass(pathname === "/loan-codes")}>Loan Codes</Link></li>
@@ -446,7 +438,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
 
             {/* ===== REPORTS ===== */}
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">REPORTS</h3>
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">REPORTS</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               <li>
                 <Link href="/settings" className={linkClass(pathname === "/total-values")}>

@@ -37,7 +37,7 @@ const CollectionListInfo: React.FC<CollectionListProps> = ({ setShowForm }) => {
           <div className="flex justify-around border-b">
             <button
               className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab2' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
+                activeTab === 'tab2' ? 'border-blue-500 text-blue-500' : 'border-transparent text-body hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab2')}
             >
@@ -45,7 +45,7 @@ const CollectionListInfo: React.FC<CollectionListProps> = ({ setShowForm }) => {
             </button>
             <button
               className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab3' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
+                activeTab === 'tab3' ? 'border-blue-500 text-blue-500' : 'border-transparent text-body hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab3')}
             >
@@ -65,27 +65,27 @@ const CollectionListInfo: React.FC<CollectionListProps> = ({ setShowForm }) => {
             )}
             {activeTab === 'tab3' && (
               <div id="content3">
-                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
+                <h2 className="text-xl font-semibold text-black dark:text-white">Under Development..</h2>
+                {/* <p className="mt-2 text-body">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
               </div>
             )}
             {activeTab === 'tab4' && (
               <div id="content4">
-                {/* <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2> */}
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
+                {/* <h2 className="text-xl font-semibold text-black dark:text-white">Under Development..</h2> */}
+                {/* <p className="mt-2 text-body">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
                 {/* <BorrowerCoMaker singleData={singleData} /> */}
               </div>
             )}
             {activeTab === 'tab5' && (
               <div id="content5">
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
+                {/* <p className="mt-2 text-body">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
                 {/* <BorrowerAttachments singleData={singleData} /> */}
               </div>
             )}
             {activeTab === 'tab6' && (
               <div id="content6">
-                <h2 className="text-xl font-semibold text-gray-800">Under Development..</h2>
-                {/* <p className="mt-2 text-gray-600">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
+                <h2 className="text-xl font-semibold text-black dark:text-white">Under Development..</h2>
+                {/* <p className="mt-2 text-body">This is the content of the third tab. Tailwind CSS makes styling easy!</p> */}
               </div>
             )}
           </div>

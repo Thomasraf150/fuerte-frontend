@@ -7,6 +7,7 @@ import CustomDatatable from '@/components/CustomDatatable';
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import useNotesReceivable from '@/hooks/useNotesReceivable';
 import { useNotesReceivablePaginated } from '@/hooks/useNotesReceivablePaginated';
+import Button from '@/components/Button';
 import { NotesReceivableSkeleton, LoadingSpinner } from '@/components/LoadingStates';
 import NetworkStatus from '@/components/NetworkStatus';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -15,6 +16,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import useBranches from '@/hooks/useBranches';
 import { formatNumberComma, formatMoneyOrBlank } from '@/utils/helper';
+import { Card, CardBody } from "@/components/Card";
 
 // const column = soaListColumn;
 interface Option {
@@ -264,17 +266,13 @@ const BorrNrSchedList: React.FC = () => {
         <div className="grid grid-cols-1 gap-4">
           <div className="w-full">
 
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-4 sm:px-7 py-4 dark:border-strokedark">
-                  <h3 className="text-sm text-black dark:text-white">
-                    Notes Receivable
-                  </h3>
-                </div>
-                <div className="p-4 sm:p-7">
+              {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). The filter box is no longer a second card inside this one. */}
+              <Card>
+                <CardBody>
 
 
-                <div className="rounded-lg bg-gray-200 dark:bg-boxdark mb-4 p-6 relative z-20">
-                  <label className="mb-6 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range and Filters:</label>
+                <div className="relative z-20">
+                  <label className="mb-4 block font-semibold text-black dark:text-white">Select Date Range and Filters:</label>
 
                   {/*
                     Seven controls, capped at four columns so they deliberately
@@ -285,7 +283,7 @@ const BorrNrSchedList: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-4 items-end">
                     {/* Start Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="startDate" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                         Start Date:
                       </label>
                       <DatePicker
@@ -296,13 +294,13 @@ const BorrNrSchedList: React.FC = () => {
                         startDate={startDate ?? undefined}
                         endDate={endDate ?? undefined}
                         placeholderText="Start Date"
-                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                       />
                     </div>
 
                     {/* End Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="endDate" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                         End Date:
                       </label>
                       <DatePicker
@@ -314,14 +312,14 @@ const BorrNrSchedList: React.FC = () => {
                         endDate={endDate ?? undefined}
                         minDate={startDate ?? undefined}
                         placeholderText="End Date"
-                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                       />
                     </div>
 
                     {/* Enhanced Search Input (Loan Ref + Name) */}
                     <div className="flex flex-col">
                       <div className="flex items-center justify-between mb-1">
-                        <label htmlFor="searchTerm" className="text-sm font-medium text-gray-700 dark:text-bodydark">
+                        <label htmlFor="searchTerm" className="text-sm font-semibold text-black dark:text-white">
                           Search:
                         </label>
                         <div className="flex items-center space-x-2">
@@ -332,7 +330,7 @@ const BorrNrSchedList: React.FC = () => {
                             onChange={(e) => setAutoSearch(e.target.checked)}
                             className="h-3 w-3"
                           />
-                          <label htmlFor="autoSearch" className="text-xs text-gray-500 dark:text-bodydark whitespace-nowrap">
+                          <label htmlFor="autoSearch" className="text-xs text-body dark:text-bodydark whitespace-nowrap">
                             Auto-search
                           </label>
                         </div>
@@ -344,7 +342,7 @@ const BorrNrSchedList: React.FC = () => {
                           placeholder="Loan Ref or Borrower"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="border border-stroke dark:border-strokedark rounded px-4 py-2 w-full pr-8 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                          className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white pr-10"
                         />
                         {searchTerm !== debouncedSearchTerm && (
                           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -352,14 +350,14 @@ const BorrNrSchedList: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-bodydark mt-1">
+                      <div className="text-xs text-body dark:text-bodydark mt-1">
                         Loan ref or borrower name
                       </div>
                     </div>
 
                     {/* Group Select — FA/FB/FC/FD; narrows the Branch list below */}
                     <div className="flex flex-col">
-                      <label htmlFor="groupSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="groupSelect" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                         Group:
                       </label>
                       <Controller
@@ -385,7 +383,7 @@ const BorrNrSchedList: React.FC = () => {
 
                     {/* Branch Select */}
                     <div className="flex flex-col">
-                      <label htmlFor="branchSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="branchSelect" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                         Branch:
                       </label>
                       <Controller
@@ -411,7 +409,7 @@ const BorrNrSchedList: React.FC = () => {
 
                     {/* Sub Branch Select */}
                     <div className="flex flex-col">
-                      <label htmlFor="subBranchSelect" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="subBranchSelect" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                         Sub Branch:
                       </label>
                       <Controller
@@ -445,10 +443,11 @@ const BorrNrSchedList: React.FC = () => {
                     {/* Search Button */}
                     <div className="flex flex-col">
                       <label className="mb-1 text-sm font-medium text-transparent select-none">Search</label>
-                      <button
+                      <Button
+                        variant="primary"
                         onClick={handleSearch}
                         disabled={loading || !startDate || !endDate}
-                        className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        className="w-full"
                       >
                         {loading ? (
                           <>
@@ -458,7 +457,7 @@ const BorrNrSchedList: React.FC = () => {
                         ) : (
                           <span>Search</span>
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -469,20 +468,17 @@ const BorrNrSchedList: React.FC = () => {
                   <NotesReceivableSkeleton rows={5} columns={months?.length || 3} />
                 ) : error ? (
                   <div className="text-center py-8">
-                    <div className="text-red-600 mb-4">
+                    <div className="text-danger mb-4">
                       <p className="text-lg font-semibold">Error Loading Data</p>
                       <p className="text-sm">{error}</p>
                     </div>
-                    <button 
-                      onClick={retry}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                    >
+                    <Button variant="secondary" onClick={retry}>
                       Retry
-                    </button>
+                    </Button>
                   </div>
                 ) : allLoadedData?.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-600">No data available for the selected date range.</p>
+                    <p className="text-body">No data available for the selected date range.</p>
                   </div>
                 ) : (
                   <>
@@ -505,37 +501,37 @@ const BorrNrSchedList: React.FC = () => {
                         <div
                           key={`${item.loan_ref}-${index}`}
                           onClick={() => setSelectedRow(index)}
-                          className={`${isSelected ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
+                          className={`${isSelected ? 'bg-blue-100 border-blue-300' : 'bg-white border-stroke'} border rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
                         >
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Name</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Name</p>
                               <p className="font-medium text-sm">
                                 {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Loan Ref</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Loan Ref</p>
                               <p className="font-medium text-sm">{item?.loan_ref}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Notes Receivable</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Notes Receivable</p>
                               <p className="font-medium text-sm">{formatNumberComma(pnAmount)}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">UDI</p>
+                              <p className="text-xs text-body uppercase tracking-wide">UDI</p>
                               <p className="font-medium text-sm">{formatNumberComma(udiAmount)}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Net Receivable</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Net Receivable</p>
                               <p className="font-medium text-sm">{formatNumberComma(netReceivable)}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Balance</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Balance</p>
                               <p className="font-medium text-sm">{formatNumberComma(balance)}</p>
                             </div>
                             <div className="col-span-2">
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Total Collected</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Total Collected</p>
                               <p className="font-medium text-sm">{formatNumberComma(totalCollected)}</p>
                             </div>
                           </div>
@@ -549,16 +545,16 @@ const BorrNrSchedList: React.FC = () => {
                     <table className="min-w-full border-separate border-spacing-0">
                       <thead className="bg-white dark:bg-boxdark sticky top-0 z-10">
                         <tr>
-                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
-                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>UDI</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Net Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
+                          <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>UDI</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Net Receivable</th>
                           {months?.map(
                             (month) => (
                               <th
                                 key={month}
-                                className="px-1 md:px-2 py-2 text-center text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden xl:table-cell bg-white dark:bg-boxdark"
+                                className="px-1 md:px-2 py-2 text-center text-xs md:text-sm text-body dark:text-bodydark font-bold hidden xl:table-cell bg-white dark:bg-boxdark"
                                 style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 colSpan={MONTH_FIELDS.length}
                               >
@@ -566,8 +562,8 @@ const BorrNrSchedList: React.FC = () => {
                               </th>
                             )
                           )}
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-gray-600 dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
                         </tr>
                         <tr>
                           {Array(months?.length)
@@ -576,7 +572,7 @@ const BorrNrSchedList: React.FC = () => {
                               MONTH_FIELDS.map(({ label }, idx1) => (
                                 <th
                                   key={`${monthIdx}-${label}-${idx1}`}
-                                  className="px-1 md:px-2 py-1 text-center text-xs text-gray-500 dark:text-bodydark font-bold w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden xl:table-cell bg-white dark:bg-boxdark"
+                                  className="px-1 md:px-2 py-1 text-center text-xs text-body dark:text-bodydark font-bold w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden xl:table-cell bg-white dark:bg-boxdark"
                                   style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                                 >
                                   {label}
@@ -604,19 +600,19 @@ const BorrNrSchedList: React.FC = () => {
                                 <tr
                                   key={`${item.loan_ref}-${index}`}
                                   onClick={() => setSelectedRow(index)}
-                                  className={`${isSelected ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-meta-4'} cursor-pointer`}
+                                  className={`${isSelected ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-whiten dark:hover:bg-meta-4'} cursor-pointer`}
                               >
-                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">
                                   {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                                 </td>
-                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
-                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(pnAmount)}
                                 </td>
-                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(udiAmount)}
                                 </td>
-                                <td className="border border-gray-300 dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(netReceivable)}
                                 </td>
 
@@ -629,7 +625,7 @@ const BorrNrSchedList: React.FC = () => {
                                     MONTH_FIELDS.map(({ key }, fieldIndex) => (
                                       <td
                                         key={`${monthIndex}-${fieldIndex}`}
-                                        className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
+                                        className="border border-stroke dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
                                         {formatMoneyOrBlank(monthlyData[key])}
                                       </td>
@@ -638,7 +634,7 @@ const BorrNrSchedList: React.FC = () => {
                                     Array(MONTH_FIELDS.length).fill(null).map((_, emptyIndex) => (
                                       <td
                                         key={`${monthIndex}-empty-${emptyIndex}`}
-                                        className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
+                                        className="border border-stroke dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
                                         --
                                       </td>
@@ -646,10 +642,10 @@ const BorrNrSchedList: React.FC = () => {
                                   );
                                 })}
 
-                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(totalCollected)}
                                 </td>
-                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(balance)}
                                 </td>
                               </tr>
@@ -661,40 +657,34 @@ const BorrNrSchedList: React.FC = () => {
                   
                   {/* Load More Section */}
                   {hasNextPage && (
-                    <div className="flex items-center justify-center py-6 border-t border-gray-300 md:hidden">
+                    <div className="flex items-center justify-center py-6 border-t border-stroke md:hidden">
                       {loadingMore ? (
                         <LoadingSpinner message="Loading more records..." />
                       ) : (
-                        <button
-                          onClick={handleLoadMore}
-                          className="bg-blue-600 text-white px-4 md:px-6 py-2 rounded hover:bg-blue-700 transition flex items-center space-x-2 text-sm md:text-base"
-                        >
+                        <Button variant="secondary" onClick={handleLoadMore}>
                           <span>Load More Records</span>
                           <span className="text-xs md:text-sm">({totalRecords - allLoadedData.length} remaining)</span>
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}
 
                   {/* Desktop Load More Section */}
                   {hasNextPage && (
-                    <div className="hidden md:flex items-center justify-center py-6 border-t border-gray-300">
+                    <div className="hidden md:flex items-center justify-center py-6 border-t border-stroke">
                       {loadingMore ? (
                         <LoadingSpinner message="Loading more records..." />
                       ) : (
-                        <button
-                          onClick={handleLoadMore}
-                          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition flex items-center space-x-2"
-                        >
+                        <Button variant="secondary" onClick={handleLoadMore}>
                           <span>Load More Records</span>
                           <span className="text-sm">({totalRecords - allLoadedData.length} remaining)</span>
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}
                   
                   {/* Status Footer */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between py-4 px-4 bg-gray-50 border-t border-gray-300 text-xs md:text-sm text-gray-600 gap-2">
+                  <div className="flex flex-col sm:flex-row items-center justify-between py-4 px-4 bg-whiten border-t border-stroke text-xs md:text-sm text-body gap-2">
                     <span>
                       Showing {allLoadedData.length} of {totalRecords} records
                     </span>
@@ -709,8 +699,8 @@ const BorrNrSchedList: React.FC = () => {
 
 
 
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             
           </div>
         </div>

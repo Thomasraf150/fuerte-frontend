@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Layout, Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
+import Button from '@/components/Button';
+import StickyActions from '@/components/StickyActions';
 import FormInput from '@/components/FormInput';
 import { BorrowerRowInfo, BorrLoanFormValues, DataSubBranches, DataRenewalData, SelectOption } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
@@ -25,7 +27,7 @@ interface ParentFormBr {
 }
 
 const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub: _dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches, dataLoanRenewal, dataComputedRenewal }) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors }, control } = useForm<BorrLoanFormValues>();
+  const { register, handleSubmit, setValue, watch, formState: { errors, isDirty }, control } = useForm<BorrLoanFormValues>();
   const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading, searchLoanProducts } = useLoans();
 
   // State to track which action was triggered (compute vs save)
@@ -163,14 +165,14 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   return (
 
     <div className="max-w-8xl mx-auto m-4">
-      <div className="bg-black border-b mb-3 border-stroke px-6.5 py-4 dark:border-strokedark">
-        <h3 className="font-medium text-whiter dark:text-white">
+      <div className="border-b mb-3 border-stroke px-6.5 pb-3 pt-4 dark:border-strokedark">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-primary dark:text-olive-300">
           Create Loans
         </h3>
       </div>
       <div className="max-w-full px-0 z-999999">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 m-5">
-        <div className="border-2 border-emerald-200 p-3 sm:p-4"> {/* column 1 */}
+        <div> {/* column 1 */}
           <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
             {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={setRenewalDetails} />}
@@ -194,7 +196,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                   />
                 )}
               />
-              {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
+              {errors.branch_sub_id && <p className="mt-1.5 text-sm font-medium text-danger">{errors.branch_sub_id.message}</p>}
             </div>
             <div className="mb-3">
               <FormLabel title={`Loan Product`}/>
@@ -225,7 +227,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                   />
                 )}
               />
-              {errors.loan_product_id && <p className="mt-2 text-sm text-red-600">{errors.loan_product_id.message}</p>}
+              {errors.loan_product_id && <p className="mt-1.5 text-sm font-medium text-danger">{errors.loan_product_id.message}</p>}
             </div>
             <FormInput
               label="Loan Amount"
@@ -237,18 +239,16 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
               formatType="number"
             />
 
-            <div>
-              <div className="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
-                <button
-                  className="flex justify-center items-center rounded border border-stroke px-4 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white w-full sm:w-auto"
-                  type="button"
+            {/* The same Back, Compute and Save, kept on screen while the form scrolls (UI modernisation B). */}
+            <StickyActions dirty={isDirty}>
+                <Button
+                  variant="secondary"
                   onClick={()=>{ createLoans(false) }}
                 >
                   Back
-                </button>
-                <button
-                  className="flex justify-center items-center rounded bg-primary px-4 py-2 font-medium text-gray hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                  type="button"
+                </Button>
+                <Button
+                  variant="secondary"
                   disabled={loading}
                   onClick={() => {
                     handleSubmit((data) => onSubmit(data, 'compute'))();
@@ -267,10 +267,9 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       <span>Compute</span>
                     </>
                   )}
-                </button>
-                <button
-                  className="flex justify-center items-center rounded bg-yellow-400 px-4 py-2 font-medium text-black hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                  type="button"
+                </Button>
+                <Button
+                  variant="primary"
                   disabled={loading}
                   onClick={() => {
                     handleSubmit((data) => onSubmit(data, 'save'))();
@@ -289,9 +288,8 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                       <span>Save</span>
                     </>
                   )}
-                </button>
-              </div>
-            </div>
+                </Button>
+            </StickyActions>
 
             </form>
           </div>

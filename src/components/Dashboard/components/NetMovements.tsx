@@ -33,7 +33,7 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
 
   return (
     <div>
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="mb-6 flex justify-between">
           <div>
             <h5 className="text-title-sm font-bold text-black dark:text-white">

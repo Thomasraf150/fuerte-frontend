@@ -22,6 +22,8 @@
 import { MIN_BUSINESS_DATE } from '@/constants/dateBounds';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
+import { Card, CardBody, CardHeader } from '@/components/Card';
+import Button from '@/components/Button';
 import AsyncReactSelect from '@/components/ReactSelect/AsyncReactSelect';
 import { todayLocalISO } from '@/utils/helper';
 import {
@@ -45,9 +47,9 @@ import ManualProductFields from './ManualProductFields';
 import QuotePanel from './QuotePanel';
 
 const FIELD_CLASS =
-  'w-full rounded-sm border border-stroke bg-transparent px-4 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary';
+  'h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-default disabled:bg-whiten dark:border-field-dark dark:bg-form-input dark:text-white';
 
-const LABEL_CLASS = 'mb-2 block text-sm font-medium text-black dark:text-white';
+const LABEL_CLASS = 'mb-1.5 block text-sm font-semibold text-black dark:text-white';
 
 type Mode = 'product' | 'manual';
 
@@ -175,7 +177,7 @@ const LoanCalculator: React.FC = () => {
   };
 
   const tabClass = (active: boolean) =>
-    `flex-1 rounded-sm px-4 py-2.5 text-sm font-medium transition ${
+    `min-h-12 lg:min-h-10 flex-1 rounded-sm px-4 py-2.5 text-sm font-medium transition ${
       active
         ? 'bg-primary text-white'
         : 'text-body hover:text-primary dark:text-bodydark dark:hover:text-white'
@@ -185,15 +187,14 @@ const LoanCalculator: React.FC = () => {
     <div className="lc-print-root grid grid-cols-1 gap-6 xl:grid-cols-12">
       {/* ---------------- Operator controls ---------------- */}
       <section className="lc-no-print xl:col-span-5">
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="border-b border-stroke px-6 py-4 dark:border-strokedark">
-            <h2 className="font-medium text-black dark:text-white">Quote a loan</h2>
-            <p className="mt-1 text-xs text-bodydark2">
-              Nothing on this screen is saved. No borrower or loan is created.
-            </p>
-          </div>
+        <Card as="div">
+          <CardHeader
+            as="h2"
+            title="Quote a loan"
+            description="Nothing on this screen is saved. No borrower or loan is created."
+          />
 
-          <div className="space-y-5 p-6">
+          <CardBody>
             {/* Mode switch */}
             <div className="flex gap-1 rounded-sm bg-whiten p-1 dark:bg-form-input">
               <button type="button" onClick={() => switchMode('product')} className={tabClass(mode === 'product')}>
@@ -397,11 +398,12 @@ const LoanCalculator: React.FC = () => {
               </p>
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="primary"
+              className="w-full"
               onClick={handleCompute}
               disabled={computing}
-              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-6 py-3.5 font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:bg-opacity-60"
             >
               {computing ? (
                 <>
@@ -411,19 +413,15 @@ const LoanCalculator: React.FC = () => {
               ) : (
                 'Compute quote'
               )}
-            </button>
+            </Button>
 
             {comp ? (
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="w-full rounded-sm border border-primary px-6 py-3 font-medium text-primary transition hover:bg-primary hover:text-white"
-              >
+              <Button type="button" variant="secondary" className="w-full" onClick={() => window.print()}>
                 Print quote for borrower
-              </button>
+              </Button>
             ) : null}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </section>
 
       {/* ---------------- Borrower-facing quote ---------------- */}

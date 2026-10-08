@@ -2,6 +2,7 @@
 
 import React, { useId, useState } from 'react';
 import { ChevronDown } from 'react-feather';
+import { CARD_CLASS } from '@/components/Card';
 import { IntakeFlagMark } from '@/app/applications/components/ApplicationStatusPill';
 import { CHANNEL_ICONS, TINTS } from '@/app/applications/components/channelIcons';
 import type { LoanApplicationAnswer } from '@/utils/DataTypes';
@@ -47,7 +48,7 @@ const FlagNotes: React.FC<{ flags: readonly string[] }> = ({ flags }) => {
 const AnswersPanel: React.FC<{ answers: readonly LoanApplicationAnswer[] }> = ({ answers }) => {
   const [open] = useState(startsOpen);
   return (
-    <details open={open} className="group rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+    <details open={open} className={`group ${CARD_CLASS}`}>
       <summary className="flex min-h-12 list-none items-center gap-2.5 rounded-sm px-4 py-3 text-sm font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:text-white [&::-webkit-details-marker]:hidden">
         {/* The Google Form source's own icon and tint: the same bubble the header and the New application tile give it. */}
         <span aria-hidden="true" className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${TINTS.google_form}`}>

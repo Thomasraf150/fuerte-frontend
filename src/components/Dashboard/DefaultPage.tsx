@@ -13,7 +13,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
 import './styles.css';
 import { Package } from "@/types/package";
-import { Printer } from "react-feather";
+import { Calendar, Printer } from "react-feather";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import SummaryTicket from './components/SummaryTicket';
 import NetMovements from './components/NetMovements';
 import CashoutByBank from './components/CashoutByBank';
@@ -229,14 +230,16 @@ const DefaultPage: React.FC = () => {
 
   return (
     <>
+      {/* The home page names itself like every other page (Phase 7): the sidebar calls it Summary. */}
+      <Breadcrumb pageName="Summary" items={[{ label: "Dashboard" }, { label: "Summary" }]} />
 
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
-      <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-4">
+      <div className="rounded-2xl border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-4 items-end">
           {/* Start Date */}
           <div className="flex flex-col">
-            <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+            <label htmlFor="startDate" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
               Start Date:
             </label>
             <DatePicker
@@ -247,13 +250,13 @@ const DefaultPage: React.FC = () => {
               startDate={startDate}
               endDate={endDate}
               placeholderText="Start Date"
-              className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             />
           </div>
 
           {/* End Date */}
           <div className="flex flex-col">
-            <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+            <label htmlFor="endDate" className="mb-1.5 text-sm font-semibold text-black dark:text-white">
               End Date:
             </label>
             <DatePicker
@@ -265,7 +268,7 @@ const DefaultPage: React.FC = () => {
               endDate={endDate}
               minDate={startDate}
               placeholderText="End Date"
-              className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             />
           </div>
 
@@ -274,7 +277,7 @@ const DefaultPage: React.FC = () => {
             <>
               {/* Group Select — FA/FB/FC/FD; narrows the Branch list below */}
               <div className="flex flex-col min-w-[200px]">
-                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                <label className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                   Group:
                 </label>
                 <Controller
@@ -304,7 +307,7 @@ const DefaultPage: React.FC = () => {
 
               {/* Branch Select */}
               <div className="flex flex-col min-w-[200px]">
-                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                <label className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                   Branch:
                 </label>
                 <Controller
@@ -341,7 +344,7 @@ const DefaultPage: React.FC = () => {
 
               {/* Sub Branch Select - Always visible, disabled when "All Branches" selected */}
               <div className="flex flex-col min-w-[200px]">
-                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                <label className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                   Sub Branch:
                 </label>
                 <Controller
@@ -380,11 +383,11 @@ const DefaultPage: React.FC = () => {
           ) : (
             /* Non-OWNER: Static branch label */
             <div className="flex flex-col min-w-[200px]">
-              <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+              <label className="mb-1.5 text-sm font-semibold text-black dark:text-white">
                 Branch:
               </label>
-              <div className="flex items-center h-[42px] px-4 rounded-md border border-stroke dark:border-strokedark bg-white dark:bg-form-input">
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+              <div className="flex items-center h-12 md:h-11 px-4 rounded-lg border border-field dark:border-field-dark bg-white dark:bg-form-input">
+                <span className="text-sm font-medium text-black dark:text-white">
                   {userBranchLabel || 'Loading...'}
                 </span>
               </div>
@@ -394,10 +397,10 @@ const DefaultPage: React.FC = () => {
           {/* Breakdown Toggle - Only show for OWNER when "All Branches" selected */}
           {isOwner && dataSummaryTicket !== undefined && branchSubId === 'all' && (
             <div className="flex flex-col">
-              <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark invisible">
+              <label className="mb-1.5 text-sm font-semibold text-black dark:text-white invisible">
                 Options:
               </label>
-              <div className="flex items-center h-[42px] px-4 rounded-md border border-stroke dark:border-strokedark bg-white dark:bg-form-input">
+              <div className="flex items-center h-12 md:h-11 px-4 rounded-lg border border-field dark:border-field-dark bg-white dark:bg-form-input">
                 <input
                   type="checkbox"
                   id="showBreakdown"
@@ -408,7 +411,7 @@ const DefaultPage: React.FC = () => {
                   }}
                   className="w-4 h-4 text-primary"
                 />
-                <label htmlFor="showBreakdown" className="ml-2 text-sm text-gray-700 dark:text-bodydark cursor-pointer">
+                <label htmlFor="showBreakdown" className="ml-2 text-sm text-black dark:text-white cursor-pointer">
                   Show breakdown by branch &amp; sub-branch
                 </label>
               </div>
@@ -418,14 +421,14 @@ const DefaultPage: React.FC = () => {
           {/* Print Button - Only show for OWNER when data is loaded */}
           {isOwner && dataSummaryTicket !== undefined && (
             <div className="flex flex-col">
-              <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark invisible">
+              <label className="mb-1.5 text-sm font-semibold text-black dark:text-white invisible">
                 Action:
               </label>
               <button
                 type="button"
                 onClick={handlePrint}
                 disabled={printLoading || !startDate || !endDate || !branchSubId}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[42px]"
+                className="inline-flex min-h-12 lg:min-h-10 items-center justify-center gap-2 bg-primary px-4 text-center font-semibold text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[42px]"
               >
                 <Printer size={18} />
                 {printLoading ? 'Generating...' : 'Print'}
@@ -441,7 +444,7 @@ const DefaultPage: React.FC = () => {
           <div className="rounded-sm border my-4 border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-              <span className="text-gray-600 dark:text-gray-300">Loading Summary Ticket data...</span>
+              <span className="text-body dark:text-bodydark">Loading Summary Ticket data...</span>
             </div>
           </div>
         ) : dataSummaryTicket !== undefined ? (
@@ -474,14 +477,17 @@ const DefaultPage: React.FC = () => {
             )}
           </>
         ) : (
-          <div className="rounded-sm border my-4 border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-            <div className="mb-6 flex justify-between">
-              <div>
-                <h5 className="text-title-sm font-bold text-black dark:text-white">
-                  Select date for Summary ticket
-                </h5>
-              </div>
-            </div>
+          // Nothing to show until a period is picked: say what to do, beside a calendar, instead of a bare heading.
+          <div className="my-4 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-field bg-white px-6 py-12 text-center shadow-default dark:border-field-dark dark:bg-boxdark">
+            <span aria-hidden="true" className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-olive-300/10 dark:text-olive-300">
+              <Calendar size={26} />
+            </span>
+            <h5 className="font-display text-xl font-semibold text-black dark:text-white">
+              Select date for Summary ticket
+            </h5>
+            <p className="max-w-md text-sm text-body dark:text-bodydark">
+              Pick a Start Date and an End Date above. The totals for that period show here.
+            </p>
           </div>
         )}
       </div>

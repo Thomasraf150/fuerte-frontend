@@ -2,74 +2,48 @@ import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownUser from "./DropdownUser";
 import DropdownNotification from "./DropdownNotification";
-import Image from "next/image";
+import { CastleMark } from "@/components/Brand/BrandLockup";
+import { Menu, X } from "react-feather";
+import { GlobalSearchBox, GlobalSearchLink } from "./GlobalSearch";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
   return (
-    <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
-      <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
+    <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+      <div className="flex min-h-16 flex-grow items-center justify-between gap-2 px-3 py-2.5 sm:px-4 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-          {/* <!-- Hamburger Toggle BTN --> */}
+          {/* The menu button: a plain icon and the word, 48px (UI modernisation B, Phase 6c). */}
           <button
+            type="button"
             aria-controls="sidebar"
+            aria-expanded={Boolean(props.sidebarOpen)}
             onClick={(e) => {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+            className="z-99999 inline-flex min-h-12 items-center gap-1.5 rounded-lg border border-field bg-white px-2.5 text-sm font-semibold text-black hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:border-field-dark dark:bg-boxdark dark:text-white lg:hidden"
           >
-            <span className="relative block h-5.5 w-5.5 cursor-pointer">
-              <span className="du-block absolute right-0 h-full w-full">
-                <span
-                  className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-[0] duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!w-full delay-300"
-                  }`}
-                ></span>
-                <span
-                  className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-150 duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "delay-400 !w-full"
-                  }`}
-                ></span>
-                <span
-                  className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-200 duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!w-full delay-500"
-                  }`}
-                ></span>
-              </span>
-              <span className="absolute right-0 h-full w-full rotate-45">
-                <span
-                  className={`absolute left-2.5 top-0 block h-full w-0.5 rounded-sm bg-black delay-300 duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!h-0 !delay-[0]"
-                  }`}
-                ></span>
-                <span
-                  className={`delay-400 absolute left-0 top-2.5 block h-0.5 w-full rounded-sm bg-black duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!h-0 !delay-200"
-                  }`}
-                ></span>
-              </span>
-            </span>
+            {props.sidebarOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+            Menu
           </button>
-          {/* <!-- Hamburger Toggle BTN --> */}
 
-          <Link className="block flex-shrink-0 lg:hidden" href="/">
-            <Image
-              width={32}
-              height={32}
-              src={"/images/logo/logo-icon.svg"}
-              alt="Logo"
-            />
+          <Link className="block flex-shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 lg:hidden" href="/" aria-label="Fuerte home">
+            <CastleMark className="h-10 w-10" />
           </Link>
         </div>
 
 
-        <div className="flex items-center gap-3 2xsm:gap-7 ml-auto">
+        {/* The universal search (UI modernisation B, Phase 5): the box from lg, on the empty left. */}
+        <GlobalSearchBox />
+        <div className="flex items-center gap-2 2xsm:gap-7 ml-auto">
           <ul className="flex items-center gap-2 2xsm:gap-4">
+            {/* Below lg: the search as a worded link. */}
+            <li className="lg:hidden"><GlobalSearchLink /></li>
             {/* <!-- Dark Mode Toggler --> */}
-            <DarkModeSwitcher />
+            {/* Phones: the switch lives in the user menu, so the worded Search fits at 360px. */}
+            <DarkModeSwitcher className="hidden sm:block" />
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Deletion-Approval bell --> */}

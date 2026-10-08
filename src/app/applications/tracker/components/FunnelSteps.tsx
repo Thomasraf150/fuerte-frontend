@@ -60,7 +60,7 @@ const Step: React.FC<{ item: FunnelItem; index: number; counts: ApplicationFunne
   const count = counts[item.key];
   const share = index === 0 ? (counts.applied > 0 ? 1 : 0) : shareOf(count, counts.applied);
   return (
-    <li data-step={item.key} className="flex flex-col rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark sm:p-5">
+    <li data-step={item.key} className="flex flex-col rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5">
       <p className="flex items-baseline gap-2.5">
         <span aria-hidden="true" className="font-display text-2xl font-semibold leading-none text-accent">
           {stepNumber(index)}

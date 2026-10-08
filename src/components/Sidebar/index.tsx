@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import ApplicationsMenuItem from "./ApplicationsMenuItem";
 import { useAuthStore } from "@/store/authStore";
@@ -72,17 +72,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
         <Link href={isCallCenter ? "/applications" : "/"}>
-          <Image
-            width={0}
-            height={0}
-            sizes="240px"
-            src={"/images/logo/fuerte-logo.png"}
-            alt="Logo"
-            priority
-            style={{ width: '240px', height: 'auto' }}
-          />
+          <BrandLockup />
         </Link>
 
         <button
@@ -111,7 +103,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
         {/* <!-- Sidebar Menu --> */}
-        <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
+        <nav className="mt-2 px-4 py-4 lg:px-5">
           {/* <!-- Menu Group --> */}
           {/* Call Center sees only Applications; withAuth redirects it away from
               every other page. UI only: neither is a security control. */}
@@ -123,8 +115,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </div>
           ) : (
           <div>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
-              DASBOARD
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">
+              DASHBOARD
             </h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
@@ -139,10 +131,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/" ||
                             pathname.includes("dashboard")) &&
-                          "bg-graydark dark:bg-meta-4"
+                          "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -201,11 +193,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                        <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/" && "text-white"
                               }`}
                             >
@@ -215,7 +207,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/notes-receivable"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/notes-receivable" &&
                                 "text-white"
                               }`}
@@ -226,7 +218,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/commission-schedule"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/commission-schedule" &&
                                 "text-white"
                               }`}
@@ -247,9 +239,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/borrowers"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                     pathname.includes("borrowers") &&
-                    "bg-graydark dark:bg-meta-4"
+                    "!bg-primary text-white"
                   }`}
                 >
                   <svg
@@ -276,9 +268,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/approvals"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                     pathname.includes("approvals") &&
-                    "bg-graydark dark:bg-meta-4"
+                    "!bg-primary text-white"
                   }`}
                 >
                   <svg
@@ -302,9 +294,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/imports"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                     pathname.includes("imports") &&
-                    "bg-graydark dark:bg-meta-4"
+                    "!bg-primary text-white"
                   }`}
                 >
                   <svg
@@ -324,7 +316,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
             </ul>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">
               TRANSACTIONS
             </h3>
             <ul className="mb-6 flex flex-col gap-1.5">
@@ -339,12 +331,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/loans-list" ||
                             pathname === '/pending-release-loans' ||
                             pathname.includes("dashboard") || 
                               pathname.includes("pending-release-loans")) &&
-                          "bg-graydark dark:bg-meta-4"
+                          "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -398,11 +390,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                        <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/loans-list"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/loans-list" && "text-white"
                               }`}
                             >
@@ -412,7 +404,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/loan-calculator"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/loan-calculator" && "text-white"
                               }`}
                             >
@@ -422,7 +414,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           {/* <li>
                             <Link
                               href="/pending-release-loans"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/pending-release-loans" &&
                                 "text-white"
                               }`}
@@ -450,12 +442,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/loans-list" ||
                             pathname === '/pending-release-loans' ||
                             pathname.includes("dashboard") || 
                               pathname.includes("pending-release-loans")) &&
-                          "bg-graydark dark:bg-meta-4"
+                          "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -499,11 +491,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                        <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/collection-list"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/collection-list" && "text-white"
                               }`}
                             >
@@ -513,7 +505,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/payment-posting"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/payment-posting" &&
                                 "text-white"
                               }`}
@@ -524,7 +516,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/statement-of-account"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/statement-of-account" &&
                                 "text-white"
                               }`}
@@ -535,7 +527,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/problem-accounts"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/problem-accounts" &&
                                 "text-white"
                               }`}
@@ -546,7 +538,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/renewable-borrowers"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/renewable-borrowers" &&
                                 "text-white"
                               }`}
@@ -557,7 +549,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           {/* <li>
                             <Link
                               href="/forms/form-elements"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/notes-receivable" &&
                                 "text-white"
                               }`}
@@ -568,7 +560,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/forms/form-elements"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/notes-receivable" &&
                                 "text-white"
                               }`}
@@ -586,7 +578,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Transactions --> */}
 
             </ul>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">
               SETTINGS
             </h3>
             <ul className="mb-6 flex flex-col gap-1.5">
@@ -601,13 +593,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/company-profile" 
                             // ||
                             // pathname === '/pending-release-loans' ||
                             // pathname.includes("dashboard") || 
                             //   pathname.includes("pending-release-loans")
-                            ) && "bg-graydark dark:bg-meta-4"
+                            ) && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -656,11 +648,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                        <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/company-profile"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/company-profile" && "text-white"
                               }`}
                             >
@@ -670,7 +662,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/branch-setup"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/branch-setup" &&
                                 "text-white"
                               }`}
@@ -681,7 +673,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/users-setup"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/users-setup" &&
                                 "text-white"
                               }`}
@@ -710,13 +702,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/settings" 
                             // ||
                             // pathname === '/pending-release-loans' ||
                             // pathname.includes("dashboard") || 
                             //   pathname.includes("pending-release-loans")
-                            ) && "bg-graydark dark:bg-meta-4"
+                            ) && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -760,11 +752,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
+                        <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/borrower-process"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/borrower-process" && "text-white"
                               }`}
                             >
@@ -774,7 +766,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/loan-products"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/loan-products" &&
                                 "text-white"
                               }`}
@@ -785,7 +777,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/loan-codes"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/loan-codes" &&
                                 "text-white"
                               }`}
@@ -796,7 +788,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/loan-types"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/loan-types" &&
                                 "text-white"
                               }`}
@@ -807,7 +799,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/clients"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/clients" &&
                                 "text-white"
                               }`}
@@ -818,7 +810,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/companies"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/companies" &&
                                 "text-white"
                               }`}
@@ -829,7 +821,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/chiefs"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/chiefs" &&
                                 "text-white"
                               }`}
@@ -840,7 +832,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/area"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/area" &&
                                 "text-white"
                               }`}
@@ -851,7 +843,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/sub-area"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/sub-area" &&
                                 "text-white"
                               }`}
@@ -862,7 +854,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/banks"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/banks" &&
                                 "text-white"
                               }`}
@@ -873,7 +865,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/file-types"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/file-types" &&
                                 "text-white"
                               }`}
@@ -884,7 +876,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/other-company-charges"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/other-company-charges" &&
                                 "text-white"
                               }`}
@@ -895,7 +887,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/for-new-loans"
-                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/for-new-loans" &&
                                 "text-white"
                               }`}
@@ -921,16 +913,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
 
             {/* <!-- Menu Item Reports --> */}
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">
               REPORTS
             </h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               <li>
                 <Link
                   href="/settings"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                     pathname.includes("settings") &&
-                    "bg-graydark dark:bg-meta-4"
+                    "!bg-primary text-white"
                   }`}
                 >
                 <svg

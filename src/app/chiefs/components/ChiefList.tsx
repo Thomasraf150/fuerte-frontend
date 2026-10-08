@@ -6,9 +6,11 @@ import chiefListCol from './ChiefListColumn';
 import { DataChief } from '@/utils/DataTypes';
 import ChiefForm from './ChiefForm';
 import useChiefs from '@/hooks/useChiefs';
-import { GitBranch, SkipBack } from 'react-feather';
+import { Plus, SkipBack } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = chiefListCol;
 
@@ -67,18 +69,16 @@ const ChiefList: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
 
-          <div className="col-span-1 xl:col-span-2">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Chiefs
-                </h3>
-              </div>
-              <div className="p-7">
-                <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2" onClick={() => handleShowForm('Create Chief', true)}>
-                  <GitBranch  size={14} />
-                  <span>Create</span>
-                </button>
+          <div className={`col-span-1 ${showForm ? 'xl:col-span-2' : 'xl:col-span-3'}`}>
+            <Card>
+              <CardHeader title="Chiefs" />
+              <CardBody>
+                <Toolbar>
+                  <Button variant="primary" onClick={() => handleShowForm('Create Chief', true)}>
+                    <Plus size={16} aria-hidden="true" />
+                    <span>Create</span>
+                  </Button>
+                </Toolbar>
                 <CustomDatatable
                   apiLoading={chiefFetchLoading}
                   title="Chief List"
@@ -98,23 +98,18 @@ const ChiefList: React.FC = () => {
                     enableSearch: false,
                   }}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
 
           {showForm && (
             <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                  <FormCloseButton onClose={() => setShowForm(false)} />
-                </div>
-                <div className="p-7">
+              <Card>
+                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => setShowForm(false)} />} />
+                <CardBody>
                   <ChiefForm setShowForm={setShowForm} fetchDataChief={fetchDataChief} initialData={initialFormData} actionLbl={actionLbl} />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
             )}
 

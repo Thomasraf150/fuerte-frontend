@@ -9,6 +9,7 @@ import CoaForm from './components/CoaForm';
 import { DataChartOfAccountList } from '@/utils/DataTypes';
 import useCoa from '@/hooks/useCoa';
 import { toast } from 'react-toastify';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 const COA: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -90,8 +91,8 @@ const COA: React.FC = () => {
         <Breadcrumb pageName="Chart of Accounts" />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className={showForm ? 'col-span-2' : 'col-span-3'}>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className={showForm ? 'col-span-1 xl:col-span-2' : 'col-span-1 xl:col-span-3'}>
           <ChartofAcctList
             coaDataAccount={coaDataAccount}
             fetchCoaDataTable={fetchCoaDataTable}
@@ -107,13 +108,9 @@ const COA: React.FC = () => {
 
         {showForm && (
           <div ref={formColumnRef} className="fade-in col-span-1">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  {actionLbl}
-                </h3>
-              </div>
-              <div className="p-7">
+            <Card>
+              <CardHeader title={actionLbl} />
+              <CardBody>
                 <CoaForm
                   setShowForm={setShowForm}
                   fetchCoaDataTable={fetchCoaDataTable}
@@ -126,8 +123,8 @@ const COA: React.FC = () => {
                   onClose={handleCloseForm}
                   onReady={handleFormReady}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         )}
       </div>

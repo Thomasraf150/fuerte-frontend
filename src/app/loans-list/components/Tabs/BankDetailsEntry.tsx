@@ -9,6 +9,7 @@ import useBank from '@/hooks/useBank';
 import { useStableLoading } from '@/hooks/useStableLoading';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { LoadingSpinner } from '@/components/LoadingStates';
+import Button from '@/components/Button';
 import moment from 'moment';
 
 interface OMProps {
@@ -163,7 +164,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
   }, [issuedBankId, isIssuedSkip, setValue, watch]);
 
   return (
-    <div className="w-full lg:w-3/4 xl:w-1/2 relative" data-testid="bank-details-entry-section">
+    <div className="w-full max-w-3xl relative" data-testid="bank-details-entry-section">
       {showLoadingOverlay && (
         <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 z-50 flex items-center justify-center rounded-lg" data-testid="bank-details-loading-overlay">
           <LoadingSpinner size="lg" message="Saving bank details..." />
@@ -172,32 +173,34 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-1 gap-3 p-3 sm:gap-4">
         <div>
-          <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Account Name</h3>
+          <h3 className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Account Name</h3>
           <input
             type="text"
-            className="block w-60 p-2 mb-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+            className="h-12 md:h-11 w-full sm:w-72 rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             placeholder="Card Account Name"
             {...register('account_name', { required: "Account name is required!" })}
           />
-          {errors.account_name && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.account_name.message}</p>}
+          {errors.account_name && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.account_name.message}</p>}
         </div>
         {loanSingleData?.loan_bank_details?.updated_at && (
-          <div className="text-base font-semibold text-gray-600 dark:text-gray-400 px-1">
+          <div className="text-base font-semibold text-body dark:text-bodydark px-1">
             Last saved: {moment(loanSingleData.loan_bank_details.updated_at).format('LLL')}
           </div>
         )}
-        <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
-          <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
-            <div className="grid grid-cols-2 gap-1 p-3 lg:grid-cols-3 sm:grid-cols-3 sm:gap-4 bg-boxdark-2 dark:bg-meta-4 text-lime-100 dark:text-white">
-              <dt className="font-medium text-left text-gray-900 dark:text-bodydark dark:text-white"></dt>
-              <dt className="font-medium text-center text-gray-900 dark:text-bodydark dark:text-white">ATM Surrender</dt>
-              <dd className="text-gray-700 dark:text-bodydark text-center">ATM Issued</dd>
+        <div className="flow-root border border-stroke dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
+          <dl className="-my-3 divide-y divide-stroke dark:divide-strokedark text-sm">
+            {/* Column titles from sm up; on phones each field carries its own caption instead. */}
+            <div className="hidden gap-4 p-3 sm:grid sm:grid-cols-3 bg-whiten dark:bg-meta-4 text-black dark:text-white">
+              <dt className="font-medium text-left text-black dark:text-bodydark dark:text-white"></dt>
+              <dt className="font-medium text-center text-black dark:text-bodydark dark:text-white">ATM Surrender</dt>
+              <dd className="text-black dark:text-bodydark text-center">ATM Issued</dd>
             </div>
-            <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-              <dt className="font-medium text-right text-gray-900 dark:text-bodydark leading-9">
+            <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-3 sm:gap-4">
+              <dt className="font-medium text-left sm:text-right text-black dark:text-bodydark sm:leading-9">
                 Bank:
               </dt>
-              <dd className="text-gray-700 text-left">
+              <dd className="text-black dark:text-white text-left">
+                <span aria-hidden="true" className="mb-1 block text-left text-xs font-semibold uppercase tracking-wide text-body dark:text-bodydark sm:hidden">ATM Surrender</span>
                 <div className="">
                   <Controller
                     name="surrendered_bank_id"
@@ -206,6 +209,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                     render={({ field }) => (
                       <ReactSelect
                         {...field}
+                        aria-label="ATM Surrender bank"
                         options={bankOptions1}
                         placeholder="Select a Bank..."
                         isLoading={banksLoading}
@@ -218,10 +222,11 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       />
                     )}
                   />
-                  {errors.surrendered_bank_id && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.surrendered_bank_id.message}</p>}
+                  {errors.surrendered_bank_id && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.surrendered_bank_id.message}</p>}
                 </div>
               </dd>
-              <dt className="font-medium text-left text-gray-900 dark:text-bodydark">
+              <dt className="font-medium text-left text-black dark:text-bodydark">
+                <span aria-hidden="true" className="mb-1 block text-left text-xs font-semibold uppercase tracking-wide text-body dark:text-bodydark sm:hidden">ATM Issued</span>
                 <div className="">
                   <Controller
                     name="issued_bank_id"
@@ -230,6 +235,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                     render={({ field }) => (
                       <ReactSelect
                         {...field}
+                        aria-label="ATM Issued bank"
                         options={bankOptions2}
                         placeholder="Select a Bank..."
                         isLoading={banksLoading}
@@ -242,18 +248,19 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       />
                     )}
                   />
-                  {errors.issued_bank_id && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.issued_bank_id.message}</p>}
+                  {errors.issued_bank_id && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.issued_bank_id.message}</p>}
                 </div>
               </dt>
             </div>
             {/* Account/Card Number Row - Hidden when skip validation bank is selected */}
             {(!isSurrenderedSkip || !isIssuedSkip) && (
-              <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                <dt className="font-medium text-right text-gray-900 leading-9">
+              <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-3 sm:gap-4">
+                <dt className="font-medium text-left sm:text-right text-black dark:text-white sm:leading-9">
                   Account / Card No.:
                 </dt>
                 {!isSurrenderedSkip && (
-                  <dd className="text-gray-700 text-center">
+                  <dd className="text-black dark:text-white text-center">
+                    <span aria-hidden="true" className="mb-1 block text-left text-xs font-semibold uppercase tracking-wide text-body dark:text-bodydark sm:hidden">ATM Surrender</span>
                     <div className="relative">
                       <Controller
                         name="surrendered_acct_no"
@@ -261,7 +268,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         rules={{ required: "Surrendered Card is required!" }}
                         render={({ field }) => (
                           <input
-                            className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                            className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                             type="text"
                             id="surrendered_acct_no"
                             placeholder="000000"
@@ -270,16 +277,17 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                           />
                         )}
                       />
-                      <span className="absolute right-3 top-2.5">
+                      <span className="absolute right-3 top-3.5 md:top-3 pointer-events-none">
                         <CreditCard size="18" />
                       </span>
-                      {errors.surrendered_acct_no && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.surrendered_acct_no.message}</p>}
+                      {errors.surrendered_acct_no && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.surrendered_acct_no.message}</p>}
                     </div>
                   </dd>
                 )}
-                {isSurrenderedSkip && <dd className="text-gray-700 text-center"></dd>}
+                {isSurrenderedSkip && <dd className="text-black dark:text-white text-center"></dd>}
                 {!isIssuedSkip && (
-                  <dt className="font-medium text-center text-gray-900">
+                  <dt className="font-medium text-center text-black dark:text-white">
+                    <span aria-hidden="true" className="mb-1 block text-left text-xs font-semibold uppercase tracking-wide text-body dark:text-bodydark sm:hidden">ATM Issued</span>
                     <div className="relative">
                       <Controller
                         name="issued_acct_no"
@@ -287,7 +295,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         rules={{ required: "Issued Card No. is required!" }}
                         render={({ field }) => (
                           <input
-                            className={`block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm`}
+                            className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                             type="text"
                             id="issued_acct_no"
                             placeholder="000000"
@@ -296,28 +304,29 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                           />
                         )}
                       />
-                      <span className="absolute right-3 top-2.5">
+                      <span className="absolute right-3 top-3.5 md:top-3 pointer-events-none">
                         <CreditCard size="18" />
                       </span>
-                      {errors.issued_acct_no && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.issued_acct_no.message}</p>}
+                      {errors.issued_acct_no && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.issued_acct_no.message}</p>}
                     </div>
                   </dt>
                 )}
-                {isIssuedSkip && <dt className="font-medium text-center text-gray-900"></dt>}
+                {isIssuedSkip && <dt className="font-medium text-center text-black dark:text-white"></dt>}
               </div>
             )}
             {/* PIN Row - Hidden when skip validation bank is selected */}
             {(!isSurrenderedSkip || !isIssuedSkip) && (
-              <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                <dt className="font-medium text-right text-gray-900 leading-9">
+              <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-3 sm:gap-4">
+                <dt className="font-medium text-left sm:text-right text-black dark:text-white sm:leading-9">
                   PIN.:
                 </dt>
                 {!isSurrenderedSkip && (
-                  <dd className="text-gray-700 text-center">
+                  <dd className="text-black dark:text-white text-center">
+                    <span aria-hidden="true" className="mb-1 block text-left text-xs font-semibold uppercase tracking-wide text-body dark:text-bodydark sm:hidden">ATM Surrender</span>
                     <div className="relative">
                       <input
                         type={showPin1 ? 'text' : 'password'}
-                        className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                         placeholder="000000"
                         {...register('surrendered_pin', { required: "Surrendered Pin. is required!" })}
                       />
@@ -325,20 +334,22 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         type="button"
                         className="absolute inset-y-0 right-0 flex items-center pr-2"
                         onClick={toggleShowPin1}
+                        aria-label={showPin1 ? 'Hide PIN' : 'Show PIN'}
                       >
                         {showPin1 ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
-                    {errors.surrendered_pin && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.surrendered_pin.message}</p>}
+                    {errors.surrendered_pin && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.surrendered_pin.message}</p>}
                   </dd>
                 )}
-                {isSurrenderedSkip && <dd className="text-gray-700 text-center relative"></dd>}
+                {isSurrenderedSkip && <dd className="text-black dark:text-white text-center relative"></dd>}
                 {!isIssuedSkip && (
-                  <dt className="font-medium text-center text-gray-900">
+                  <dt className="font-medium text-center text-black dark:text-white">
+                    <span aria-hidden="true" className="mb-1 block text-left text-xs font-semibold uppercase tracking-wide text-body dark:text-bodydark sm:hidden">ATM Issued</span>
                     <div className="relative">
                       <input
                         type={showPin2 ? 'text' : 'password'}
-                        className="block p-2 border border-gray-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                         placeholder="000000"
                         {...register('issued_pin', { required: "Issued Pin. is required!" })}
                       />
@@ -346,30 +357,30 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         type="button"
                         className="absolute inset-y-0 right-0 flex items-center pr-2"
                         onClick={toggleShowPin2}
+                        aria-label={showPin2 ? 'Hide PIN' : 'Show PIN'}
                       >
                         {showPin2 ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
-                    {errors.issued_pin && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{errors.issued_pin.message}</p>}
+                    {errors.issued_pin && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.issued_pin.message}</p>}
                   </dt>
                 )}
-                {isIssuedSkip && <dt className="font-medium text-center text-gray-900 relative"></dt>}
+                {isIssuedSkip && <dt className="font-medium text-center text-black dark:text-white relative"></dt>}
               </div>
             )}
           </dl>
 
         </div>
         <div>
-        <button
-          className="bg-primary flex justify-between float-right items-center text-white py-2 px-4 rounded hover:bg-primary/90 text-sm"
+        <Button
+          variant="primary"
+          className="float-right"
           type="submit"
           disabled={loanSingleData?.status === 1 ? false : true}
         >
-          <span className="mt-1 mr-1">
-            <Save size={17} />
-          </span>
+          <Save size={17} />
           <span>Save and Submit for Releasing</span>
-        </button>
+        </Button>
         </div>
       </div>
       </form>

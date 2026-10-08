@@ -5,6 +5,7 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import CustomDatatable from '@/components/CustomDatatable';
 import vendorsTblColumn from '@/app/accounting/vendors/components/VendorsTblColumn';
 import ReactSelect from '@/components/ReactSelect';
+import { CardSection } from '@/components/Card';
 import useVendor from '@/hooks/useVendor';
 import { RowVendorsData } from '@/utils/DataTypes';
 
@@ -57,9 +58,9 @@ const PayeeView: React.FC<ParentProp> = ({ setShowPayee, setDataPayee }) => {
 
   return (
     <div>
-      <div className="max-w-12xl">
-        <div className="border-b border-stroke py-4 dark:border-strokedark">
-          <div className="grid grid-cols-3 gap-4">
+      <div className="max-w-12xl space-y-4">
+        <div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="">
               <Controller
                 name="code"
@@ -88,22 +89,15 @@ const PayeeView: React.FC<ParentProp> = ({ setShowPayee, setDataPayee }) => {
         <div className="grid grid-cols-2 gap-4">
           {!showForm && (
             <div className={`col-span-2 ${!showForm ? 'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-boxdark dark:text-boxdark">
-                    {actionLbl || 'Payee'}
-                  </h3>
-                </div>
-                <div className="px-4">
-                  <CustomDatatable
-                    apiLoading={false}
-                    title="Vendor List"
-                    onRowClicked={handleWholeRowClick}
-                    columns={column()}
-                    data={dataVendors || []}
-                  />
-                </div>
-              </div>
+              <CardSection title={actionLbl || 'Payee'}>
+                <CustomDatatable
+                  apiLoading={false}
+                  title="Vendor List"
+                  onRowClicked={handleWholeRowClick}
+                  columns={column()}
+                  data={dataVendors || []}
+                />
+              </CardSection>
             </div>
           )}
 

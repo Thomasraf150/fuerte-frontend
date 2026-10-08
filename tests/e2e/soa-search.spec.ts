@@ -44,7 +44,7 @@ test('SOA: lowercase server-side search finds an OLD loan and opens its ledger',
   await page.waitForTimeout(3000);
 
   const body = await page.locator('body').innerText();
-  expect(body).not.toContain('There are no records to display');
+  expect(body).not.toMatch(/No [a-z ]+ to show./); // the shared table's empty sentence
   expect(body).not.toContain('Cannot read properties of null');
   console.log('✅ ledger loaded for MA-0123 (no empty/error state)');
 });

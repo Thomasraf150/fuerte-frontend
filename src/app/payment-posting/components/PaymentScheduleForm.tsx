@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Edit3, X } from 'react-feather';
 import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
 import LoanDetails from './LoanDetails';
+import { CardHeader } from '@/components/Card';
 
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
@@ -23,15 +24,16 @@ const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowFo
 
   return (
     <div className="w-full">
-      <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
-        <h3 className="font-medium text-black dark:text-white">
-          {singleData?.loan_product?.description} 
-        </h3>
-        <span className="text-right cursor-pointer text-boxdark-2" onClick={() => { return handleShowForm(false); }}><X size={17}/></span>
-      </div>
       {singleData && (
         <>
-          <LoanDetails fnReversePayment={fnReversePayment} loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading} />
+          <LoanDetails
+            header={
+              <CardHeader
+                title={singleData?.loan_product?.description}
+                actions={<span className="text-right cursor-pointer text-boxdark-2" onClick={() => { return handleShowForm(false); }}><X size={17}/></span>}
+              />
+            }
+            fnReversePayment={fnReversePayment} loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading} />
         </>
       )}
     </div>

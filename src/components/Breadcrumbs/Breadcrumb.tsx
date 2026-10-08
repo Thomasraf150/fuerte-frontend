@@ -18,10 +18,10 @@ const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
   ];
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 sm:mb-7">
       {/* Breadcrumb Navigation - Above title for better UX */}
       <nav aria-label="Breadcrumb" className="mb-2">
-        <ol className="flex items-center gap-1 text-sm flex-wrap">
+        <ol className="flex flex-wrap items-center gap-1 text-[13px]">
           {breadcrumbItems.map((item, index) => {
             const isLast = index === breadcrumbItems.length - 1;
 
@@ -30,12 +30,14 @@ const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
                 {item.href && !isLast ? (
                   <>
                     <Link
-                      className="font-medium text-bodydark2 hover:text-primary transition-colors"
+                      // text-body, not bodydark2: bodydark2 is the sidebar's muted grey and only 2.4:1 on the
+                      // cream page ground; body is 5.06:1 there (AA). bodydark keeps it readable in dark mode.
+                      className="font-medium text-body hover:text-primary transition-colors dark:text-bodydark"
                       href={item.href}
                     >
                       {item.label}
                     </Link>
-                    <span className="mx-1 text-bodydark2">/</span>
+                    <span className="mx-1 text-body dark:text-bodydark" aria-hidden="true">/</span>
                   </>
                 ) : (
                   <span className="font-medium text-primary">
@@ -48,8 +50,8 @@ const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
         </ol>
       </nav>
 
-      {/* Page Title - Full width below breadcrumbs */}
-      <h2 className="font-display text-title-md2 font-semibold text-black dark:text-white">
+      {/* Page title: Fraunces, the brand's display face, large and tight (Phase 7, 2026-10-07). */}
+      <h2 className="font-display text-[28px] font-semibold leading-tight tracking-[-0.01em] text-black sm:text-[32px] dark:text-white">
         {pageName}
       </h2>
     </div>

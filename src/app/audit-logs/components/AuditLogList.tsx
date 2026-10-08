@@ -8,6 +8,7 @@ import AuditLogForm from './AuditLogForm';
 import useArea from '@/hooks/useArea';
 import { GitBranch, SkipBack } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import Button from '@/components/Button';
 
 const column = auditLogListCol;
 
@@ -59,17 +60,17 @@ const AuditLogList: React.FC = () => {
         <div className="grid grid-cols-3 gap-4">
         {!showSubBranch && (
           <div className={`col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+            <div className="rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
                   Audit Logs
                 </h3>
               </div>
               <div className="p-7">
-                <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2" onClick={() => handleShowForm('Create Area', true)}>
+                <Button variant="primary" onClick={() => handleShowForm('Create Area', true)}>
                   <GitBranch  size={14} /> 
                   <span>Create</span>
-                </button>
+                </Button>
                 <CustomDatatable
                   apiLoading={false}
                   title="Area List"
@@ -83,7 +84,7 @@ const AuditLogList: React.FC = () => {
 
           {showForm && (
             <div className="fade-in">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <div className="rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                   <h3 className="font-medium text-black dark:text-white">
                     {actionLbl}

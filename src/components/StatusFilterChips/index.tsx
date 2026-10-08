@@ -22,6 +22,10 @@ const statusOptions: StatusOption[] = [
   { label: 'Released', value: 'released' },
 ];
 
+/**
+ * Status chips, square like every button (house rule) and 48px on phones / 40px from lg. An
+ * unselected chip is black text on a 3:1 border: the old light-grey text (1.9:1) read as disabled.
+ */
 const StatusFilterChips: React.FC<StatusFilterChipsProps> = ({
   selectedStatus,
   onStatusChange,
@@ -30,7 +34,7 @@ const StatusFilterChips: React.FC<StatusFilterChipsProps> = ({
     <div className="space-y-3">
       {/* Label - Hidden on mobile, shown on tablet+ */}
       <div className="hidden sm:block">
-        <span className="text-sm font-medium text-gray-700 dark:text-bodydark1">
+        <span className="text-sm font-semibold text-black dark:text-bodydark1">
           Filter by Status:
         </span>
       </div>
@@ -44,9 +48,8 @@ const StatusFilterChips: React.FC<StatusFilterChipsProps> = ({
               key={option.value}
               onClick={() => onStatusChange(option.value)}
               className={`
-                px-3 py-1.5 sm:px-4 sm:py-2
-                rounded-full
-                text-xs sm:text-sm
+                inline-flex min-h-12 items-center px-4 lg:min-h-10
+                text-sm
                 font-medium
                 cursor-pointer
                 transition-all duration-200 ease-in-out
@@ -54,8 +57,8 @@ const StatusFilterChips: React.FC<StatusFilterChipsProps> = ({
                 whitespace-nowrap
                 ${
                   isSelected
-                    ? 'border-2 border-primary bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary shadow-sm'
-                    : 'border border-stroke bg-white dark:bg-boxdark dark:border-strokedark text-bodydark dark:text-bodydark1 hover:bg-gray-50 dark:hover:bg-meta-4 hover:border-primary/50 dark:hover:border-primary/50'
+                    ? 'border-2 border-primary bg-primary/10 font-semibold text-primary dark:bg-primary/20 dark:text-olive-300'
+                    : 'border border-field bg-white text-black hover:border-primary hover:text-primary dark:border-field-dark dark:bg-boxdark dark:text-bodydark1 dark:hover:border-olive-300'
                 }
               `}
               aria-pressed={isSelected}

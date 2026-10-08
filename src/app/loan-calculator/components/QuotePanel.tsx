@@ -120,13 +120,13 @@ const QuotePanel: React.FC<QuotePanelProps> = ({
         materially less than the headline. Say so on screen and on paper rather
         than letting the operator discover it at release.
       */}
-      <p className="rounded-sm border border-stroke bg-whiten p-3 text-xs leading-relaxed text-body dark:border-strokedark dark:bg-form-input dark:text-bodydark">
+      <p className="rounded-2xl border border-stroke bg-whiten p-3 text-xs leading-relaxed text-body dark:border-strokedark dark:bg-form-input dark:text-bodydark">
         This assumes you have no outstanding balance. If this is a renewal, the cash released is
         reduced by your current balance and any penalty.
       </p>
 
       {/* --- The note --- */}
-      <div className="lc-reveal lc-reveal-2 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="lc-reveal lc-reveal-2 rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <h3 className="mb-1 text-sm font-semibold uppercase tracking-wider text-black dark:text-white">
           The note
         </h3>
@@ -165,7 +165,7 @@ const QuotePanel: React.FC<QuotePanelProps> = ({
       </div>
 
       {/* --- Deductions --- */}
-      <div className="lc-reveal lc-reveal-3 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="lc-reveal lc-reveal-3 rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-black dark:text-white">
           Deductions
         </h3>
@@ -222,7 +222,7 @@ const QuotePanel: React.FC<QuotePanelProps> = ({
       </div>
 
       {/* --- Schedule --- */}
-      <div className="lc-reveal lc-reveal-4 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="lc-reveal lc-reveal-4 rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-black dark:text-white">
             Payment schedule

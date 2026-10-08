@@ -7,6 +7,7 @@ import useUsers from '@/hooks/useUsers';
 import { DataBranches, DataFormUser, User, DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
 import useLoanCodes from '@/hooks/useLoanCodes';
 import useLoanProducts from '@/hooks/useLoanProducts';
+import Button from '@/components/Button';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
   fetchLoanProducts: (value: string) => void;
@@ -300,18 +301,14 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
 
         <div className="col-span-1 md:col-span-2 mt-4">
           <div className="flex justify-end gap-4.5">
-            <button
-              className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+            <Button variant="secondary"
               type="button"
-              onClick={()=>{ setShowForm(false) }}
-            >
+              onClick={()=>{ setShowForm(false) }}>
               Back
-            </button>
-            <button
-              className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanProductLoading ? 'opacity-70' : ''}`}
+            </Button>
+            <Button variant="primary"
               type="submit"
-              disabled={loanProductLoading}
-            >
+              disabled={loanProductLoading}>
               {loanProductLoading ? (
                 <>
                   <RotateCw size={17} className="animate-spin mr-1" />
@@ -323,7 +320,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
                   <span>Save</span>
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
 

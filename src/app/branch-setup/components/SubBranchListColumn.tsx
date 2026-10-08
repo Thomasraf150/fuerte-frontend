@@ -4,6 +4,7 @@ import { TableColumn } from 'react-data-table-component';
 import { DataSubBranches } from '@/utils/DataTypes';
 import { Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
+import Button from '@/components/Button';
 import PendingDeletionBadge from '@/components/PendingDeletion/PendingDeletionBadge';
 import type { PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 
@@ -55,6 +56,8 @@ const subBranchListCol = (
   },
   {
     name: 'Action',
+    minWidth: '330px',
+    button: true,
     cell: row => {
       const info = pendingByEntityId.get(Number(row.id));
       const isPending = !!info;
@@ -66,22 +69,19 @@ const subBranchListCol = (
               onClick={() => onPendingClick(row, info!)}
             />
           )}
-          <Tooltip text="Edit">
-            <Edit3 onClick={() => handleUpdateSubRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
-          </Tooltip>
+          <Button variant="secondary" size="sm" onClick={() => handleUpdateSubRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
           {isPending ? (
             <Tooltip text="Already in queue">
-              <Trash2
-                size="16"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => onPendingClick(row, info!)}
-                className="pdb-disabled-action ml-1"
-                aria-label="Already in deletion queue"
-              />
+              >
+                <Trash2 size={16} aria-hidden="true" />Already in deletion queue
+              </Button>
             </Tooltip>
           ) : (
-            <Tooltip text="Remove">
-              <Trash2 size="16" onClick={() => handleDeleteSubRow(row)} className="text-cyan-400 ml-1 cursor-pointer"/>
-            </Tooltip>
+            <Button variant="danger" size="sm" onClick={() => handleDeleteSubRow(row)}><Trash2 size={16} aria-hidden="true" />Remove</Button>
           )}
         </div>
       );

@@ -20,7 +20,7 @@ const pillClass = (active: boolean) =>
   `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
     active
       ? 'bg-blue-500 text-white shadow-sm'
-      : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
+      : 'bg-whiten dark:bg-meta-4 text-black dark:text-bodydark hover:bg-whiten dark:hover:bg-strokedark'
   }`;
 
 const isValidDay = (n: number) => Number.isInteger(n) && n >= 1 && n <= 31;
@@ -86,7 +86,7 @@ const ThriceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handl
       <ReferenceDatePicker selected={refDate} onChange={handleDateChange} />
 
       <div>
-        <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Cutoff Pattern</h3>
+        <h3 className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Cutoff Pattern</h3>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -113,27 +113,27 @@ const ThriceAMonth: React.FC<OMProps> = ({ term, addon_term, selectedData, handl
             value={customDay1}
             onChange={e => handleCustomDayChange('day1', e.target.value)}
             placeholder="Day"
-            className="w-16 p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm text-sm text-center rounded"
+            className="h-12 md:h-11 w-16 rounded-lg border border-field bg-white px-2 text-center text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             data-testid="custom-day1"
           />
-          <span className="text-gray-500 dark:text-bodydark font-medium">/</span>
+          <span className="text-body dark:text-bodydark font-medium">/</span>
           <input
             type="text"
             inputMode="numeric"
             value={customDay2}
             onChange={e => handleCustomDayChange('day2', e.target.value)}
             placeholder="Day"
-            className="w-16 p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm text-sm text-center rounded"
+            className="h-12 md:h-11 w-16 rounded-lg border border-field bg-white px-2 text-center text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             data-testid="custom-day2"
           />
-          <span className="text-gray-500 dark:text-bodydark font-medium">/</span>
+          <span className="text-body dark:text-bodydark font-medium">/</span>
           <input
             type="text"
             inputMode="numeric"
             value={customDay3}
             onChange={e => handleCustomDayChange('day3', e.target.value)}
             placeholder="Day"
-            className="w-16 p-2 border border-stroke dark:border-strokedark bg-white dark:bg-form-input text-gray-900 dark:text-white shadow-sm text-sm text-center rounded"
+            className="h-12 md:h-11 w-16 rounded-lg border border-field bg-white px-2 text-center text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             data-testid="custom-day3"
           />
         </div>

@@ -1,6 +1,8 @@
 "use client";
 
+import { SkeletonBlock } from '@/components/LoadingStates';
 import React, { useEffect, useState } from 'react';
+import { Card, CardBody } from '@/components/Card';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import CustomDatatable from '@/components/CustomDatatable';
 import ReactSelect from '@/components/ReactSelect';
@@ -158,13 +160,11 @@ const BalanceSheetList: React.FC = () => {
 
   return (
     <div>
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="w-full">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
-
-              <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-5">
-                <label className="mb-2 text-gray-700 dark:text-bodydark">Select Date Range:</label>
+      <Card>
+        {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). */}
+        <CardBody>
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Select Date Range:</label>
                 <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
                   <div className="w-full sm:w-auto sm:flex-1">
                     <DatePicker
@@ -174,7 +174,7 @@ const BalanceSheetList: React.FC = () => {
                       startDate={startDate}
                       endDate={endDate}
                       placeholderText="Start Date"
-                      className="w-full border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                      className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                     />
                   </div>
                   <div className="w-full sm:w-auto sm:flex-1">
@@ -186,7 +186,7 @@ const BalanceSheetList: React.FC = () => {
                       endDate={endDate}
                       minDate={startDate} // Prevent selecting an end date before start date
                       placeholderText="End Date"
-                      className="w-full border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white"
+                      className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                     />
                   </div>
                   {/* Group Select — FA/FB/FC/FD; narrows the Branch list beside it */}
@@ -268,63 +268,54 @@ const BalanceSheetList: React.FC = () => {
                 </div>
               </div>
 
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-boxdark dark:text-boxdark">
-                  Balance Sheet
-                </h3>
-              </div>
-
-              <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto min-h-[300px] max-h-[70vh] lg:h-[600px]">
+              <div className="overflow-x-auto">
                 {loading ? (
-                  <div className="flex items-center justify-center min-h-[300px] text-gray-500 dark:text-bodydark">
-                    <span className="inline-block h-5 w-5 mr-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
-                    Loading balance sheet…
-                  </div>
+                  <SkeletonBlock rows={6} label="Loading balance sheet…" />
                 ) : balanceSheetData !== undefined ? (
                   <table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="bg-gray-100 dark:bg-meta-4 border-b-2 border-gray-300 dark:border-strokedark">
-                        <th className="px-6 py-4 text-left font-bold text-gray-900 dark:text-white md:min-w-[280px] lg:min-w-[400px]">Account Name</th>
-                        <th className="px-6 py-4 text-right font-bold text-gray-900 dark:text-white">Account Number</th>
-                        <th className="px-6 py-4 text-right font-bold text-gray-900 dark:text-white">Balance</th>
+                      <tr className="bg-gray-2 dark:bg-meta-4 border-b-2 border-stroke dark:border-strokedark">
+                        <th className="px-6 py-4 text-left font-bold text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">Account Name</th>
+                        <th className="px-6 py-4 text-right font-bold text-black dark:text-white">Account Number</th>
+                        <th className="px-6 py-4 text-right font-bold text-black dark:text-white">Balance</th>
                       </tr>
                     </thead>
                     <tbody>
                       {/* Assets Section */}
-                      <tr className="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-800">
-                        <td colSpan={3} className="px-6 py-3 font-bold text-lg text-blue-900 dark:text-blue-300">
+                      <tr className="bg-sky-50 dark:bg-sky-900/20 border-t-2 border-sky-200 dark:border-sky-800">
+                        <td colSpan={3} className="px-6 py-3 font-bold text-lg text-sky-900 dark:text-sky-300">
                           ASSETS
                         </td>
                       </tr>
                       {balanceSheetData?.assets?.map((item: any) => (
                         <React.Fragment key={item.number}>
-                          <tr className="border-b border-gray-200 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                            <td className="px-6 py-3 font-semibold text-gray-900 dark:text-white">{item.account_name}</td>
-                            <td className="px-6 py-3 text-right text-gray-700 dark:text-gray-300">{item.number}</td>
-                            <td className="px-6 py-3 text-right font-semibold text-gray-900 dark:text-white">{formatCurrency(item.balance)}</td>
+                          <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                            <td className="px-6 py-3 font-semibold text-black dark:text-white">{item.account_name}</td>
+                            <td className="px-6 py-3 text-right text-black dark:text-white">{item.number}</td>
+                            <td className="px-6 py-3 text-right tabular-nums font-semibold text-black dark:text-white">{formatCurrency(item.balance)}</td>
                           </tr>
                           {item.subAccounts?.map((child: any) => (
                             <React.Fragment key={child.number}>
-                              <tr className="border-b border-gray-100 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                <td className="px-6 py-2 pl-12 text-gray-800 dark:text-gray-200">{child.account_name}</td>
-                                <td className="px-6 py-2 text-right text-sm text-gray-600 dark:text-gray-400">{child.number}</td>
-                                <td className="px-6 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrency(child.balance)}</td>
+                              <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                                <td className="px-6 py-2 pl-12 text-black dark:text-white">{child.account_name}</td>
+                                <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{child.number}</td>
+                                <td className="px-6 py-2 text-right tabular-nums text-black dark:text-white">{formatCurrency(child.balance)}</td>
                               </tr>
                               {child.subAccounts?.map((grandChild: any) => (
-                                <tr key={grandChild.number} className="border-b border-gray-100 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                  <td className="px-6 py-2 pl-20 text-sm text-gray-700 dark:text-gray-300">{grandChild.account_name}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-gray-600 dark:text-gray-400">{grandChild.number}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{formatCurrency(grandChild.balance)}</td>
+                                <tr key={grandChild.number} className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                                  <td className="px-6 py-2 pl-20 text-sm text-black dark:text-white">{grandChild.account_name}</td>
+                                  <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{grandChild.number}</td>
+                                  <td className="px-6 py-2 text-right tabular-nums text-sm text-black dark:text-white">{formatCurrency(grandChild.balance)}</td>
                                 </tr>
                               ))}
                             </React.Fragment>
                           ))}
                         </React.Fragment>
                       ))}
-                      <tr className="bg-blue-100 dark:bg-blue-900/30 border-t-2 border-blue-300 dark:border-blue-700">
-                        <td className="px-6 py-3 font-bold text-blue-900 dark:text-blue-300">TOTAL ASSETS</td>
+                      <tr className="bg-sky-100 dark:bg-sky-900/30 border-t-2 border-sky-300 dark:border-sky-700">
+                        <td className="px-6 py-3 font-bold text-sky-900 dark:text-sky-300">TOTAL ASSETS</td>
                         <td className="px-6 py-3"></td>
-                        <td className="px-6 py-3 text-right font-bold text-lg text-blue-900 dark:text-blue-300">{formatCurrency(balanceSheetData.total_assets)}</td>
+                        <td className="px-6 py-3 text-right tabular-nums font-bold text-lg text-sky-900 dark:text-sky-300">{formatCurrency(balanceSheetData.total_assets)}</td>
                       </tr>
 
                       {/* Liabilities Section */}
@@ -335,23 +326,23 @@ const BalanceSheetList: React.FC = () => {
                       </tr>
                       {balanceSheetData?.liabilities?.map((item: any) => (
                         <React.Fragment key={item.number}>
-                          <tr className="border-b border-gray-200 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                            <td className="px-6 py-3 font-semibold text-gray-900 dark:text-white">{item.account_name}</td>
-                            <td className="px-6 py-3 text-right text-gray-700 dark:text-gray-300">{item.number}</td>
-                            <td className="px-6 py-3 text-right font-semibold text-gray-900 dark:text-white">{formatCurrency(item.balance)}</td>
+                          <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                            <td className="px-6 py-3 font-semibold text-black dark:text-white">{item.account_name}</td>
+                            <td className="px-6 py-3 text-right text-black dark:text-white">{item.number}</td>
+                            <td className="px-6 py-3 text-right tabular-nums font-semibold text-black dark:text-white">{formatCurrency(item.balance)}</td>
                           </tr>
                           {item.subAccounts?.map((child: any) => (
                             <React.Fragment key={child.number}>
-                              <tr className="border-b border-gray-100 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                <td className="px-6 py-2 pl-12 text-gray-800 dark:text-gray-200">{child.account_name}</td>
-                                <td className="px-6 py-2 text-right text-sm text-gray-600 dark:text-gray-400">{child.number}</td>
-                                <td className="px-6 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrency(child.balance)}</td>
+                              <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                                <td className="px-6 py-2 pl-12 text-black dark:text-white">{child.account_name}</td>
+                                <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{child.number}</td>
+                                <td className="px-6 py-2 text-right tabular-nums text-black dark:text-white">{formatCurrency(child.balance)}</td>
                               </tr>
                               {child.subAccounts?.map((grandChild: any) => (
-                                <tr key={grandChild.number} className="border-b border-gray-100 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                  <td className="px-6 py-2 pl-20 text-sm text-gray-700 dark:text-gray-300">{grandChild.account_name}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-gray-600 dark:text-gray-400">{grandChild.number}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{formatCurrency(grandChild.balance)}</td>
+                                <tr key={grandChild.number} className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                                  <td className="px-6 py-2 pl-20 text-sm text-black dark:text-white">{grandChild.account_name}</td>
+                                  <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{grandChild.number}</td>
+                                  <td className="px-6 py-2 text-right tabular-nums text-sm text-black dark:text-white">{formatCurrency(grandChild.balance)}</td>
                                 </tr>
                               ))}
                             </React.Fragment>
@@ -361,7 +352,7 @@ const BalanceSheetList: React.FC = () => {
                       <tr className="bg-orange-100 dark:bg-orange-900/30 border-t-2 border-orange-300 dark:border-orange-700">
                         <td className="px-6 py-3 font-bold text-orange-900 dark:text-orange-300">TOTAL LIABILITIES</td>
                         <td className="px-6 py-3"></td>
-                        <td className="px-6 py-3 text-right font-bold text-lg text-orange-900 dark:text-orange-300">{formatCurrency(balanceSheetData.total_liabilities)}</td>
+                        <td className="px-6 py-3 text-right tabular-nums font-bold text-lg text-orange-900 dark:text-orange-300">{formatCurrency(balanceSheetData.total_liabilities)}</td>
                       </tr>
 
                       {/* Equity Section */}
@@ -372,23 +363,23 @@ const BalanceSheetList: React.FC = () => {
                       </tr>
                       {balanceSheetData?.equity?.map((item: any) => (
                         <React.Fragment key={item.number}>
-                          <tr className="border-b border-gray-200 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                            <td className="px-6 py-3 font-semibold text-gray-900 dark:text-white">{item.account_name}</td>
-                            <td className="px-6 py-3 text-right text-gray-700 dark:text-gray-300">{item.number}</td>
-                            <td className="px-6 py-3 text-right font-semibold text-gray-900 dark:text-white">{formatCurrency(item.balance)}</td>
+                          <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                            <td className="px-6 py-3 font-semibold text-black dark:text-white">{item.account_name}</td>
+                            <td className="px-6 py-3 text-right text-black dark:text-white">{item.number}</td>
+                            <td className="px-6 py-3 text-right tabular-nums font-semibold text-black dark:text-white">{formatCurrency(item.balance)}</td>
                           </tr>
                           {item.subAccounts?.map((child: any) => (
                             <React.Fragment key={child.number}>
-                              <tr className="border-b border-gray-100 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                <td className="px-6 py-2 pl-12 text-gray-800 dark:text-gray-200">{child.account_name}</td>
-                                <td className="px-6 py-2 text-right text-sm text-gray-600 dark:text-gray-400">{child.number}</td>
-                                <td className="px-6 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrency(child.balance)}</td>
+                              <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                                <td className="px-6 py-2 pl-12 text-black dark:text-white">{child.account_name}</td>
+                                <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{child.number}</td>
+                                <td className="px-6 py-2 text-right tabular-nums text-black dark:text-white">{formatCurrency(child.balance)}</td>
                               </tr>
                               {child.subAccounts?.map((grandChild: any) => (
-                                <tr key={grandChild.number} className="border-b border-gray-100 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                  <td className="px-6 py-2 pl-20 text-sm text-gray-700 dark:text-gray-300">{grandChild.account_name}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-gray-600 dark:text-gray-400">{grandChild.number}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{formatCurrency(grandChild.balance)}</td>
+                                <tr key={grandChild.number} className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
+                                  <td className="px-6 py-2 pl-20 text-sm text-black dark:text-white">{grandChild.account_name}</td>
+                                  <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{grandChild.number}</td>
+                                  <td className="px-6 py-2 text-right tabular-nums text-sm text-black dark:text-white">{formatCurrency(grandChild.balance)}</td>
                                 </tr>
                               ))}
                             </React.Fragment>
@@ -398,19 +389,16 @@ const BalanceSheetList: React.FC = () => {
                       <tr className="bg-green-100 dark:bg-green-900/30 border-t-2 border-green-300 dark:border-green-700">
                         <td className="px-6 py-3 font-bold text-green-900 dark:text-green-300">TOTAL EQUITY</td>
                         <td className="px-6 py-3"></td>
-                        <td className="px-6 py-3 text-right font-bold text-lg text-green-900 dark:text-green-300">{formatCurrency(balanceSheetData.total_equity)}</td>
+                        <td className="px-6 py-3 text-right tabular-nums font-bold text-lg text-green-900 dark:text-green-300">{formatCurrency(balanceSheetData.total_equity)}</td>
                       </tr>
                     </tbody>
                   </table>
                 ) : (
-                  <p className="text-center text-gray-500 dark:text-gray-400 py-8">No balance sheet data available. Please select a date range and branch.</p>
+                  <p className="text-center text-body dark:text-bodydark py-8">No balance sheet data available. Please select a date range and branch.</p>
                 )}
               </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 };

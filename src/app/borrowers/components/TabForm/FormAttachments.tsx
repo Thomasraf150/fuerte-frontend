@@ -63,8 +63,8 @@ const FormAttachments: React.FC<ParentFormBr> = ({ createAttachments, singleData
   return (
 
     <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="bg-black border-b mb-3 border-stroke px-6.5 py-4 dark:border-strokedark">
-        <h3 className="font-medium text-whiter dark:text-white">
+      <div className="border-b mb-3 border-stroke px-6.5 pb-3 pt-4 dark:border-strokedark">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-primary dark:text-olive-300">
           Create Attachments
         </h3>
       </div>

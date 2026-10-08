@@ -1,3 +1,5 @@
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -61,63 +63,62 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({ filters, onFilt
   const hasActiveFilters = localFilters.startDate || localFilters.endDate || localFilters.journalType;
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-6 py-4 dark:border-strokedark">
-        <div className="flex items-center gap-3">
-          <h3 className="font-medium text-black dark:text-white">
+    <Card>
+      <CardHeader
+        title={
+          <span className="flex items-center gap-3">
             Transaction History
-          </h3>
-          {hasActiveFilters && (
-            <span className="inline-flex items-center rounded bg-primary px-2 py-1 text-xs font-medium text-white">
-              {[
-                localFilters.startDate && 'Start Date',
-                localFilters.endDate && 'End Date',
-                localFilters.journalType && 'Journal Type'
-              ].filter(Boolean).length} active
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="p-6">
+            {hasActiveFilters && (
+              <span className="inline-flex items-center rounded bg-primary px-2 py-1 text-xs font-medium text-white">
+                {[
+                  localFilters.startDate && 'Start Date',
+                  localFilters.endDate && 'End Date',
+                  localFilters.journalType && 'Journal Type'
+                ].filter(Boolean).length} active
+              </span>
+            )}
+          </span>
+        }
+      />
+      <CardBody>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Start Date */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Start Date
             </label>
             <DatePicker
               selected={localFilters.startDate}
               onChange={(date) => setLocalFilters(prev => ({ ...prev, startDate: date }))}
               dateFormat="MM/dd/yyyy"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
               placeholderText="Select start date"
             />
           </div>
 
           {/* End Date */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               End Date
             </label>
             <DatePicker
               selected={localFilters.endDate}
               onChange={(date) => setLocalFilters(prev => ({ ...prev, endDate: date }))}
               dateFormat="MM/dd/yyyy"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
               placeholderText="Select end date"
             />
           </div>
 
           {/* Journal Type */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Journal Type
             </label>
             <select
               value={localFilters.journalType || ''}
               onChange={(e) => setLocalFilters(prev => ({ ...prev, journalType: e.target.value || undefined }))}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             >
               {JOURNAL_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -129,22 +130,18 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({ filters, onFilt
 
           {/* Action Buttons */}
           <div className="flex items-end gap-2">
-            <button
-              onClick={handleApplyFilters}
-              className="flex-1 rounded bg-primary px-4 py-3 text-center font-medium text-white hover:bg-opacity-90"
-            >
+            <Button variant="primary" className="flex-1"
+              onClick={handleApplyFilters}>
               Apply
-            </button>
-            <button
-              onClick={handleClearFilters}
-              className="rounded border border-stroke px-4 py-3 text-center font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-            >
+            </Button>
+            <Button variant="secondary"
+              onClick={handleClearFilters}>
               Clear
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };
 

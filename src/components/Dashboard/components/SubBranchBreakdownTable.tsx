@@ -17,7 +17,7 @@ interface SubBranchBreakdownTableProps {
  */
 const LoadingSkeleton: React.FC = () => (
   <div>
-    <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
+    <div className="rounded-2xl border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
       <div className="animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
         {[1, 2, 3, 4].map((i) => (
@@ -62,7 +62,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
   if (breakdown.length === 0) {
     return (
       <div className={containerClass}>
-        <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
+        <div className="rounded-2xl border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
             Sub-Branch Breakdown
           </h4>
@@ -76,7 +76,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
 
   return (
     <div className={containerClass}>
-      <div className="rounded-sm border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
+      <div className="rounded-2xl border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
         <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
           Sub-Branch Breakdown
         </h4>

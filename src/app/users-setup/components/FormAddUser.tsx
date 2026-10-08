@@ -5,6 +5,7 @@ import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import useUsers from '@/hooks/useUsers';
 import { DataBranches, DataFormUser, User } from '@/utils/DataTypes';
+import Button from '@/components/Button';
 
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
@@ -153,7 +154,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
           />
 
           {actionLbl === 'Update User' && callerIsOwner && (
-            <div className="mb-6 mt-6 rounded-md border border-stroke bg-gray-50 px-4 py-4 dark:border-strokedark dark:bg-meta-4">
+            <div className="mb-6 mt-6 rounded-md border border-stroke bg-whiten px-4 py-4 dark:border-strokedark dark:bg-meta-4">
               <div className="mb-3 flex items-baseline justify-between gap-2">
                 <label className="block text-sm font-semibold text-black dark:text-white">
                   Cross-Branch Access
@@ -278,18 +279,14 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
       )}
 
       <div className="flex justify-end gap-4.5 mt-6">
-        <button
-          className="flex justify-center rounded border border-stroke px-4 py-2 sm:px-6 sm:py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={() => { setShowForm(false) }}
-        >
+          onClick={() => { setShowForm(false) }}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-4 py-2 sm:px-6 sm:py-2 font-medium text-gray hover:bg-opacity-90 ${userLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={userLoading}
-        >
+          disabled={userLoading}>
           {userLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -301,7 +298,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

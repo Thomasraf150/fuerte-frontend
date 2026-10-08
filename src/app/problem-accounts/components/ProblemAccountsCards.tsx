@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { SkeletonBlock } from "@/components/LoadingStates";
 import { ProblemAccountRow } from "@/hooks/useProblemAccountsPaginated";
 import { formatNumber } from "@/utils/formatNumber";
 import { formatCount } from "@/utils/helper";
@@ -83,16 +84,14 @@ const ProblemAccountsCards: React.FC<Props> = ({
 }) => {
   if (loading && rows.length === 0) {
     return (
-      <p className="py-10 text-center text-sm text-body dark:text-bodydark">
-        Loading problem accounts…
-      </p>
+      <SkeletonBlock rows={4} label="Loading problem accounts…" />
     );
   }
 
   if (rows.length === 0) {
     return (
       <p className="py-10 text-center text-sm text-body dark:text-bodydark">
-        There are no records to display
+        No problem accounts to show.
       </p>
     );
   }

@@ -33,13 +33,13 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
           Customer Ledger
         </h4>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1800px] text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-teal-50 dark:bg-gray-700 dark:text-gray-400">
+          <table className="w-full min-w-[1800px] text-sm text-left text-body dark:text-bodydark">
+            <thead className="text-xs text-black uppercase bg-teal-50 dark:bg-meta-4 dark:text-bodydark">
               <tr>
-                <th scope="col" className="px-4 py-3 w-32 whitespace-nowrap sticky left-0 bg-teal-50 dark:bg-gray-700">Debit</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-24 bg-teal-50 dark:bg-gray-700">Credit</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-44 bg-teal-50 dark:bg-gray-700">Running Balance</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap bg-teal-50 dark:bg-gray-700">Due Date</th>
+                <th scope="col" className="px-4 py-3 w-32 whitespace-nowrap sticky left-0 bg-teal-50 dark:bg-meta-4">Debit</th>
+                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-24 bg-teal-50 dark:bg-meta-4">Credit</th>
+                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-44 bg-teal-50 dark:bg-meta-4">Running Balance</th>
+                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap bg-teal-50 dark:bg-meta-4">Due Date</th>
                 <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap">Date Paid</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Collection</th>
                 <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Penalty</th>
@@ -55,15 +55,15 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
             </thead>
             <tbody>
             {loading ? (
-              <tr className="bg-white dark:bg-gray-800">
+              <tr className="bg-white dark:bg-boxdark">
                 <th colSpan={12} className="text-center p-5">Please wait..</th>
               </tr>
             ) : (
               custLedgerData && custLedgerData.map((item, i) => (
-                <tr key={i} className="bg-white dark:bg-gray-800">
-                  <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-800">{formatMoneyOrBlank(item.debit)}</th>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-24 bg-white dark:bg-gray-800">{formatMoneyOrBlank(item.credit)}</td>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-44 bg-white dark:bg-gray-800">{formatMoneyOrBlank(item.running_balance)}</td>
+                <tr key={i} className="bg-white dark:bg-boxdark">
+                  <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-boxdark">{formatMoneyOrBlank(item.debit)}</th>
+                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-24 bg-white dark:bg-boxdark">{formatMoneyOrBlank(item.credit)}</td>
+                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-44 bg-white dark:bg-boxdark">{formatMoneyOrBlank(item.running_balance)}</td>
                   <td className="px-4 py-4 text-left whitespace-nowrap left-64">{item.due_date}</td>
                   <td className="px-4 py-4 text-left">{item.date_paid}</td>
                   <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.collection)}</td>
@@ -81,10 +81,10 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
             )}
             </tbody>
             <tfoot>
-              <tr className="font-semibold text-gray-900 dark:text-white">
-                <th scope="row" className="px-4 py-3 text-base sticky left-0 bg-teal-50 dark:bg-gray-700"></th>
-                <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-gray-700"></td>
-                <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-gray-700"></td>
+              <tr className="font-semibold text-black dark:text-white">
+                <th scope="row" className="px-4 py-3 text-base sticky left-0 bg-teal-50 dark:bg-meta-4"></th>
+                <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-meta-4"></td>
+                <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-meta-4"></td>
                 <td className="px-4 py-3 text-left left-64">Total</td>
                 <td className="px-4 py-3 text-center"></td>
                 <td className="px-4 py-3 text-center">{formatNumberComma(totalCollection)}</td>

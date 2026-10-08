@@ -10,12 +10,14 @@ import FormAddBranch from './FormAddBranch';
 import FormAddSubBranch from './FormAddSubBranch';
 import { useBranchListsStore } from '../hooks/store';
 import useBranches from '@/hooks/useBranches';
-import { GitBranch, SkipBack } from 'react-feather';
+import { Plus, SkipBack } from 'react-feather';
 import { showConfirmationModal, showAlreadyPendingModal, showProcessingModal } from '@/components/ConfirmationModal';
 import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
 import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 import useDeletionRequests from '@/hooks/useDeletionRequests';
 import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = branchListCol;
 const subcolumn = subBranchListCol;
@@ -121,61 +123,56 @@ const BranchLists: React.FC = () => {
   useEffect(() => {
   }, [dataBranch, dataBranchSub, initialFormData, selectedBranchID])
 
+  // The list takes the full width until a form opens beside it (the empty right column was a bug).
+  const listSpan = showForm || showSubForm ? 'xl:col-span-2' : 'xl:col-span-3';
+
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {!showSubBranch && (
-          <div className={`col-span-1 xl:col-span-2 ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Main Branch
-                </h3>
-              </div>
-              <div className="p-7">
-                <button className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2" onClick={() => handleShowForm('Create Branch', true)}>
-                  <GitBranch  size={14} /> 
-                  <span>Create</span>
-                </button>
+          <div className={`col-span-1 ${listSpan} ${!showSubBranch ? 'fade-in' : 'fade-out'}`}>
+            <Card>
+              <CardHeader title="Main Branch" />
+              <CardBody>
+                <Toolbar>
+                  <Button variant="primary" onClick={() => handleShowForm('Create Branch', true)}>
+                    <Plus size={16} aria-hidden="true" />
+                    <span>Create</span>
+                  </Button>
+                </Toolbar>
                 <CustomDatatable
                   apiLoading={false}
                   title="Branch List"
                   columns={column(handleUpdateRowClick, handleSubViewRowClick, handleDeleteRow)}
                   data={dataBranch || []}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         )}
 
           {showSubBranch && (
-            <div className={`col-span-1 xl:col-span-2 ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {dataBranchSub && dataBranchSub[0]?.branch?.name}
-                  </h3>
-                </div>
-                <div className="p-7">
-                  <div className="flex items-center space-x-2">
-                    <button 
-                      className="bg-rose-600 text-white py-2 px-4 rounded hover:bg-rose-800 flex items-center space-x-2" onClick={() => 
+            <div className={`col-span-1 ${listSpan} ${showSubBranch ? 'fade-in' : 'fade-out'}`}>
+              <Card>
+                <CardHeader title={dataBranchSub && dataBranchSub[0]?.branch?.name} />
+                <CardBody>
+                  <Toolbar>
+                    <Button variant="secondary" onClick={() =>
                       {
                         setShowSubBranch(false)
                         setShowSubForm(false)
-                      } 
+                      }
                       }>
-                      <SkipBack size={15} /> 
+                      <SkipBack size={15} aria-hidden="true" />
                       <span>Back</span>
-                    </button>
-                    <button 
-                      className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2" 
+                    </Button>
+                    <Button variant="primary"
                       onClick={() => handleCreateSubRowClick() }>
-                      <GitBranch  size={14} /> 
+                      <Plus size={16} aria-hidden="true" />
                       <span>Create</span>
-                    </button>
-                  </div>
+                    </Button>
+                  </Toolbar>
                   <CustomDatatable
                     apiLoading={pendingSubLoading}
                     title="Branch List"
@@ -183,40 +180,30 @@ const BranchLists: React.FC = () => {
                     data={dataBranchSub || []}
                     conditionalRowStyles={pendingDeletionRowStyles<DataSubBranches>(pendingSubBranches)}
                   />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
 
           {showForm && (
             <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                  <FormCloseButton onClose={() => setShowForm(false)} />
-                </div>
-                <div className="p-7">
+              <Card>
+                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => setShowForm(false)} />} />
+                <CardBody>
                   <FormAddBranch setShowForm={setShowForm} fetchDataList={fetchDataList} initialData={initialFormData} actionLbl={actionLbl} />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
-          
+
           {showSubForm && (
             <div ref={subFormPanelRef} className="fade-in col-span-1 scroll-mt-24">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                  <FormCloseButton onClose={() => setShowSubForm(false)} />
-                </div>
-                <div className="p-7">
+              <Card>
+                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => setShowSubForm(false)} />} />
+                <CardBody>
                   <FormAddSubBranch setShowForm={setShowSubForm} selectedBranchId={selectedBranchID ?? 0} initialSubData={initialFormSubData} actionLbl={actionLbl} fetchSubDataList={fetchSubDataList}/>
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
         </div>

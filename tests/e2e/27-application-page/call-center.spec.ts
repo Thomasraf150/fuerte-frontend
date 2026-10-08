@@ -362,7 +362,7 @@ test.describe('2. Kept on /applications', () => {
     await expect(statusFilter(page)).toBeVisible({ timeout: 90_000 });
     const paths = trackPaths(page);
 
-    await page.locator('header').getByRole('link', { name: 'Logo' }).click();
+    await page.locator('header').getByRole('link', { name: 'Fuerte home' }).click();
 
     await expect.poll(() => paths, { timeout: 90_000 }).toContain('/');
     await expect.poll(() => paths.at(-1), { timeout: 90_000 }).toBe('/applications');

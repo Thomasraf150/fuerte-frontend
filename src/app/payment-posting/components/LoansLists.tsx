@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
+import Button from '@/components/Button';
 import CustomDatatable from '@/components/CustomDatatable';
+import { Card, CardHeader, CardBody } from '@/components/Card';
 import loansListColumn from './LoansListColumn';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
@@ -37,22 +39,15 @@ const LoansLists: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Loans List
-                </h3>
-              </div>
-              <div className="p-7">
+            <Card>
+              <CardHeader title="Loans List" />
+              <CardBody>
                 {loansError && (
-                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading payment posting loans: {loansError}
-                    <button
-                      onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                    >
+                    <Button variant="secondary" size="sm" className="ml-2" onClick={refresh}>
                       Retry
-                    </button>
+                    </Button>
                   </div>
                 )}
                 <CustomDatatable
@@ -64,8 +59,8 @@ const LoansLists: React.FC = () => {
                   title={''}
                   serverSidePagination={{ ...serverSidePaginationProps, recordType: 'loan', recordTypePlural: 'loans' }}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>

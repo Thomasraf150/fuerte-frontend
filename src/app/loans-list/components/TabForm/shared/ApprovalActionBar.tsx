@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle, RotateCw } from 'react-feather';
+import Button from '@/components/Button';
 
 interface Props {
   disabled: boolean;
@@ -8,24 +9,24 @@ interface Props {
 }
 
 const ApprovalActionBar: React.FC<Props> = ({ disabled, loading, onClick }) => (
-  <button
+  <Button
     type="button"
+    variant="primary"
     onClick={onClick}
     disabled={disabled || loading}
-    className="bg-primary flex justify-between items-center text-white py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
   >
     {loading ? (
       <>
-        <RotateCw size={16} className="animate-spin mr-1" />
+        <RotateCw size={16} className="animate-spin" />
         <span>Approving...</span>
       </>
     ) : (
       <>
-        <span className="mr-1"><CheckCircle size={16} /></span>
+        <CheckCircle size={16} />
         <span>Approve</span>
       </>
     )}
-  </button>
+  </Button>
 );
 
 export default ApprovalActionBar;

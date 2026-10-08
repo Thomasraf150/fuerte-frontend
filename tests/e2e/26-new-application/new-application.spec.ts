@@ -9,7 +9,8 @@
  *   3. With the basics and Facebook Messenger it posts exactly toApplicationInput's
  *      output ("15,000" goes as "15000"), then the list says "Na-save ang application."
  *      until a refresh. 3b: Enter pressed inside the amount, never left, posts it too.
- *   4. No photo and no Check Borrower button; the first card is "Name & Contact".
+ *   4. No photo; a Check Borrower button under "Name & Contact" (4b Call Center asks only the
+ *      cross-branch probe, 4c Processing both checks, 4d a refused check says it failed).
  *   5. The branch picker offers exactly what getApplicationBranches returned, and Call
  *      Center starts with none picked, although its home branch is a choice.
  *   6. A server refusal shows its message, and the form keeps its values; Back then
@@ -332,14 +333,14 @@ test('3b. Enter pressed inside the amount, before it is ever left, posts that am
 // 4. No photo, no Check Borrower
 // ---------------------------------------------------------------------------
 
-test('4. no photo and no Check Borrower button, under "Name & Contact"', async ({ page, backend }) => {
+test('4. no photo, and a Check Borrower button under "Name & Contact" (Rafael 2026-10-07)', async ({ page, backend }) => {
   stubApplications(backend);
   await signedInAs(page, backend, 'CALLCTR');
   const form = await openNewApplication(page);
 
   await expect(form.getByRole('img', { name: 'profile' })).toHaveCount(0);
   await expect(form.locator('input#photo')).toHaveCount(0);
-  await expect(form.getByRole('button', { name: 'Check Borrower' })).toHaveCount(0);
+  await expect(form.getByRole('button', { name: 'Check Borrower', exact: true })).toBeVisible();
   expect(await form.locator('h3').allTextContents()).toEqual([
     'Name & Contact',
     'Borrower Information',
@@ -349,6 +350,62 @@ test('4. no photo and no Check Borrower button, under "Name & Contact"', async (
     'Company Information',
   ]);
   await expect(page.getByRole('link', { name: 'Back to Applications' })).toHaveAttribute('href', '/applications');
+});
+
+/** The cross-branch probe's answer: a match on another branch, aggregates only. */
+const ELSEWHERE = {
+  existsElsewhere: true, branches: ['Subic FB'], isProblem: true, worstCutoffsMissed: 3, matchCount: 1,
+  existsInMyBranches: false, myBranches: [], myBranchIsProblem: false, myBranchWorstCutoffs: 0, myBranchMatchCount: 0,
+};
+
+async function typeNameAndCheck(form: Locator): Promise<void> {
+  await form.locator('input[name="firstname"]').fill('Ana');
+  await form.locator('input[name="lastname"]').fill('Reyes');
+  await form.getByRole('button', { name: 'Check Borrower', exact: true }).click();
+}
+
+test('4b. Call Center\'s Check Borrower asks only the cross-branch probe and shows where the match is', async ({ page, backend }) => {
+  stubApplications(backend);
+  backend.extraGraphql.set('checkBorrowerCrossBranch', () => ({ data: { checkBorrowerCrossBranch: ELSEWHERE } }));
+  await signedInAs(page, backend, 'CALLCTR');
+  const form = await openNewApplication(page);
+
+  await typeNameAndCheck(form);
+
+  const dialog = page.locator('.swal2-popup');
+  await expect(dialog).toContainText('Also found in another branch', { timeout: 30_000 });
+  await expect(dialog).toContainText('Subic FB');
+  await expect(dialog).not.toContainText('in your branch');
+  expect(backend.calls('checkBorrowerCrossBranch')).toHaveLength(1);
+  expect(backend.calls('checkBorrowerCrossBranch')[0].variables).toMatchObject({ firstname: 'Ana', lastname: 'Reyes' });
+  expect(backend.calls('checkBorrowerDuplicate')).toHaveLength(0);
+});
+
+test('4c. Processing\'s Check Borrower asks both checks, as on New Borrower', async ({ page, backend }) => {
+  stubApplications(backend);
+  backend.extraGraphql.set('checkBorrowerCrossBranch', () => ({ data: { checkBorrowerCrossBranch: ELSEWHERE } }));
+  backend.extraGraphql.set('checkBorrowerDuplicate', () => ({ data: { checkBorrowerDuplicate: { isDuplicate: false, duplicateType: null, duplicateBorrower: null, duplicateProblem: null, message: 'No duplicate' } } }));
+  await signedInAs(page, backend, 'PROC');
+  const form = await openNewApplication(page, 3);
+
+  await typeNameAndCheck(form);
+
+  await expect(page.locator('.swal2-popup')).toContainText('Subic FB', { timeout: 30_000 });
+  expect(backend.calls('checkBorrowerDuplicate')).toHaveLength(1);
+  expect(backend.calls('checkBorrowerCrossBranch')).toHaveLength(1);
+});
+
+test('4d. a refused check says it failed, never "No existing borrower found"', async ({ page, backend }) => {
+  stubApplications(backend);
+  backend.extraGraphql.set('checkBorrowerCrossBranch', () => ({ errors: [{ message: 'This is not available to Call Center accounts.' }] }));
+  await signedInAs(page, backend, 'CALLCTR');
+  const form = await openNewApplication(page);
+
+  await typeNameAndCheck(form);
+
+  await expect(page.getByText('Borrower check failed — please try again.')).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('.swal2-popup')).toHaveCount(0);
+  await expect(page.getByText('No existing borrower found')).toHaveCount(0);
 });
 
 // ---------------------------------------------------------------------------
@@ -451,8 +508,11 @@ test('8. Tab reaches the tiles as one stop, the arrow keys change the choice, an
   for (const name of ALL_TILES) await expect(radio(form, name)).toHaveCount(1);
   await expect(radio(form, 'Facebook Messenger')).toHaveAccessibleDescription('Nag-message sa FB page');
 
-  // Email is the last field before Borrower Information, whose first field is Saan galing.
+  // Email is the last field of Name & Contact; then its Check Borrower button (2026-10-07), then
+  // Borrower Information, whose first field is Saan galing.
   await form.locator('input[name="email"]').focus();
+  await page.keyboard.press('Tab');
+  await expect(form.getByRole('button', { name: 'Check Borrower', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(radio(form, 'Google Form')).toBeFocused();
   await page.keyboard.press('ArrowRight');

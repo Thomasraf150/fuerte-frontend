@@ -42,6 +42,9 @@
  *      their controls are 48px.
  *  11. On an existing borrower (/borrowers/<id>?application=7) the parameter is ignored: no
  *      lookup, no banner, and the plain update.
+ *  12. Call Center (2026-10-07) converts too: it asks only fields its server gate opens (no branch
+ *      list, no same-branch duplicate check), saves with application_id, and lands on the
+ *      application; without ?application= it is sent back to /applications.
  *
  * /applications/<id> belongs to another page: it is answered here, so these tests do not
  * depend on it (or on the requests it makes). NO CREDENTIALS AND NO BACKEND: see
@@ -59,9 +62,11 @@ import type { LoanApplicationDetails, LoanApplicationRecord } from '../../../src
 import {
   AREA_WITH_SUB_AREAS,
   BRANCH_SUBS,
+  FAKE_TOKEN,
   type FakeBackend,
   type GraphqlBody,
   expect,
+  fakeUser,
   fieldErrors,
   optionsOf,
   pick,
@@ -541,6 +546,66 @@ test('2. Save posts the application and its branch through its own mutation, and
   await expect(page).toHaveURL(`${APP}/applications/${ID}`, { timeout: 30_000 });
   await expect(page.getByRole('heading', { name: 'Application page (stub)' })).toBeVisible();
   expect(seen.paths.filter((path) => path === '/borrowers'), 'the list was asked for after a conversion').toEqual([]);
+});
+
+// ---------------------------------------------------------------------------
+// 12. Call Center converts (Rafael 2026-10-07)
+// ---------------------------------------------------------------------------
+
+/** The roots app/Support/CallCenterAllowList.php opens to Call Center. Keep the two in step. */
+const CALL_CENTER_FIELDS = [
+  'maintenance', 'getLoanApplications', 'getApplicationBranches', 'getLoanApplication', 'getApplicationSourceCounts',
+  'getChief', 'getAreas', 'getOneSubArea', 'getBorrCompanies', 'getApplicationNotifications',
+  'getLoanApplicationBorrowerMatch', 'getApplicationFunnel', 'checkBorrowerCrossBranch',
+  'createLoanApplication', 'updateLoanApplication', 'setLoanApplicationStatus', 'printLoanApplication', 'saveBorrower',
+];
+
+/** A Call Center user: no branches of its own; a home branch that is NOT the application's. */
+async function signedInAsCallCenter(page: Page, backend: FakeBackend): Promise<void> {
+  backend.user = {
+    ...fakeUser([], Number(BRANCH_SUBS[1].id)),
+    name: 'E2E Call Center', email: 'e2e.callcenter@example.test',
+    role_id: 8, role: { id: 8, name: 'CALL_CENTER', code: 'CALLCTR' },
+  };
+  await page.addInitScript(
+    ([user, token]) => localStorage.setItem('authStore', JSON.stringify({ state: { user, authToken: token }, version: 0 })),
+    [backend.user, FAKE_TOKEN] as const,
+  );
+}
+
+test('12. Call Center converts: only fields its gate opens, saved with application_id, back on the application', async ({ page, backend }) => {
+  stubApplication(backend);
+  stubSave(backend, true, SAVED);
+  await answerApplicationPage(page);
+  await signedInAsCallCenter(page, backend);
+  const form = await openConversion(page);
+
+  await expect(page).toHaveURL(`${APP}/borrowers/new?application=${ID}`);
+  await expect.poll(() => selectedText(form, 'branch_sub_id')).toBe('E2E Sub-branch A');
+  await addWhatIsMissing(form, backend);
+  await saveButton(form).click();
+
+  await expect.poll(() => backend.calls('saveBorrower').length, { timeout: 30_000 }).toBe(1);
+  const posted = backend.calls('saveBorrower')[0].variables;
+  expect(posted.application_id).toBe(ID);
+  expect((posted.inputBorrInfo as Record<string, unknown>).branch_sub_id, "the application's branch, not Call Center's home").toBe(BRANCH_SUBS[0].id);
+  await expect(page).toHaveURL(`${APP}/applications/${ID}`, { timeout: 30_000 });
+
+  const asked = Array.from(new Set(backend.graphql.map((call) => call.field)));
+  expect(asked.filter((field) => !CALL_CENTER_FIELDS.includes(field)), 'asked for a field the server refuses Call Center').toEqual([]);
+  expect(backend.calls('checkBorrowerDuplicate')).toHaveLength(0);
+  expect(backend.calls('getMyAccessibleBranchSubs')).toHaveLength(0);
+});
+
+test('12b. Call Center on New Borrower without ?application= is sent back to /applications', async ({ page, backend }) => {
+  await page.route((url) => url.origin === APP && url.pathname === '/applications', (route) => route.fulfill({
+    status: 200, contentType: 'text/html', body: '<!doctype html><html lang="en"><head><title>Applications</title></head><body><h1>Applications (stub)</h1></body></html>',
+  }));
+  await signedInAsCallCenter(page, backend);
+  await page.goto('/borrowers/new', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+
+  await expect(page).toHaveURL(`${APP}/applications`, { timeout: 60_000 });
+  expect(backend.calls('saveBorrower')).toHaveLength(0);
 });
 
 // ---------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 // export default config;
 import type { Config } from "tailwindcss";
 import defaultTheme from "tailwindcss/defaultTheme";
-import { BRAND } from "./src/utils/brandColors";
+import { BRAND, OLIVE } from "./src/utils/brandColors";
 
 const config: Config = {
   content: [
@@ -29,7 +29,7 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   safelist: [
-    // Chart of Accounts hierarchical colors - active parent accounts (blue)
+    // Chart of Accounts hierarchical colors - active parent accounts (blue, which draws the olive scale)
     'bg-blue-900', 'bg-blue-800', 'bg-blue-700', 'bg-blue-600', 'bg-blue-500', 'bg-blue-400', 'bg-blue-300', 'bg-blue-200', 'bg-blue-100',
     // Chart of Accounts - inactive parent accounts (gray)
     'bg-gray-500', 'bg-gray-400', 'bg-gray-300', 'bg-gray-200', 'bg-gray-100',
@@ -73,7 +73,7 @@ const config: Config = {
         primary: BRAND.primary, // #3C50E0
         accent: BRAND.accent, // new
         ink: BRAND.ink, // new
-        secondary: "#80CAEE",
+        secondary: BRAND.accent, // #80CAEE (TailAdmin light blue; used only by the dashboard charts)
         stroke: BRAND.stroke, // #E2E8F0
         gray: "#FBF7EC", // #EFF4FB
         graydark: "#3F4426", // #333A48 (sidebar hover and active item: a dark olive)
@@ -99,6 +99,16 @@ const config: Config = {
         success: BRAND.success, // #219653
         danger: BRAND.danger, // #B5372F
         warning: "#F29A0E", // #FFA70B
+        // Form-field borders that reach 3:1 against the field (WCAG 1.4.11), unlike the 1.3:1
+        // stroke hairline: light on white 3.54:1, dark on form-input 3.37:1 (UI modernisation B).
+        field: "#8F8873",
+        "field-dark": "#7A735F",
+        // Phase 4 (2026-10-06): the default blue and cyan scales are re-pointed at the olive
+        // scale, so the hard-coded blue-*/cyan-* classes follow the brand. See OLIVE in
+        // src/utils/brandColors.ts; a hue that must stay distinct next to green uses sky-*.
+        olive: OLIVE,
+        blue: OLIVE,
+        cyan: OLIVE,
       },
       fontSize: {
         "title-xxl": ["44px", "55px"],

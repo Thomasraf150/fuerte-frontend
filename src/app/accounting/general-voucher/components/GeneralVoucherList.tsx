@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
@@ -11,6 +12,7 @@ import { Download, GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import gVTblColumn from './GVTblColumn';
 import { RowAcctgEntry } from '@/utils/DataTypes';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = gVTblColumn;
 
@@ -69,49 +71,40 @@ const GeneralVoucherList: React.FC = () => {
             <div className={`col-span-2 ${!showFormCv ?'fade-in' : 'fade-out'}`}>
               <VoucherFilters onChange={setFilters} />
 
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    General Voucher
-                  </h3>
-                </div>
-                <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
-                  <button
+              <Card>
+                <CardHeader title="General Voucher" />
+                <CardBody>
+                <Toolbar>
+                  <Button variant="primary"
                     type="button"
-                    className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowFormCv('Create Check Voucher', true) }>
                       <Plus size={14} />
                       <span>New CV</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="secondary"
                     type="button"
-                    className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowFormJv('Create Journal Voucher', true) }>
                       <Plus size={14} />
                       <span>New JV</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="secondary" className="ml-auto"
                     type="button"
                     disabled={exportDisabled}
                     title={!filters?.startDate || !filters?.endDate
                       ? 'Select a date range first'
                       : 'Export check vouchers (in the selected date range and branch) to an Excel file'}
-                    className="ml-auto text-white bg-gradient-to-r items-center from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={exportCheckVouchersToExcel}>
                       <Download size={14} />
                       <span>{exportLoading ? 'Exporting…' : 'Export to Excel'}</span>
-                  </button>
-                </div>
-                <div className="px-4">
+                  </Button>
+                </Toolbar>
                   {generalVoucherError && (
-                    <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                    <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                       Error loading general vouchers: {generalVoucherError}
-                      <button
-                        onClick={refresh}
-                        className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                      >
+                      <Button variant="secondary" className="ml-2"
+                        onClick={refresh}>
                         Retry
-                      </button>
+                      </Button>
                     </div>
                   )}
                   <CustomDatatable
@@ -123,13 +116,13 @@ const GeneralVoucherList: React.FC = () => {
                     data={dataGV || []}
                     serverSidePagination={serverSidePaginationProps}
                   />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
           {showFormCv && (
             <div className={`col-span-2 ${showFormCv ?'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <Card>
                 <CVForm
                   setShowForm={setShowFormCv}
                   actionLbl={actionLbl}
@@ -142,12 +135,12 @@ const GeneralVoucherList: React.FC = () => {
                   pubSubBrId={pubSubBrId}
                   printSummaryTicketDetails={printSummaryTicketDetails}
                   printLoading={printLoading} />
-              </div>
+              </Card>
             </div>
           )}
           {showFormJv && (
             <div className={`col-span-2 ${showFormJv ?'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <Card>
                 <JVForm
                   setShowForm={setShowFormJv}
                   actionLbl={actionLbl}
@@ -159,12 +152,12 @@ const GeneralVoucherList: React.FC = () => {
                   pubSubBrId={pubSubBrId}
                   printSummaryTicketDetails={printSummaryTicketDetails}
                   printLoading={printLoading} />
-              </div>
+              </Card>
             </div>
           )}
 
 
-        </div>
+</div>
       </div>
     </div>
   );

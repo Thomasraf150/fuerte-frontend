@@ -6,7 +6,9 @@ import { toast } from 'react-toastify';
 import { DataColListRow } from '@/utils/DataTypes';
 import useCollectionList from '@/hooks/useCollectionList';
 import collectionListCol from './CollectionListCol';
+import Button from '@/components/Button';
 import CustomDatatable from '@/components/CustomDatatable';
+import { Card, CardBody } from '@/components/Card';
 
 const column = collectionListCol;
 
@@ -33,23 +35,15 @@ const CollectionList: React.FC = () => {
     <div>
       <div className="max-w-12xl">
         <div className="flex flex-col lg:flex-row gap-4">
-          <div className="w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-            <div>
-              <div className="border-b border-stroke px-4 lg:px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Collection List
-                </h3>
-              </div>
-              <div className="p-2 lg:p-4 overflow-x-auto">
+          {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). */}
+          <Card className="w-full">
+            <CardBody className="overflow-x-auto">
                 {collectionListError && (
-                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading collection list: {collectionListError}
-                    <button
-                      onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                    >
+                    <Button variant="secondary" size="sm" className="ml-2" onClick={refresh}>
                       Retry
-                    </button>
+                    </Button>
                   </div>
                 )}
                 <CustomDatatable
@@ -61,9 +55,8 @@ const CollectionList: React.FC = () => {
                   title={''}
                   serverSidePagination={{ ...serverSidePaginationProps, recordType: 'loan', recordTypePlural: 'loans' }}
                 />
-              </div>
-            </div>
-          </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>

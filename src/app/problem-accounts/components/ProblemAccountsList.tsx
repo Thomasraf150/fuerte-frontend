@@ -9,7 +9,9 @@ import {
   useProblemAccountsPaginated,
   ProblemAccountRow,
 } from "@/hooks/useProblemAccountsPaginated";
+import Button from '@/components/Button';
 import CustomDatatable from "@/components/CustomDatatable";
+import { Card, CardBody } from "@/components/Card";
 import ReactSelect from "@/components/ReactSelect";
 import ProblemAccountsSummary from "./ProblemAccountsSummary";
 import ProblemAccountsCards from "./ProblemAccountsCards";
@@ -206,7 +208,7 @@ const ProblemAccountsList: React.FC = () => {
         loading={loading && data.length === 0}
       />
 
-      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <Card>
         {/*
           Five filters only go side by side from 2xl. At `lg` the sidebar left
           each control ~130px, which truncated both the sub-branch value and the
@@ -214,7 +216,7 @@ const ProblemAccountsList: React.FC = () => {
         */}
         <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 border-b border-stroke dark:border-strokedark">
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Group
             </label>
             <ReactSelect
@@ -228,7 +230,7 @@ const ProblemAccountsList: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Branch
             </label>
             <ReactSelect
@@ -242,7 +244,7 @@ const ProblemAccountsList: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Sub-Branch
             </label>
             <ReactSelect
@@ -258,7 +260,7 @@ const ProblemAccountsList: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Search
             </label>
             <input
@@ -266,17 +268,17 @@ const ProblemAccountsList: React.FC = () => {
               placeholder="Loan ref or borrower name"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="border border-stroke dark:border-strokedark rounded px-3 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white text-sm"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-medium text-gray-700 dark:text-bodydark">
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Sort by
             </label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="border border-stroke dark:border-strokedark rounded px-3 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white text-sm"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -290,7 +292,7 @@ const ProblemAccountsList: React.FC = () => {
         <ProblemAccountsLegend />
 
         {/*
-          `bg-red-100 border-red-400 text-red-700` rendered as an unstyled box:
+          `bg-danger/10 border-danger text-danger` rendered as an unstyled box:
           tailwind.config.ts assigns `red` a bare string, which wipes out the
           whole default shade scale, so every `red-<shade>` utility in this app
           is dead. `danger` is the live token. Stacks on a phone so a long
@@ -299,12 +301,9 @@ const ProblemAccountsList: React.FC = () => {
         {error && (
           <div className="m-4 flex flex-col gap-2 rounded border border-danger bg-danger/10 p-3 text-danger sm:flex-row sm:items-center sm:justify-between">
             <span>Error loading problem accounts: {error}</span>
-            <button
-              onClick={refresh}
-              className="shrink-0 rounded bg-danger px-3 py-1 text-sm text-white hover:bg-opacity-90"
-            >
+            <Button variant="secondary" size="sm" className="shrink-0" onClick={refresh}>
               Retry
-            </button>
+            </Button>
           </div>
         )}
 
@@ -313,7 +312,7 @@ const ProblemAccountsList: React.FC = () => {
           card per loan. Above it, the table keeps its own responsive ladder via
           the `hide` breakpoints in ProblemAccountsColumns.
         */}
-        <div className="p-4 md:hidden">
+        <CardBody className="md:hidden">
           <ProblemAccountsCards
             rows={data}
             groupByLoanId={groupByLoanId}
@@ -327,9 +326,9 @@ const ProblemAccountsList: React.FC = () => {
             totalRecords={serverSidePaginationProps.totalRecords}
             onPageChange={serverSidePaginationProps.onPageChange}
           />
-        </div>
+        </CardBody>
 
-        <div className="hidden p-2 md:block lg:p-4">
+        <CardBody className="hidden md:block">
           <CustomDatatable
             apiLoading={loading}
             columns={columns}
@@ -339,8 +338,8 @@ const ProblemAccountsList: React.FC = () => {
             title={""}
             serverSidePagination={serverSidePaginationProps}
           />
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 };

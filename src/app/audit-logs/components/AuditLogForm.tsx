@@ -5,6 +5,7 @@ import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown, Save, Rot
 import FormInput from '@/components/FormInput';
 import useArea from '@/hooks/useArea';
 import { DataArea, DataSubBranches } from '@/utils/DataTypes';
+import Button from '@/components/Button';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
   fetchDataArea: () => void;
@@ -97,18 +98,14 @@ const AuditLogForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, init
       />
 
       <div className="flex justify-end gap-4.5">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={() => { setShowForm(false) }}
-        >
+          onClick={() => { setShowForm(false) }}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${areaLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={areaLoading}
-        >
+          disabled={areaLoading}>
           {areaLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -120,7 +117,7 @@ const AuditLogForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataArea, init
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

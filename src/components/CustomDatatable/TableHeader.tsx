@@ -37,7 +37,7 @@ const TableHeader: React.FC<Props> = ({ title, renderButton, searchQuery, onSear
               placeholder={placeholder}
               value={searchQuery}
               onChange={onSearch}
-              className="h-12 w-full rounded border border-stroke bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:w-72 lg:h-10 dark:border-strokedark dark:bg-form-input dark:text-white dark:placeholder:text-bodydark"
+              className="h-12 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:w-72 lg:h-10 dark:border-field-dark dark:bg-form-input dark:text-white dark:placeholder:text-bodydark"
             />
           </div>
         )}

@@ -54,8 +54,8 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate, isOw
 
   return (
     <div>
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-          <table className="w-full table-auto mb-4">
+      <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+          <table className="w-full table-auto mb-4 tabular-nums">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th colSpan={4} className="text-center min-w-[220px] px-4 py-4 font-medium text-black dark:text-white">

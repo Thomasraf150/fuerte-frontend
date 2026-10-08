@@ -20,7 +20,7 @@ const weekdayPillClass = (active: boolean) =>
   `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
     active
       ? 'bg-blue-500 text-white shadow-sm'
-      : 'bg-gray-100 dark:bg-meta-4 text-gray-700 dark:text-bodydark hover:bg-gray-200 dark:hover:bg-strokedark'
+      : 'bg-whiten dark:bg-meta-4 text-black dark:text-bodydark hover:bg-whiten dark:hover:bg-strokedark'
   }`;
 
 const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handleApproveRelease, loading }) => {
@@ -51,7 +51,7 @@ const DayOfTheWeek: React.FC<OMProps> = ({ term, addon_term, selectedData, handl
       <ReferenceDatePicker selected={refDate} onChange={handleDateChange} />
 
       <div>
-        <h3 className="text-sm font-semibold mb-1 text-gray-700 dark:text-bodydark">Weekday</h3>
+        <h3 className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Weekday</h3>
         <div className="flex flex-wrap gap-2">
           {SELECTABLE_WEEKDAYS.map(day => (
             <button

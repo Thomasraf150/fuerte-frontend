@@ -173,7 +173,7 @@ test.describe('B1 at desktop and tablet widths', () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openList(page, backend);
 
-    const search = page.getByRole('searchbox', { name: 'Search borrowers' });
+    const search = page.getByRole('searchbox', { name: 'Search borrowers', exact: true });
     await expect(search).toBeVisible({ timeout: 30_000 });
     await expect(search).toHaveAttribute('placeholder', 'Name, mobile no. or chief');
     await expect(page.getByText('Search borrowers', { exact: true })).toBeVisible();
@@ -256,7 +256,7 @@ for (const width of [360, 768, 1280]) {
   test(`nothing scrolls sideways at ${width}px`, async ({ page, backend }) => {
     await page.setViewportSize({ width, height: 900 });
     await openList(page, backend);
-    await expect(page.getByRole('searchbox', { name: 'Search borrowers' })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('searchbox', { name: 'Search borrowers', exact: true })).toBeVisible({ timeout: 30_000 });
     await page.waitForTimeout(300);
     expect(await sidewaysScroll(page)).toBeLessThanOrEqual(0);
   });

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
 import { Server } from 'react-feather';
@@ -68,17 +68,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
         <Link href="/">
-          <Image
-            width={0}
-            height={0}
-            sizes="240px"
-            src={"/images/logo/fuerte-logo.png"}
-            alt="Logo"
-            priority
-            style={{ width: '240px', height: 'auto' }}
-          />
+          <BrandLockup />
         </Link>
 
         <button
@@ -107,11 +99,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
         {/* <!-- Sidebar Menu --> */}
-        <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
+        <nav className="mt-2 px-4 py-4 lg:px-5">
           {/* <!-- System Group --> */}
           <div>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
-              ACCOUNTING DASBOARD
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">
+              ACCOUNTING DASHBOARD
             </h3>
 
 
@@ -125,8 +117,8 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          pathname === "/" && "bg-graydark dark:bg-meta-4"
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
+                          pathname === "/" && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -165,11 +157,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/" && "text-white"
                               }`}
                             >
@@ -190,8 +182,8 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/approvals"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes("approvals") && "bg-graydark dark:bg-meta-4"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
+                    pathname.includes("approvals") && "!bg-primary text-white"
                   }`}
                 >
                   <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -205,8 +197,8 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/loan-calculator"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname === "/loan-calculator" && "bg-graydark dark:bg-meta-4"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
+                    pathname === "/loan-calculator" && "!bg-primary text-white"
                   }`}
                 >
                   <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -220,8 +212,8 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/imports"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes("imports") && "bg-graydark dark:bg-meta-4"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
+                    pathname.includes("imports") && "!bg-primary text-white"
                   }`}
                 >
                   <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -253,7 +245,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (
                             pathname === "/accounting/unadjusted-trial-balance" ||
                             pathname === "/accounting/adjusting-entries" ||
@@ -266,7 +258,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             pathname === "/accounting/refund-schedule" ||
                             pathname === "/accounting/udi-schedule" ||
                             pathname === "/accounting/commission-schedule"
-                            ) && "bg-graydark dark:bg-meta-4"
+                            ) && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -301,11 +293,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/accounting/unadjusted-trial-balance"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/unadjusted-trial-balance" && "text-white"
                               }`}
                             >
@@ -315,7 +307,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/adjusting-entries"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/adjusting-entries" && "text-white"
                               }`}
                             >
@@ -325,7 +317,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/adjusted-trial-balance"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/adjusted-trial-balance" && "text-white"
                               }`}
                             >
@@ -335,7 +327,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/balance-sheet"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/balance-sheet" && "text-white"
                               }`}
                             >
@@ -345,7 +337,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/cash-flow"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/cash-flow" && "text-white"
                               }`}
                             >
@@ -355,7 +347,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/cash-position"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/cash-position" && "text-white"
                               }`}
                             >
@@ -365,7 +357,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/aging"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/aging" && "text-white"
                               }`}
                             >
@@ -375,7 +367,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/closing-entries"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/closing-entries" && "text-white"
                               }`}
                             >
@@ -385,7 +377,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/refund-schedule"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/refund-schedule" && "text-white"
                               }`}
                             >
@@ -395,7 +387,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/udi-schedule"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/udi-schedule" && "text-white"
                               }`}
                             >
@@ -405,7 +397,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/commission-schedule"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/commission-schedule" && "text-white"
                               }`}
                             >
@@ -435,11 +427,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/accounting/general-voucher" ||
                             pathname === '/accounting/debit-memo' ||
                             pathname === "/accounting/credit-memo"
-                            ) && "bg-graydark dark:bg-meta-4"
+                            ) && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -474,11 +466,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/accounting/general-voucher"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/general-voucher" && "text-white"
                               }`}
                             >
@@ -488,7 +480,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/debit-memo"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/debit-memo" && "text-white"
                               }`}
                             >
@@ -498,7 +490,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/credit-memo"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/credit-memo" && "text-white"
                               }`}
                             >
@@ -529,11 +521,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/accounting/general-journal" ||
                             pathname === '/accounting/cdj' ||
                             pathname === "/accounting/crj"
-                            ) && "bg-graydark dark:bg-meta-4"
+                            ) && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -568,11 +560,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/accounting/general-journal"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/general-journal" && "text-white"
                               }`}
                             >
@@ -582,7 +574,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/cdj"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/cdj" && "text-white"
                               }`}
                             >
@@ -592,7 +584,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/crj"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/crj" && "text-white"
                               }`}
                             >
@@ -612,9 +604,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/accounting/general-ledger"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                     pathname.includes("accounting/general-ledger") &&
-                    "bg-graydark dark:bg-meta-4"
+                    "!bg-primary text-white"
                   }`}
                 >
                   <Server size={14} /> 
@@ -626,8 +618,8 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/accounting/loan-proceed-settings"
-                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname === "/accounting/loan-proceed-settings" && "bg-graydark dark:bg-meta-4"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
+                    pathname === "/accounting/loan-proceed-settings" && "!bg-primary text-white"
                   }`}
                 >
                   <Server size={14} />
@@ -647,13 +639,13 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
                           (pathname === "/accounting/coa" 
                             // ||
                             // pathname === '/pending-release-loans' ||
                             // pathname.includes("dashboard") || 
                             //   pathname.includes("pending-release-loans")
-                            ) && "bg-graydark dark:bg-meta-4"
+                            ) && "!bg-primary text-white"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -697,11 +689,11 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           !open && "hidden"
                         }`}
                       >
-                        <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-2">
+                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                           <li>
                             <Link
                               href="/accounting/vendors"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/vendors" && "text-white"
                               }`}
                             >
@@ -711,7 +703,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/coa"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/coa" && "text-white"
                               }`}
                             >
@@ -721,7 +713,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/loan-proceed-settings"
-                              className={`group relative text-sm flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/accounting/loan-proceed-settings" && "text-white"
                               }`}
                             >

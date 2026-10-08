@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Edit3, X, Clock } from 'react-feather';
+import { Check, X, Clock } from 'react-feather';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import LoanDetails from './TabForm/LoanDetails';
 import SetEffectivityMaturity from './Tabs/SetEffectivityMaturity';
@@ -11,12 +11,31 @@ import BankDetailsEntry from './Tabs/BankDetailsEntry';
 import ReleaseLoans from './Tabs/ReleaseLoans';
 import LoanHistory from './Tabs/LoanHistory';
 import useCoa from '@/hooks/useCoa';
-import { LoadingSpinner } from '@/components/LoadingStates';
+import { LoadingSpinner, SkeletonBlock } from '@/components/LoadingStates';
 
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
   handleShowForm: (v: boolean) => void;
 }
+
+/**
+ * Numbered step marker for the workflow tabs. Olive when current, a check when done, muted when
+ * still ahead. Presentation only: the tab text and click handlers are unchanged.
+ */
+const StepMarker: React.FC<{ n: number; active: boolean; done: boolean }> = ({ n, active, done }) => (
+  <span
+    aria-hidden="true"
+    className={`mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold tabular-nums ${
+      active
+        ? 'border-primary bg-primary text-white'
+        : done
+        ? 'border-primary text-primary dark:border-olive-300 dark:text-olive-300'
+        : 'border-stroke text-bodydark dark:border-strokedark'
+    }`}
+  >
+    {done && !active ? <Check size={13} strokeWidth={3} /> : n}
+  </span>
+);
 
 const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm }) => {
   const [activeTab, setActiveTab] = useState<number>();
@@ -46,6 +65,17 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
     fetchSingLoans(Number(singleData?.id));
   }, []);
 
+  // Step states come only from loan fields the old tabs already used to enable themselves:
+  // loan_schedules (step 2 gate), is_pn_signed + status (step 3 gate), status > 1 (step 4 gate), status 3 (released).
+  const status = Number(loanSingleData?.status ?? 0);
+  const hasSchedule = (loanSingleData?.loan_schedules?.length ?? 0) > 0;
+  const steps = [
+    { n: 1, label: 'Set Effectivity/Maturity', disabled: false, done: hasSchedule },
+    { n: 2, label: 'PN Signing', disabled: !hasSchedule, done: loanSingleData?.is_pn_signed === 1 },
+    { n: 3, label: 'Bank Details Entry', disabled: !(status > 0 && loanSingleData?.is_pn_signed === 1), done: status > 1 },
+    { n: 4, label: 'Approve and Release', disabled: !(status > 1), done: status === 3 },
+  ];
+
   return (
     <div className="w-full relative">
       {refetching && (
@@ -60,64 +90,42 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
         <span className="text-right cursor-pointer text-boxdark-2" onClick={() => { return handleShowForm(false); }}><X size={17}/></span>
       </div>
       {!loanSingleData ? (
-        <div className="flex justify-center py-12">
-          <LoadingSpinner size="lg" message="Loading loan details..." />
+        <div className="px-7 py-6">
+          <SkeletonBlock rows={5} label="Loading the loan…" />
         </div>
       ) : (
         <>
           <LoanDetails loanSingleData={loanSingleData} printLoanDetails={printLoanDetails} />
-          <div className="flex flex-col md:flex-row border-b mt-3">
-            <button
-              onClick={() => handleTabClick(1)}
-              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
-                activeTab === 1
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={false}
-            >
-              <span className="mr-2"><Edit3 size={18} /></span> <span>Set Effectivity/Maturity</span>
-            </button>
-            <button
-              onClick={() => handleTabClick(2)}
-              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
-                activeTab === 2
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={(loanSingleData?.loan_schedules?.length ?? 0) > 0 ? false : true}
-            >
-              <span className="mr-2"><Edit3 size={18} /></span> <span>PN Signing</span>
-            </button>
-            <button
-              onClick={() => handleTabClick(3)}
-              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
-                activeTab === 3
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={loanSingleData?.status > 0 && loanSingleData?.is_pn_signed === 1 ? false : true}
-            >
-              <span className="mr-2"><Edit3 size={18} /></span> <span>Bank Details Entry</span>
-            </button>
-            <button
-              onClick={() => handleTabClick(4)}
-              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
-                activeTab === 4
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
-              } focus:outline-none disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed`}
-              disabled={loanSingleData?.status > 1 ? false : true}
-            >
-              <span className="mr-2"><Edit3 size={18} /></span> <span>Approve and Release</span>
-            </button>
+          {/* Phones stack the steps, marked by a left bar; wider screens put them in a row, marked by an underline. */}
+          <div className="flex flex-col md:flex-row md:flex-wrap border-b border-stroke dark:border-strokedark mt-3">
+            {steps.map((step) => {
+              const isActive = activeTab === step.n;
+              return (
+                <button
+                  key={step.n}
+                  onClick={() => handleTabClick(step.n)}
+                  aria-current={isActive ? 'step' : undefined}
+                  title={step.done ? 'Done' : undefined}
+                  className={`min-h-12 p-4 text-sm font-medium flex items-center border-l-4 md:border-l-0 md:border-b-2 transition-all duration-200 ease-in-out ${
+                    isActive
+                      ? 'border-primary text-primary font-bold dark:text-olive-300 dark:border-olive-300'
+                      : 'border-transparent text-body dark:text-bodydark hover:text-primary'
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:bg-whiten disabled:text-bodydark disabled:cursor-not-allowed dark:disabled:bg-meta-4`}
+                  disabled={step.disabled}
+                >
+                  <StepMarker n={step.n} active={isActive} done={step.done} />
+                  <span>{step.label}</span>
+                </button>
+              );
+            })}
             <button
               onClick={() => handleTabClick(5)}
-              className={`p-4 text-sm font-medium flex items-center transition-all duration-200 ease-in-out ${
-                activeTab === 5
-                  ? 'border-b-2 md:border-b-0 md:border-r-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 dark:text-bodydark hover:text-blue-600'
-              } focus:outline-none`}
+              aria-current={activeTab === 5 ? 'step' : undefined}
+              className={`min-h-12 p-4 text-sm font-medium flex items-center border-l-4 md:border-l-0 md:border-b-2 transition-all duration-200 ease-in-out ${
+                    activeTab === 5
+                      ? 'border-primary text-primary font-bold dark:text-olive-300 dark:border-olive-300'
+                      : 'border-transparent text-body dark:text-bodydark hover:text-primary'
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
             >
               <span className="mr-2"><Clock size={18} /></span> <span>History</span>
             </button>

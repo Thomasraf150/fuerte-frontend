@@ -1,5 +1,7 @@
 "use client";
 
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import useFinancialStatement, { IncomeStatementRow, IncomeStatementByBranchRow, BreakdownData } from '@/hooks/useFinancialStatement';
@@ -7,7 +9,7 @@ import ReactSelect from '@/components/ReactSelect';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import '../styles.css';
-import { LoadingSpinner } from '@/components/LoadingStates';
+import { SkeletonBlock } from '@/components/LoadingStates';
 import useBranches from '@/hooks/useBranches';
 import { buildSelectOptions } from '@/utils/buildSelectOptions';
 import { Printer } from 'react-feather';
@@ -283,17 +285,14 @@ const IncomeStatementList: React.FC = () => {
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
-          <div className="">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-4">
-
-            <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-              <h3 className="font-medium text-black dark:text-white">Report Filters</h3>
-            </div>
-            <div className="p-7">
+          <div className="space-y-4">
+            <Card>
+            <CardHeader title="Report Filters" />
+            <CardBody>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Start Date */}
                 <div className="flex flex-col relative z-50">
-                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Start Date</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Start Date</label>
                   <DatePicker
                     selected={startDate}
                     onChange={handleStartDateChange}
@@ -301,14 +300,14 @@ const IncomeStatementList: React.FC = () => {
                     startDate={startDate}
                     endDate={endDate}
                     placeholderText="Select start date"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                     popperPlacement="bottom-start"
                   />
                 </div>
 
                 {/* End Date */}
                 <div className="flex flex-col relative z-50">
-                  <label className="mb-2 text-sm font-medium text-black dark:text-white">End Date</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">End Date</label>
                   <DatePicker
                     selected={endDate}
                     onChange={handleEndDateChange}
@@ -317,14 +316,14 @@ const IncomeStatementList: React.FC = () => {
                     endDate={endDate}
                     minDate={startDate}
                     placeholderText="Select end date"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                     popperPlacement="bottom-start"
                   />
                 </div>
 
                 {/* Group Select — FA/FB/FC/FD; narrows the Branch list below */}
                 <div className="flex flex-col">
-                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Group</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Group</label>
                   <Controller
                     name="branch_group_id"
                     control={control}
@@ -352,7 +351,7 @@ const IncomeStatementList: React.FC = () => {
 
                 {/* Branch Select */}
                 <div className="flex flex-col">
-                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Branch</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Branch</label>
                   <Controller
                     name="branch_id"
                     control={control}
@@ -380,7 +379,7 @@ const IncomeStatementList: React.FC = () => {
 
                 {/* Sub Branch Select */}
                 <div className="flex flex-col">
-                  <label className="mb-2 text-sm font-medium text-black dark:text-white">Sub Branch</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Sub Branch</label>
                   <Controller
                     name="branch_sub_id"
                     control={control}
@@ -423,49 +422,45 @@ const IncomeStatementList: React.FC = () => {
                       checked={showBreakdown}
                       onChange={(e) => handleBreakdownToggle(e.target.checked)}
                       disabled={loading}
-                      className="mr-3 h-5 w-5 rounded border-stroke bg-transparent text-primary focus:ring-primary dark:border-strokedark disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="mr-3 h-5 w-5 rounded border-field bg-transparent accent-primary focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <span className="text-sm font-medium text-black dark:text-white">
                       Show Sub-Branch Breakdown
                     </span>
-                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="ml-2 text-xs text-body dark:text-bodydark">
                       (View income/expense breakdown by individual sub-branch)
                     </span>
                   </label>
                 </div>
               )}
-            </div>
-            </div>
+            </CardBody>
+            </Card>
 
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-                <h3 className="font-medium text-black dark:text-white">
-                  Income Statement
-                </h3>
-                <button
-                  type="button"
-                  onClick={handlePrint}
-                  disabled={printLoading || !startDate || !endDate || !branchSubId}
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  <Printer size={18} />
-                  {printLoading ? 'Generating PDF...' : 'Print Report'}
-                </button>
-              </div>
-              <div className="overflow-x-auto p-7">
+            <Card>
+              <CardHeader
+                title="Income Statement"
+                actions={
+                  <Button variant="secondary"
+                    type="button"
+                    onClick={handlePrint}
+                    disabled={printLoading || !startDate || !endDate || !branchSubId}>
+                    <Printer size={18} />
+                    {printLoading ? 'Generating PDF...' : 'Print Report'}
+                  </Button>
+                }
+              />
+              <CardBody className="overflow-x-auto">
 
               {/* Loading spinner */}
               {showSpinner && (
-                <div className="flex items-center justify-center min-h-[400px]">
-                  <LoadingSpinner message="Loading financial data..." size="lg" />
-                </div>
+                <SkeletonBlock rows={6} label="Loading financial data..." />
               )}
 
               {/* Empty state - no filters selected */}
               {!showSpinner && (!startDate || !endDate || !branchSubId) && (
                 <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
                   <svg
-                    className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4"
+                    className="w-16 h-16 text-body dark:text-body mb-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -477,10 +472,10 @@ const IncomeStatementList: React.FC = () => {
                       d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  <h3 className="text-lg font-medium text-body dark:text-bodydark mb-2">
                     Select Report Filters
                   </h3>
-                  <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md">
+                  <p className="text-sm text-body dark:text-body max-w-md">
                     Please select a <strong>start date</strong>, <strong>end date</strong>, and <strong>branch</strong> to generate the income statement report.
                   </p>
                 </div>
@@ -506,7 +501,7 @@ const IncomeStatementList: React.FC = () => {
                 varianceTotal={sectionTotals.varianceIntInc}
                 totalLabel="Total Interest Income"
                 showHeader={true}
-                headerRowBgClass="bg-blue-50 dark:bg-blue-900/20 border-blue-400"
+                headerRowBgClass="bg-sky-50 dark:bg-sky-900/20 border-sky-400"
               />
 
               {/* Other Revenue */}
@@ -516,7 +511,7 @@ const IncomeStatementList: React.FC = () => {
                 monthlyTotals={sectionTotals.othRevenue}
                 varianceTotal={sectionTotals.varianceOthRev}
                 totalLabel="Total Other Revenue"
-                headerRowBgClass="bg-blue-50 dark:bg-blue-900/20 border-blue-400"
+                headerRowBgClass="bg-sky-50 dark:bg-sky-900/20 border-sky-400"
                 summaryRows={[
                   {
                     label: 'Total Income',
@@ -536,7 +531,7 @@ const IncomeStatementList: React.FC = () => {
                 totalLabel="TOTAL EXPENSE"
                 totalRowBgClass="bg-meta-1 dark:bg-meta-1"
                 totalRowTextClass="text-white"
-                headerRowBgClass="bg-red-50 dark:bg-red-900/20 border-red-400"
+                headerRowBgClass="bg-danger/10 dark:bg-danger/20 border-danger"
               />
 
               {/* Direct Financing Cost */}
@@ -621,8 +616,8 @@ const IncomeStatementList: React.FC = () => {
                 </div>
               )}
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
 
         </div>

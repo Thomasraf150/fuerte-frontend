@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import CustomDatatable from '@/components/CustomDatatable';
@@ -17,6 +18,7 @@ import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { RowVendorTypeData, RowVendorsData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 interface Option {
   value: string;
@@ -80,8 +82,9 @@ const VendorsList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="border-b border-stroke py-4 dark:border-strokedark">
-          <div className="grid grid-cols-3 gap-4">
+        <Card className="mb-4">
+          <CardBody>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="">
               <Controller
                 name="code"
@@ -106,25 +109,21 @@ const VendorsList: React.FC = () => {
               />
             </div>
           </div>
-        </div>
+          </CardBody>
+        </Card>
         <div className="grid grid-cols-2 gap-4">
           {!showForm && (
             <div className={`col-span-2 ${!showForm ? 'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-boxdark dark:text-boxdark">
-                    {actionLbl}
-                  </h3>
-                </div>
-                <div className="p-5">
-                  <button 
-                    className="bg-primary text-white py-2 px-4 mb-4 rounded hover:bg-primary/90 flex items-center space-x-2"
-                    onClick={() => handleCreateVendor(true)}>
-                    <GitBranch  size={14} /> 
-                    <span>Create</span>
-                  </button>
-                </div>
-                <div className="px-4">
+              <Card>
+                {actionLbl && <CardHeader title={actionLbl} />}
+                <CardBody>
+                  <Toolbar>
+                    <Button variant="primary"
+                      onClick={() => handleCreateVendor(true)}>
+                      <GitBranch  size={14} /> 
+                      <span>Create</span>
+                    </Button>
+                  </Toolbar>
                   <CustomDatatable
                     apiLoading={false}
                     title="Branch List"
@@ -132,8 +131,8 @@ const VendorsList: React.FC = () => {
                     columns={column()}
                     data={dataVendors || []}
                   />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
 
@@ -141,7 +140,7 @@ const VendorsList: React.FC = () => {
           {formType === 'Supplier' && (
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
-                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <Card><CardBody>
                   <SupplierForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
@@ -152,14 +151,14 @@ const VendorsList: React.FC = () => {
                     createVendor={createVendor}
                     dataSupplierCat={dataSupplierCat} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
-                </div>
+                </CardBody></Card>
               </div>
             )
           )}
           {formType === 'Nontrade' && (
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
-                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <Card><CardBody>
                   <NontradeForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
@@ -168,14 +167,14 @@ const VendorsList: React.FC = () => {
                     singleData={singleData}
                     createVendor={createVendor} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
-                </div>
+                </CardBody></Card>
               </div>
             )
           )}
           {formType === 'Customer' && (
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
-                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <Card><CardBody>
                   <CustomerForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
@@ -185,14 +184,14 @@ const VendorsList: React.FC = () => {
                     createVendor={createVendor}
                     dataCustCat={dataCustCat} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
-                </div>
+                </CardBody></Card>
               </div>
             )
           )}
           {formType === 'Employee' && (
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
-                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <Card><CardBody>
                   <EmployeeForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
@@ -202,14 +201,14 @@ const VendorsList: React.FC = () => {
                     createVendor={createVendor}
                     dataDepartments={dataDepartments} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
-                </div>
+                </CardBody></Card>
               </div>
             )
           )}
           {formType === 'Officer' && (
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
-                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <Card><CardBody>
                   <OfficerForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
@@ -218,14 +217,14 @@ const VendorsList: React.FC = () => {
                     singleData={singleData}
                     createVendor={createVendor} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
-                </div>
+                </CardBody></Card>
               </div>
             )
           )}
           {formType === 'Affiliate' && (
             showForm && (
               <div className={`col-span-2 ${showForm ? 'fade-in' : 'fade-out'}`}>
-                <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+                <Card><CardBody>
                   <AffiliateForm
                     setShowForm={setShowForm}
                     vendorTypeId={vendorTypeId}
@@ -234,7 +233,7 @@ const VendorsList: React.FC = () => {
                     singleData={singleData}
                     createVendor={createVendor} />
                   {/* <VendorsForm setShowForm={setShowForm}/> */}
-                </div>
+                </CardBody></Card>
               </div>
             )
           )}

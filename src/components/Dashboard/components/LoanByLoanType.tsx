@@ -22,7 +22,7 @@ const LoanByLoanType: React.FC<SumProps> = ({sumTixData, startDate, endDate}) =>
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-1 lg:gap-2 md:gap-2">
-        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
           <div className="overflow-x-auto">
             <table className="w-full table-auto mb-4 min-w-[700px]">
             <thead>

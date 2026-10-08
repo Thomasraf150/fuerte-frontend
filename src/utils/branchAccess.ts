@@ -5,6 +5,8 @@ import { graphqlFetch } from '@/utils/graphqlFetch';
 
 /** The Owner's role code: the one role that reaches every branch. */
 const OWNER_ROLE_CODE = 'OWN';
+/** Call Center: it files a borrower under no branch of its own; the server uses the application's (2026-10-07). */
+const CALL_CENTER_ROLE_CODE = 'CALLCTR';
 
 /**
  * Which branches the signed-in user may create a borrower in (see BranchAccess). The Owner needs
@@ -16,7 +18,9 @@ const OWNER_ROLE_CODE = 'OWN';
  * refuses. A failure is logged without any name or number: the list holds branch ids only.
  */
 export async function fetchBranchAccess(): Promise<BranchAccess> {
-  if (useAuthStore.getState().user?.role?.code === OWNER_ROLE_CODE) return { kind: 'any' };
+  const role = useAuthStore.getState().user?.role?.code;
+  // The Owner and Call Center need no list: the server files their borrower on the application's branch.
+  if (role === OWNER_ROLE_CODE || role === CALL_CENTER_ROLE_CODE) return { kind: 'any' };
   try {
     const result = await graphqlFetch<{ getMyAccessibleBranchSubs?: { id: string | number }[] | null }>(
       BranchQueryMutations.GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY,

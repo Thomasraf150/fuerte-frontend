@@ -10,6 +10,7 @@ import { checkBorrowerDuplicates, getAuthUserData } from '@/utils/borrowerDuplic
 import { withApplication, type ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from "react-toastify";
+import { useAuthStore } from "@/store/authStore";
 
 /**
  * Base hook for borrower operations - shared functionality
@@ -107,8 +108,10 @@ const useBorrowerBase = () => {
     setBorrowerLoading(true);
 
     try {
-      // Check for duplicates only for new borrowers
-      if (!data.id) {
+      // Check for duplicates only for new borrowers. Not for Call Center (Create as borrower only,
+      // 2026-10-07): the same-branch check is closed to it, and saveBorrower checks duplicates itself.
+      const isCallCenter = useAuthStore.getState().user?.role?.code === 'CALLCTR';
+      if (!data.id && !isCallCenter) {
         const canProceed = await checkBorrowerDuplicates(data);
         if (!canProceed) {
           setBorrowerLoading(false);

@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { DataFormLoanType, DataRowLoanTypeList } from '@/utils/DataTypes';
+import Button from '@/components/Button';
 
 interface LoanTypeFormProps {
   onSubmit: (data: DataFormLoanType) => Promise<{ success: boolean }>;
@@ -50,18 +51,14 @@ const LoanTypeForm: React.FC<LoanTypeFormProps> = ({
       />
 
       <div className="flex justify-end gap-4.5 mt-6">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={onCancel}
-        >
+          onClick={onCancel}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${submitting ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={submitting}
-        >
+          disabled={submitting}>
           {submitting ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -73,7 +70,7 @@ const LoanTypeForm: React.FC<LoanTypeFormProps> = ({
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

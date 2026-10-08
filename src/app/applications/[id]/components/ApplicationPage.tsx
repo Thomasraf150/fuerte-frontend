@@ -30,7 +30,7 @@ type Application = ReturnType<typeof useLoanApplication>;
  */
 const ViewOnlyApplication: React.FC<{ record: LoanApplicationRecord }> = ({ record }) => (
   <div className="space-y-4">
-    <p className="flex items-start gap-2.5 rounded-sm border border-stroke bg-whiten px-4 py-3 text-sm text-black dark:border-strokedark dark:bg-meta-4 dark:text-bodydark">
+    <p className="flex items-start gap-2.5 rounded-2xl border border-stroke bg-whiten px-4 py-3 text-sm text-black dark:border-strokedark dark:bg-meta-4 dark:text-bodydark">
       <Eye aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-body dark:text-bodydark" />
       <span className="min-w-0 break-words">
         {record.branch_sub?.name
@@ -58,7 +58,8 @@ const ViewOnlyApplication: React.FC<{ record: LoanApplicationRecord }> = ({ reco
  * right-hand column, where it follows the page as it scrolls.
  */
 const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecord }> = ({ app, record }) => {
-  // Owner, Admin and Call Center may place an application on any branch; Call Center never creates borrowers.
+  // Owner, Admin and Call Center may place an application on any branch. Call Center also creates the
+  // borrower from an Interviewed application since 2026-10-07 (it never opens the borrower afterwards).
   const mayAssign = useCanUpload();
   const isCallCenter = useStore(useAuthStore, (state) => state.user?.role?.code === 'CALLCTR');
   // Whether the form holds changes that are not saved. Print and Create as borrower use the saved application.
@@ -83,8 +84,9 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
   // frame after mount).
   const checksTheApplicant = mayAssign !== null && !converted;
   // Whether the user may create a borrower for this application's branch: only for those who work on it,
-  // so not Call Center (it never creates borrowers) and not a view-only reader.
-  const worksTheApplication = checksTheApplicant && !isCallCenter && !viewOnly;
+  // so not a view-only reader. Call Center does since 2026-10-07 (Rafael: it creates the borrower once
+  // the application is Interviewed, so Marketing can approve or reject it); its branch access is "any".
+  const worksTheApplication = checksTheApplicant && !viewOnly;
   const repeatApplicant = useApplicationBorrowerMatch(parseApplicationId(record.id), checksTheApplicant, app.saves);
   const branchAccess = useBranchAccess(worksTheApplication);
 
@@ -98,7 +100,7 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
         record={record}
         converted={converted}
         viewOnly={viewOnly}
-        canCreateBorrower={!isCallCenter && !viewOnly}
+        canCreateBorrower={!viewOnly}
         branchAccess={branchAccess}
         unsaved={!converted && (dirty || app.saving)}
         onStatus={app.setStatus}

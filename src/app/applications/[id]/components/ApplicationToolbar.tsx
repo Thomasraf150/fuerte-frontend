@@ -132,7 +132,7 @@ interface ApplicationToolbarProps {
    * the server's can_edit): the status is shown, fixed, with nothing to save. Print stays.
    */
   viewOnly: boolean;
-  /** Everyone but Call Center, which never creates borrowers, and a view-only reader. */
+  /** Everyone but a view-only reader (Call Center included since 2026-10-07). */
   canCreateBorrower: boolean;
   /** The branches the user may create a borrower in: an application on another branch cannot be converted by them. */
   branchAccess: BranchAccess;
@@ -168,7 +168,7 @@ export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, 
     <div
       role="group"
       aria-label="Application actions"
-      className="flex flex-col gap-3 rounded-sm border border-stroke bg-white p-3 shadow-default dark:border-strokedark dark:bg-boxdark md:flex-row md:flex-wrap md:items-start md:gap-x-4 md:px-5"
+      className="flex flex-col gap-3 rounded-2xl border border-stroke bg-white p-3 shadow-default dark:border-strokedark dark:bg-boxdark md:flex-row md:flex-wrap md:items-start md:gap-x-4 md:px-5"
     >
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap md:gap-4">
         <BackLink />

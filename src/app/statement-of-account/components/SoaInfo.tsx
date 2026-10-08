@@ -39,7 +39,7 @@ const SoaInfo: React.FC<BorrInfoProps> = ({ setShowForm }) => {
           <div className="flex justify-around border-b">
             <button
               className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab1' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
+                activeTab === 'tab1' ? 'border-blue-500 text-blue-500' : 'border-transparent text-body hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab1')}
             >
@@ -47,7 +47,7 @@ const SoaInfo: React.FC<BorrInfoProps> = ({ setShowForm }) => {
             </button>
             <button
               className={`p-4 focus:outline-none border-b-2 ${
-                activeTab === 'tab2' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-600 hover:border-blue-500 hover:text-blue-500'
+                activeTab === 'tab2' ? 'border-blue-500 text-blue-500' : 'border-transparent text-body hover:border-blue-500 hover:text-blue-500'
               }`}
               onClick={() => handleTabClick('tab2')}
             >

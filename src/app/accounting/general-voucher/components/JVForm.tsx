@@ -1,4 +1,6 @@
 "use client"
+import Button from '@/components/Button';
+import { CardBody, CardHeader, Toolbar } from '@/components/Card';
 import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
@@ -229,27 +231,22 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
         <PayeeView setShowPayee={setShowPayee} setDataPayee={setDataPayee} />
       )}
       <div>
-        <div className="border-b border-stroke py-4 dark:border-strokedark">
-          <h3 className="font-medium text-boxdark dark:text-boxdark">
-            {actionLbl} {singleData && (<>- <span className="font-bold text-orange-500"> {singleData?.journal_ref}</span></>)} 
-          </h3>
-        </div>
+        <CardHeader title={<>{actionLbl} {singleData && (<>- <span className="font-bold text-orange-500"> {singleData?.journal_ref}</span></>)}</>} />
+        <CardBody>
         {singleData !== undefined ? (
-          <div className="border-b border-stroke py-4 dark:border-strokedark">
-            <button
-              className="flex justify-center rounded bg-success border border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-light dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          <Toolbar>
+            <Button variant="secondary"
               type="button"
               onClick={() => printSummaryTicketDetails(singleData?.journal_ref)}
-              disabled={printLoading}
-            >
+              disabled={printLoading}>
               <Printer size={19} className="pt-1 mr-1" /> {printLoading ? 'Generating...' : 'Print'}
-            </button>
-          </div>
+            </Button>
+          </Toolbar>
         ) : (
           <></>
         )}
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-3 gap-4 mb-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-5">
             <div className='mt-2'>
               <FormInput
                 label="Date"
@@ -280,7 +277,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
             <div className='mt-2'>
               <label
-                className="mb-3 block text-sm font-medium text-black dark:text-white"
+                className="mb-1.5 block text-sm font-semibold text-black dark:text-white"
                 htmlFor="vendor_id"
               >
                 Payee
@@ -302,17 +299,15 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                 isDisabled={isSavedVoucher}
               />
               {!isSavedVoucher && (
-                <button
-                  className="mt-2 text-sm font-medium text-primary underline-offset-2 hover:underline disabled:opacity-50"
+                <Button variant="secondary" className="mt-2"
                   type="button"
                   onClick={() => { setShowPayee(true); }}
-                  disabled={payeeCreating}
-                >
+                  disabled={payeeCreating}>
                   Browse by category
-                </button>
+                </Button>
               )}
             </div>
-            <div className='col-span-3'>
+            <div className='md:col-span-3'>
               <FormInput
                 label="Particulars"
                 id="journal_desc"
@@ -327,11 +322,12 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
           <div className="grid grid-cols-1 gap-4 mb-5">
             <div>
-              <div className="border-b pb-2 mb-4">
-                <h6 className="text-lg font-bold">Voucher Details</h6>
+              <div className="border-b border-stroke pb-3 mb-4 dark:border-strokedark">
+                <h6 className="text-sm font-bold uppercase tracking-wide text-primary dark:text-olive-300">Voucher Details</h6>
               </div>
-              <table className="w-full border-collapse border border-gray-300">
-                <thead className="bg-gray-100">
+              <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-stroke dark:border-strokedark">
+                <thead className="bg-gray-2 dark:bg-meta-4">
                   <tr className="text-left">
                     <th className="p-2 border">Account Title</th>
                     <th className="p-2 border text-right">Debit</th>
@@ -367,7 +363,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                       <td className="p-2 border w-[30%]">
                         <input
                           type="text"
-                          className="w-full p-1 border rounded text-right"
+                          className="h-10 w-full rounded-lg border border-field bg-white px-3 text-right text-sm tabular-nums text-black focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:bg-gray-2 disabled:opacity-60 dark:border-field-dark dark:bg-form-input dark:text-white"
                           value={activeInput?.index === index && activeInput?.field === 'debit' ? row.debit : (row.debit ? formatWithThousandsSeparator(row.debit, 2) : '')}
                           onChange={(e) => handleChange(index, "debit", e.target.value, '')}
                           disabled={!!row.credit}
@@ -378,7 +374,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                       <td className="p-2 border w-[30%]">
                         <input
                           type="text"
-                          className="w-full p-1 border rounded text-right"
+                          className="h-10 w-full rounded-lg border border-field bg-white px-3 text-right text-sm tabular-nums text-black focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:bg-gray-2 disabled:opacity-60 dark:border-field-dark dark:bg-form-input dark:text-white"
                           value={activeInput?.index === index && activeInput?.field === 'credit' ? row.credit : (row.credit ? formatWithThousandsSeparator(row.credit, 2) : '')}
                           onChange={(e) => handleChange(index, "credit", e.target.value, '')}
                           disabled={!!row.debit}
@@ -387,61 +383,52 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                         />
                       </td>
                       <td className="p-2 border text-center flex gap-3 justify-center w-[100%]">
-                        <button
+                        <Button variant="secondary"
                           type="button"
-                          className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                          onClick={addRow}
-                        >
-                          <Plus size={16} />
-                        </button>
+                          onClick={addRow}>
+                          <Plus size={16} /> <span>Add row</span>
+                        </Button>
                         {rows.length > 1 && (
-                          <button
+                          <Button variant="danger"
                             type="button"
-                            className="p-2 bg-red-500 text-black rounded hover:bg-red-600"
-                            onClick={() => removeRow(index)}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                            onClick={() => removeRow(index)}>
+                            <Trash2 size={16} /> <span>Remove</span>
+                          </Button>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="font-bold bg-gray-50">
+                  <tr className="border-t-2 border-black bg-gray-2 font-bold dark:border-white dark:bg-meta-4">
                     <th className="p-2 border text-right">TOTAL</th>
-                    <th className="p-2 border text-right">{calculateTotal("debit")}</th>
-                    <th className="p-2 border text-right">{calculateTotal("credit")}</th>
+                    <th className="p-2 border text-right tabular-nums">{calculateTotal("debit")}</th>
+                    <th className="p-2 border text-right tabular-nums">{calculateTotal("credit")}</th>
                     <th className="p-2 border"></th>
                   </tr>
                 </tfoot>
               </table>
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-4.5">
-            <button
-              className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 text-sm dark:border-strokedark dark:text-white"
+          <div className="flex flex-wrap justify-end gap-4.5">
+            <Button variant="secondary"
               type="button"
-              onClick={() => setShowForm(false)}
-            >
+              onClick={() => setShowForm(false)}>
               Back
-            </button>
+            </Button>
             {singleData !== undefined && singleData?.is_cancelled === false && (
-              <button
-                className="flex justify-center rounded border bg-danger border-stroke px-6 py-2 font-medium text-white hover:shadow-1 text-sm dark:border-rose-400 dark:text-white"
+              <Button variant="danger"
                 type="button"
-                onClick={() => { return handleCancelEntry(singleData); }}
-              >
+                onClick={() => { return handleCancelEntry(singleData); }}>
                 Cancel Entry
-              </button>
+              </Button>
             )}
             {singleData === undefined && (
-              <button
-                className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 text-sm ${generalVoucherLoading ? 'opacity-70' : ''}`}
+              <Button variant="primary"
                 type="submit"
-                disabled={generalVoucherLoading}
-              >
+                disabled={generalVoucherLoading}>
                 {generalVoucherLoading ? (
                   <>
                     <RotateCw size={17} className="animate-spin mr-1" />
@@ -453,10 +440,11 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                     <span>Save</span>
                   </>
                 )}
-              </button>
+              </Button>
             )}
           </div>
         </form>
+        </CardBody>
       </div>
     </>
   );

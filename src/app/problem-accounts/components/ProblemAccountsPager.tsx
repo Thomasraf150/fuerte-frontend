@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Button from "@/components/Button";
 import { formatCount } from "@/utils/helper";
 
 interface Props {
@@ -28,35 +29,33 @@ const ProblemAccountsPager: React.FC<Props> = ({
 }) => {
   if (totalPages <= 1) return null;
 
-  const btn =
-    "min-h-[48px] min-w-[48px] flex-1 rounded border border-stroke px-4 text-sm font-medium text-black transition-colors disabled:opacity-40 dark:border-strokedark dark:text-white";
 
   return (
     <nav
       aria-label="Problem accounts pages"
       className="mt-4 flex items-center gap-3 border-t border-stroke pt-4 dark:border-strokedark"
     >
-      <button
-        type="button"
-        className={btn}
+      <Button
+        variant="secondary"
+        className="min-w-[48px] flex-1"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
       >
         Previous
-      </button>
+      </Button>
       <p className="shrink-0 text-center text-xs text-body dark:text-bodydark">
         Page {formatCount(currentPage)} of {formatCount(totalPages)}
         <br />
         {formatCount(totalRecords)} accounts
       </p>
-      <button
-        type="button"
-        className={btn}
+      <Button
+        variant="secondary"
+        className="min-w-[48px] flex-1"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
       >
         Next
-      </button>
+      </Button>
     </nav>
   );
 };

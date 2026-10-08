@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import AEForm from './AEForm';
@@ -8,6 +9,7 @@ import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet, RowAcctgEntry } from '@/utils/DataTypes';
 import aETblColumn from './AETblColumn';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = aETblColumn;
 
@@ -55,31 +57,24 @@ const AdjustingEntriesList: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           {!showFormAe && (
             <div className={`col-span-2 ${!showFormAe ?'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-boxdark dark:text-boxdark">
-                    Adjusting Entries
-                  </h3>
-                </div>
-                <div className="p-5 flex gap-x-2">  {/* Added flex and gap-x-2 */}
-                  <button
+              <Card>
+                <CardHeader title="Adjusting Entries" />
+                <CardBody>
+                <Toolbar>
+                  <Button variant="primary"
                     type="button"
-                    className="text-white bg-gradient-to-r items-center from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 flex space-x-2 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     onClick={ () => handleShowFormAe('Create Adjusting Entries', true) }>
                       <Plus size={14} />
                       <span>New Adjusting Entry</span>
-                  </button>
-                </div>
-                <div className="px-4">
+                  </Button>
+                </Toolbar>
                   {adjustingEntriesError && (
-                    <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                    <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                       Error loading adjusting entries: {adjustingEntriesError}
-                      <button
-                        onClick={refresh}
-                        className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                      >
+                      <Button variant="secondary" className="ml-2"
+                        onClick={refresh}>
                         Retry
-                      </button>
+                      </Button>
                     </div>
                   )}
                   <CustomDatatable
@@ -91,13 +86,13 @@ const AdjustingEntriesList: React.FC = () => {
                     enableCustomHeader={true}
                     serverSidePagination={serverSidePaginationProps}
                   />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
           {showFormAe && (
             <div className={`col-span-2 ${showFormAe ?'fade-in' : 'fade-out'}`}>
-              <div className="rounded-sm border p-4 px-5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
+              <Card>
                 <AEForm
                   setShowForm={setShowFormAe}
                   actionLbl={actionLbl}
@@ -107,7 +102,7 @@ const AdjustingEntriesList: React.FC = () => {
                   refresh={refresh}
                   loading={adjustingEntriesLoading}
                 />
-              </div>
+              </Card>
             </div>
           )}
 

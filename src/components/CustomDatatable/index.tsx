@@ -143,6 +143,7 @@ const CustomDatatable = <T extends object>({
           opensRows={opensRows}
           defaultSortFieldId={defaultSortFieldId}
           conditionalRowStyles={conditionalRowStyles}
+          plural={plural}
         />
       </div>
       {isServerSide && <Pager pagination={serverSidePagination} />}

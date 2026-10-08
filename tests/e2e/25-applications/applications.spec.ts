@@ -365,7 +365,7 @@ test.describe('1. Call Center', () => {
     await expect(links.nth(1)).toHaveAttribute('href', '/applications/tracker');
     await expect(links.nth(1)).not.toHaveAttribute('aria-current', 'page');
     // The logo would otherwise send Call Center to "/" only to be bounced back.
-    await expect(page.locator('aside').getByRole('link', { name: 'Logo' })).toHaveAttribute('href', '/applications');
+    await expect(page.locator('aside').getByRole('link', { name: /FUERTE/ })).toHaveAttribute('href', '/applications');
   });
 
   test('visiting /borrowers ends on /applications', async ({ page, backend }) => {

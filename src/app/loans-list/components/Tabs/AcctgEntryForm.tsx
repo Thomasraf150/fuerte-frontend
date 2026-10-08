@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, CheckSquare, RotateCw, RefreshCw } from 'react-feather';
+import Button from '@/components/Button';
 import ReactSelect from '@/components/ReactSelect';
 import FormLabel from '@/components/FormLabel';
 import FormInput from '@/components/FormInput';
@@ -205,9 +206,9 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Branch</label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Branch</label>
           <Controller
             name="branch_sub_id"
             control={control}
@@ -225,11 +226,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
+          {errors.branch_sub_id && <p className="mt-2 text-sm text-danger">{errors.branch_sub_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notes Receivale <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Notes Receivable <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="nr_id"
             control={control}
@@ -246,11 +247,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.nr_id && <p className="mt-2 text-sm text-red-600">{errors.nr_id.message}</p>}
+          {errors.nr_id && <p className="mt-2 text-sm text-danger">{errors.nr_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Outstanding Balance <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Outstanding Balance <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="ob_id"
             control={control}
@@ -267,11 +268,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.ob_id && <p className="mt-2 text-sm text-red-600">{errors.ob_id.message}</p>}
+          {errors.ob_id && <p className="mt-2 text-sm text-danger">{errors.ob_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>UDI <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">UDI <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="udi_id"
             control={control}
@@ -288,11 +289,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.udi_id && <p className="mt-2 text-sm text-red-600">{errors.udi_id.message}</p>}
+          {errors.udi_id && <p className="mt-2 text-sm text-danger">{errors.udi_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Processing <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Processing <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="proc_id"
             control={control}
@@ -309,11 +310,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.proc_id && <p className="mt-2 text-sm text-red-600">{errors.proc_id.message}</p>}
+          {errors.proc_id && <p className="mt-2 text-sm text-danger">{errors.proc_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Insurance <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="ins_id"
             control={control}
@@ -330,11 +331,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.ins_id && <p className="mt-2 text-sm text-red-600">{errors.ins_id.message}</p>}
+          {errors.ins_id && <p className="mt-2 text-sm text-danger">{errors.ins_id.message}</p>}
         </div>
         
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Insurance Manual Fee <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Insurance Manual Fee <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="ins_mfee_id"
             control={control}
@@ -351,11 +352,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.ins_mfee_id && <p className="mt-2 text-sm text-red-600">{errors.ins_mfee_id.message}</p>}
+          {errors.ins_mfee_id && <p className="mt-2 text-sm text-danger">{errors.ins_mfee_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Collection <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Collection <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="col_id"
             control={control}
@@ -372,11 +373,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.col_id && <p className="mt-2 text-sm text-red-600">{errors.col_id.message}</p>}
+          {errors.col_id && <p className="mt-2 text-sm text-danger">{errors.col_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Notarial <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Notarial <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="not_id"
             control={control}
@@ -393,11 +394,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.not_id && <p className="mt-2 text-sm text-red-600">{errors.not_id.message}</p>}
+          {errors.not_id && <p className="mt-2 text-sm text-danger">{errors.not_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Rebates <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Rebates <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="reb_id"
             control={control}
@@ -414,11 +415,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.reb_id && <p className="mt-2 text-sm text-red-600">{errors.reb_id.message}</p>}
+          {errors.reb_id && <p className="mt-2 text-sm text-danger">{errors.reb_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Agent Fee <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Agent Fee <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="agent_id"
             control={control}
@@ -435,11 +436,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.agent_id && <p className="mt-2 text-sm text-red-600">{errors.agent_id.message}</p>}
+          {errors.agent_id && <p className="mt-2 text-sm text-danger">{errors.agent_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Penalty <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Penalty <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="pen_id"
             control={control}
@@ -456,11 +457,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.pen_id && <p className="mt-2 text-sm text-red-600">{errors.pen_id.message}</p>}
+          {errors.pen_id && <p className="mt-2 text-sm text-danger">{errors.pen_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon Amount <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Addon Amount <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="addon_id"
             control={control}
@@ -477,11 +478,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.addon_id && <p className="mt-2 text-sm text-red-600">{errors.addon_id.message}</p>}
+          {errors.addon_id && <p className="mt-2 text-sm text-danger">{errors.addon_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Addon UDI <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Addon UDI <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="addon_udi_id"
             control={control}
@@ -498,11 +499,11 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.addon_udi_id && <p className="mt-2 text-sm text-red-600">{errors.addon_udi_id.message}</p>}
+          {errors.addon_udi_id && <p className="mt-2 text-sm text-danger">{errors.addon_udi_id.message}</p>}
         </div>
 
         <div className="col-span-1 mb-4 mt-4">
-          <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Cash in Bank <span style={{ color: '#ef4444' }}>*</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Cash in Bank <span style={{ color: '#DC2626' }}>*</span></label>
           <Controller
             name="cib_id"
             control={control}
@@ -519,7 +520,7 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
               />
             )}
           />
-          {errors.cib_id && <p className="mt-2 text-sm text-red-600">{errors.cib_id.message}</p>}
+          {errors.cib_id && <p className="mt-2 text-sm text-danger">{errors.cib_id.message}</p>}
         </div>
 
       </div>
@@ -527,8 +528,8 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
       <div className="w-full flex justify-end mt-6">
         <div className="flex gap-4">
           {isRepostMode ? (
-            <button
-              className={`flex justify-center items-center gap-1 rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${(!isDirty || isReposting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            <Button
+              variant="primary"
               type="button"
               disabled={!isDirty || !!isReposting}
               onClick={() => {
@@ -540,27 +541,27 @@ const AcctgEntryForm: React.FC<ParentFormBr> = ({ coaDataAccount, branchSubData,
                 onAfterSave?.(handleRefetchData, overrides);
               }}
             >
-              {isReposting ? <RotateCw size={17} className="animate-spin mr-1" /> : <RefreshCw size={17} className="mr-1" />}
+              {isReposting ? <RotateCw size={17} className="animate-spin" /> : <RefreshCw size={17} />}
               <span>{isReposting ? 'Re-posting...' : 'Re-post'}</span>
-            </button>
+            </Button>
           ) : (
-            <button
-              className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanProcLoading ? 'opacity-70' : ''}`}
+            <Button
+              variant="primary"
               type="submit"
               disabled={loanProcLoading}
             >
               {loanProcLoading ? (
                 <>
-                  <RotateCw size={17} className="animate-spin mr-1" />
+                  <RotateCw size={17} className="animate-spin" />
                   <span>Posting...</span>
                 </>
               ) : (
                 <>
-                  <CheckSquare size={17} className="mr-1" />
+                  <CheckSquare size={17} />
                   <span>Post</span>
                 </>
               )}
-            </button>
+            </Button>
           )}
         </div>
       </div>

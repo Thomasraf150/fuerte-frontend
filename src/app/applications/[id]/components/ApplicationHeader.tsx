@@ -2,6 +2,7 @@
 
 import React, { useId } from 'react';
 import { Clock, Home, type Icon } from 'react-feather';
+import { Card } from '@/components/Card';
 import { formatSubmitted } from '@/app/applications/components/ApplicationColumns';
 import ApplicationStatusPill, { APPLICATION_STATUS_DOT } from '@/app/applications/components/ApplicationStatusPill';
 import { CHANNEL_ICONS, TINTS } from '@/app/applications/components/channelIcons';
@@ -70,10 +71,7 @@ export const ApplicationHeader: React.FC<{ record: LoanApplicationRecord; headin
   const titleId = useId();
   const submitted = formatSubmitted(record.submitted_at);
   return (
-    <section
-      aria-labelledby={titleId}
-      className="relative overflow-hidden rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
-    >
+    <Card aria-labelledby={titleId} className="relative overflow-hidden">
       <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1.5 ${APPLICATION_STATUS_DOT[record.status] ?? 'bg-body'}`} />
       <div className="px-5 py-4 pl-7 sm:px-8 sm:py-5">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -109,6 +107,6 @@ export const ApplicationHeader: React.FC<{ record: LoanApplicationRecord; headin
           </MetaItem>
         </dl>
       </div>
-    </section>
+    </Card>
   );
 };

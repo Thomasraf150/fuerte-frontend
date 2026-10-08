@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useLogin from '@/hooks/useLogin';
+import DarkModeSwitcher from "./DarkModeSwitcher";
 
 const DropdownUser = () => {
   const [userData, setUserData] = useState<any>(null);
@@ -99,11 +100,18 @@ const DropdownUser = () => {
         ref={dropdown}
         onFocus={() => setDropdownOpen(true)}
         onBlur={() => setDropdownOpen(false)}
-        className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark ${
+        className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark ${
           dropdownOpen === true ? "block" : "hidden"
         }`}
       >
         <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+          {/* Phones: the dark-mode switch, which the top bar leaves out below sm to fit the worded Search. */}
+          <li className="flex items-center justify-between gap-3 text-sm font-medium sm:hidden">
+            <span>Dark mode</span>
+            <ul>
+              <DarkModeSwitcher />
+            </ul>
+          </li>
           <li>
             <Link
               href="/profile"

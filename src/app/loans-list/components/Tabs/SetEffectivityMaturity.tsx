@@ -10,6 +10,7 @@ import useLoans from '@/hooks/useLoans';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { Calendar } from 'react-feather';
 import { LoadingSpinner } from '@/components/LoadingStates';
+import Button from '@/components/Button';
 import { useStableLoading } from '@/hooks/useStableLoading';
 
 interface OMProps {
@@ -77,54 +78,53 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <div className="grid grid-cols-7 mb-2">
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
-          <button
-              className="bg-green-500 flex justify-between float-right items-center text-white py-2 px-4 mr-2 rounded hover:bg-green-600 text-sm"
+          <Button
+              variant="primary"
+              className="float-right mr-2"
               type="button"
               onClick={() => handleUpdateMaturity(loanSingleData?.id, 'change_effectivity', handleRefetchData)}
             >
-              <span className="mt-1 mr-1">
-                <Calendar size={17} /> 
-              </span>
+              <Calendar size={17} />
               <span>Update Maturity</span>
-            </button>
+            </Button>
           ) : ('')}
         </div>
-        <div className="grid grid-cols-3 bg-white dark:bg-boxdark p-4 rounded">
-          <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm mr-3 bg-white dark:bg-boxdark">
-            <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white dark:bg-boxdark p-4 rounded">
+          <div className="flow-root border border-stroke dark:border-strokedark py-3 shadow-sm md:mr-3 bg-white dark:bg-boxdark">
+            <dl className="-my-3 divide-y divide-stroke dark:divide-strokedark text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-                <dt className="col-span-3 font-medium p-4 bg-black dark:bg-meta-4 text-white text-center">Monthly Amortization</dt>
-                {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
+                <dt className="col-span-3 border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">Monthly Amortization</dt>
+                {/* <dd className="text-black dark:text-white sm:col-span-2">Mr</dd> */}
               </div>
               <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
-                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Date</dt>
-                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Monthly</dt>
+                <dt className="font-medium text-center text-black dark:text-bodydark">Date</dt>
+                <dt className="font-medium text-center text-black dark:text-bodydark">Monthly</dt>
               </div>
               {loanSingleData.loan_schedules && loanSingleData.loan_schedules.map((item, i) => {
               return (
                 <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
-                  <dd className="text-gray-700 dark:text-bodydark text-center">{item.due_date}</dd>
-                  <dt className="font-medium text-center text-gray-900 dark:text-white">{formatNumber(Number(item.amount))}</dt>
+                  <dd className="text-black dark:text-bodydark text-center">{item.due_date}</dd>
+                  <dt className="font-medium text-center text-black dark:text-white">{formatNumber(Number(item.amount))}</dt>
                 </div>
               )
             })}
             </dl>
           </div>
-          <div className="flow-root border border-gray-100 dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
-            <dl className="-my-3 divide-y divide-gray-100 dark:divide-strokedark text-sm">
+          <div className="flow-root border border-stroke dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
+            <dl className="-my-3 divide-y divide-stroke dark:divide-strokedark text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-                <dt className="col-span-3 font-medium p-4 bg-black dark:bg-meta-4 text-white text-center">UDI Schedule</dt>
-                {/* <dd className="text-gray-700 sm:col-span-2">Mr</dd> */}
+                <dt className="col-span-3 border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">UDI Schedule</dt>
+                {/* <dd className="text-black dark:text-white sm:col-span-2">Mr</dd> */}
               </div>
               <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
-                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Date</dt>
-                <dt className="font-medium text-center text-gray-900 dark:text-bodydark">Monthly</dt>
+                <dt className="font-medium text-center text-black dark:text-bodydark">Date</dt>
+                <dt className="font-medium text-center text-black dark:text-bodydark">Monthly</dt>
               </div>
               {loanSingleData.loan_udi_schedules && loanSingleData.loan_udi_schedules.map((item, i) => {
               return (
                 <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
-                  <dd className="text-gray-700 dark:text-bodydark text-center">{item.due_date}</dd>
-                  <dt className="font-medium text-center text-gray-900 dark:text-white">{formatNumber(Number(item.amount))}</dt>
+                  <dd className="text-black dark:text-bodydark text-center">{item.due_date}</dd>
+                  <dt className="font-medium text-center text-black dark:text-white">{formatNumber(Number(item.amount))}</dt>
                 </div>
               )
             })}
@@ -143,14 +143,14 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
           <LoadingSpinner size="lg" message="Saving loan schedule..." />
         </div>
       )}
-      <div className="relative block overflow-hidden rounded-lg border border-gray-100 p-4 mb-4 sm:p-6 lg:p-4">
+      <div className="relative block overflow-hidden rounded-lg border border-stroke p-4 mb-4 sm:p-6 lg:p-4">
       <span
         className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-yellow-300 via-orange-300 to-green-500"
       ></span>
     
       <div className="sm:flex sm:justify-between sm:gap-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 sm:text-xl">
+          <h3 className="text-lg font-bold text-black dark:text-white sm:text-xl">
             Confirm
           </h3>
     
@@ -158,7 +158,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       </div>
     
       <div className="mt-1 mb-3">
-        <p className="text-pretty text-sm text-gray-500">
+        <p className="text-pretty text-sm text-body">
           Confirm Approve Loan of with an amount of <strong>{ formatNumber(Number(loanSingleData?.pn_amount ?? 0)) }</strong>
         </p>
       </div>
@@ -168,12 +168,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <label
           htmlFor="once_a_month"
-          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
-            selectedOption === 'once_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-primary ${
+            selectedOption === 'once_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-stroke'
           }`}
         >
           <div>
-            <p className="text-gray-700">Once a month</p>
+            <p className="text-black dark:text-white">Once a month</p>
           </div>
     
           <input
@@ -181,7 +181,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             name="once_a_month"
             value="once_a_month"
             id="once_a_month"
-            className="h-5 w-5 border-gray-300 text-blue-500"
+            className="h-5 w-5 border-stroke text-blue-500"
             checked={selectedOption === 'once_a_month'}
             onChange={handleOptionChange}
           />
@@ -190,12 +190,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <label
           htmlFor="twice_a_month"
-          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
-            selectedOption === 'twice_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-primary ${
+            selectedOption === 'twice_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-stroke'
           }`}
         >
           <div>
-            <p className="text-gray-700">Twice a month</p>
+            <p className="text-black dark:text-white">Twice a month</p>
           </div>
     
           <input
@@ -203,7 +203,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             name="twice_a_month"
             value="twice_a_month"
             id="twice_a_month"
-            className="h-5 w-5 border-gray-300 text-blue-500"
+            className="h-5 w-5 border-stroke text-blue-500"
             checked={selectedOption === 'twice_a_month'}
             onChange={handleOptionChange}
           />
@@ -212,12 +212,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <label
           htmlFor="thrice_a_month"
-          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
-            selectedOption === 'thrice_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-primary ${
+            selectedOption === 'thrice_a_month' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-stroke'
           }`}
         >
           <div>
-            <p className="text-gray-700">Thrice a month</p>
+            <p className="text-black dark:text-white">Thrice a month</p>
           </div>
 
           <input
@@ -225,7 +225,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             name="thrice_a_month"
             value="thrice_a_month"
             id="thrice_a_month"
-            className="h-5 w-5 border-gray-300 text-blue-500"
+            className="h-5 w-5 border-stroke text-blue-500"
             checked={selectedOption === 'thrice_a_month'}
             onChange={handleOptionChange}
           />
@@ -234,12 +234,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <label
           htmlFor="day_of_the_week"
-          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
-            selectedOption === 'day_of_the_week' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-primary ${
+            selectedOption === 'day_of_the_week' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-stroke'
           }`}
         >
           <div>
-            <p className="text-gray-700">Day of the week</p>
+            <p className="text-black dark:text-white">Day of the week</p>
           </div>
     
           <input
@@ -247,7 +247,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             name="day_of_the_week"
             value="day_of_the_week"
             id="day_of_the_week"
-            className="h-5 w-5 border-gray-300 text-blue-500"
+            className="h-5 w-5 border-stroke text-blue-500"
             checked={selectedOption === 'day_of_the_week'}
             onChange={handleOptionChange}
           />
@@ -256,12 +256,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <label
           htmlFor="manual_date"
-          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
-            selectedOption === 'manual_date' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-primary ${
+            selectedOption === 'manual_date' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-stroke'
           }`}
         >
           <div>
-            <p className="text-gray-700">Manual Date</p>
+            <p className="text-black dark:text-white">Manual Date</p>
           </div>
     
           <input
@@ -269,7 +269,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             name="manual_date"
             value="manual_date"
             id="manual_date"
-            className="h-5 w-5 border-gray-300 text-blue-500"
+            className="h-5 w-5 border-stroke text-blue-500"
             checked={selectedOption === 'manual_date'}
             onChange={handleOptionChange}
           />
@@ -278,12 +278,12 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       <div>
         <label
           htmlFor="twice_a_month_oth_week"
-          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-gray-200 ${
-            selectedOption === 'twice_a_month_oth_week' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100'
+          className={`flex cursor-pointer justify-between gap-4 rounded-lg border p-4 text-sm font-medium shadow-sm hover:border-primary ${
+            selectedOption === 'twice_a_month_oth_week' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-stroke'
           }`}
         >
           <div>
-            <p className="text-gray-700">Twice a month (other week)</p>
+            <p className="text-black dark:text-white">Twice a month (other week)</p>
           </div>
     
           <input
@@ -291,7 +291,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             name="twice_a_month_oth_week"
             value="twice_a_month_oth_week"
             id="twice_a_month_oth_week"
-            className="h-5 w-5 border-gray-300 text-blue-500"
+            className="h-5 w-5 border-stroke text-blue-500"
             checked={selectedOption === 'twice_a_month_oth_week'}
             onChange={handleOptionChange}
           />
@@ -299,7 +299,7 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
       </div>
       <div className='col-span-full'>
         <span className="flex items-center">
-          <span className="h-px flex-1 bg-slate-500"></span>
+          <span className="h-px flex-1 bg-stroke dark:bg-strokedark"></span>
         </span>
       </div>
       {/* Payment method options - each renders a selector + preview table */}
@@ -317,21 +317,21 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
               <Component term={Number(loanSingleData?.term)} addon_term={Number(loanSingleData?.addon_terms)} selectedData={selectedData} handleApproveRelease={catchSubmitApproval} loading={loading} />
             </div>
             <div className="col-span-full lg:col-span-2 xl:col-span-4">
-              <div className="flow-root border border-gray-100 py-3 shadow-sm">
-                <dl className="-my-3 divide-y divide-gray-100 text-sm">
+              <div className="flow-root border border-stroke py-3 shadow-sm">
+                <dl className="-my-3 divide-y divide-stroke text-sm">
                   <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                    <dt className="col-span-3 font-medium p-4 bg-black text-white text-center">{title}</dt>
+                    <dt className="col-span-3 border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">{title}</dt>
                   </div>
                   <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-                    <dt className="font-medium text-center text-gray-900">Date</dt>
-                    <dt className="font-medium text-center text-gray-900">Monthly</dt>
-                    <dd className="text-gray-700 text-center">Interest</dd>
+                    <dt className="font-medium text-center text-black dark:text-white">Date</dt>
+                    <dt className="font-medium text-center text-black dark:text-white">Monthly</dt>
+                    <dd className="text-black dark:text-white text-center">Interest</dd>
                   </div>
                   {dateListSelected && dateListSelected.map((date, i) => (
                     <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
-                      <dt className="font-medium text-center text-gray-900">{date}</dt>
-                      <dd className="text-gray-700 text-center">{newMonthlyList?.[i] ?? formatNumber((Number(loanSingleData?.pn_amount ?? 0) + Number(loanSingleData?.addon_amount ?? 0)) / (paycount || 1))}</dd>
-                      <dt className="font-medium text-center text-gray-900">{udiComputedList?.[i] ?? formatNumber(Number(loanSingleData?.loan_details?.find((d: any) => d.description === 'udi')?.credit ?? 0) / (paycount || 1))}</dt>
+                      <dt className="font-medium text-center text-black dark:text-white">{date}</dt>
+                      <dd className="text-black dark:text-white text-center">{newMonthlyList?.[i] ?? formatNumber((Number(loanSingleData?.pn_amount ?? 0) + Number(loanSingleData?.addon_amount ?? 0)) / (paycount || 1))}</dd>
+                      <dt className="font-medium text-center text-black dark:text-white">{udiComputedList?.[i] ?? formatNumber(Number(loanSingleData?.loan_details?.find((d: any) => d.description === 'udi')?.credit ?? 0) / (paycount || 1))}</dt>
                     </div>
                   ))}
                 </dl>

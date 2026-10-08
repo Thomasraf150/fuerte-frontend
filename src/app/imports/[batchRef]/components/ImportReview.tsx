@@ -1,5 +1,8 @@
 'use client';
 
+import { SkeletonBlock } from '@/components/LoadingStates';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle, Download, Eye, RotateCcw, XCircle } from 'react-feather';
@@ -142,11 +145,14 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
 
   if (!batch) {
     return (
-      <div className="rounded-sm border border-stroke bg-white p-7 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <p className="text-body dark:text-bodydark">
-          {busy ? 'Checking the file…' : error ?? 'Loading…'}
-        </p>
-      </div>
+      <Card>
+        <CardBody>
+          <p className="text-body dark:text-bodydark">
+            {busy ? 'Checking the file…' : error ?? 'Loading…'}
+          </p>
+          {(busy || !error) && <SkeletonBlock rows={3} label="Loading the import…" />}
+        </CardBody>
+      </Card>
     );
   }
 
@@ -203,26 +209,22 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
       )}
 
       {/* header card */}
-      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 className="font-medium text-black dark:text-white">{batch.original_filename}</h3>
-            <p className="text-xs text-body dark:text-bodydark mt-1">
-              {batch.batch_ref} · uploaded {batch.created_at}
-            </p>
-          </div>
-          <StatusPill status={batch.status} />
-        </div>
+      <Card>
+        <CardHeader title={batch.original_filename} actions={<StatusPill status={batch.status} />} />
+        <CardBody>
+        <p className="text-xs text-body dark:text-bodydark">
+          {batch.batch_ref} · uploaded {batch.created_at}
+        </p>
 
         {batch.summary?.fatal && (
-          <div className="m-7 rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+          <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
             {batch.summary.fatal}
           </div>
         )}
 
         {/* error groups */}
         {groups.length > 0 && (
-          <div className="px-7 py-5 border-b border-stroke dark:border-strokedark">
+          <div>
             <h4 className="mb-3 text-xs font-medium uppercase tracking-wide text-body dark:text-bodydark">
               Why rows were rejected
             </h4>
@@ -247,7 +249,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
 
         {/* warnings on rows that WILL post */}
         {warningRows.length > 0 && (
-          <div className="px-7 py-5 border-b border-stroke dark:border-strokedark">
+          <div>
             <h4 className="mb-3 text-xs font-medium uppercase tracking-wide text-body dark:text-bodydark">
               Will post, but check these
             </h4>
@@ -269,7 +271,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
         )}
 
         {/* the rows themselves */}
-        <div className="px-7 py-5 overflow-x-auto">
+        <div className="overflow-x-auto">
           {/* Columns come from the handler, not from here. They used to be
               hardcoded to collections (Loan / Amount / Remaining / Interest),
               so a borrowers batch rendered five dashes per row. The server
@@ -312,12 +314,14 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
             </tbody>
           </table>
         </div>
-      </div>
+        </CardBody>
+      </Card>
 
       {/* confirm-and-commit card — the summary shows for ANY checked file,
           even one with nothing postable, so the counts always have a home */}
       {batch.status === 'validated' && (
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark px-7 py-5 space-y-4">
+        <Card>
+          <CardBody>
           <h4 className="text-xs font-medium uppercase tracking-wide text-body dark:text-bodydark">
             Confirm before posting
           </h4>
@@ -432,7 +436,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                   type="checkbox"
                   checked={checked}
                   onChange={(e) => setChecked(e.target.checked)}
-                  className="mt-1"
+                  className="mt-1 h-5 w-5 accent-primary focus-visible:ring-2 focus-visible:ring-primary/30"
                 />
                 {hasMoney && postsToLedger
                   ? 'These match the paper collection sheet.'
@@ -443,17 +447,16 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
               {error && (
                 <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</div>
               )}
-              <button
+              <Button variant="primary"
                 onClick={doCommit}
-                disabled={!confirmOk || busy !== null}
-                className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+                disabled={!confirmOk || busy !== null}>
                 <CheckCircle size={15} />
                 {postsToLedger ? `Post ${countOf(batch.ok_count)}` : `Import ${countOf(batch.ok_count)}`}
-              </button>
+              </Button>
             </>
           )}
-        </div>
+          </CardBody>
+        </Card>
       )}
 
       {/* committed result — persistent, never a toast */}
@@ -517,18 +520,16 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
               total" — that older test put this button on schedule
               corrections, a type with no receipt endpoint at all. */}
           {hasReceipt && (
-            <button
+            <Button variant="secondary"
               onClick={getReceipt}
-              disabled={busy !== null || receiptBusy}
-              className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-green-600/40 bg-white px-5 py-2.5 text-sm text-black transition hover:border-green-600 disabled:cursor-wait disabled:opacity-50 dark:bg-boxdark dark:text-white"
-            >
+              disabled={busy !== null || receiptBusy}>
               {receiptBusy ? (
                 <span className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" />
               ) : (
                 <Download size={14} />
               )}
               {receiptBusy ? 'Building the ID list…' : 'Download the ID list for the loans sheet'}
-            </button>
+            </Button>
           )}
           {batch.summary?.sweep_failed && (
             <div className="flex max-w-xl items-start gap-2 rounded border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-900/10 dark:text-amber-400">
@@ -574,14 +575,12 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                 </div>
               </div>
             ) : (
-              <button
+              <Button variant="danger"
                 onClick={doReverse}
-                disabled={busy !== null}
-                className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-danger px-5 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+                disabled={busy !== null}>
                 <RotateCcw size={14} />
                 Cancel this posting
-              </button>
+              </Button>
             )}
           </div>
         </div>

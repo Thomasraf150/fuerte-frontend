@@ -1,10 +1,9 @@
 "use client";
 
 import React from 'react';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import { formatMoneyOrBlank } from '@/utils/helper';
 import type { LoanApplicationRecord } from '@/utils/DataTypes';
-
-const CARD = 'rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark';
 
 /** One term and its value: a direct child of the <dl>, so a wider one takes `className` rather than a wrapper of its own. */
 const Fact: React.FC<{ label: string; className?: string; children: React.ReactNode }> = ({ label, className = '', children }) => (
@@ -31,12 +30,11 @@ const Blank: React.FC = () => (
 const ApplicationSummary: React.FC<{ record: LoanApplicationRecord }> = ({ record }) => {
   const amount = formatMoneyOrBlank(record.amount_applied);
   return (
-    <section aria-label="Application summary" className={CARD}>
-      <h3 className="border-b border-stroke px-5 py-3.5 text-sm font-semibold text-black dark:border-strokedark dark:text-white sm:px-7">
-        Application summary
-      </h3>
+    <Card aria-label="Application summary">
+      <CardHeader title="Application summary" />
+      <CardBody>
       {/* grid-cols-1 is minmax(0, 1fr): a long name or purpose wraps instead of widening the page. */}
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-5 px-5 py-5 sm:grid-cols-2 sm:px-7">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
         <Fact label="Name">
           <span className="uppercase">{record.full_name}</span>
         </Fact>
@@ -47,7 +45,8 @@ const ApplicationSummary: React.FC<{ record: LoanApplicationRecord }> = ({ recor
           {record.purpose || <Blank />}
         </Fact>
       </dl>
-    </section>
+      </CardBody>
+    </Card>
   );
 };
 

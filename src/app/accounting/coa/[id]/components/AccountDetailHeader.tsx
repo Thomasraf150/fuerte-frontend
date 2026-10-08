@@ -1,3 +1,5 @@
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import React, { useState } from 'react';
 import type { AccountDetail } from '@/types/chartOfAccounts';
 import { formatCurrency } from '@/utils/formatters';
@@ -13,16 +15,11 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
   const INITIAL_DISPLAY_COUNT = 3;
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-6 py-4 dark:border-strokedark">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium text-black dark:text-white">
-            Account Details
-          </h3>
-          <button
-            onClick={onBack}
-            className="inline-flex items-center justify-center gap-2 rounded bg-meta-3 px-4 py-2 text-center font-medium text-white hover:bg-opacity-90"
-          >
+    <Card>
+      <CardHeader
+        title="Account Details"
+        actions={
+          <Button variant="secondary" onClick={onBack}>
             <svg
               className="fill-current"
               width="16"
@@ -47,15 +44,14 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
               />
             </svg>
             Back to List
-          </button>
-        </div>
-      </div>
-
-      <div className="p-6">
+          </Button>
+        }
+      />
+      <CardBody>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* Account Name */}
           <div>
-            <p className="text-sm font-medium text-black dark:text-white mb-1">
+            <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Account Name
             </p>
             <p className="text-base font-semibold text-black dark:text-white">
@@ -65,7 +61,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
 
           {/* Account Number */}
           <div>
-            <p className="text-sm font-medium text-black dark:text-white mb-1">
+            <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Account Number
             </p>
             <p className="text-base font-mono font-semibold text-black dark:text-white">
@@ -75,11 +71,11 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
 
           {/* Balance */}
           <div>
-            <p className="text-sm font-medium text-black dark:text-white mb-1">
+            <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Current Balance
             </p>
             <p className={`text-base font-semibold ${
-              parseFloat(account.balance) < 0 ? 'text-red-500' : 'text-green-500'
+              parseFloat(account.balance) < 0 ? 'text-danger' : 'text-success'
             }`}>
               {formatCurrency(account.balance)}
             </p>
@@ -87,7 +83,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
 
           {/* Account Type */}
           <div>
-            <p className="text-sm font-medium text-black dark:text-white mb-1">
+            <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Account Type
             </p>
             <span className={`inline-flex rounded px-2 py-1 text-sm font-medium ${
@@ -101,7 +97,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
 
           {/* Status */}
           <div>
-            <p className="text-sm font-medium text-black dark:text-white mb-1">
+            <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Status
             </p>
             <span className={`inline-flex rounded px-2 py-1 text-sm font-medium ${
@@ -115,7 +111,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
 
           {/* Transaction Count */}
           <div>
-            <p className="text-sm font-medium text-black dark:text-white mb-1">
+            <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Total Transactions
             </p>
             <p className="text-base font-semibold text-black dark:text-white">
@@ -126,7 +122,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
           {/* Parent Account */}
           {account.parent && (
             <div>
-              <p className="text-sm font-medium text-black dark:text-white mb-1">
+              <p className="mb-1 text-sm font-semibold text-black dark:text-white">
                 Parent Account
               </p>
               <p className="text-base text-black dark:text-white">
@@ -138,7 +134,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
           {/* Branch */}
           {account.branch_sub && (
             <div>
-              <p className="text-sm font-medium text-black dark:text-white mb-1">
+              <p className="mb-1 text-sm font-semibold text-black dark:text-white">
                 Branch
               </p>
               <p className="text-base text-black dark:text-white">
@@ -150,7 +146,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
           {/* Created By */}
           {account.created_by && (
             <div>
-              <p className="text-sm font-medium text-black dark:text-white mb-1">
+              <p className="mb-1 text-sm font-semibold text-black dark:text-white">
                 Created By
               </p>
               <p className="text-base text-black dark:text-white">
@@ -162,7 +158,7 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
           {/* Description */}
           {account.description && (
             <div className="sm:col-span-2 lg:col-span-3">
-              <p className="text-sm font-medium text-black dark:text-white mb-1">
+              <p className="mb-1 text-sm font-semibold text-black dark:text-white">
                 Description
               </p>
               <p className="text-base text-black dark:text-white">
@@ -208,8 +204,8 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };
 

@@ -9,6 +9,7 @@ import useLoans from '@/hooks/useLoans';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import { Search, RefreshCw } from 'react-feather';
+import { Card, CardBody } from '@/components/Card';
 
 const SoaList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -99,16 +100,12 @@ const SoaList: React.FC = () => {
         <div className="grid grid-cols-1 gap-4">
           <div className="w-full">
 
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-4 sm:px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    Commission Schedule
-                  </h3>
-                </div>
-                <div className="p-4 sm:p-7">
+              {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). The filter box is no longer a second card inside this one. */}
+              <Card>
+                <CardBody>
 
-                <div className="rounded-lg bg-gray-200 dark:bg-boxdark p-6 mb-4 relative z-20">
-                  <label className="mb-6 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range:</label>
+                <div className="relative z-20">
+                  <label className="mb-4 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range:</label>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 items-end mb-4">
                     {/* Start Date */}
@@ -383,8 +380,8 @@ const SoaList: React.FC = () => {
                   </div>
                 )}
 
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             
           </div>
         </div>

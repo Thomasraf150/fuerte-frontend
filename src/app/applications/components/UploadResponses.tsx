@@ -92,7 +92,7 @@ const RowNote: React.FC<{ row: number; text: string }> = ({ row, text }) => (
 );
 
 const UploadResult: React.FC<{ outcome: Outcome }> = ({ outcome: { way, source, result } }) => (
-  <div className="mt-4 overflow-hidden rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+  <div className="mt-4 overflow-hidden rounded-2xl border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
     <p className="flex min-w-0 items-center gap-2 px-4 py-3 text-sm">
       <CheckCircle aria-hidden="true" size={16} className="shrink-0 text-success" />
       <span className="shrink-0 font-medium text-black dark:text-white">{DONE[way]}</span>
@@ -229,7 +229,7 @@ const UploadResponses: React.FC<UploadResponsesProps> = ({ uploading, pasting, o
   };
 
   return (
-    <section aria-labelledby={headingId} className="rounded-sm border border-stroke bg-whiter p-3 dark:border-strokedark dark:bg-boxdark-2 sm:p-5">
+    <section aria-labelledby={headingId} className="rounded-2xl border border-stroke bg-whiter p-3 dark:border-strokedark dark:bg-boxdark-2 sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
         <div className="min-w-0">
           <h4 id={headingId} className="font-semibold text-black dark:text-white">Google Form responses</h4>

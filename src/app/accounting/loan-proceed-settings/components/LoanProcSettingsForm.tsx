@@ -1,4 +1,5 @@
 "use client"
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
@@ -152,9 +153,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="col-span-1 mb-4 mt-4">
-        <label className={`mb-3 block text-sm font-medium text-black dark:text-white`}>Branch</label>
+        <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Branch</label>
           <Controller
             name="branch_sub_id"
             control={control}
@@ -172,7 +173,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
               />
             )}
           />
-          {errors.branch_sub_id && <p className="mt-2 text-sm text-red-600">{errors.branch_sub_id.message}</p>}
+          {errors.branch_sub_id && <p className="mt-2 text-sm text-danger">{errors.branch_sub_id.message}</p>}
         </div>
         
         {[
@@ -193,7 +194,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'coh_id' as const, label: 'Cash on Hand' },
         ].map(({ name, label }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">{label} <span style={{ color: '#ef4444' }}>*</span></label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">{label} <span className="text-danger">*</span></label>
             <Controller
               name={name}
               control={control}
@@ -209,25 +210,21 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
                 />
               )}
             />
-            {errors[name] && <p className="mt-2 text-sm text-red-600">{errors[name]?.message}</p>}
+            {errors[name] && <p className="mt-2 text-sm text-danger">{errors[name]?.message}</p>}
           </div>
         ))}
       </div>
 
       <div className="w-full flex justify-end mt-6">
         <div className="flex gap-4">
-          <button
-            className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+          <Button variant="secondary"
             type="button"
-            onClick={() => { setShowForm(false) }}
-          >
+            onClick={() => { setShowForm(false) }}>
             Back
-          </button>
-          <button
-            className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanProcLoading ? 'opacity-70' : ''}`}
+          </Button>
+          <Button variant="primary"
             type="submit"
-            disabled={loanProcLoading}
-          >
+            disabled={loanProcLoading}>
             {loanProcLoading ? (
               <>
                 <RotateCw size={17} className="animate-spin mr-1" />
@@ -239,7 +236,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
                 <span>Save</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </form>

@@ -1,16 +1,19 @@
 "use client";
 
+import Button from '@/components/Button';
+import { SkeletonBlock } from '@/components/LoadingStates';
 import React, { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList, DataSubBranches, SelectOption } from '@/utils/DataTypes';
 import ReactSelect from '@/components/ReactSelect';
 import BranchBadge from '@/components/BranchBadge';
-import { ChevronDown, ChevronRight, Edit2, Eye, GitBranch, Printer, RefreshCw, Search, Trash2 } from 'react-feather';
+import { ChevronDown, ChevronRight, Edit2, Eye, Plus, Printer, RefreshCw, Search, Trash2 } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
 import useCoaGroupView from '@/hooks/useCoaGroupView';
 import Swal from 'sweetalert2';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 // 'all' is this screen's no-filter sentinel (not '') — kept as a real option so
 // the control never renders blank.
@@ -163,37 +166,25 @@ const AccountRow = React.memo<AccountRowProps>(({
         })}
       </td>
       <td className="px-6 py-2 text-sm text-center">
-        <div className="flex items-center justify-center space-x-2">
-          <button
-            onClick={handleView}
-            className="text-body hover:text-black dark:text-bodydark dark:hover:text-white transition-colors"
-            title="View Details"
-          >
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button variant="secondary" size="sm" onClick={handleView} title="View Details">
             <Eye size={16} />
-          </button>
-          <button
-            onClick={() => onEdit(account)}
-            className="text-orange-300 hover:text-orange-100 dark:text-orange-300 dark:hover:text-orange-100 transition-colors"
-            title="Edit Account"
-          >
+            View
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => onEdit(account)} title="Edit Account">
             <Edit2 size={16} />
-          </button>
+            Edit
+          </Button>
           {isActive ? (
-            <button
-              onClick={() => onDelete(account)}
-              className="text-danger transition-opacity hover:opacity-70"
-              title="Deactivate Account"
-            >
+            <Button variant="danger" size="sm" onClick={() => onDelete(account)} title="Deactivate Account">
               <Trash2 size={16} />
-            </button>
+              Deactivate
+            </Button>
           ) : (
-            <button
-              onClick={() => onReactivate(account)}
-              className="text-green-600 transition-opacity hover:opacity-70 dark:text-green-400"
-              title="Reactivate Account"
-            >
+            <Button variant="secondary" size="sm" onClick={() => onReactivate(account)} title="Reactivate Account">
               <RefreshCw size={16} />
-            </button>
+              Reactivate
+            </Button>
           )}
         </div>
       </td>
@@ -424,20 +415,20 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
     // REQUIREMENT 1: Leaf nodes (no children) = WHITE in light mode, gray-800 in dark mode
     if (!hasChildren) {
       return isActive
-        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
-        : 'bg-gray-200 dark:bg-gray-900 text-gray-500 dark:text-gray-400';
+        ? 'bg-white dark:bg-boxdark text-black dark:text-white'
+        : 'bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark';
     }
 
     // REQUIREMENT 2: Inactive accounts with children = GRAYED OUT
     if (!isActive) {
       const adjustedLevel = Math.max(0, Math.min(level - 1, 5));
       const grayClasses = [
-        'bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-300',     // Level 0
-        'bg-gray-400 dark:bg-gray-600 text-gray-700 dark:text-gray-300',  // Level 1
-        'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400',  // Level 2
-        'bg-gray-300 dark:bg-gray-800 text-gray-600 dark:text-gray-400',  // Level 3
-        'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400',  // Level 4
-        'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400',  // Level 5
+        'bg-body dark:bg-form-strokedark text-white',                     // Level 0
+        'bg-stroke dark:bg-strokedark text-black dark:text-white',        // Level 1
+        'bg-stroke dark:bg-strokedark text-black dark:text-white',        // Level 2
+        'bg-gray-3 dark:bg-meta-4 text-body dark:text-bodydark',          // Level 3
+        'bg-gray-3 dark:bg-meta-4 text-body dark:text-bodydark',          // Level 4
+        'bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark',          // Level 5
       ];
       return grayClasses[adjustedLevel];
     }
@@ -448,9 +439,9 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
       'bg-blue-900 dark:bg-blue-800 text-white',           // Level 0
       'bg-blue-700 dark:bg-blue-700 text-white',           // Level 1
       'bg-blue-500 dark:bg-blue-600 text-white',           // Level 2
-      'bg-blue-400 dark:bg-blue-500 text-gray-900 dark:text-white', // Level 3
-      'bg-blue-300 dark:bg-blue-400 text-gray-900 dark:text-white', // Level 4
-      'bg-blue-200 dark:bg-blue-300 text-gray-900',        // Level 5
+      'bg-blue-400 dark:bg-blue-500 text-black dark:text-white', // Level 3
+      'bg-blue-300 dark:bg-blue-400 text-black dark:text-white', // Level 4
+      'bg-blue-200 dark:bg-blue-300 text-black',        // Level 5
     ];
     return blueClasses[adjustedLevel];
   }, []);
@@ -501,41 +492,42 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
     <>
       <div>
         <div className="max-w-12xl">
-          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
-            <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-              <h3 className="font-medium text-black dark:text-white">
-                Chart of Accounts
-              </h3>
-              <button
-                type="button"
-                onClick={() => printChartOfAccounts(branchFilter)}
-                disabled={loading || !coaDataAccount || coaDataAccount.length === 0}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                <Printer size={18} />
-                Print Report
-              </button>
-            </div>
-            <div className="p-5">
-              <div className="flex flex-col gap-2 mb-4">
-                <button
-                  className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center justify-center space-x-2"
+          <Card>
+            {/* Print Report keeps its place at the right of the title bar (nothing moves), so the
+                bar stays even though its title repeats the page title. */}
+            <CardHeader
+              title="Chart of Accounts"
+              actions={
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => printChartOfAccounts(branchFilter)}
+                  disabled={loading || !coaDataAccount || coaDataAccount.length === 0}
+                >
+                  <Printer size={18} />
+                  Print Report
+                </Button>
+              }
+            />
+            <CardBody>
+              <Toolbar>
+                <Button
+                  variant="primary"
                   onClick={() => onOpenForm('Create Account', true, null)}
                 >
-                  <GitBranch size={14} />
+                  <Plus size={16} aria-hidden="true" />
                   <span>Create Account</span>
-                </button>
-              </div>
-            </div>
-            <div className="px-5 pb-4">
+                </Button>
+              </Toolbar>
+            <div>
               <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-body" size={18} />
                 <input
                   type="text"
                   placeholder="Search by Account Name or Number..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-md border border-stroke bg-white dark:bg-form-input text-gray-900 dark:text-white dark:border-strokedark focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label="Search by Account Name or Number" className="h-12 md:h-11 w-full rounded-lg border border-field bg-white pl-10 pr-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                 />
               </div>
               <div className="mb-3">
@@ -556,37 +548,37 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setStatusFilter('all')}
-                  className={`px-4 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap ${
+                  className={`min-h-10 border px-4 text-sm transition-colors whitespace-nowrap ${
                     statusFilter === 'all'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-700 dark:bg-meta-4 dark:text-white hover:bg-gray-300 dark:hover:bg-opacity-80'
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-stroke bg-gray-2 text-black hover:border-primary dark:border-strokedark dark:bg-meta-4 dark:text-white'
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setStatusFilter('active')}
-                  className={`px-4 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap ${
+                  className={`min-h-10 border px-4 text-sm transition-colors whitespace-nowrap ${
                     statusFilter === 'active'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-700 dark:bg-meta-4 dark:text-white hover:bg-gray-300 dark:hover:bg-opacity-80'
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-stroke bg-gray-2 text-black hover:border-primary dark:border-strokedark dark:bg-meta-4 dark:text-white'
                   }`}
                 >
                   Active
                 </button>
                 <button
                   onClick={() => setStatusFilter('inactive')}
-                  className={`px-4 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap ${
+                  className={`min-h-10 border px-4 text-sm transition-colors whitespace-nowrap ${
                     statusFilter === 'inactive'
-                      ? 'bg-orange-600 text-white border-2 border-orange-800 dark:bg-orange-600 dark:text-white dark:border-orange-300 shadow-lg'
-                      : 'bg-gray-200 text-gray-700 dark:bg-meta-4 dark:text-white hover:bg-gray-300 dark:hover:bg-opacity-80'
+                      ? 'border-body bg-body text-white'
+                      : 'border-stroke bg-gray-2 text-black hover:border-primary dark:border-strokedark dark:bg-meta-4 dark:text-white'
                   }`}
                 >
                   Inactive
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto shadow-md sm:rounded-lg p-5">
+            <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-black dark:text-white">
                 <thead className="text-xs text-black dark:text-white uppercase bg-gray-3 dark:bg-meta-4">
                   <tr>
@@ -595,24 +587,21 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                     <th scope="col" className="px-6 py-3">Group / Branch</th>
                     <th scope="col" className="px-6 py-3 text-center">Is Debit</th>
                     <th scope="col" className="px-6 py-3 text-center">Balance</th>
-                    <th scope="col" className="px-6 py-3 text-center">Actions</th>
+                    <th scope="col" className="min-w-[17rem] px-6 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-8 text-center">
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                          <span className="text-gray-500 dark:text-gray-400">Loading accounts...</span>
-                        </div>
+                        <SkeletonBlock rows={4} label="Loading accounts..." />
                       </td>
                     </tr>
                   ) : filteredAccounts.length > 0 ? (
                     renderedAccountTree
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={6} className="px-6 py-8 text-center text-body dark:text-bodydark">
                         {searchTerm && groupPrune
                           ? "No matches in your branch's accounts."
                           : searchTerm ? 'No accounts found matching your search.' : 'No accounts available.'}
@@ -622,7 +611,8 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                 </tbody>
               </table>
             </div>
-          </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </>

@@ -38,7 +38,7 @@ const LoanFiltersBar: React.FC<LoanFiltersBarProps> = ({
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-4">
+    <div className="rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-4">
       <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
         <h3 className="font-medium text-black dark:text-white">
           Filter Loans

@@ -88,7 +88,7 @@ const ShareBar: React.FC<{ row: SourceRow; total: number; grown: boolean }> = ({
 const SourceCard: React.FC<{ row: SourceRow; total: number; grown: boolean }> = ({ row, total, grown }) => {
   const ChannelIcon = CHANNEL_ICONS[row.channel];
   return (
-    <li className="rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark sm:p-5">
+    <li className="rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5">
       <div className="flex items-center gap-3">
         <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${TINTS[row.channel]}`}>
           <ChannelIcon size={18} />
@@ -156,7 +156,7 @@ const ResultsSkeleton: React.FC = () => (
     </div>
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
       {[0, 1, 2, 3].map((slot) => (
-        <div key={slot} className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark sm:p-5">
+        <div key={slot} className="rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-whiten dark:bg-meta-4" />
             <div className="h-4 w-28 rounded bg-whiten dark:bg-meta-4" />

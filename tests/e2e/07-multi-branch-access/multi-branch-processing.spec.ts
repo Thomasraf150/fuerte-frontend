@@ -559,9 +559,8 @@ test.describe('Multi-Branch Processing User (per-form picker)', () => {
 
     // Edit form still works.
     const firstRow = page.locator('.rdt_TableRow').first();
-    const actionIcons = firstRow.locator('svg.cursor-pointer');
-    expect(await actionIcons.count()).toBeGreaterThanOrEqual(2);
-    await actionIcons.nth(1).click({ force: true });
+    // Row actions are labelled buttons since UI modernisation B (Phase 6).
+    await firstRow.getByRole("button", { name: "Edit", exact: true }).click();
     await page.waitForTimeout(2500);
     await expect(page.locator('text=Update User').first()).toBeVisible({ timeout: 5000 });
 
@@ -599,9 +598,8 @@ test.describe('Multi-Branch Processing User (per-form picker)', () => {
     await page.waitForSelector('.rdt_TableRow', { timeout: 15000 });
 
     const firstRow = page.locator('.rdt_TableRow').first();
-    const actionIcons = firstRow.locator('svg.cursor-pointer');
-    expect(await actionIcons.count()).toBeGreaterThanOrEqual(2);
-    await actionIcons.nth(1).click({ force: true });
+    // Row actions are labelled buttons since UI modernisation B (Phase 6).
+    await firstRow.getByRole("button", { name: "Edit", exact: true }).click();
     await page.waitForTimeout(2500);
 
     await expect(page.locator('text=Cross-Branch Access').first()).toBeVisible({ timeout: 5000 });

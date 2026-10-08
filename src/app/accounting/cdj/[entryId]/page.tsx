@@ -1,11 +1,13 @@
 'use client';
 
+import Button from '@/components/Button';
+import { Card } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { SkeletonBlock } from '@/components/LoadingStates';
 import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations';
 import useCoa from '@/hooks/useCoa';
 import CdjForm from '../components/CdjForm';
@@ -88,9 +90,9 @@ const CdjDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Loading..." />
         </div>
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner />
-        </div>
+        <Card className="p-6">
+          <SkeletonBlock rows={5} label="Loading the entry…" />
+        </Card>
       </DefaultLayout>
     );
   }
@@ -102,19 +104,17 @@ const CdjDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Error" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Card className="p-10">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-500 mb-4">
+            <h3 className="text-xl font-semibold text-danger mb-4">
               {error || 'CDJ entry not found'}
             </h3>
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-            >
+            <Button variant="primary"
+              onClick={handleBack}>
               Back to Cash Disbursements Journal
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -137,18 +137,16 @@ const CdjDetailPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="p-4 lg:p-7">
-            <CdjForm
-              setShowForm={handleShowForm}
-              actionLbl="Reference #:"
-              singleData={singleData}
-              loading={false}
-              coaDataAccount={coaDataAccount || []}
-              fetchCoaDataTable={fetchCoaDataTable}
-            />
-          </div>
-        </div>
+        <Card>
+          <CdjForm
+            setShowForm={handleShowForm}
+            actionLbl="Reference #:"
+            singleData={singleData}
+            loading={false}
+            coaDataAccount={coaDataAccount || []}
+            fetchCoaDataTable={fetchCoaDataTable}
+          />
+        </Card>
       </div>
     </DefaultLayout>
   );

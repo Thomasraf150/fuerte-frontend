@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import DatePicker from 'react-datepicker';
@@ -8,6 +9,7 @@ import moment from 'moment';
 import ReactSelect from '@/components/ReactSelect';
 import useBranches from '@/hooks/useBranches';
 import { buildSelectOptions } from '@/utils/buildSelectOptions';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 export interface VoucherFiltersValue {
   startDate: string;
@@ -148,22 +150,20 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-4">
-      <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-        <h3 className="font-medium text-black dark:text-white">Filters</h3>
-        <button
-          type="button"
-          onClick={handleClear}
-          className="text-sm text-primary hover:underline"
-        >
-          Clear
-        </button>
-      </div>
-      <div className="p-7">
+    <Card className="mb-4">
+      <CardHeader
+        title="Filters"
+        actions={
+          <Button variant="secondary" type="button" onClick={handleClear}>
+            Clear
+          </Button>
+        }
+      />
+      <CardBody>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Start Date */}
           <div className="flex flex-col relative z-50">
-            <label className="mb-2 text-sm font-medium text-black dark:text-white">Start Date</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Start Date</label>
             <DatePicker
               selected={startDate}
               onChange={handleStartDateChange}
@@ -171,14 +171,14 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
               startDate={startDate}
               endDate={endDate}
               placeholderText="Select start date"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
               popperPlacement="bottom-start"
             />
           </div>
 
           {/* End Date */}
           <div className="flex flex-col relative z-50">
-            <label className="mb-2 text-sm font-medium text-black dark:text-white">End Date</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">End Date</label>
             <DatePicker
               selected={endDate}
               onChange={handleEndDateChange}
@@ -187,14 +187,14 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
               endDate={endDate}
               minDate={startDate}
               placeholderText="Select end date"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
               popperPlacement="bottom-start"
             />
           </div>
 
           {/* Group — narrows the Branch list below; not a filter of its own */}
           <div className="flex flex-col">
-            <label className="mb-2 text-sm font-medium text-black dark:text-white">Group</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Group</label>
             <Controller
               name="branch_group_id"
               control={control}
@@ -220,7 +220,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
 
           {/* Branch */}
           <div className="flex flex-col">
-            <label className="mb-2 text-sm font-medium text-black dark:text-white">Branch</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Branch</label>
             <Controller
               name="branch_id"
               control={control}
@@ -245,7 +245,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
 
           {/* Sub Branch */}
           <div className="flex flex-col">
-            <label className="mb-2 text-sm font-medium text-black dark:text-white">Sub Branch</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Sub Branch</label>
             <Controller
               name="branch_sub_id"
               control={control}
@@ -277,8 +277,8 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
             />
           </div>
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };
 

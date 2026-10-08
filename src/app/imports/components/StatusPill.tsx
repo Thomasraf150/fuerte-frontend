@@ -14,8 +14,9 @@ import React from 'react';
  */
 const STATUS: Record<string, { cls: string; label: string }> = {
   uploaded: { cls: 'bg-whiten text-body', label: 'Uploaded' },
-  validating: { cls: 'bg-blue-100 text-blue-700', label: 'Checking…' },
-  validated: { cls: 'bg-blue-100 text-blue-700', label: 'Checked' },
+  // sky, not blue: blue draws the olive brand scale, too close to Posted's green.
+  validating: { cls: 'bg-sky-100 text-sky-700', label: 'Checking…' },
+  validated: { cls: 'bg-sky-100 text-sky-700', label: 'Checked' },
   committing: { cls: 'bg-amber-100 text-amber-700', label: 'Posting…' },
   committed: { cls: 'bg-green-100 text-green-700', label: 'Posted' },
   reversed: { cls: 'bg-rose-100 text-rose-700', label: 'Cancelled' },

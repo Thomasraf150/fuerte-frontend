@@ -133,7 +133,7 @@ const ApprovalsView: React.FC = () => {
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       {/* Title and caption sit side by side from `sm` up, as before; on a phone
           they stack so the caption is not squeezed into a narrow column. */}
       <div className="border-b border-stroke px-4 py-4 dark:border-strokedark flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:px-7">

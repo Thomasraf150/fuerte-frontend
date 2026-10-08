@@ -57,7 +57,7 @@ const NrUdiSummary: React.FC<NrUdiSummaryProps> = ({ summary, previous, loading,
         {Array.from({ length: cardCount }, (_, i) => (
           <div
             key={i}
-            className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+            className="rounded-2xl border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
           >
             <LoadingSkeleton />
           </div>

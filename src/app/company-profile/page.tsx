@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import CompanyProfileForm from './CompanyProfileForm';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 export const metadata = {
   title: "Company Profile",
@@ -20,16 +21,12 @@ const CompanyProfile: React.FC = () => {
       <div className="max-w-3xl">
         <div className="grid gap-8">
           <div className="col-span-3 xl:col-span-3">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Company Information
-                </h3>
-              </div>
-              <div className="p-7">
+            <Card>
+              <CardHeader title="Company Information" />
+              <CardBody>
                 <CompanyProfileForm />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>

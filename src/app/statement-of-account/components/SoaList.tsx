@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
+import { Card, CardBody } from '@/components/Card';
 import soaListColumn from './SoaListColumn';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
@@ -45,13 +46,9 @@ const SoaList: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  Statement of Account
-                </h3>
-              </div>
-              <div className="p-7">
+            {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). */}
+            <Card>
+              <CardBody>
                 <CustomDatatable
                   apiLoading={loansLoading}
                   columns={column(handleRowClick)}
@@ -61,8 +58,8 @@ const SoaList: React.FC = () => {
                   enableCustomHeader={true}
                   title={''}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>

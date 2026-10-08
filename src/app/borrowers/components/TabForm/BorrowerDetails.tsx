@@ -4,6 +4,9 @@ import FormInput from '@/components/FormInput';
 import { checkBorrowerNow } from '@/utils/borrowerDuplicateCheck';
 import FormLabel from '@/components/FormLabel';
 import { useForm, useFieldArray, Controller, type Control, type FieldErrors, type UseFormRegister } from 'react-hook-form';
+import { Card, CardBody, CardHeader } from '@/components/Card';
+import Button from '@/components/Button';
+import StickyActions from '@/components/StickyActions';
 import ReactSelect from '@/components/ReactSelect';
 import { BorrowerInfo, DataSubArea, BorrowerRowInfo, DataChief, DataArea, DataBorrCompanies, DataSubBranches, SelectOption } from '@/utils/DataTypes';
 import { useAuthStore } from "@/store";
@@ -40,13 +43,18 @@ interface BorrInfoProps {
   branchChoices?: SelectOption[];
   /** Extra fields rendered at the top of "Borrower Information", bound to this same form. */
   renderExtraFields?: (form: { control: Control<any>; register: UseFormRegister<any>; errors: FieldErrors<any> }) => React.ReactNode;
-  /** 'application' hides the profile photo and the Check Borrower button and titles the identity block "Name & Contact". */
+  /** 'application' hides the profile photo and titles the identity block "Name & Contact". */
   variant?: 'borrower' | 'application';
+  /**
+   * The application variant shows Check Borrower only where this is true: New application (Rafael
+   * 2026-10-07). A saved application runs its own check (RepeatApplicantCheck). New Borrower always has it.
+   */
+  offerCheckBorrower?: boolean;
   /** Start the branch picker on the user's home branch when it is a choice. False = the user must pick. */
   preselectHomeBranch?: boolean;
 }
 
-const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, requiredFields, initialValues, branchChoices, renderExtraFields, variant = 'borrower', preselectHomeBranch = true }) => {
+const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubArea, dataBorrCompany, myAccessibleBranchSubs, loadingMyAccessibleBranches, onSubmitBorrower, singleData, setSingleData, setShowForm, fetchDataSubArea, fetchDataBorrower, fetchDataChief, fetchDataArea, fetchDataBorrCompany, borrowerLoading, requiredFields, initialValues, branchChoices, renderExtraFields, variant = 'borrower', preselectHomeBranch = true, offerCheckBorrower = false }) => {
   const defaultValues: any = {
     reference: [
       { occupation: 'Supervisor/Princpal', name: '', contact_no: '' },
@@ -104,7 +112,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
   const seed: Partial<BorrowerInfo> = { ...initialValues };
   delete seed.id;
 
-  const { register, control, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrowerInfo>({
+  const { register, control, handleSubmit, setValue, reset, watch, formState: { errors, isDirty } } = useForm<BorrowerInfo>({
     defaultValues: { ...defaultValues, ...seed }
   });
 
@@ -265,7 +273,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
         dob: watch('dob'),
         id: singleData?.id,
         branch_sub_id: watch('branch_sub_id' as any),
-      } as any);
+      } as any, { crossBranchOnly: useAuthStore.getState().user?.role?.code === 'CALLCTR' });
     } finally {
       setChecking(false);
     }
@@ -438,17 +446,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               button — so an encoder can verify a borrower (own-branch duplicate,
               cross-branch match, problem account) before filling everything. */}
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  {(singleData?.id || variant === 'application') ? 'Name & Contact' : 'Check for Existing Borrower'}
-                </h3>
-              </div>
-              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+            <Card>
+              <CardHeader title={(singleData?.id || variant === 'application') ? 'Name & Contact' : 'Check for Existing Borrower'} />
+              <CardBody>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div>
                     <FormInput
-                      label="Firstname"
+                      label="First Name"
                       id="firstname"
                       type="text"
                       icon={Home}
@@ -459,7 +463,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   </div>
                   <div>
                     <FormInput
-                      label="Middlename"
+                      label="Middle Name"
                       id="middlename"
                       type="text"
                       icon={Home}
@@ -469,7 +473,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   </div>
                   <div>
                     <FormInput
-                      label="Lastname"
+                      label="Last Name"
                       id="lastname"
                       type="text"
                       icon={Home}
@@ -504,32 +508,26 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     />
                   </div>
                 </div>
-                {!singleData?.id && variant !== 'application' && (
+                {/* New Borrower AND New application (Rafael 2026-10-07): check before filling the rest. A
+                    saved application runs its own check (RepeatApplicantCheck), so not there. Secondary:
+                    Save stays the form's one primary button. */}
+                {!singleData?.id && (variant !== 'application' || offerCheckBorrower) && (
                   <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleCheckBorrower}
-                      disabled={checking}
-                      className="flex items-center justify-center gap-2 rounded bg-primary px-5 py-2 font-medium text-white transition hover:bg-opacity-90 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto"
-                    >
+                    <Button variant="secondary" onClick={handleCheckBorrower} disabled={checking} className="w-full sm:w-auto">
                       {checking
-                        ? <RotateCw size={16} className="animate-spin" />
-                        : <Search size={16} />}
+                        ? <RotateCw size={16} aria-hidden="true" className="animate-spin" />
+                        : <Search size={16} aria-hidden="true" />}
                       <span>{checking ? 'Checking…' : 'Check Borrower'}</span>
-                    </button>
+                    </Button>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  Borrower Information
-                </h3>
-              </div>
-              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+            <Card>
+              <CardHeader title="Borrower Information" />
+              <CardBody>
                 {renderExtraFields?.({ control, register, errors })}
                 {showBranchPicker && (
                   <div data-testid="borrower-branch-picker">
@@ -722,17 +720,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   </div>
                 </div>
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  Borrower Details
-                </h3>
-              </div>
-              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+            <Card>
+              <CardHeader title="Borrower Details" />
+              <CardBody>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
@@ -803,18 +797,14 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   </div>
                 </div>
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
           {requiresSpouse && (
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  Borrower Spouse Details
-                </h3>
-              </div>
-              <div className="flex flex-col gap-5.5 p-6.5">
+            <Card>
+              <CardHeader title="Borrower Spouse Details" />
+              <CardBody>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -843,7 +833,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <FormInput
-                    label="Fullname"
+                    label="Full Name"
                     id="fullname"
                     type="text"
                     icon={Home}
@@ -933,18 +923,14 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 </div>
               </div>
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
           )}
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  Work Background
-                </h3>
-              </div>
-              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+            <Card>
+              <CardHeader title="Work Background" />
+              <CardBody>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <div>
@@ -1069,7 +1055,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <FormInput
-                      label="Employement Status"
+                      label="Employment Status"
                       id="employment_status"
                       type="select"
                       icon={Home}
@@ -1142,17 +1128,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   </div>
                 </div>
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  References
-                </h3>
-              </div>
-              <div className="flex flex-col gap-4 sm:gap-5.5 p-4 sm:p-6.5">
+            <Card>
+              <CardHeader title="References" />
+              <CardBody>
 
               <div className="flex flex-col gap-4">
                   {fields.map((field, index) => (
@@ -1170,7 +1152,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       </div>
                       <div>
                         <FormInput
-                          label="Fullname"
+                          label="Full Name"
                           id={`reference.${index}.name`}
                           type="text"
                           icon={Home}
@@ -1211,17 +1193,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   Add More
                 </button>
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
           <div className="w-full">
-            <div className="rounded-sm border m-2 sm:m-3 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="bg-black border-b border-stroke px-4 py-3 sm:px-6.5 sm:py-4 dark:border-strokedark">
-                <h3 className="font-medium text-base lg:text-lg text-whiter dark:text-white">
-                  Company Information
-                </h3>
-              </div>
-              <div className="flex flex-col gap-5.5 p-6.5">
+            <Card>
+              <CardHeader title="Company Information" />
+              <CardBody>
            
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div>
@@ -1264,23 +1242,17 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
               </div>
 
 
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
-          <div className="w-full mb-5 mt-5">
-            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mx-2 sm:mx-3">
-              <button
-                className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white w-full sm:w-auto"
-                type="button"
-                onClick={() => setShowForm(false)}
-              >
+          {/* The same Back and Save, kept on screen on this long form (UI modernisation B). It sits
+              directly in the form's container: sticky only sticks within its parent. */}
+          <div className="mx-2 mb-5 sm:mx-3 contents">
+            <StickyActions dirty={isDirty}>
+              <Button variant="secondary" onClick={() => setShowForm(false)}>
                 Back
-              </button>
-              <button
-                className={`flex justify-center rounded bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 transition ${borrowerLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                type="submit"
-                disabled={borrowerLoading}
-              >
+              </Button>
+              <Button variant="primary" type="submit" disabled={borrowerLoading}>
                 {borrowerLoading ? (
                   <>
                     <RotateCw size={17} className="animate-spin mr-1" />
@@ -1288,12 +1260,12 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   </>
                 ) : (
                   <>
-                    <Save size={17} className="mr-1" />
+                    <Save size={17} />
                     <span>Save</span>
                   </>
                 )}
-              </button>
-            </div>
+              </Button>
+            </StickyActions>
           </div>
           
         </div>

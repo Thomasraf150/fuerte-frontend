@@ -2,7 +2,7 @@
 
 import { TableColumn } from 'react-data-table-component';
 import { Eye, Trash2 } from 'react-feather';
-import Tooltip from '@/components/Tooltip';
+import Button from '@/components/Button';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import PendingDeletionBadge from '@/components/PendingDeletion/PendingDeletionBadge';
@@ -77,6 +77,8 @@ const borrLoanCol = (
   },
   {
     name: 'Action',
+    // Buttons cannot ellipsize like text: the floor is what View + Remove measure (197px).
+    minWidth: '200px',
     cell: row => {
       const info = pendingByEntityId.get(Number(row.id));
       const isPending = !!info;
@@ -90,31 +92,25 @@ const borrLoanCol = (
               onClick={() => onPendingClick(row, info!)}
             />
           )}
-          <Tooltip text="View">
-            <Eye
-              onClick={() => handleViewWholeLoan(row)}
-              size="16"
-              className="text-cyan-400 cursor-pointer hover:text-cyan-600 transition-colors"
-            />
-          </Tooltip>
+          <Button variant="secondary" size="sm" onClick={() => handleViewWholeLoan(row)}>
+            <Eye size="16" />
+            <span>View</span>
+          </Button>
           {deletable && isPending && (
-            <Tooltip text="Already in queue">
-              <Trash2
-                onClick={() => onPendingClick(row, info!)}
-                size="16"
-                className="pdb-disabled-action"
-                aria-label="Already in deletion queue"
-              />
-            </Tooltip>
+            <Button
+              variant="secondary"
+              size="sm" className="pdb-disabled-action"
+              onClick={() => onPendingClick(row, info!)}
+            >
+              <Trash2 size="16" aria-hidden="true" />
+              <span>Already in deletion queue</span>
+            </Button>
           )}
           {deletable && !isPending && (
-            <Tooltip text="Remove">
-              <Trash2
-                onClick={() => handleRowClick(row)}
-                size="16"
-                className="text-cyan-400 cursor-pointer hover:text-red-500 transition-colors"
-              />
-            </Tooltip>
+            <Button variant="danger" size="sm" onClick={() => handleRowClick(row)}>
+              <Trash2 size="16" aria-hidden="true" />
+              <span>Remove</span>
+            </Button>
           )}
         </div>
       );

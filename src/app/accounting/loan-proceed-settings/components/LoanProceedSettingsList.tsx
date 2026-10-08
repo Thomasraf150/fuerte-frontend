@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import { DataChartOfAccountList } from '@/utils/DataTypes';
@@ -9,6 +10,7 @@ import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
 import useCoa from '@/hooks/useCoa';
 import { GitBranch, SkipBack } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = loanProcListCol;
 
@@ -42,22 +44,18 @@ const LoanProceedSettingsList: React.FC = () => {
   return (
     <div>
       <div className="max-w-12xl">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           {!showForm && (
-            <div className={`${!showForm ? 'fade-in' : 'fade-out'} col-span-3`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2 ">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-boxdark dark:text-boxdark">
-                    Loan Proceed Settings
-                  </h3>
-                </div>
-                <div className="p-5">
-                  <button className="bg-primary text-white py-2 px-4 mb-4 rounded hover:bg-primary/90 flex items-center space-x-2" onClick={() => handleShowForm('Create Account', true)}>
+            <div className={`${!showForm ? 'fade-in' : 'fade-out'} col-span-1 xl:col-span-3`}>
+              <Card>
+                <CardBody>
+                <Toolbar>
+                  <Button variant="primary" onClick={() => handleShowForm('Create Account', true)}>
                     <GitBranch  size={14} /> 
                     <span>Create Account</span>
-                  </button>
-                </div>
-                <div className="overflow-x-auto shadow-md sm:rounded-lg p-5 overflow-y-auto">
+                  </Button>
+                </Toolbar>
+                <div className="overflow-x-auto overflow-y-auto">
                   <CustomDatatable
                     apiLoading={loading}
                     columns={column(handleRowClick)}
@@ -79,18 +77,15 @@ const LoanProceedSettingsList: React.FC = () => {
                     <tbody>{renderAccounts(coaDataAccount || [])}</tbody>
                   </table> */}
                 </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
           {showForm && (
-            <div className={`${showForm ? 'fade-in' : 'fade-out'} col-span-3`}>
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                </div>
-                <div className="p-7">
+            <div className={`${showForm ? 'fade-in' : 'fade-out'} col-span-1 xl:col-span-3`}>
+              <Card>
+                <CardHeader title={actionLbl} />
+                <CardBody>
                   <LoanProcSettingsForm
                       setShowForm={setShowForm}
                       actionLbl={actionLbl}
@@ -98,8 +93,8 @@ const LoanProceedSettingsList: React.FC = () => {
                       coaDataAccount={coaDataAccount || []}
                       branchSubData={branchSubData}
                       onSaveSuccess={fetchLpsDataTable} />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
 

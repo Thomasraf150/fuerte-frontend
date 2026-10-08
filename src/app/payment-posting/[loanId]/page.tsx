@@ -5,7 +5,9 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { SkeletonBlock } from '@/components/LoadingStates';
+import Button from '@/components/Button';
+import { Card, CardBody } from '@/components/Card';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import PaymentScheduleForm from '../components/PaymentScheduleForm';
 import { toast } from 'react-toastify';
@@ -69,9 +71,11 @@ const PaymentPostingDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Loading..." />
         </div>
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner />
-        </div>
+        <Card className="min-h-[400px]">
+          <CardBody>
+            <SkeletonBlock rows={5} label="Loading the payment schedule…" />
+          </CardBody>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -83,19 +87,18 @@ const PaymentPostingDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Error" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-500 mb-4">
+        <Card>
+          <CardBody className="text-center sm:p-10">
+          <div>
+            <h3 className="text-xl font-semibold text-danger mb-4">
               {error || 'Loan schedule not found'}
             </h3>
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-            >
+            <Button variant="primary" onClick={handleBack}>
               Back to Payment Posting
-            </button>
+            </Button>
           </div>
-        </div>
+          </CardBody>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -107,22 +110,21 @@ const PaymentPostingDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Loan Closed" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="text-center">
+        <Card>
+          <CardBody className="text-center sm:p-10">
+          <div>
             <h3 className="text-xl font-semibold text-amber-500 mb-4">
               This loan has already been closed
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-body dark:text-bodydark mb-4">
               Payment posting is not available for closed loans.
             </p>
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-            >
+            <Button variant="primary" onClick={handleBack}>
               Back to Payment Posting
-            </button>
+            </Button>
           </div>
-        </div>
+          </CardBody>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -149,16 +151,14 @@ const PaymentPostingDetailPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <PaymentScheduleForm
-            singleData={loanScheduleList}
-            handleShowForm={handleShowForm}
-            onSubmitCollectionPayment={onSubmitCollectionPayment}
-            onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}
-            fnReversePayment={fnReversePayment}
-            paymentLoading={paymentLoading}
-          />
-        </div>
+        <PaymentScheduleForm
+          singleData={loanScheduleList}
+          handleShowForm={handleShowForm}
+          onSubmitCollectionPayment={onSubmitCollectionPayment}
+          onSubmitOthCollectionPayment={onSubmitOthCollectionPayment}
+          fnReversePayment={fnReversePayment}
+          paymentLoading={paymentLoading}
+        />
       </div>
     </DefaultLayout>
   );

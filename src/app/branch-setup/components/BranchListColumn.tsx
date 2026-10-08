@@ -2,8 +2,8 @@
 
 import { TableColumn } from 'react-data-table-component';
 import { DataBranches } from '@/utils/DataTypes';
-import { Eye, Edit3, Trash2 } from 'react-feather';
-import Tooltip from '@/components/Tooltip';
+import { Eye, Edit3 } from 'react-feather';
+import Button from '@/components/Button';
 
 const branchListCol = (
     handleUpdateRowClick: (row: DataBranches) => void, 
@@ -37,23 +37,15 @@ const branchListCol = (
   },
   {
     name: 'Action',
+    minWidth: '270px',
+    button: true,
     cell: row => {
-      
       return (
-        <>
-          <Tooltip text="View Sub Branch">
-            <Eye onClick={() => handleSubViewRowClick(Number(row.id))} size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `}
-          <Tooltip text="Edit">
-            <Edit3 onClick={() => handleUpdateRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `}
-          {/* <Tooltip text="Remove">
-            <Trash2 onClick={() => handleDeleteRow(Number(row.id))} size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
-          </Tooltip> */}
-        </>
-      )
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => handleSubViewRowClick(Number(row.id))}><Eye size={16} aria-hidden="true" />View Sub Branch</Button>
+          <Button variant="secondary" size="sm" onClick={() => handleUpdateRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
+        </div>
+      );
     },
   },
 ];

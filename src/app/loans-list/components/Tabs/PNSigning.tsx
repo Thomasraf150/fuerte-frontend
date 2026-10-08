@@ -4,6 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
 import { LoadingSpinner } from '@/components/LoadingStates';
+import Button from '@/components/Button';
 import { useStableLoading } from '@/hooks/useStableLoading';
 
 interface OMProps {
@@ -30,8 +31,8 @@ const PNSigning: React.FC<OMProps> = ({ handleRefetchData, loanSingleData }) => 
           <LoadingSpinner size="lg" message="Signing PN..." />
         </div>
       )}
-      <button
-        className="bg-primary flex justify-between items-center text-white py-2 px-4 rounded hover:bg-primary/90 text-sm disabled:bg-slate-300 disabled:text-bodydark-300 disabled:cursor-not-allowed"
+      <Button
+        variant="primary"
         onClick={() => { return handlePNSigning(loanSingleData); }}
         disabled={isSigned || !hasSchedule}>
         <span className="mr-1">
@@ -40,9 +41,9 @@ const PNSigning: React.FC<OMProps> = ({ handleRefetchData, loanSingleData }) => 
         <span>
           {`${isSigned ? 'PN is Signed' : 'Submit For PN Signing'}`}
         </span>
-      </button>
+      </Button>
       {!isSigned && !hasSchedule && (
-        <p className="mt-2 text-xs text-red-600">
+        <p className="mt-2 text-xs text-danger">
           Please complete Set Effectivity/Maturity first before signing the PN.
         </p>
       )}

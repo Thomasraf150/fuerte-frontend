@@ -43,9 +43,9 @@ interface IncomeStatementBySubBranchProps {
 type SectionKey = 'interestIncome' | 'otherRevenues' | 'directFinancing' | 'lessExpense' | 'otherIncomeExpense' | 'incomeTax';
 
 const SECTION_CONFIG: { key: SectionKey; label: string; bgClass: string; textClass: string }[] = [
-  { key: 'interestIncome', label: 'INTEREST INCOME', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-800 dark:text-blue-200' },
-  { key: 'otherRevenues', label: 'OTHER REVENUES', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-800 dark:text-blue-200' },
-  { key: 'lessExpense', label: 'LESS: EXPENSES', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-800 dark:text-red-200' },
+  { key: 'interestIncome', label: 'INTEREST INCOME', bgClass: 'bg-sky-50 dark:bg-sky-900/30', textClass: 'text-sky-800 dark:text-sky-200' },
+  { key: 'otherRevenues', label: 'OTHER REVENUES', bgClass: 'bg-sky-50 dark:bg-sky-900/30', textClass: 'text-sky-800 dark:text-sky-200' },
+  { key: 'lessExpense', label: 'LESS: EXPENSES', bgClass: 'bg-danger/10 dark:bg-danger/20', textClass: 'text-danger dark:text-danger' },
   { key: 'directFinancing', label: 'DIRECT FINANCING', bgClass: 'bg-orange-50 dark:bg-orange-900/30', textClass: 'text-orange-800 dark:text-orange-200' },
   { key: 'otherIncomeExpense', label: 'OTHER INCOME / EXPENSE', bgClass: 'bg-purple-50 dark:bg-purple-900/30', textClass: 'text-purple-800 dark:text-purple-200' },
   { key: 'incomeTax', label: 'INCOME TAX', bgClass: 'bg-green-50 dark:bg-green-900/30', textClass: 'text-green-800 dark:text-green-200' },
@@ -238,9 +238,9 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
                           <tr
                             key={`${config.key}-${idx}`}
                             className={isHeader
-                              ? 'bg-gray-100 dark:bg-gray-800/50 font-medium'
-                              : `border-b border-[#eee] dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4 ${
-                                  idx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-900/30'
+                              ? 'bg-gray-2 dark:bg-meta-4 font-medium'
+                              : `border-b border-[#eee] dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4 ${
+                                  idx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-3 dark:bg-meta-4'
                                 }`
                             }
                           >
@@ -265,7 +265,7 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
                       })}
 
                       {/* Section Subtotal */}
-                      <tr className="bg-gray-100 dark:bg-gray-700/50 border-b border-stroke dark:border-strokedark">
+                      <tr className="bg-gray-2 dark:bg-meta-4 border-b border-stroke dark:border-strokedark">
                         <td className="px-4 py-2 font-semibold text-black dark:text-white text-sm">
                           Subtotal {config.label}
                         </td>

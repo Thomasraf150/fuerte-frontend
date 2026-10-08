@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/store/authStore';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
@@ -271,9 +272,11 @@ const useBranches = () => {
     }
   };
 
-   // Fetch data on component mount if id exists
+   // Fetch data on component mount if id exists. Not for Call Center, which works no branch lists
+   // (the server refuses getBranch to it, and a refusal would toast): it reaches a page with this
+   // hook only on Create as borrower (2026-10-07).
   useEffect(() => {
-    fetchDataList()
+    if (useAuthStore.getState().user?.role?.code !== 'CALLCTR') fetchDataList();
   }, []);
 
   return {

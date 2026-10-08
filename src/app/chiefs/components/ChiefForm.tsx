@@ -5,6 +5,7 @@ import { Home, MapPin, Archive, Mail, Globe, Phone, User, Save, RotateCw } from 
 import FormInput from '@/components/FormInput';
 import useChiefs from '@/hooks/useChiefs';
 import { DataChief, } from '@/utils/DataTypes';
+import Button from '@/components/Button';
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
   fetchDataChief: (f: number, p: number) => void;
@@ -84,18 +85,14 @@ const ChiefForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataChief, initia
       />
 
       <div className="flex justify-end gap-4.5 mt-6">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={() => { setShowForm(false) }}
-        >
+          onClick={() => { setShowForm(false) }}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${chiefLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={chiefLoading}
-        >
+          disabled={chiefLoading}>
           {chiefLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -107,7 +104,7 @@ const ChiefForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataChief, initia
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

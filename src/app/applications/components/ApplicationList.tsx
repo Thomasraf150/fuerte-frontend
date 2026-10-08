@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, Inbox, Plus } from 'react-feather';
+import { Card, CardBody, Toolbar } from '@/components/Card';
 import CustomDatatable from '@/components/CustomDatatable';
 import useLoanApplications, { ApplicationStatusFilter, LoadedApplications } from '@/hooks/useLoanApplications';
 import type { ApplicationOutcome, LoanApplicationRow } from '@/utils/DataTypes';
@@ -95,10 +96,9 @@ const NothingYet: React.FC<{ canUpload: boolean }> = ({ canUpload }) => (
   </div>
 );
 
-/** The title, and the page's primary action. On phones the button takes the full width, under the title. */
-const ListHeader: React.FC = () => (
-  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
-    <h3 className="font-medium text-black dark:text-white">Applications</h3>
+/** The page's primary action. On phones the button takes the full width. */
+const NewApplicationLink: React.FC = () => (
+  <Toolbar className="sm:justify-end">
     <Link
       href="/applications/new"
       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark sm:w-auto md:min-h-10"
@@ -106,7 +106,7 @@ const ListHeader: React.FC = () => (
       <Plus aria-hidden="true" size={18} className="shrink-0" />
       New application
     </Link>
-  </div>
+  </Toolbar>
 );
 
 /**
@@ -173,14 +173,14 @@ const ApplicationList: React.FC<{ initial?: ListParams }> = ({ initial }) => {
   const nothingYet = isNothingYet(shown);
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <ListHeader />
+    <Card>
       {/*
-        px-3 on phones leaves the table 302px at 360px. Three columns fit there only
-        through the app-wide table-fit settings: useDatatableTheme's tableWrapper
-        display:block, and the library's 100px column default (3 x 101px in 302px).
+        CardBody's 16px padding on phones leaves the table 328px at 360px. Three columns fit there
+        only through the app-wide table-fit settings: useDatatableTheme's tableWrapper
+        display:block, and the library's 100px column default.
       */}
-      <div className="space-y-5 px-3 py-5 sm:px-5 md:p-7">
+      <CardBody>
+        <NewApplicationLink />
         {canUpload && (
           <UploadResponses uploading={uploading} pasting={pasting} onUpload={uploadResponses} onPaste={pasteRows} onUploaded={refresh} />
         )}
@@ -216,8 +216,8 @@ const ApplicationList: React.FC<{ initial?: ListParams }> = ({ initial }) => {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };
 

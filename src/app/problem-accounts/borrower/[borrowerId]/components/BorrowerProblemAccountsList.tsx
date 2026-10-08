@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "nextjs-toploader/app";
@@ -9,6 +10,7 @@ import {
   ProblemAccountRow,
 } from "@/hooks/useProblemAccountsPaginated";
 import CustomDatatable from "@/components/CustomDatatable";
+import { Card, CardBody } from "@/components/Card";
 import ProblemAccountsSummary from "../../../components/ProblemAccountsSummary";
 import ProblemAccountsCards from "../../../components/ProblemAccountsCards";
 import ProblemAccountsLegend from "../../../components/ProblemAccountsLegend";
@@ -69,13 +71,14 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
       <div className="mb-4">
         <Link
           href="/problem-accounts"
-          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1"
+          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 inline-flex items-center gap-1"
         >
           <span aria-hidden>←</span> Back to Problem Accounts
         </Link>
       </div>
 
-      <div className="rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-5 mb-4">
+      <Card className="mb-4">
+        <CardBody>
         {headerInfo ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
             <div>
@@ -116,7 +119,8 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
         ) : (
           <p className="text-sm text-body dark:text-bodydark">No data found for this borrower.</p>
         )}
-      </div>
+        </CardBody>
+      </Card>
 
       <ProblemAccountsSummary
         totalAccounts={summary.total_problem_accounts}
@@ -131,20 +135,17 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
       {error && (
         <div className="mb-4 flex flex-col gap-2 rounded border border-danger bg-danger/10 p-3 text-danger sm:flex-row sm:items-center sm:justify-between">
           <span>Error loading borrower&apos;s problem accounts: {error}</span>
-          <button
-            onClick={refresh}
-            className="shrink-0 rounded bg-danger px-3 py-1 text-sm text-white hover:bg-opacity-90"
-          >
+          <Button variant="secondary" size="sm" className="shrink-0" onClick={refresh}>
             Retry
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <Card>
         <ProblemAccountsLegend />
 
         {/* Same breakpoint swap as the main list: cards on a phone, table above. */}
-        <div className="p-4 md:hidden">
+        <CardBody className="md:hidden">
           <ProblemAccountsCards
             rows={data}
             hrefFor={rowHref}
@@ -157,9 +158,9 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
             totalRecords={serverSidePaginationProps.totalRecords}
             onPageChange={serverSidePaginationProps.onPageChange}
           />
-        </div>
+        </CardBody>
 
-        <div className="hidden p-2 md:block lg:p-4">
+        <CardBody className="hidden md:block">
           <CustomDatatable
             apiLoading={loading}
             columns={columns}
@@ -169,8 +170,8 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
             title={""}
             serverSidePagination={serverSidePaginationProps}
           />
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 };

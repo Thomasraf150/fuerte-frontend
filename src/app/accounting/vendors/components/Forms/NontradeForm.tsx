@@ -1,4 +1,5 @@
 "use client"
+import Button from '@/components/Button';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
@@ -50,7 +51,7 @@ const NontradeForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className='mt-2'>
           <FormInput
             label="Name"
@@ -112,18 +113,14 @@ const NontradeForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
       </div>
 
       <div className="flex justify-end gap-4.5 mt-5">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={() => { setShowForm(false); }}
-        >
+          onClick={() => { setShowForm(false); }}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${vendorLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={vendorLoading}
-        >
+          disabled={vendorLoading}>
           {vendorLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -135,7 +132,7 @@ const NontradeForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

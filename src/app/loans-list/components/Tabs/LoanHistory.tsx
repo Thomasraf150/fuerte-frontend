@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonBlock } from '@/components/LoadingStates';
 import React, { useEffect, useState } from 'react';
 import { formatDate } from '@/utils/formatDate';
 import { fetchWithRecache } from '@/utils/helper';
@@ -186,7 +187,7 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
       case 'Released':
         return 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-whiten text-black dark:bg-meta-4 dark:text-bodydark';
     }
   };
 
@@ -207,7 +208,7 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
   };
 
   const renderFieldChanges = (oldData: any, newData: any) => {
-    if (!oldData || !newData) return <span className="text-gray-500 dark:text-gray-400 text-sm">No changes detected</span>;
+    if (!oldData || !newData) return <span className="text-body dark:text-bodydark text-sm">No changes detected</span>;
 
     const changes: JSX.Element[] = [];
 
@@ -215,13 +216,13 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
       if (oldData[key] !== newData[key] && key !== 'id') {
         changes.push(
           <div key={key} className="flex gap-2 text-sm py-1">
-            <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[140px]">
+            <span className="font-semibold text-black dark:text-bodydark min-w-[140px]">
               {fieldLabels[key] || key}:
             </span>
-            <span className="text-red-600 dark:text-red-400 line-through">
+            <span className="text-danger dark:text-danger line-through">
               {renderAuditValue(key, oldData[key])}
             </span>
-            <span className="dark:text-gray-400">→</span>
+            <span className="dark:text-bodydark">→</span>
             <span className="text-green-600 dark:text-green-400 font-semibold">
               {renderAuditValue(key, newData[key])}
             </span>
@@ -230,7 +231,7 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
       }
     });
 
-    return changes.length > 0 ? changes : <span className="text-gray-500 dark:text-gray-400 text-sm">No changes detected</span>;
+    return changes.length > 0 ? changes : <span className="text-body dark:text-bodydark text-sm">No changes detected</span>;
   };
 
   // Count significant field changes (excluding id, updated_at, etc.)
@@ -251,22 +252,21 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600 dark:text-gray-400">Loading history...</span>
+      <div className="p-4">
+        <SkeletonBlock rows={4} label="Loading history…" />
       </div>
     );
   }
 
   return (
     <div className="space-y-4 p-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+      <h3 className="text-lg font-semibold text-black dark:text-white flex items-center gap-2">
         <Clock size={20} className="text-blue-600" />
         Loan Change History
       </h3>
 
       {historyData.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 text-body dark:text-bodydark">
           No history records found for this loan.
         </div>
       ) : (
@@ -280,10 +280,10 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
             return (
               <div
                 key={entry.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                className="border border-stroke dark:border-strokedark rounded-lg overflow-hidden"
               >
                 <div
-                  className={`p-4 bg-gray-50 dark:bg-gray-800 ${showDropdown ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700' : ''} transition-colors`}
+                  className={`p-4 bg-whiten dark:bg-boxdark ${showDropdown ? 'cursor-pointer hover:bg-whiten dark:hover:bg-meta-4' : ''} transition-colors`}
                   onClick={showDropdown ? () => setExpandedId(expandedId === entry.id ? null : entry.id) : undefined}
                 >
                   <div className="flex justify-between items-start">
@@ -299,7 +299,7 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
                             <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(statusChange.oldStatus)}`}>
                               {statusChange.oldStatus}
                             </span>
-                            <span className="text-gray-500 dark:text-gray-400">→</span>
+                            <span className="text-body dark:text-bodydark">→</span>
                             <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(statusChange.newStatus)}`}>
                               {statusChange.newStatus}
                             </span>
@@ -309,21 +309,21 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
                             {statusChange.newStatus}
                           </span>
                         )}
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="text-sm text-body dark:text-bodydark">
                           {formatDate(entry.changed_at)}
                         </span>
                       </div>
 
                       {/* User and Change Summary */}
                       <div className="mt-2 text-sm">
-                        <span className="text-gray-700 dark:text-gray-300">Changed by: </span>
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                        <span className="text-black dark:text-bodydark">Changed by: </span>
+                        <span className="font-semibold text-black dark:text-white">
                           {entry.user?.name || entry.changed_by || 'System'}
                         </span>
                       </div>
                     </div>
                     {showDropdown && (
-                      <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                      <button className="text-body hover:text-black dark:text-bodydark dark:hover:text-white">
                         {expandedId === entry.id ? '▼' : '▶'}
                       </button>
                     )}
@@ -332,8 +332,8 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
 
                 {/* Expandable Details - Only show if there are multiple changes */}
                 {showDropdown && expandedId === entry.id && (
-                  <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Detailed Changes:</h4>
+                  <div className="p-4 bg-white dark:bg-boxdark-2 border-t border-stroke dark:border-strokedark">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">Detailed Changes:</h4>
                     <div className="space-y-1">
                       {renderFieldChanges(entry.old_data, entry.new_data)}
                     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/Button';
 import React, { useEffect, useState } from "react";
 import useAccountingDashboard from "@/hooks/useAccountingDashboard";
 import NrUdiSummary from "@/components/Dashboard/components/NrUdiSummary";
@@ -98,13 +99,11 @@ const AcctDefaultPage: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-red-500 text-lg">{error}</div>
-        <button
-          onClick={refetch}
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-opacity-90"
-        >
+        <div className="text-danger text-lg">{error}</div>
+        <Button variant="primary"
+          onClick={refetch}>
           Retry
-        </button>
+        </Button>
       </div>
     );
   }
@@ -122,7 +121,7 @@ const AcctDefaultPage: React.FC = () => {
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value as PeriodOption)}
-            className="rounded border border-stroke bg-white px-4 py-2 text-black outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-white"
+            aria-label="Period" className="h-12 md:h-11 w-full sm:w-auto rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
           >
             {periodOptions.map((option) => (
               <option key={option.value} value={option.value}>

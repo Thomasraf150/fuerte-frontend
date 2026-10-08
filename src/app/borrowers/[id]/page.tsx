@@ -14,6 +14,7 @@ import BorrowerHeader from '../components/BorrowerHeader';
 import BorrowerInfo from '../components/BorrowerInfo';
 import { ConvertBanner, ConvertStop } from '../components/ConvertFromApplication';
 import { BorrowerDecision, BorrowerRowInfo } from '@/utils/DataTypes';
+import { useAuthStore } from '@/store/authStore';
 
 const BorrowerDetailPage: React.FC = () => {
   const params = useParams();
@@ -57,6 +58,8 @@ const BorrowerDetailPage: React.FC = () => {
   // Create as borrower: /borrowers/new?application=<id> opens the form on that application.
   // Without a usable ?application= (or on an existing borrower) this is all inert.
   const convert = useConvertApplication(borrowerId === 'new');
+  // Read once from the persisted store (hydrated on the client), as CallCenterGuard does.
+  const isCallCenter = useAuthStore.getState().user?.role?.code === 'CALLCTR';
 
   // Fetch reference data on mount
   useEffect(() => {
@@ -71,7 +74,8 @@ const BorrowerDetailPage: React.FC = () => {
           fetchDataChief(MAX_DROPDOWN_SIZE, 1),
           fetchDataArea(MAX_DROPDOWN_SIZE, 1),
           fetchDataBorrCompany(MAX_COMPANY_DROPDOWN_SIZE, 1),
-          fetchMyAccessibleBranchSubs(),
+          // Call Center files a borrower under no branch of its own (the application's): no list to ask for.
+          ...(isCallCenter ? [] : [fetchMyAccessibleBranchSubs()]),
         ]);
         setLoading(false);
       } catch (err: any) {
@@ -83,6 +87,12 @@ const BorrowerDetailPage: React.FC = () => {
 
     fetchReferenceData();
   }, []);
+
+  // Call Center is on New Borrower only to Create as borrower from an application (withAuth lets it
+  // onto /borrowers/new for that): without a usable ?application= it goes back to the Applications.
+  useEffect(() => {
+    if (isCallCenter && convert.state.kind === 'off') router.replace('/applications');
+  }, [isCallCenter, convert.state.kind, router]);
 
   // Back button handler
   const handleBack = () => {
@@ -160,7 +170,7 @@ const BorrowerDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Error" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="rounded-2xl border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="text-center">
             <h3 className="text-xl font-semibold text-danger mb-4">
               {error}

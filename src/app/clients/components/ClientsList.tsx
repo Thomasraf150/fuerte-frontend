@@ -5,6 +5,8 @@ import CustomDatatable from '@/components/CustomDatatable';
 import clientListColumn from './ClientListColumn';
 import { DataRowClientList } from '@/utils/DataTypes';
 import useClients from '@/hooks/useClients';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 // const data: DataRowClientList[] = [
 //   {
@@ -46,23 +48,17 @@ const ClientsList: React.FC = () => {
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
-          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-            <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-              <h3 className="font-medium text-black dark:text-white">
-                Clients
-              </h3>
-            </div>
-            <div className="p-7">
-              {/* <button className="bg-purple-700 text-white py-2 px-4 rounded hover:bg-purple-800">Create</button> */}
+          <Card>
+            <CardHeader title="Clients" />
+            <CardBody>
+              {/* <Button variant="secondary" >Create</Button> */}
               {clientsError && (
-                <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                   Error loading clients: {clientsError}
-                  <button
-                    onClick={refresh}
-                    className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                  >
+                  <Button variant="secondary" size="sm" className="ml-2"
+                    onClick={refresh}>
                     Retry
-                  </button>
+                  </Button>
                 </div>
               )}
               <CustomDatatable
@@ -73,8 +69,8 @@ const ClientsList: React.FC = () => {
                 data={dataClients}
                 serverSidePagination={serverSidePaginationProps}
               />
-            </div>
-          </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>

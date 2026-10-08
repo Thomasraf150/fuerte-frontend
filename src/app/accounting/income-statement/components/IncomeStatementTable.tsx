@@ -49,7 +49,7 @@ const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
   summaryRows = [],
   totalRowBgClass = 'bg-gray-2 dark:bg-meta-4',
   totalRowTextClass = 'text-black dark:text-white',
-  headerRowBgClass = 'bg-gray-100 dark:bg-gray-700',
+  headerRowBgClass = 'bg-gray-2 dark:bg-meta-4',
 }) => {
   const parseAmount = (val: any): DecimalValue => parseFinancialAmount(val);
 

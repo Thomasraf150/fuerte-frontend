@@ -1,10 +1,11 @@
 import useColorMode from "@/hooks/useColorMode";
 
-const DarkModeSwitcher = () => {
+/** `className` goes on the <li>: the top bar hides it on phones, where the user menu carries it. */
+const DarkModeSwitcher = ({ className = "" }: { className?: string }) => {
   const [colorMode, setColorMode] = useColorMode();
 
   return (
-    <li>
+    <li className={className}>
       <label
         className={`relative m-0 block h-7.5 w-14 rounded-full ${
           colorMode === "dark" ? "bg-primary" : "bg-stroke"
@@ -12,6 +13,8 @@ const DarkModeSwitcher = () => {
       >
         <input
           type="checkbox"
+          aria-label="Dark mode"
+          checked={colorMode === "dark"}
           onChange={() => {
             if (typeof setColorMode === "function") {
               setColorMode(colorMode === "light" ? "dark" : "light");

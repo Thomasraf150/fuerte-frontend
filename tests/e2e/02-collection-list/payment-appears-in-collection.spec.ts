@@ -173,7 +173,7 @@ test.describe('Collection List - Payment Posting Integration', () => {
     await page.waitForSelector('table, [role="table"], .rdt_Table', { timeout: 15000 });
 
     // Search for the loan ref
-    const searchInput = page.locator('input[type="search"], input[placeholder*="Search"]').first();
+    const searchInput = page.locator('main').locator('input[type="search"], input[placeholder*="Search"]').first();
     if (await searchInput.count() > 0 && loanRef) {
       await searchInput.fill(loanRef.trim());
       await page.waitForTimeout(2000);

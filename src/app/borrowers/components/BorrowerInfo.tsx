@@ -74,7 +74,9 @@ const BorrowerInfo: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSubAre
     <div>
       <div className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-0">
         {/* The way back is the page header's labelled back link (BorrowerHeader), New Borrower's too. */}
-        <div className="max-w-12xl mx-auto bg-white dark:bg-boxdark rounded-xl shadow-md overflow-hidden">
+        {/* overflow-clip, not overflow-hidden: it still clips the rounded corners, but does not become a
+            scroll container, so the forms' sticky save bar (StickyActions) can stick to the page. */}
+        <div className="max-w-12xl mx-auto bg-white dark:bg-boxdark rounded-xl shadow-md overflow-clip">
           {/* <div className="p-4">
             <h5 className="text-lg font-medium text-black dark:text-white">
               Task title

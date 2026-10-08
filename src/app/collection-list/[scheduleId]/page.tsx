@@ -5,7 +5,9 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { SkeletonBlock } from '@/components/LoadingStates';
+import Button from '@/components/Button';
+import { Card, CardBody } from '@/components/Card';
 import useCollectionList from '@/hooks/useCollectionList';
 import { Info, AlertTriangle } from 'react-feather';
 
@@ -59,9 +61,11 @@ const CollectionDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Loading..." />
         </div>
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner />
-        </div>
+        <Card className="min-h-[400px]">
+          <CardBody>
+            <SkeletonBlock rows={5} label="Loading the collection entry…" />
+          </CardBody>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -72,17 +76,16 @@ const CollectionDetailPage: React.FC = () => {
         <div className="mx-auto">
           <Breadcrumb pageName="Error" />
         </div>
-        <div className="rounded-sm border border-stroke bg-white p-10 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-500 mb-4">{error}</h3>
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-            >
+        <Card>
+          <CardBody className="text-center sm:p-10">
+          <div>
+            <h3 className="text-xl font-semibold text-danger mb-4">{error}</h3>
+            <Button variant="primary" onClick={handleBack}>
               Back to Collection List
-            </button>
+            </Button>
           </div>
-        </div>
+          </CardBody>
+        </Card>
       </DefaultLayout>
     );
   }
@@ -104,12 +107,12 @@ const CollectionDetailPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="border-b border-stroke px-4 lg:px-7 py-4 dark:border-strokedark">
+        <Card>
+          <div className="border-b border-stroke px-4 py-4 sm:px-6 dark:border-strokedark">
             <h3 className="font-medium text-black dark:text-white mb-1">
               Collection Entry (Read-only)
             </h3>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm text-body dark:text-bodydark">
               <div className="font-semibold text-primary">{loanRef}</div>
               {transDate && (
                 <div className="mt-1 text-xs">Transaction Date: {transDate}</div>
@@ -135,14 +138,14 @@ const CollectionDetailPage: React.FC = () => {
             )}
           </div>
 
-          <div className="p-4 lg:p-7">
-            <h4 className="text-md font-semibold mb-3 text-black dark:text-white">
+          <CardBody>
+            <h4 className="text-md font-semibold text-black dark:text-white">
               Payment Line Items
             </h4>
             {dataColEntry && dataColEntry.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-100 dark:bg-gray-800 text-left">
+                  <thead className="bg-whiten dark:bg-boxdark text-left">
                     <tr>
                       <th className="px-4 py-3 font-medium">Description</th>
                       <th className="px-4 py-3 font-medium text-right">Amount</th>
@@ -154,7 +157,7 @@ const CollectionDetailPage: React.FC = () => {
                     {dataColEntry.map((entry, idx) => (
                       <tr
                         key={idx}
-                        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        className="border-b border-stroke dark:border-strokedark hover:bg-whiten dark:hover:bg-boxdark/50"
                       >
                         <td className="px-4 py-3">{entry.description}</td>
                         <td className="px-4 py-3 text-right font-mono">
@@ -165,7 +168,7 @@ const CollectionDetailPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-3">
                           {entry.journal_ref ? (
-                            <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded text-xs font-semibold">
+                            <span className="inline-block px-2 py-1 bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 rounded text-xs font-semibold">
                               {entry.journal_ref}
                             </span>
                           ) : (
@@ -190,16 +193,13 @@ const CollectionDetailPage: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-6 flex justify-start">
-              <button
-                onClick={handleBack}
-                className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90"
-              >
+            <div className="flex justify-start">
+              <Button variant="primary" onClick={handleBack}>
                 Back to Collection List
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </div>
     </DefaultLayout>
   );

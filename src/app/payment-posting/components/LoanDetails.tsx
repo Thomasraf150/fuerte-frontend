@@ -8,15 +8,31 @@ import useLoans from '@/hooks/useLoans';
 import PaymentCollectionForm from './Form/PaymentCollectionForm';
 import OtherPaymentForm from './Form/OtherPaymentForm';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
+import Button from '@/components/Button';
+import { Card, CardHeader, CardBody } from '@/components/Card';
+/** One label and its figure (receipt row): the figure right-aligned in tabular numerals. */
+const Row: React.FC<{ label: string; children: React.ReactNode; total?: boolean; valueClass?: string }> = ({ label, children, total = false, valueClass = '' }) => (
+  <div className={`flex items-baseline justify-between gap-4 py-1.5 text-sm ${total ? 'mt-1 border-t border-stroke pt-2 font-bold dark:border-strokedark' : ''}`}>
+    <dt className={total ? 'text-black dark:text-white' : 'text-body dark:text-bodydark'}>{label}</dt>
+    <dd className={`text-right tabular-nums text-black dark:text-white ${valueClass}`}>{children}</dd>
+  </div>
+);
+
+const Panel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <dl className="rounded-lg border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">{children}</dl>
+);
+
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   onSubmitOthCollectionPayment: (d: OtherCollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   fnReversePayment: (d: any, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   paymentLoading: boolean;
+  /** The summary card's title bar (CardHeader), supplied by PaymentScheduleForm. */
+  header?: React.ReactNode;
 }
 
-const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment, paymentLoading }) => {
+const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollectionPayment, onSubmitOthCollectionPayment, fnReversePayment, paymentLoading }) => {
 
   const [selectedMoSched, setSelectedMoSched] = useState<BorrLoanRowData>();
   const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
@@ -51,97 +67,40 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
   }, [])
 
   return (
-    <>
+    <div className="grid grid-cols-1 gap-4">
+      <Card>
+        {header}
+        <CardBody>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-boxdark p-2 sm:p-4 rounded border border-stroke dark:border-strokedark">
-          <table className="w-full bg-white dark:bg-boxdark border-stroke dark:border-strokedark border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Borrower</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</td>
-              </tr>
-              <tr className="">
-              <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">PN Amount</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{ formatNumber(Number(loanSingleData?.pn_amount)) }</td>
-              </tr>
-              <tr>
-              <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Status</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{ loanStatus(loanSingleData?.status) }</td>
-              </tr>
-              <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Monthly</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(Number(loanSingleData?.monthly))}</td>
-              </tr>
-              <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Loan Ref #:</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{loanSingleData?.loan_ref}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-white dark:bg-boxdark p-2 sm:p-4 rounded border border-stroke dark:border-strokedark">
-          <table className="w-full bg-white dark:bg-boxdark border-stroke dark:border-strokedark border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Term</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{loanSingleData?.term} Mo/s.</td>
-              </tr>
-              <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Total Deduction</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(totalDeduction)}</td>
-              </tr>
-              <tr>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Total Interest</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</td>
-              </tr>
-              <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Loan Proceeds</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatNumber(Number(loanSingleData?.loan_proceeds))}</td>
-              </tr>
-
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-white dark:bg-boxdark p-2 sm:p-4 rounded border border-stroke dark:border-strokedark">
-          <table className="w-full bg-white dark:bg-boxdark border-stroke dark:border-strokedark border-separate border-spacing-y-1">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="">
-                <td className="px-2 py-1 sm:px-4 sm:py-2 font-semibold text-xs sm:text-sm text-black dark:text-white bg-stroke dark:bg-meta-4">Transaction Date</td>
-                <td className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-black dark:text-white">{formatDate(String(loanSingleData?.created_at))}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <Panel>
+          <Row label="Borrower" valueClass="uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</Row>
+          <Row label="PN Amount">{ formatNumber(Number(loanSingleData?.pn_amount)) }</Row>
+          <Row label="Status">{ loanStatus(loanSingleData?.status) }</Row>
+          <Row label="Monthly">{formatNumber(Number(loanSingleData?.monthly))}</Row>
+          <Row label="Loan Ref #:">{loanSingleData?.loan_ref}</Row>
+        </Panel>
+        <Panel>
+          <Row label="Term">{loanSingleData?.term} Mo/s.</Row>
+          <Row label="Total Deduction">{formatNumber(totalDeduction)}</Row>
+          <Row label="Total Interest">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</Row>
+          <Row label="Loan Proceeds" total>{formatNumber(Number(loanSingleData?.loan_proceeds))}</Row>
+        </Panel>
+        <Panel>
+          <Row label="Transaction Date">{formatDate(String(loanSingleData?.created_at))}</Row>
+        </Panel>
         {/* Add more grid items as needed */}
       </div>
+        </CardBody>
+      </Card>
 
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4">
           {/* First Column - Payment Schedule */}
           <div>
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="px-2 py-2 sm:px-4 sm:py-4 md:px-3 xl:px-6">
-                <h5 className="text-m text-black dark:text-white">
-                  <span className="font-semibold">Loan Ref:</span> {loanSingleData?.loan_ref}
-                </h5>
-              </div>
+            <Card>
+              <CardHeader
+                as="h4"
+                title={<><span className="font-semibold">Loan Ref:</span> {loanSingleData?.loan_ref}</>}
+              />
 
               <div className="grid grid-cols-[auto_auto_1fr] sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6">
                 <div className="flex items-center">
@@ -176,60 +135,65 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
                   </div>
 
                   {/* Button Group */}
-                  <div className="w-full flex flex-col sm:flex-row sm:flex-wrap gap-1.5 sm:gap-2 sm:justify-end">
-                    <button
-                      className="w-full sm:w-auto flex items-center justify-center whitespace-nowrap text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      variant="secondary"
+                      className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                       onClick={() => handleProceedToOtherPay(item, loanSingleData?.loan_udi_schedules[i])}
                     >
-                      <CreditCard size={15} className="mr-1" />
+                      <CreditCard size={15} />
                       <span className="hidden md:inline">Other Payments</span>
                       <span className="md:hidden">Other</span>
-                    </button>
+                    </Button>
 
                     {item?.amount > 0 ? (
-                      <button
-                        className="w-full sm:w-auto flex items-center justify-center whitespace-nowrap text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                      <Button
+                        variant="secondary"
+                        className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                         onClick={() => handleProceedToPay(item, loanSingleData?.loan_udi_schedules[i])}
                       >
-                        <CreditCard size={15} className="mr-1" />
+                        <CreditCard size={15} />
                         <span className="hidden lg:inline">Proceed to Pay</span>
                         <span className="lg:hidden">Pay</span>
-                      </button>
+                      </Button>
                     ) : (
-                      <button
-                        className="w-full sm:w-auto flex items-center justify-center whitespace-nowrap text-white bg-blue-400 cursor-not-allowed font-medium rounded-lg text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2"
+                      <Button
+                        variant="secondary"
+                        className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                         disabled
                       >
-                        <CheckCircle size={15} className="mr-1" />
+                        <CheckCircle size={15} />
                         Paid
-                      </button>
+                      </Button>
                     )}
 
-                    <button
-                      className={`w-full sm:w-auto flex items-center justify-center whitespace-nowrap text-white bg-orange-700 hover:bg-orange-400 focus:ring-4 focus:ring-orange-600 font-medium rounded-lg text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 dark:bg-orange-300 dark:hover:bg-orange-700 dark:focus:ring-orange-400 ${paymentLoading ? 'opacity-70' : ''}`}
+                    <Button
+                      variant="danger"
+                      className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                       onClick={() => handleReversePayment(item)}
                       disabled={paymentLoading}
                     >
                       {paymentLoading ? (
                         <>
-                          <RotateCw size={15} className="mr-1 animate-spin" />
+                          <RotateCw size={15} className="animate-spin" />
                           <span className="hidden sm:inline">Reversing...</span>
                           <span className="sm:hidden">...</span>
                         </>
                       ) : (
                         <>
-                          <RefreshCcw size={15} className="mr-1" />
+                          <RefreshCcw size={15} />
                           Reverse
                         </>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
-            </div>
+            </Card>
           </div>
 
         {/* Second Column - Payment Form */}
+        {(selectedMoSched || selectedMoSchedOthPay) && (
         <div>
           {selectedMoSched && (
             <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
@@ -242,8 +206,9 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, onSubmitCollectionPaym
             </div>
           )}
         </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

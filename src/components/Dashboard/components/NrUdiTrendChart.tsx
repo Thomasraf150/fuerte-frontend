@@ -4,6 +4,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import { NrUdiTrend } from "@/types/dashboard";
+import { BRAND } from '@/utils/brandColors';
 
 // Dynamic import for ApexCharts (SSR fix)
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -28,7 +29,7 @@ const formatMonth = (month: string): string => {
  * Loading skeleton component.
  */
 const LoadingSkeleton: React.FC = () => (
-  <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
+  <div className="col-span-12 rounded-2xl border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
     <div className="animate-pulse">
       <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
       <div className="h-[350px] bg-gray-200 rounded dark:bg-gray-700"></div>
@@ -53,14 +54,14 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
     legend: {
       show: false, // Using custom HTML legend above chart
     },
-    colors: ["#3C50E0", "#F97316"],
+    colors: [BRAND.primary, BRAND.accent],
     chart: {
       fontFamily: "Satoshi, sans-serif",
       height: 335,
       type: "line",
       dropShadow: {
         enabled: true,
-        color: "#623CEA14",
+        color: `${BRAND.primary}14`,
         top: 10,
         blur: 4,
         left: 0,
@@ -110,7 +111,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
     markers: {
       size: 4,
       colors: "#fff",
-      strokeColors: ["#3C50E0", "#F97316"],
+      strokeColors: [BRAND.primary, BRAND.accent],
       strokeWidth: 3,
       strokeOpacity: 0.9,
       strokeDashArray: 0,
@@ -177,7 +178,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
 
   if (trend.length === 0) {
     return (
-      <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
+      <div className="col-span-12 rounded-2xl border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
         <div className="mb-4">
           <h5 className="text-xl font-semibold text-black dark:text-white">
             NR & UDI Trend
@@ -191,7 +192,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
   }
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
+    <div className="col-span-12 rounded-2xl border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
       <div className="mb-4 flex flex-wrap items-center gap-4 sm:gap-8">
         <div className="flex items-center gap-2">
           <span className="flex h-4 w-4 items-center justify-center rounded-full border border-primary">
@@ -200,10 +201,10 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
           <p className="font-semibold text-primary">NR (Gross)</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="flex h-4 w-4 items-center justify-center rounded-full border border-[#F97316]">
-            <span className="block h-2.5 w-2.5 rounded-full bg-[#F97316]"></span>
+          <span className="flex h-4 w-4 items-center justify-center rounded-full border border-accent">
+            <span className="block h-2.5 w-2.5 rounded-full bg-accent"></span>
           </span>
-          <p className="font-semibold text-[#F97316]">UDI (Unearned Interest)</p>
+          <p className="font-semibold text-[#8A6312] dark:text-accent">UDI (Unearned Interest)</p>
         </div>
       </div>
 

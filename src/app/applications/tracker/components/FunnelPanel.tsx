@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useId, useState } from 'react';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 import LoadError from '@/app/applications/components/LoadError';
 import useApplicationFunnel from '@/hooks/useApplicationFunnel';
 import { FUNNEL_STEPS, channelName } from '@/utils/applicationFunnel';
@@ -88,10 +89,10 @@ const Loaded: React.FC<{ funnel: ApplicationFunnel; range: DayRange }> = ({ funn
 const Skeleton: React.FC = () => (
   <div aria-hidden="true" className="grid animate-pulse grid-cols-1 gap-3 motion-reduce:animate-none sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
     {[0, 1, 2, 3].map((slot) => (
-      <div key={slot} className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark sm:p-5">
-        <div className="h-5 w-24 rounded bg-whiten dark:bg-meta-4" />
-        <div className="mt-3 h-10 w-20 rounded bg-whiten dark:bg-meta-4" />
-        <div className="mt-3 h-1.5 rounded-full bg-whiten dark:bg-meta-4" />
+      <div key={slot} className="rounded-lg bg-whiten p-4 dark:bg-meta-4 sm:p-5">
+        <div className="h-5 w-24 rounded bg-stroke dark:bg-strokedark" />
+        <div className="mt-3 h-10 w-20 rounded bg-stroke dark:bg-strokedark" />
+        <div className="mt-3 h-1.5 rounded-full bg-stroke dark:bg-strokedark" />
       </div>
     ))}
   </div>
@@ -112,23 +113,19 @@ const FunnelPanel: React.FC<{ range: DayRange }> = ({ range }) => {
       ? `Funnel: ${formatCount(funnel.total.applied)} ${applicationsNoun(funnel.total.applied)}, ${formatCount(funnel.total.loan_released)} got a loan`
       : '';
   return (
-    <section
-      aria-labelledby={headingId}
-      className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
-    >
-      <header className="border-b border-stroke px-3 py-4 dark:border-strokedark sm:px-5 md:px-7">
-        <h3 id={headingId} className="font-medium text-black dark:text-white">From application to loan</h3>
-        <p className="mt-0.5 text-sm text-body dark:text-bodydark">
-          Applied {formatPeriod(range)}. Where each applicant is now. Tap a number to see them.
-        </p>
-      </header>
-      <div className="px-3 py-5 sm:px-5 md:p-7">
+    <Card aria-labelledby={headingId}>
+      <CardHeader
+        id={headingId}
+        title="From application to loan"
+        description={<>Applied {formatPeriod(range)}. Where each applicant is now. Tap a number to see them.</>}
+      />
+      <CardBody>
         <p role="status" className="sr-only">{status}</p>
         <div aria-busy={loading}>
           {error ? <LoadError message={error} onRetry={refresh} /> : funnel ? <Loaded funnel={funnel} range={range} /> : <Skeleton />}
         </div>
-      </div>
-    </section>
+      </CardBody>
+    </Card>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { FocusEvent, useState, useEffect } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
-import { Icon } from 'react-feather';
+import { AlertCircle, Icon } from 'react-feather';
+import PesoSign from '@/components/PesoSign';
 
 interface Option {
   value: string | undefined;
@@ -12,7 +13,12 @@ interface FormInputProps {
   label: string;
   id: string;
   type: 'text' | 'password' | 'email' | 'select' | 'checkbox' | 'file' | 'date';
-  icon: Icon;
+  /**
+   * No longer drawn (UI modernisation B, 2026-10-07): every field showed the same decorative icon
+   * (a house on a name field), which guidance says adds noise without meaning. Kept optional so
+   * the ~50 callers need no change. A money field (formatType="currency") shows "₱" as text instead.
+   */
+  icon?: Icon;
   register?: UseFormRegisterReturn;
   error?: string;
   options?: Option[];
@@ -131,7 +137,7 @@ const FormInput: React.FC<FormInputProps> = ({
   label,
   id,
   type,
-  icon: IconComponent,
+  icon,
   register,
   maxLength,
   min,
@@ -285,27 +291,35 @@ const FormInput: React.FC<FormInputProps> = ({
       register.onBlur(event);
     }
   };
+  // UI modernisation B (2026-10-07): one field style everywhere. Borders reach 3:1 (WCAG 1.4.11),
+  // focus shows a ring (2.4.7), and the error is text linked to its field (3.3.1).
+  const errorId = error ? `${id}-error` : undefined;
+  // A money field: currency formatting, or the peso icon its caller used to draw.
+  const isMoney = type === 'text' && (formatType === 'currency' || icon === PesoSign);
+  const fieldClass = `w-full rounded-lg border bg-white text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:bg-whiter dark:bg-form-input dark:text-white dark:placeholder:text-bodydark dark:focus:border-primary ${error ? 'border-danger' : 'border-field dark:border-field-dark'}`;
   return (
     <div className={`${type === 'checkbox' ? 'flex items-center' : ''} ${className}`}>
       <label
-        className={`mb-3 block text-sm font-medium text-black dark:text-white ${type === 'checkbox' ? 'mr-2' : ''}`}
+        className={`mb-1.5 block text-sm font-semibold text-black dark:text-white ${type === 'checkbox' ? 'mr-2' : ''}`}
         htmlFor={id}
       >
         {label}
-        {required && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+        {required && <span className="ml-1 font-bold text-danger" aria-hidden="true">*</span>}
       </label>
       <div className="relative">
         {type === 'checkbox' ? (
           <input
-            className="h-10 text-sm border border-stroke text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+            className="h-5 w-5 rounded border-field text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark"
             type={type}
             id={id}
             {...register}
           />
         ) : type === 'select' ? (
           <select
-            className={`h-12 md:h-11 text-sm w-full border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
+            className={`${fieldClass} h-12 md:h-11 px-4 ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
             id={id}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={errorId}
             {...register}
             onChange={(e) => {
               // Call React Hook Form's onChange first for validation
@@ -333,9 +347,11 @@ const FormInput: React.FC<FormInputProps> = ({
           </select>
         ) : (
           <input
-            className={`w-full ${type === 'file' ? '' : 'mb-0'} h-12 md:h-10 text-sm border border-stroke py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary`}
+            className={`${fieldClass} ${type === 'file' ? 'py-2' : 'mb-0'} h-12 md:h-11 ${isMoney ? 'pl-9 pr-4' : 'px-4'}`}
             type={type}
             id={id}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={errorId}
             placeholder={placeholder}
             disabled={disabled}
             {...(formatType === 'number' || formatType === 'currency' ? {} : { defaultValue })}
@@ -349,13 +365,16 @@ const FormInput: React.FC<FormInputProps> = ({
             max={max}
           />
         )}
-        {type !== 'checkbox' && type !== 'file' && type !== 'select' && (
-          // The field is 48px tall on phones (a touch target) and 40px from md up; the icon keeps to its centre.
-          <span className={`absolute top-4 left-4.5 md:top-3`}>
-            <IconComponent size="18" />
-          </span>
+        {isMoney && (
+          // The peso sign means something here, unlike the old decorative icons, so it stays as text.
+          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm text-body dark:text-bodydark" aria-hidden="true">₱</span>
         )}
-        {error && <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>}
+        {error && (
+          <p id={errorId} className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-danger">
+            <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

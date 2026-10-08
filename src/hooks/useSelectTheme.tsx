@@ -16,6 +16,17 @@ import { useTheme } from './useTheme';
  * <Select styles={styles} theme={theme} {...props} />
  * ```
  */
+/**
+ * The same field geometry as FormInput (UI modernisation B, 2026-10-07): 48px on phones, 44px
+ * from md, an 8px radius, a border that reaches 3:1 (WCAG 1.4.11) and a visible focus ring.
+ */
+const CONTROL_GEOMETRY = {
+  minHeight: 48,
+  borderRadius: 8,
+  '@media (min-width: 768px)': { minHeight: 44 },
+};
+const FOCUS_RING = '0 0 0 3px rgba(90, 107, 44, 0.3)';
+
 export function useSelectTheme<T>(): {
   styles: StylesConfig<T, false>;
   theme: (baseTheme: Theme) => Theme;
@@ -27,10 +38,11 @@ export function useSelectTheme<T>(): {
       return {
         control: (provided, state) => ({
           ...provided,
+          ...CONTROL_GEOMETRY,
           backgroundColor: '#24221A',
-          borderColor: state.isFocused ? '#5A6B2C' : '#4D4939',
+          borderColor: state.isFocused ? '#5A6B2C' : '#7A735F',
           color: '#FFFFFF',
-          boxShadow: state.isFocused ? '0 0 0 1px #5A6B2C' : 'none',
+          boxShadow: state.isFocused ? FOCUS_RING : 'none',
           '&:hover': {
             borderColor: '#5A6B2C'
           }
@@ -112,8 +124,16 @@ export function useSelectTheme<T>(): {
       };
     }
 
-    // Light mode - return minimal or default styles
+    // Light mode: react-select's own look, with the shared field geometry and border.
     return {
+      control: (provided, state) => ({
+        ...provided,
+        ...CONTROL_GEOMETRY,
+        borderColor: state.isFocused ? '#5A6B2C' : '#8F8873',
+        boxShadow: state.isFocused ? FOCUS_RING : 'none',
+        '&:hover': { borderColor: '#5A6B2C' },
+      }),
+      placeholder: (provided) => ({ ...provided, color: '#6B6553' }),
       menuPortal: (provided) => ({
         ...provided,
         zIndex: 9999
@@ -126,7 +146,7 @@ export function useSelectTheme<T>(): {
       if (themeMode === 'dark') {
         return {
           ...baseTheme,
-          borderRadius: 6,
+          borderRadius: 8,
           colors: {
             ...baseTheme.colors,
             primary: '#5A6B2C',

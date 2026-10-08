@@ -1,8 +1,9 @@
 "use client";
 
 import { TableColumn } from 'react-data-table-component';
-import { Eye, Edit3, Trash2 } from 'react-feather';
+import { Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
+import Button from '@/components/Button';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
 import { formatMoneyOrBlank } from '@/utils/helper';
 
@@ -68,23 +69,17 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
   },
   {
     name: 'Action',
+    minWidth: '190px',
+    button: true,
     cell: row => {
-      
       return (
-        <>
-          {/* <Tooltip text="View Sub Branch">
-            <Eye size="16" className="text-cyan-400 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `} */}
-          <Tooltip text="Edit">
-            <Edit3 onClick={() => handleRowClick(row)} size="16" className="text-cyan-400 ml-1 mr-1 cursor-pointer"/>
-          </Tooltip>
-          {` | `}
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => handleRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
           <Tooltip text="Remove">
-            <Trash2 size="16" className="text-cyan-400 ml-1 cursor-pointer"/>
+            <Trash2 size="16" className="text-cyan-400 cursor-pointer"/>
           </Tooltip>
-        </>
-      )
+        </div>
+      );
     },
   },
 ];

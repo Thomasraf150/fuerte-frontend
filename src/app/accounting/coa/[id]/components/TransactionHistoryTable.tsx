@@ -5,7 +5,8 @@ import type {
   PaginationParams
 } from '@/types/chartOfAccounts';
 import { formatCurrency, formatDate } from '@/utils/formatters';
-import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { SkeletonBlock } from '@/components/LoadingStates';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 interface TransactionHistoryTableProps {
   account: AccountDetail;
@@ -94,13 +95,12 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
   }
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-6 py-4 dark:border-strokedark">
-        <h3 className="font-medium text-black dark:text-white">
-          Transaction History ({transactions.total_count.toLocaleString()} transactions)
-        </h3>
+    <Card>
+      <CardHeader title={`Transaction History (${transactions.total_count.toLocaleString()} transactions)`} />
+
+      <CardBody>
         {transactions.total_count > 0 && (
-          <div className="mt-2 flex gap-6 text-sm">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
             <div>
               <span className="text-black dark:text-white">Beginning Balance: </span>
               <span className="font-semibold text-black dark:text-white">
@@ -115,13 +115,8 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
             </div>
           </div>
         )}
-      </div>
-
-      <div className="p-6">
         {loading ? (
-          <div className="flex justify-center py-10">
-            <LoadingSpinner />
-          </div>
+          <SkeletonBlock rows={6} label="Loading transactions…" />
         ) : !hasTransactions ? (
           <div className="py-10 text-center text-black dark:text-white">
             <p className="text-lg">No transactions found for this account.</p>
@@ -302,8 +297,8 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
             )}
           </>
         )}
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };
 

@@ -3,8 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import { TableColumn } from 'react-data-table-component';
-import { GitBranch, X } from 'react-feather';
+import { Plus, X } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import Button from '@/components/Button';
+import { Card, CardBody, CardHeader } from '@/components/Card';
 
 /*
  * The master/detail pages (this layout, used by /area and /sub-area, and its
@@ -44,14 +46,13 @@ export function useRevealFormWhenStacked<T extends HTMLElement>(
  * hit area reach into the header's padding, so the header bar keeps its height.
  */
 export const FormCloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) => (
-  <button
+  <Button variant="secondary"
     type="button"
     aria-label="Close form"
-    onClick={onClose}
-    className="-my-3 -mr-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded text-boxdark-2 transition-colors hover:bg-gray-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-bodydark dark:hover:bg-meta-4 dark:hover:text-white lg:-my-2 lg:-mr-3 lg:h-10 lg:w-10 xl:hidden"
-  >
+    className="-my-3 -mr-4 h-12 w-12 shrink-0 !px-0 lg:-my-2 lg:-mr-3 lg:h-10 lg:w-10 xl:hidden"
+    onClick={onClose}>
     <X size={17} aria-hidden="true" />
-  </button>
+  </Button>
 );
 
 interface EntityListLayoutProps<T extends object> {
@@ -119,30 +120,25 @@ function EntityListLayout<T extends object>({
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-          <div className="col-span-1 xl:col-span-2">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-              <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  {title}
-                </h3>
-              </div>
-              <div className="p-7">
-                <button
-                  className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 flex items-center space-x-2"
-                  onClick={() => handleShowForm(`Create ${entityName}`)}
-                >
-                  <GitBranch size={14} />
-                  <span>Create</span>
-                </button>
+          {/* The list takes the full width until the form opens beside it (Phase 7). */}
+          <div className={`col-span-1 ${showForm ? 'xl:col-span-2' : 'xl:col-span-3'}`}>
+            <Card>
+              <CardHeader title={title} />
+              <CardBody>
+                <div>
+                  <Button variant="primary"
+                    onClick={() => handleShowForm(`Create ${entityName}`)}>
+                    <Plus size={16} aria-hidden="true" />
+                    <span>Create</span>
+                  </Button>
+                </div>
                 {error && (
-                  <div className="mb-4 p-4 bg-danger/10 border border-danger text-danger rounded">
+                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
                     Error loading {title.toLowerCase()}: {error}
-                    <button
-                      onClick={refresh}
-                      className="ml-2 px-2 py-1 bg-danger text-white rounded text-sm hover:bg-opacity-90"
-                    >
+                    <Button variant="secondary" size="sm" className="ml-2"
+                      onClick={refresh}>
                       Retry
-                    </button>
+                    </Button>
                   </div>
                 )}
                 <CustomDatatable
@@ -152,28 +148,23 @@ function EntityListLayout<T extends object>({
                   data={data}
                   serverSidePagination={serverSidePagination}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
 
           {showForm && (
             <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
-              <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-2">
-                <div className="border-b border-stroke px-7 py-4 dark:border-strokedark flex justify-between items-center">
-                  <h3 className="font-medium text-black dark:text-white">
-                    {actionLbl}
-                  </h3>
-                  <FormCloseButton onClose={() => setShowForm(false)} />
-                </div>
-                <div className="p-7">
+              <Card>
+                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => setShowForm(false)} />} />
+                <CardBody>
                   <FormComponent
                     setShowForm={setShowForm}
                     refresh={refresh}
                     initialData={initialFormData}
                     actionLbl={actionLbl}
                   />
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
           )}
 

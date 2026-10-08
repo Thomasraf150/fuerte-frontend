@@ -1,4 +1,5 @@
 "use client"
+import Button from '@/components/Button';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
@@ -164,38 +165,38 @@ const CoaForm: React.FC<CoaFormProps> = ({
 
       <div className="space-y-2 mt-4">
         <label
-              className={`block text-sm font-medium text-black dark:text-white mr-2`}
+              className="mb-1.5 block text-sm font-semibold text-black dark:text-white"
         >
           Placement
           <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>
         </label>
         <div className="flex items-center space-x-6">
 
-          <label className="flex items-center space-x-2">
+          <label className="flex min-h-10 items-center space-x-2">
             <input
               type="radio"
               {...register("is_debit", { required: "Please select Placement" })}
               value="1"
               checked={selectedPlacement === "1"}
               onChange={handleChangePlacement}
-              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              className="h-5 w-5 accent-primary focus-visible:ring-2 focus-visible:ring-primary/30"
             />
-            <span className="text-gray-700 dark:text-gray-300">Debit</span>
+            <span className="text-sm text-black dark:text-white">Debit</span>
           </label>
 
-          <label className="flex items-center space-x-2">
+          <label className="flex min-h-10 items-center space-x-2">
             <input
               type="radio"
               {...register("is_debit", { required: "Please select Placement" })}
               value="0"
               checked={selectedPlacement === "0"}
               onChange={handleChangePlacement}
-              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              className="h-5 w-5 accent-primary focus-visible:ring-2 focus-visible:ring-primary/30"
             />
-            <span className="text-gray-700 dark:text-gray-300">Credit</span>
+            <span className="text-sm text-black dark:text-white">Credit</span>
           </label>
         </div>
-        {/* text-danger, NOT text-red-600. tailwind.config.ts defines `red` as a flat
+        {/* text-danger, NOT text-danger. tailwind.config.ts defines `red` as a flat
                     hex string, so every red-<shade> class is dead and rendered this in body
                     grey (measured: rgb(100,116,139), identical to body text) — which is why
                     a blocked Save looked like nothing happening. Only rendered when the
@@ -246,18 +247,14 @@ const CoaForm: React.FC<CoaFormProps> = ({
       />
 
       <div className="flex justify-end gap-4.5">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={() => { onClose ? onClose() : setShowForm(false) }}
-        >
+          onClick={() => { onClose ? onClose() : setShowForm(false) }}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${coaLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={coaLoading}
-        >
+          disabled={coaLoading}>
           {coaLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -269,7 +266,7 @@ const CoaForm: React.FC<CoaFormProps> = ({
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

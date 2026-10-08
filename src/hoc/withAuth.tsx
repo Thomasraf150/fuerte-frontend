@@ -10,9 +10,15 @@ let lastValidatedAt = 0;
 // "/applications" or a page under it, never a sibling like "/applications-archive".
 const isApplicationsPath = (p: string) => p === '/applications' || p.startsWith('/applications/');
 
+// New Borrower, which Call Center opens only to Create as borrower from an Interviewed application
+// (Rafael 2026-10-07). The page itself sends Call Center back to /applications unless the URL
+// carries ?application= (borrowers/[id]/page.tsx): the query is not known here during a client
+// navigation, and the server refuses a Call Center save that converts no application anyway.
+const isCreateAsBorrowerPath = (p: string) => p === '/borrowers/new';
+
 // Where Call Center must go from path p, or null when it may stay. Shared with CallCenterGuard.
 export const callCenterTarget = (p: string) =>
-  useAuthStore.getState().user?.role?.code === 'CALLCTR' && !isApplicationsPath(p) ? '/applications' : null;
+  useAuthStore.getState().user?.role?.code === 'CALLCTR' && !isApplicationsPath(p) && !isCreateAsBorrowerPath(p) ? '/applications' : null;
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): ComponentType<P> => {
   const AuthWrapper: React.FC<P> = (props: P) => {

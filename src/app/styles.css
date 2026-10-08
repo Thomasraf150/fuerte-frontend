@@ -9,13 +9,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* The sidebar's active item: the dark olive ground (Tailwind graydark) carries a gold edge,
- * the castle's yellow, and the active sub-link is drawn in gold. Colour only: no markup moves. */
-aside nav .bg-graydark {
-  box-shadow: inset 3px 0 0 #E3A92E;
-}
+/* The sidebar (Phase 7, 2026-10-07): the current page is a solid olive item (the three Sidebar components);
+ * the current sub-page, hanging off the group's guide line, is drawn in gold and bold. */
 aside nav ul ul a.text-white {
   color: #E3A92E;
+  font-weight: 700;
 }
 
 /* Dark mode: olive text (links, the breadcrumb's current page, the active tab) is lifted to a

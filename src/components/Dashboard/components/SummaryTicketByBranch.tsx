@@ -44,7 +44,7 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
 
   return (
     <div className="mt-6">
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="overflow-x-auto">
           <table className="w-full table-auto mb-4 min-w-[800px]">
             <thead>

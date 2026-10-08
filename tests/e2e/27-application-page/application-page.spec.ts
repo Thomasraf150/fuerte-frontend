@@ -29,7 +29,7 @@
  *      choice posts nothing. A converted application's status is locked, with no button.
  *   6. Print Application calls printLoanApplication with {application_id: <number>} and opens
  *      the PDF in a window of its own; while it is made the button reads "Generating…".
- *   7. Create as borrower is hidden for Call Center, says why while it cannot be pressed
+ *   7. Create as borrower (Call Center included since 2026-10-07) says why while it cannot be pressed
  *      ("Assign a branch first", "Set the status to Interviewed first") and, once the
  *      application has a saved branch and is Interviewed, opens /borrowers/new?application=<id>.
  *      Both it and Print use the SAVED application, so while the form holds changes that are
@@ -1053,12 +1053,21 @@ test.describe('7. Create as borrower', () => {
   const button = (page: Page): Locator => toolbar(page).getByRole('button', { name: 'Create as borrower' });
   const link = (page: Page): Locator => toolbar(page).getByRole('link', { name: 'Create as borrower' });
 
-  test('Call Center never sees it, whatever the application', async ({ page, backend }) => {
+  test('Call Center gets it too (2026-10-07): an Interviewed application on a branch opens New Borrower on it', async ({ page, backend }) => {
     await open(page, backend, application({ status: 'interviewed' }), 'CALLCTR');
 
     await expect(toolbar(page).getByRole('button', { name: 'Print Application' })).toBeVisible();
-    await expect(createAsBorrower(page)).toHaveCount(0);
+    await expect(link(page)).toHaveAttribute('href', '/borrowers/new?application=2');
     await expect(toolbar(page).getByText(/first\.?$/)).toHaveCount(0);
+    // A saved application runs its own repeat-applicant check: Check Borrower is New application's only.
+    await expect(page.getByRole('button', { name: 'Check Borrower', exact: true })).toHaveCount(0);
+  });
+
+  test('Call Center is held by the same rules: an application not Interviewed yet says so', async ({ page, backend }) => {
+    await open(page, backend, application({ status: 'for_interview' }), 'CALLCTR');
+
+    await expect(button(page)).toHaveAttribute('aria-disabled', 'true');
+    await expect(toolbar(page).getByText('Set the status to Interviewed first', { exact: true })).toBeVisible();
   });
 
   test('an application that already has a borrower is a read-only record, whatever its status says: the rule is New Borrower\'s own', async ({ page, backend }) => {
@@ -2216,7 +2225,7 @@ test.describe('15. Unsaved changes', () => {
   });
 
   for (const role of ['CALLCTR', 'PROC'] as const) {
-    test(`${role}: Print is held too, with the reason${role === 'CALLCTR' ? ', and there is no Create as borrower' : ', and so is Create as borrower'}`, async ({ page, backend }) => {
+    test(`${role}: Print is held too, with the reason, and so is Create as borrower`, async ({ page, backend }) => {
       await open(page, backend, fullApplication(), role);
       await expect(printButton(page)).toBeEnabled();
       await expect(toolbar(page).getByText(SAVE_FIRST)).toHaveCount(0);
@@ -2226,12 +2235,8 @@ test.describe('15. Unsaved changes', () => {
       await expect(printButton(page)).toBeDisabled();
       await expect(toolbar(page).getByText(SAVE_FIRST, { exact: true })).toBeVisible();
       await expect(printButton(page)).toHaveAccessibleDescription(SAVE_FIRST);
-      if (role === 'CALLCTR') {
-        await expect(createAsBorrower(page)).toHaveCount(0);
-      } else {
-        await expect(createButton(page)).toBeDisabled();
-        await expect(createButton(page)).toHaveAccessibleDescription(SAVE_FIRST);
-      }
+      await expect(createButton(page)).toBeDisabled();
+      await expect(createButton(page)).toHaveAccessibleDescription(SAVE_FIRST);
 
       await saveButton(page).click();
       await expect(savedNote(page)).toBeVisible();
@@ -2473,8 +2478,9 @@ test.describe('16. The repeat-applicant warning', () => {
     await expect(announcer(page)).toHaveText(`${REPEAT_TITLE}. Let the branch know before they continue.`);
     expect(checks(backend).length).toBeGreaterThan(0);
     for (const call of checks(backend)) expect(call.variables).toEqual({ id: 2 });
-    // The card changes nothing else: Call Center still has no Create as borrower.
-    await expect(createAsBorrower(page)).toHaveCount(0);
+    // The card changes nothing else: the warning blocks nothing, so Call Center's Create as borrower
+    // (2026-10-07) is still offered for this Interviewed application.
+    await expect(createAsBorrower(page)).toHaveCount(1);
   });
 
   test('a converted application is never asked: not by its status, and not by a borrower linked whatever the status says', async ({ page, backend }) => {

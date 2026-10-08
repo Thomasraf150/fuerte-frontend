@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle, Eye, XCircle } from 'react-feather';
+import { Card as SharedCard, CardHeader } from '@/components/Card';
 import StatusPill from '../../../components/StatusPill';
 import { useImport, type ImportBatchPayload, type OpeningBalancePreview as Preview } from '@/hooks/useImport';
 import { formatCurrency } from '@/utils/formatCurrency';
@@ -66,9 +67,9 @@ export default function OpeningBalancePreview({ batchRef }: { batchRef: string }
 
   if (busy || !batch || !preview) {
     return (
-      <div className="rounded-sm border border-stroke bg-white px-7 py-10 text-center text-sm text-body shadow-default dark:border-strokedark dark:bg-boxdark dark:text-bodydark">
+      <SharedCard className="px-4 py-10 text-center text-sm text-body sm:px-6 dark:text-bodydark">
         Working out what this book still owes…
-      </div>
+      </SharedCard>
     );
   }
 
@@ -142,34 +143,26 @@ function Section({ delay, children }: { delay: number; children: React.ReactNode
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      {children}
-    </div>
+    <SharedCard>{children}</SharedCard>
   );
 }
 
 function CardHead({ title, note }: { title: string; note?: string }) {
   return (
-    <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-      <h3 className="font-medium text-black dark:text-white">{title}</h3>
-      {note && <p className="mt-1 text-xs text-body dark:text-bodydark">{note}</p>}
-    </div>
+    <>
+      <CardHeader title={title} actions={note ? <span className="text-xs text-body dark:text-bodydark">{note}</span> : undefined} />
+    </>
   );
 }
 
 function HeaderCard({ batch }: { batch: ImportBatchPayload }) {
   return (
     <Card>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stroke px-7 py-4 dark:border-strokedark">
-        <div>
-          <h3 className="font-medium text-black dark:text-white">{batch.original_filename}</h3>
-          <p className="mt-1 text-xs text-body dark:text-bodydark">
-            {batch.batch_ref} · {batch.committed_count} loans imported
-            {batch.committed_at ? ` · posted ${batch.committed_at}` : ''}
-          </p>
-        </div>
-        <StatusPill status={batch.status} />
-      </div>
+      <CardHeader title={batch.original_filename} actions={<StatusPill status={batch.status} />} />
+      <p className="px-4 py-3 text-xs text-body sm:px-6 dark:text-bodydark">
+        {batch.batch_ref} · {batch.committed_count} loans imported
+        {batch.committed_at ? ` · posted ${batch.committed_at}` : ''}
+      </p>
     </Card>
   );
 }
@@ -223,7 +216,7 @@ function BalanceProof({ totals }: { totals: Preview['totals'] }) {
         title="Does it balance?"
         note={`${totals.loans} ${totals.loans === 1 ? 'loan' : 'loans'} stated`}
       />
-      <div className="px-7 py-5">
+      <div className="p-4 sm:p-6">
         <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
           <Side
             label="Total debit"
@@ -327,7 +320,7 @@ function Problems({ problems }: { problems: string[] }) {
         title="Resolve these first"
         note="Each of these has to be settled by a person before this book could be posted."
       />
-      <div className="space-y-2 px-7 py-5">
+      <div className="space-y-2 p-4 sm:p-6">
         {problems.map((p, i) => (
           <div
             key={i}
@@ -360,7 +353,7 @@ function Refusals({ skipped }: { skipped: Preview['skipped'] }) {
         title={`${skipped.length} ${skipped.length === 1 ? 'loan' : 'loans'} not included`}
         note="Refused rather than guessed at — a stated figure that might be wrong is worse than none."
       />
-      <div className="space-y-3 px-7 py-5">
+      <div className="space-y-3 p-4 sm:p-6">
         {/* Array.from, not a spread: this project's tsconfig target predates
             es2015 iteration, so [...map.entries()] fails the build. */}
         {Array.from(groups.entries()).map(([reason, refs]) => (
@@ -401,7 +394,7 @@ function EntryLedger({ entries }: { entries: Preview['entries'] }) {
     return (
       <Card>
         <CardHead title="Entries" />
-        <div className="px-7 py-10 text-center text-sm text-body dark:text-bodydark">
+        <div className="px-4 py-10 text-center sm:px-6 text-sm text-body dark:text-bodydark">
           No entry could be stated for this batch.
         </div>
       </Card>
@@ -414,7 +407,7 @@ function EntryLedger({ entries }: { entries: Preview['entries'] }) {
         title={`${entries.length} journal ${entries.length === 1 ? 'voucher' : 'vouchers'}`}
         note="One per loan, dated at the cutover. Each states what that loan still owes today."
       />
-      <div className="overflow-x-auto px-7 py-5">
+      <div className="overflow-x-auto p-4 sm:p-6">
         <div className="min-w-[640px] space-y-4">
           {entries.map((e) => (
             <div key={e.loan_ref} className="border-l-2 border-stroke pl-4 dark:border-strokedark">

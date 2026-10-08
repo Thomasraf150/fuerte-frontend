@@ -29,7 +29,7 @@ const ROW = 'flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left transit
 function MobileRows<T extends object>({ rows, render, rowHref, onRowClicked, loading, plural }: Props<T>): JSX.Element {
   if (loading && rows.length === 0) return <DataTableLoadingComponent columns={1} />;
   if (rows.length === 0) {
-    return <p className="px-4 py-10 text-center text-sm text-body dark:text-bodydark">No {plural} to show</p>;
+    return <p className="px-4 py-10 text-center text-sm text-body dark:text-bodydark">No {plural} to show.</p>;
   }
 
   return (

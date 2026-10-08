@@ -191,7 +191,7 @@ const NotificationPanel = forwardRef<HTMLDivElement, PanelProps>(({ open, trigge
         const to = e.relatedTarget as Node | null;
         if (!e.currentTarget.contains(to) && !trigger.current?.contains(to)) setOpen(false);
       }}
-      className={`absolute right-4 mt-2.5 flex w-75 max-w-[calc(100vw-2rem)] flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80 ${
+      className={`absolute right-4 mt-2.5 flex w-75 max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80 ${
         open ? "block" : "hidden"
       }`}
     >

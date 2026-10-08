@@ -7,6 +7,7 @@ import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
 import useLoanCodes from '@/hooks/useLoanCodes';
 import { DataFormLoanCodes, DataRowLoanCodes, SelectOption } from '@/utils/DataTypes';
+import Button from '@/components/Button';
 
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
@@ -84,7 +85,7 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
           )}
         />
         {errors.loan_client_id && (
-          <p className="mt-1 text-sm text-red-500">{errors.loan_client_id.message}</p>
+          <p className="mt-1 text-sm text-danger">{errors.loan_client_id.message}</p>
         )}
       </div>
 
@@ -107,7 +108,7 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
           )}
         />
         {errors.loan_type_id && (
-          <p className="mt-1 text-sm text-red-500">{errors.loan_type_id.message}</p>
+          <p className="mt-1 text-sm text-danger">{errors.loan_type_id.message}</p>
         )}
       </div>
 
@@ -130,18 +131,14 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
       />
 
       <div className="flex justify-end gap-4.5 mt-6">
-        <button
-          className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+        <Button variant="secondary"
           type="button"
-          onClick={() => { setShowForm(false) }}
-        >
+          onClick={() => { setShowForm(false) }}>
           Cancel
-        </button>
-        <button
-          className={`flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 ${loanCodeLoading ? 'opacity-70' : ''}`}
+        </Button>
+        <Button variant="primary"
           type="submit"
-          disabled={loanCodeLoading}
-        >
+          disabled={loanCodeLoading}>
           {loanCodeLoading ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
@@ -153,7 +150,7 @@ const FormAddLoanCode: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, singl
               <span>Save</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

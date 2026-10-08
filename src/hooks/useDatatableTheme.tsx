@@ -81,15 +81,27 @@ const CELL_GEOMETRY = {
   paddingRight: '8px',
 };
 
-/** Header cells: the same 8px padding, and a tighter line for two-line labels. */
+/**
+ * Header cells: a quiet tinted band (Carbon's data table: a tinted header layer, no heavy rule)
+ * with small tracked labels, so the eye goes to the rows. The 5px olive underline of the old
+ * template is gone (Phase 7, 2026-10-07). Same 8px side padding; a tighter line for two-line labels.
+ */
 const HEAD_CELL_GEOMETRY = {
   textTransform: 'uppercase' as const,
-  fontSize: '14px',
-  lineHeight: '1.2',
-  borderBottomWidth: '5px',
+  fontSize: '12px',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  lineHeight: '1.25',
+  borderBottomWidth: '1px',
   borderBottomStyle: 'solid' as const,
   paddingLeft: '8px',
   paddingRight: '8px',
+};
+
+/** Rows: 56px, room to read and to tap (Carbon xl is 64, lg 48), 14px text. */
+const ROW_GEOMETRY = {
+  minHeight: '56px',
+  fontSize: '14px',
 };
 
 /**
@@ -108,7 +120,7 @@ export function useDatatableTheme({ interactive = true }: { interactive?: boolea
         headCells: {
           style: {
             ...HEAD_CELL_GEOMETRY,
-            color: '#FFFFFF',
+            color: '#D8D1BE',
             backgroundColor: '#1E1C14',
             borderBottomColor: '#3D3A2D'
           },
@@ -121,6 +133,7 @@ export function useDatatableTheme({ interactive = true }: { interactive?: boolea
         },
         rows: {
           style: {
+            ...ROW_GEOMETRY,
             cursor,
             backgroundColor: '#2E2B20',
             borderBottomColor: '#3D3A2D',
@@ -129,6 +142,7 @@ export function useDatatableTheme({ interactive = true }: { interactive?: boolea
         },
         headRow: {
           style: {
+            minHeight: '44px',
             backgroundColor: '#1E1C14',
             borderBottomColor: '#3D3A2D'
           }
@@ -163,9 +177,9 @@ export function useDatatableTheme({ interactive = true }: { interactive?: boolea
       headCells: {
         style: {
           ...HEAD_CELL_GEOMETRY,
-          color: '#28261A',
-          backgroundColor: '#FBF7EC',
-          borderBottomColor: '#5A6B2C'
+          color: '#5E5847',
+          backgroundColor: '#F6F1E7',
+          borderBottomColor: '#E4DED0'
         },
       },
       cells: {
@@ -176,6 +190,7 @@ export function useDatatableTheme({ interactive = true }: { interactive?: boolea
       },
       rows: {
         style: {
+          ...ROW_GEOMETRY,
           cursor,
           backgroundColor: '#FFFFFF',
           borderBottomColor: '#E4DED0',
@@ -184,7 +199,8 @@ export function useDatatableTheme({ interactive = true }: { interactive?: boolea
       },
       headRow: {
         style: {
-          backgroundColor: '#FBF7EC',
+          minHeight: '44px',
+          backgroundColor: '#F6F1E7',
           borderBottomColor: '#E4DED0'
         }
       },
