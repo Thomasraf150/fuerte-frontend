@@ -224,7 +224,23 @@ test('2. Call Center: status changes and decisions, with the reason, and a row o
 // 3. Everyone else
 // ---------------------------------------------------------------------------
 
-for (const role of ['ACCTG', 'COL', 'OWN'] as const) {
+test('1b. Marketing (COL) is told of new borrowers too (2026-10-08), and a row opens the borrower to decide on', async ({ page, backend }) => {
+  backend.notifications = PROC_ITEMS;
+  await standInForBorrowerPages(page);
+  await signedInAs(page, backend, 'COL', [9101], 9101);
+  await openList(page, backend);
+
+  await expect(bell(page)).toHaveAttribute('aria-label', '2 new notification(s)');
+  await bell(page).click();
+
+  await expect(rows(page)).toHaveCount(2);
+  await expect(rows(page).nth(0)).toContainText('E2E Applicant Twenty-One');
+  await expect(rows(page).nth(0)).toContainText('is now a borrower');
+  await expect(rows(page).nth(0)).toHaveAttribute('href', '/borrowers/77');
+  expect(asked(backend), 'COL asks for getApplicationNotifications').toBeGreaterThan(0);
+});
+
+for (const role of ['ACCTG', 'OWN'] as const) {
   test(`3. ${role} is never asked for Applications items`, async ({ page, backend }) => {
     backend.notifications = PROC_ITEMS; // there to be found, if the bell asked
     backend.record = application();

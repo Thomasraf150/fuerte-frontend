@@ -24,11 +24,12 @@ const IS_APPROVER_ROLE = (roleName: string): boolean => {
 };
 
 /**
- * Who gets the Applications items, by role code: Processing ("X is now a borrower", on its own
- * branches) and Call Center (every status change, and every Approved / Rejected on a borrower made
- * from an application). The server decides what each gets; the bell only asks.
+ * Who gets the Applications items, by role code: Processing and Marketing (COL, 2026-10-08:
+ * "X is now a borrower", on their own branches) and Call Center (every status change, and every
+ * Approved / Rejected on a borrower made from an application, in its own branch group). The server
+ * decides what each gets; the bell only asks.
  */
-const APPLICATION_ROLE_CODES: ReadonlySet<string> = new Set(["PROC", "CALLCTR"]);
+const APPLICATION_ROLE_CODES: ReadonlySet<string> = new Set(["PROC", "COL", "CALLCTR"]);
 
 /**
  * Generic notification item. Each producer (deletion approvals today,
@@ -262,7 +263,8 @@ const DropdownNotification = () => {
         setOpen={setDropdownOpen}
         notifications={notifications}
         applicationItems={applicationItems}
-        opensBorrower={roleCode === "PROC"}
+        // Processing and Marketing open the new borrower (Marketing approves or rejects it next).
+        opensBorrower={roleCode === "PROC" || roleCode === "COL"}
       />
     </li>
   );

@@ -892,7 +892,7 @@ test.describe('3. Source tracker page', () => {
   });
 
   for (const { code, scope } of [
-    { code: 'CALLCTR', scope: 'All branches' },
+    { code: 'CALLCTR', scope: "Your group's branches" },
     { code: 'OWN', scope: 'All branches' },
     { code: 'ADM', scope: 'All branches' },
     { code: 'PROC', scope: 'Your branches' },

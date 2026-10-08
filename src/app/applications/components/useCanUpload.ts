@@ -6,7 +6,8 @@ import { useAuthStore } from '@/store/authStore';
 /**
  * Admin, Owner and Call Center: who may upload Google Form responses (the backend's
  * ApplicationAccessPolicy::canUpload). On New application they are also the roles that
- * may choose any branch and "Google Form"; the backend refuses google_form from anyone else.
+ * choose the branch (Admin and Owner any; Call Center any of its own group's, 2026-10-08) and may
+ * pick "Google Form"; the backend refuses google_form from anyone else.
  */
 export const UPLOAD_ROLE_CODES: ReadonlySet<string> = new Set(['ADM', 'OWN', 'CALLCTR']);
 

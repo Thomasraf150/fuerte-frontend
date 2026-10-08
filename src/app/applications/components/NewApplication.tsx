@@ -71,7 +71,7 @@ const useSaveThenList = (createApplication: (input: LoanApplicationInput) => Pro
  * New application: New Borrower's own Details form (BorrowerDetails.tsx) with only the
  * basics required, "Saan galing" at the top of Borrower Information, and a branch
  * picker fed by getApplicationBranches. Call Center, Owner and Admin (who may choose
- * any branch) must pick one; branch staff start on their home branch.
+ * any branch; Call Center any of its group's, since 2026-10-08) must pick one; branch staff start on their home branch.
  */
 const NewApplication: React.FC = () => {
   const picklists = useApplicationPicklists();

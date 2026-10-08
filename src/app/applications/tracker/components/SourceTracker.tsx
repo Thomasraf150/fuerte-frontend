@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useId, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { Users } from 'react-feather';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 import LoadError from '@/app/applications/components/LoadError';
-import { useCanUpload } from '@/app/applications/components/useCanUpload';
+import { useAuthStore } from '@/store/authStore';
 import useApplicationSourceCounts from '@/hooks/useApplicationSourceCounts';
 import { formatCount } from '@/utils/helper';
 import { applicationsNoun, formatPeriod, presetRange, summarizeSources, type DayRange, type Period } from '@/utils/sourceTracker';
@@ -13,13 +13,23 @@ import PeriodPicker from './PeriodPicker';
 import SourceResults from './SourceResults';
 
 /**
- * Whose applications are counted. The server decides (Call Center, Owner and Admin count
- * every branch, everyone else their own); this only says so. useCanUpload reads the same
- * three role codes, and null until the role has been read after mount.
+ * Whose applications are counted. The server decides (Owner and Admin count every branch, Call
+ * Center its own branch group's -- one account per group, 2026-10-08 -- everyone else their
+ * own); this only says so. null until the role has been read after mount.
  */
-const scopeLine = (allBranches: boolean | null): string | null => {
-  if (allBranches === null) return null;
-  return allBranches ? 'All branches' : 'Your branches';
+const scopeLine = (roleCode: string | null | undefined): string | null => {
+  if (roleCode === null) return null;
+  if (roleCode === 'OWN' || roleCode === 'ADM') return 'All branches';
+  return roleCode === 'CALLCTR' ? "Your group's branches" : 'Your branches';
+};
+
+/** The signed-in role code, read after mount (the persisted store exists only in the browser); null before. */
+const useRoleCode = (): string | null | undefined => {
+  const [code, setCode] = useState<string | null | undefined>(null);
+  useEffect(() => {
+    setCode(useAuthStore.getState().user?.role?.code);
+  }, []);
+  return code;
 };
 
 /** The days being counted and whose applications they are: always on screen, so every state (loading, an error, the tally) has its context. */
@@ -45,7 +55,7 @@ const SourceTracker: React.FC = () => {
   const [period, setPeriod] = useState<Period>('month');
   const [range, setRange] = useState<DayRange>(() => presetRange('month'));
   const { counts, loading, error, refresh } = useApplicationSourceCounts(range);
-  const scope = scopeLine(useCanUpload());
+  const scope = scopeLine(useRoleCode());
   const summary = counts ? summarizeSources(counts) : null;
 
   const select = (next: Period) => {

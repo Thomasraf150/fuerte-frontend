@@ -9,8 +9,9 @@ const OWNER_ROLE_CODE = 'OWN';
 const CALL_CENTER_ROLE_CODE = 'CALLCTR';
 
 /**
- * Which branches the signed-in user may create a borrower in (see BranchAccess). The Owner needs
- * no list: the server files an Owner's borrower on the application's own branch. Everyone else
+ * Which branches the signed-in user may create a borrower in (see BranchAccess). The Owner and Call
+ * Center need no list: the server files their borrower on the application's own branch (Call
+ * Center opens only its group's applications, so it is always its group's). Everyone else
  * gets the list the server checks the borrower's branch against, getMyAccessibleBranchSubs.
  *
  * Never rejects and never blocks: when the list does not come (no connection, an error, an

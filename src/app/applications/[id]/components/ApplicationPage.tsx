@@ -58,7 +58,7 @@ const ViewOnlyApplication: React.FC<{ record: LoanApplicationRecord }> = ({ reco
  * right-hand column, where it follows the page as it scrolls.
  */
 const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecord }> = ({ app, record }) => {
-  // Owner, Admin and Call Center may place an application on any branch. Call Center also creates the
+  // Owner and Admin may place an application on any branch, Call Center on any of its group's (2026-10-08). It also creates the
   // borrower from an Interviewed application since 2026-10-07 (it never opens the borrower afterwards).
   const mayAssign = useCanUpload();
   const isCallCenter = useStore(useAuthStore, (state) => state.user?.role?.code === 'CALLCTR');

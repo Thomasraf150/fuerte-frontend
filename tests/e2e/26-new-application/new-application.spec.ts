@@ -356,6 +356,7 @@ test('4. no photo, and a Check Borrower button under "Name & Contact" (Rafael 20
 const ELSEWHERE = {
   existsElsewhere: true, branches: ['Subic FB'], isProblem: true, worstCutoffsMissed: 3, matchCount: 1,
   existsInMyBranches: false, myBranches: [], myBranchIsProblem: false, myBranchWorstCutoffs: 0, myBranchMatchCount: 0,
+  locations: [{ group: 'FB', branch: 'Subic FB', sub_branch: 'Subic 1' }], myLocations: [],
 };
 
 async function typeNameAndCheck(form: Locator): Promise<void> {
@@ -374,7 +375,8 @@ test('4b. Call Center\'s Check Borrower asks only the cross-branch probe and sho
 
   const dialog = page.locator('.swal2-popup');
   await expect(dialog).toContainText('Also found in another branch', { timeout: 30_000 });
-  await expect(dialog).toContainText('Subic FB');
+  // Each place by group, branch and sub-branch (2026-10-08).
+  await expect(dialog).toContainText('Group FB · Branch Subic FB · Sub-branch Subic 1');
   await expect(dialog).not.toContainText('in your branch');
   expect(backend.calls('checkBorrowerCrossBranch')).toHaveLength(1);
   expect(backend.calls('checkBorrowerCrossBranch')[0].variables).toMatchObject({ firstname: 'Ana', lastname: 'Reyes' });

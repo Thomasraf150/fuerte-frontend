@@ -32,7 +32,33 @@ interface CrossBranchResult {
   myBranchIsProblem: boolean;
   myBranchWorstCutoffs: number;
   myBranchMatchCount: number;
+  /** Where the matches elsewhere / in my branches are, by name only (2026-10-08). */
+  locations?: MatchLocation[];
+  myLocations?: MatchLocation[];
 }
+
+interface MatchLocation {
+  group: string | null;
+  branch: string | null;
+  sub_branch: string;
+}
+
+/** Names go into the dialog's HTML: escaped, whoever typed them. */
+const escapeHtml = (text: string): string =>
+  text.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch] as string);
+
+/**
+ * One line per place a match is (Rafael 2026-10-08): "Group FD · Branch FD · Sub-branch FD Main".
+ * A part the server does not know (a branch outside any group) is left out.
+ */
+const placesHtml = (places: MatchLocation[] | undefined): string =>
+  (places ?? [])
+    .map((place) => [
+      place.group ? `Group <strong>${escapeHtml(place.group)}</strong>` : '',
+      place.branch ? `Branch <strong>${escapeHtml(place.branch)}</strong>` : '',
+      `Sub-branch <strong>${escapeHtml(place.sub_branch)}</strong>`,
+    ].filter(Boolean).join(' · '))
+    .join('<br/>');
 
 /**
  * Safely parse auth store from localStorage with error handling
@@ -77,8 +103,8 @@ const goodStandingHtml = (): string =>
 
 /**
  * Cross-branch section: another branch already holds a matching name/contact.
- * Deliberately shows only the branch name(s) + problem flag — never the other
- * borrower's details.
+ * Deliberately shows only where (group, branch and sub-branch names) + the
+ * problem flag — never the other borrower's details.
  */
 /**
  * Match inside the caller's OWN accessible branches, found by the looser
@@ -92,11 +118,13 @@ const inMyBranchesHtml = (c: CrossBranchResult | null | undefined, alreadyShownA
   const problemLine = c.myBranchIsProblem
     ? `<br/><span style="color:#DC2626;font-weight:600;">⚠ Problem account: YES (${c.myBranchWorstCutoffs} cut-offs)</span>`
     : '';
-  const where = c.myBranches.length ? `<strong>${c.myBranches.join(', ')}</strong>` : 'your branch';
+  const where = c.myBranches.length ? `<strong>${escapeHtml(c.myBranches.join(', '))}</strong>` : 'your branch';
+  const places = placesHtml(c.myLocations);
   return (
     `<div style="margin-top:10px;padding:10px 12px;border-radius:6px;background:#FFFBEB;border-left:4px solid #D97706;">` +
       `<strong style="color:#B45309;">⚠ Possible match already in your branch</strong><br/>` +
       `${c.myBranchMatchCount} existing borrower${c.myBranchMatchCount === 1 ? '' : 's'} in ${where} ${c.myBranchMatchCount === 1 ? 'has' : 'have'} the same first and last name, or the same mobile number.` +
+      (places ? `<br/>${places}` : '') +
       problemLine +
       `<br/><em style="font-size:0.85em;color:#6B7280;">Middle name may differ — open Borrowers and verify before creating.</em>` +
     `</div>`
@@ -111,7 +139,11 @@ const crossBranchHtml = (c: CrossBranchResult | null | undefined): string => {
   return (
     `<div style="margin-top:10px;padding:10px 12px;border-radius:6px;background:#FFFBEB;border-left:4px solid #D97706;">` +
       `<strong style="color:#B45309;">⚠ Also found in another branch</strong><br/>` +
-      `Branch(es): <strong>${c.branches.join(', ') || 'another branch'}</strong><br/>` +
+      // Each place by group, branch and sub-branch (2026-10-08); the bare branch list only when no
+      // place came back (matches on a sub-branch without a name). Backend and frontend deploy together.
+      (c.locations?.length
+        ? `${placesHtml(c.locations)}<br/>`
+        : `Branch(es): <strong>${escapeHtml(c.branches.join(', ')) || 'another branch'}</strong><br/>`) +
       `${problemLine}<br/>` +
       `<em style="font-size:0.85em;color:#6B7280;">Name / contact match only — verify identity with that branch.</em>` +
     `</div>`
