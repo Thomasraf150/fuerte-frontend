@@ -5,6 +5,12 @@ import BranchQueryMutations from "@/graphql/BranchQueryMutation";
 import { useAuthStore } from "@/store";
 import ReactSelect from "@/components/ReactSelect";
 import { SelectOption } from "@/utils/DataTypes";
+import type { StylesConfig } from "react-select";
+
+/** Same height as the native selects beside it: 48px on phones, 40px from lg (the theme's own 44px desktop floor is lowered here). */
+const BRANCH_SELECT_STYLES: StylesConfig<SelectOption, false> = {
+  control: (base) => ({ ...base, minHeight: 48, "@media (min-width: 1024px)": { minHeight: 40 } }),
+};
 
 /** Sentinel option: empty value === "no branch filter". */
 const ALL_BRANCHES_OPTION: SelectOption = { value: "", label: "All Branches" };
@@ -143,14 +149,16 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Month Dropdown */}
         <div className="relative">
+          <label htmlFor="filter-release-month" className="mb-1.5 block text-sm font-medium text-black dark:text-white">Month</label>
           <select
+            id="filter-release-month"
             aria-label="Filter by release month"
             value={month ?? ""}
             onChange={(e) => {
               const value = e.target.value === "" ? null : parseInt(e.target.value, 10);
               onMonthChange(value);
             }}
-            className="w-full rounded border border-stroke bg-white dark:bg-boxdark dark:border-strokedark px-3 py-2 text-sm outline-none transition focus:border-primary active:border-primary dark:focus:border-primary"
+            className="w-full rounded-lg border border-field bg-white px-3 text-sm text-black outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 h-12 lg:h-10 dark:border-field-dark dark:bg-form-input dark:text-white"
           >
             <option value="">All Months</option>
             {months.map((m) => (
@@ -163,14 +171,16 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
 
         {/* Year Dropdown */}
         <div className="relative">
+          <label htmlFor="filter-release-year" className="mb-1.5 block text-sm font-medium text-black dark:text-white">Year</label>
           <select
+            id="filter-release-year"
             aria-label="Filter by release year"
             value={year ?? ""}
             onChange={(e) => {
               const value = e.target.value === "" ? null : parseInt(e.target.value, 10);
               onYearChange(value);
             }}
-            className="w-full rounded border border-stroke bg-white dark:bg-boxdark dark:border-strokedark px-3 py-2 text-sm outline-none transition focus:border-primary active:border-primary dark:focus:border-primary"
+            className="w-full rounded-lg border border-field bg-white px-3 text-sm text-black outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 h-12 lg:h-10 dark:border-field-dark dark:bg-form-input dark:text-white"
           >
             <option value="">All Years</option>
             {years.map((y) => (
@@ -183,8 +193,11 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
 
         {/* Branch Dropdown */}
         <div className="relative">
+          {/* react-select does not take an id for its input here, so this label is visual only; the combobox is named by its aria-label. */}
+          <span aria-hidden="true" className="mb-1.5 block text-sm font-medium text-black dark:text-white">Branch</span>
           <ReactSelect
             aria-label="Filter by branch"
+            styles={BRANCH_SELECT_STYLES}
             options={branchOptions}
             value={selectedBranchOption}
             onChange={handleBranchChange}
@@ -198,7 +211,7 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
             menuPortalTarget={typeof document !== "undefined" ? document.body : null}
           />
           {error && (
-            <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+            <p className="mt-1 text-sm text-danger">
               {error}
             </p>
           )}
@@ -206,10 +219,10 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
 
         {/* Clear Button */}
         {hasActiveFilters && (
-          <div className="flex items-center">
+          <div className="flex items-end">
             <button
               onClick={onClearFilters}
-              className="w-full sm:w-auto px-4 py-2 rounded text-sm font-medium text-white bg-meta-1 hover:bg-opacity-90 transition focus:outline-none focus:ring-2 focus:ring-meta-1 focus:ring-offset-1"
+              className="h-12 w-full sm:w-auto px-4 rounded text-sm lg:h-10 font-medium text-white bg-meta-1 hover:bg-opacity-90 transition focus:outline-none focus:ring-2 focus:ring-meta-1 focus:ring-offset-1"
             >
               Clear Filters
             </button>

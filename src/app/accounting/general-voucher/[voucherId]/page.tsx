@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -116,10 +117,11 @@ const GeneralVoucherDetailPage: React.FC = () => {
           <Breadcrumb pageName="Error" />
         </div>
         <Card className="p-10">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-danger mb-4">
-              {error || 'Voucher not found'}
-            </h3>
+          <div className="space-y-4 text-left">
+            <ErrorAlert
+              title={error ? "This voucher didn't load." : "This voucher couldn't be found."}
+              detail={error ?? 'Voucher not found'}
+            />
             <Button variant="primary"
               onClick={handleBack}>
               Back to General Voucher

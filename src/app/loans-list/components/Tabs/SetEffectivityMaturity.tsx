@@ -76,11 +76,11 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
   if (loanSingleData?.loan_schedules && loanSingleData.loan_schedules.length > 0) {
     return (
       <div>
-        <div className="grid grid-cols-7 mb-2">
+        <div className="mb-2 flex">
           {loanSingleData?.acctg_entry === null && loanSingleData?.status === 3 ? (
           <Button
               variant="primary"
-              className="float-right mr-2"
+              className="w-full sm:w-auto"
               type="button"
               onClick={() => handleUpdateMaturity(loanSingleData?.id, 'change_effectivity', handleRefetchData)}
             >
@@ -92,19 +92,19 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white dark:bg-boxdark p-4 rounded">
           <div className="flow-root border border-stroke dark:border-strokedark py-3 shadow-sm md:mr-3 bg-white dark:bg-boxdark">
             <dl className="-my-3 divide-y divide-stroke dark:divide-strokedark text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-                <dt className="col-span-3 border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">Monthly Amortization</dt>
+              <div className="grid grid-cols-1">
+                <dt className="border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">Monthly Amortization</dt>
                 {/* <dd className="text-black dark:text-white sm:col-span-2">Mr</dd> */}
               </div>
-              <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
+              <div className="grid grid-cols-2 gap-4 p-3">
                 <dt className="font-medium text-center text-black dark:text-bodydark">Date</dt>
                 <dt className="font-medium text-center text-black dark:text-bodydark">Monthly</dt>
               </div>
               {loanSingleData.loan_schedules && loanSingleData.loan_schedules.map((item, i) => {
               return (
-                <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
+                <div className="grid grid-cols-2 gap-4 p-3" key={i}>
                   <dd className="text-black dark:text-bodydark text-center">{item.due_date}</dd>
-                  <dt className="font-medium text-center text-black dark:text-white">{formatNumber(Number(item.amount))}</dt>
+                  <dt className="text-center font-medium tabular-nums text-black dark:text-white">{formatNumber(Number(item.amount))}</dt>
                 </div>
               )
             })}
@@ -112,19 +112,19 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
           </div>
           <div className="flow-root border border-stroke dark:border-strokedark py-3 shadow-sm bg-white dark:bg-boxdark">
             <dl className="-my-3 divide-y divide-stroke dark:divide-strokedark text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
-                <dt className="col-span-3 border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">UDI Schedule</dt>
+              <div className="grid grid-cols-1">
+                <dt className="border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">UDI Schedule</dt>
                 {/* <dd className="text-black dark:text-white sm:col-span-2">Mr</dd> */}
               </div>
-              <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4">
+              <div className="grid grid-cols-2 gap-4 p-3">
                 <dt className="font-medium text-center text-black dark:text-bodydark">Date</dt>
                 <dt className="font-medium text-center text-black dark:text-bodydark">Monthly</dt>
               </div>
               {loanSingleData.loan_udi_schedules && loanSingleData.loan_udi_schedules.map((item, i) => {
               return (
-                <div className="grid grid-cols-1 p-3 sm:grid-cols-2 sm:gap-4" key={i}>
+                <div className="grid grid-cols-2 gap-4 p-3" key={i}>
                   <dd className="text-black dark:text-bodydark text-center">{item.due_date}</dd>
-                  <dt className="font-medium text-center text-black dark:text-white">{formatNumber(Number(item.amount))}</dt>
+                  <dt className="text-center font-medium tabular-nums text-black dark:text-white">{formatNumber(Number(item.amount))}</dt>
                 </div>
               )
             })}
@@ -319,16 +319,16 @@ const SetEffectivityMaturity: React.FC<OMProps> = ({ loanSingleData, handleRefet
             <div className="col-span-full lg:col-span-2 xl:col-span-4">
               <div className="flow-root border border-stroke py-3 shadow-sm">
                 <dl className="-my-3 divide-y divide-stroke text-sm">
-                  <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-4">
-                    <dt className="col-span-3 border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">{title}</dt>
+                  <div className="grid grid-cols-1">
+                    <dt className="border-b border-stroke bg-whiten p-4 text-center text-sm font-bold uppercase tracking-wide text-primary dark:border-strokedark dark:bg-meta-4 dark:text-olive-300">{title}</dt>
                   </div>
-                  <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
+                  <div className="grid grid-cols-3 gap-2 p-3 sm:gap-4">
                     <dt className="font-medium text-center text-black dark:text-white">Date</dt>
                     <dt className="font-medium text-center text-black dark:text-white">Monthly</dt>
-                    <dd className="text-black dark:text-white text-center">Interest</dd>
+                    <dt className="font-medium text-center text-black dark:text-white">Interest</dt>
                   </div>
                   {dateListSelected && dateListSelected.map((date, i) => (
-                    <div className="grid grid-cols-3 gap-1 p-3 sm:grid-cols-3 sm:gap-4" key={i}>
+                    <div className="grid grid-cols-3 gap-2 p-3 tabular-nums sm:gap-4" key={i}>
                       <dt className="font-medium text-center text-black dark:text-white">{date}</dt>
                       <dd className="text-black dark:text-white text-center">{newMonthlyList?.[i] ?? formatNumber((Number(loanSingleData?.pn_amount ?? 0) + Number(loanSingleData?.addon_amount ?? 0)) / (paycount || 1))}</dd>
                       <dt className="font-medium text-center text-black dark:text-white">{udiComputedList?.[i] ?? formatNumber(Number(loanSingleData?.loan_details?.find((d: any) => d.description === 'udi')?.credit ?? 0) / (paycount || 1))}</dt>

@@ -5,6 +5,7 @@ import moment from 'moment';
 import { IncomeStatementRow } from '@/hooks/useFinancialStatement';
 import { formatAmount, DecimalValue } from '../utils/incomeStatementCalculations';
 import { parseFinancialAmount } from '@/utils/financial';
+import { rt, indent } from '@/components/ReportTable';
 
 interface IncomeStatementTableProps {
   data: IncomeStatementRow[] | undefined;
@@ -17,27 +18,20 @@ interface IncomeStatementTableProps {
   showHeader?: boolean;
   /** Optional summary rows to show after section total */
   summaryRows?: SummaryRow[];
-  /** Custom background class for the section total row (default: gray) */
-  totalRowBgClass?: string;
-  /** Custom text class for the section total row */
-  totalRowTextClass?: string;
-  /** Custom background/border class for header/category rows (rows where acctnumber is null) */
-  headerRowBgClass?: string;
 }
 
 interface SummaryRow {
   label: string;
   monthlyValues: Record<string, DecimalValue>;
   varianceValue: DecimalValue;
-  /** CSS class for background color */
-  bgClass: string;
-  /** CSS class for text color */
-  textClass?: string;
+  /** 'grand' = the statement's bottom line (double rule under it); default is a single rule above. */
+  emphasis?: 'subtotal' | 'grand';
 }
 
 /**
  * Reusable table component for income statement sections
- * Handles rendering of data rows, totals, and optional summary rows
+ * Handles rendering of data rows, totals, and optional summary rows.
+ * Styling follows the shared statement conventions in components/ReportTable.
  */
 const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
   data,
@@ -47,9 +41,6 @@ const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
   totalLabel,
   showHeader = false,
   summaryRows = [],
-  totalRowBgClass = 'bg-gray-2 dark:bg-meta-4',
-  totalRowTextClass = 'text-black dark:text-white',
-  headerRowBgClass = 'bg-gray-2 dark:bg-meta-4',
 }) => {
   const parseAmount = (val: any): DecimalValue => parseFinancialAmount(val);
 
@@ -60,24 +51,17 @@ const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
   };
 
   return (
-    <table className="w-full text-sm mt-6 first:mt-0">
+    <table className={`${rt.table} mt-6 first:mt-0`}>
       {showHeader && (
-        <thead className="sticky top-0 z-1">
-          <tr className="bg-gray-2 dark:bg-meta-4">
-            <th className="px-4 py-4 font-medium text-black dark:text-white text-left min-w-[280px]">
-              Account Name
-            </th>
+        <thead className={rt.thead}>
+          <tr>
+            <th className={`${rt.thPin} min-w-[280px]`}>Account Name</th>
             {monthKeys.map((month: string) => (
-              <th
-                key={month}
-                className="px-4 py-4 font-medium text-black dark:text-white text-right min-w-[120px]"
-              >
+              <th key={month} className={`${rt.thNum} min-w-[120px]`}>
                 {moment(month, 'YYYY-MM').format('MMM YYYY')}
               </th>
             ))}
-            <th className="px-4 py-4 font-medium text-black dark:text-white text-right min-w-[100px]">
-              Variance
-            </th>
+            <th className={`${rt.thNum} min-w-[100px]`}>Variance</th>
           </tr>
         </thead>
       )}
@@ -87,27 +71,19 @@ const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
             {data.map((row: IncomeStatementRow, index: number) => {
               const isHeader = isHeaderRow(row);
               return (
-                <tr
-                  key={index}
-                  className={isHeader
-                    ? `${headerRowBgClass} font-semibold border-l-4`
-                    : 'border-b border-[#eee] dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4'
-                  }
-                >
-                  <td className={`py-4 text-black dark:text-white md:min-w-[280px] lg:min-w-[400px] ${
-                    isHeader ? 'px-4' : 'pl-8 pr-4'
-                  }`}>
+                <tr key={index} className={isHeader ? '' : 'hover:bg-whiten dark:hover:bg-meta-4'}>
+                  <td
+                    className={`${rt.tdPin} md:min-w-[280px] lg:min-w-[400px] ${isHeader ? 'pt-4 font-semibold' : ''}`}
+                    style={indent(isHeader ? 0 : 1)}
+                  >
                     {row.AccountName}
                   </td>
                   {monthKeys.map((month) => (
-                    <td
-                      key={month}
-                      className="px-4 py-4 text-right text-black dark:text-white min-w-[120px]"
-                    >
+                    <td key={month} className={`${rt.tdNum} min-w-[120px]`}>
                       {isHeader ? '' : (row[month] ? formatAmount(parseAmount(row[month])) : '-')}
                     </td>
                   ))}
-                  <td className="px-4 py-4 text-right text-black dark:text-white min-w-[100px]">
+                  <td className={`${rt.tdNum} min-w-[100px]`}>
                     {isHeader ? '' : (row.variance ? formatAmount(parseAmount(row.variance)) : '-')}
                   </td>
                 </tr>
@@ -116,41 +92,27 @@ const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
           </tbody>
 
           <tfoot>
-            {/* Section total row */}
-            <tr className={totalRowBgClass}>
-              <td className={`px-4 py-4 font-bold ${totalRowTextClass}`}>
-                {totalLabel}
-              </td>
+            {/* Section total row: a single rule above */}
+            <tr className={rt.subtotal}>
+              <td className={rt.tdPin}>{totalLabel}</td>
               {monthKeys.map((month) => (
-                <td
-                  key={month}
-                  className={`px-4 py-4 font-bold text-right ${totalRowTextClass}`}
-                >
+                <td key={month} className={rt.tdNum}>
                   {formatAmount(monthlyTotals[month])}
                 </td>
               ))}
-              <td className={`px-4 py-4 font-bold text-right ${totalRowTextClass}`}>
-                {formatAmount(varianceTotal)}
-              </td>
+              <td className={rt.tdNum}>{formatAmount(varianceTotal)}</td>
             </tr>
 
             {/* Optional summary rows (like Total Income, Net Income, etc.) */}
             {summaryRows.map((summary, idx) => (
-              <tr key={idx} className={summary.bgClass}>
-                <td className={`px-4 py-4 font-bold ${summary.textClass || 'text-white'}`}>
-                  {summary.label}
-                </td>
+              <tr key={idx} className={summary.emphasis === 'grand' ? rt.grand : rt.subtotal}>
+                <td className={rt.tdPin}>{summary.label}</td>
                 {monthKeys.map((month) => (
-                  <td
-                    key={month}
-                    className={`px-4 py-4 font-bold text-right ${summary.textClass || 'text-white'}`}
-                  >
+                  <td key={month} className={rt.tdNum}>
                     {formatAmount(summary.monthlyValues[month])}
                   </td>
                 ))}
-                <td className={`px-4 py-4 font-bold text-right ${summary.textClass || 'text-white'}`}>
-                  {formatAmount(summary.varianceValue)}
-                </td>
+                <td className={rt.tdNum}>{formatAmount(summary.varianceValue)}</td>
               </tr>
             ))}
           </tfoot>
@@ -158,10 +120,7 @@ const IncomeStatementTable: React.FC<IncomeStatementTableProps> = ({
       ) : (
         <tbody>
           <tr>
-            <td
-              colSpan={monthKeys.length + 2}
-              className="px-4 py-8 text-center text-black dark:text-white"
-            >
+            <td colSpan={monthKeys.length + 2} className={rt.emptyRow}>
               No data available
             </td>
           </tr>

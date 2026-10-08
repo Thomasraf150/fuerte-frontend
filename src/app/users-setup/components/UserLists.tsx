@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import userListCol from './UsersListColumn';
+import userListCol, { renderUserActions } from './UsersListColumn';
 import FormAddUser from './FormAddUser';
 import { User, DataFormUser } from '@/utils/DataTypes';
 import useUsers from '@/hooks/useUsers';
-import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
+import { FormCloseButton, useRevealFormWhenStacked, PhoneRowText } from '@/components/EntityListLayout';
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = userListCol;
@@ -75,18 +76,15 @@ const UserLists: React.FC = () => {
                   </Toolbar>
                 )}
                 {usersError && (
-                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                    Error loading users: {usersError}
-                    <Button variant="secondary" size="sm" className="ml-2"
-                      onClick={refresh}>
-                      Retry
-                    </Button>
-                  </div>
+                  <ErrorAlert title="The users didn't load." detail={usersError} onRetry={refresh} />
                 )}
                 <CustomDatatable
+                  loadFailed={Boolean(usersError)}
                   apiLoading={loading}
                   title={''}
                   columns={column(handleRowUpdate, handlePwUpdate)}
+                  mobileRow={(row) => <PhoneRowText title={row.name} sub={`${row.role.name} · ${row.email}`} />}
+                  mobileActions={(row) => renderUserActions(row, handleRowUpdate, handlePwUpdate)}
                   data={data}
                   enableCustomHeader={true}
                   serverSidePagination={serverSidePaginationProps}

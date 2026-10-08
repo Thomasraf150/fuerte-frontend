@@ -7,6 +7,7 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import { SkeletonBlock } from '@/components/LoadingStates';
 import Button from '@/components/Button';
+import StatusBadge from '@/components/StatusBadge';
 import { Card, CardBody } from '@/components/Card';
 import useCollectionList from '@/hooks/useCollectionList';
 import { Info, AlertTriangle } from 'react-feather';
@@ -160,7 +161,7 @@ const CollectionDetailPage: React.FC = () => {
                         className="border-b border-stroke dark:border-strokedark hover:bg-whiten dark:hover:bg-boxdark/50"
                       >
                         <td className="px-4 py-3">{entry.description}</td>
-                        <td className="px-4 py-3 text-right font-mono">
+                        <td className="px-4 py-3 text-right font-mono tabular-nums">
                           {Number(entry.amount).toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
@@ -168,18 +169,18 @@ const CollectionDetailPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-3">
                           {entry.journal_ref ? (
-                            <span className="inline-block px-2 py-1 bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 rounded text-xs font-semibold">
+                            <StatusBadge tone="neutral" icon={false}>
                               {entry.journal_ref}
-                            </span>
+                            </StatusBadge>
                           ) : (
                             <span className="text-amber-600 dark:text-amber-400 text-xs">—</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
                           {entry.journal_ref ? (
-                            <span className="text-green-600 dark:text-green-400 font-medium">Posted</span>
+                            <StatusBadge tone="posted">Posted</StatusBadge>
                           ) : (
-                            <span className="text-amber-600 dark:text-amber-400 font-medium">Pending</span>
+                            <StatusBadge tone="pending">Pending</StatusBadge>
                           )}
                         </td>
                       </tr>

@@ -176,15 +176,13 @@ test.describe('the header and the table body', () => {
 });
 
 test.describe('the page-CSS leak', () => {
-  // Borrowers has no page table CSS any more (B1: phone rows); Payment Posting still hides its
-  // Terms (3) and Loan Proceeds (5) columns on phones, and must do it only on its own list.
-  test("Payment Posting's stylesheet hides its phone columns only inside its own list, never on another table", async ({ page, backend }) => {
+  // Borrowers (B1) and, since Phase 8 (2026-10-08), Payment Posting show phone cards instead of a
+  // table below md, so Payment Posting's stylesheet no longer hides columns. What still matters:
+  // with that stylesheet loaded, no other table loses a column or its margins.
+  test("Payment Posting's stylesheet never hides a column or a margin on another table", async ({ page, backend }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await openPaymentPosting(page, backend);
-    await expect(page.getByRole('button', { name: 'Open loan E2E-8801', exact: true })).toBeVisible({ timeout: 30_000 });
-
-    const inside = await page.locator('.payment-posting-list [data-column-id="3"]').first().evaluate((el) => getComputedStyle(el).display);
-    expect(inside).toBe('none');
+    await expect(phoneCard(page, 'E2E-8801')).toBeVisible({ timeout: 30_000 });
 
     // Any other table: a column 3 outside that list (as on the SOA list, which Next would render
     // with this stylesheet still loaded) stays visible, and its container keeps its own margins.
@@ -209,6 +207,9 @@ const ppLoan = (id: string, customStatus: string) => ({
   loan_product: { id: '1', description: 'E2E 6 months' },
   borrower: { id: '7001', firstname: 'E2E', lastname: 'Borrower' },
 });
+
+/** A Payment Posting phone card (Phase 8): one button per loan, named by its text, ref included. */
+const phoneCard = (page: Page, ref: string) => page.getByRole('button', { name: new RegExp(ref) }).filter({ hasNotText: 'Open loan' });
 
 async function openPaymentPosting(page: Page, backend: FakeBackend): Promise<void> {
   const loans = [ppLoan('8801', 'Released'), ppLoan('8802', 'Posted (Closed)')];
@@ -244,16 +245,17 @@ test.describe('Payment Posting', () => {
     await expect(page).toHaveURL(/\/payment-posting$/);
   });
 
-  test('at 360px the Open button is 48px and its icon is drawn at full size', async ({ page, backend }) => {
+  test('at 360px each loan is a phone card at least 48px tall that opens the loan', async ({ page, backend }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await openPaymentPosting(page, backend);
 
-    const open = page.getByRole('button', { name: 'Open loan E2E-8801', exact: true });
-    const box = (await open.boundingBox())!;
+    const card = phoneCard(page, 'E2E-8801');
+    await expect(card).toBeVisible({ timeout: 30_000 });
+    const box = (await card.boundingBox())!;
     expect(box.height).toBeGreaterThanOrEqual(48);
-    expect(box.width).toBeGreaterThanOrEqual(48);
-    const icon = (await open.locator('svg').boundingBox())!;
-    expect(icon.width).toBeGreaterThanOrEqual(18);
+    expect(box.width).toBeGreaterThanOrEqual(280);
+    await card.click();
+    await expect(page).toHaveURL(/\/payment-posting\/8801$/, { timeout: 30_000 });
   });
 });
 

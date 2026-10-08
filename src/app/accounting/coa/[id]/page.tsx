@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
@@ -192,10 +193,11 @@ const AccountDetailPage: React.FC = () => {
           <Breadcrumb pageName="Error" />
         </div>
         <Card className="p-10">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-danger mb-4">
-              {error || 'Account not found'}
-            </h3>
+          <div className="space-y-4 text-left">
+            <ErrorAlert
+              title={error ? "This account didn't load." : "This account couldn't be found."}
+              detail={error ?? 'Account not found'}
+            />
             <Button variant="primary"
               onClick={handleBackToList}>
               Back to Chart of Accounts

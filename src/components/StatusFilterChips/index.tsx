@@ -32,15 +32,33 @@ const StatusFilterChips: React.FC<StatusFilterChipsProps> = ({
 }) => {
   return (
     <div className="space-y-3">
-      {/* Label - Hidden on mobile, shown on tablet+ */}
+      {/* Chips from sm up; below sm they are one native select (Decision 1) with a visible label. */}
       <div className="hidden sm:block">
         <span className="text-sm font-semibold text-black dark:text-bodydark1">
           Filter by Status:
         </span>
       </div>
 
+      <div className="sm:hidden">
+        <label htmlFor="status-filter-select" className="mb-1.5 block text-sm font-medium text-black dark:text-white">
+          Status
+        </label>
+        <select
+          id="status-filter-select"
+          value={selectedStatus}
+          onChange={(e) => onStatusChange(e.target.value)}
+          className="h-12 w-full rounded-lg border border-field bg-white px-3 text-sm text-black outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
+        >
+          {statusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Filter chips container - Responsive grid */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="hidden flex-wrap items-center gap-2 sm:flex">
         {statusOptions.map((option) => {
           const isSelected = selectedStatus === option.value;
           return (

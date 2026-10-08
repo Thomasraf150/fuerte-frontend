@@ -6,7 +6,8 @@ import { toast } from 'react-toastify';
 import { DataColListRow } from '@/utils/DataTypes';
 import useCollectionList from '@/hooks/useCollectionList';
 import collectionListCol from './CollectionListCol';
-import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
+import CollectionPhoneRow from './CollectionPhoneRow';
 import CustomDatatable from '@/components/CustomDatatable';
 import { Card, CardBody } from '@/components/Card';
 
@@ -39,17 +40,19 @@ const CollectionList: React.FC = () => {
           <Card className="w-full">
             <CardBody className="overflow-x-auto">
                 {collectionListError && (
-                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                    Error loading collection list: {collectionListError}
-                    <Button variant="secondary" size="sm" className="ml-2" onClick={refresh}>
-                      Retry
-                    </Button>
-                  </div>
+                  <ErrorAlert
+                    title="The collection list didn't load."
+                    detail={collectionListError}
+                    onRetry={refresh}
+                    className="mb-4"
+                  />
                 )}
                 <CustomDatatable
+                  loadFailed={Boolean(collectionListError)}
                   apiLoading={collectionListLoading}
                   columns={column()}
                   onRowClicked={handleRowClick}
+                  mobileRow={(row) => <CollectionPhoneRow row={row} />}
                   data={dataColListData || []}
                   enableCustomHeader={true}
                   title={''}

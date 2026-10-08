@@ -76,6 +76,10 @@ interface CustomDatatableProps<T> {
    * what this renders (plus a chevron). Server-side lists only.
    */
   mobileRow?: (row: T) => React.ReactNode;
+  /** Phone rows only: the row's buttons, drawn under its content (see MobileRows `actions`). */
+  mobileActions?: (row: T) => React.ReactNode;
+  /** The list failed to load and the page shows an ErrorAlert: draw no empty message and no pager. */
+  loadFailed?: boolean;
 }
 
 // Define the CustomDatatable component
@@ -94,6 +98,8 @@ const CustomDatatable = <T extends object>({
   searchLabel,
   rowHref,
   mobileRow,
+  mobileActions,
+  loadFailed = false,
 }: CustomDatatableProps<T>): JSX.Element => {
   const isServerSide = !!serverSidePagination;
   const opensRows = Boolean(rowHref || onRowClicked);
@@ -110,6 +116,9 @@ const CustomDatatable = <T extends object>({
     else setLocalQuery(event.target.value);
   }, [isServerSide, serverSidePagination, setLocalQuery]);
   const searchQuery = isServerSide ? (serverSidePagination?.searchQuery || '') : localQuery;
+  // A failed load keeps the search and filters (a bad filter may be the cause) but draws no rows,
+  // no "No records to show." and no pager: the page's ErrorAlert says what happened.
+  const showBody = !(loadFailed && rows.length === 0 && !apiLoading);
 
   return (
     <div className={opensRows ? 'responsive-table-container rows-open' : 'responsive-table-container'}>
@@ -126,11 +135,12 @@ const CustomDatatable = <T extends object>({
         />
       )}
       {isServerSide && <ListFilters pagination={serverSidePagination} searchQuery={searchQuery} />}
-      {phoneRows && (
+      {showBody && phoneRows && (
         <div className="md:hidden">
-          <MobileRows rows={rows} render={phoneRows} rowHref={rowHref} onRowClicked={onRowClicked} loading={apiLoading} plural={plural} />
+          <MobileRows rows={rows} render={phoneRows} actions={mobileActions} rowHref={rowHref} onRowClicked={onRowClicked} loading={apiLoading} plural={plural} />
         </div>
       )}
+      {showBody && (
       <div className={phoneRows ? 'relative hidden md:block' : 'relative'} {...rowOpen}>
         <TableView
           title={title}
@@ -146,7 +156,8 @@ const CustomDatatable = <T extends object>({
           plural={plural}
         />
       </div>
-      {isServerSide && <Pager pagination={serverSidePagination} />}
+      )}
+      {showBody && isServerSide && <Pager pagination={serverSidePagination} />}
     </div>
   );
 };

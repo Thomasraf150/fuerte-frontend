@@ -1,6 +1,7 @@
 "use client";
 
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
@@ -99,15 +100,15 @@ const GeneralVoucherList: React.FC = () => {
                   </Button>
                 </Toolbar>
                   {generalVoucherError && (
-                    <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                      Error loading general vouchers: {generalVoucherError}
-                      <Button variant="secondary" className="ml-2"
-                        onClick={refresh}>
-                        Retry
-                      </Button>
-                    </div>
+                    <ErrorAlert
+                      title="The vouchers didn't load."
+                      detail={`Error loading general vouchers: ${generalVoucherError}`}
+                      onRetry={refresh}
+                      className="mb-4"
+                    />
                   )}
                   <CustomDatatable
+                    loadFailed={Boolean(generalVoucherError)}
                     apiLoading={paginationLoading}
                     title=""
                     onRowClicked={handleWholeRowClick}

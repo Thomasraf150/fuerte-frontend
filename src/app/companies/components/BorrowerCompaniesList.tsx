@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import borrowerCompaniesCol from './BorrowerCompaniesColumn';
+import borrowerCompaniesCol, { renderCompanyActions } from './BorrowerCompaniesColumn';
 // import subBranchListCol from './SubBranchListColumn';
 import { DataBranches, DataFormBranch, DataSubBranches, DataBorrCompanies } from '@/utils/DataTypes';
 import BorrCompForm from './BorrCompForm';
@@ -11,7 +11,7 @@ import BorrCompForm from './BorrCompForm';
 import useBorrCompanies from '@/hooks/useBorrCompanies';
 import { Plus, SkipBack } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
+import { FormCloseButton, useRevealFormWhenStacked, PhoneRowText } from '@/components/EntityListLayout';
 import Button from '@/components/Button';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
@@ -89,6 +89,8 @@ const BorrowerCompaniesList: React.FC = () => {
                   apiLoading={borrCompFetchLoading}
                   title="Companies List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
+                  mobileRow={(row) => <PhoneRowText title={row.name} sub={row.address} />}
+                  mobileActions={(row) => renderCompanyActions(row, handleUpdateRowClick, handleDeleteRow)}
                   data={dataBorrComp || []}
                   enableCustomHeader={true}
                   serverSidePagination={serverSidePaginationProps}

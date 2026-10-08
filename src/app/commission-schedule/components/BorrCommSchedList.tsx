@@ -241,7 +241,7 @@ const SoaList: React.FC = () => {
                             </th>
                           )
                         )}
-                        <th className="px-2 md:px-4 py-2 text-right font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                        <th className="px-2 md:px-4 py-2 text-right tabular-nums font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
                       </tr>
                       <tr>
                         {Array(months?.length)
@@ -304,7 +304,7 @@ const SoaList: React.FC = () => {
                                   return monthlyData ? (
                                     <td
                                       key={`${monthIndex}-commission`}
-                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
+                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                     >
                                       {parseFloat(monthlyData.commission_collected || '0').toLocaleString('en-US', {
                                         minimumFractionDigits: 2,
@@ -314,7 +314,7 @@ const SoaList: React.FC = () => {
                                   ) : (
                                     <td
                                       key={`${monthIndex}-empty`}
-                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs text-gray-400 dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
+                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs text-gray-400 dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
                                     >
                                       --
                                     </td>
@@ -322,7 +322,7 @@ const SoaList: React.FC = () => {
                                 })}
 
                                 {/* Total Collected */}
-                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right font-semibold text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right tabular-nums font-semibold text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {totalCollected.toLocaleString('en-US', {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2

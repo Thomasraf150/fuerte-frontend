@@ -3,6 +3,7 @@
 import { TableColumn } from 'react-data-table-component';
 import { ChevronRight } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
+import { LoanStatusBadge } from '@/components/StatusBadge';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { loanStatus } from '@/utils/helper';
@@ -20,6 +21,7 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
   },
   {
     name: 'Terms',
+    hide: 1199,
     cell: row => parseInt(String(row.loan_product.terms || 0)) + parseInt(String(row.loan_product.addon_terms || 0)),
     sortable: true,
   },
@@ -30,38 +32,21 @@ const borrLoanCol = (handleRowClick: (row: BorrLoanRowData) => void): TableColum
   },
   {
     name: 'Loan Proceeds',
-    cell: row => formatNumber(Number(row.loan_proceeds)),
+    hide: 1199,
+    cell: row => <span className="tabular-nums">{formatNumber(Number(row.loan_proceeds))}</span>,
+    right: true,
     sortable: true,
   },
   {
     name: 'PN Amount',
-    cell: row => formatNumber(Number(row.pn_amount)),
+    cell: row => <span className="tabular-nums">{formatNumber(Number(row.pn_amount))}</span>,
+    right: true,
     sortable: true,
   },
   {
     name: 'Status',
     selector: row => row.custom_status ?? '',
-    cell: row => (
-      <span
-        className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
-          row.custom_status === 'Posted (Closed)' ? 'bg-slate-600 text-white dark:bg-slate-500 dark:text-white' :
-          row.custom_status === 'Closed' ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' :
-          (row.custom_status === 'For Approval'
-            ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300'
-            : row.custom_status === 'Approved'
-            ? 'bg-yellow-400 text-boxdark dark:bg-orange-600 dark:text-yellow-300'
-            : row.custom_status === 'For Releasing'
-            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-            : row.custom_status === 'Released'
-            ? 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
-            : row.custom_status === 'Posted'
-            ? 'bg-amber-200 text-graydark dark:bg-green-900 dark:text-green-300'
-            : '')
-        }`}
-      >
-      {row.custom_status}
-      </span>
-    ),
+    cell: row => <LoanStatusBadge status={row.custom_status} />,
     sortable: true,
   },
   {

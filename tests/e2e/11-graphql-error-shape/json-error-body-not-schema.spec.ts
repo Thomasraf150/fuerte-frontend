@@ -84,7 +84,7 @@ test.describe('JSON error body is reported as infra, not "schema out of sync"', 
     // Now inject the 503 and force a refetch by reloading the page.
     await interceptWithJsonError(page, 503, 'Service Unavailable');
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('text=Error loading general vouchers')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=The vouchers didn't load.")).toBeVisible({ timeout: 10000 });
 
     const bodyText = await page.locator('body').innerText();
 
@@ -120,7 +120,7 @@ test.describe('JSON error body is reported as infra, not "schema out of sync"', 
 
     await interceptWithJsonError(page, 500, 'Server Error');
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('text=Error loading general vouchers')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=The vouchers didn't load.")).toBeVisible({ timeout: 10000 });
 
     const bodyText = await page.locator('body').innerText();
     for (const fragment of FALSE_LEAD_FRAGMENTS) {

@@ -11,6 +11,8 @@ import { useAuthStore } from '@/store';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import StatusPill from '../../components/StatusPill';
+import StatusBadge, { type StatusTone } from '@/components/StatusBadge';
+import ErrorAlert from '@/components/ErrorAlert';
 import { formatNumberComma } from '@/utils/helper';
 
 
@@ -203,9 +205,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
           'validated' branch, so a failed cancel — a money operation — reported
           nothing at all. */}
       {error && (
-        <div className="rounded-sm border border-danger/40 bg-danger/10 px-7 py-4 text-sm text-danger">
-          {error}
-        </div>
+        <ErrorAlert title="That didn't go through.">{error}</ErrorAlert>
       )}
 
       {/* header card */}
@@ -445,7 +445,7 @@ export default function ImportReview({ batchRef }: { batchRef: string }) {
                     : 'I have checked the list above.'}
               </label>
               {error && (
-                <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</div>
+                <ErrorAlert title="That didn't go through.">{error}</ErrorAlert>
               )}
               <Button variant="primary"
                 onClick={doCommit}
@@ -632,15 +632,15 @@ function isNumeric(field: string): boolean {
 }
 
 function OutcomePill({ outcome }: { outcome: string }) {
-  const map: Record<string, [string, string]> = {
-    ok: ['Ready', 'bg-green-100 text-green-700'],
-    update: ['Will update', 'bg-amber-100 text-amber-700'],
-    unchanged: ['Already there', 'bg-whiten text-body'],
-    error: ['Rejected', 'bg-danger/10 text-danger'],
-    committed: ['Posted', 'bg-green-100 text-green-700'],
-    failed: ['Failed', 'bg-danger/10 text-danger'],
-    reversed: ['Cancelled', 'bg-rose-100 text-rose-700'],
+  const map: Record<string, [string, StatusTone]> = {
+    ok: ['Ready', 'approved'],
+    update: ['Will update', 'pending'],
+    unchanged: ['Already there', 'neutral'],
+    error: ['Rejected', 'danger'],
+    committed: ['Posted', 'posted'],
+    failed: ['Failed', 'danger'],
+    reversed: ['Cancelled', 'closed'],
   };
-  const [label, cls] = map[outcome] ?? [outcome, 'bg-whiten text-body'];
-  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>{label}</span>;
+  const [label, tone] = map[outcome] ?? [outcome, 'neutral' as StatusTone];
+  return <StatusBadge tone={tone}>{label}</StatusBadge>;
 }

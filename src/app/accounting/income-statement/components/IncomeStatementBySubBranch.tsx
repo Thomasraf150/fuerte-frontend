@@ -6,6 +6,7 @@ import Decimal from 'decimal.js';
 import { IncomeStatementByBranchRow } from '@/hooks/useFinancialStatement';
 import { formatAmount, DecimalValue } from '../utils/incomeStatementCalculations';
 import { parseFinancialAmount } from '@/utils/financial';
+import { rt, indent } from '@/components/ReportTable';
 
 interface SectionData {
   rows: IncomeStatementByBranchRow[];
@@ -42,13 +43,13 @@ interface IncomeStatementBySubBranchProps {
 
 type SectionKey = 'interestIncome' | 'otherRevenues' | 'directFinancing' | 'lessExpense' | 'otherIncomeExpense' | 'incomeTax';
 
-const SECTION_CONFIG: { key: SectionKey; label: string; bgClass: string; textClass: string }[] = [
-  { key: 'interestIncome', label: 'INTEREST INCOME', bgClass: 'bg-sky-50 dark:bg-sky-900/30', textClass: 'text-sky-800 dark:text-sky-200' },
-  { key: 'otherRevenues', label: 'OTHER REVENUES', bgClass: 'bg-sky-50 dark:bg-sky-900/30', textClass: 'text-sky-800 dark:text-sky-200' },
-  { key: 'lessExpense', label: 'LESS: EXPENSES', bgClass: 'bg-danger/10 dark:bg-danger/20', textClass: 'text-danger dark:text-danger' },
-  { key: 'directFinancing', label: 'DIRECT FINANCING', bgClass: 'bg-orange-50 dark:bg-orange-900/30', textClass: 'text-orange-800 dark:text-orange-200' },
-  { key: 'otherIncomeExpense', label: 'OTHER INCOME / EXPENSE', bgClass: 'bg-purple-50 dark:bg-purple-900/30', textClass: 'text-purple-800 dark:text-purple-200' },
-  { key: 'incomeTax', label: 'INCOME TAX', bgClass: 'bg-green-50 dark:bg-green-900/30', textClass: 'text-green-800 dark:text-green-200' },
+const SECTION_CONFIG: { key: SectionKey; label: string }[] = [
+  { key: 'interestIncome', label: 'INTEREST INCOME' },
+  { key: 'otherRevenues', label: 'OTHER REVENUES' },
+  { key: 'lessExpense', label: 'LESS: EXPENSES' },
+  { key: 'directFinancing', label: 'DIRECT FINANCING' },
+  { key: 'otherIncomeExpense', label: 'OTHER INCOME / EXPENSE' },
+  { key: 'incomeTax', label: 'INCOME TAX' },
 ];
 
 const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
@@ -174,43 +175,31 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
   const subBranchEntries = Array.from(subBranchMap.entries());
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {subBranchEntries.map(([branchId, branch]) => (
-        <div
-          key={branchId}
-          className="border border-stroke dark:border-strokedark rounded-lg shadow-md overflow-hidden"
-        >
+        <section key={branchId} aria-label={branch.branch_name}>
           {/* Sub-Branch Header */}
-          <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-700 dark:to-indigo-900">
-            <h3 className="text-lg font-bold text-white">
-              {branch.branch_name}
-              {branch.branch_code && (
-                <span className="ml-2 text-sm font-normal text-indigo-200">
-                  ({branch.branch_code})
-                </span>
-              )}
-            </h3>
-          </div>
+          <h3 className="mb-2 font-display text-lg font-semibold text-black dark:text-white">
+            {branch.branch_name}
+            {branch.branch_code && (
+              <span className="ml-2 font-satoshi text-sm font-normal text-body dark:text-bodydark">
+                ({branch.branch_code})
+              </span>
+            )}
+          </h3>
 
           {/* Table for this sub-branch */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 z-1">
-                <tr className="bg-gray-2 dark:bg-meta-4">
-                  <th className="px-4 py-3 font-medium text-black dark:text-white text-left min-w-[280px]">
-                    Section / Account
-                  </th>
+          <div className={rt.wrap}>
+            <table className={rt.table}>
+              <thead className={rt.thead}>
+                <tr>
+                  <th className={`${rt.thPin} min-w-[280px]`}>Section / Account</th>
                   {monthKeys.map((month) => (
-                    <th
-                      key={month}
-                      className="px-4 py-3 font-medium text-black dark:text-white text-right min-w-[100px]"
-                    >
+                    <th key={month} className={`${rt.thNum} min-w-[100px]`}>
                       {moment(month, 'YYYY-MM').format('MMM YY')}
                     </th>
                   ))}
-                  <th className="px-4 py-3 font-medium text-black dark:text-white text-right min-w-[100px]">
-                    Variance
-                  </th>
+                  <th className={`${rt.thNum} min-w-[100px]`}>Variance</th>
                 </tr>
               </thead>
 
@@ -222,11 +211,8 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
                   return (
                     <React.Fragment key={config.key}>
                       {/* Section Header */}
-                      <tr className={config.bgClass}>
-                        <td
-                          colSpan={monthKeys.length + 2}
-                          className={`px-4 py-3 font-bold ${config.textClass}`}
-                        >
+                      <tr>
+                        <td colSpan={monthKeys.length + 2} className={rt.groupPin}>
                           {config.label}
                         </td>
                       </tr>
@@ -237,27 +223,17 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
                         return (
                           <tr
                             key={`${config.key}-${idx}`}
-                            className={isHeader
-                              ? 'bg-gray-2 dark:bg-meta-4 font-medium'
-                              : `border-b border-[#eee] dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4 ${
-                                  idx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-3 dark:bg-meta-4'
-                                }`
-                            }
+                            className={isHeader ? 'font-semibold' : 'hover:bg-whiten dark:hover:bg-meta-4'}
                           >
-                            <td className={`py-2 text-black dark:text-white ${
-                              isHeader ? 'pl-6 pr-4' : 'pl-10 pr-4'
-                            }`}>
+                            <td className={rt.tdPin} style={indent(isHeader ? 1 : 2)}>
                               {row.AccountName}
                             </td>
                             {monthKeys.map((month) => (
-                              <td
-                                key={month}
-                                className="px-4 py-2 text-right text-black dark:text-white"
-                              >
+                              <td key={month} className={rt.tdNum}>
                                 {isHeader ? '' : (row[month] ? formatAmount(parseAmount(row[month])) : '-')}
                               </td>
                             ))}
-                            <td className="px-4 py-2 text-right text-black dark:text-white">
+                            <td className={rt.tdNum}>
                               {isHeader ? '' : (row.variance ? formatAmount(parseAmount(row.variance)) : '-')}
                             </td>
                           </tr>
@@ -265,73 +241,50 @@ const IncomeStatementBySubBranch: React.FC<IncomeStatementBySubBranchProps> = ({
                       })}
 
                       {/* Section Subtotal */}
-                      <tr className="bg-gray-2 dark:bg-meta-4 border-b border-stroke dark:border-strokedark">
-                        <td className="px-4 py-2 font-semibold text-black dark:text-white text-sm">
-                          Subtotal {config.label}
-                        </td>
+                      <tr className={rt.subtotal}>
+                        <td className={rt.tdPin}>Subtotal {config.label}</td>
                         {monthKeys.map((month) => (
-                          <td
-                            key={month}
-                            className="px-4 py-2 font-semibold text-right text-black dark:text-white"
-                          >
+                          <td key={month} className={rt.tdNum}>
                             {formatAmount(section.monthlyTotals[month])}
                           </td>
                         ))}
-                        <td className="px-4 py-2 font-semibold text-right text-black dark:text-white">
-                          {formatAmount(section.varianceTotal)}
-                        </td>
+                        <td className={rt.tdNum}>{formatAmount(section.varianceTotal)}</td>
                       </tr>
                     </React.Fragment>
                   );
                 })}
 
                 {/* Sub-Branch Total (Net Income) */}
-                <tr className="bg-indigo-100 dark:bg-indigo-900/50 border-t-2 border-indigo-400">
-                  <td className="px-4 py-3 font-bold text-indigo-900 dark:text-indigo-100">
-                    NET INCOME - {branch.branch_name}
-                  </td>
+                <tr className={rt.grand}>
+                  <td className={rt.tdPin}>NET INCOME - {branch.branch_name}</td>
                   {monthKeys.map((month) => (
-                    <td
-                      key={month}
-                      className="px-4 py-3 font-bold text-right text-indigo-900 dark:text-indigo-100"
-                    >
+                    <td key={month} className={rt.tdNum}>
                       {formatAmount(branch.totals.monthly[month])}
                     </td>
                   ))}
-                  <td className="px-4 py-3 font-bold text-right text-indigo-900 dark:text-indigo-100">
-                    {formatAmount(branch.totals.variance)}
-                  </td>
+                  <td className={rt.tdNum}>{formatAmount(branch.totals.variance)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       ))}
 
       {/* Grand Total - All Sub-Branches */}
-      <div className="border border-stroke dark:border-strokedark rounded-lg shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <tbody>
-              <tr className="bg-yellow-100 dark:bg-yellow-900/30 border-t-4 border-yellow-400">
-                <td className="px-6 py-4 font-bold text-yellow-900 dark:text-yellow-100 text-base min-w-[280px]">
-                  GRAND TOTAL - All Sub-Branches
+      <div className={rt.wrap}>
+        <table className={rt.table}>
+          <tbody>
+            <tr className={rt.grand}>
+              <td className={`${rt.tdPin} min-w-[280px]`}>GRAND TOTAL - All Sub-Branches</td>
+              {monthKeys.map((month) => (
+                <td key={month} className={`${rt.tdNum} min-w-[100px]`}>
+                  {formatAmount(grandTotals.monthly[month])}
                 </td>
-                {monthKeys.map((month) => (
-                  <td
-                    key={month}
-                    className="px-4 py-4 font-bold text-right text-yellow-900 dark:text-yellow-100 min-w-[100px]"
-                  >
-                    {formatAmount(grandTotals.monthly[month])}
-                  </td>
-                ))}
-                <td className="px-4 py-4 font-bold text-right text-yellow-900 dark:text-yellow-100 min-w-[100px]">
-                  {formatAmount(grandTotals.variance)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              ))}
+              <td className={`${rt.tdNum} min-w-[100px]`}>{formatAmount(grandTotals.variance)}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

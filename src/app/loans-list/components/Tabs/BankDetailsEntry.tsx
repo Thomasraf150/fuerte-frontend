@@ -180,7 +180,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
             placeholder="Card Account Name"
             {...register('account_name', { required: "Account name is required!" })}
           />
-          {errors.account_name && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.account_name.message}</p>}
+          {errors.account_name && <p className="mt-2 text-sm text-danger">{errors.account_name.message}</p>}
         </div>
         {loanSingleData?.loan_bank_details?.updated_at && (
           <div className="text-base font-semibold text-body dark:text-bodydark px-1">
@@ -222,7 +222,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       />
                     )}
                   />
-                  {errors.surrendered_bank_id && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.surrendered_bank_id.message}</p>}
+                  {errors.surrendered_bank_id && <p className="mt-2 text-sm text-danger">{errors.surrendered_bank_id.message}</p>}
                 </div>
               </dd>
               <dt className="font-medium text-left text-black dark:text-bodydark">
@@ -248,7 +248,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       />
                     )}
                   />
-                  {errors.issued_bank_id && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.issued_bank_id.message}</p>}
+                  {errors.issued_bank_id && <p className="mt-2 text-sm text-danger">{errors.issued_bank_id.message}</p>}
                 </div>
               </dt>
             </div>
@@ -280,7 +280,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       <span className="absolute right-3 top-3.5 md:top-3 pointer-events-none">
                         <CreditCard size="18" />
                       </span>
-                      {errors.surrendered_acct_no && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.surrendered_acct_no.message}</p>}
+                      {errors.surrendered_acct_no && <p className="mt-2 text-sm text-danger">{errors.surrendered_acct_no.message}</p>}
                     </div>
                   </dd>
                 )}
@@ -307,7 +307,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                       <span className="absolute right-3 top-3.5 md:top-3 pointer-events-none">
                         <CreditCard size="18" />
                       </span>
-                      {errors.issued_acct_no && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.issued_acct_no.message}</p>}
+                      {errors.issued_acct_no && <p className="mt-2 text-sm text-danger">{errors.issued_acct_no.message}</p>}
                     </div>
                   </dt>
                 )}
@@ -339,7 +339,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         {showPin1 ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
-                    {errors.surrendered_pin && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.surrendered_pin.message}</p>}
+                    {errors.surrendered_pin && <p className="mt-2 text-sm text-danger">{errors.surrendered_pin.message}</p>}
                   </dd>
                 )}
                 {isSurrenderedSkip && <dd className="text-black dark:text-white text-center relative"></dd>}
@@ -362,7 +362,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         {showPin2 ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
-                    {errors.issued_pin && <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{errors.issued_pin.message}</p>}
+                    {errors.issued_pin && <p className="mt-2 text-sm text-danger">{errors.issued_pin.message}</p>}
                   </dt>
                 )}
                 {isIssuedSkip && <dt className="font-medium text-center text-black dark:text-white relative"></dt>}

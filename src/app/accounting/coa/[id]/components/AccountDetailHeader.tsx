@@ -3,6 +3,7 @@ import { Card, CardBody, CardHeader } from '@/components/Card';
 import React, { useState } from 'react';
 import type { AccountDetail } from '@/types/chartOfAccounts';
 import { formatCurrency } from '@/utils/formatters';
+import { StatusBadge } from '@/components/StatusBadge';
 
 interface AccountDetailHeaderProps {
   account: AccountDetail;
@@ -86,13 +87,9 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
             <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Account Type
             </p>
-            <span className={`inline-flex rounded px-2 py-1 text-sm font-medium ${
-              isDebitAccount
-                ? 'bg-success bg-opacity-10 text-success'
-                : 'bg-warning bg-opacity-10 text-warning'
-            }`}>
+            <StatusBadge tone="neutral" icon={false}>
               {isDebitAccount ? 'Debit' : 'Credit'}
-            </span>
+            </StatusBadge>
           </div>
 
           {/* Status */}
@@ -100,13 +97,9 @@ const AccountDetailHeader: React.FC<AccountDetailHeaderProps> = ({ account, onBa
             <p className="mb-1 text-sm font-semibold text-black dark:text-white">
               Status
             </p>
-            <span className={`inline-flex rounded px-2 py-1 text-sm font-medium ${
-              account.is_active
-                ? 'bg-success bg-opacity-10 text-success'
-                : 'bg-danger bg-opacity-10 text-danger'
-            }`}>
+            <StatusBadge tone={account.is_active ? 'neutral' : 'closed'}>
               {account.is_active ? 'Active' : 'Inactive'}
-            </span>
+            </StatusBadge>
           </div>
 
           {/* Transaction Count */}

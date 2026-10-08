@@ -10,6 +10,7 @@ import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 import { formatNumberComma } from '@/utils/helper';
+import { rt } from '@/components/ReportTable';
 
 const GeneralLedgerList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -46,7 +47,7 @@ const GeneralLedgerList: React.FC = () => {
             <div className={`col-span-2`}>
               <Card>
                 <CardBody>
-                  <div>
+                  <div className="no-print">
                     <input
                       type="text"
                       placeholder="Search by Account Name or Number..."
@@ -55,99 +56,81 @@ const GeneralLedgerList: React.FC = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <div className="overflow-x-auto">
-                        <table className="min-w-full border-collapse">
-                          {/* Table Header */}
-                          <thead className="bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark text-sm sticky top-0">
-                            <tr>
-                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Account Name</th>
-                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Account Number</th>
-                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Debit</th>
-                              <th className="px-4 py-2 border border-stroke dark:border-strokedark bg-slate-50 dark:bg-boxdark">Credit</th>
-                            </tr>
-                          </thead>
-                          {/* Table Body */}
-                          <tbody className="text-sm text-black dark:text-bodydark">
-                            {/*
-                              Skeleton mirrors the real row: four bordered cells at the
-                              same height, with bar widths that stand in for the shape of
-                              the data — a long account name, a shorter number, two narrow
-                              right-aligned figures. Reserving the true layout is why this
-                              is a skeleton and not a spinner: nothing shifts on arrival.
+                  <div className={rt.wrap}>
+                    <table className={rt.table}>
+                      <thead className={rt.thead}>
+                        <tr>
+                          <th className={rt.thPin}>Account Name</th>
+                          <th className={rt.th}>Account Number</th>
+                          <th className={rt.thNum}>Debit</th>
+                          <th className={rt.thNum}>Credit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Skeleton mirrors the real row, so nothing shifts on arrival. */}
+                        {loading && Array.from({ length: 8 }).map((_, i) => (
+                          <tr key={`skeleton-${i}`} className="animate-pulse">
+                            <td className={rt.tdPin}>
+                              <div className="h-3 w-48 max-w-full rounded bg-stroke dark:bg-strokedark" />
+                            </td>
+                            <td className={rt.td}>
+                              <div className="h-3 w-24 rounded bg-stroke dark:bg-strokedark" />
+                            </td>
+                            <td className={rt.tdNum}>
+                              <div className="ml-auto h-3 w-16 rounded bg-stroke dark:bg-strokedark" />
+                            </td>
+                            <td className={rt.tdNum}>
+                              <div className="ml-auto h-3 w-16 rounded bg-stroke dark:bg-strokedark" />
+                            </td>
+                          </tr>
+                        ))}
 
-                              bg-stroke / dark:bg-strokedark, NOT bg-gray-200 — this
-                              project's tailwind config defines `gray` as a single string,
-                              so every `gray-<shade>` class in this file renders nothing.
-                            */}
-                            {loading && Array.from({ length: 8 }).map((_, i) => (
-                              <tr key={`skeleton-${i}`} className="animate-pulse">
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
-                                  <div className="h-3 w-48 max-w-full rounded bg-stroke dark:bg-strokedark" />
-                                </td>
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
-                                  <div className="mx-auto h-3 w-24 rounded bg-stroke dark:bg-strokedark" />
-                                </td>
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
-                                  <div className="ml-auto h-3 w-16 rounded bg-stroke dark:bg-strokedark" />
-                                </td>
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">
-                                  <div className="ml-auto h-3 w-16 rounded bg-stroke dark:bg-strokedark" />
-                                </td>
-                              </tr>
-                            ))}
+                        {/* An empty result names itself: nothing at all, or nothing matching this search. */}
+                        {!loading && filteredData?.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className={rt.emptyRow}>
+                              <p className="font-medium text-black dark:text-white">
+                                {searchTerm ? 'No matching accounts' : 'No ledger accounts to show'}
+                              </p>
+                              <p className="mt-1 text-sm text-bodydark2 dark:text-bodydark">
+                                {searchTerm
+                                  ? <>Nothing matches &ldquo;{searchTerm}&rdquo;. Search by account name or number — journal references like CRJ-… are not searched here.</>
+                                  : 'The ledger returned no accounts.'}
+                              </p>
+                            </td>
+                          </tr>
+                        )}
 
-                            {/*
-                              An empty result used to render as a bare white box, which
-                              reads identically to "still loading" and to "the page is
-                              broken". Naming which of the two it is — nothing here at all,
-                              or nothing matching this search — is the whole point.
-                            */}
-                            {!loading && filteredData?.length === 0 && (
-                              <tr>
-                                <td colSpan={4} className="px-4 py-10 text-center border border-stroke dark:border-strokedark">
-                                  <p className="font-medium text-black dark:text-white">
-                                    {searchTerm ? 'No matching accounts' : 'No ledger accounts to show'}
-                                  </p>
-                                  <p className="mt-1 text-sm text-bodydark2 dark:text-bodydark">
-                                    {searchTerm
-                                      ? <>Nothing matches &ldquo;{searchTerm}&rdquo;. Search by account name or number — journal references like CRJ-… are not searched here.</>
-                                      : 'The ledger returned no accounts.'}
-                                  </p>
-                                </td>
-                              </tr>
-                            )}
-
-                            {!loading && filteredData && filteredData.map((item, i) => (
-                              <tr
-                                key={i}
-                                className={`hover:bg-gray-2 dark:hover:bg-meta-4 cursor-pointer ${
-                                  selectedItem?.number === item.number ? 'bg-blue-200 dark:bg-blue-700' : 'even:bg-gray-3 dark:even:bg-boxdark'
-                                }`}
-                                onClick={() => handleRowClick(item)}
-                              >
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark">{item?.account_name}</td>
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark text-center">{item?.number}</td>
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right">{formatNumberComma(Number(item?.debit) || 0)}</td>
-                                <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right">{formatNumberComma(Number(item?.credit) || 0)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                          {/* Table Footer - Totals */}
-                          <tfoot className="bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark text-sm sticky bottom-0">
-                            <tr className="bg-gray-2 dark:bg-boxdark font-semibold">
-                              <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark" colSpan={2}>Total:</td>
-                              {/* While loading these would read 0.00 off an empty array —
-                                  a real-looking figure for a total nobody has computed yet.
-                                  An em dash says "not known", which is the truth. */}
-                              <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark">
-                                {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
-                              </td>
-                              <td className="px-4 py-2 border border-stroke dark:border-strokedark text-right bg-slate-50 dark:bg-boxdark">
-                                {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
-                              </td>
-                            </tr>
-                          </tfoot>
-                        </table>
+                        {!loading && filteredData && filteredData.map((item, i) => (
+                          <tr
+                            key={i}
+                            className={`cursor-pointer hover:bg-whiten dark:hover:bg-meta-4 ${
+                              selectedItem?.number === item.number ? 'bg-olive-50 font-semibold dark:bg-olive-950' : ''
+                            }`}
+                            onClick={() => handleRowClick(item)}
+                          >
+                            <td className={rt.tdPin}>{item?.account_name}</td>
+                            <td className={rt.td}>{item?.number}</td>
+                            <td className={rt.tdNum}>{formatNumberComma(Number(item?.debit) || 0)}</td>
+                            <td className={rt.tdNum}>{formatNumberComma(Number(item?.credit) || 0)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      {/* Grand total at the bottom, where accountants look for it. */}
+                      <tfoot>
+                        <tr className={rt.grand}>
+                          <td className={rt.tdPin} colSpan={2}>Total:</td>
+                          {/* While loading these would read 0.00 off an empty array, a real-looking
+                              figure for a total nobody has computed yet. An em dash says "not known". */}
+                          <td className={rt.tdNum}>
+                            {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
+                          </td>
+                          <td className={rt.tdNum}>
+                            {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </CardBody>
               </Card>

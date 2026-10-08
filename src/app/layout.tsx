@@ -98,8 +98,13 @@ export default function RootLayout({
         {/* The app's one toast container. Each page layout used to mount its own, so a toast
             fired just before a page change (a save that returns to the list, sign-in) was
             unmounted with the page that fired it. */}
+        {/* Top right, but BELOW the header (Phase 8): at the top they covered the bell, the user menu and
+            the phone Menu button; at the bottom they covered the sticky Save bar (StickyActions). */}
         <ToastContainer
           position="top-right"
+          style={{ top: '5.5rem' }}
+          toastClassName="font-satoshi"
+          bodyClassName="font-satoshi"
           autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}

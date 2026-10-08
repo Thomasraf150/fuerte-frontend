@@ -9,7 +9,8 @@ import {
   useRenewableBorrowersPaginated,
   RenewableBorrowerRow,
 } from "@/hooks/useRenewableBorrowersPaginated";
-import Button from '@/components/Button';
+import ErrorAlert from "@/components/ErrorAlert";
+import StatusBadge from "@/components/StatusBadge";
 import CustomDatatable from "@/components/CustomDatatable";
 import { Card, CardBody } from "@/components/Card";
 import ReactSelect from "@/components/ReactSelect";
@@ -50,21 +51,38 @@ const peso = (raw: string | number | null | undefined): string => {
 };
 
 /**
- * Standing pill. A flagged borrower is always RED — the 2-cut-off rule already
+ * Standing pill. A flagged borrower is always danger — the 2-cut-off rule already
  * means "problem na", so there is no softer tier to communicate.
  */
 const StandingBadge: React.FC<{ row: RenewableBorrowerRow }> = ({ row }) => {
-  if (!row.is_problem) {
-    return (
-      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/40 dark:text-green-300">
-        ✓ Good standing
-      </span>
-    );
-  }
+  if (!row.is_problem) return <StatusBadge tone="approved">Good standing</StatusBadge>;
   return (
-    <span className="inline-flex items-center rounded-full bg-danger/10 px-2.5 py-0.5 text-xs font-semibold text-danger dark:bg-danger/20 dark:text-danger">
-      ⚠ {row.problem_cutoffs} cut-off{row.problem_cutoffs === 1 ? "" : "s"} · ₱{peso(row.problem_shortfall)}
-    </span>
+    <StatusBadge tone="danger">
+      {row.problem_cutoffs} cut-off{row.problem_cutoffs === 1 ? "" : "s"} · ₱{peso(row.problem_shortfall)}
+    </StatusBadge>
+  );
+};
+
+/** One renewable borrower on a phone: name, what they could renew for, and standing. */
+const RenewablePhoneRow: React.FC<{ row: RenewableBorrowerRow }> = ({ row }) => {
+  const branch = `${row.branch_name ?? "—"}${row.sub_branch_name ? " / " + row.sub_branch_name : ""}`;
+  return (
+    <div className="min-w-0">
+      <div className="flex items-start justify-between gap-3">
+        <p className="line-clamp-2 break-normal font-semibold uppercase leading-snug text-black dark:text-white">
+          {row.borrower_name}
+        </p>
+        <p className="shrink-0 whitespace-nowrap text-right font-semibold tabular-nums text-black dark:text-white">
+          ₱{peso(row.total_pn_amount)}
+        </p>
+      </div>
+      <p className="mt-0.5 text-sm text-body dark:text-bodydark">
+        {branch} · {row.renewable_loan_count} renewable loan{Number(row.renewable_loan_count) === 1 ? "" : "s"}
+      </p>
+      <p className="mt-1">
+        <StandingBadge row={row} />
+      </p>
+    </div>
   );
 };
 
@@ -164,13 +182,13 @@ const RenewableBorrowersList: React.FC = () => {
       {
         name: "Renewable Loans",
         cell: (r) => (
-          <span className="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">
+          <StatusBadge tone="neutral" icon={false}>
             {r.renewable_loan_count}
-          </span>
+          </StatusBadge>
         ),
         center: true,
       },
-      { name: "Total PN", cell: (r) => `₱${peso(r.total_pn_amount)}`, right: true },
+      { name: "Total PN", cell: (r) => <span className="tabular-nums">₱{peso(r.total_pn_amount)}</span>, right: true },
       { name: "Latest Released", cell: (r) => (r.latest_released_date ? String(r.latest_released_date).slice(0, 10) : "—") },
       { name: "Standing", cell: (r) => <StandingBadge row={r} /> },
     ],
@@ -200,7 +218,7 @@ const RenewableBorrowersList: React.FC = () => {
       </div>
 
       <Card>
-        <div className="p-4 grid grid-cols-1 md:grid-cols-4 gap-3 border-b border-stroke dark:border-strokedark">
+        <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-3 border-b border-stroke dark:border-strokedark">
           <div className="flex flex-col">
             <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Group</label>
             <ReactSelect
@@ -252,16 +270,14 @@ const RenewableBorrowersList: React.FC = () => {
         </div>
 
         {error && (
-          <div className="m-4 p-3 bg-danger/10 border border-danger text-danger rounded flex items-center justify-between">
-            <span>Error loading renewable borrowers: {error}</span>
-            <Button variant="secondary" size="sm" className="ml-2" onClick={refresh}>
-              Retry
-            </Button>
-          </div>
+          <CardBody className="pb-0 sm:pb-0">
+            <ErrorAlert title="The renewable borrowers didn't load." detail={error} onRetry={refresh} />
+          </CardBody>
         )}
 
         <CardBody className="overflow-x-auto">
           <CustomDatatable
+            loadFailed={Boolean(error)}
             apiLoading={loading}
             columns={columns}
             data={data}
@@ -269,6 +285,7 @@ const RenewableBorrowersList: React.FC = () => {
             enableCustomHeader={true}
             title={""}
             serverSidePagination={serverSidePaginationProps}
+            mobileRow={(row) => <RenewablePhoneRow row={row} />}
           />
         </CardBody>
       </Card>

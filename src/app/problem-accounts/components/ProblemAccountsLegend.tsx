@@ -16,7 +16,7 @@ import { METRIC_HELP, RED } from "./ProblemAccountsColumns";
  * missed cut-offs COUNT, so the opening sentence names both.
  */
 const ProblemAccountsLegend: React.FC = () => (
-  <div className="border-b border-stroke px-4 py-3 text-xs leading-relaxed text-body dark:border-strokedark dark:text-bodydark">
+  <div className="border-b border-stroke px-4 py-3 sm:px-6 text-xs leading-relaxed text-body dark:border-strokedark dark:text-bodydark">
     <p>
       <span className="font-semibold" style={{ color: RED }}>
         Red figures

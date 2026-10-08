@@ -28,6 +28,7 @@ const bankListCol = (handleUpdateRowClick: (row: DataBank) => void, handleDelete
       )
     },
     sortable: true,
+    hide: 1439,
   },
   {
     name: 'Email',
@@ -41,6 +42,7 @@ const bankListCol = (handleUpdateRowClick: (row: DataBank) => void, handleDelete
       )
     },
     sortable: true,
+    hide: 1439,
   },
   {
     name: 'Action',

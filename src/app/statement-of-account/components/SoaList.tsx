@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import { Card, CardBody } from '@/components/Card';
+import LoanPhoneRow from '@/components/LoanPhoneRow';
 import soaListColumn from './SoaListColumn';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
@@ -53,6 +54,7 @@ const SoaList: React.FC = () => {
                   apiLoading={loansLoading}
                   columns={column(handleRowClick)}
                   onRowClicked={handleRowClick}
+                  mobileRow={(row) => <LoanPhoneRow row={row} />}
                   data={dataLoans}
                   serverSidePagination={{ ...soaSearchProps, recordType: 'loan', recordTypePlural: 'loans' }}
                   enableCustomHeader={true}

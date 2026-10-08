@@ -1,40 +1,29 @@
 import React from 'react';
+import StatusBadge, { type StatusTone } from '@/components/StatusBadge';
 
 /**
  * Batch status as the office reads it, not as the database stores it.
  * Shared by the batch list and the review screen so the two can never
- * disagree about the same batch — they previously carried duplicate maps
- * with a comment asking whoever edited one to remember the other.
+ * disagree about the same batch. Renders the shared StatusBadge (word + icon
+ * + colour); the words are the office's, the tones follow the badge's meanings.
  */
-/**
- * Uses theme tokens, NOT `red-*` / `gray-*`: this project's tailwind config
- * sets `red` and `gray` to single hex strings, so every numbered shade of
- * those two palettes is a dead class that renders unstyled. `next build`
- * does not catch it.
- */
-const STATUS: Record<string, { cls: string; label: string }> = {
-  uploaded: { cls: 'bg-whiten text-body', label: 'Uploaded' },
-  // sky, not blue: blue draws the olive brand scale, too close to Posted's green.
-  validating: { cls: 'bg-sky-100 text-sky-700', label: 'Checking…' },
-  validated: { cls: 'bg-sky-100 text-sky-700', label: 'Checked' },
-  committing: { cls: 'bg-amber-100 text-amber-700', label: 'Posting…' },
-  committed: { cls: 'bg-green-100 text-green-700', label: 'Posted' },
-  reversed: { cls: 'bg-rose-100 text-rose-700', label: 'Cancelled' },
-  failed: { cls: 'bg-danger/10 text-danger', label: 'Failed' },
+const STATUS: Record<string, { tone: StatusTone; label: string }> = {
+  uploaded: { tone: 'neutral', label: 'Uploaded' },
+  validating: { tone: 'progress', label: 'Checking…' },
+  validated: { tone: 'approved', label: 'Checked' },
+  committing: { tone: 'progress', label: 'Posting…' },
+  committed: { tone: 'posted', label: 'Posted' },
+  reversed: { tone: 'closed', label: 'Cancelled' },
+  failed: { tone: 'danger', label: 'Failed' },
 };
 
 export default function StatusPill({
   status,
-  size = 'md',
 }: {
   status: string;
+  /** Kept so existing callers compile; the badge has one size. */
   size?: 'sm' | 'md';
 }) {
-  const s = STATUS[status] ?? { cls: 'bg-whiten text-body', label: status };
-  const pad = size === 'sm' ? 'px-2.5 py-0.5' : 'px-3 py-1';
-  return (
-    <span className={`rounded-full ${pad} text-xs font-medium uppercase tracking-wide ${s.cls}`}>
-      {s.label}
-    </span>
-  );
+  const s = STATUS[status] ?? { tone: 'neutral' as StatusTone, label: status };
+  return <StatusBadge tone={s.tone}>{s.label}</StatusBadge>;
 }

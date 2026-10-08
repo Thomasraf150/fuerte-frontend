@@ -10,6 +10,16 @@ import Button from '@/components/Button';
 // description
 // type_of_loan
 
+/** The row's buttons: the table's Action cell and the phone card both draw these. */
+export const renderLoanCodeActions = (row: DataRowLoanCodes, handleRowClick: (row: DataRowLoanCodes) => void) => (
+  <div className="flex items-center gap-2">
+      <Button variant="secondary" size="sm" onClick={() => handleRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
+      <Tooltip text="Remove">
+        <Trash2 size="16" className="text-cyan-400 cursor-pointer"/>
+      </Tooltip>
+  </div>
+);
+
 const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): TableColumn<DataRowLoanCodes>[] => [
   {
     name: 'Loan Code',
@@ -38,16 +48,7 @@ const loanCodeListColumn = (handleRowClick: (row: DataRowLoanCodes) => void): Ta
     name: 'Action',
     minWidth: '190px',
     button: true,
-    cell: row => {
-      return (
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => handleRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
-          <Tooltip text="Remove">
-            <Trash2 size="16" className="text-cyan-400 cursor-pointer"/>
-          </Tooltip>
-        </div>
-      );
-    },
+    cell: row => renderLoanCodeActions(row, handleRowClick),
   },
 ];
 

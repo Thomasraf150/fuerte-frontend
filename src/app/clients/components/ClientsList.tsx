@@ -6,6 +6,8 @@ import clientListColumn from './ClientListColumn';
 import { DataRowClientList } from '@/utils/DataTypes';
 import useClients from '@/hooks/useClients';
 import Button from '@/components/Button';
+import { PhoneRowText } from '@/components/EntityListLayout';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 
 // const data: DataRowClientList[] = [
@@ -53,18 +55,14 @@ const ClientsList: React.FC = () => {
             <CardBody>
               {/* <Button variant="secondary" >Create</Button> */}
               {clientsError && (
-                <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                  Error loading clients: {clientsError}
-                  <Button variant="secondary" size="sm" className="ml-2"
-                    onClick={refresh}>
-                    Retry
-                  </Button>
-                </div>
+                <ErrorAlert title="The clients didn't load." detail={clientsError} onRetry={refresh} />
               )}
               <CustomDatatable
+                loadFailed={Boolean(clientsError)}
                 apiLoading={clientsLoading}
                 title={``}
                 columns={column(handleRowClick)}
+                mobileRow={(row) => <PhoneRowText title={row.name} sub={`Penalty ${row.penalty_rate}`} />}
                 enableCustomHeader={true}
                 data={dataClients}
                 serverSidePagination={serverSidePaginationProps}

@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
-import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
+import LoanPhoneRow from '@/components/LoanPhoneRow';
 import CustomDatatable from '@/components/CustomDatatable';
 import { Card, CardHeader, CardBody } from '@/components/Card';
 import loansListColumn from './LoansListColumn';
@@ -43,17 +44,19 @@ const LoansLists: React.FC = () => {
               <CardHeader title="Loans List" />
               <CardBody>
                 {loansError && (
-                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                    Error loading payment posting loans: {loansError}
-                    <Button variant="secondary" size="sm" className="ml-2" onClick={refresh}>
-                      Retry
-                    </Button>
-                  </div>
+                  <ErrorAlert
+                    title="The loans didn't load."
+                    detail={loansError}
+                    onRetry={refresh}
+                    className="mb-4"
+                  />
                 )}
                 <CustomDatatable
+                  loadFailed={Boolean(loansError)}
                   apiLoading={loansLoading}
                   columns={column(handleRowClick)}
                   onRowClicked={handleRowClick}
+                  mobileRow={(row) => <LoanPhoneRow row={row} />}
                   data={dataLoans}
                   enableCustomHeader={true}
                   title={''}

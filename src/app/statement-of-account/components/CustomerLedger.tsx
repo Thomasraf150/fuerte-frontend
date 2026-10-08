@@ -5,6 +5,10 @@
 import React, { useEffect } from 'react';
 import { CustomerLedgerData, BorrLoanRowData } from '@/utils/DataTypes';
 import { formatMoneyOrBlank, formatNumberComma } from '@/utils/helper';
+import { rt } from '@/components/ReportTable';
+
+// The first column stays put while the other 14 scroll sideways, on every screen width.
+const PIN = 'sticky left-0 z-[1] bg-white dark:bg-boxdark';
 
 interface OMProps {
   custLedgerData: CustomerLedgerData[] | undefined;
@@ -32,71 +36,71 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
         <h4 className="font-medium mb-4 pl-3 text-black dark:text-white">
           Customer Ledger
         </h4>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1800px] text-sm text-left text-body dark:text-bodydark">
-            <thead className="text-xs text-black uppercase bg-teal-50 dark:bg-meta-4 dark:text-bodydark">
+        <div className={rt.wrap}>
+          <table className={`${rt.table} min-w-[1800px] whitespace-nowrap`}>
+            <thead className={rt.thead}>
               <tr>
-                <th scope="col" className="px-4 py-3 w-32 whitespace-nowrap sticky left-0 bg-teal-50 dark:bg-meta-4">Debit</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-24 bg-teal-50 dark:bg-meta-4">Credit</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap sticky left-44 bg-teal-50 dark:bg-meta-4">Running Balance</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap bg-teal-50 dark:bg-meta-4">Due Date</th>
-                <th scope="col" className="px-4 py-3 w-32 text-left whitespace-nowrap">Date Paid</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Collection</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Penalty</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Principal</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Bank Charge</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Other Charge</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">AP or Refund</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Payment UA/SP</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Penalty UA/SP</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">UA/SP</th>
-                <th scope="col" className="px-4 py-3 w-32 text-center whitespace-nowrap">Advanced Payment</th>
+                <th scope="col" className={`${rt.thNum} ${PIN}`}>Debit</th>
+                <th scope="col" className={rt.thNum}>Credit</th>
+                <th scope="col" className={rt.thNum}>Running Balance</th>
+                <th scope="col" className={rt.th}>Due Date</th>
+                <th scope="col" className={rt.th}>Date Paid</th>
+                <th scope="col" className={rt.thNum}>Collection</th>
+                <th scope="col" className={rt.thNum}>Penalty</th>
+                <th scope="col" className={rt.thNum}>Principal</th>
+                <th scope="col" className={rt.thNum}>Bank Charge</th>
+                <th scope="col" className={rt.thNum}>Other Charge</th>
+                <th scope="col" className={rt.thNum}>AP or Refund</th>
+                <th scope="col" className={rt.thNum}>Payment UA/SP</th>
+                <th scope="col" className={rt.thNum}>Penalty UA/SP</th>
+                <th scope="col" className={rt.thNum}>UA/SP</th>
+                <th scope="col" className={rt.thNum}>Advanced Payment</th>
               </tr>
             </thead>
             <tbody>
             {loading ? (
-              <tr className="bg-white dark:bg-boxdark">
+              <tr>
                 <th colSpan={12} className="text-center p-5">Please wait..</th>
               </tr>
             ) : (
               custLedgerData && custLedgerData.map((item, i) => (
-                <tr key={i} className="bg-white dark:bg-boxdark">
-                  <th scope="row" className="px-4 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-boxdark">{formatMoneyOrBlank(item.debit)}</th>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-24 bg-white dark:bg-boxdark">{formatMoneyOrBlank(item.credit)}</td>
-                  <td className="px-4 py-4 text-left whitespace-nowrap sticky left-44 bg-white dark:bg-boxdark">{formatMoneyOrBlank(item.running_balance)}</td>
-                  <td className="px-4 py-4 text-left whitespace-nowrap left-64">{item.due_date}</td>
-                  <td className="px-4 py-4 text-left">{item.date_paid}</td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.collection)}</td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.penalty)}</td>
-                  <td className="px-4 py-4 text-center"></td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.bank_charge)}</td>
-                  <td className="px-4 py-4 text-center"></td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.ap_refund)}</td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.payment_ua_sp)}</td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.penalty_ua_sp)}</td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.ua_sp)}</td>
-                  <td className="px-4 py-4 text-center">{formatMoneyOrBlank(item.advance_payment)}</td>
+                <tr key={i}>
+                  <th scope="row" className={`${rt.tdNum} ${PIN} font-normal`}>{formatMoneyOrBlank(item.debit)}</th>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.credit)}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.running_balance)}</td>
+                  <td className={rt.td}>{item.due_date}</td>
+                  <td className={rt.td}>{item.date_paid}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.collection)}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.penalty)}</td>
+                  <td className={rt.tdNum}></td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.bank_charge)}</td>
+                  <td className={rt.tdNum}></td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.ap_refund)}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.payment_ua_sp)}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.penalty_ua_sp)}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.ua_sp)}</td>
+                  <td className={rt.tdNum}>{formatMoneyOrBlank(item.advance_payment)}</td>
                 </tr>
               ))
             )}
             </tbody>
             <tfoot>
-              <tr className="font-semibold text-black dark:text-white">
-                <th scope="row" className="px-4 py-3 text-base sticky left-0 bg-teal-50 dark:bg-meta-4"></th>
-                <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-meta-4"></td>
-                <td className="px-4 py-3 text-left sticky left-32 bg-teal-50 dark:bg-meta-4"></td>
-                <td className="px-4 py-3 text-left left-64">Total</td>
-                <td className="px-4 py-3 text-center"></td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalCollection)}</td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalPenalty)}</td>
-                <td className="px-4 py-3 text-center"></td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalBankCharge)}</td>
-                <td className="px-4 py-3 text-center"></td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalApRefund)}</td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalPaymentUaSp)}</td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalPenaltyUaSp)}</td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalUaSp)}</td>
-                <td className="px-4 py-3 text-center">{formatNumberComma(totalAdvancePayment)}</td>
+              <tr className={rt.grand}>
+                <th scope="row" className={`${rt.tdNum} ${PIN}`}></th>
+                <td className={rt.tdNum}></td>
+                <td className={rt.tdNum}></td>
+                <td className={rt.td}>Total</td>
+                <td className={rt.td}></td>
+                <td className={rt.tdNum}>{formatNumberComma(totalCollection)}</td>
+                <td className={rt.tdNum}>{formatNumberComma(totalPenalty)}</td>
+                <td className={rt.tdNum}></td>
+                <td className={rt.tdNum}>{formatNumberComma(totalBankCharge)}</td>
+                <td className={rt.tdNum}></td>
+                <td className={rt.tdNum}>{formatNumberComma(totalApRefund)}</td>
+                <td className={rt.tdNum}>{formatNumberComma(totalPaymentUaSp)}</td>
+                <td className={rt.tdNum}>{formatNumberComma(totalPenaltyUaSp)}</td>
+                <td className={rt.tdNum}>{formatNumberComma(totalUaSp)}</td>
+                <td className={rt.tdNum}>{formatNumberComma(totalAdvancePayment)}</td>
               </tr>
             </tfoot>
           </table>

@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -105,10 +106,11 @@ const CdjDetailPage: React.FC = () => {
           <Breadcrumb pageName="Error" />
         </div>
         <Card className="p-10">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-danger mb-4">
-              {error || 'CDJ entry not found'}
-            </h3>
+          <div className="space-y-4 text-left">
+            <ErrorAlert
+              title={error ? "This disbursement entry didn't load." : "This disbursement entry couldn't be found."}
+              detail={error ?? 'CDJ entry not found'}
+            />
             <Button variant="primary"
               onClick={handleBack}>
               Back to Cash Disbursements Journal

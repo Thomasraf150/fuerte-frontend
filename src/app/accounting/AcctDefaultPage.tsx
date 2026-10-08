@@ -1,6 +1,6 @@
 "use client";
 
-import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import React, { useEffect, useState } from "react";
 import useAccountingDashboard from "@/hooks/useAccountingDashboard";
 import NrUdiSummary from "@/components/Dashboard/components/NrUdiSummary";
@@ -99,11 +99,7 @@ const AcctDefaultPage: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-danger text-lg">{error}</div>
-        <Button variant="primary"
-          onClick={refetch}>
-          Retry
-        </Button>
+        <ErrorAlert title="The dashboard didn't load." detail={error} onRetry={refetch} />
       </div>
     );
   }

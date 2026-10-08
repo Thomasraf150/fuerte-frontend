@@ -5,6 +5,7 @@ import { TableColumn } from "react-data-table-component";
 import { ProblemAccountRow } from "@/hooks/useProblemAccountsPaginated";
 import { formatNumber } from "@/utils/formatNumber";
 import { formatCount } from "@/utils/helper";
+import StatusBadge from "@/components/StatusBadge";
 
 const num = (raw: string) => parseFloat(raw) || 0;
 const fmt = (raw: string) => formatNumber(num(raw));
@@ -74,8 +75,9 @@ const HIDE_BELOW_DESKTOP = 1279; // breakdown columns: laptop and up
  * list shows the same METRIC_HELP text for missed cut-offs, UA and SP, and the
  * mobile cards spell those terms out.
  */
-const HeaderLabel: React.FC<{ help: string; children: React.ReactNode }> = ({
+const HeaderLabel: React.FC<{ help: string; right?: boolean; children: React.ReactNode }> = ({
   help,
+  right,
   children,
 }) => (
   <span
@@ -90,7 +92,7 @@ const HeaderLabel: React.FC<{ help: string; children: React.ReactNode }> = ({
      * almost never comes to this, but allowing a mid-word break guarantees a
      * character is never silently lost.
      */
-    className="block whitespace-normal leading-tight"
+    className={`block whitespace-normal leading-tight${right ? " text-right" : ""}`}
     // `anywhere`, not Tailwind's `break-words` (= `break-word`): with ten
     // columns sharing 1196px each header gets ~95px of content, and
     // "UNCOLLECTED" measures ~102px at the shared 14px uppercase style.
@@ -141,9 +143,9 @@ const borrowerColumn = (
           {row.borrower_name}
         </span>
         {info.isFirst && info.count > 1 && (
-          <span className="px-1.5 py-0.5 text-[10px] rounded bg-whiten text-body dark:bg-meta-4 dark:text-bodydark">
+          <StatusBadge tone="neutral" icon={false} className="shrink-0">
             {info.count} loans
-          </span>
+          </StatusBadge>
         )}
       </div>
     );
@@ -188,13 +190,14 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
   },
   {
     id: "pa-missed",
-    name: <HeaderLabel help={METRIC_HELP.missed}>Missed Cut-offs</HeaderLabel>,
+    name: <HeaderLabel help={METRIC_HELP.missed} right>Missed Cut-offs</HeaderLabel>,
     sortable: false,
     right: true,
     cell: (row) => {
       const n = row.cutoffs_missed ?? 0;
       return n > 0 ? (
         <span
+          className="tabular-nums"
           style={{ color: RED, fontWeight: 700 }}
           title={`${formatCount(n)} missed — ${METRIC_HELP.missed}`}
         >
@@ -207,30 +210,30 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
   },
   {
     id: "pa-scheduled",
-    name: <HeaderLabel help={METRIC_HELP.scheduled}>Scheduled</HeaderLabel>,
+    name: <HeaderLabel help={METRIC_HELP.scheduled} right>Scheduled</HeaderLabel>,
     sortable: false,
     right: true,
     hide: HIDE_BELOW_WIDE,
-    cell: (row) => fmt(row.cumulative_scheduled),
+    cell: (row) => <span className="tabular-nums">{fmt(row.cumulative_scheduled)}</span>,
   },
   {
     id: "pa-collected",
-    name: <HeaderLabel help={METRIC_HELP.collected}>Collected</HeaderLabel>,
+    name: <HeaderLabel help={METRIC_HELP.collected} right>Collected</HeaderLabel>,
     sortable: false,
     right: true,
     hide: HIDE_BELOW_WIDE,
-    cell: (row) => fmt(row.cumulative_collected),
+    cell: (row) => <span className="tabular-nums">{fmt(row.cumulative_collected)}</span>,
   },
   {
     id: "pa-ua",
-    name: <HeaderLabel help={METRIC_HELP.ua}>Uncollected (UA)</HeaderLabel>,
+    name: <HeaderLabel help={METRIC_HELP.ua} right>Uncollected (UA)</HeaderLabel>,
     sortable: false,
     right: true,
     hide: HIDE_BELOW_DESKTOP,
     cell: (row) => {
       const v = num(row.ua_amount);
       return v > 0 ? (
-        <span style={{ color: RED, fontWeight: 700 }} title={`Uncollected (UA): ${METRIC_HELP.ua}`}>
+        <span className="tabular-nums" style={{ color: RED, fontWeight: 700 }} title={`Uncollected (UA): ${METRIC_HELP.ua}`}>
           {fmt(row.ua_amount)}
         </span>
       ) : (
@@ -240,14 +243,14 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
   },
   {
     id: "pa-sp",
-    name: <HeaderLabel help={METRIC_HELP.sp}>Shorts (SP)</HeaderLabel>,
+    name: <HeaderLabel help={METRIC_HELP.sp} right>Shorts (SP)</HeaderLabel>,
     sortable: false,
     right: true,
     hide: HIDE_BELOW_DESKTOP,
     cell: (row) => {
       const v = num(row.sp_amount);
       return v > 0 ? (
-        <span style={{ color: RED, fontWeight: 700 }} title={`Shorts (SP): ${METRIC_HELP.sp}`}>
+        <span className="tabular-nums" style={{ color: RED, fontWeight: 700 }} title={`Shorts (SP): ${METRIC_HELP.sp}`}>
           {fmt(row.sp_amount)}
         </span>
       ) : (
@@ -257,11 +260,11 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
   },
   {
     id: "pa-shortfall",
-    name: <HeaderLabel help={METRIC_HELP.shortfall}>Shortfall</HeaderLabel>,
+    name: <HeaderLabel help={METRIC_HELP.shortfall} right>Shortfall</HeaderLabel>,
     sortable: false,
     right: true,
     cell: (row) => (
-      <span style={{ color: RED, fontWeight: 800 }} title={METRIC_HELP.shortfall}>
+      <span className="tabular-nums" style={{ color: RED, fontWeight: 800 }} title={METRIC_HELP.shortfall}>
         {fmt(row.shortfall)}
       </span>
     ),

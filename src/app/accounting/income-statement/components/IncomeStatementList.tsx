@@ -286,14 +286,16 @@ const IncomeStatementList: React.FC = () => {
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-4">
-            <Card>
+            <Card className="no-print">
             <CardHeader title="Report Filters" />
             <CardBody>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Start Date */}
                 <div className="flex flex-col relative z-50">
-                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Start Date</label>
+                  <label htmlFor="is-start-date" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Start Date</label>
                   <DatePicker
+                    id="is-start-date"
+                    wrapperClassName="w-full"
                     selected={startDate}
                     onChange={handleStartDateChange}
                     selectsStart
@@ -307,8 +309,10 @@ const IncomeStatementList: React.FC = () => {
 
                 {/* End Date */}
                 <div className="flex flex-col relative z-50">
-                  <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">End Date</label>
+                  <label htmlFor="is-end-date" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">End Date</label>
                   <DatePicker
+                    id="is-end-date"
+                    wrapperClassName="w-full"
                     selected={endDate}
                     onChange={handleEndDateChange}
                     selectsEnd
@@ -330,6 +334,7 @@ const IncomeStatementList: React.FC = () => {
                     defaultValue="all"
                     render={({ field }) => (
                       <ReactSelect
+                        aria-label="Group"
                         {...field}
                         options={optionsGroup}
                         placeholder="Select a group..."
@@ -358,6 +363,7 @@ const IncomeStatementList: React.FC = () => {
                     rules={{ required: 'Branch is required' }}
                     render={({ field }) => (
                       <ReactSelect
+                        aria-label="Branch"
                         {...field}
                         options={optionsBranch}
                         placeholder="Select a branch..."
@@ -386,6 +392,7 @@ const IncomeStatementList: React.FC = () => {
                     rules={{ required: 'Sub Branch is required' }}
                     render={({ field }) => (
                       <ReactSelect
+                        aria-label="Sub-branch"
                         {...field}
                         options={optionsSubBranch}
                         placeholder="Select a sub branch..."
@@ -440,13 +447,15 @@ const IncomeStatementList: React.FC = () => {
               <CardHeader
                 title="Income Statement"
                 actions={
-                  <Button variant="secondary"
-                    type="button"
-                    onClick={handlePrint}
-                    disabled={printLoading || !startDate || !endDate || !branchSubId}>
-                    <Printer size={18} />
-                    {printLoading ? 'Generating PDF...' : 'Print Report'}
-                  </Button>
+                  <div className="no-print">
+                    <Button variant="secondary"
+                      type="button"
+                      onClick={handlePrint}
+                      disabled={printLoading || !startDate || !endDate || !branchSubId}>
+                      <Printer size={18} />
+                      {printLoading ? 'Generating PDF...' : 'Print Report'}
+                    </Button>
+                  </div>
                 }
               />
               <CardBody className="overflow-x-auto">
@@ -501,7 +510,6 @@ const IncomeStatementList: React.FC = () => {
                 varianceTotal={sectionTotals.varianceIntInc}
                 totalLabel="Total Interest Income"
                 showHeader={true}
-                headerRowBgClass="bg-sky-50 dark:bg-sky-900/20 border-sky-400"
               />
 
               {/* Other Revenue */}
@@ -511,13 +519,11 @@ const IncomeStatementList: React.FC = () => {
                 monthlyTotals={sectionTotals.othRevenue}
                 varianceTotal={sectionTotals.varianceOthRev}
                 totalLabel="Total Other Revenue"
-                headerRowBgClass="bg-sky-50 dark:bg-sky-900/20 border-sky-400"
                 summaryRows={[
                   {
                     label: 'Total Income',
                     monthlyValues: computedTotals.totalIncome,
                     varianceValue: computedTotals.totalIncomeVariance,
-                    bgClass: 'bg-primary dark:bg-primary',
                   },
                 ]}
               />
@@ -529,9 +535,6 @@ const IncomeStatementList: React.FC = () => {
                 monthlyTotals={sectionTotals.lessExpense}
                 varianceTotal={sectionTotals.varianceLessExp}
                 totalLabel="TOTAL EXPENSE"
-                totalRowBgClass="bg-meta-1 dark:bg-meta-1"
-                totalRowTextClass="text-white"
-                headerRowBgClass="bg-danger/10 dark:bg-danger/20 border-danger"
               />
 
               {/* Direct Financing Cost */}
@@ -541,13 +544,11 @@ const IncomeStatementList: React.FC = () => {
                 monthlyTotals={sectionTotals.directFin}
                 varianceTotal={sectionTotals.varianceDirectFin}
                 totalLabel="Total Direct Financing"
-                headerRowBgClass="bg-orange-50 dark:bg-orange-900/20 border-orange-400"
                 summaryRows={[
                   {
                     label: 'NET INCOME BEFORE OTHER INCOME',
                     monthlyValues: computedTotals.netIncomeBeforeOther,
                     varianceValue: computedTotals.netBeforeOtherVariance,
-                    bgClass: 'bg-primary dark:bg-primary',
                   },
                 ]}
               />
@@ -559,13 +560,11 @@ const IncomeStatementList: React.FC = () => {
                 monthlyTotals={sectionTotals.othIncExpense}
                 varianceTotal={sectionTotals.varianceOthIncExp}
                 totalLabel="Total"
-                headerRowBgClass="bg-purple-50 dark:bg-purple-900/20 border-purple-400"
                 summaryRows={[
                   {
                     label: 'NET INCOME BEFORE INCOME TAX',
                     monthlyValues: computedTotals.netIncomeBeforeTax,
                     varianceValue: computedTotals.netBeforeTaxVariance,
-                    bgClass: 'bg-primary dark:bg-primary',
                   },
                 ]}
               />
@@ -577,26 +576,25 @@ const IncomeStatementList: React.FC = () => {
                 monthlyTotals={sectionTotals.incomeTax}
                 varianceTotal={sectionTotals.varianceIncTax}
                 totalLabel="Total Income Tax"
-                headerRowBgClass="bg-green-50 dark:bg-green-900/20 border-green-400"
                 summaryRows={[
                   {
                     label: 'NET INCOME AFTER TAX',
                     monthlyValues: computedTotals.netIncomeAfterTax,
                     varianceValue: computedTotals.netAfterTaxVariance,
-                    bgClass: 'bg-meta-3 dark:bg-meta-3',
+                    emphasis: 'grand',
                   },
                 ]}
               />
 
               {/* ═══════════ SUB-BRANCH BREAKDOWN SECTION ═══════════ */}
               {showBreakdown && branchSubId === 'all' && (
-                <div className="mt-12 border-t-4 border-blue-400 pt-8">
+                <div className="mt-12 border-t border-black/70 pt-8 dark:border-bodydark">
                   {/* Section Title */}
-                  <div className="mb-8 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg">
-                    <h2 className="text-xl font-bold text-white">
+                  <div className="mb-8">
+                    <h2 className="font-display text-xl font-semibold text-black dark:text-white">
                       Sub-Branch Breakdown
                     </h2>
-                    <p className="text-blue-100 text-sm mt-1">
+                    <p className="text-body dark:text-bodydark text-sm mt-1">
                       Detailed breakdown showing contributions from each sub-branch
                     </p>
                   </div>

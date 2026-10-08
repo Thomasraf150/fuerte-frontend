@@ -4,6 +4,7 @@ import React, { useId } from "react";
 import Link from "next/link";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import { applicationsNav } from "./applicationsNav";
+import { NAV_CURRENT, NAV_GROUP_HAS } from "./currentNav";
 
 /*
  * Classes match the other link groups (Loans, Payments), plus `min-h-12 lg:min-h-10` on
@@ -65,8 +66,9 @@ const SubLink = ({ href, active, compact, children }: SubLinkProps) => (
   <li>
     <Link
       href={href}
+      data-nav-own=""
       aria-current={active ? "page" : undefined}
-      className={`${SUB_LINK} ${compact ? "text-sm" : ""} ${active ? "text-white" : "text-bodydark2"}`}
+      className={`${SUB_LINK} ${compact ? "text-sm" : ""} text-bodydark2 ${NAV_CURRENT}`}
     >
       {children}
     </Link>
@@ -97,7 +99,7 @@ const ApplicationsMenuItem = ({ pathname, compact = false }: { pathname: string;
             aria-expanded={open}
             aria-controls={menuId}
             onClick={handleClick}
-            className={`${TOGGLE} ${nav.inGroup ? "!bg-primary text-white" : ""}`}
+            className={`${TOGGLE} ${NAV_GROUP_HAS}`}
           >
             <DocumentIcon />
             Applications

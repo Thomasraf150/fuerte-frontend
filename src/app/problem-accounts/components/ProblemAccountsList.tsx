@@ -9,7 +9,7 @@ import {
   useProblemAccountsPaginated,
   ProblemAccountRow,
 } from "@/hooks/useProblemAccountsPaginated";
-import Button from '@/components/Button';
+import ErrorAlert from "@/components/ErrorAlert";
 import CustomDatatable from "@/components/CustomDatatable";
 import { Card, CardBody } from "@/components/Card";
 import ReactSelect from "@/components/ReactSelect";
@@ -214,7 +214,7 @@ const ProblemAccountsList: React.FC = () => {
           each control ~130px, which truncated both the sub-branch value and the
           search placeholder.
         */}
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 border-b border-stroke dark:border-strokedark">
+        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 border-b border-stroke dark:border-strokedark">
           <div className="flex flex-col">
             <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Group
@@ -291,20 +291,11 @@ const ProblemAccountsList: React.FC = () => {
 
         <ProblemAccountsLegend />
 
-        {/*
-          `bg-danger/10 border-danger text-danger` rendered as an unstyled box:
-          tailwind.config.ts assigns `red` a bare string, which wipes out the
-          whole default shade scale, so every `red-<shade>` utility in this app
-          is dead. `danger` is the live token. Stacks on a phone so a long
-          message and the Retry button do not fight for one row.
-        */}
+        {/* Same CardBody padding as the filters and the table: one left edge. */}
         {error && (
-          <div className="m-4 flex flex-col gap-2 rounded border border-danger bg-danger/10 p-3 text-danger sm:flex-row sm:items-center sm:justify-between">
-            <span>Error loading problem accounts: {error}</span>
-            <Button variant="secondary" size="sm" className="shrink-0" onClick={refresh}>
-              Retry
-            </Button>
-          </div>
+          <CardBody className="pb-0 sm:pb-0">
+            <ErrorAlert title="The problem accounts didn't load." detail={error} onRetry={refresh} />
+          </CardBody>
         )}
 
         {/*
@@ -330,6 +321,7 @@ const ProblemAccountsList: React.FC = () => {
 
         <CardBody className="hidden md:block">
           <CustomDatatable
+            loadFailed={Boolean(error)}
             apiLoading={loading}
             columns={columns}
             data={data}

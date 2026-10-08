@@ -25,7 +25,8 @@ const aETblColumn = (): TableColumn<RowAcctgEntry>[] => [
   },
   {
     name: 'Amount',
-    cell: row => formatMoneyOrBlank(row?.amount),
+    cell: row => <span className="tabular-nums">{formatMoneyOrBlank(row?.amount)}</span>,
+    right: true,
     sortable: true,
   },
   {

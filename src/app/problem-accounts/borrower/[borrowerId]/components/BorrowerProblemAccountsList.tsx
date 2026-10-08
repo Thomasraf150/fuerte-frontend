@@ -1,6 +1,6 @@
 "use client";
 
-import Button from '@/components/Button';
+import ErrorAlert from "@/components/ErrorAlert";
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "nextjs-toploader/app";
@@ -130,15 +130,13 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
         loading={loading && data.length === 0}
       />
 
-      {/* `red-<shade>` utilities are dead in this app's Tailwind config — see
-          the note in ProblemAccountsList. `danger` is the live token. */}
       {error && (
-        <div className="mb-4 flex flex-col gap-2 rounded border border-danger bg-danger/10 p-3 text-danger sm:flex-row sm:items-center sm:justify-between">
-          <span>Error loading borrower&apos;s problem accounts: {error}</span>
-          <Button variant="secondary" size="sm" className="shrink-0" onClick={refresh}>
-            Retry
-          </Button>
-        </div>
+        <ErrorAlert
+          className="mb-4"
+          title="This borrower's problem accounts didn't load."
+          detail={error}
+          onRetry={refresh}
+        />
       )}
 
       <Card>
@@ -162,6 +160,7 @@ const BorrowerProblemAccountsList: React.FC<Props> = ({ borrowerId }) => {
 
         <CardBody className="hidden md:block">
           <CustomDatatable
+            loadFailed={Boolean(error)}
             apiLoading={loading}
             columns={columns}
             data={data}

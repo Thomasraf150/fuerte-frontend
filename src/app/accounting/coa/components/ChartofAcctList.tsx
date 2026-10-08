@@ -13,6 +13,7 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
 import useCoaGroupView from '@/hooks/useCoaGroupView';
 import Swal from 'sweetalert2';
+import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 // 'all' is this screen's no-filter sentinel (not '') — kept as a real option so
@@ -146,7 +147,7 @@ const AccountRow = React.memo<AccountRowProps>(({
           )}
           <span>
             {account.account_name}
-            {!isActive && <span className="ml-2 text-xs text-danger">(Inactive)</span>}
+            {!isActive && <StatusBadge tone="closed" className="ml-2">Inactive</StatusBadge>}
           </span>
           {/* How much is hidden, so expanding is an informed click. */}
           {childCount > 0 && !isExpanded && (
@@ -159,7 +160,7 @@ const AccountRow = React.memo<AccountRowProps>(({
       <td className="px-6 py-2 text-sm font-medium">{account.number}</td>
       <td className="px-6 py-2 text-sm font-medium"><GroupBranchCell branchSub={account?.branch_sub} /></td>
       <td className="px-6 py-2 text-sm text-center">{account.is_debit === '1' ? 'Yes' : 'No'}</td>
-      <td className="px-6 py-2 text-sm text-center">
+      <td className="px-6 py-2 text-sm text-right tabular-nums">
         {Number(account.balance).toLocaleString('en-US', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
@@ -586,7 +587,7 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
                     <th scope="col" className="px-6 py-3">Account #</th>
                     <th scope="col" className="px-6 py-3">Group / Branch</th>
                     <th scope="col" className="px-6 py-3 text-center">Is Debit</th>
-                    <th scope="col" className="px-6 py-3 text-center">Balance</th>
+                    <th scope="col" className="px-6 py-3 text-right">Balance</th>
                     <th scope="col" className="min-w-[17rem] px-6 py-3 text-center">Actions</th>
                   </tr>
                 </thead>

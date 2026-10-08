@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle, Eye, XCircle } from 'react-feather';
 import { Card as SharedCard, CardHeader } from '@/components/Card';
 import StatusPill from '../../../components/StatusPill';
+import StatusBadge from '@/components/StatusBadge';
+import ErrorAlert from '@/components/ErrorAlert';
 import { useImport, type ImportBatchPayload, type OpeningBalancePreview as Preview } from '@/hooks/useImport';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { addAmounts, validateDoubleEntry } from '@/utils/financial';
@@ -59,9 +61,7 @@ export default function OpeningBalancePreview({ batchRef }: { batchRef: string }
 
   if (error) {
     return (
-      <div className="rounded-sm border border-danger/40 bg-danger/10 px-7 py-4 text-sm text-danger">
-        {error}
-      </div>
+      <ErrorAlert title="The opening balance didn't load." detail={error} />
     );
   }
 
@@ -225,13 +225,9 @@ function BalanceProof({ totals }: { totals: Preview['totals'] }) {
             tone="text-black dark:text-white"
           />
 
-          <div
-            className={`justify-self-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-              isValid ? 'bg-green-100 text-green-700' : 'bg-danger/10 text-danger'
-            }`}
-          >
+          <StatusBadge tone={isValid ? 'approved' : 'danger'} className="justify-self-center">
             {isValid ? 'equal' : 'out by ' + formatCurrency(difference.toFixed(2))}
-          </div>
+          </StatusBadge>
 
           {/* The credit side is shown as its TOTAL first, with the two legs
               beneath it. Listing 7,100 beside a debit of 35,000 made the

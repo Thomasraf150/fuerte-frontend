@@ -5,6 +5,7 @@ import { Eye, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { formatMoneyOrBlank } from '@/utils/helper';
+import { StatusBadge } from '@/components/StatusBadge';
 
 const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
   {
@@ -42,23 +43,16 @@ const gVTblColumn = (): TableColumn<RowAcctgEntry>[] => [
   },
   {
     name: 'Amount',
-    cell: row => formatMoneyOrBlank(row?.amount),
+    cell: row => <span className="tabular-nums">{formatMoneyOrBlank(row?.amount)}</span>,
+    right: true,
     sortable: true,
   },
   {
     name: 'Status',
     cell: row => (
-          <span
-            className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${
-            row?.is_cancelled === true ? 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300' 
-            : 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300'
-          }`}
-          >
-            {`${
-              row?.is_cancelled === true ? 'Cancelled' :
-              'Active'
-            }`}
-          </span>
+          <StatusBadge tone={row?.is_cancelled === true ? 'closed' : 'neutral'}>
+            {row?.is_cancelled === true ? 'Cancelled' : 'Active'}
+          </StatusBadge>
         ),
     sortable: true,
   },

@@ -6,6 +6,7 @@ import type {
 } from '@/types/chartOfAccounts';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { SkeletonBlock } from '@/components/LoadingStates';
+import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 
 interface TransactionHistoryTableProps {
@@ -202,13 +203,13 @@ const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = ({
                           )}
                         </td>
                         <td className="hidden px-4 py-4 sm:table-cell">
-                          <span className="inline-flex rounded bg-primary bg-opacity-10 px-2 py-1 text-xs font-medium text-primary">
+                          <StatusBadge tone="neutral" icon={false}>
                             {transaction.journal_type}
-                          </span>
+                          </StatusBadge>
                           {transaction.is_cancelled && (
-                            <span className="ml-1 inline-flex rounded bg-danger bg-opacity-10 px-2 py-1 text-xs font-medium text-danger">
+                            <StatusBadge tone="closed" className="ml-1">
                               Cancelled
-                            </span>
+                            </StatusBadge>
                           )}
                         </td>
                         <td className="px-4 py-4 text-right">

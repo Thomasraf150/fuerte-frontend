@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import EntityListLayout from '@/components/EntityListLayout';
-import subAreaListCol from './SubAreaListColumn';
+import EntityListLayout, { PhoneRowText } from '@/components/EntityListLayout';
+import subAreaListCol, { renderSubAreaActions } from './SubAreaListColumn';
 import { DataSubArea } from '@/utils/DataTypes';
 import SubAreaForm from './SubAreaForm';
 import useSubArea from '@/hooks/useSubArea';
@@ -23,6 +23,8 @@ const SubAreaList: React.FC = () => {
       entityName="Sub Area"
       data={dataSubArea || []}
       columns={subAreaListCol}
+      mobileRow={(row) => <PhoneRowText title={row.name} sub={`Mother area: ${row.area.name}`} />}
+      mobileActions={renderSubAreaActions}
       loading={paginationLoading}
       error={subAreaError}
       serverSidePagination={serverSidePaginationProps}

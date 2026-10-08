@@ -10,7 +10,7 @@ const ListFilters: React.FC<{ pagination: ServerSidePaginationProps; searchQuery
   <>
     {/* Status Filter Chips - Responsive layout for all screen sizes */}
     {pagination.onStatusFilterChange && (
-      <div className="px-4 sm:px-6 md:px-7 pb-4">
+      <div className="pb-4">
         <StatusFilterChips
           selectedStatus={pagination.statusFilter || 'all'}
           onStatusChange={pagination.onStatusFilterChange}
@@ -39,7 +39,7 @@ const ListFilters: React.FC<{ pagination: ServerSidePaginationProps; searchQuery
 
     {/* Date & Branch Filters - Integrated below status filters */}
     {pagination.onMonthChange && pagination.onYearChange && pagination.onBranchSubIdChange && (
-      <div className="px-4 sm:px-6 md:px-7 pb-4">
+      <div className="pb-4">
         <DateBranchFilters
           month={pagination.month ?? null}
           year={pagination.year ?? null}

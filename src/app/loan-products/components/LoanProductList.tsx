@@ -3,10 +3,12 @@
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
-import loanProductListColumn from './LoanProductListColumn';
+import loanProductListColumn, { renderLoanProductActions } from './LoanProductListColumn';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
 import useLoanProducts from '@/hooks/useLoanProducts';
 import Button from '@/components/Button';
+import { PhoneRowText } from '@/components/EntityListLayout';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = loanProductListColumn;
@@ -48,17 +50,14 @@ const LoanProductList: React.FC = () => {
                   <Button variant="primary" onClick={handleCreateLoanProduct}>Create</Button>
                 </Toolbar>
                 {loanProductsError && (
-                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                    Error loading loan products: {loanProductsError}
-                    <Button variant="secondary" size="sm" className="ml-2"
-                      onClick={refresh}>
-                      Retry
-                    </Button>
-                  </div>
+                  <ErrorAlert title="The loan products didn't load." detail={loanProductsError} onRetry={refresh} />
                 )}
                 <CustomDatatable
+                  loadFailed={Boolean(loanProductsError)}
                   apiLoading={loanProductsLoading}
                   columns={column(handleRowClick)}
+                  mobileRow={(row) => <PhoneRowText title={row.description} sub={`Loan code ${row.loan_code_id} · Terms ${row.terms}`} />}
+                  mobileActions={(row) => renderLoanProductActions(row, handleRowClick)}
                   data={dataLoanProducts}
                   enableCustomHeader={true}
                   onRowClicked={handleWholeRowClick}

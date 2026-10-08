@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import chiefListCol from './ChiefListColumn';
+import chiefListCol, { renderChiefActions } from './ChiefListColumn';
 import { DataChief } from '@/utils/DataTypes';
 import ChiefForm from './ChiefForm';
 import useChiefs from '@/hooks/useChiefs';
 import { Plus, SkipBack } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { FormCloseButton, useRevealFormWhenStacked } from '@/components/EntityListLayout';
+import { FormCloseButton, useRevealFormWhenStacked, PhoneRowText } from '@/components/EntityListLayout';
 import Button from '@/components/Button';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
@@ -83,6 +83,8 @@ const ChiefList: React.FC = () => {
                   apiLoading={chiefFetchLoading}
                   title="Chief List"
                   columns={column(handleUpdateRowClick, handleDeleteRow)}
+                  mobileRow={(row) => <PhoneRowText title={row.name} sub={row.address} />}
+                  mobileActions={(row) => renderChiefActions(row, handleUpdateRowClick, handleDeleteRow)}
                   data={dataChief || []}
                   serverSidePagination={{
                     totalRecords: chiefPaginator?.total ?? 0,

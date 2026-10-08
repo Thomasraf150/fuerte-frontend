@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "./SidebarLinkGroup";
+import { NAV_CURRENT, NAV_GROUP_HAS, NavCurrentContext, useCurrentNav } from "@/components/Sidebar/currentNav";
 import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
 import { Server } from 'react-feather';
 
@@ -15,6 +16,7 @@ interface SidebarProps {
 
 const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
+  const { navRef, current: currentNav } = useCurrentNav(pathname);
 
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
@@ -99,7 +101,8 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
         {/* <!-- Sidebar Menu --> */}
-        <nav className="mt-2 px-4 py-4 lg:px-5">
+        <NavCurrentContext.Provider value={currentNav}>
+        <nav ref={navRef} className="mt-2 px-4 py-4 lg:px-5">
           {/* <!-- System Group --> */}
           <div>
             <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">
@@ -117,9 +120,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                          pathname === "/" && "!bg-primary text-white"
-                        }`}
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
                         onClick={(e) => {
                           e.preventDefault();
                           sidebarExpanded
@@ -161,9 +162,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Summary
                             </Link>
@@ -182,9 +181,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/approvals"
-                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                    pathname.includes("approvals") && "!bg-primary text-white"
-                  }`}
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
                 >
                   <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="" />
@@ -197,9 +194,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/loan-calculator"
-                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                    pathname === "/loan-calculator" && "!bg-primary text-white"
-                  }`}
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
                 >
                   <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v4h10V4H7zm0 6v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 14v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v6h2v-6h-2zM7 18v2h2v-2H7zm4 0v2h2v-2h-2z" fill="" />
@@ -212,9 +207,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/imports"
-                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                    pathname.includes("imports") && "!bg-primary text-white"
-                  }`}
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
                 >
                   <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="" />
@@ -245,21 +238,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                          (
-                            pathname === "/accounting/unadjusted-trial-balance" ||
-                            pathname === "/accounting/adjusting-entries" ||
-                            pathname === "/accounting/adjusted-trial-balance" ||
-                            pathname === "/accounting/balance-sheet" ||
-                            pathname === "/accounting/cash-flow" ||
-                            pathname === "/accounting/cash-position" ||
-                            pathname === "/accounting/aging" ||
-                            pathname === "/accounting/closing-entries" ||
-                            pathname === "/accounting/refund-schedule" ||
-                            pathname === "/accounting/udi-schedule" ||
-                            pathname === "/accounting/commission-schedule"
-                            ) && "!bg-primary text-white"
-                        }`}
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
                         onClick={(e) => {
                           e.preventDefault();
                           sidebarExpanded
@@ -297,9 +276,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/unadjusted-trial-balance"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/unadjusted-trial-balance" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Unadjusted Trial Balance
                             </Link>
@@ -307,9 +284,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/adjusting-entries"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/adjusting-entries" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Adjusting Entries
                             </Link>
@@ -317,9 +292,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/adjusted-trial-balance"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/adjusted-trial-balance" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Adjusted Trial Balance
                             </Link>
@@ -327,9 +300,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/balance-sheet"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/balance-sheet" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Balance Sheet
                             </Link>
@@ -337,9 +308,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/cash-flow"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/cash-flow" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Cash Flow
                             </Link>
@@ -347,9 +316,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/cash-position"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/cash-position" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Cash Position
                             </Link>
@@ -357,9 +324,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/aging"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/aging" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Aging
                             </Link>
@@ -367,9 +332,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/closing-entries"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/closing-entries" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Closing Entries
                             </Link>
@@ -377,9 +340,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/refund-schedule"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/refund-schedule" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Refund Schedule
                             </Link>
@@ -387,9 +348,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/udi-schedule"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/udi-schedule" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               UDI Schedule
                             </Link>
@@ -397,9 +356,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/commission-schedule"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/commission-schedule" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Commission Schedule
                             </Link>
@@ -427,12 +384,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                          (pathname === "/accounting/general-voucher" ||
-                            pathname === '/accounting/debit-memo' ||
-                            pathname === "/accounting/credit-memo"
-                            ) && "!bg-primary text-white"
-                        }`}
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
                         onClick={(e) => {
                           e.preventDefault();
                           sidebarExpanded
@@ -470,9 +422,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/general-voucher"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/general-voucher" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               General Voucher
                             </Link>
@@ -480,9 +430,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/debit-memo"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/debit-memo" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Debit Memo
                             </Link>
@@ -490,9 +438,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/credit-memo"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/credit-memo" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Credit Memo
                             </Link>
@@ -521,12 +467,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                          (pathname === "/accounting/general-journal" ||
-                            pathname === '/accounting/cdj' ||
-                            pathname === "/accounting/crj"
-                            ) && "!bg-primary text-white"
-                        }`}
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
                         onClick={(e) => {
                           e.preventDefault();
                           sidebarExpanded
@@ -564,9 +505,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/general-journal"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/general-journal" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               General Journal
                             </Link>
@@ -574,9 +513,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/cdj"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/cdj" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Cash Disbursements Journal
                             </Link>
@@ -584,9 +521,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/crj"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/crj" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Cash Receipts Journal
                             </Link>
@@ -604,10 +539,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/accounting/general-ledger"
-                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                    pathname.includes("accounting/general-ledger") &&
-                    "!bg-primary text-white"
-                  }`}
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
                 >
                   <Server size={14} /> 
                   General Ledger
@@ -618,9 +550,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/accounting/loan-proceed-settings"
-                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                    pathname === "/accounting/loan-proceed-settings" && "!bg-primary text-white"
-                  }`}
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
                 >
                   <Server size={14} />
                   Loan Proceed Settings
@@ -639,14 +569,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       {/* <!-- Dropdown Menu End --> */}
                       <Link
                         href="#"
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${
-                          (pathname === "/accounting/coa" 
-                            // ||
-                            // pathname === '/pending-release-loans' ||
-                            // pathname.includes("dashboard") || 
-                            //   pathname.includes("pending-release-loans")
-                            ) && "!bg-primary text-white"
-                        }`}
+                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
                         onClick={(e) => {
                           e.preventDefault();
                           sidebarExpanded
@@ -693,9 +616,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/vendors"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/vendors" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Vendors
                             </Link>
@@ -703,9 +624,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/coa"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/coa" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Chart of Accounts
                             </Link>
@@ -713,9 +632,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           <li>
                             <Link
                               href="/accounting/loan-proceed-settings"
-                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                pathname === "/accounting/loan-proceed-settings" && "text-white"
-                              }`}
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Loan Proceed Settings
                             </Link>
@@ -732,6 +649,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           </div>
 
         </nav>
+        </NavCurrentContext.Provider>
         {/* <!-- Sidebar Menu --> */}
       </div>
     </aside>

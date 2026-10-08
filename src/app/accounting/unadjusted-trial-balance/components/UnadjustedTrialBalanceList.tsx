@@ -8,9 +8,22 @@ import useFinancialStatement from '@/hooks/useFinancialStatement';
 import useTrialBalance from '@/hooks/useTrialBalance';
 import { GitBranch, Plus } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
+import { DataLoanProceedList, DataAccBalanceSheet, DataTbRow } from '@/utils/DataTypes';
 import { formatNumberComma } from '@/utils/helper';
 import TrialBalanceSkeleton from '@/components/LoadingStates/TrialBalanceSkeleton';
+import { rt, indent } from '@/components/ReportTable';
+
+const TB_SECTIONS: ReadonlyArray<readonly [string, keyof DataTbRow, string]> = [
+  ['ASSETS', 'assets', 'TOTAL ASSETS'],
+  ['LIABILITIES', 'liabilities', 'TOTAL LIABILITIES'],
+  ['CAPITAL', 'capital', 'TOTAL CAPITAL'],
+  ['REVENUE', 'revenue', 'TOTAL REVENUE'],
+  ['EXPENSES', 'expenses', 'TOTAL EXPENSES'],
+];
+
+// Same rounding as before: sum, then toFixed(2).
+const sumOf = (rows: any[], pick: (item: any) => number): number =>
+  parseFloat(rows.reduce((acc: number, item: any) => acc + pick(item), 0).toFixed(2));
 
 const UnadjustedTrialBalanceList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -33,172 +46,59 @@ const UnadjustedTrialBalanceList: React.FC = () => {
             <div className={`col-span-2`}>
               <Card>
                 <CardBody>
-                  <div className="overflow-x-auto">
-                        <table className="min-w-full border-collapse">
-                          {/* Table Header */}
-                          <thead className="bg-gray-2 dark:bg-meta-4 text-body dark:text-bodydark text-sm sticky top-0">
-                            <tr>
-                              <th className="px-4 py-2 border dark:border-strokedark bg-slate-50 dark:bg-meta-4">Account Name</th>
-                              <th className="px-4 py-2 border dark:border-strokedark bg-slate-50 dark:bg-meta-4">Account Number</th>
-                              <th className="px-4 py-2 border dark:border-strokedark bg-slate-50 dark:bg-meta-4">Debit</th>
-                              <th className="px-4 py-2 border dark:border-strokedark bg-slate-50 dark:bg-meta-4">Credit</th>
-                            </tr>
-                          </thead>
-                          {/* Table Body */}
-                          <tbody className="text-sm">
-                            {loading ? (
-                              <tr>
-                                <td colSpan={4} className="p-0 border-0">
-                                  <TrialBalanceSkeleton rows={15} columns={4} />
-                                </td>
-                              </tr>
-                            ) : dataUtb !== undefined ? (
-                              <>
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>ASSETS</td>
+                  <div className={rt.wrap}>
+                    <table className={rt.table}>
+                      <thead className={rt.thead}>
+                        <tr>
+                          <th className={rt.thPin}>Account Name</th>
+                          <th className={rt.th}>Account Number</th>
+                          <th className={rt.thNum}>Debit</th>
+                          <th className={rt.thNum}>Credit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          <tr>
+                            <td colSpan={4} className="p-0">
+                              <TrialBalanceSkeleton rows={15} columns={4} />
+                            </td>
+                          </tr>
+                        ) : dataUtb !== undefined ? (
+                          TB_SECTIONS.map(([title, key, totalLabel]) => {
+                            const rows: any[] = dataUtb[key];
+                            return (
+                              <React.Fragment key={key}>
+                                <tr>
+                                  <td className={rt.groupPin} colSpan={4}>{title}</td>
                                 </tr>
-                                {dataUtb.assets.length > 0 ? dataUtb.assets.map((item: any, i: number) =>
-                                    <tr key={`${i}`} className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                      <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
-                                      <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
-                                      <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
-                                      <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
-                                    </tr>
-                                ) : (
-                                  <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
+                                {rows.length > 0 ? rows.map((item: any, i: number) => (
+                                  <tr key={`${i}`}>
+                                    <td className={rt.tdPin} style={indent(1)}>{item?.account_name}</td>
+                                    <td className={rt.td}>{item?.number}</td>
+                                    <td className={rt.tdNum}>{formatNumberComma(item?.total_debit)}</td>
+                                    <td className={rt.tdNum}>{formatNumberComma(item?.total_credit)}</td>
+                                  </tr>
+                                )) : (
+                                  <tr>
+                                    <td className={rt.emptyRow} colSpan={4}>NO DATA</td>
                                   </tr>
                                 )}
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4 font-bold">
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL ASSETS</td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.assets.reduce((acc: number, item: any) => acc + (item?.total_debit || 0), 0).toFixed(2)))}
-                                  </td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.assets.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
-                                  </td>
+                                <tr className={rt.subtotal}>
+                                  <td className={rt.tdPin}>{totalLabel}</td>
+                                  <td className={rt.td}></td>
+                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.total_debit || 0)))}</td>
+                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.total_credit || 0)))}</td>
                                 </tr>
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>LIABILITIES</td>
-                                </tr>
-                                {dataUtb.liabilities.length > 0 ? dataUtb.liabilities.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
-                                  </tr>
-                                ) : (
-                                  <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
-                                  </tr>
-                                )}
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4 font-bold">
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL LIABILITIES</td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.liabilities.reduce((acc: number, item: any) => acc + (item?.total_debit || 0), 0).toFixed(2)))}
-                                  </td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.liabilities.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
-                                  </td>
-                                </tr>
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>CAPITAL</td>
-                                </tr>
-                                {dataUtb.capital.length > 0 ? dataUtb.capital.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
-                                  </tr>
-                                ) : (
-                                  <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
-                                  </tr>
-                                )}
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4 font-bold">
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL CAPITAL</td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.capital.reduce((acc: number, item: any) => acc + (item?.total_debit || 0), 0).toFixed(2)))}
-                                  </td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.capital.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
-                                  </td>
-                                </tr>
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>REVENUE</td>
-                                </tr>
-                                {dataUtb.revenue.length > 0 ? dataUtb.revenue.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
-                                  </tr>
-                                ) : (
-                                  <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
-                                  </tr>
-                                )}
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4 font-bold">
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL REVENUE</td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.revenue.reduce((acc: number, item: any) => acc + (item?.total_debit || 0), 0).toFixed(2)))}
-                                  </td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.revenue.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
-                                  </td>
-                                </tr>
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                  <td className="px-4 py-2 border dark:border-strokedark bg-neutral-700 dark:bg-neutral-600 text-whiten" colSpan={4}>EXPENSES</td>
-                                </tr>
-                                {dataUtb.expenses.length > 0 ? dataUtb.expenses.map((item: any, i: number) =>
-                                  <tr key={`${i}`} className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark">{item?.account_name}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-center">{item?.number}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_debit)}</td>
-                                    <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">{formatNumberComma(item?.total_credit)}</td>
-                                  </tr>
-                                ) : (
-                                  <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
-                                    <td className="px-4 py-2 border dark:border-strokedark text-boxdark-2 dark:text-bodydark text-center" colSpan={4}>NO DATA</td>
-                                  </tr>
-                                )}
-                                <tr className="even:bg-gray-3 dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4 font-bold">
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">TOTAL EXPENSES</td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark" colSpan={1}></td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.expenses.reduce((acc: number, item: any) => acc + (item?.total_debit || 0), 0).toFixed(2)))}
-                                  </td>
-                                  <td className="px-4 py-2 border dark:border-strokedark dark:text-bodydark text-right">
-                                    {formatNumberComma(parseFloat(dataUtb.expenses.reduce((acc: number, item: any) => acc + (item?.total_credit || 0), 0).toFixed(2)))}
-                                  </td>
-                                </tr>
-                              </>
-                            ) : (
-                              <tr>
-                                <td colSpan={4} className="text-center py-2 border dark:border-strokedark dark:text-bodydark">No data available</td>
-                              </tr>
-                            )}
-                          </tbody>
-                          {/* Table Footer - Totals */}
-                          {/* <tfoot className="bg-gray-2 text-black text-sm sticky bottom-0">
-                            <tr className="bg-gray-2 font-semibold">
-                              <td className="px-4 py-2 border text-right bg-slate-50" colSpan={2}>Total:</td>
-                              <td className="px-4 py-2 border text-right bg-slate-50">
-                                {formatNumberComma(dataUtb?.reduce((acc, item) => acc + (Number(item?.total_debit) || 0), 0) ?? 0)}
-                              </td>
-                              <td className="px-4 py-2 border text-right bg-slate-50">
-                                {formatNumberComma(dataUtb?.reduce((acc, item) => acc + (Number(item?.total_credit) || 0), 0) ?? 0)}
-                              </td>
-                            </tr>
-                          </tfoot> */}
-                        </table>
+                              </React.Fragment>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan={4} className={rt.emptyRow}>No data available</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </CardBody>
               </Card>

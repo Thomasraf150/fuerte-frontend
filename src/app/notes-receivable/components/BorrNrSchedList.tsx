@@ -17,6 +17,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import useBranches from '@/hooks/useBranches';
 import { formatNumberComma, formatMoneyOrBlank } from '@/utils/helper';
 import { Card, CardBody } from "@/components/Card";
+import ErrorAlert from "@/components/ErrorAlert";
 
 // const column = soaListColumn;
 interface Option {
@@ -467,15 +468,7 @@ const BorrNrSchedList: React.FC = () => {
                 {initialLoading ? (
                   <NotesReceivableSkeleton rows={5} columns={months?.length || 3} />
                 ) : error ? (
-                  <div className="text-center py-8">
-                    <div className="text-danger mb-4">
-                      <p className="text-lg font-semibold">Error Loading Data</p>
-                      <p className="text-sm">{error}</p>
-                    </div>
-                    <Button variant="secondary" onClick={retry}>
-                      Retry
-                    </Button>
-                  </div>
+                  <ErrorAlert title="The notes receivable schedule didn't load." detail={error} onRetry={retry} />
                 ) : allLoadedData?.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-body">No data available for the selected date range.</p>
@@ -547,9 +540,9 @@ const BorrNrSchedList: React.FC = () => {
                         <tr>
                           <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm min-w-[200px] md:min-w-[320px] text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
                           <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>UDI</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Net Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Notes Receivable</th>
+                          <th className="px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>UDI</th>
+                          <th className="px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Net Receivable</th>
                           {months?.map(
                             (month) => (
                               <th
@@ -562,8 +555,8 @@ const BorrNrSchedList: React.FC = () => {
                               </th>
                             )
                           )}
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
-                          <th className="px-2 md:px-4 py-2 text-right text-xs md:text-sm text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
+                          <th className="px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm text-body dark:text-bodydark font-bold hidden lg:table-cell bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                          <th className="px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm text-body dark:text-bodydark font-bold bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Balance</th>
                         </tr>
                         <tr>
                           {Array(months?.length)
@@ -606,13 +599,13 @@ const BorrNrSchedList: React.FC = () => {
                                   {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                                 </td>
                                 <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
-                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right tabular-nums hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(pnAmount)}
                                 </td>
-                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right tabular-nums hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(udiAmount)}
                                 </td>
-                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark text-xs md:text-sm px-2 md:px-4 py-2 text-right tabular-nums hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(netReceivable)}
                                 </td>
 
@@ -625,7 +618,7 @@ const BorrNrSchedList: React.FC = () => {
                                     MONTH_FIELDS.map(({ key }, fieldIndex) => (
                                       <td
                                         key={`${monthIndex}-${fieldIndex}`}
-                                        className="border border-stroke dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
+                                        className="border border-stroke dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
                                         {formatMoneyOrBlank(monthlyData[key])}
                                       </td>
@@ -634,7 +627,7 @@ const BorrNrSchedList: React.FC = () => {
                                     Array(MONTH_FIELDS.length).fill(null).map((_, emptyIndex) => (
                                       <td
                                         key={`${monthIndex}-empty-${emptyIndex}`}
-                                        className="border border-stroke dark:border-strokedark px-1 md:px-2 py-1 text-right text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
+                                        className="border border-stroke dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs hidden xl:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                       >
                                         --
                                       </td>
@@ -642,10 +635,10 @@ const BorrNrSchedList: React.FC = () => {
                                   );
                                 })}
 
-                                <td className="border border-stroke dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(totalCollected)}
                                 </td>
-                                <td className="border border-stroke dark:border-strokedark px-2 md:px-4 py-2 text-right text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark px-2 md:px-4 py-2 text-right tabular-nums text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {formatNumberComma(balance)}
                                 </td>
                               </tr>

@@ -3,6 +3,7 @@
 import { SkeletonBlock } from '@/components/LoadingStates';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import Link from 'next/link';
@@ -58,10 +59,7 @@ export default function ImportsList() {
       />
       <CardBody>
         {error && (
-          <div className="rounded border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
-            {error}
-            <Button variant="secondary" size="sm" className="ml-3" onClick={load}>Retry</Button>
-          </div>
+          <ErrorAlert title="The imports didn't load." detail={error} onRetry={load} />
         )}
         {loading ? (
           <SkeletonBlock rows={4} label="Loading imports…" />

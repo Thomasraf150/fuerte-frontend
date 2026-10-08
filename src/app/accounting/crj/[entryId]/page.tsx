@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -105,10 +106,11 @@ const CrjDetailPage: React.FC = () => {
           <Breadcrumb pageName="Error" />
         </div>
         <Card className="p-10">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-danger mb-4">
-              {error || 'CRJ entry not found'}
-            </h3>
+          <div className="space-y-4 text-left">
+            <ErrorAlert
+              title={error ? "This receipt entry didn't load." : "This receipt entry couldn't be found."}
+              detail={error ?? 'CRJ entry not found'}
+            />
             <Button variant="primary"
               onClick={handleBack}>
               Back to Cash Receipts Journal

@@ -1,6 +1,7 @@
 "use client";
 
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import AEForm from './AEForm';
@@ -69,15 +70,15 @@ const AdjustingEntriesList: React.FC = () => {
                   </Button>
                 </Toolbar>
                   {adjustingEntriesError && (
-                    <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                      Error loading adjusting entries: {adjustingEntriesError}
-                      <Button variant="secondary" className="ml-2"
-                        onClick={refresh}>
-                        Retry
-                      </Button>
-                    </div>
+                    <ErrorAlert
+                      title="The adjusting entries didn't load."
+                      detail={`Error loading adjusting entries: ${adjustingEntriesError}`}
+                      onRetry={refresh}
+                      className="mb-4"
+                    />
                   )}
                   <CustomDatatable
+                    loadFailed={Boolean(adjustingEntriesError)}
                     apiLoading={paginationLoading}
                     title="AE List"
                     onRowClicked={handleWholeRowClick}

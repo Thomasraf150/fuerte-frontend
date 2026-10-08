@@ -6,6 +6,7 @@ import { TableColumn } from 'react-data-table-component';
 import { Plus, X } from 'react-feather';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import Button from '@/components/Button';
+import ErrorAlert from '@/components/ErrorAlert';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 
 /*
@@ -55,6 +56,14 @@ export const FormCloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) 
   </Button>
 );
 
+/** A phone card's text: the name in bold, one secondary line (Phase 8). */
+export const PhoneRowText: React.FC<{ title: React.ReactNode; sub?: React.ReactNode }> = ({ title, sub }) => (
+  <div className="min-w-0">
+    <p className="break-words font-semibold text-black dark:text-white">{title}</p>
+    {sub ? <p className="mt-0.5 break-words text-sm text-body dark:text-bodydark">{sub}</p> : null}
+  </div>
+);
+
 interface EntityListLayoutProps<T extends object> {
   title: string;
   entityName: string;
@@ -66,6 +75,9 @@ interface EntityListLayoutProps<T extends object> {
   loading: boolean;
   error: string | null;
   serverSidePagination: any;
+  /** Phone card text and buttons (CustomDatatable mobileRow / mobileActions). Server-side lists only. */
+  mobileRow?: (row: T) => React.ReactNode;
+  mobileActions?: (row: T, onEdit: (row: T) => void, onDelete: (row: T) => void) => React.ReactNode;
   refresh: () => Promise<void>;
   onDelete: (row: T) => Promise<void>;
   FormComponent: React.FC<{
@@ -84,6 +96,8 @@ function EntityListLayout<T extends object>({
   loading,
   error,
   serverSidePagination,
+  mobileRow,
+  mobileActions,
   refresh,
   onDelete,
   FormComponent,
@@ -133,20 +147,17 @@ function EntityListLayout<T extends object>({
                   </Button>
                 </div>
                 {error && (
-                  <div className="p-4 bg-danger/10 border border-danger text-danger rounded">
-                    Error loading {title.toLowerCase()}: {error}
-                    <Button variant="secondary" size="sm" className="ml-2"
-                      onClick={refresh}>
-                      Retry
-                    </Button>
-                  </div>
+                  <ErrorAlert title={`The ${title.toLowerCase()} didn't load.`} detail={error} onRetry={refresh} />
                 )}
-                <CustomDatatable
+                <CustomDatatable<T>
+                  loadFailed={Boolean(error)}
                   apiLoading={loading}
                   title={`${entityName} List`}
                   columns={columns(handleUpdateRowClick, handleDeleteRow)}
                   data={data}
                   serverSidePagination={serverSidePagination}
+                  mobileRow={mobileRow}
+                  mobileActions={mobileActions && ((row) => mobileActions(row, handleUpdateRowClick, handleDeleteRow))}
                 />
               </CardBody>
             </Card>

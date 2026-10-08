@@ -1,0 +1,51 @@
+/*
+ * Printing a financial report (Phase 5). Imported by components/ReportTable, so it only loads
+ * on the report pages. Hides the shell (sidebar, top header) and everything marked `no-print`
+ * (filters, buttons), prints black on white, keeps the rules, and repeats the table header on
+ * every page. The app shell is `h-screen overflow-hidden`, which would clip a long report to a
+ * single page, so those limits are lifted for print only.
+ */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  aside,
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .h-screen,
+  .overflow-hidden,
+  .overflow-x-auto,
+  .overflow-y-auto {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-row-group; /* not table-footer-group: that would repeat subtotals on every page */
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  .report-table,
+  .report-table * {
+    color: #000 !important;
+    background: #fff !important;
+    position: static !important;
+  }
+}

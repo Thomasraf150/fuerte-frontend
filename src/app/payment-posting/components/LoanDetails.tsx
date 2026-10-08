@@ -10,18 +10,7 @@ import OtherPaymentForm from './Form/OtherPaymentForm';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import Button from '@/components/Button';
 import { Card, CardHeader, CardBody } from '@/components/Card';
-/** One label and its figure (receipt row): the figure right-aligned in tabular numerals. */
-const Row: React.FC<{ label: string; children: React.ReactNode; total?: boolean; valueClass?: string }> = ({ label, children, total = false, valueClass = '' }) => (
-  <div className={`flex items-baseline justify-between gap-4 py-1.5 text-sm ${total ? 'mt-1 border-t border-stroke pt-2 font-bold dark:border-strokedark' : ''}`}>
-    <dt className={total ? 'text-black dark:text-white' : 'text-body dark:text-bodydark'}>{label}</dt>
-    <dd className={`text-right tabular-nums text-black dark:text-white ${valueClass}`}>{children}</dd>
-  </div>
-);
-
-const Panel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <dl className="rounded-lg border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">{children}</dl>
-);
-
+import { KeyValueColumns, KeyValueList, KeyValueRow } from '@/components/KeyValueList';
 interface OMProps {
   loanSingleData: BorrLoanRowData | undefined;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
@@ -38,6 +27,9 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
   const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
   const [selectedUdiSched, setSelectedUdiSched] = useState<BorrLoanRowData>();
 
+  // PARKED: this sum is missing a `+` before loan_details[5] and [6], so those two lines are
+  // statements of their own and never reach the total (it shows 1,200 less than the loan page).
+  // Left as is on purpose until Rafael decides; do not add the `+` here without his say.
   const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
                         Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
                         Number(loanSingleData?.loan_details[4]?.credit ?? 0)
@@ -71,25 +63,24 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
       <Card>
         {header}
         <CardBody>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Panel>
-          <Row label="Borrower" valueClass="uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</Row>
-          <Row label="PN Amount">{ formatNumber(Number(loanSingleData?.pn_amount)) }</Row>
-          <Row label="Status">{ loanStatus(loanSingleData?.status) }</Row>
-          <Row label="Monthly">{formatNumber(Number(loanSingleData?.monthly))}</Row>
-          <Row label="Loan Ref #:">{loanSingleData?.loan_ref}</Row>
-        </Panel>
-        <Panel>
-          <Row label="Term">{loanSingleData?.term} Mo/s.</Row>
-          <Row label="Total Deduction">{formatNumber(totalDeduction)}</Row>
-          <Row label="Total Interest">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</Row>
-          <Row label="Loan Proceeds" total>{formatNumber(Number(loanSingleData?.loan_proceeds))}</Row>
-        </Panel>
-        <Panel>
-          <Row label="Transaction Date">{formatDate(String(loanSingleData?.created_at))}</Row>
-        </Panel>
-        {/* Add more grid items as needed */}
-      </div>
+      <KeyValueColumns>
+        <KeyValueList>
+          <KeyValueRow label="Borrower" valueClass="uppercase">{loanSingleData?.borrower?.lastname + ', ' + loanSingleData?.borrower?.firstname}</KeyValueRow>
+          <KeyValueRow label="PN Amount">{ formatNumber(Number(loanSingleData?.pn_amount)) }</KeyValueRow>
+          <KeyValueRow label="Status">{ loanStatus(loanSingleData?.status) }</KeyValueRow>
+          <KeyValueRow label="Monthly">{formatNumber(Number(loanSingleData?.monthly))}</KeyValueRow>
+          <KeyValueRow label="Loan Ref #:">{loanSingleData?.loan_ref}</KeyValueRow>
+        </KeyValueList>
+        <KeyValueList>
+          <KeyValueRow label="Term">{loanSingleData?.term} Mo/s.</KeyValueRow>
+          <KeyValueRow label="Total Deduction">{formatNumber(totalDeduction)}</KeyValueRow>
+          <KeyValueRow label="Total Interest">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit))}</KeyValueRow>
+          <KeyValueRow label="Loan Proceeds" total>{formatNumber(Number(loanSingleData?.loan_proceeds))}</KeyValueRow>
+        </KeyValueList>
+        <KeyValueList>
+          <KeyValueRow label="Transaction Date">{formatDate(String(loanSingleData?.created_at))}</KeyValueRow>
+        </KeyValueList>
+      </KeyValueColumns>
         </CardBody>
       </Card>
 
@@ -102,43 +93,43 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                 title={<><span className="font-semibold">Loan Ref:</span> {loanSingleData?.loan_ref}</>}
               />
 
-              <div className="grid grid-cols-[auto_auto_1fr] sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6">
+              <div className="grid grid-cols-2 sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6">
                 <div className="flex items-center">
                   <p className="text-xs sm:text-sm font-semibold">Due Date</p>
                 </div>
-                <div className="hidden sm:flex items-center">
+                <div className="hidden sm:flex items-center justify-end">
                   <p className="text-xs sm:text-sm font-semibold">Amortization</p>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center justify-end">
                   <p className="text-xs sm:text-sm font-semibold">Interest</p>
                 </div>
-                <div className="text-right">
+                <div className="hidden text-right sm:block">
                   <p className="text-xs sm:text-sm font-semibold">Actions</p>
                 </div>
               </div>
 
               {loanSingleData?.loan_schedules?.map((item, i) => (
                 <div
-                  className="grid grid-cols-[auto_auto_1fr] sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6"
+                  className="grid grid-cols-2 sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6"
                   key={i}
                 >
                   <div className="flex items-center">
                     <p className="text-xs sm:text-sm text-black dark:text-white">{item?.due_date}</p>
                   </div>
-                  <div className="hidden sm:flex items-center">
-                    <p className="text-xs sm:text-sm text-black dark:text-white">{formatNumberComma(Number(item?.amount))}</p>
+                  <div className="hidden sm:flex items-center justify-end">
+                    <p className="text-xs sm:text-sm tabular-nums text-black dark:text-white">{formatNumberComma(Number(item?.amount))}</p>
                   </div>
-                  <div className="flex items-center">
-                    <p className="text-xs sm:text-sm text-black dark:text-white">
+                  <div className="flex items-center justify-end">
+                    <p className="text-xs sm:text-sm tabular-nums text-black dark:text-white">
                       {formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
                     </p>
                   </div>
 
                   {/* Button Group */}
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="col-span-2 flex flex-wrap justify-end gap-2 sm:col-span-1">
                     <Button
                       variant="secondary"
-                      className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
+                      className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                       onClick={() => handleProceedToOtherPay(item, loanSingleData?.loan_udi_schedules[i])}
                     >
                       <CreditCard size={15} />
@@ -149,7 +140,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                     {item?.amount > 0 ? (
                       <Button
                         variant="secondary"
-                        className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
+                        className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                         onClick={() => handleProceedToPay(item, loanSingleData?.loan_udi_schedules[i])}
                       >
                         <CreditCard size={15} />
@@ -159,7 +150,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                     ) : (
                       <Button
                         variant="secondary"
-                        className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
+                        className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                         disabled
                       >
                         <CheckCircle size={15} />
@@ -169,7 +160,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
 
                     <Button
                       variant="danger"
-                      className="w-full sm:w-auto whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
+                      className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
                       onClick={() => handleReversePayment(item)}
                       disabled={paymentLoading}
                     >

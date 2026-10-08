@@ -23,23 +23,13 @@ const subBranchListCol = (
     name: 'Branch',
     cell: row => row.name,
     sortable: true,
-    style: { minWidth: '200px' },
-    width: '200px',
   },
   {
     name: 'Address',
-    cell: row => {
-      return (
-        <div className='d-flex justify-content-left align-items-center text-truncate'>
-            <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{`${row.address.slice(0, 50)}...`}</span>
-            </div>
-        </div>
-      );
-    },
+    cell: row => (
+      <span className="block min-w-0 truncate" title={row.address}>{row.address}</span>
+    ),
     sortable: true,
-    style: { minWidth: '400px' },
-    width: '400px',
   },
   {
     name: 'User',
@@ -56,13 +46,13 @@ const subBranchListCol = (
   },
   {
     name: 'Action',
-    minWidth: '330px',
+    minWidth: '210px',
     button: true,
     cell: row => {
       const info = pendingByEntityId.get(Number(row.id));
       const isPending = !!info;
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 py-1">
           {isPending && (
             <PendingDeletionBadge
               info={info!}

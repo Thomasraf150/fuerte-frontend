@@ -44,12 +44,6 @@
     padding: 0 1rem;
   }
 
-  /* Hide less critical columns on mobile - Terms and Loan Proceeds */
-  .payment-posting-list [data-column-id="3"],
-  .payment-posting-list [data-column-id="5"] {
-    display: none !important;
-  }
-
   /* Better spacing for action buttons on mobile */
   .payment-posting-list .rdt_TableCell:last-child {
     min-width: 100px;

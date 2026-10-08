@@ -5,6 +5,14 @@ import { DataArea } from '@/utils/DataTypes';
 import { Edit3, Trash2 } from 'react-feather';
 import Button from '@/components/Button';
 
+/** The row's buttons: the table's Action cell and the phone card both draw these. */
+export const renderAreaActions = (row: DataArea, handleUpdateRowClick: (row: DataArea) => void, handleDeleteRow: (row: DataArea) => void) => (
+  <div className="flex items-center gap-2">
+      <Button variant="secondary" size="sm" onClick={() => handleUpdateRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
+      <Button variant="danger" size="sm" onClick={() => handleDeleteRow(row)}><Trash2 size={16} aria-hidden="true" />Remove</Button>
+  </div>
+);
+
 const areaListCol = (handleUpdateRowClick: (row: DataArea) => void, handleDeleteRow: (row: DataArea) => void): TableColumn<DataArea>[] => [
   {
     name: 'Company',
@@ -28,6 +36,7 @@ const areaListCol = (handleUpdateRowClick: (row: DataArea) => void, handleDelete
       )
     },
     sortable: true,
+    hide: 1439,
   },
   {
     name: 'Email',
@@ -41,19 +50,13 @@ const areaListCol = (handleUpdateRowClick: (row: DataArea) => void, handleDelete
       )
     },
     sortable: true,
+    hide: 1439,
   },
   {
     name: 'Action',
     minWidth: '210px',
     button: true,
-    cell: row => {
-      return (
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => handleUpdateRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
-          <Button variant="danger" size="sm" onClick={() => handleDeleteRow(row)}><Trash2 size={16} aria-hidden="true" />Remove</Button>
-        </div>
-      );
-    },
+    cell: row => renderAreaActions(row, handleUpdateRowClick, handleDeleteRow),
   },
 ];
 

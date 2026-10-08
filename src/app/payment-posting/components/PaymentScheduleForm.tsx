@@ -30,7 +30,16 @@ const PaymentScheduleForm: React.FC<BorrInfoProps> = ({ singleData, handleShowFo
             header={
               <CardHeader
                 title={singleData?.loan_product?.description}
-                actions={<span className="text-right cursor-pointer text-boxdark-2" onClick={() => { return handleShowForm(false); }}><X size={17}/></span>}
+                actions={
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    onClick={() => { return handleShowForm(false); }}
+                    className="flex h-12 w-12 items-center justify-center rounded-full text-boxdark-2 hover:bg-whiten focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:h-10 md:w-10 dark:text-bodydark dark:hover:bg-meta-4"
+                  >
+                    <X size={17} />
+                  </button>
+                }
               />
             }
             fnReversePayment={fnReversePayment} loanSingleData={singleData} onSubmitCollectionPayment={onSubmitCollectionPayment} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading} />

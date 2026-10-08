@@ -35,9 +35,9 @@ const gJTblColumn = (): TableColumn<RowAcctgEntry>[] => [
   },
   {
     name: 'Amount',
-    cell: row => formatAmount(row),
-    sortable: true,
+    cell: row => <span className="tabular-nums">{formatAmount(row)}</span>,
     right: true,
+    sortable: true,
   },
   {
     name: 'Journal Date',

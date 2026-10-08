@@ -7,6 +7,16 @@ import Button from '@/components/Button';
 import { DataRowLoanProducts } from '@/utils/DataTypes';
 import { formatMoneyOrBlank } from '@/utils/helper';
 
+/** The row's buttons: the table's Action cell and the phone card both draw these. */
+export const renderLoanProductActions = (row: DataRowLoanProducts, handleRowClick: (row: DataRowLoanProducts) => void) => (
+  <div className="flex items-center gap-2">
+      <Button variant="secondary" size="sm" onClick={() => handleRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
+      <Tooltip text="Remove">
+        <Trash2 size="16" className="text-cyan-400 cursor-pointer"/>
+      </Tooltip>
+  </div>
+);
+
 const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => void): TableColumn<DataRowLoanProducts>[] => [
   {
     name: 'Loan Code',
@@ -71,16 +81,7 @@ const loanProductListColumn = (handleRowClick: (row: DataRowLoanProducts) => voi
     name: 'Action',
     minWidth: '190px',
     button: true,
-    cell: row => {
-      return (
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => handleRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
-          <Tooltip text="Remove">
-            <Trash2 size="16" className="text-cyan-400 cursor-pointer"/>
-          </Tooltip>
-        </div>
-      );
-    },
+    cell: row => renderLoanProductActions(row, handleRowClick),
   },
 ];
 

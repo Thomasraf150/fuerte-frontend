@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { formatDate } from '@/utils/formatDate';
 import { fetchWithRecache } from '@/utils/helper';
 import { Clock } from 'react-feather';
+import StatusBadge, { loanStatusTone } from '@/components/StatusBadge';
 import { useAuthStore } from '@/store';
 import { formatNumberComma } from '@/utils/helper';
 
@@ -171,26 +172,6 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
     }
   };
 
-  // Helper function to get status badge color
-  const getStatusBadgeClass = (statusLabel: string): string => {
-    switch (statusLabel) {
-      case 'Posted':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'Closed':
-        return 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300';
-      case 'For Approval':
-        return 'bg-orange-600 text-white dark:bg-orange-600 dark:text-yellow-300';
-      case 'Approved':
-        return 'bg-yellow-400 text-boxdark dark:bg-yellow-600 dark:text-yellow-100';
-      case 'For Releasing':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'Released':
-        return 'bg-green-600 text-lime-100 dark:bg-green-900 dark:text-green-300';
-      default:
-        return 'bg-whiten text-black dark:bg-meta-4 dark:text-bodydark';
-    }
-  };
-
   // Helper function to detect status change
   const getStatusChange = (oldData: any, newData: any): { changed: boolean; oldStatus: string; newStatus: string } => {
     if (!oldData || !newData) {
@@ -291,23 +272,23 @@ const LoanHistory: React.FC<LoanHistoryProps> = ({ loanId }) => {
                       {/* Status Transition Display */}
                       <div className="flex items-center gap-2 flex-wrap">
                         {isCreated ? (
-                          <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(statusChange.newStatus)}`}>
+                          <StatusBadge tone={loanStatusTone(statusChange.newStatus)}>
                             Created
-                          </span>
+                          </StatusBadge>
                         ) : statusChange.changed ? (
                           <>
-                            <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(statusChange.oldStatus)}`}>
+                            <StatusBadge tone={loanStatusTone(statusChange.oldStatus)}>
                               {statusChange.oldStatus}
-                            </span>
+                            </StatusBadge>
                             <span className="text-body dark:text-bodydark">→</span>
-                            <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(statusChange.newStatus)}`}>
+                            <StatusBadge tone={loanStatusTone(statusChange.newStatus)}>
                               {statusChange.newStatus}
-                            </span>
+                            </StatusBadge>
                           </>
                         ) : (
-                          <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(statusChange.newStatus)}`}>
+                          <StatusBadge tone={loanStatusTone(statusChange.newStatus)}>
                             {statusChange.newStatus}
-                          </span>
+                          </StatusBadge>
                         )}
                         <span className="text-sm text-body dark:text-bodydark">
                           {formatDate(entry.changed_at)}

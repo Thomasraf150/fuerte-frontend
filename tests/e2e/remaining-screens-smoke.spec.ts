@@ -17,6 +17,7 @@ const ERROR_PATTERNS = [
   'Cannot read properties of null',
   'Cannot read properties of undefined',
   'Error loading',
+  "didn't load", // ErrorAlert's title (Phase 8): the raw reason may sit under "Details for IT"
   'Unauthenticated',
   'Internal server error',
   'is not a function',

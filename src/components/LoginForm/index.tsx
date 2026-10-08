@@ -18,23 +18,24 @@ const LoginForm = () => {
     <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
       <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
         {/* <span className="mb-1.5 block font-medium">Start for free</span> */}
-        <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
+        <h2 className="mb-9 font-display text-2xl text-black dark:text-white sm:text-title-xl2">
           Sign In to Fuerte
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="mb-2.5 block font-medium text-black dark:text-white">
+            <label htmlFor="login-email" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Email
             </label>
             <div className="relative">
               <input
                 type="email"
+                id="login-email"
                 placeholder="Enter your email"
                 onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                className="h-12 md:h-11 w-full rounded-lg border border-field bg-white pl-4 pr-11 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
               />
 
-              <span className="absolute right-4 top-4">
+              <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-body">
                 <svg
                   className="fill-current"
                   width="22"
@@ -55,18 +56,19 @@ const LoginForm = () => {
           </div>
 
           <div className="mb-6">
-            <label className="mb-2.5 block font-medium text-black dark:text-white">
+            <label htmlFor="login-password" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Password
             </label>
             <div className="relative">
               <input
                 type="password"
+                id="login-password"
                 placeholder="6+ Characters, 1 Capital letter"
                 onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-graydark outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                className="h-12 md:h-11 w-full rounded-lg border border-field bg-white pl-4 pr-11 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
               />
 
-              <span className="absolute right-4 top-4">
+              <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-body">
                 <svg
                   className="fill-current"
                   width="22"

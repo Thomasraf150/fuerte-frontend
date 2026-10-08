@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Check, X, Clock } from 'react-feather';
+import { Check, X, Clock, Lock } from 'react-feather';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import LoanDetails from './TabForm/LoanDetails';
 import SetEffectivityMaturity from './Tabs/SetEffectivityMaturity';
@@ -22,7 +22,7 @@ interface BorrInfoProps {
  * Numbered step marker for the workflow tabs. Olive when current, a check when done, muted when
  * still ahead. Presentation only: the tab text and click handlers are unchanged.
  */
-const StepMarker: React.FC<{ n: number; active: boolean; done: boolean }> = ({ n, active, done }) => (
+const StepMarker: React.FC<{ n: number; active: boolean; done: boolean; locked?: boolean }> = ({ n, active, done, locked = false }) => (
   <span
     aria-hidden="true"
     className={`mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold tabular-nums ${
@@ -33,7 +33,7 @@ const StepMarker: React.FC<{ n: number; active: boolean; done: boolean }> = ({ n
         : 'border-stroke text-bodydark dark:border-strokedark'
     }`}
   >
-    {done && !active ? <Check size={13} strokeWidth={3} /> : n}
+    {done && !active ? <Check size={13} strokeWidth={3} /> : locked ? <Lock size={12} strokeWidth={2.5} /> : n}
   </span>
 );
 
@@ -87,7 +87,14 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
         <h3 className="font-medium text-black dark:text-white">
           {loanSingleData?.loan_product?.description}
         </h3>
-        <span className="text-right cursor-pointer text-boxdark-2" onClick={() => { return handleShowForm(false); }}><X size={17}/></span>
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={() => { return handleShowForm(false); }}
+          className="-mr-3 flex h-12 w-12 items-center justify-center rounded-full text-boxdark-2 hover:bg-whiten focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:-mr-2 md:h-10 md:w-10 dark:text-bodydark dark:hover:bg-meta-4"
+        >
+          <X size={17} />
+        </button>
       </div>
       {!loanSingleData ? (
         <div className="px-7 py-6">
@@ -96,6 +103,12 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
       ) : (
         <>
           <LoanDetails loanSingleData={loanSingleData} printLoanDetails={printLoanDetails} />
+          {/* Phones: say where you are, since the list below is long. */}
+          {activeTab !== undefined && activeTab >= 1 && activeTab <= 4 && (
+            <p className="mt-3 px-4 text-sm font-semibold text-black md:hidden dark:text-white">
+              Step {activeTab} of 4: {steps[activeTab - 1].label}
+            </p>
+          )}
           {/* Phones stack the steps, marked by a left bar; wider screens put them in a row, marked by an underline. */}
           <div className="flex flex-col md:flex-row md:flex-wrap border-b border-stroke dark:border-strokedark mt-3">
             {steps.map((step) => {
@@ -105,6 +118,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   key={step.n}
                   onClick={() => handleTabClick(step.n)}
                   aria-current={isActive ? 'step' : undefined}
+                  aria-disabled={step.disabled || undefined}
                   title={step.done ? 'Done' : undefined}
                   className={`min-h-12 p-4 text-sm font-medium flex items-center border-l-4 md:border-l-0 md:border-b-2 transition-all duration-200 ease-in-out ${
                     isActive
@@ -113,7 +127,7 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
                   } focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:bg-whiten disabled:text-bodydark disabled:cursor-not-allowed dark:disabled:bg-meta-4`}
                   disabled={step.disabled}
                 >
-                  <StepMarker n={step.n} active={isActive} done={step.done} />
+                  <StepMarker n={step.n} active={isActive} done={step.done} locked={step.disabled} />
                   <span>{step.label}</span>
                 </button>
               );

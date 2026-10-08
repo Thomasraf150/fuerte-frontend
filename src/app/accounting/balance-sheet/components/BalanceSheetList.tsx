@@ -16,6 +16,26 @@ import '../styles.css';
 import useCoa from '@/hooks/useCoa';
 import useBranches from '@/hooks/useBranches';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { rt, indent } from '@/components/ReportTable';
+
+// Total Assets closes the statement, so it gets the double rule; the other totals get a single rule.
+const BS_SECTIONS = [
+  { title: 'ASSETS', key: 'assets', totalLabel: 'TOTAL ASSETS', totalKey: 'total_assets', rule: 'grand' },
+  { title: 'LIABILITIES', key: 'liabilities', totalLabel: 'TOTAL LIABILITIES', totalKey: 'total_liabilities', rule: 'subtotal' },
+  { title: 'EQUITY', key: 'equity', totalLabel: 'TOTAL EQUITY', totalKey: 'total_equity', rule: 'subtotal' },
+] as const;
+
+/** One account line: parents (level 0) bold, sub-accounts indented 16px per level and regular. */
+const AccountRow: React.FC<{ account: any; level: 0 | 1 | 2 }> = ({ account, level }) => {
+  const weight = level === 0 ? 'font-semibold' : '';
+  return (
+    <tr className="hover:bg-whiten dark:hover:bg-meta-4">
+      <td className={`${rt.tdPin} ${weight}`} style={indent(level)}>{account.account_name}</td>
+      <td className={`${rt.td} text-body dark:text-bodydark`}>{account.number}</td>
+      <td className={`${rt.tdNum} ${weight}`}>{formatCurrency(account.balance)}</td>
+    </tr>
+  );
+};
 
 interface Option {
   value: string;
@@ -163,234 +183,160 @@ const BalanceSheetList: React.FC = () => {
       <Card>
         {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). */}
         <CardBody>
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Select Date Range:</label>
-                <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
-                  <div className="w-full sm:w-auto sm:flex-1">
-                    <DatePicker
-                      selected={startDate}
-                      onChange={handleStartDateChange}
-                      selectsStart
-                      startDate={startDate}
-                      endDate={endDate}
-                      placeholderText="Start Date"
-                      className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
-                    />
-                  </div>
-                  <div className="w-full sm:w-auto sm:flex-1">
-                    <DatePicker
-                      selected={endDate}
-                      onChange={handleEndDateChange}
-                      selectsEnd
-                      startDate={startDate}
-                      endDate={endDate}
-                      minDate={startDate} // Prevent selecting an end date before start date
-                      placeholderText="End Date"
-                      className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
-                    />
-                  </div>
-                  {/* Group Select — FA/FB/FC/FD; narrows the Branch list beside it */}
-                  <div className="w-full sm:w-auto sm:flex-1">
-                    <Controller
-                      name="branch_group_id"
-                      control={control}
-                      defaultValue="all"
-                      render={({ field }) => (
-                        <ReactSelect
-                          {...field}
-                          options={optionsGroup}
-                          placeholder="Select a group..."
-                          isLoading={loadingBranchGroups}
-                          loadingMessage={() => 'Loading groups...'}
-                          onChange={(selectedOption) => {
-                            field.onChange(selectedOption?.value);
-                            handleGroupChange(selectedOption?.value ?? 'all');
-                          }}
-                          value={optionsGroup.find(option => String(option.value) === String(field.value)) || null}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="w-full sm:w-auto sm:flex-1">
-                    <Controller
-                      name="branch_id"
-                      control={control}
-                      rules={{ required: 'Branch is required' }}
-                      render={({ field }) => (
-                        <ReactSelect
-                          {...field}
-                          options={optionsBranch}
-                          placeholder="Select a branch..."
-                          isLoading={loadingBranches}
-                          loadingMessage={() => 'Loading branches...'}
-                          onChange={(selectedOption) => {
-                            field.onChange(selectedOption?.value);
-                            handleBranchChange(selectedOption?.value ?? '');
-                          }}
-                          value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="w-full sm:w-auto sm:flex-1">
-                    <Controller
-                      name="branch_sub_id"
-                      control={control}
-                      rules={{ required: 'Sub Branch is required' }}
-                      render={({ field }) => (
-                        <ReactSelect
-                          {...field}
-                          options={optionsSubBranch}
-                          placeholder="Select a sub branch..."
-                          isDisabled={branchId === 'all' || loadingSubBranches}
-                          isLoading={loadingSubBranches}
-                          loadingMessage={() => 'Loading sub-branches...'}
-                          onChange={(selectedOption) => {
-                            field.onChange(selectedOption?.value);
-                            handleBranchSubChange(selectedOption?.value ?? '');
-                          }}
-                          value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
-                          styles={{
-                            control: (base, state) => ({
-                              ...base,
-                              cursor: state.isDisabled ? 'not-allowed' : 'default',
-                              opacity: state.isDisabled ? 0.6 : 1,
-                              backgroundColor: state.isDisabled ? '#f3f4f6' : base.backgroundColor
-                            })
-                          }}
-                        />
-                      )}
-                    />
+              <div className="no-print flex flex-wrap items-end gap-x-3 gap-y-4">
+                {/* Every control has its own visible label; "Select Date Range:" heads the two dates. */}
+                <div role="group" aria-labelledby="bs-date-range" className="w-full sm:w-auto sm:flex-[2]">
+                  <p id="bs-date-range" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Select Date Range:</p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="w-full sm:flex-1">
+                      <label htmlFor="bs-start-date" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">Start date</label>
+                      <DatePicker
+                        id="bs-start-date"
+                        selected={startDate}
+                        onChange={handleStartDateChange}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        placeholderText="Start Date"
+                        wrapperClassName="w-full"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
+                      />
+                    </div>
+                    <div className="w-full sm:flex-1">
+                      <label htmlFor="bs-end-date" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">End date</label>
+                      <DatePicker
+                        id="bs-end-date"
+                        selected={endDate}
+                        onChange={handleEndDateChange}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate} // Prevent selecting an end date before start date
+                        placeholderText="End Date"
+                        wrapperClassName="w-full"
+                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="flex space-x-1">
-                  
+                <div className="w-full sm:w-auto sm:flex-1">
+                  <span id="bs-group-label" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">Group</span>
+                      <Controller
+                        name="branch_group_id"
+                        control={control}
+                        defaultValue="all"
+                        render={({ field }) => (
+                          <ReactSelect
+                            aria-label="Group"
+                            {...field}
+                            options={optionsGroup}
+                            placeholder="Select a group..."
+                            isLoading={loadingBranchGroups}
+                            loadingMessage={() => 'Loading groups...'}
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption?.value);
+                              handleGroupChange(selectedOption?.value ?? 'all');
+                            }}
+                            value={optionsGroup.find(option => String(option.value) === String(field.value)) || null}
+                          />
+                        )}
+                      />
+                </div>
+                <div className="w-full sm:w-auto sm:flex-1">
+                  <span id="bs-branch-label" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">Branch</span>
+                      <Controller
+                        name="branch_id"
+                        control={control}
+                        rules={{ required: 'Branch is required' }}
+                        render={({ field }) => (
+                          <ReactSelect
+                            aria-label="Branch"
+                            {...field}
+                            options={optionsBranch}
+                            placeholder="Select a branch..."
+                            isLoading={loadingBranches}
+                            loadingMessage={() => 'Loading branches...'}
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption?.value);
+                              handleBranchChange(selectedOption?.value ?? '');
+                            }}
+                            value={optionsBranch.find(option => String(option.value) === String(field.value)) || null}
+                          />
+                        )}
+                      />
+                </div>
+                <div className="w-full sm:w-auto sm:flex-1">
+                  <span id="bs-sub-label" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">Sub-branch</span>
+                      <Controller
+                        name="branch_sub_id"
+                        control={control}
+                        rules={{ required: 'Sub Branch is required' }}
+                        render={({ field }) => (
+                          <ReactSelect
+                            aria-label="Sub-branch"
+                            {...field}
+                            options={optionsSubBranch}
+                            placeholder="Select a sub branch..."
+                            isDisabled={branchId === 'all' || loadingSubBranches}
+                            isLoading={loadingSubBranches}
+                            loadingMessage={() => 'Loading sub-branches...'}
+                            onChange={(selectedOption) => {
+                              field.onChange(selectedOption?.value);
+                              handleBranchSubChange(selectedOption?.value ?? '');
+                            }}
+                            value={optionsSubBranch.find(option => String(option.value) === String(field.value)) || null}
+                            styles={{
+                              control: (base, state) => ({
+                                ...base,
+                                cursor: state.isDisabled ? 'not-allowed' : 'default',
+                                opacity: state.isDisabled ? 0.6 : 1,
+                                backgroundColor: state.isDisabled ? '#f3f4f6' : base.backgroundColor
+                              })
+                            }}
+                          />
+                        )}
+                      />
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className={`${rt.wrap} mt-4`}>
                 {loading ? (
                   <SkeletonBlock rows={6} label="Loading balance sheet…" />
                 ) : balanceSheetData !== undefined ? (
-                  <table className="w-full text-sm border-collapse">
-                    <thead>
-                      <tr className="bg-gray-2 dark:bg-meta-4 border-b-2 border-stroke dark:border-strokedark">
-                        <th className="px-6 py-4 text-left font-bold text-black dark:text-white md:min-w-[280px] lg:min-w-[400px]">Account Name</th>
-                        <th className="px-6 py-4 text-right font-bold text-black dark:text-white">Account Number</th>
-                        <th className="px-6 py-4 text-right font-bold text-black dark:text-white">Balance</th>
+                  <table className={rt.table}>
+                    <thead className={rt.thead}>
+                      <tr>
+                        <th className={`${rt.thPin} md:min-w-[280px] lg:min-w-[400px]`}>Account Name</th>
+                        <th className={rt.th}>Account Number</th>
+                        <th className={rt.thNum}>Balance</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {/* Assets Section */}
-                      <tr className="bg-sky-50 dark:bg-sky-900/20 border-t-2 border-sky-200 dark:border-sky-800">
-                        <td colSpan={3} className="px-6 py-3 font-bold text-lg text-sky-900 dark:text-sky-300">
-                          ASSETS
-                        </td>
-                      </tr>
-                      {balanceSheetData?.assets?.map((item: any) => (
-                        <React.Fragment key={item.number}>
-                          <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                            <td className="px-6 py-3 font-semibold text-black dark:text-white">{item.account_name}</td>
-                            <td className="px-6 py-3 text-right text-black dark:text-white">{item.number}</td>
-                            <td className="px-6 py-3 text-right tabular-nums font-semibold text-black dark:text-white">{formatCurrency(item.balance)}</td>
+                      {BS_SECTIONS.map(({ title, key, totalLabel, totalKey, rule }) => (
+                        <React.Fragment key={key}>
+                          <tr>
+                            <td colSpan={3} className={rt.groupPin}>{title}</td>
                           </tr>
-                          {item.subAccounts?.map((child: any) => (
-                            <React.Fragment key={child.number}>
-                              <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                                <td className="px-6 py-2 pl-12 text-black dark:text-white">{child.account_name}</td>
-                                <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{child.number}</td>
-                                <td className="px-6 py-2 text-right tabular-nums text-black dark:text-white">{formatCurrency(child.balance)}</td>
-                              </tr>
-                              {child.subAccounts?.map((grandChild: any) => (
-                                <tr key={grandChild.number} className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                                  <td className="px-6 py-2 pl-20 text-sm text-black dark:text-white">{grandChild.account_name}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{grandChild.number}</td>
-                                  <td className="px-6 py-2 text-right tabular-nums text-sm text-black dark:text-white">{formatCurrency(grandChild.balance)}</td>
-                                </tr>
+                          {balanceSheetData?.[key]?.map((item: any) => (
+                            <React.Fragment key={item.number}>
+                              <AccountRow account={item} level={0} />
+                              {item.subAccounts?.map((child: any) => (
+                                <React.Fragment key={child.number}>
+                                  <AccountRow account={child} level={1} />
+                                  {child.subAccounts?.map((grandChild: any) => (
+                                    <AccountRow key={grandChild.number} account={grandChild} level={2} />
+                                  ))}
+                                </React.Fragment>
                               ))}
                             </React.Fragment>
                           ))}
-                        </React.Fragment>
-                      ))}
-                      <tr className="bg-sky-100 dark:bg-sky-900/30 border-t-2 border-sky-300 dark:border-sky-700">
-                        <td className="px-6 py-3 font-bold text-sky-900 dark:text-sky-300">TOTAL ASSETS</td>
-                        <td className="px-6 py-3"></td>
-                        <td className="px-6 py-3 text-right tabular-nums font-bold text-lg text-sky-900 dark:text-sky-300">{formatCurrency(balanceSheetData.total_assets)}</td>
-                      </tr>
-
-                      {/* Liabilities Section */}
-                      <tr className="bg-orange-50 dark:bg-orange-900/20 border-t-2 border-orange-200 dark:border-orange-800">
-                        <td colSpan={3} className="px-6 py-3 font-bold text-lg text-orange-900 dark:text-orange-300">
-                          LIABILITIES
-                        </td>
-                      </tr>
-                      {balanceSheetData?.liabilities?.map((item: any) => (
-                        <React.Fragment key={item.number}>
-                          <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                            <td className="px-6 py-3 font-semibold text-black dark:text-white">{item.account_name}</td>
-                            <td className="px-6 py-3 text-right text-black dark:text-white">{item.number}</td>
-                            <td className="px-6 py-3 text-right tabular-nums font-semibold text-black dark:text-white">{formatCurrency(item.balance)}</td>
+                          <tr className={rt[rule]}>
+                            <td className={rt.tdPin}>{totalLabel}</td>
+                            <td className={rt.td}></td>
+                            <td className={rt.tdNum}>{formatCurrency(balanceSheetData[totalKey])}</td>
                           </tr>
-                          {item.subAccounts?.map((child: any) => (
-                            <React.Fragment key={child.number}>
-                              <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                                <td className="px-6 py-2 pl-12 text-black dark:text-white">{child.account_name}</td>
-                                <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{child.number}</td>
-                                <td className="px-6 py-2 text-right tabular-nums text-black dark:text-white">{formatCurrency(child.balance)}</td>
-                              </tr>
-                              {child.subAccounts?.map((grandChild: any) => (
-                                <tr key={grandChild.number} className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                                  <td className="px-6 py-2 pl-20 text-sm text-black dark:text-white">{grandChild.account_name}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{grandChild.number}</td>
-                                  <td className="px-6 py-2 text-right tabular-nums text-sm text-black dark:text-white">{formatCurrency(grandChild.balance)}</td>
-                                </tr>
-                              ))}
-                            </React.Fragment>
-                          ))}
                         </React.Fragment>
                       ))}
-                      <tr className="bg-orange-100 dark:bg-orange-900/30 border-t-2 border-orange-300 dark:border-orange-700">
-                        <td className="px-6 py-3 font-bold text-orange-900 dark:text-orange-300">TOTAL LIABILITIES</td>
-                        <td className="px-6 py-3"></td>
-                        <td className="px-6 py-3 text-right tabular-nums font-bold text-lg text-orange-900 dark:text-orange-300">{formatCurrency(balanceSheetData.total_liabilities)}</td>
-                      </tr>
-
-                      {/* Equity Section */}
-                      <tr className="bg-green-50 dark:bg-green-900/20 border-t-2 border-green-200 dark:border-green-800">
-                        <td colSpan={3} className="px-6 py-3 font-bold text-lg text-green-900 dark:text-green-300">
-                          EQUITY
-                        </td>
-                      </tr>
-                      {balanceSheetData?.equity?.map((item: any) => (
-                        <React.Fragment key={item.number}>
-                          <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                            <td className="px-6 py-3 font-semibold text-black dark:text-white">{item.account_name}</td>
-                            <td className="px-6 py-3 text-right text-black dark:text-white">{item.number}</td>
-                            <td className="px-6 py-3 text-right tabular-nums font-semibold text-black dark:text-white">{formatCurrency(item.balance)}</td>
-                          </tr>
-                          {item.subAccounts?.map((child: any) => (
-                            <React.Fragment key={child.number}>
-                              <tr className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                                <td className="px-6 py-2 pl-12 text-black dark:text-white">{child.account_name}</td>
-                                <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{child.number}</td>
-                                <td className="px-6 py-2 text-right tabular-nums text-black dark:text-white">{formatCurrency(child.balance)}</td>
-                              </tr>
-                              {child.subAccounts?.map((grandChild: any) => (
-                                <tr key={grandChild.number} className="border-b border-stroke dark:border-strokedark hover:bg-gray-3 dark:hover:bg-meta-4">
-                                  <td className="px-6 py-2 pl-20 text-sm text-black dark:text-white">{grandChild.account_name}</td>
-                                  <td className="px-6 py-2 text-right text-sm text-body dark:text-bodydark">{grandChild.number}</td>
-                                  <td className="px-6 py-2 text-right tabular-nums text-sm text-black dark:text-white">{formatCurrency(grandChild.balance)}</td>
-                                </tr>
-                              ))}
-                            </React.Fragment>
-                          ))}
-                        </React.Fragment>
-                      ))}
-                      <tr className="bg-green-100 dark:bg-green-900/30 border-t-2 border-green-300 dark:border-green-700">
-                        <td className="px-6 py-3 font-bold text-green-900 dark:text-green-300">TOTAL EQUITY</td>
-                        <td className="px-6 py-3"></td>
-                        <td className="px-6 py-3 text-right tabular-nums font-bold text-lg text-green-900 dark:text-green-300">{formatCurrency(balanceSheetData.total_equity)}</td>
-                      </tr>
                     </tbody>
                   </table>
                 ) : (

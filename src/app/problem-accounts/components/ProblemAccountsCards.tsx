@@ -6,6 +6,7 @@ import { SkeletonBlock } from "@/components/LoadingStates";
 import { ProblemAccountRow } from "@/hooks/useProblemAccountsPaginated";
 import { formatNumber } from "@/utils/formatNumber";
 import { formatCount } from "@/utils/helper";
+import StatusBadge from "@/components/StatusBadge";
 import { METRIC_HELP, RED, GRAY, RowGroupInfo } from "./ProblemAccountsColumns";
 
 const num = (raw: string) => parseFloat(raw) || 0;
@@ -135,9 +136,9 @@ const ProblemAccountsCards: React.FC<Props> = ({
                 </p>
               </div>
               {info && info.isFirst && info.count > 1 && (
-                <span className="shrink-0 rounded bg-whiten px-1.5 py-0.5 text-[10px] text-body dark:bg-meta-4 dark:text-bodydark">
+                <StatusBadge tone="neutral" icon={false} className="shrink-0">
                   {info.count} loans
-                </span>
+                </StatusBadge>
               )}
             </div>
 
