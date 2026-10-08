@@ -30,7 +30,7 @@ const borrowerCompaniesCol = (handleUpdateRowClick: (row: DataBorrCompanies) => 
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.contact_no}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.contact_no ?? '')}>{row.contact_no}</span>
             </div>
         </div> 
       )
@@ -44,7 +44,7 @@ const borrowerCompaniesCol = (handleUpdateRowClick: (row: DataBorrCompanies) => 
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.contact_email}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.contact_email ?? '')}>{row.contact_email}</span>
             </div>
         </div> 
       )

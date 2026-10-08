@@ -22,7 +22,7 @@ const auditLogListCol = (handleUpdateRowClick: (row: DataArea) => void, handleDe
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.description}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.description ?? '')}>{row.description}</span>
             </div>
         </div> 
       )
@@ -35,7 +35,7 @@ const auditLogListCol = (handleUpdateRowClick: (row: DataArea) => void, handleDe
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.description}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.description ?? '')}>{row.description}</span>
             </div>
         </div> 
       )

@@ -83,6 +83,29 @@ interface CustomDatatableProps<T> {
 }
 
 // Define the CustomDatatable component
+/**
+ * Long text ends in "…" instead of being cut flat at the column edge, where it read as part of
+ * the next column ("NEW-MANILA TEACH" + "Garcia…"). A cell is a flex box, where text-overflow
+ * cannot apply, so a plain-text cell (a `cell:` that returns a string or number) is wrapped in
+ * a .cell-text span (app/styles.css) with the full value as its tooltip. The span carries
+ * data-tag="allowRowEvents": without it the library ignores clicks on it and rows stop opening.
+ * Cells that return elements (badges, buttons, links) are left as they are.
+ */
+function withCellText<T>(columns: TableColumn<T>[]): TableColumn<T>[] {
+  return columns.map((column) => {
+    const render = column.cell;
+    if (!render) return column;
+    return {
+      ...column,
+      cell: (row: T, rowIndex: number, col: TableColumn<T>, id: string | number) => {
+        const out = render(row, rowIndex, col, id);
+        if (typeof out !== 'string' && typeof out !== 'number') return out;
+        return <span className="cell-text" data-tag="allowRowEvents" title={String(out)}>{out}</span>;
+      },
+    };
+  });
+}
+
 const CustomDatatable = <T extends object>({
   data,
   columns,
@@ -116,6 +139,7 @@ const CustomDatatable = <T extends object>({
     else setLocalQuery(event.target.value);
   }, [isServerSide, serverSidePagination, setLocalQuery]);
   const searchQuery = isServerSide ? (serverSidePagination?.searchQuery || '') : localQuery;
+  const textColumns = withCellText(columns);
   // A failed load keeps the search and filters (a bad filter may be the cause) but draws no rows,
   // no "No records to show." and no pager: the page's ErrorAlert says what happened.
   const showBody = !(loadFailed && rows.length === 0 && !apiLoading);
@@ -144,7 +168,7 @@ const CustomDatatable = <T extends object>({
       <div className={phoneRows ? 'relative hidden md:block' : 'relative'} {...rowOpen}>
         <TableView
           title={title}
-          columns={columns}
+          columns={textColumns}
           rows={rows}
           loading={apiLoading}
           styles={customStyles}

@@ -69,7 +69,8 @@ const borrowerColumn = (
       <Link
         href={`/borrowers/${row.id}`}
         aria-label={borrowerListName(row)}
-        className="rounded-sm font-medium text-black hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent dark:text-white"
+        title={row.firstname}
+        className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap rounded-sm font-medium text-black hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent dark:text-white"
       >
         {row.firstname}
       </Link>

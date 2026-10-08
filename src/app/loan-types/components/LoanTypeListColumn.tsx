@@ -20,8 +20,8 @@ const loanTypeListColumn = (
       const info = pendingByEntityId.get(Number(row.id));
       return (
         <div className="flex items-center gap-2">
-          <span>{row.name}</span>
-          {info && <PendingDeletionBadge info={info} />}
+          <span className="cell-text" data-tag="allowRowEvents" title={row.name}>{row.name}</span>
+          {info && <PendingDeletionBadge info={info} className="shrink-0" />}
         </div>
       );
     },

@@ -74,7 +74,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
+      <div className="relative flex items-center justify-center border-b border-white/10 px-14 py-5 lg:px-6">
         <Link href={isCallCenter ? "/applications" : "/"}>
           <BrandLockup />
         </Link>
@@ -84,7 +84,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-controls="sidebar"
           aria-expanded={sidebarOpen}
-          className="block lg:hidden"
+          className="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center lg:hidden"
         >
           <svg
             className="fill-current"

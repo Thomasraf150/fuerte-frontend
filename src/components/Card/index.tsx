@@ -45,7 +45,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ title, description, acti
     className={`flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-stroke px-4 py-3 sm:px-6 dark:border-strokedark ${className}`}
   >
     <div className="min-w-0">
-      <Heading id={id} className="text-base font-semibold text-black dark:text-white">
+      <Heading id={id} className="break-words text-base font-semibold text-black dark:text-white">
         {title}
       </Heading>
       {description && <p className="mt-0.5 text-sm text-body dark:text-bodydark">{description}</p>}

@@ -29,7 +29,7 @@ const LoanPhoneRow: React.FC<Props> = ({ row, note }) => {
           {Number.isFinite(pn) ? formatNumber(pn) : ''}
         </p>
       </div>
-      <p className="mt-1 text-sm text-body dark:text-bodydark">
+      <p className="mt-1 break-words text-sm text-body dark:text-bodydark">
         {row.loan_product?.description}
         {row.loan_ref ? <> &middot; {row.loan_ref}</> : null}
       </p>

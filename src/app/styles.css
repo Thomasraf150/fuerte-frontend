@@ -39,6 +39,16 @@ aside nav ul ul a.text-white {
   overflow: hidden;
 }
 
+/* …except plain text, which ends in "…" (Phase 8, 2026-10-08). CustomDatatable wraps every
+ * string/number cell in .cell-text, a block inside the flex cell where text-overflow works. */
+.rdt_TableCell .cell-text {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Hovering a row with a mouse reveals what its cells clipped: the cell wraps
  * and stops clipping, for content that inherits its `white-space` (an element
  * with its own `nowrap`, such as Tailwind's `truncate`, stays on one line). It
@@ -46,7 +56,8 @@ aside nav ul ul a.text-white {
  * left out: a tap leaves `:hover` stuck on the tapped row, so that row reflowed
  * taller and the list shifted under the user's finger. */
 @media (hover: hover) and (pointer: fine) {
-  .rdt_TableRow:hover .rdt_TableCell {
+  .rdt_TableRow:hover .rdt_TableCell,
+  .rdt_TableRow:hover .rdt_TableCell .cell-text {
     white-space: normal;
     overflow: visible;
   }

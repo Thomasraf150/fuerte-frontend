@@ -30,7 +30,7 @@ const chiefListCol = (handleUpdateRowClick: (row: DataChief) => void, handleDele
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.contact_no}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.contact_no ?? '')}>{row.contact_no}</span>
             </div>
         </div> 
       )
@@ -43,7 +43,7 @@ const chiefListCol = (handleUpdateRowClick: (row: DataChief) => void, handleDele
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.email}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.email ?? '')}>{row.email}</span>
             </div>
         </div> 
       )

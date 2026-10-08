@@ -28,7 +28,7 @@ const branchListCol = (
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.user?.name ?? '—'}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.user?.name ?? '—')}>{row.user?.name ?? '—'}</span>
             </div>
         </div>
       )

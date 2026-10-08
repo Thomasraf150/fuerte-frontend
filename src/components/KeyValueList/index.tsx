@@ -40,7 +40,7 @@ export const KeyValueRow: React.FC<{
   >
     <dt className={total ? 'text-sm font-semibold text-black dark:text-white' : 'text-sm text-body dark:text-bodydark'}>{label}</dt>
     <dd
-      className={`text-right tabular-nums text-black dark:text-white ${
+      className={`min-w-0 break-words text-right tabular-nums text-black dark:text-white ${
         total ? 'text-xl font-bold' : ''
       } ${valueClass}`}
     >

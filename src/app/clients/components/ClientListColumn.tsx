@@ -17,7 +17,7 @@ const clientListColumn = (handleRowClick: (row: DataRowClientList) => void): Tab
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.penalty_rate}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.penalty_rate ?? '')}>{row.penalty_rate}</span>
             </div>
         </div> 
       )

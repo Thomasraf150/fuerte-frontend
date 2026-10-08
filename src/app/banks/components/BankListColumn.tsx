@@ -22,7 +22,7 @@ const bankListCol = (handleUpdateRowClick: (row: DataBank) => void, handleDelete
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.address}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.address ?? '')}>{row.address}</span>
             </div>
         </div> 
       )
@@ -36,7 +36,7 @@ const bankListCol = (handleUpdateRowClick: (row: DataBank) => void, handleDelete
       return (
         <div className='d-flex justify-content-left align-items-center text-truncate'>
             <div className='d-flex flex-column text-truncate'>
-                <span className='d-block font-weight-semibold'>{row.address}</span>
+                <span className="cell-text" data-tag="allowRowEvents" title={String(row.address ?? '')}>{row.address}</span>
             </div>
         </div> 
       )
