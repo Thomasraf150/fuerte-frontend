@@ -6,7 +6,7 @@ import LoginForm from "@/components/LoginForm";
 import BrandLockup from "@/components/Brand/BrandLockup";
 
 export const metadata: Metadata = {
-  title: "Fuerte Lending",
+  title: "Sign in",
   description: "Fuerte Made Easy",
 };
 

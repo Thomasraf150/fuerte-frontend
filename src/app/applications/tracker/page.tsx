@@ -4,7 +4,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import SourceTracker from './components/SourceTracker';
 
 export const metadata = {
-  title: "Source tracker | Fuerte",
+  title: "Source tracker",
   description: "",
 };
 

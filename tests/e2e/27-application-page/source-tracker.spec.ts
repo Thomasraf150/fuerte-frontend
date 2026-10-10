@@ -636,11 +636,12 @@ test.describe('3. Source tracker page', () => {
   // The browser is in Los Angeles: every day the page asks for must come from Manila, not from here.
   test.use({ timezoneId: 'America/Los_Angeles' });
 
-  // The browser tab keeps the root layout's own <title> (app-wide, not this page's doing), so the page's metadata is read from the server's HTML.
-  test('its metadata names the page "Source tracker | Fuerte"', async ({ page }) => {
+  // Since 2026-10-10 the root layout's title template ("{page} · Fuerte Lending") applies; it used to
+  // hard-code its own <title>, so the page's metadata could only be read from the server's HTML.
+  test('its metadata names the page "Source tracker · Fuerte Lending"', async ({ page }) => {
     const response = await page.request.get('/applications/tracker', { timeout: 120_000 });
     expect(response.ok()).toBe(true);
-    expect(await response.text()).toContain('<title>Source tracker | Fuerte</title>');
+    expect(await response.text()).toContain('<title>Source tracker · Fuerte Lending</title>');
   });
 
   test('the premise: the browser is in Los Angeles, where it is still 30 Sep, yet Today asks for 1 Oct', async ({ page, backend }) => {

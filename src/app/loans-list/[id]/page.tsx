@@ -9,6 +9,7 @@ import { SkeletonBlock } from '@/components/LoadingStates';
 import Button from '@/components/Button';
 import useLoanDetail from '@/hooks/useLoanDetail';
 import LoanPnSigningForm from '@/app/loans-list/components/LoanPnSigningForm';
+import { useDocumentTitle, loanTitle as loanTabTitle } from '@/hooks/useDocumentTitle';
 
 const LoanDetailPage: React.FC = () => {
   // Extract loan ID from URL
@@ -20,6 +21,7 @@ const LoanDetailPage: React.FC = () => {
 
   // State management
   const { loanSingleData, fetchSingLoans } = useLoanDetail();
+  useDocumentTitle(...loanTabTitle(null, loanSingleData)); // tab: "TESTPLAN, ANA UNO · MA-0512 · Fuerte Lending"
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

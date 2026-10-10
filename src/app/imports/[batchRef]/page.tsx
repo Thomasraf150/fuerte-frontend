@@ -4,7 +4,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import ImportReview from './components/ImportReview';
 
 export const metadata = {
-  title: 'Import review | Fuerte',
+  title: "Import review",
 };
 
 export default function ImportBatchPage({ params }: { params: { batchRef: string } }) {

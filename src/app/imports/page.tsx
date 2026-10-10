@@ -3,7 +3,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import ImportsList from './components/ImportsList';
 
 export const metadata = {
-  title: 'Imports | Fuerte',
+  title: "Imports",
 };
 
 /**

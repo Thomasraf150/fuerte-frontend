@@ -4,7 +4,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import ApprovalsView from "./components/ApprovalsView";
 
 export const metadata = {
-  title: "Approvals · Fuerte",
+  title: "Approvals",
 };
 
 export default function ApprovalsPage() {

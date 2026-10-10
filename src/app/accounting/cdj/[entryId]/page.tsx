@@ -14,6 +14,7 @@ import useCoa from '@/hooks/useCoa';
 import CdjForm from '../components/CdjForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const CdjDetailPage: React.FC = () => {
   const params = useParams();
@@ -28,6 +29,7 @@ const CdjDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<RowAcctgEntry | undefined>(undefined);
+  useDocumentTitle(singleData?.journal_ref, singleData?.journal_name); // tab: "{journal ref} · {journal name} · Fuerte Lending"
 
   // Fetch CDJ entry directly by ID (fixes pagination bug)
   useEffect(() => {

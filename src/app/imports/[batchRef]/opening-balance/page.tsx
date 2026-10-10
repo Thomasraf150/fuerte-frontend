@@ -4,7 +4,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import OpeningBalancePreview from './components/OpeningBalancePreview';
 
 export const metadata = {
-  title: 'Opening balance | Fuerte',
+  title: "Opening balance",
 };
 
 /**

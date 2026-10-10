@@ -4,7 +4,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import ApplicationPage from './components/ApplicationPage';
 
 export const metadata = {
-  title: "Application | Fuerte",
+  title: "Application",
   description: "",
 };
 

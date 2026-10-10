@@ -15,6 +15,7 @@ import BorrowerInfo from '../components/BorrowerInfo';
 import { ConvertBanner, ConvertStop } from '../components/ConvertFromApplication';
 import { BorrowerDecision, BorrowerRowInfo } from '@/utils/DataTypes';
 import { useAuthStore } from '@/store/authStore';
+import { useDocumentTitle, borrowerTitle } from '@/hooks/useDocumentTitle';
 
 const BorrowerDetailPage: React.FC = () => {
   const params = useParams();
@@ -45,6 +46,8 @@ const BorrowerDetailPage: React.FC = () => {
   } = useBranches();
 
   const [singleData, setSingleData] = useState<BorrowerRowInfo | undefined>(undefined);
+  // Tab: the borrower's name once loaded; "New borrower" on /borrowers/new.
+  useDocumentTitle(borrowerId === 'new' ? 'New borrower' : borrowerTitle(singleData));
   // The latest Approved / Rejected, held apart from singleData: the header's decision updates it, and
   // a new singleData object would reload the Details form over unsaved edits. Re-read per borrower.
   const [decision, setDecision] = useState<BorrowerDecision | null>(null);

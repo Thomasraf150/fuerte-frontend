@@ -5,7 +5,7 @@ import './styles.css';
 import BorrNrSchedList from './components/BorrNrSchedList';
 
 export const metadata = {
-  title: "Loan Products",
+  title: "Notes Receivable",
   description: "",
 };
 

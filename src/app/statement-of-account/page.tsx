@@ -5,7 +5,7 @@ import './styles.css';
 import SoaList from './components/SoaList';
 
 export const metadata = {
-  title: "Loan Products",
+  title: "Statement of Account",
   description: "",
 };
 

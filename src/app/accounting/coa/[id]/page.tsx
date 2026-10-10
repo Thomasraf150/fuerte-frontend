@@ -14,6 +14,7 @@ import { SkeletonBlock } from '@/components/LoadingStates';
 import { Card } from '@/components/Card';
 import { useAuthStore } from '@/store';
 import CoaQueryMutations from '@/graphql/CoaQueryMutations';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type {
   AccountDetail,
   AccountTransactionsResponse,
@@ -28,6 +29,7 @@ const AccountDetailPage: React.FC = () => {
 
   // State
   const [account, setAccount] = useState<AccountDetail | null>(null);
+  useDocumentTitle(account && `${account.number} ${account.account_name}`); // tab: "{number} {name} · Fuerte Lending"
   const [transactions, setTransactions] = useState<AccountTransactionsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingTransactions, setLoadingTransactions] = useState(false);

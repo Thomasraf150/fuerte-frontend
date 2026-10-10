@@ -5,7 +5,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import NotReadyPanel from '@/components/NotReadyPanel';
 
 export const metadata: Metadata = {
-  title: 'Fuerte Lending | Settings',
+  title: "Settings",
   description: 'Fuerte Made Easy',
 };
 

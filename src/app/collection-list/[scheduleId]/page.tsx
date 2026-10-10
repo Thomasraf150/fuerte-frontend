@@ -11,6 +11,7 @@ import StatusBadge from '@/components/StatusBadge';
 import { Card, CardBody } from '@/components/Card';
 import useCollectionList from '@/hooks/useCollectionList';
 import { Info, AlertTriangle } from 'react-feather';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const CollectionDetailPage: React.FC = () => {
   const params = useParams();
@@ -25,6 +26,9 @@ const CollectionDetailPage: React.FC = () => {
     fetchCollectionEntry,
     dataColEntry,
   } = useCollectionList();
+  // "Collection · {borrower} · {ref}", page first like the other record titles; only once the entry
+  // has loaded (the ?ref= in the URL alone must not title the tab).
+  useDocumentTitle(...(dataColEntry?.length ? ['Collection', dataColEntry[0].borrower_name, loanRef] : []));
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

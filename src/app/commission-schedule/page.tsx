@@ -5,7 +5,7 @@ import './styles.css';
 import BorrCommSchedList from './components/BorrCommSchedList';
 
 export const metadata = {
-  title: "Loan Products",
+  title: "Commission Schedule",
   description: "",
 };
 

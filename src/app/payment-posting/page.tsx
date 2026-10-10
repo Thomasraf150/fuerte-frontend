@@ -4,7 +4,7 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import './styles.css';
 import LoansLists from './components/LoansLists';
 export const metadata = {
-  title: "Loan Products",
+  title: "Payment Posting",
   description: "",
 };
 

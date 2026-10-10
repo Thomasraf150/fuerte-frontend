@@ -11,6 +11,7 @@ import { Card, CardBody } from '@/components/Card';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import PaymentScheduleForm from '../components/PaymentScheduleForm';
 import { toast } from 'react-toastify';
+import { useDocumentTitle, loanTitle } from '@/hooks/useDocumentTitle';
 
 const PaymentPostingDetailPage: React.FC = () => {
   const params = useParams();
@@ -25,6 +26,7 @@ const PaymentPostingDetailPage: React.FC = () => {
     fnReversePayment,
     paymentLoading
   } = usePaymentPosting();
+  useDocumentTitle(...loanTitle('Post payment', loanScheduleList)); // "Post payment · {borrower} · {ref}"
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

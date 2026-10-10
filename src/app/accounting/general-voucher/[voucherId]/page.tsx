@@ -15,6 +15,7 @@ import CVForm from '../components/CVForm';
 import JVForm from '../components/JVForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const GeneralVoucherDetailPage: React.FC = () => {
   const params = useParams();
@@ -37,6 +38,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<RowAcctgEntry | undefined>(undefined);
+  useDocumentTitle(singleData?.journal_ref, singleData?.journal_name); // tab: "{journal ref} · {journal name} · Fuerte Lending"
 
   // Fetch voucher directly by ID (fixes pagination bug where voucher was on page 53 but only page 1 was fetched)
   useEffect(() => {

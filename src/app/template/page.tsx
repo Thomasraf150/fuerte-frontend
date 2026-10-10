@@ -5,7 +5,7 @@ import './styles.css';
 import GeneralVoucherList from './components/GeneralVoucherList';
 
 export const metadata = {
-  title: "General Voucher",
+  title: "Voucher Template",
   description: "",
 };
 

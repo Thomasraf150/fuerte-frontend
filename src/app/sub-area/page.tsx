@@ -5,7 +5,7 @@ import SubAreaList from './components/SubAreaList';
 import './styles.css';
 
 export const metadata = {
-  title: "Areas",
+  title: "Sub Areas",
   description: "",
 };
 

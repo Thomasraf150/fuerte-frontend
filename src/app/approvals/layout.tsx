@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Approvals · Fuerte",
+  title: "Approvals",
 };
 
 export default function ApprovalsLayout({ children }: { children: React.ReactNode }) {

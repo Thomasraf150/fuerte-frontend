@@ -12,6 +12,7 @@ import useSoa from '@/hooks/useSoa';
 import LoanDetails from '../components/LoanDetails';
 import CustomerLedger from '../components/CustomerLedger';
 import { CornerUpLeft } from 'react-feather';
+import { useDocumentTitle, loanTitle } from '@/hooks/useDocumentTitle';
 
 const SoaDetailPage: React.FC = () => {
   const params = useParams();
@@ -20,6 +21,7 @@ const SoaDetailPage: React.FC = () => {
   const loanId = params.loanId as string;
 
   const { fetchSingLoans, loanSingleData, loading: loanLoading } = useLoans();
+  useDocumentTitle(...loanTitle("Statement", loanSingleData)); // "Statement · {borrower} · {ref}"
   const { fetchCustomerLedger, custLedgerData, loading: ledgerLoading, printStateOfAccount, printing } = useSoa();
 
   const [loading, setLoading] = useState(true);
