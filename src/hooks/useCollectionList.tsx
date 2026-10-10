@@ -134,7 +134,8 @@ const useCollectionList = () => {
       searchQuery,
       onSearchChange: setSearchQuery,
       pageSizeOptions: [10, 20, 50, 100],
-      searchPlaceholder: "Search for collection...",
+      // Say what the box searches (GOV.UK / MoJ "Find a person": "search by name or …").
+      searchPlaceholder: "Search by borrower name or loan ref",
     },
     refresh,
 

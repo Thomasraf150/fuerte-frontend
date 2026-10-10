@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EyeOff, Eye, CreditCard, Save } from 'react-feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
@@ -102,10 +102,43 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
     }
   }, [dataBank])
 
+  // Where an unsaved Step 3 got its starting values, shown under Account Name so staff check them.
+  const [prefillNote, setPrefillNote] = useState<string | null>(null);
+  const prefilledFor = useRef<string | null>(null);
+
+  /**
+   * Unsaved Step 3 only, once per loan: a repeat borrower starts from their previous loan's
+   * name, banks and card numbers (same banks 87% of the time); a first loan starts from the
+   * borrower's name, FIRST LAST in caps (91% of saved names are the borrower). PINs are never
+   * pre-filled. Everything stays editable.
+   */
+  const prefillUnsaved = useCallback((loan: BorrLoanRowData) => {
+    if (prefilledFor.current === loan.id) return;
+    prefilledFor.current = loan.id;
+    const prev = loan.previous_bank_details;
+    if (prev) {
+      if (prev.account_name) setValue('account_name', prev.account_name);
+      if (prev.surrendered_bank_id) setValue('surrendered_bank_id', Number(prev.surrendered_bank_id));
+      if (prev.issued_bank_id) setValue('issued_bank_id', Number(prev.issued_bank_id));
+      if (prev.surrendered_acct_no) setValue('surrendered_acct_no', prev.surrendered_acct_no);
+      if (prev.issued_acct_no) setValue('issued_acct_no', prev.issued_acct_no);
+      setPrefillNote(`Filled in from loan ${prev.loan_ref ?? 'before this one'}. Check it against the card, then enter the PINs.`);
+      return;
+    }
+    const name = [loan.borrower?.firstname, loan.borrower?.lastname].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toUpperCase();
+    if (name) {
+      setValue('account_name', name);
+      setPrefillNote("Filled in with the borrower's name. Change it if the card is in someone else's name.");
+    }
+  }, [setValue]);
+
   useEffect(() => {
     if (loanSingleData) {
       setValue('loan_id', Number(loanSingleData?.id));
-      if (loanSingleData?.loan_bank_details) {
+      if (!loanSingleData.loan_bank_details) {
+        prefillUnsaved(loanSingleData);
+      } else {
+        setPrefillNote(null);
         // CRITICAL FIX: Add id field to enable UPDATE instead of CREATE
         setValue('id', loanSingleData?.loan_bank_details?.id);
         setValue('account_name', loanSingleData?.loan_bank_details?.account_name);
@@ -119,7 +152,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
       }
     }
     console.log(loanSingleData?.status, ' loanSingleData?.status')
-  }, [loanSingleData, setValue]);
+  }, [loanSingleData, setValue, prefillUnsaved]);
 
   // Smart value management for surrendered bank details
   useEffect(() => {
@@ -173,13 +206,19 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
       <form onSubmit={handleSubmit(onSubmit)} >
       <div className="grid grid-cols-1 gap-3 p-3 sm:gap-4">
         <div>
-          <h3 className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Account Name</h3>
+          <label htmlFor="account_name" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Account Name</label>
+          {/* autoComplete off: next to the PIN password boxes, browsers took this for a login
+              username and filled staff emails (admin@gmail.com) in here. */}
           <input
             type="text"
+            id="account_name"
+            autoComplete="off"
+            aria-describedby={prefillNote ? 'account_name_note' : undefined}
             className="h-12 md:h-11 w-full sm:w-72 rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
             placeholder="Card Account Name"
             {...register('account_name', { required: "Account name is required!" })}
           />
+          {prefillNote && <p id="account_name_note" className="mt-1.5 text-xs text-body dark:text-bodydark">{prefillNote}</p>}
           {errors.account_name && <p className="mt-2 text-sm text-danger">{errors.account_name.message}</p>}
         </div>
         {loanSingleData?.loan_bank_details?.updated_at && (
@@ -271,6 +310,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                             className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                             type="text"
                             id="surrendered_acct_no"
+                            autoComplete="off"
                             placeholder="000000"
                             value={field.value || ''}
                             onChange={(e) => field.onChange(e.target.value)}
@@ -298,6 +338,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                             className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                             type="text"
                             id="issued_acct_no"
+                            autoComplete="off"
                             placeholder="000000"
                             value={field.value || ''}
                             onChange={(e) => field.onChange(e.target.value)}
@@ -328,6 +369,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         type={showPin1 ? 'text' : 'password'}
                         className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                         placeholder="000000"
+                        autoComplete="new-password"
                         {...register('surrendered_pin', { required: "Surrendered Pin. is required!" })}
                       />
                       <button
@@ -351,6 +393,7 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
                         type={showPin2 ? 'text' : 'password'}
                         className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 pr-10 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
                         placeholder="000000"
+                        autoComplete="new-password"
                         {...register('issued_pin', { required: "Issued Pin. is required!" })}
                       />
                       <button

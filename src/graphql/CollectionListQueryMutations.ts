@@ -13,6 +13,7 @@ const GET_DATA_COLLECTION_LIST: string = `
         trans_date
         loan_ref
         journal_ref
+        borrower_name
       }
       paginatorInfo {
         total
@@ -34,6 +35,7 @@ const GET_COLLECTION_ENTRY: string = `
       journal_ref
       account_id
       is_deleted
+      borrower_name
     }
   }
 `;

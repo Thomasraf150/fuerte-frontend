@@ -5,15 +5,15 @@ import type { PendingDeletionInfo } from '@/hooks/usePendingDeletions';
 import type { BorrowerRowInfo } from '@/utils/DataTypes';
 
 /**
- * Deleting a borrower: bypass-eligible roles (ADMIN/OWNER/BRANCH_ADMIN) soft-delete
- * immediately; everyone else files a request. One definition for both places that
+ * Deleting a borrower: the Owner soft-deletes immediately; everyone else files a request. One definition for both places that
  * delete a borrower: the Borrowers list (useBorrower) and the borrower page's More menu.
  */
 export const BORROWER_DELETE: UseDeleteWithApprovalConfig<{ id: string | number }> = {
   mutation: BorrowerQueryMutations.DELETE_BORROWER_MUTATION,
   responseKey: 'deleteBorrower',
   promptTitle: 'Delete this borrower?',
-  promptText: 'If you are an admin or owner, this happens immediately. Otherwise a branch admin will review your request.',
+  // Only the Owner bypasses approval (User::canBypassDeletionApproval); the old text said admin or owner.
+  promptText: 'If you are the owner, this happens immediately. Otherwise an approver will review your request.',
   buildVariables: (args, reason) => ({ id: args.id, reason }),
   errorLabel: 'Failed to delete borrower',
 };

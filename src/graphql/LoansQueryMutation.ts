@@ -197,6 +197,15 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         created_at
         updated_at
       }
+      is_closed
+      previous_bank_details {
+        loan_ref
+        account_name
+        surrendered_bank_id
+        issued_bank_id
+        surrendered_acct_no
+        issued_acct_no
+      }
       acctg_entry {
         id
         reference_no

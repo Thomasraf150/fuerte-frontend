@@ -93,6 +93,8 @@ const CollectionDetailPage: React.FC = () => {
 
   const pageTitle = loanRef ? `Collection Entry: ${loanRef}` : 'Collection Entry';
   const isPosted = dataColEntry && dataColEntry.length > 0 && !!dataColEntry[0]?.journal_ref;
+  // Every line carries the same borrower (the server stamps it per entry).
+  const borrowerName = dataColEntry?.[0]?.borrower_name ?? null;
 
   return (
     <DefaultLayout>
@@ -113,10 +115,22 @@ const CollectionDetailPage: React.FC = () => {
             <h3 className="font-medium text-black dark:text-white mb-1">
               Collection Entry (Read-only)
             </h3>
-            <div className="text-sm text-body dark:text-bodydark">
-              <div className="font-semibold text-primary">{loanRef}</div>
+            {/* Whose collection this is leads the card (NN/g: a human-readable identifier,
+                not just a ref code); ref and date sit beneath it as the receipt's reference line. */}
+            {borrowerName && (
+              <p className="font-display text-xl uppercase leading-snug text-black dark:text-white">
+                <span className="sr-only">Borrower: </span>
+                {borrowerName}
+              </p>
+            )}
+            <div className="mt-0.5 text-sm text-body dark:text-bodydark">
+              <span className="font-semibold tabular-nums text-primary dark:text-olive-300">{loanRef}</span>
               {transDate && (
-                <div className="mt-1 text-xs">Transaction Date: {transDate}</div>
+                <>
+                  <span aria-hidden="true"> &middot; </span>
+                  <span className="sr-only">, </span>
+                  Transaction Date: <span className="tabular-nums">{transDate}</span>
+                </>
               )}
             </div>
             {isPosted ? (

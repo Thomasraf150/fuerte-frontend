@@ -8,6 +8,7 @@ import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import PendingDeletionBadge from '@/components/PendingDeletion/PendingDeletionBadge';
 import type { PendingDeletionInfo } from '@/hooks/usePendingDeletions';
+import { isLoanDeletable } from '@/hooks/loanDelete';
 
 const borrLoanCol = (
   handleRowClick: (row: BorrLoanRowData) => void,
@@ -67,7 +68,7 @@ const borrLoanCol = (
     cell: row => {
       const info = pendingByEntityId.get(Number(row.id));
       const isPending = !!info;
-      const deletable = row?.acctg_entry === null && row.is_closed !== '1' && row.status <= 3;
+      const deletable = isLoanDeletable(row);
 
       return (
         <div className="flex items-center space-x-2">

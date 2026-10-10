@@ -11,8 +11,8 @@ import loansListColumn from './LoansListColumn';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import useLoans from '@/hooks/useLoans';
 import { usePendingDeletions, PendingDeletionInfo } from '@/hooks/usePendingDeletions';
-import { showAlreadyPendingModal, showProcessingModal } from '@/components/ConfirmationModal';
 import useDeletionRequests from '@/hooks/useDeletionRequests';
+import { isLoanDeletable, showPendingLoanDeletion } from '@/hooks/loanDelete';
 import { pendingDeletionRowStyles } from '@/components/PendingDeletion/rowStyles';
 
 const LoansLists: React.FC = () => {
@@ -40,27 +40,13 @@ const LoansLists: React.FC = () => {
     router.push(`/loans-list/${data.id}`);
   };
 
-  const handlePendingClick = async (row: BorrLoanRowData, info: PendingDeletionInfo) => {
-    const action = await showAlreadyPendingModal({
-      request_id: info.request_id,
-      requested_by_name: info.requested_by_name,
-      reason: info.reason,
-      created_at: info.created_at,
-      is_mine: info.is_mine,
-      entity_label: `Loan ${row.loan_ref ?? `#${row.id}`}${row.borrower?.lastname ? ` — ${row.borrower.lastname}, ${row.borrower.firstname ?? ''}` : ''}`,
+  // Shared with the loan page's More menu (hooks/loanDelete.ts).
+  const handlePendingClick = (row: BorrLoanRowData, info: PendingDeletionInfo) =>
+    showPendingLoanDeletion(info, row, {
+      onView: () => router.push('/approvals'),
+      cancel: cancelDeletionRequest,
+      refresh: refreshPending,
     });
-    if (action === 'view') {
-      router.push('/approvals');
-    } else if (action === 'withdraw' && info.is_mine) {
-      const closeProcessing = showProcessingModal('Deleting request…');
-      try {
-        const ok = await cancelDeletionRequest(String(info.request_id));
-        if (ok) await refreshPending();
-      } finally {
-        closeProcessing();
-      }
-    }
-  };
 
   return (
     <div>
@@ -81,7 +67,7 @@ const LoansLists: React.FC = () => {
                   rowHref={(row) => `/loans-list/${row.id}`}
                   mobileActions={(row) => {
                     const info = pendingByEntityId.get(Number(row.id));
-                    const deletable = row?.acctg_entry === null && row.is_closed !== '1' && row.status <= 3;
+                    const deletable = isLoanDeletable(row);
                     return (
                       <>
                         <Button variant="secondary" size="sm" onClick={() => handleViewWholeLoan(row)}>
@@ -107,7 +93,7 @@ const LoansLists: React.FC = () => {
                     <LoanPhoneRow
                       row={row}
                       note={
-                        pendingByEntityId.has(Number(row.id)) && row?.acctg_entry === null && row.is_closed !== '1' && row.status <= 3
+                        pendingByEntityId.has(Number(row.id)) && isLoanDeletable(row)
                           ? 'Deletion pending'
                           : undefined
                       }

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
+import { closeDetails, useDismissDetails } from "@/components/MoreMenu/dismissDetails";
 import { useRouter } from "nextjs-toploader/app";
 import { ChevronDown, Trash2 } from "react-feather";
 import { useDeleteWithApproval } from "@/hooks/useDeleteWithApproval";
@@ -15,45 +16,11 @@ interface BorrowerMoreMenuProps {
   summaryClassName: string;
 }
 
-/** Close a <details>; with `returnFocus`, put the focus back on its summary. */
-const closeDetails = (details: HTMLDetailsElement | null, returnFocus: boolean): void => {
-  if (!details) return;
-  details.open = false;
-  if (returnFocus) details.querySelector("summary")?.focus();
-};
-
-/**
- * Escape and a click outside close an open <details>, which does neither by itself. Escape hands
- * the focus back to More only when it was inside the menu; elsewhere (an open picker in the form,
- * say) it just closes the menu and leaves the focus where it is.
- *
- * The listeners stay on for the menu's life and read details.open when the event arrives. They
- * used to wait for React state set from the toggle event, which the browser fires a task later,
- * so an Escape pressed right after opening reached no listener (seen as a flaky e2e, 2026-10-06).
- */
-const useDismissDetails = (menu: React.RefObject<HTMLDetailsElement>): void => {
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || !menu.current?.open) return;
-      closeDetails(menu.current, !!menu.current?.contains(document.activeElement));
-    };
-    const onPointerDown = (event: PointerEvent) => {
-      if (menu.current?.open && !menu.current.contains(event.target as Node)) closeDetails(menu.current, false);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [menu]);
-};
-
 /**
  * Delete this borrower with the Borrowers list's flow: useDeleteWithApproval with the same
  * BORROWER_DELETE definition, and, when a request is already pending for this borrower, the same
  * "Already in the queue" modal (showPendingBorrowerDeletion, which the list uses too).
- * An immediate delete (Admin, Owner, Branch Admin) leaves no borrower behind the page: back to the list.
+ * An immediate delete (the Owner's) leaves no borrower behind the page: back to the list.
  */
 const useDeleteBorrower = (borrower: BorrowerRowInfo) => {
   const router = useRouter();

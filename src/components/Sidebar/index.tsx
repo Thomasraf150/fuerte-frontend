@@ -7,6 +7,7 @@ import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import { NAV_CURRENT, NAV_GROUP_HAS, NavCurrentContext, useCurrentNav } from "@/components/Sidebar/currentNav";
 import ApplicationsMenuItem from "./ApplicationsMenuItem";
+import ApprovalsNavBadge from "./ApprovalsNavBadge";
 import { useAuthStore } from "@/store/authStore";
 import { useStore } from "zustand";
 
@@ -272,6 +273,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     />
                   </svg>
                   Approvals
+                  <ApprovalsNavBadge />
                 </Link>
               </li>
 

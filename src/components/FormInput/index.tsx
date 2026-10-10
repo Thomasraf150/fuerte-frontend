@@ -367,7 +367,9 @@ const FormInput: React.FC<FormInputProps> = ({
         )}
         {isMoney && (
           // The peso sign means something here, unlike the old decorative icons, so it stays as text.
-          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm text-body dark:text-bodydark" aria-hidden="true">₱</span>
+          // Sized to the input's own height, not inset-y-0: the error text below shares this box,
+          // and centring on the whole box dropped the ₱ to the input's bottom edge on any error.
+          <span className="pointer-events-none absolute left-4 top-0 flex h-12 items-center text-sm text-body md:h-11 dark:text-bodydark" aria-hidden="true">₱</span>
         )}
         {error && (
           <p id={errorId} className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-danger">

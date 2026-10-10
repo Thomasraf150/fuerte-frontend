@@ -7,6 +7,7 @@ import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import { NAV_CURRENT, NAV_GROUP_HAS, NavCurrentContext, useCurrentNav } from "@/components/Sidebar/currentNav";
 import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
+import ApprovalsNavBadge from "@/components/Sidebar/ApprovalsNavBadge";
 import { Server } from 'react-feather';
 
 interface SidebarProps {
@@ -187,6 +188,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="" />
                   </svg>
                   Approvals
+                  <ApprovalsNavBadge />
                 </Link>
               </li>
 

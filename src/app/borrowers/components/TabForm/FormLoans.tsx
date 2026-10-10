@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Layout, Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
@@ -32,6 +32,9 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
   // State to track which action was triggered (compute vs save)
   const [actionType, setActionType] = useState<'compute' | 'save' | null>(null);
+  // Compute only (useLoans' `loading` also covers Save): drives the receipt's skeleton figures.
+  const [computing, setComputing] = useState<boolean>(false);
+  const computesInFlight = useRef(0);
 
 
   // Safety utility to ensure numeric values are clean (backup for edge cases)
@@ -79,7 +82,14 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
     if (currentActionType === 'compute') {
       setShowComputation(true);
-      onSubmitLoanComp(cleanData, "Compute");
+      // Counted, not a flag: editing OB / Penalty / Rebates recomputes while one may be in flight,
+      // and the first to finish must not drop the skeleton over figures still being computed.
+      computesInFlight.current += 1;
+      setComputing(true);
+      onSubmitLoanComp(cleanData, "Compute").finally(() => {
+        computesInFlight.current -= 1;
+        if (computesInFlight.current === 0) setComputing(false);
+      });
     } else if (currentActionType === 'save') {
       handleSaveWithConfirmation(cleanData);
     }
@@ -296,7 +306,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
           {showComputation && (
             <div className={`${showComputation ? 'fade-in' : 'fade-out'}`}>
-              <FormLoanComputation setValue={setValue} register={register} watch={watch} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} />
+              <FormLoanComputation setValue={setValue} register={register} watch={watch} handleCompTblDecimal={handleCompTblDecimal} dataComputedLoans={dataComputedLoans} computing={computing} />
             </div>
           )}
 

@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store";
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
+import { LOAN_DELETE } from '@/hooks/loanDelete';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';
 import { usePagination } from '@/hooks/usePagination';
@@ -788,16 +789,8 @@ const useLoans = () => {
   // The shared delete-with-approval flow only fits the "rm_loans" path.
   // "change_effectivity" is a different operation (status reset, no
   // approval queue) so it stays on the inline confirmation path below.
-  const submitDeleteLoan = useDeleteWithApproval<{ loan_id: string }>({
-    mutation: DELETE_LOANS,
-    responseKey: 'removeLoans',
-    promptTitle: 'Delete this loan?',
-    promptText: 'If you are an admin or owner, this happens immediately. Otherwise, a branch admin will review your request.',
-    buildVariables: (args, reason) => ({
-      input: { loan_id: args.loan_id, type: 'rm_loans', ...(reason ? { reason } : {}) },
-    }),
-    errorLabel: 'Failed to delete loan',
-  });
+  // Shared with the loan page's More menu (hooks/loanDelete.ts).
+  const submitDeleteLoan = useDeleteWithApproval(LOAN_DELETE);
 
   const handleDeleteLoans = async (
     loan_id: String,

@@ -563,6 +563,8 @@ export interface DataRowLoanPayments {
   journal_ref: string;
   account_id: string;
   is_deleted: string;
+  /** "LASTNAME, FIRSTNAME"; only getCollectionEntry selects it. */
+  borrower_name?: string | null;
 }
 
 export interface DataRowLoanSchedules {
@@ -604,6 +606,14 @@ export interface LoanBankFormValues {
   created_at?: string;
   updated_at?: string;
 }
+export interface PreviousLoanBankDetails {
+  loan_ref: string | null;
+  account_name: string | null;
+  surrendered_bank_id: string | null;
+  issued_bank_id: string | null;
+  surrendered_acct_no: string | null;
+  issued_acct_no: string | null;
+}
 export interface BorrLoanRowData {
   id: string;
   branch_sub_id: number;
@@ -635,6 +645,8 @@ export interface BorrLoanRowData {
   loan_schedules: DataRowLoanSchedules[];
   loan_udi_schedules: DataRowLoanUdiSchedules[];
   loan_bank_details: LoanBankFormValues;
+  /** Step 3 pre-fill from the borrower's latest other loan; never has PINs. Single-loan query only. */
+  previous_bank_details?: PreviousLoanBankDetails | null;
   borrower: BorrowerRowInfo;
   acctg_entry: AcctgEntryRowData;
   branch_sub: DataSubBranches;
@@ -930,6 +942,8 @@ export interface DataColListRow {
   trans_date: string;
   loan_ref: string;
   journal_ref: string | null;
+  /** "LASTNAME, FIRSTNAME" of the loan's borrower. */
+  borrower_name: string | null;
 }
 
 export interface DataColEntries {

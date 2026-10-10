@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Check, X, Clock, Lock } from 'react-feather';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import LoanDetails from './TabForm/LoanDetails';
@@ -12,6 +12,8 @@ import ReleaseLoans from './Tabs/ReleaseLoans';
 import LoanHistory from './Tabs/LoanHistory';
 import useCoa from '@/hooks/useCoa';
 import { LoadingSpinner, SkeletonBlock } from '@/components/LoadingStates';
+import { isLoanDeletable } from '@/hooks/loanDelete';
+import LoanMoreMenu from './LoanMoreMenu';
 
 interface BorrInfoProps {
   singleData: BorrLoanRowData | undefined;
@@ -76,6 +78,18 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
     { n: 4, label: 'Approve and Release', disabled: !(status > 1), done: status === 3 },
   ];
 
+  // The step to do next is always open: on load, and again whenever finishing a step moves it on.
+  // Keyed on the step number, so a tab the user clicks stays put until the loan actually progresses.
+  // A released loan has no next step and opens on nothing, as before; checked on status, not the
+  // steps, because 56 released loans still carry is_pn_signed = 0 and would open on PN Signing.
+  const nextStep = status === 3 ? undefined : steps.find((s) => !s.done && !s.disabled)?.n;
+  const openedFor = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (!loanSingleData || nextStep === undefined || openedFor.current === nextStep) return;
+    openedFor.current = nextStep;
+    setActiveTab(nextStep);
+  }, [loanSingleData, nextStep]);
+
   return (
     <div className="w-full relative">
       {refetching && (
@@ -83,18 +97,25 @@ const LoanPnSigningForm: React.FC<BorrInfoProps> = ({ singleData, handleShowForm
           <LoadingSpinner size="lg" message="Updating loan details..." />
         </div>
       )}
-      <div className="border-b flex justify-between items-center border-stroke px-7 py-4 dark:border-strokedark">
-        <h3 className="font-medium text-black dark:text-white">
+      <div className="border-b flex justify-between items-center gap-3 border-stroke px-7 py-4 dark:border-strokedark">
+        <h3 className="min-w-0 font-medium text-black dark:text-white">
           {loanSingleData?.loan_product?.description}
         </h3>
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={() => { return handleShowForm(false); }}
-          className="-mr-3 flex h-12 w-12 items-center justify-center rounded-full text-boxdark-2 hover:bg-whiten focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:-mr-2 md:h-10 md:w-10 dark:text-bodydark dark:hover:bg-meta-4"
-        >
-          <X size={17} />
-        </button>
+        {/* `relative`: the More menu opens against this row, so it never leaves the screen. */}
+        <div className="relative flex shrink-0 items-center gap-2">
+          {/* Delete, as the Loans list offers it, and only when the list would (isLoanDeletable). */}
+          {loanSingleData && isLoanDeletable(loanSingleData) && (
+            <LoanMoreMenu loan={loanSingleData} onDeleted={() => handleShowForm(false)} />
+          )}
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => { return handleShowForm(false); }}
+            className="-mr-3 flex h-12 w-12 items-center justify-center rounded-full text-boxdark-2 hover:bg-whiten focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:-mr-2 md:h-10 md:w-10 dark:text-bodydark dark:hover:bg-meta-4"
+          >
+            <X size={17} />
+          </button>
+        </div>
       </div>
       {!loanSingleData ? (
         <div className="px-7 py-6">
