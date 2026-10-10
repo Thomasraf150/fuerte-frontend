@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { graphqlFetch } from "@/utils/graphqlFetch";
 
 /**
- * Lightweight slice for the bell-icon badge.
+ * Lightweight slice for the bell-icon badge and the sidebar Approvals count (ApprovalsNavBadge).
  *
  * The /approvals page owns the heavy fetching via useDeletionRequests.
  * This store keeps a synchronized list of pending-request IDs (and a

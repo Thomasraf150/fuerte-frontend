@@ -199,7 +199,8 @@ const useBranches = () => {
     mutation: DELETE_SUB_BRANCH_MUTATION,
     responseKey: 'deleteSubBranch',
     promptTitle: 'Delete this sub-branch?',
-    promptText: 'A branch admin can approve sub-branch deletion within their branch. Admins and owners can delete immediately.',
+    // Only the Owner bypasses approval (User::canBypassDeletionApproval), as in loanDelete / borrowerDelete.
+    promptText: 'If you are the owner, this happens immediately. Otherwise an approver will review your request.',
     buildVariables: (args, reason) => ({ id: args.id, reason }),
     errorLabel: 'Failed to delete sub-branch',
   });
