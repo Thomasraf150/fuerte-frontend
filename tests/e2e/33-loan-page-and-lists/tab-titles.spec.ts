@@ -38,7 +38,7 @@ test('list pages, record pages and client-side navigation all title the tab; the
   await expect(page).toHaveTitle('Collection List · Fuerte Lending', { timeout: 120_000 });
   // Exactly one <title>: the old hard-coded "Fuerte Lending System" is gone.
   expect(await page.locator('head title').count()).toBe(1);
-  // The castle favicon, served by app/icon.svg; the template's stock favicon.ico is gone.
+  // The gold castle favicon (no tile), served by app/icon.svg; the template's stock favicon.ico is gone.
   const icon = page.locator('head link[rel="icon"]');
   await expect(icon.first()).toHaveAttribute('href', /icon\.svg/);
   const svg = await (await page.request.get(String(await icon.first().getAttribute('href')))).text();
