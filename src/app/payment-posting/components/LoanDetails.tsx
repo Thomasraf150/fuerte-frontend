@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { manilaToday } from '@/utils/sourceTracker';
+import { scheduleRowViews } from '@/utils/scheduleRowState';
+import { ROW_MARKER, ScheduleRowStatus, ScheduleSummary } from './ScheduleRowStatus';
 import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatNumberComma } from '@/utils/helper';
-import { CheckCircle, CreditCard, RefreshCcw, Save, RotateCw } from 'react-feather';
+import { CreditCard, RefreshCcw, Save, RotateCw } from 'react-feather';
 import useLoans from '@/hooks/useLoans';
 import PaymentCollectionForm from './Form/PaymentCollectionForm';
 import OtherPaymentForm from './Form/OtherPaymentForm';
@@ -26,6 +29,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
   const [selectedMoSched, setSelectedMoSched] = useState<BorrLoanRowData>();
   const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
   const [selectedUdiSched, setSelectedUdiSched] = useState<BorrLoanRowData>();
+  const rowViews = useMemo(() => scheduleRowViews(loanSingleData?.loan_schedules, manilaToday()), [loanSingleData]);
 
   // PARKED: this sum is missing a `+` before loan_details[5] and [6], so those two lines are
   // statements of their own and never reach the total (it shows 1,200 less than the loan page).
@@ -92,6 +96,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                 as="h4"
                 title={<><span className="font-semibold">Loan Ref:</span> {loanSingleData?.loan_ref}</>}
               />
+              <ScheduleSummary views={rowViews} rows={loanSingleData?.loan_schedules} />
 
               <div className="grid grid-cols-2 sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6">
                 <div className="flex items-center">
@@ -108,20 +113,27 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                 </div>
               </div>
 
-              {loanSingleData?.loan_schedules?.map((item, i) => (
+              {loanSingleData?.loan_schedules?.map((item, i) => {
+                const view = rowViews[i];
+                const paid = view?.state === 'paid';
+                return (
                 <div
-                  className="grid grid-cols-2 sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6"
+                  className={`relative grid grid-cols-2 sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6 ${ROW_MARKER[view?.state ?? 'upcoming']}`}
                   key={i}
                 >
-                  <div className="flex items-center">
-                    <p className="text-xs sm:text-sm text-black dark:text-white">{item?.due_date}</p>
+                  <div className="flex flex-col justify-center gap-1">
+                    <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>{item?.due_date}</p>
+                    {view && <ScheduleRowStatus view={view} />}
                   </div>
                   <div className="hidden sm:flex items-center justify-end">
-                    <p className="text-xs sm:text-sm tabular-nums text-black dark:text-white">{formatNumberComma(Number(item?.amount))}</p>
+                    {/* A paid row shows what was paid, not the 0.00 left. */}
+                    <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>
+                      {paid ? <><span className="sr-only">Paid </span>{formatNumberComma(view.paidCents / 100)}</> : formatNumberComma(Number(item?.amount))}
+                    </p>
                   </div>
                   <div className="flex items-center justify-end">
-                    <p className="text-xs sm:text-sm tabular-nums text-black dark:text-white">
-                      {formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
+                    <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>
+                      {paid ? <span aria-label="settled">—</span> : formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
                     </p>
                   </div>
 
@@ -137,7 +149,8 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                       <span className="md:hidden">Other</span>
                     </Button>
 
-                    {item?.amount > 0 ? (
+                    {/* A paid row says so in its badge; the disabled "Paid" button is gone. */}
+                    {!paid && (
                       <Button
                         variant="secondary"
                         className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
@@ -147,17 +160,10 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                         <span className="hidden lg:inline">Proceed to Pay</span>
                         <span className="lg:hidden">Pay</span>
                       </Button>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
-                        disabled
-                      >
-                        <CheckCircle size={15} />
-                        Paid
-                      </Button>
                     )}
 
+                    {/* Reverse only where there is a payment to reverse. */}
+                    {view?.hasPayments && (
                     <Button
                       variant="danger"
                       className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
@@ -177,9 +183,11 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                         </>
                       )}
                     </Button>
+                    )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </Card>
           </div>
 

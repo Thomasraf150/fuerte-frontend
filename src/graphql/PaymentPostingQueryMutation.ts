@@ -150,6 +150,7 @@ const GET_LOAN_SCHEDULE: string = `
       loan_payments {
         description
         amount
+        trans_date
       }
     }
     loan_udi_schedules {
