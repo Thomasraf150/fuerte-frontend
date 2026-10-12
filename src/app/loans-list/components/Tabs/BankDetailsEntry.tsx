@@ -118,8 +118,11 @@ const BankDetailsEntry: React.FC<OMProps> = ({ handleRefetchData, loanSingleData
     const prev = loan.previous_bank_details;
     if (prev) {
       if (prev.account_name) setValue('account_name', prev.account_name);
-      if (prev.surrendered_bank_id) setValue('surrendered_bank_id', Number(prev.surrendered_bank_id));
-      if (prev.issued_bank_id) setValue('issued_bank_id', Number(prev.issued_bank_id));
+      // Kept as the string the server sends, like a hand-picked option: the
+      // mutation's bank ids are GraphQL String, which refuses a JSON number
+      // ("String cannot represent a non string value", 2026-10-12).
+      if (prev.surrendered_bank_id) setValue('surrendered_bank_id', String(prev.surrendered_bank_id));
+      if (prev.issued_bank_id) setValue('issued_bank_id', String(prev.issued_bank_id));
       if (prev.surrendered_acct_no) setValue('surrendered_acct_no', prev.surrendered_acct_no);
       if (prev.issued_acct_no) setValue('issued_acct_no', prev.issued_acct_no);
       setPrefillNote(`Filled in from loan ${prev.loan_ref ?? 'before this one'}. Check it against the card, then enter the PINs.`);

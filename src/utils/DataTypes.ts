@@ -596,8 +596,10 @@ export interface LoanBankFormValues {
   id?: number;
   loan_id: number;
   account_name: string;
-  surrendered_bank_id: number;
-  issued_bank_id: number;
+  // Strings at runtime on every path (select options, saved details, pre-fill);
+  // InputLoanBankDetails declares them String.
+  surrendered_bank_id: string;
+  issued_bank_id: string;
   surrendered_acct_no: string;
   issued_acct_no: string;
   surrendered_pin: string;
