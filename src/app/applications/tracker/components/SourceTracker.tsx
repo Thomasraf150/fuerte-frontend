@@ -14,13 +14,13 @@ import SourceResults from './SourceResults';
 
 /**
  * Whose applications are counted. The server decides (Owner and Admin count every branch, Call
- * Center its own branch group's -- one account per group, 2026-10-08 -- everyone else their
- * own); this only says so. null until the role has been read after mount.
+ * Center its own and its Cross-Branch Access branches -- one account per location, 2026-10-12 --
+ * everyone else their own); this only says so. null until the role has been read after mount.
  */
 const scopeLine = (roleCode: string | null | undefined): string | null => {
   if (roleCode === null) return null;
   if (roleCode === 'OWN' || roleCode === 'ADM') return 'All branches';
-  return roleCode === 'CALLCTR' ? "Your group's branches" : 'Your branches';
+  return 'Your branches';
 };
 
 /** The signed-in role code, read after mount (the persisted store exists only in the browser); null before. */

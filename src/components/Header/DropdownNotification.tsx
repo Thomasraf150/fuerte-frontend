@@ -26,7 +26,8 @@ const IS_APPROVER_ROLE = (roleName: string): boolean => {
 /**
  * Who gets the Applications items, by role code: Processing and Marketing (COL, 2026-10-08:
  * "X is now a borrower", on their own branches) and Call Center (every status change, and every
- * Approved / Rejected on a borrower made from an application, in its own branch group). The server
+ * Approved / Rejected on a borrower made from an application, on its own and Cross-Branch Access
+ * branches, 2026-10-12). The server
  * decides what each gets; the bell only asks.
  */
 const APPLICATION_ROLE_CODES: ReadonlySet<string> = new Set(["PROC", "COL", "CALLCTR"]);
