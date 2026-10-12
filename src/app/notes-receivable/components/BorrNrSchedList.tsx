@@ -11,13 +11,14 @@ import Button from '@/components/Button';
 import { NotesReceivableSkeleton, LoadingSpinner } from '@/components/LoadingStates';
 import NetworkStatus from '@/components/NetworkStatus';
 import { useDebounce } from '@/hooks/useDebounce';
-import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import useBranches from '@/hooks/useBranches';
 import { formatNumberComma, formatMoneyOrBlank } from '@/utils/helper';
 import { Card, CardBody } from "@/components/Card";
 import ErrorAlert from "@/components/ErrorAlert";
+import PeriodPresets from '@/components/PeriodPresets';
+import { presetDates } from '@/utils/reportPeriod';
 
 // const column = soaListColumn;
 interface Option {
@@ -57,8 +58,10 @@ const BorrNrSchedList: React.FC = () => {
   const [singleData, setSingleData] = useState<BorrLoanRowData>();
   
   // Date state
-  const [startDate, setStartDate] = useState<Date | null>(moment('2024-01-01').toDate());
-  const [endDate, setEndDate] = useState<Date | null>(moment('2025-01-15').toDate());
+  // Opens on this whole month (a schedule looks ahead, as CHR's does); it was stuck
+  // on a hard-coded 2024-01-01 to 2025-01-15 window.
+  const [startDate, setStartDate] = useState<Date | null>(() => presetDates('thisMonth').start);
+  const [endDate, setEndDate] = useState<Date | null>(() => presetDates('thisMonth').end);
   
   // Branch state
   const { dataBranch, dataBranchGroup, dataBranchSub, fetchDataList, fetchBranchGroupList, fetchSubDataList, loadingBranches, loadingBranchGroups, loadingSubBranches } = useBranches();
@@ -188,6 +191,20 @@ const BorrNrSchedList: React.FC = () => {
   };
 
   const handleSearch = () => runSearch();
+
+  // A quick period applies at once (no Search click), with its own dates: the
+  // setState calls above have not landed when setFilters reads them.
+  const handlePresetPick = (start: Date, end: Date) => {
+    setStartDate(start);
+    setEndDate(end);
+    setFilters({
+      startDate: start,
+      endDate: end,
+      branchId: selectedBranchId || undefined,
+      branchSubId: branchSubId || undefined,
+      searchTerm: debouncedSearchTerm || undefined,
+    });
+  };
 
   // Auto-search when debounced search term changes (if auto-search is enabled)
   useEffect(() => {
@@ -464,6 +481,15 @@ const BorrNrSchedList: React.FC = () => {
                 </div>
 
     
+                <PeriodPresets
+                  presets={['thisMonth', 'lastMonth', 'nextMonth']}
+                  start={startDate}
+                  end={endDate}
+                  onPick={handlePresetPick}
+                  disabled={loading}
+                  className="mb-4"
+                />
+
                 {/* Loading States */}
                 {initialLoading ? (
                   <NotesReceivableSkeleton rows={5} columns={months?.length || 3} />

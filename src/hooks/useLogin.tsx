@@ -48,13 +48,11 @@ const useLogin = () => {
         } else if (response.status >= 500) {
           errorMessage = 'The server could not be reached. Please try again in a moment.';
         }
-        toast.error(errorMessage);
         return { success: false, error: errorMessage };
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Network error occurred. Please try again.';
       console.error('An error occurred during login:', error);
-      toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setLoginLoading(false);

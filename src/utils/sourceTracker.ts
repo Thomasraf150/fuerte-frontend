@@ -42,7 +42,8 @@ const dayOf = (ymd: string): Date => {
 
 const ymdOf = (date: Date): string => date.toISOString().slice(0, 10);
 
-const shiftDays = (ymd: string, days: number): string => {
+/** A Y-m-d moved by whole days (negative goes back). Also used by utils/reportPeriod.ts. */
+export const shiftDays = (ymd: string, days: number): string => {
   const date = dayOf(ymd);
   date.setUTCDate(date.getUTCDate() + days);
   return ymdOf(date);

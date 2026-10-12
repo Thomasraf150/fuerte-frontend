@@ -6,7 +6,7 @@ import './styles.css';
 
 export const metadata = {
   title: "Branch Setup",
-  description: "This is Next.js Profile page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
+  description: "Set up Fuerte branches and sub-branches.",
 };
 
 const BranchSetup: React.FC = () => {

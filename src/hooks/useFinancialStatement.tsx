@@ -164,17 +164,16 @@ const useFinancialStatement = () => {
     setIncomeTaxData(undefined);
   };
  
-  const fetchBalanceSheetData = async (startDate: Date | undefined, endDate: Date | undefined, branch_sub_id: string, branch_id?: string) => {
-    // Validate dates before API call
-    if (!startDate || !endDate) {
-      toast.warning('Please select start and end dates');
+  // A balance sheet is "as of" one day: the server totals every posting up to it
+  // (no startDate is sent, so it counts from the beginning of the books).
+  const fetchBalanceSheetData = async (asOf: Date | undefined, branch_sub_id: string, branch_id?: string) => {
+    if (!asOf) {
+      toast.warning('Please choose the "as of" date');
       return;
     }
 
-    const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
-    const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
-
-    if (formattedStartDate === 'Invalid date' || formattedEndDate === 'Invalid date') {
+    const formattedEndDate = moment(asOf).format('YYYY-MM-DD');
+    if (formattedEndDate === 'Invalid date') {
       toast.error('Invalid date format');
       return;
     }
@@ -182,8 +181,7 @@ const useFinancialStatement = () => {
     setLoading(true);
 
     try {
-      const variables: { startDate: string, endDate: string, branch_sub_id: string, branch_id?: string } = {
-        startDate: formattedStartDate,
+      const variables: { endDate: string, branch_sub_id: string, branch_id?: string } = {
         endDate: formattedEndDate,
         branch_sub_id,
         // Forward the selected main branch so "Branch + All Sub-Branches" scopes

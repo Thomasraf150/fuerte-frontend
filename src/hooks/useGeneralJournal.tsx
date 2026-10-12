@@ -5,15 +5,16 @@ import GeneralJournalQueryMutations from '@/graphql/GeneralJournalQueryMutations
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { usePagination } from './usePagination';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { reportRange } from '@/utils/reportPeriod';
 
 const useGeneralJournal = (journalType: string = 'CRJ') => {
   const { GET_GJ_QUERY } = GeneralJournalQueryMutations;
 
-  const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    branch_id: '',
-    branch_sub_id: '',
+  // Opens on the last 30 days, the same period VoucherFilters starts on, so the
+  // first query is already right and the filters' mount emit is a no-op.
+  const [filters, setFilters] = useState(() => {
+    const { from, to } = reportRange('last30');
+    return { startDate: from, endDate: to, branch_id: '', branch_sub_id: '' };
   });
 
   // Wrapper function for usePagination hook

@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Pusher from "pusher-js";
 import { usePathname } from "next/navigation";
 import { useRouter } from 'nextjs-toploader/app';
 import NextTopLoader from 'nextjs-toploader';
 import { ToastContainer } from 'react-toastify';
-import Loader from "@/components/common/Loader";
 import CallCenterGuard from "@/components/Guards/CallCenterGuard";
 import useMaintenanceRedirect from '@/hooks/useMaintenanceRedirect';
 import { BRAND } from '@/utils/brandColors';
@@ -19,13 +18,7 @@ import { BRAND } from '@/utils/brandColors';
  * loader, the Call Center guard and the app's one toast container.
  */
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState<boolean>(true);
-
   useMaintenanceRedirect();
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, [loading]);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -64,7 +57,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         shadow={`0 0 10px ${BRAND.accent},0 0 5px ${BRAND.accent}`}
       />
       <div className="dark:bg-boxdark-2 dark:text-bodydark">
-        {loading ? <Loader /> : ''}
         <CallCenterGuard>{children}</CallCenterGuard>
       </div>
       {/* The app's one toast container. Each page layout used to mount its own, so a toast

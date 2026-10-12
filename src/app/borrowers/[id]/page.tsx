@@ -157,7 +157,7 @@ const BorrowerDetailPage: React.FC = () => {
     return (
       <DefaultLayout>
         <div className="mx-auto">
-          <Breadcrumb pageName="Loading..." />
+          <Breadcrumb pageName="" loading />
         </div>
         <div className="flex justify-center items-center min-h-[400px]">
           <LoadingSpinner />

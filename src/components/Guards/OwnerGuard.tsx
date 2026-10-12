@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import SkeletonBlock from "@/components/LoadingStates/SkeletonBlock";
 
 interface OwnerGuardProps {
   children: ReactNode;
@@ -28,9 +29,8 @@ const OwnerGuard: React.FC<OwnerGuardProps> = ({ children }) => {
 
   if (isAuthorized === null) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-        <span className="text-gray-600 dark:text-gray-300">Checking access...</span>
+      <div className="mx-auto w-full max-w-md p-6">
+        <SkeletonBlock rows={3} label="Checking access…" />
       </div>
     );
   }

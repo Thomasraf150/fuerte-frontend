@@ -2,17 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
-import ChartOne from "../Charts/ChartOne";
-import ChartThree from "../Charts/ChartThree";
-import ChartTwo from "../Charts/ChartTwo";
-import ChatCard from "../Chat/ChatCard";
-import TableOne from "../Tables/TableOne";
-import CardDataStats from "../CardDataStats";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
 import './styles.css';
-import { Package } from "@/types/package";
 import { Calendar, Printer } from "react-feather";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import SummaryTicket from './components/SummaryTicket';
@@ -25,6 +18,10 @@ import useSummaryTicket from '@/hooks/useSummaryTicket';
 // import useCoa from '@/hooks/useCoa';
 import useBranches from '@/hooks/useBranches';
 import { toast } from 'react-toastify';
+import PeriodPresets from '@/components/PeriodPresets';
+import Worklist from '@/components/Worklist';
+import SkeletonBlock from '@/components/LoadingStates/SkeletonBlock';
+import { presetDates } from '@/utils/reportPeriod';
 
 interface Option {
   value: string;
@@ -37,9 +34,9 @@ const DefaultPage: React.FC = () => {
   // const { onSubmitCoa, branchSubData } = useCoa();
   const { dataBranch, dataBranchGroup, dataBranchSub, fetchDataList, fetchBranchGroupList, fetchSubDataList, loadingBranches, loadingBranchGroups, loadingSubBranches } = useBranches();
   const { fetchSummaryTixReport, sumTixLoading, dataSummaryTicket, printSummaryTicketDetails, printLoading } = useSummaryTicket();
-  // Use undefined instead of null for initial state
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  // Opens on the last 30 days (CHR's Summary Ticket default) instead of empty dates.
+  const [startDate, setStartDate] = useState<Date | undefined>(() => presetDates('last30').start);
+  const [endDate, setEndDate] = useState<Date | undefined>(() => presetDates('last30').end);
   const [branchSubId, setBranchSubId] = useState<string>('');
   const [branchId, setBranchId] = useState<string>(''); // Track selected branch
   const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
@@ -77,8 +74,45 @@ const DefaultPage: React.FC = () => {
         setUserBranchSubId(ubsId);
         setBranchSubId(ubsId);
       }
+      openOnDefaultScope(roleCode, userData?.user, assigned.length > 1);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Load the report on arrival instead of waiting for picks. Owner: every branch
+   * ("All Main Branches"). Staff who can reach several sub-branches: their home one,
+   * shown in the pickers. Single-branch staff load through the effect further down,
+   * which already fires once their branch and the default dates are set.
+   */
+  const openOnDefaultScope = (roleCode: string | undefined, user: any, multiBranch: boolean) => {
+    const { start, end } = presetDates('last30');
+    if (roleCode === 'OWN') {
+      setValue('branch_id', 'all');
+      setValue('branch_sub_id', 'all');
+      setBranchId('all');
+      setBranchSubId('all');
+      fetchSummaryTixReport(start, end, 'all', false, 'all');
+      return;
+    }
+    const homeSubId = String(user?.branch_sub_id || '');
+    const homeBranchId = String((user?.branch_sub || user?.branchSub)?.branch_id || '');
+    if (multiBranch && homeSubId) {
+      if (homeBranchId) {
+        setValue('branch_id', homeBranchId);
+        setBranchId(homeBranchId);
+        fetchSubDataList('name_asc', Number(homeBranchId));
+      }
+      setValue('branch_sub_id', homeSubId);
+      fetchSummaryTixReport(start, end, homeSubId, false, homeBranchId);
+    }
+  };
+
+  // A quick period sets both dates in one go, so the report refetches once.
+  const handlePresetPick = (start: Date, end: Date) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
 
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
@@ -157,8 +191,9 @@ const DefaultPage: React.FC = () => {
   // Refetch data when dates change (only if data was already loaded)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    // Only refetch if we have valid dates, a branch selected, and data was previously loaded
-    if (startDate && endDate && branchSubId && dataSummaryTicket !== undefined) {
+    // Only refetch if we have valid dates, a branch selected, and data was previously loaded.
+    // Single-branch staff refetch through the effect below; both firing loaded twice.
+    if (canPickBranch && startDate && endDate && branchSubId && dataSummaryTicket !== undefined) {
       fetchSummaryTixReport(startDate, endDate, branchSubId, showBreakdown, branchId);
     }
   }, [startDate, endDate]);
@@ -232,6 +267,9 @@ const DefaultPage: React.FC = () => {
     <>
       {/* The home page names itself like every other page (Phase 7): the sidebar calls it Summary. */}
       <Breadcrumb pageName="Summary" items={[{ label: "Dashboard" }, { label: "Summary" }]} />
+
+      {/* What this user can act on now, first, so it is never lost below the figures (CHR's lesson). */}
+      <Worklist />
 
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-1 lg:gap-2">
 
@@ -436,16 +474,19 @@ const DefaultPage: React.FC = () => {
             </div>
           )}
         </div>
+        <PeriodPresets
+          presets={['last30', 'thisMonth', 'lastMonth']}
+          start={startDate}
+          end={endDate}
+          onPick={handlePresetPick}
+          disabled={sumTixLoading}
+          className="mt-4 border-t border-stroke pt-4 dark:border-strokedark"
+        />
       </div>
-        
-        
-        
+
         {sumTixLoading ? (
-          <div className="rounded-sm border my-4 border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-              <span className="text-body dark:text-bodydark">Loading Summary Ticket data...</span>
-            </div>
+          <div className="my-4 rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <SkeletonBlock rows={6} label="Loading the Summary Ticket…" />
           </div>
         ) : dataSummaryTicket !== undefined ? (
           <>

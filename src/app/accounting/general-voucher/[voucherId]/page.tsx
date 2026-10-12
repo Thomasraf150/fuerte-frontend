@@ -102,7 +102,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
     return (
       <DefaultLayout>
         <div className="mx-auto">
-          <Breadcrumb pageName="Loading..." />
+          <Breadcrumb pageName="" loading />
         </div>
         <Card className="p-6">
           <SkeletonBlock rows={5} label="Loading the entry…" />

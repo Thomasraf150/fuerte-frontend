@@ -71,7 +71,7 @@ const PaymentPostingDetailPage: React.FC = () => {
     return (
       <DefaultLayout>
         <div className="mx-auto">
-          <Breadcrumb pageName="Loading..." />
+          <Breadcrumb pageName="" loading />
         </div>
         <Card className="min-h-[400px]">
           <CardBody>

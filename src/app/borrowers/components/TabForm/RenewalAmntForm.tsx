@@ -107,13 +107,13 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
     <div className="max-w-8xl mx-auto pb-4">
       <FormLabel title={`Renewal Details`}/>
       {loading ? (
-        <div className="border border-gray-300 dark:border-strokedark rounded-lg shadow-sm p-12 bg-white dark:bg-meta-4">
+        <div className="border border-stroke dark:border-strokedark rounded-lg shadow-sm p-12 bg-white dark:bg-meta-4">
           <LoadingSpinner size="lg" message="Loading renewal data..." />
         </div>
       ) : (
-        <div className="overflow-x-auto border border-gray-300 dark:border-strokedark rounded-lg shadow-sm">
+        <div className="overflow-x-auto border border-stroke dark:border-strokedark rounded-lg shadow-sm">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-100">
+            <thead className="bg-gray-2">
               <tr>
                 <th className="border px-4 py-2 text-left">Ref #</th>
                 <th className="border px-4 py-2 text-left">Actions</th>
@@ -122,7 +122,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
             <tbody>
               {dataComputedRenewal && dataComputedRenewal?.map((v: any, index: number) => (
               <React.Fragment key={index}>
-                <tr className="hover:bg-gray-50">
+                <tr className="hover:bg-gray">
                   <td className="border px-4 py-2">{v.loan_ref}</td>
                   <td className="border px-4 py-2">
                     <button
@@ -137,10 +137,10 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
 
                 {openRows.includes(index) && (
                   <tr>
-                    <td colSpan={4} className="border py-2 bg-gray-50">
+                    <td colSpan={4} className="border py-2 bg-gray">
                       <div className="p-2 overflow-x-auto">
-                        <table className="min-w-full border border-gray-300 text-sm">
-                          <thead className="bg-gray-100">
+                        <table className="min-w-full border border-stroke dark:border-strokedark text-sm">
+                          <thead className="bg-gray-2">
                             <tr>
                               <th className="px-2 py-2 text-center">Action</th>
                               <th className="px-2 py-2 text-center">Type</th>
@@ -151,7 +151,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                           <tbody>
                           {v?.loan_schedules?.ua_sp?.map((row: any, idx: number) => (
                             row?.amount > 0 && (
-                              <tr key={idx} className="hover:bg-gray-100">
+                              <tr key={idx} className="hover:bg-gray-2">
                                 <td className="text-center px-2 py-2">
                                   <div className="flex justify-center items-center">
                                     <input
@@ -160,7 +160,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                       value={JSON.stringify([row?.amount, row?.due_date])}
                                       checked={selectedValues.some(item => item.loan_ref === v.loan_ref && item.amount === row?.amount && item.dueDate === row?.due_date)}
                                       onChange={() => handleRadioChange(v.loan_ref, { amount: row?.amount, loan_schedule_id: row?.loan_schedule_id, dueDate: row?.due_date }, v)}
-                                      className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                      className="w-5 h-5 text-blue-600 border-stroke dark:border-strokedark focus:ring-blue-500 cursor-pointer"
                                     />
                                   </div>
                                 </td>
@@ -185,7 +185,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                             let fOb = ((obTotal * 100) / 100);
 
                             return obTotal > 0 ? (
-                              <tr key="ob-total" className="hover:bg-gray-100">
+                              <tr key="ob-total" className="hover:bg-gray-2">
                                 <td className="text-center px-2 py-2">
                                   <div className="flex justify-center items-center">
                                     <input
@@ -193,7 +193,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                                       value={JSON.stringify([fOb, ''])}
                                       onChange={() => handleCheckChangeOb(v.loan_ref, { amount: fOb.toFixed(2), dueDate: '' })}
                                       checked={selectedValuesOb.some(item => item.loan_ref === v.loan_ref && item.amount === fOb.toFixed(2) && item.dueDate === '')}
-                                      className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                      className="w-5 h-5 text-blue-600 border-stroke dark:border-strokedark focus:ring-blue-500 cursor-pointer"
                                     />
                                   </div>
                                 </td>
@@ -203,7 +203,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                               </tr>
                             ) : (
                               <tr>
-                                <td colSpan={4} className="text-center text-gray-500 italic px-2 py-2">
+                                <td colSpan={4} className="text-center text-body italic px-2 py-2">
                                   No OB schedules available
                                 </td>
                               </tr>
@@ -221,7 +221,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
           </table>
         </div>
       )}
-      <div className="mt-3 border border-gray-300 dark:border-strokedark rounded-lg p-3 bg-white dark:bg-meta-4">
+      <div className="mt-3 border border-stroke dark:border-strokedark rounded-lg p-3 bg-white dark:bg-meta-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="text-lg font-semibold">Total</div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">

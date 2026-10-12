@@ -44,7 +44,7 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
 
   return (
     <div className="mt-6">
-      <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="overflow-x-auto">
           <table className="w-full table-auto mb-4 min-w-[800px]">
             <thead>
@@ -64,6 +64,13 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
               </tr>
             </thead>
             <tbody>
+              {mainBranches.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-center text-body dark:text-bodydark">
+                    Nothing in this period.
+                  </td>
+                </tr>
+              )}
               {mainBranches.map((main) => {
                 const mainBorrowers = main.subBranches.reduce((s, sub) => s + borrowersOf(sub.details), 0);
                 return (
@@ -94,7 +101,7 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
 
                       {/* Detail rows */}
                       {sub.details.map((detail, detailIdx) => (
-                        <tr key={detailIdx} className={`border-b border-gray-200 dark:border-strokedark ${detailIdx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
+                        <tr key={detailIdx} className={`border-b border-stroke dark:border-strokedark ${detailIdx % 2 === 0 ? 'bg-white dark:bg-boxdark' : 'bg-gray dark:bg-meta-4/50'}`}>
                           <td className="border-b border-[#eee] px-4 py-3 pl-16 dark:border-strokedark">
                             {detail.description?.toLowerCase() === 'cash in bank' ? 'Cash Out' : toCamelCase(detail.description)}
                           </td>

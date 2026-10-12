@@ -51,7 +51,7 @@ const BranchBadge: React.FC<BranchBadgeProps> = ({ branchName, subBranchName, si
         {code}
       </span>
       {label && (
-        <span className={`${isLg ? 'text-sm font-medium text-gray-700 dark:text-gray-300' : 'text-xs text-gray-500 dark:text-gray-400 truncate max-w-[90px]'}`}>
+        <span className={`${isLg ? 'text-sm font-medium text-body dark:text-bodydark' : 'text-xs text-body dark:text-bodydark truncate max-w-[90px]'}`}>
           {label}
         </span>
       )}

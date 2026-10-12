@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { Metadata } from "next";
 import BlankLayout from "@/components/Layouts/BlankLayout";
 import LoginForm from "@/components/LoginForm";
@@ -10,24 +9,22 @@ export const metadata: Metadata = {
   description: "Fuerte Made Easy",
 };
 
-// No breadcrumb: a signed-out visitor has no Dashboard to go back to, and the card's own
-// heading ("Sign In to Fuerte") is the one title on the page.
+// One centred column at every width (a 50/50 split left a narrow form in a sea of cream on wide
+// screens). The lockup is not a link: a signed-out visitor has nowhere to go "home" to.
 const SignIn: React.FC = () => {
   return (
     <BlankLayout>
-      <div className="overflow-hidden rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div className="flex flex-wrap items-stretch">
-          <div className="flex w-full flex-col items-center justify-center bg-black px-6 py-8 text-center xl:w-1/2 xl:px-26 xl:py-17.5">
-            <Link className="inline-block" href="/">
-              <BrandLockup />
-            </Link>
-            <p className="mt-4 text-sm text-bodydark2 xl:mt-6 xl:text-base">
-              Borrower, Transactions and Processing
-            </p>
-          </div>
-          <LoginForm />
+      <header className="border-b-2 border-secondary bg-black">
+        <div className="mx-auto flex h-16 max-w-screen-2xl items-center px-4 md:px-6 2xl:px-10">
+          <BrandLockup />
         </div>
-      </div>
+      </header>
+      <main className="flex flex-1 items-center justify-center px-4 py-10 md:py-16">
+        <LoginForm />
+      </main>
+      <footer className="px-4 pb-8 text-center text-xs text-body dark:text-bodydark">
+        Authorised Fuerte staff only.
+      </footer>
     </BlankLayout>
   );
 };

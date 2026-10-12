@@ -4,6 +4,7 @@ import React, { ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { callCenterTarget } from "@/hoc/withAuth";
 import { useAuthStore } from "@/store/authStore";
+import { Castle } from "@/components/Brand/BrandLockup";
 
 /** Pages every signed-in user may be on, Call Center included: sign-in, and the maintenance page everyone is sent to. */
 const isOpenToAll = (p: string) => p === "/maintenance" || p === "/auth" || p.startsWith("/auth/");
@@ -31,7 +32,14 @@ const CallCenterGuard: React.FC<{ children: ReactNode }> = ({ children }) => {
     if (target) router.replace(target);
   }, [target, router]);
 
-  if (target) return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  if (target) {
+    return (
+      <div role="status" className="flex h-screen items-center justify-center bg-whiten dark:bg-boxdark-2">
+        <Castle className="h-10 w-auto animate-pulse motion-reduce:animate-none" />
+        <span className="sr-only">Loading</span>
+      </div>
+    );
+  }
   return <>{children}</>;
 };
 

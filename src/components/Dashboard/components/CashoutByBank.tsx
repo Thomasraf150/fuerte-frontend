@@ -27,7 +27,7 @@ const CashoutByBank: React.FC<CashoutByBankProps> = ({ sumTixData }) => {
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-1 lg:gap-2 md:gap-2">
-        <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default bg-gray-200 dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <div className="rounded-2xl border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
           <div className="overflow-x-auto">
             <table className="w-full table-auto mb-4 min-w-[800px]">
               <thead>
@@ -52,6 +52,13 @@ const CashoutByBank: React.FC<CashoutByBankProps> = ({ sumTixData }) => {
                 </tr>
               </thead>
               <tbody>
+                {sumTixData && sumTixData.cashout_by_bank.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-6 text-center text-body dark:text-bodydark">
+                      Nothing in this period.
+                    </td>
+                  </tr>
+                )}
                 {sumTixData?.cashout_by_bank.map((item: CashoutByBankItem, i: number) => (
                   <tr key={i}>
                     <td className="border-b border-[#eee] px-4 py-3 dark:border-strokedark">

@@ -72,7 +72,7 @@ const FormInputFile: React.FC<FileUploadProps> = ({
         </p>
         <p className="mt-1.5">{subLabel1}</p>
         <p>{subLabel2}</p>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm text-danger">{error}</p>}
       </div>
     </div>
   );

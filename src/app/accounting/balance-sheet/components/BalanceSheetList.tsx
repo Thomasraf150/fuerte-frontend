@@ -17,6 +17,7 @@ import useCoa from '@/hooks/useCoa';
 import useBranches from '@/hooks/useBranches';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { rt, indent } from '@/components/ReportTable';
+import { dateOf, manilaToday } from '@/utils/reportPeriod';
 
 // Total Assets closes the statement, so it gets the double rule; the other totals get a single rule.
 const BS_SECTIONS = [
@@ -49,10 +50,11 @@ const BalanceSheetList: React.FC = () => {
   const { dataBranch, dataBranchGroup, dataBranchSub, fetchDataList, fetchBranchGroupList, fetchSubDataList, loadingBranches, loadingBranchGroups, loadingSubBranches } = useBranches();
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [branchSubId, setBranchSubId] = useState<string>('');
-  const [branchId, setBranchId] = useState<string>(''); // Track selected branch
+  // "As of" today, every branch the user may see (the server narrows non-Owners),
+  // loaded on arrival like CHR's balance sheet instead of waiting for picks.
+  const [asOf, setAsOf] = useState<Date | undefined>(() => dateOf(manilaToday()));
+  const [branchSubId, setBranchSubId] = useState<string>('all');
+  const [branchId, setBranchId] = useState<string>('all'); // Track selected branch
   const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
   const [optionsBranch, setOptionsBranch] = useState<Option[]>([]);
   const [optionsGroup, setOptionsGroup] = useState<Option[]>([]);
@@ -60,31 +62,22 @@ const BalanceSheetList: React.FC = () => {
 
   const { balanceSheetData, fetchBalanceSheetData, loading } = useFinancialStatement();
   
-  const handleStartDateChange = (date: Date | null) => {
-    if (date) {
-      setStartDate(date);
-      // Reset end date if it's before the new start date
-      if (endDate && date > endDate) {
-        setEndDate(undefined);
-      }
-    } else {
-      setStartDate(undefined);
-    }
-  };
-  
-  const handleEndDateChange = (date: Date | null) => {
-    setEndDate(date || undefined);
-  };
+  // Opens on "All Main Branches" in the pickers too, so what is shown is what is picked.
+  useEffect(() => {
+    setValue('branch_id', 'all');
+    setValue('branch_sub_id', 'all');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Refetch when the date range changes IF a (sub-)branch scope is already
+  // Fetch on arrival and whenever the day changes, IF a (sub-)branch scope is
   // chosen. Previously the date pickers only mutated state — the report kept
   // showing figures for the OLD range while the pickers displayed the new one.
   useEffect(() => {
     if (branchSubId) {
-      fetchBalanceSheetData(startDate, endDate, branchSubId, branchId);
+      fetchBalanceSheetData(asOf, branchSubId, branchId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate]);
+  }, [asOf]);
 
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -95,7 +88,7 @@ const BalanceSheetList: React.FC = () => {
     setBranchSubId(branch_sub_id);
     // Pass the selected main branch so "All Sub-Branches" scopes to that
     // branch's sub-branches (previously it leaked company-wide figures).
-    fetchBalanceSheetData(startDate, endDate, branch_sub_id, branchId);
+    fetchBalanceSheetData(asOf, branch_sub_id, branchId);
   };
 
   useEffect(()=>{
@@ -165,7 +158,7 @@ const BalanceSheetList: React.FC = () => {
     if (branch_id === 'all') {
       setValue('branch_sub_id', 'all');
       setBranchSubId('all');
-      fetchBalanceSheetData(startDate, endDate, 'all');
+      fetchBalanceSheetData(asOf, 'all');
     } else {
       // Reset sub-branch selection when changing to specific branch
       setValue('branch_sub_id', '');
@@ -184,40 +177,17 @@ const BalanceSheetList: React.FC = () => {
         {/* One card on the page, so no card title: it would only repeat the page title (Decision 3). */}
         <CardBody>
               <div className="no-print flex flex-wrap items-end gap-x-3 gap-y-4">
-                {/* Every control has its own visible label; "Select Date Range:" heads the two dates. */}
-                <div role="group" aria-labelledby="bs-date-range" className="w-full sm:w-auto sm:flex-[2]">
-                  <p id="bs-date-range" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Select Date Range:</p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="w-full sm:flex-1">
-                      <label htmlFor="bs-start-date" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">Start date</label>
-                      <DatePicker
-                        id="bs-start-date"
-                        selected={startDate}
-                        onChange={handleStartDateChange}
-                        selectsStart
-                        startDate={startDate}
-                        endDate={endDate}
-                        placeholderText="Start Date"
-                        wrapperClassName="w-full"
-                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
-                      />
-                    </div>
-                    <div className="w-full sm:flex-1">
-                      <label htmlFor="bs-end-date" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">End date</label>
-                      <DatePicker
-                        id="bs-end-date"
-                        selected={endDate}
-                        onChange={handleEndDateChange}
-                        selectsEnd
-                        startDate={startDate}
-                        endDate={endDate}
-                        minDate={startDate} // Prevent selecting an end date before start date
-                        placeholderText="End Date"
-                        wrapperClassName="w-full"
-                        className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
-                      />
-                    </div>
-                  </div>
+                {/* A balance sheet is a picture of one day: everything posted up to and including it. */}
+                <div className="w-full sm:w-auto sm:flex-1">
+                  <label htmlFor="bs-as-of" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">As of</label>
+                  <DatePicker
+                    id="bs-as-of"
+                    selected={asOf}
+                    onChange={(date: Date | null) => setAsOf(date || undefined)}
+                    placeholderText="As of date"
+                    wrapperClassName="w-full"
+                    className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white"
+                  />
                 </div>
                 <div className="w-full sm:w-auto sm:flex-1">
                   <span id="bs-group-label" className="mb-1 block text-xs font-medium text-body dark:text-bodydark">Group</span>
@@ -340,7 +310,7 @@ const BalanceSheetList: React.FC = () => {
                     </tbody>
                   </table>
                 ) : (
-                  <p className="text-center text-body dark:text-bodydark py-8">No balance sheet data available. Please select a date range and branch.</p>
+                  <p className="text-center text-body dark:text-bodydark py-8">No balance sheet to show. Choose the &ldquo;as of&rdquo; date and a branch above.</p>
                 )}
               </div>
         </CardBody>

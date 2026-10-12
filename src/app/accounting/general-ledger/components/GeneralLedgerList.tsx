@@ -11,6 +11,13 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { DataLoanProceedList, DataAccBalanceSheet } from '@/utils/DataTypes';
 import { formatNumberComma } from '@/utils/helper';
 import { rt } from '@/components/ReportTable';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import PeriodPresets from '@/components/PeriodPresets';
+import { presetDates, ymdOf } from '@/utils/reportPeriod';
+
+const DATE_FIELD =
+  'h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-sm text-black focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white';
 
 const GeneralLedgerList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -18,6 +25,10 @@ const GeneralLedgerList: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { fetchGL, dataGl, loading } = useGeneralLedger();
+  // Debit and credit moved in a period, opening on this month to date (CHR's General
+  // Ledger default). Before 2026-10-12 the page sent no dates and showed all-time totals.
+  const [startDate, setStartDate] = useState<Date | undefined>(() => presetDates('monthToDate').start);
+  const [endDate, setEndDate] = useState<Date | undefined>(() => presetDates('monthToDate').end);
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -30,9 +41,9 @@ const GeneralLedgerList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchGL("", "");
+    if (startDate && endDate) fetchGL(ymdOf(startDate), ymdOf(endDate));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [startDate, endDate])
 
   const filteredData = dataGl?.filter(item =>
     item.account_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,6 +58,25 @@ const GeneralLedgerList: React.FC = () => {
             <div className={`col-span-2`}>
               <Card>
                 <CardBody>
+                  <div className="no-print mb-4 space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:max-w-xl">
+                      <div>
+                        <label htmlFor="gl-start-date" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">Start Date</label>
+                        <DatePicker id="gl-start-date" selected={startDate} onChange={(d: Date | null) => setStartDate(d || undefined)} selectsStart startDate={startDate} endDate={endDate} maxDate={endDate} wrapperClassName="w-full" className={DATE_FIELD} />
+                      </div>
+                      <div>
+                        <label htmlFor="gl-end-date" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">End Date</label>
+                        <DatePicker id="gl-end-date" selected={endDate} onChange={(d: Date | null) => setEndDate(d || undefined)} selectsEnd startDate={startDate} endDate={endDate} minDate={startDate} wrapperClassName="w-full" className={DATE_FIELD} />
+                      </div>
+                    </div>
+                    <PeriodPresets
+                      presets={['monthToDate', 'lastMonth', 'last30']}
+                      start={startDate}
+                      end={endDate}
+                      onPick={(s, e) => { setStartDate(s); setEndDate(e); }}
+                      disabled={loading}
+                    />
+                  </div>
                   <div className="no-print">
                     <input
                       type="text"
@@ -95,7 +125,7 @@ const GeneralLedgerList: React.FC = () => {
                               <p className="mt-1 text-sm text-bodydark2 dark:text-bodydark">
                                 {searchTerm
                                   ? <>Nothing matches &ldquo;{searchTerm}&rdquo;. Search by account name or number — journal references like CRJ-… are not searched here.</>
-                                  : 'The ledger returned no accounts.'}
+                                  : 'Nothing was posted to any account in this period.'}
                               </p>
                             </td>
                           </tr>

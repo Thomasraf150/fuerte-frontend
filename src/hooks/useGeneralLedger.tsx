@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import GeneralLedgerQueryMutations from '@/graphql/GeneralLedgerQueryMutations';
 import { RowAcctgEntry, DataGLRow } from '@/utils/DataTypes';
@@ -14,6 +14,9 @@ const useGeneralLedger = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [dataGl, setDataGl] = useState<DataGLRow[]>();
+  // Only the newest request may land: an older, slower one must not overwrite it
+  // and leave last month's totals under this month's dates.
+  const latest = useRef(0);
   // Function to fetchdata
 
   const fetchGL = async (startDate: string, endDate: string) => {
@@ -28,6 +31,7 @@ const useGeneralLedger = () => {
     };
 
     mutation = GET_GL_QUERY;
+    const mine = ++latest.current;
     setLoading(true);
 
     // finally, not a trailing call: a throw here used to leave `loading` true
@@ -35,12 +39,13 @@ const useGeneralLedger = () => {
     // this flag, a failed fetch would otherwise shimmer for eternity.
     try {
       const result = await graphqlFetch(mutation, variables);
-      setDataGl(result?.data.getGL);
+      if (mine === latest.current) setDataGl(result?.data.getGL);
     } catch (error) {
+      if (mine !== latest.current) return;
       toast.error('Failed to load the general ledger. Please try again.');
       setDataGl([]);
     } finally {
-      setLoading(false);
+      if (mine === latest.current) setLoading(false);
     }
   };
 

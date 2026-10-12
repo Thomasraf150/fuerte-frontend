@@ -497,22 +497,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Renewable Borrowers
                             </Link>
                           </li>
-                          {/* <li>
-                            <Link
-                              href="/forms/form-elements"
-                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
-                            >
-                              Borrower Refund
-                            </Link>
-                          </li>
-                          <li>
-                            <Link
-                              href="/forms/form-elements"
-                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
-                            >
-                              Advanced Payment
-                            </Link>
-                          </li> */}
                         </ul>
                       </div>
                       {/* <!-- Dropdown Menu End --> */}

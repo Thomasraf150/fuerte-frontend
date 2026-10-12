@@ -12,6 +12,7 @@ import { DataLoanProceedList, DataAccBalanceSheet, DataTbRow } from '@/utils/Dat
 import { formatNumberComma } from '@/utils/helper';
 import TrialBalanceSkeleton from '@/components/LoadingStates/TrialBalanceSkeleton';
 import { rt, indent } from '@/components/ReportTable';
+import AsOfField from '@/components/AsOfField';
 
 const TB_SECTIONS: ReadonlyArray<readonly [string, keyof DataTbRow, string]> = [
   ['ASSETS', 'assets', 'TOTAL ASSETS'],
@@ -28,7 +29,7 @@ const sumOf = (rows: any[], pick: (item: any) => number): number =>
 const UnadjustedTrialBalanceList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const { dataUtb, loading } = useTrialBalance();
+  const { dataUtb, loading, asOf, setAsOf } = useTrialBalance();
   
   const handleShowForm = (lbl: string, showFrm: boolean) => {
     setShowForm(showFrm);
@@ -46,6 +47,9 @@ const UnadjustedTrialBalanceList: React.FC = () => {
             <div className={`col-span-2`}>
               <Card>
                 <CardBody>
+                  <div className="no-print mb-4">
+                    <AsOfField id="utb-as-of" value={asOf} onChange={setAsOf} disabled={loading} />
+                  </div>
                   <div className={rt.wrap}>
                     <table className={rt.table}>
                       <thead className={rt.thead}>
@@ -94,7 +98,7 @@ const UnadjustedTrialBalanceList: React.FC = () => {
                           })
                         ) : (
                           <tr>
-                            <td colSpan={4} className={rt.emptyRow}>No data available</td>
+                            <td colSpan={4} className={rt.emptyRow}>Nothing was posted up to this day.</td>
                           </tr>
                         )}
                       </tbody>

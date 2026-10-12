@@ -19,13 +19,13 @@ const LoadingSkeleton: React.FC = () => (
   <div>
     <div className="rounded-2xl border border-stroke bg-white px-3 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-5 xl:pb-1">
       <div className="animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
+        <div className="h-6 bg-stroke rounded w-48 mb-4 dark:bg-meta-4"></div>
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex gap-2 py-3">
-            <div className="h-4 bg-gray-200 rounded flex-1 dark:bg-gray-700"></div>
-            <div className="h-4 bg-gray-200 rounded w-12 dark:bg-gray-700"></div>
-            <div className="h-4 bg-gray-200 rounded w-20 dark:bg-gray-700"></div>
-            <div className="h-4 bg-gray-200 rounded w-20 dark:bg-gray-700"></div>
+            <div className="h-4 bg-stroke rounded flex-1 dark:bg-meta-4"></div>
+            <div className="h-4 bg-stroke rounded w-12 dark:bg-meta-4"></div>
+            <div className="h-4 bg-stroke rounded w-20 dark:bg-meta-4"></div>
+            <div className="h-4 bg-stroke rounded w-20 dark:bg-meta-4"></div>
           </div>
         ))}
       </div>
@@ -66,7 +66,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
             Sub-Branch Breakdown
           </h4>
-          <div className="flex items-center justify-center py-10 text-gray-500">
+          <div className="flex items-center justify-center py-10 text-body">
             No data available for the selected period.
           </div>
         </div>
@@ -126,7 +126,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
                     </p>
                   </td>
                   <td className="p-2 text-right sm:p-3">
-                    <p className="text-meta-5 text-xs sm:text-sm whitespace-nowrap">
+                    <p className="text-primary dark:text-olive-300 text-xs sm:text-sm whitespace-nowrap">
                       {formatCurrency(isOwner ? item.udi_balance : item.cash_out)}
                     </p>
                   </td>
@@ -151,7 +151,7 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
                   </p>
                 </td>
                 <td className="p-2 text-right sm:p-3">
-                  <p className="font-bold text-meta-5 text-xs sm:text-sm whitespace-nowrap">
+                  <p className="font-bold text-primary dark:text-olive-300 text-xs sm:text-sm whitespace-nowrap">
                     {formatCurrency(isOwner ? totals.udi_balance : totals.cash_out)}
                   </p>
                 </td>

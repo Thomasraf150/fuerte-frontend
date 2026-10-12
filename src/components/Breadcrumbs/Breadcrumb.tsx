@@ -7,10 +7,12 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   pageName: string;
+  /** The record is still loading: draw a quiet bar where its name will be (pass pageName=""). */
+  loading?: boolean;
   items?: BreadcrumbItem[];
 }
 
-const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
+const Breadcrumb = ({ pageName, items, loading = false }: BreadcrumbProps) => {
   // Use custom items if provided, otherwise use legacy two-level behavior
   const breadcrumbItems = items || [
     { label: 'Dashboard', href: '/' },
@@ -40,9 +42,13 @@ const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
                     <span className="mx-1 text-body dark:text-bodydark" aria-hidden="true">/</span>
                   </>
                 ) : (
-                  <span className="break-words font-medium text-primary">
-                    {item.label}
-                  </span>
+                  loading ? (
+                    <span aria-hidden="true" className="block h-3.5 w-24 animate-pulse rounded bg-stroke motion-reduce:animate-none dark:bg-meta-4" />
+                  ) : (
+                    <span className="break-words font-medium text-primary">
+                      {item.label}
+                    </span>
+                  )
                 )}
               </li>
             );
@@ -52,7 +58,17 @@ const Breadcrumb = ({ pageName, items }: BreadcrumbProps) => {
 
       {/* Page title: Fraunces, the brand's display face, large and tight (Phase 7, 2026-10-07). */}
       <h2 className="break-words font-display text-[28px] font-semibold leading-tight tracking-[-0.01em] text-black sm:text-[32px] dark:text-white">
-        {pageName}
+        {loading ? (
+          <span role="status">
+            <span className="sr-only">Loading</span>
+            <span
+              aria-hidden="true"
+              className="block h-8 w-2/3 max-w-xs animate-pulse rounded-lg bg-stroke motion-reduce:animate-none sm:h-9 dark:bg-meta-4"
+            />
+          </span>
+        ) : (
+          pageName
+        )}
       </h2>
     </div>
   );

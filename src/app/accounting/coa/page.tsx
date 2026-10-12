@@ -10,6 +10,7 @@ import { DataChartOfAccountList } from '@/utils/DataTypes';
 import useCoa from '@/hooks/useCoa';
 import { toast } from 'react-toastify';
 import { Card, CardBody, CardHeader } from '@/components/Card';
+import SkeletonBlock from "@/components/LoadingStates/SkeletonBlock";
 
 const COA: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -131,10 +132,9 @@ const COA: React.FC = () => {
 
       {/* Full-page loading overlay for modal operations */}
       {modalLoading && (
-        <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="flex flex-col items-center">
-            <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
-            <p className="mt-4 text-white">Loading...</p>
+        <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-xs border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <SkeletonBlock rows={3} label="Loading…" />
           </div>
         </div>
       )}

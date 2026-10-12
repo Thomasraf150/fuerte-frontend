@@ -21,7 +21,7 @@ const TrialBalanceSkeleton: React.FC<TrialBalanceSkeletonProps> = ({
     <div className="overflow-x-auto overflow-h-auto h-[700px]">
       <table className="min-w-full border-collapse">
         {/* Table Header Skeleton */}
-        <thead className="bg-gray-200 dark:bg-meta-4">
+        <thead className="bg-stroke dark:bg-meta-4">
           <tr>
             <th className="px-4 py-2 border dark:border-strokedark bg-slate-50 dark:bg-meta-4">
               <ContentLoader
@@ -137,7 +137,7 @@ const TrialBalanceSkeleton: React.FC<TrialBalanceSkeletonProps> = ({
         {/* Table Body Skeleton */}
         <tbody>
           {Array.from({ length: rows }).map((_, rowIndex) => (
-            <tr key={rowIndex} className="even:bg-gray-50 dark:even:bg-boxdark hover:bg-gray-100 dark:hover:bg-meta-4">
+            <tr key={rowIndex} className="even:bg-gray dark:even:bg-boxdark hover:bg-gray-2 dark:hover:bg-meta-4">
               <td className="px-4 py-2 border dark:border-strokedark">
                 <ContentLoader
                   speed={2}

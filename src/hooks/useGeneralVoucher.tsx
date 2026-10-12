@@ -10,6 +10,7 @@ import { fetchWithRecache } from '@/utils/helper';
 import { usePagination } from './usePagination';
 import { useDownloadPdf } from '@/hooks/useDownloadPdf';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { reportRange } from '@/utils/reportPeriod';
 
 const useGeneralVoucher = () => {
 
@@ -20,11 +21,11 @@ const useGeneralVoucher = () => {
   // Print state owned by the shared useDownloadPdf hook so every PDF feature
   // shares one consistent flow + loader UI.
   const { download: downloadPdf, printing: printLoading } = useDownloadPdf();
-  const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    branch_id: '',
-    branch_sub_id: '',
+  // Opens on the last 30 days, the same period VoucherFilters starts on, so the
+  // first query is already right and the filters' mount emit is a no-op.
+  const [filters, setFilters] = useState(() => {
+    const { from, to } = reportRange('last30');
+    return { startDate: from, endDate: to, branch_id: '', branch_sub_id: '' };
   });
   const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
   const userData = JSON.parse(storedAuthStore)['state'];

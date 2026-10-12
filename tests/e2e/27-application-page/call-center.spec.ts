@@ -285,7 +285,7 @@ test.describe('1. The contract: what each page asks for', () => {
   test('signing in lands on /applications', async ({ page, backend, seen }) => {
     backend.user = fakeUser('CALLCTR');
     await gotoPage(page, '/auth/signin');
-    const email = page.getByPlaceholder('Enter your email');
+    const email = page.getByLabel('Email');
     await expect(email).toBeVisible({ timeout: 90_000 });
     // Typing before React hydrates is lost: the box keeps the text, the form state stays empty.
     await page.waitForFunction(() => {
@@ -293,8 +293,8 @@ test.describe('1. The contract: what each page asks for', () => {
       return !!input && Object.keys(input).some((key) => key.startsWith('__reactProps'));
     }, undefined, { timeout: 60_000 });
     await email.fill('e2e.signin@example.test');
-    await page.getByPlaceholder('6+ Characters, 1 Capital letter').fill('Not-a-real-password-1');
-    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    await page.getByLabel('Password', { exact: true }).fill('Not-a-real-password-1');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 
     await expect(page).toHaveURL(`${APP}/applications`, { timeout: 90_000 });
     await expect(statusFilter(page)).toBeVisible({ timeout: 90_000 });

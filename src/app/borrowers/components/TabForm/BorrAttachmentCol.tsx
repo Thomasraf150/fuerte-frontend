@@ -45,7 +45,7 @@ const borrAttachmentCol = (handleRowClick: (row: BorrAttachmentsRowData) => void
             <Trash2
               onClick={() => handleRowClick(row)}
               size="16"
-              className="text-cyan-400 cursor-pointer hover:text-red-500 p-1 rounded transition-colors min-w-[32px] min-h-[32px]"
+              className="text-cyan-400 cursor-pointer hover:text-danger p-1 rounded transition-colors min-w-[32px] min-h-[32px]"
             />
           </Tooltip>
         </div>

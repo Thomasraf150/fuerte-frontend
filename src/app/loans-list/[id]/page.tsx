@@ -69,7 +69,7 @@ const LoanDetailPage: React.FC = () => {
     return (
       <DefaultLayout>
         <div className="mx-auto">
-          <Breadcrumb pageName="Loading..." />
+          <Breadcrumb pageName="" loading />
         </div>
         <div className="min-h-[400px] rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
           <SkeletonBlock rows={5} label="Loading the loan…" />

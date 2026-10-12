@@ -41,7 +41,7 @@ test('Balance Sheet: Branch Admin is redirected, report-viewers are allowed', as
   await page.waitForTimeout(3500);
   console.log('OWNER url after BS nav:', page.url());
   expect(page.url(), 'owner should stay on balance-sheet').toContain('/accounting/balance-sheet');
-  expect(await page.locator('body').innerText()).toContain('Select Date Range');
+  expect(await page.locator('body').innerText()).toContain('As of');
 
   // Accounting (ACCTG) — report viewer → allowed.
   await uiLoginAs(page, 'dondonacctg@gmail.com', PW);

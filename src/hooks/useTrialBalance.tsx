@@ -1,49 +1,54 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
 import TrialBalanceQueryMutations from '@/graphql/TrialBalanceQueryMutations';
 import { DataTbRow } from '@/utils/DataTypes';
 import { toast } from "react-toastify";
-import moment from 'moment';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+import { manilaToday } from '@/utils/reportPeriod';
 
+/**
+ * The trial balance "as of" a day (inclusive), opening on today. A trial balance is
+ * cumulative, so only the end day is sent; the server totals every posting up to it.
+ * Before 2026-10-12 the page sent empty dates and the server ignored them anyway.
+ */
 const useTrialBalance = () => {
 
   const { GET_UTB } = TrialBalanceQueryMutations;
 
   const [loading, setLoading] = useState<boolean>(false);
   const [dataUtb, setDataUtb] = useState<DataTbRow>();
-  // Function to fetchdata
+  const [asOf, setAsOf] = useState<string>(() => manilaToday());
+  // Only the newest request may land: an older, slower one must not overwrite it
+  // and leave one day's totals under another day's heading.
+  const latest = useRef(0);
 
-  const fetchUtb = async (branch_sub_id: String, startDate: string, endDate: string) => {
-    // const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
-    // const userData = JSON.parse(storedAuthStore)['state'];
-    let mutation;
-    let variables: { input: any } = {
-      input: {
-        startDate,
-        endDate,
-        branch_sub_id
-      },
-    };
-
-    mutation = GET_UTB;
+  const fetchUtb = async (branch_sub_id: string, endDate: string) => {
+    const mine = ++latest.current;
     setLoading(true);
-
-    const result = await graphqlFetch(mutation, variables);
-    setDataUtb(result?.data.getUnadjustedTBal);
-    setLoading(false);
+    // finally, so a failed request cannot leave the skeleton shimmering forever.
+    try {
+      const result = await graphqlFetch(GET_UTB, { input: { endDate, branch_sub_id } });
+      if (mine === latest.current) setDataUtb(result?.data.getUnadjustedTBal);
+    } catch (error) {
+      if (mine !== latest.current) return;
+      toast.error('Failed to load the trial balance. Please try again.');
+      setDataUtb(undefined);
+    } finally {
+      if (mine === latest.current) setLoading(false);
+    }
   };
 
-   // Fetch data on component mount if id exists
   useEffect(() => {
-    fetchUtb("", "", "");
-  }, []);
+    fetchUtb('', asOf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [asOf]);
 
   return {
     dataUtb,
-    loading
+    loading,
+    asOf,
+    setAsOf,
   };
 };
 

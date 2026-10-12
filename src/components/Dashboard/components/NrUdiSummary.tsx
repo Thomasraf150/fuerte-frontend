@@ -34,8 +34,8 @@ const isPositive = (value: string): boolean => {
  */
 const LoadingSkeleton: React.FC = () => (
   <div className="animate-pulse">
-    <div className="h-4 bg-gray-200 rounded w-20 mb-2 dark:bg-gray-700"></div>
-    <div className="h-8 bg-gray-200 rounded w-32 dark:bg-gray-700"></div>
+    <div className="h-4 bg-stroke rounded w-20 mb-2 dark:bg-meta-4"></div>
+    <div className="h-8 bg-stroke rounded w-32 dark:bg-meta-4"></div>
   </div>
 );
 

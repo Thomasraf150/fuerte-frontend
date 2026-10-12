@@ -14,11 +14,11 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
 }) => {
   return (
     <div className="overflow-x-auto overflow-h-auto h-[600px]">
-      <table className="min-w-full border-collapse border border-gray-300">
+      <table className="min-w-full border-collapse border border-stroke dark:border-strokedark">
         {/* Table Header Skeleton */}
-        <thead className="bg-gray-100">
+        <thead className="bg-gray-2">
           <tr>
-            <th className="border border-gray-300 px-4 py-2 text-left text-sm w-[100px] min-w-[320px]" rowSpan={2}>
+            <th className="border border-stroke dark:border-strokedark px-4 py-2 text-left text-sm w-[100px] min-w-[320px]" rowSpan={2}>
               <ContentLoader
                 speed={2}
                 width={200}
@@ -30,7 +30,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
                 <rect x="0" y="0" rx="3" ry="3" width="80" height="16" />
               </ContentLoader>
             </th>
-            <th className="border border-gray-300 px-4 py-2 text-left text-sm" rowSpan={2}>
+            <th className="border border-stroke dark:border-strokedark px-4 py-2 text-left text-sm" rowSpan={2}>
               <ContentLoader
                 speed={2}
                 width={100}
@@ -42,7 +42,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
                 <rect x="0" y="0" rx="3" ry="3" width="70" height="16" />
               </ContentLoader>
             </th>
-            <th className="border border-gray-300 px-4 py-2 text-right text-sm" rowSpan={2}>
+            <th className="border border-stroke dark:border-strokedark px-4 py-2 text-right text-sm" rowSpan={2}>
               <ContentLoader
                 speed={2}
                 width={120}
@@ -59,7 +59,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
             {Array.from({ length: columns }).map((_, monthIndex) => (
               <th
                 key={monthIndex}
-                className="border border-gray-300 px-4 py-2 text-center text-sm"
+                className="border border-stroke dark:border-strokedark px-4 py-2 text-center text-sm"
                 colSpan={10}
               >
                 <ContentLoader
@@ -75,7 +75,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
               </th>
             ))}
             
-            <th className="border border-gray-300 px-4 py-2 text-right text-sm" rowSpan={2}>
+            <th className="border border-stroke dark:border-strokedark px-4 py-2 text-right text-sm" rowSpan={2}>
               <ContentLoader
                 speed={2}
                 width={100}
@@ -87,7 +87,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
                 <rect x="0" y="0" rx="3" ry="3" width="90" height="16" />
               </ContentLoader>
             </th>
-            <th className="border border-gray-300 px-4 py-2 text-right text-sm" rowSpan={2}>
+            <th className="border border-stroke dark:border-strokedark px-4 py-2 text-right text-sm" rowSpan={2}>
               <ContentLoader
                 speed={2}
                 width={80}
@@ -106,7 +106,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
               Array.from({ length: 10 }).map((_, fieldIndex) => (
                 <th
                   key={`${monthIndex}-${fieldIndex}`}
-                  className="border border-gray-300 px-2 py-1 text-center text-xs w-[150px] min-w-[150px]"
+                  className="border border-stroke dark:border-strokedark px-2 py-1 text-center text-xs w-[150px] min-w-[150px]"
                 >
                   <ContentLoader
                     speed={2}
@@ -127,9 +127,9 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
         {/* Table Body Skeleton */}
         <tbody>
           {Array.from({ length: rows }).map((_, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-gray-50">
+            <tr key={rowIndex} className="hover:bg-gray">
               {/* Name column */}
-              <td className="border border-gray-300 text-sm px-4 py-2">
+              <td className="border border-stroke dark:border-strokedark text-sm px-4 py-2">
                 <ContentLoader
                   speed={2}
                   width={200}
@@ -143,7 +143,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
               </td>
               
               {/* Loan Ref column */}
-              <td className="border border-gray-300 text-sm px-4 py-2">
+              <td className="border border-stroke dark:border-strokedark text-sm px-4 py-2">
                 <ContentLoader
                   speed={2}
                   width={100}
@@ -157,7 +157,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
               </td>
               
               {/* Notes Receivable amount column */}
-              <td className="border border-gray-300 text-sm px-4 py-2 text-right">
+              <td className="border border-stroke dark:border-strokedark text-sm px-4 py-2 text-right">
                 <ContentLoader
                   speed={2}
                   width={100}
@@ -175,7 +175,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
                 Array.from({ length: 10 }).map((_, fieldIndex) => (
                   <td
                     key={`${monthIndex}-${fieldIndex}`}
-                    className="border border-gray-300 px-2 py-1 text-right text-sm"
+                    className="border border-stroke dark:border-strokedark px-2 py-1 text-right text-sm"
                   >
                     <ContentLoader
                       speed={2}
@@ -192,7 +192,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
               )}
 
               {/* Total Collected column */}
-              <td className="border border-gray-300 px-4 py-2 text-right">
+              <td className="border border-stroke dark:border-strokedark px-4 py-2 text-right">
                 <ContentLoader
                   speed={2}
                   width={100}
@@ -206,7 +206,7 @@ const NotesReceivableSkeleton: React.FC<NotesReceivableSkeletonProps> = ({
               </td>
               
               {/* Balance column */}
-              <td className="border border-gray-300 px-4 py-2 text-right">
+              <td className="border border-stroke dark:border-strokedark px-4 py-2 text-right">
                 <ContentLoader
                   speed={2}
                   width={80}

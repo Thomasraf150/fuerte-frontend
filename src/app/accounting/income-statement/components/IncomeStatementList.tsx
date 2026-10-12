@@ -13,6 +13,7 @@ import { SkeletonBlock } from '@/components/LoadingStates';
 import useBranches from '@/hooks/useBranches';
 import { buildSelectOptions } from '@/utils/buildSelectOptions';
 import { Printer } from 'react-feather';
+import { presetDates } from '@/utils/reportPeriod';
 import Decimal from 'decimal.js';
 import IncomeStatementTable from './IncomeStatementTable';
 import IncomeStatementBySubBranch from './IncomeStatementBySubBranch';
@@ -61,10 +62,13 @@ const IncomeStatementList: React.FC = () => {
     loading,
     printLoading
   } = useFinancialStatement();
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [branchSubId, setBranchSubId] = useState<string>('');
-  const [branchId, setBranchId] = useState<string>(''); // Track selected branch
+  // The statement compares the Start month with the End month (the server keeps only
+  // year-month). It opens on last month against this month to date, every branch,
+  // as CHR's does, instead of waiting for three picks.
+  const [startDate, setStartDate] = useState<Date | undefined>(() => presetDates('lastMonth').start);
+  const [endDate, setEndDate] = useState<Date | undefined>(() => presetDates('monthToDate').end);
+  const [branchSubId, setBranchSubId] = useState<string>('all');
+  const [branchId, setBranchId] = useState<string>('all'); // Track selected branch
   const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
 
   const optionsGroup: Option[] = useMemo(
@@ -91,8 +95,11 @@ const IncomeStatementList: React.FC = () => {
   );
 
   // The four groups are static data — fetch them once when the screen mounts.
+  // The pickers open on "All Main Branches" to match the default scope above.
   useEffect(() => {
     fetchBranchGroupList();
+    setValue('branch_id', 'all');
+    setValue('branch_sub_id', 'all');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

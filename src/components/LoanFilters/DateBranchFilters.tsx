@@ -140,7 +140,7 @@ const DateBranchFilters: React.FC<DateBranchFiltersProps> = ({
     <div className="space-y-3">
       {/* Label */}
       <div className="hidden sm:block">
-        <span className="text-sm font-medium text-gray-700 dark:text-bodydark1">
+        <span className="text-sm font-medium text-black dark:text-bodydark1">
           Filter by Loan Release Date & Branch:
         </span>
       </div>

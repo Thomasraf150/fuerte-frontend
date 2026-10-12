@@ -9,7 +9,7 @@ import { Card, CardBody, CardHeader } from '@/components/Card';
 
 export const metadata = {
   title: "Company Profile",
-  description: "This is Next.js Profile page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
+  description: "Company details used on Fuerte documents.",
 };
 
 const CompanyProfile: React.FC = () => {

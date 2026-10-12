@@ -6,6 +6,7 @@ import FormComaker from './FormComaker'
 import useBorrowerCoMaker from '@/hooks/useBorrowerCoMaker';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { Trash2, Calendar, Phone, MapPin, User } from 'react-feather';
+import SkeletonBlock from "@/components/LoadingStates/SkeletonBlock";
 
 interface BorrAttProps {
   singleData: BorrowerRowInfo | undefined;
@@ -78,45 +79,45 @@ const BorrowerCoMaker: React.FC<BorrAttProps> = ({ singleData: BorrowerData }) =
             {/* Mobile: Card View */}
             <div className="block sm:hidden mt-4">
               {borrowerLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
+                <SkeletonBlock rows={3} label="Loading…" className="py-4" />
               ) : dataBorrCoMaker.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">No co-makers found</div>
+                <div className="text-center py-8 text-body">No co-makers found</div>
               ) : (
                 dataBorrCoMaker.map((coMaker) => (
                   <div
                     key={coMaker.id}
-                    className="bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                    className="bg-white border border-stroke dark:border-strokedark rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => handleWholeRowClick(coMaker)}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{coMaker.name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <h3 className="text-lg font-semibold text-black dark:text-white mb-1">{coMaker.name}</h3>
+                        <div className="flex items-center gap-2 text-sm text-body">
                           <User size={14} />
                           <span>{coMaker.relationship}</span>
-                          <span className="text-gray-400">•</span>
+                          <span className="text-bodydark2">•</span>
                           <span>{coMaker.marital_status}</span>
                         </div>
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleRowClick(coMaker); }}
-                        className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                        className="p-2 hover:bg-danger/10 rounded-full transition-colors"
                         aria-label="Delete co-maker"
                       >
-                        <Trash2 size={18} className="text-red-500" />
+                        <Trash2 size={18} className="text-danger" />
                       </button>
                     </div>
                     <div className="flex items-start gap-2 mb-2">
-                      <MapPin size={14} className="text-gray-400 mt-1 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{coMaker.address}</span>
+                      <MapPin size={14} className="text-bodydark2 mt-1 flex-shrink-0" />
+                      <span className="text-sm text-black dark:text-white">{coMaker.address}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-4 text-sm text-body mt-3 pt-3 border-t border-stroke dark:border-strokedark">
                       <div className="flex items-center gap-1">
-                        <Calendar size={14} className="text-gray-400" />
+                        <Calendar size={14} className="text-bodydark2" />
                         <span>{coMaker.birthdate}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Phone size={14} className="text-gray-400" />
+                        <Phone size={14} className="text-bodydark2" />
                         <span>{coMaker.contact_no}</span>
                       </div>
                     </div>

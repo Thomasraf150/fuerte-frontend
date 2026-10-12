@@ -1,5 +1,5 @@
 import { MIN_DATE_OF_BIRTH, boundsAllowing, maxDateOfBirth } from '@/constants/dateBounds';
-import { Camera, Home, Save, RotateCw, Search } from 'react-feather';
+import { Camera, Home, Save, RotateCw, Search, User } from 'react-feather';
 import FormInput from '@/components/FormInput';
 import { checkBorrowerNow } from '@/utils/borrowerDuplicateCheck';
 import FormLabel from '@/components/FormLabel';
@@ -285,7 +285,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
     }
   };
 
-  const [logoPreview, setLogoPreview] = useState('/images/user/user-06.png'); // State for image preview
+  const [logoPreview, setLogoPreview] = useState(''); // Photo preview; empty = no photo yet, the neutral tile shows
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -424,11 +424,22 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
         {variant !== 'application' && (
         <div className="flex justify-center mb-6">
           <div className="relative drop-shadow-2">
-            <img
-              src={logoPreview}
-              alt="profile"
-              className="w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full object-cover border-4 border-white dark:border-strokedark shadow-lg"
-            />
+            {logoPreview ? (
+              <img
+                src={logoPreview}
+                alt="profile"
+                className="w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full object-cover border-4 border-white dark:border-strokedark shadow-lg"
+              />
+            ) : (
+              <div
+                role="img"
+                aria-label="No photo yet"
+                className="flex h-32 w-32 flex-col items-center justify-center gap-1 rounded-full border-4 border-white bg-gray text-body shadow-lg sm:h-40 sm:w-40 lg:h-44 lg:w-44 dark:border-strokedark dark:bg-meta-4 dark:text-bodydark"
+              >
+                <User size={36} aria-hidden="true" />
+                <span className="text-xs font-medium">No photo</span>
+              </div>
+            )}
             <label
               htmlFor="photo"
               className="absolute bottom-0 right-0 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2 shadow-lg"
@@ -685,7 +696,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   <div>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="chief_id">
                       Chief
-                      {req('chief_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+                      {req('chief_id') && <span className="ml-1 font-bold text-danger">*</span>}
                     </label>
                     <Controller
                       name="chief_id"
@@ -705,7 +716,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       )}
                     />
                     {errors.chief_id?.message && (
-                      <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.chief_id.message}</p>
+                      <p className="mt-2 text-sm font-medium text-danger">{errors.chief_id.message}</p>
                     )}
                   </div>
                   <div>
@@ -942,7 +953,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                     <div>
                       <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="company_borrower_id">
                         Office Where Currently Employed
-                        {req('company_borrower_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+                        {req('company_borrower_id') && <span className="ml-1 font-bold text-danger">*</span>}
                       </label>
                       <Controller
                         name="company_borrower_id"
@@ -963,7 +974,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         )}
                       />
                       {errors.company_borrower_id?.message && (
-                        <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.company_borrower_id.message}</p>
+                        <p className="mt-2 text-sm font-medium text-danger">{errors.company_borrower_id.message}</p>
                       )}
                     </div>
                   </div>
@@ -982,7 +993,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                   <div>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="area_id">
                       Area
-                      {req('area_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+                      {req('area_id') && <span className="ml-1 font-bold text-danger">*</span>}
                     </label>
                     <Controller
                       name="area_id"
@@ -1003,13 +1014,13 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       )}
                     />
                     {errors.area_id?.message && (
-                      <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.area_id.message}</p>
+                      <p className="mt-2 text-sm font-medium text-danger">{errors.area_id.message}</p>
                     )}
                   </div>
                   <div>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white" htmlFor="sub_area_id">
                       Sub Area
-                      {!subAreaNotRequired && req('sub_area_id') && <span className="ml-1 font-bold" style={{ color: '#DC2626' }}>*</span>}
+                      {!subAreaNotRequired && req('sub_area_id') && <span className="ml-1 font-bold text-danger">*</span>}
                     </label>
                     <Controller
                       name="sub_area_id"
@@ -1030,7 +1041,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                       )}
                     />
                     {errors.sub_area_id?.message && (
-                      <p className="mt-2 text-sm font-medium" style={{ color: '#DC2626' }}>{errors.sub_area_id.message}</p>
+                      <p className="mt-2 text-sm font-medium text-danger">{errors.sub_area_id.message}</p>
                     )}
                   </div>
                 </div>
@@ -1144,7 +1155,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
 
               <div className="flex flex-col gap-4">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 border border-stroke rounded-lg bg-gray-50/50 dark:bg-meta-4/50">
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 border border-stroke rounded-lg bg-gray/50 dark:bg-meta-4/50">
                       <div>
                         <FormInput
                           label="Position"
@@ -1183,7 +1194,7 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
                         <button
                           type="button"
                           onClick={() => remove(index)}
-                          className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition-colors w-full sm:w-auto"
+                          className="px-4 py-2 text-sm border border-danger text-danger rounded hover:bg-danger/10 transition-colors w-full sm:w-auto"
                         >
                           Remove
                         </button>

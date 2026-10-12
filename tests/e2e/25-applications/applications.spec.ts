@@ -571,7 +571,7 @@ test('6. a refused upload shows the server message in an alert', async ({ page, 
 
 async function signInThroughForm(page: Page): Promise<void> {
   await page.goto('/auth/signin', { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  const email = page.getByPlaceholder('Enter your email');
+  const email = page.getByLabel('Email');
   await expect(email).toBeVisible({ timeout: 90_000 });
   // Typing before React hydrates is lost: the box keeps the text, the form state stays empty.
   await page.waitForFunction(() => {
@@ -580,8 +580,8 @@ async function signInThroughForm(page: Page): Promise<void> {
   }, undefined, { timeout: 60_000 });
 
   await email.fill(FAKE_LOGIN.email);
-  await page.getByPlaceholder('6+ Characters, 1 Capital letter').fill(FAKE_LOGIN.password);
-  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+  await page.getByLabel('Password', { exact: true }).fill(FAKE_LOGIN.password);
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 }
 
 test.describe('7. Sign-in landing', () => {

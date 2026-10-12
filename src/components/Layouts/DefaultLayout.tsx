@@ -6,6 +6,7 @@ import SidebarOwner from "@/components/SidebarOwner";
 import Header from "@/components/Header";
 import withAuth from '@/hoc/withAuth';
 import useLogin from '@/hooks/useLogin';
+import { Castle } from "@/components/Brand/BrandLockup";
 interface DefaultLayoutProps {
   children: ReactNode;
 }
@@ -26,8 +27,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
+      <div role="status" className="flex h-screen items-center justify-center bg-whiten dark:bg-boxdark-2">
+        <Castle className="h-10 w-auto animate-pulse motion-reduce:animate-none" />
+        <span className="sr-only">Loading</span>
       </div>
     );
   }

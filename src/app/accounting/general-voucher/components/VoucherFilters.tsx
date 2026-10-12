@@ -10,6 +10,8 @@ import ReactSelect from '@/components/ReactSelect';
 import useBranches from '@/hooks/useBranches';
 import { buildSelectOptions } from '@/utils/buildSelectOptions';
 import { Card, CardBody, CardHeader } from '@/components/Card';
+import PeriodPresets from '@/components/PeriodPresets';
+import { presetDates } from '@/utils/reportPeriod';
 
 export interface VoucherFiltersValue {
   startDate: string;
@@ -44,8 +46,10 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
   } = useBranches();
   const { control, setValue } = useForm<VoucherFiltersFormData>();
 
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  // Opens on the last 30 days rather than every entry ever posted (the hooks start
+  // on the same period, so the first list query already matches).
+  const [startDate, setStartDate] = useState<Date | undefined>(() => presetDates('last30').start);
+  const [endDate, setEndDate] = useState<Date | undefined>(() => presetDates('last30').end);
   const [branchGroupId, setBranchGroupId] = useState<string>('all'); // FA/FB/FC/FD, or 'all'
   const [branchId, setBranchId] = useState<string>('');
   const [branchSubId, setBranchSubId] = useState<string>('');
@@ -133,9 +137,11 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
     setBranchSubId(branch_sub_id);
   };
 
+  // Clear goes back to the opening period, not to all-time.
   const handleClear = () => {
-    setStartDate(undefined);
-    setEndDate(undefined);
+    const { start, end } = presetDates('last30');
+    setStartDate(start);
+    setEndDate(end);
     setBranchId('');
     setBranchSubId('');
     setValue('branch_id', '');
@@ -277,6 +283,13 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
             />
           </div>
         </div>
+        <PeriodPresets
+          presets={['last30', 'thisMonth', 'lastMonth']}
+          start={startDate}
+          end={endDate}
+          onPick={(start, end) => { setStartDate(start); setEndDate(end); }}
+          className="mt-4 border-t border-stroke pt-4 dark:border-strokedark"
+        />
       </CardBody>
     </Card>
   );

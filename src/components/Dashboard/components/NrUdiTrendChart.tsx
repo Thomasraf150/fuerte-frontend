@@ -31,8 +31,8 @@ const formatMonth = (month: string): string => {
 const LoadingSkeleton: React.FC = () => (
   <div className="col-span-12 rounded-2xl border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-7">
     <div className="animate-pulse">
-      <div className="h-6 bg-gray-200 rounded w-48 mb-4 dark:bg-gray-700"></div>
-      <div className="h-[350px] bg-gray-200 rounded dark:bg-gray-700"></div>
+      <div className="h-6 bg-stroke rounded w-48 mb-4 dark:bg-meta-4"></div>
+      <div className="h-[350px] bg-stroke rounded dark:bg-meta-4"></div>
     </div>
   </div>
 );
@@ -184,7 +184,7 @@ const NrUdiTrendChart: React.FC<NrUdiTrendChartProps> = ({ trend, loading }) => 
             NR & UDI Trend
           </h5>
         </div>
-        <div className="flex items-center justify-center h-[350px] text-gray-500">
+        <div className="flex items-center justify-center h-[350px] text-body">
           No trend data available for the selected period.
         </div>
       </div>

@@ -90,7 +90,7 @@ const LoanProductDetailPage: React.FC = () => {
     return (
       <DefaultLayout>
         <div className="mx-auto">
-          <Breadcrumb pageName="Loading..." />
+          <Breadcrumb pageName="" loading />
         </div>
         <SkeletonBlock rows={4} label="Loading loan product…" />
       </DefaultLayout>

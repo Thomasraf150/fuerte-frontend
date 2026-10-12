@@ -6,10 +6,11 @@ import CommissionScheduleSkeleton from '@/components/LoadingStates/CommissionSch
 import { BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
 import useCommissionSchedulePaginated from '@/hooks/useCommissionSchedulePaginated';
 import useLoans from '@/hooks/useLoans';
-import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import { Search, RefreshCw } from 'react-feather';
 import { Card, CardBody } from '@/components/Card';
+import PeriodPresets from '@/components/PeriodPresets';
+import { presetDates } from '@/utils/reportPeriod';
 
 const SoaList: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -29,8 +30,16 @@ const SoaList: React.FC = () => {
   } = useCommissionSchedulePaginated();
 
   const { loanData, fetchLoans } = useLoans();
-  const [startDate, setStartDate] = useState<Date | undefined>(moment('2024-01-01').toDate());
-  const [endDate, setEndDate] = useState<Date | undefined>(moment('2025-01-15').toDate());
+  // Opens on this whole month (a schedule looks ahead, as CHR's does); it was stuck
+  // on a hard-coded 2024-01-01 to 2025-01-15 window.
+  const [startDate, setStartDate] = useState<Date | undefined>(() => presetDates('thisMonth').start);
+  const [endDate, setEndDate] = useState<Date | undefined>(() => presetDates('thisMonth').end);
+
+  const handlePresetPick = (start: Date, end: Date) => {
+    setStartDate(start);
+    setEndDate(end);
+    debouncedFetch(start, end, searchTerm, true);
+  };
 
   const handleRowClick = (data: BorrLoanRowData) => {
     setShowForm(true);
@@ -105,12 +114,12 @@ const SoaList: React.FC = () => {
                 <CardBody>
 
                 <div className="relative z-20">
-                  <label className="mb-4 block font-semibold text-gray-800 dark:text-bodydark">Select Date Range:</label>
+                  <label className="mb-4 block font-semibold text-black dark:text-bodydark">Select Date Range:</label>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 items-end mb-4">
                     {/* Start Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="startDate" className="mb-1 text-sm font-medium text-black dark:text-bodydark">
                         Start Date:
                       </label>
                       <DatePicker
@@ -121,14 +130,14 @@ const SoaList: React.FC = () => {
                         startDate={startDate}
                         endDate={endDate}
                         placeholderText="Start Date"
-                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white w-full"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-black dark:text-white w-full"
                         disabled={loading}
                       />
                     </div>
 
                     {/* End Date */}
                     <div className="flex flex-col">
-                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">
+                      <label htmlFor="endDate" className="mb-1 text-sm font-medium text-black dark:text-bodydark">
                         End Date:
                       </label>
                       <DatePicker
@@ -140,22 +149,22 @@ const SoaList: React.FC = () => {
                         endDate={endDate}
                         minDate={startDate}
                         placeholderText="End Date"
-                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-gray-900 dark:text-white w-full"
+                        className="border border-stroke dark:border-strokedark rounded px-4 py-2 bg-white dark:bg-form-input text-black dark:text-white w-full"
                         disabled={loading}
                       />
                     </div>
 
                     {/* Search */}
                     <div className="flex flex-col">
-                      <label className="mb-1 text-sm font-medium text-gray-700 dark:text-bodydark">Search:</label>
+                      <label className="mb-1 text-sm font-medium text-black dark:text-bodydark">Search:</label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-bodydark" size={18} />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-body dark:text-bodydark" size={18} />
                         <input
                           type="text"
                           placeholder="Loan Ref or Borrower Name"
                           value={searchTerm}
                           onChange={(e) => handleSearch(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-stroke dark:border-strokedark rounded-md bg-white dark:bg-form-input text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-10 pr-4 py-2 border border-stroke dark:border-strokedark rounded-md bg-white dark:bg-form-input text-black dark:text-white focus:ring-blue-500 focus:border-blue-500"
                           disabled={loading}
                         />
                         {isSearching && (
@@ -165,8 +174,16 @@ const SoaList: React.FC = () => {
                     </div>
                   </div>
                   
+                  <PeriodPresets
+                    presets={['thisMonth', 'lastMonth', 'nextMonth']}
+                    start={startDate}
+                    end={endDate}
+                    onPick={handlePresetPick}
+                    disabled={loading}
+                    className="mb-4"
+                  />
                   {pagination.total > 0 && (
-                    <div className="text-sm text-gray-600 dark:text-bodydark">
+                    <div className="text-sm text-body dark:text-bodydark">
                       Showing {dataCommissionSched.length} of {pagination.total} records
                       {searchTerm && ` (filtered by "${searchTerm}")`}
                     </div>
@@ -179,7 +196,7 @@ const SoaList: React.FC = () => {
                     <CommissionScheduleSkeleton rows={5} columns={3} />
                   ) : dataCommissionSched.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-gray-600">
+                      <p className="text-body">
                         {searchTerm ? `No commission records found for "${searchTerm}"` : "No commission data available for selected date range"}
                       </p>
                     </div>
@@ -193,21 +210,21 @@ const SoaList: React.FC = () => {
                       return (
                         <div
                           key={`${item.loan_ref}-${index}`}
-                          className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+                          className="bg-white border border-stroke dark:border-strokedark rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
                         >
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Name</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Name</p>
                               <p className="font-medium text-sm">
                                 {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Loan Ref</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Loan Ref</p>
                               <p className="font-medium text-sm">{item?.loan_ref}</p>
                             </div>
                             <div className="col-span-2">
-                              <p className="text-xs text-gray-500 uppercase tracking-wide">Total Collected Commission</p>
+                              <p className="text-xs text-body uppercase tracking-wide">Total Collected Commission</p>
                               <p className="font-medium text-sm">
                                 {totalCollected.toLocaleString('en-US', {
                                   minimumFractionDigits: 2,
@@ -227,13 +244,13 @@ const SoaList: React.FC = () => {
                   <table className="min-w-full border-separate border-spacing-0">
                     <thead className="bg-white dark:bg-boxdark sticky top-0 z-10">
                       <tr>
-                        <th className="px-2 md:px-4 py-2 text-left font-bold min-w-[200px] md:min-w-[250px] text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
-                        <th className="px-2 md:px-4 py-2 text-left font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
+                        <th className="px-2 md:px-4 py-2 text-left font-bold min-w-[200px] md:min-w-[250px] text-xs md:text-sm text-body dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Name</th>
+                        <th className="px-2 md:px-4 py-2 text-left font-bold text-xs md:text-sm text-body dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Loan Ref</th>
                         {months && months.map(
                           (month) => (
                             <th
                               key={month}
-                              className="px-1 md:px-2 py-2 text-center font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
+                              className="px-1 md:px-2 py-2 text-center font-bold text-xs md:text-sm text-body dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
                               style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                               colSpan={1}
                             >
@@ -241,7 +258,7 @@ const SoaList: React.FC = () => {
                             </th>
                           )
                         )}
-                        <th className="px-2 md:px-4 py-2 text-right tabular-nums font-bold text-xs md:text-sm text-gray-600 dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
+                        <th className="px-2 md:px-4 py-2 text-right tabular-nums font-bold text-xs md:text-sm text-body dark:text-bodydark bg-white dark:bg-boxdark" style={{boxShadow: "inset 0 0 0 1px #d1d5db"}} rowSpan={2}>Total Collected</th>
                       </tr>
                       <tr>
                         {Array(months?.length)
@@ -252,7 +269,7 @@ const SoaList: React.FC = () => {
                             ].map((field, idx1) => (
                               <th
                                 key={`${field}-${idx1}`}
-                                className="px-1 md:px-2 py-1 text-center text-xs font-bold text-gray-500 dark:text-bodydark w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden lg:table-cell bg-white dark:bg-boxdark"
+                                className="px-1 md:px-2 py-1 text-center text-xs font-bold text-body dark:text-bodydark w-[120px] md:w-[150px] min-w-[120px] md:min-w-[150px] hidden lg:table-cell bg-white dark:bg-boxdark"
                                 style={{boxShadow: "inset 0 0 0 1px #d1d5db"}}
                               >
                                 {field}
@@ -273,7 +290,7 @@ const SoaList: React.FC = () => {
                           </tr>
                         ) : dataCommissionSched.length === 0 ? (
                           <tr>
-                            <td colSpan={months.length + 3} className="px-4 py-8 text-center text-gray-500 border-b border-gray-200">
+                            <td colSpan={months.length + 3} className="px-4 py-8 text-center text-body border-b border-stroke dark:border-strokedark">
                               {searchTerm ? `No commission records found for "${searchTerm}"` : "No commission data available for selected date range"}
                             </td>
                           </tr>
@@ -286,14 +303,14 @@ const SoaList: React.FC = () => {
                             }, 0);
 
                             return (
-                              <tr key={`${item.loan_ref}-${index}`} className="hover:bg-gray-50 dark:hover:bg-meta-4">
+                              <tr key={`${item.loan_ref}-${index}`} className="hover:bg-whiten dark:hover:bg-meta-4">
                                 {/* Name */}
-                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {item?.lastname}, {item?.firstname}{item?.middlename ? ` ${item.middlename}` : ''}
                                 </td>
 
                                 {/* Loan Reference */}
-                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
+                                <td className="border border-stroke dark:border-strokedark dark:border-strokedark px-2 md:px-4 py-2 text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">{item?.loan_ref}</td>
 
                                 {/* Monthly Data */}
                                 {months?.map((month: any, monthIndex: number) => {
@@ -304,7 +321,7 @@ const SoaList: React.FC = () => {
                                   return monthlyData ? (
                                     <td
                                       key={`${monthIndex}-commission`}
-                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
+                                      className="border border-stroke dark:border-strokedark dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs hidden lg:table-cell bg-white dark:bg-boxdark text-black dark:text-white"
                                     >
                                       {parseFloat(monthlyData.commission_collected || '0').toLocaleString('en-US', {
                                         minimumFractionDigits: 2,
@@ -314,7 +331,7 @@ const SoaList: React.FC = () => {
                                   ) : (
                                     <td
                                       key={`${monthIndex}-empty`}
-                                      className="border border-gray-300 dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs text-gray-400 dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
+                                      className="border border-stroke dark:border-strokedark dark:border-strokedark px-1 md:px-2 py-1 text-right tabular-nums text-xs text-body dark:text-bodydark hidden lg:table-cell bg-white dark:bg-boxdark"
                                     >
                                       --
                                     </td>
@@ -322,7 +339,7 @@ const SoaList: React.FC = () => {
                                 })}
 
                                 {/* Total Collected */}
-                                <td className="border border-gray-300 dark:border-strokedark px-2 md:px-4 py-2 text-right tabular-nums font-semibold text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
+                                <td className="border border-stroke dark:border-strokedark dark:border-strokedark px-2 md:px-4 py-2 text-right tabular-nums font-semibold text-xs md:text-sm bg-white dark:bg-boxdark text-black dark:text-white">
                                   {totalCollected.toLocaleString('en-US', {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2
@@ -342,12 +359,12 @@ const SoaList: React.FC = () => {
                     <button
                       onClick={handleLoadMore}
                       disabled={loading}
-                      className="w-full sm:w-auto px-4 md:px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors duration-200 inline-flex items-center justify-center space-x-2 text-sm md:text-base"
+                      className="w-full sm:w-auto px-4 md:px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg font-medium transition-colors duration-200 inline-flex items-center justify-center space-x-2 text-sm md:text-base"
                     >
                       <span>Load More Records</span>
                       {loading && <RefreshCw className="animate-spin" size={16} />}
                     </button>
-                    <div className="mt-2 text-xs md:text-sm text-gray-600">
+                    <div className="mt-2 text-xs md:text-sm text-body">
                       Page {pagination.current_page} of {pagination.last_page}
                     </div>
                   </div>
@@ -359,12 +376,12 @@ const SoaList: React.FC = () => {
                     <button
                       onClick={handleLoadMore}
                       disabled={loading}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors duration-200 inline-flex items-center space-x-2"
+                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg font-medium transition-colors duration-200 inline-flex items-center space-x-2"
                     >
                       <span>Load More Records</span>
                       {loading && <RefreshCw className="animate-spin" size={16} />}
                     </button>
-                    <div className="mt-2 text-sm text-gray-600">
+                    <div className="mt-2 text-sm text-body">
                       Page {pagination.current_page} of {pagination.last_page}
                     </div>
                   </div>
