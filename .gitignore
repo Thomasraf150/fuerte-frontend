@@ -41,3 +41,6 @@ next-env.d.ts
 /playwright-report/
 /.playwright-mcp/
 playwright/.cache/
+
+# Screenshots the 40-approvals-bulk spec writes for review (kept on disk, not committed)
+/tests/e2e/40-approvals-bulk/__screens__/

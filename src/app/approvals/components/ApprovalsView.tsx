@@ -1,14 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Inbox } from "react-feather";
 import { useAuthStore } from "@/store";
+import { useDeletionRequestsStore } from "@/store/deletionRequestsStore";
 import useDeletionRequests, {
   DeletionRequest,
   DeletionRequestStatus,
 } from "@/hooks/useDeletionRequests";
 import DeletionRequestCard from "./DeletionRequestCard";
 import ApprovalsPager from "./ApprovalsPager";
+import BatchBar from "./BatchBar";
+import BulkResultStrip from "./BulkResultStrip";
+import { bulkScope } from "./bulkScope";
+import { useBulkDecision } from "./useBulkDecision";
 import "../styles.css";
 
 type Tab = "pending" | "mine" | "all";
@@ -69,6 +74,7 @@ const ApprovalsView: React.FC = () => {
     approve,
     reject,
     cancel,
+    decideMany,
   } = useDeletionRequests();
 
   const refresh = async () => {
@@ -131,6 +137,14 @@ const ApprovalsView: React.FC = () => {
     const ok = await cancel(id);
     if (ok) await refreshAll();
   };
+
+  // "Approve all" / "Reject all": the decidable requests on the Pending tab. After a run the
+  // lists AND the bell/sidebar badge store refresh, so every count drops at once.
+  const scope = useMemo(() => bulkScope(pendingForMe, isApprover, userId), [pendingForMe, isApprover, userId]);
+  const bulk = useBulkDecision(decideMany, async () => {
+    await refreshAll();
+    await useDeletionRequestsStore.getState().fetchPendingCount(useAuthStore.getState().GET_AUTH_TOKEN());
+  });
 
   return (
     <div className="rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -227,6 +241,21 @@ const ApprovalsView: React.FC = () => {
               );
             })}
           </div>
+        )}
+
+        {/* One live region, always mounted, for the bulk decisions: "Deciding 10 requests…",
+            then the result line. A region that mounts already filled is not reliably read. */}
+        <p className="sr-only" role="status" aria-live="polite" data-testid="appr-bulk-announcer">
+          {bulk.announcement}
+        </p>
+        {tab === "pending" && bulk.result && <BulkResultStrip result={bulk.result} onDismiss={bulk.dismiss} />}
+        {tab === "pending" && scope.decidable.length >= 2 && (
+          <BatchBar
+            scope={scope}
+            running={bulk.running}
+            onApprove={() => bulk.run("approve", scope)}
+            onReject={() => bulk.run("reject", scope)}
+          />
         )}
 
         {loading ? (

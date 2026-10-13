@@ -107,6 +107,33 @@ const CANCEL_DELETION_REQUEST: string = `
   }
 `;
 
+// Bulk decisions ("Approve all" / "Reject all" on /approvals): the server takes at
+// most 50 ids per call and answers one row per id, so a partial failure is per request.
+const DELETION_BULK_RESULT_FIELDS = `
+  results {
+    id
+    entity_type
+    outcome
+    message
+  }
+`;
+
+const APPROVE_DELETION_REQUESTS: string = `
+  mutation ApproveDeletionRequests($ids: [ID!]!, $note: String) {
+    approveDeletionRequests(ids: $ids, note: $note) {
+      ${DELETION_BULK_RESULT_FIELDS}
+    }
+  }
+`;
+
+const REJECT_DELETION_REQUESTS: string = `
+  mutation RejectDeletionRequests($ids: [ID!]!, $note: String!) {
+    rejectDeletionRequests(ids: $ids, note: $note) {
+      ${DELETION_BULK_RESULT_FIELDS}
+    }
+  }
+`;
+
 const DeletionRequestsQueryMutation = {
   PENDING_DELETION_REQUESTS_FOR_ME,
   MY_DELETION_REQUESTS,
@@ -116,6 +143,8 @@ const DeletionRequestsQueryMutation = {
   APPROVE_DELETION_REQUEST,
   REJECT_DELETION_REQUEST,
   CANCEL_DELETION_REQUEST,
+  APPROVE_DELETION_REQUESTS,
+  REJECT_DELETION_REQUESTS,
 };
 
 export default DeletionRequestsQueryMutation;

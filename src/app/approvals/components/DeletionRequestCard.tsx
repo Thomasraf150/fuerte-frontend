@@ -19,7 +19,7 @@ interface Props {
   onCancel?: (id: string) => Promise<void>;
 }
 
-const ENTITY_LABEL: Record<string, string> = {
+export const ENTITY_LABEL: Record<string, string> = {
   loan: "Loan",
   borrower: "Borrower",
   posted_payment: "Posted Payment",
@@ -28,7 +28,7 @@ const ENTITY_LABEL: Record<string, string> = {
   loan_type: "Loan Type",
 };
 
-function parseSnapshotLabel(snapshotRaw: string | null, fallback: string): string {
+export function parseSnapshotLabel(snapshotRaw: string | null, fallback: string): string {
   if (!snapshotRaw) return fallback;
   try {
     const snap = typeof snapshotRaw === "string" ? JSON.parse(snapshotRaw) : snapshotRaw;

@@ -50,7 +50,61 @@ const {
   APPROVE_DELETION_REQUEST,
   REJECT_DELETION_REQUEST,
   CANCEL_DELETION_REQUEST,
+  APPROVE_DELETION_REQUESTS,
+  REJECT_DELETION_REQUESTS,
 } = DeletionRequestsQueryMutation;
+
+export type BulkDecisionAction = "approve" | "reject";
+export type DeletionBulkOutcome = "approved" | "superseded" | "rejected" | "not_decided";
+
+export interface DeletionBulkItem {
+  id: string;
+  entity_type: string | null;
+  outcome: DeletionBulkOutcome;
+  message: string | null;
+}
+
+/** The server decides at most this many ids per call; more go in sequential calls. */
+export const BULK_CHUNK_SIZE = 50;
+
+const BULK_MUTATION: Record<BulkDecisionAction, { query: string; field: string }> = {
+  approve: { query: APPROVE_DELETION_REQUESTS, field: "approveDeletionRequests" },
+  reject: { query: REJECT_DELETION_REQUESTS, field: "rejectDeletionRequests" },
+};
+
+const notDecided = (ids: string[], message: string): DeletionBulkItem[] =>
+  ids.map((id) => ({ id, entity_type: null, outcome: "not_decided", message }));
+
+/**
+ * One bulk call for up to BULK_CHUNK_SIZE ids. Never throws: a failed call (GraphQL error,
+ * network, a non-JSON answer) marks every id in it not decided, with the reason, and an id
+ * the server left out of its answer is not decided either, so it stays pending, visibly.
+ */
+async function sendBulkChunk(
+  action: BulkDecisionAction,
+  ids: string[],
+  note: string
+): Promise<DeletionBulkItem[]> {
+  const { query, field } = BULK_MUTATION[action];
+  try {
+    const r = await graphqlFetch(query, { ids, note: action === "reject" ? note : note || null });
+    if (r.errors?.length) {
+      console.error(`[approvals] bulk ${action} failed`, { ids: ids.length, message: r.errors[0].message });
+      return notDecided(ids, r.errors[0].message);
+    }
+    const rows: DeletionBulkItem[] = (r.data?.[field]?.results ?? []).map((row: DeletionBulkItem) => ({
+      ...row,
+      id: String(row.id),
+    }));
+    const answered = new Set(rows.map((row) => row.id));
+    const missing = ids.filter((id) => !answered.has(id));
+    return [...rows, ...notDecided(missing, "The server did not answer for this request.")];
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "The request could not be sent.";
+    console.error(`[approvals] bulk ${action} failed`, { ids: ids.length, message });
+    return notDecided(ids, message);
+  }
+}
 
 // Single place that surfaces a GraphQL error as a toast and tells the caller
 // whether to bail. Keeps every fetcher/mutation guard to one readable line.
@@ -143,6 +197,18 @@ export const useDeletionRequests = () => {
     return true;
   }, []);
 
+  /** Decide many requests: sequential calls of at most BULK_CHUNK_SIZE ids, results merged. */
+  const decideMany = useCallback(
+    async (action: BulkDecisionAction, ids: string[], note: string): Promise<DeletionBulkItem[]> => {
+      const results: DeletionBulkItem[] = [];
+      for (let i = 0; i < ids.length; i += BULK_CHUNK_SIZE) {
+        results.push(...(await sendBulkChunk(action, ids.slice(i, i + BULK_CHUNK_SIZE), note)));
+      }
+      return results;
+    },
+    []
+  );
+
   return {
     loading,
     pendingForMe,
@@ -157,6 +223,7 @@ export const useDeletionRequests = () => {
     approve,
     reject,
     cancel,
+    decideMany,
   };
 };
 
