@@ -72,11 +72,11 @@ export function useBulkDecision(decideMany: DecideMany, onDone: () => Promise<vo
   const [announcement, setAnnouncement] = useState("");
 
   const run = useCallback(
-    async (action: BulkDecisionAction, scope: BulkScope) => {
+    async (action: BulkDecisionAction, scope: BulkScope, opener?: HTMLElement | null) => {
       if (running) return;
       const targets = action === "approve" ? scope.approvable : scope.decidable;
       if (targets.length === 0) return;
-      const note = await showBulkReviewDialog(action, targets, action === "approve" ? scope.leftOut : []);
+      const note = await showBulkReviewDialog(action, targets, action === "approve" ? scope.leftOut : [], opener);
       if (note === null) return;
       const ordered = action === "approve" ? approvalOrder(targets) : targets;
       setResult(null);

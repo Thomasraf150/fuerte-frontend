@@ -8,8 +8,9 @@ import type { BulkRunning } from "./useBulkDecision";
 interface Props {
   scope: BulkScope;
   running: BulkRunning | null;
-  onApprove: () => void;
-  onReject: () => void;
+  /** Each gets the clicked button, so a cancelled review hands focus back to it (Safari never focuses a clicked button). */
+  onApprove: (opener: HTMLButtonElement) => void;
+  onReject: (opener: HTMLButtonElement) => void;
 }
 
 /**
@@ -49,12 +50,12 @@ const BatchBar: React.FC<Props> = ({ scope, running, onApprove, onReject }) => {
 
         <div className="appr-batch-actions">
           {approvable > 0 && (
-            <button type="button" className="appr-batch-btn is-approve" onClick={onApprove} disabled={busy}>
+            <button type="button" className="appr-batch-btn is-approve" onClick={(e) => onApprove(e.currentTarget)} disabled={busy}>
               <Check size={16} aria-hidden="true" />
               {running?.action === "approve" ? "Approving…" : `Approve ${plural(approvable, "deletion")}`}
             </button>
           )}
-          <button type="button" className="appr-batch-btn is-reject" onClick={onReject} disabled={busy}>
+          <button type="button" className="appr-batch-btn is-reject" onClick={(e) => onReject(e.currentTarget)} disabled={busy}>
             <X size={16} aria-hidden="true" />
             {running?.action === "reject" ? "Rejecting…" : `Reject all ${waiting}`}
           </button>

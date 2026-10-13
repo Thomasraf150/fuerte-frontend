@@ -253,8 +253,8 @@ const ApprovalsView: React.FC = () => {
           <BatchBar
             scope={scope}
             running={bulk.running}
-            onApprove={() => bulk.run("approve", scope)}
-            onReject={() => bulk.run("reject", scope)}
+            onApprove={(opener) => bulk.run("approve", scope, opener)}
+            onReject={(opener) => bulk.run("reject", scope, opener)}
           />
         )}
 

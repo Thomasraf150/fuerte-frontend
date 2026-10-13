@@ -284,20 +284,83 @@ test('a partial failure decides the rest, lists the failure with its reason, and
   await expect(strip(page)).toHaveCount(0);
 });
 
-test('Cancel and Escape both close the review without sending anything', async ({ page, backend }) => {
+test('Cancel and Escape both close the review without sending anything, and focus returns to the button', async ({ page, backend }) => {
   await open(page);
   await approveAll(page).click();
   await dialog(page).getByRole('button', { name: 'Cancel' }).click();
   await expect(dialog(page)).toBeHidden();
+  await expect(approveAll(page)).toBeFocused();
 
   await rejectAll(page).click();
   await expect(dialog(page)).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(dialog(page)).toBeHidden();
+  await expect(rejectAll(page)).toBeFocused();
 
   await page.waitForTimeout(300);
   expect(backend.bulkCalls).toEqual([]);
   await expect(strip(page)).toHaveCount(0);
+});
+
+test('focus returns to the bar button even when clicking it did not focus it (as in Safari)', async ({ page, backend }) => {
+  await open(page);
+  await expect(approveAll(page)).toBeVisible();
+  // A dispatched click runs the button's handler without moving focus, as Safari's click does:
+  // focus stays on <body>, so only the button handed in explicitly can take it back.
+  const clickWithoutFocus = async (button: ReturnType<typeof approveAll>) => {
+    await button.evaluate((el) => {
+      (document.activeElement as HTMLElement | null)?.blur();
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    });
+  };
+
+  await clickWithoutFocus(approveAll(page));
+  await expect(dialog(page)).toBeVisible();
+  await dialog(page).getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog(page)).toBeHidden();
+  await expect(approveAll(page)).toBeFocused();
+
+  await clickWithoutFocus(rejectAll(page));
+  await expect(dialog(page)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog(page)).toBeHidden();
+  await expect(rejectAll(page)).toBeFocused();
+  expect(backend.bulkCalls).toEqual([]);
+});
+
+/** Opens Approve all, then lands a held refetch that leaves only `remaining` pending, under the open dialog. */
+async function approveWhileListShrinks(page: Page, backend: FakeBackend, remaining: Req[]): Promise<void> {
+  await open(page);
+  await expect(approveAll(page)).toHaveText('Approve 4 deletions');
+  backend.holdPending = new Gate();
+  await page.getByRole('button', { name: /^Requests/ }).click();
+  await page.getByRole('button', { name: /Pending for me/ }).click();
+  await approveAll(page).click();
+  await expect(dialog(page)).toBeVisible();
+  backend.pending = remaining;
+  const gate = backend.holdPending;
+  backend.holdPending = null;
+  gate.open();
+  // The Approve button that opened the dialog is gone (by class: the bar is aria-hidden behind the modal).
+  await expect(page.locator('.appr-batch-btn.is-approve')).toHaveCount(0);
+}
+
+test('a cancel whose opener was removed by a refetch focuses the bar\'s other button', async ({ page, backend }) => {
+  await approveWhileListShrinks(page, backend, [PENDING[2], PENDING[5]]); // two branches: nothing to approve
+  await dialog(page).getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog(page)).toBeHidden();
+  await expect(rejectAll(page)).toHaveText('Reject all 2');
+  await expect(rejectAll(page)).toBeFocused();
+  expect(backend.bulkCalls).toEqual([]);
+});
+
+test('a cancel whose whole bar was removed by a refetch focuses the Pending for me tab', async ({ page, backend }) => {
+  await approveWhileListShrinks(page, backend, [PENDING[2]]); // one left: no bar at all
+  await expect(page.locator('section.appr-batch')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(dialog(page)).toBeHidden();
+  await expect(page.getByRole('button', { name: /Pending for me/ })).toBeFocused();
+  expect(backend.bulkCalls).toEqual([]);
 });
 
 test('more than 50 on screen go in sequential calls of at most 50', async ({ page, backend }) => {

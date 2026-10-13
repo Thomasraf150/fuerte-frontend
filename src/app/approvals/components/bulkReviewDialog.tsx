@@ -70,16 +70,34 @@ function watchReason(): void {
 }
 
 /**
+ * Where a cancelled review puts focus when its opener is gone: a refetch while it was open can
+ * unmount the button (nothing left to approve, or fewer than two to decide). The bar's other
+ * button if it is still there, else the active "Pending for me" tab.
+ */
+function focusFallback(): HTMLElement | null {
+  return (
+    document.querySelector<HTMLElement>("section.appr-batch .appr-batch-btn:not(:disabled)") ??
+    document.querySelector<HTMLElement>('nav[aria-label="Approval views"] .appr-tab.is-active')
+  );
+}
+
+/**
  * The review step before anything is sent: what will be decided (the exact requests, by the
  * name their card shows), what was left out, and what happens. Focus starts on Cancel, Escape
- * cancels. Returns the note (required for reject), or null when cancelled.
+ * cancels. Returns the note (required for reject), or null when cancelled, after handing focus
+ * back to `openedBy` (the clicked bar button; else whatever had focus when it opened).
  */
 export async function showBulkReviewDialog(
   action: BulkDecisionAction,
   targets: DeletionRequest[],
-  leftOut: DeletionRequest[]
+  leftOut: DeletionRequest[],
+  openedBy?: HTMLElement | null
 ): Promise<string | null> {
   const isApprove = action === "approve";
+  // Cancel / Escape hand focus back here (see returnFocus). Given explicitly because Safari does
+  // not focus a clicked button, so document.activeElement would be <body> there.
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const opener = openedBy ?? active;
   const result = await MySwal.fire({
     title: isApprove ? `Approve ${plural(targets.length, "deletion")}?` : `Reject ${plural(targets.length, "request")}?`,
     html: <PreviewBody action={action} targets={targets} leftOut={leftOut} />,
@@ -91,8 +109,8 @@ export async function showBulkReviewDialog(
     ...(isApprove ? {} : { inputValidator: (value: string) => reasonError(value ?? "") ?? undefined, didOpen: watchReason }),
     showCancelButton: true,
     focusCancel: true,
-    // Don't hand focus back to the bar's button on close: the result heading takes it when the run
-    // finishes, and SweetAlert's late return-focus would otherwise snatch it back.
+    // Don't let SweetAlert hand focus back on close: after a run the result heading takes it, and
+    // SweetAlert's late return-focus would otherwise snatch it back. A cancel returns it below.
     returnFocus: false,
     confirmButtonText: isApprove ? `Approve ${plural(targets.length, "deletion")}` : `Reject ${plural(targets.length, "request")}`,
     cancelButtonText: "Cancel",
@@ -101,7 +119,11 @@ export async function showBulkReviewDialog(
     customClass: { popup: "appr-bulk-popup" },
     background: "#ffffff",
   });
-  if (!result.isConfirmed) return null;
+  if (!result.isConfirmed) {
+    // Cancelled or dismissed: no run follows, so focus goes back to the opener, not to <body>.
+    (opener?.isConnected ? opener : focusFallback())?.focus();
+    return null;
+  }
   const note = typeof result.value === "string" ? result.value.trim() : "";
   return note;
 }
