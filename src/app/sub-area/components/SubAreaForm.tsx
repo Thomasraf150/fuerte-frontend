@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
@@ -28,20 +28,14 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData
     subAreaLoading,
   } = useSubArea();
 
-  const [optionsArea, setOptionsArea] = useState<OptionProps[]>([]);
+  // Built during render, not in the effect below: that effect's setValue must find the saved
+  // area's option already in the select, or Edit opens blank (2026-10-13).
+  const optionsArea = useMemo<OptionProps[]>(() => (dataArea && Array.isArray(dataArea) ? [
+    { value: '', label: 'Select a Area', hidden: true },
+    ...dataArea.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
+  ] : []), [dataArea]);
 
   useEffect(()=>{
-    if (dataArea && Array.isArray(dataArea)) {
-      const dynaOpt: OptionProps[] = dataArea?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name,
-      }));
-      setOptionsArea([
-        { value: '', label: 'Select a Area', hidden: true },
-        ...dynaOpt,
-      ]);
-    }
-
     if (initialData) {
       if (actionLbl === 'Update Sub Area') {
         setValue('id', initialData.id ?? '')

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import userListCol, { renderUserActions } from './UsersListColumn';
 import FormAddUser from './FormAddUser';
@@ -42,20 +42,29 @@ const UserLists: React.FC = () => {
     }
   }, []);
 
+  // Every click that opens the form takes a new number; a user fetch that comes back after a later
+  // click is dropped, so Edit on A then quickly on B can never end up showing A (2026-10-13).
+  const latestOpen = useRef(0);
+
   const handleShowForm = (lbl: string, showFrm: boolean) => {
+    latestOpen.current += 1;
     setShowForm(showFrm);
     setActionLbl(lbl)
   }
 
-  const handleRowUpdate = async (row: User) => {
-    setSingleUserData(await fetchSingleUser(row));
-    handleShowForm('Update User', true);
+  const openForUser = async (row: User, lbl: string) => {
+    const ticket = ++latestOpen.current;
+    const user = await fetchSingleUser(row);
+    // A failed load opens nothing: the form would keep the previous user's id, and a password
+    // typed for this user would be saved onto that one.
+    if (ticket !== latestOpen.current || !user) return;
+    setSingleUserData(user);
+    handleShowForm(lbl, true);
   };
 
-  const handlePwUpdate = async (row: User) => {
-    setSingleUserData(await fetchSingleUser(row));
-    handleShowForm('Update Password', true);
-  };
+  const handleRowUpdate = (row: User) => openForUser(row, 'Update User');
+
+  const handlePwUpdate = (row: User) => openForUser(row, 'Update Password');
 
   return (
     <div>
@@ -96,9 +105,9 @@ const UserLists: React.FC = () => {
           {showForm && (
             <div ref={formPanelRef} className="fade-in col-span-1 scroll-mt-24">
               <Card>
-                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => setShowForm(false)} />} />
+                <CardHeader title={actionLbl} actions={<FormCloseButton onClose={() => handleShowForm(actionLbl, false)} />} />
                 <CardBody>
-                  <FormAddUser setShowForm={setShowForm} actionLbl={actionLbl} onSaved={refresh} singleUserData={singleUserData} />
+                  <FormAddUser setShowForm={(show) => handleShowForm(actionLbl, show)} actionLbl={actionLbl} onSaved={refresh} singleUserData={singleUserData} />
                 </CardBody>
               </Card>
             </div>

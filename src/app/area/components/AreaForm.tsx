@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
@@ -24,20 +24,14 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData, a
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataArea>();
   const { onSubmitArea, branchSubData, areaLoading } = useArea();
 
-  const [optionsSubBranch, setOptionsSubBranch] = useState<OptionSubBranch[]>([]);
+  // Built during render, not in the effect below: that effect's setValue must find the saved
+  // sub-branch's option already in the select, or Edit opens blank (2026-10-13).
+  const optionsSubBranch = useMemo<OptionSubBranch[]>(() => (branchSubData && Array.isArray(branchSubData) ? [
+    { value: '', label: 'Select a Sub Branch', hidden: true },
+    ...branchSubData.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
+  ] : []), [branchSubData]);
 
   useEffect(()=>{
-    if (branchSubData && Array.isArray(branchSubData)) {
-      const dynaOpt: OptionSubBranch[] = branchSubData?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name,
-      }));
-      setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true },
-        ...dynaOpt,
-      ]);
-    }
-
     if (initialData) {
       if (actionLbl === 'Update Area') {
         setValue('id', initialData.id ?? '')

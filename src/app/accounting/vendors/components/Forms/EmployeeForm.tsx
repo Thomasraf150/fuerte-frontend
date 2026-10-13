@@ -1,6 +1,6 @@
 "use client"
 import Button from '@/components/Button';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
@@ -28,19 +28,14 @@ interface Option {
 const EmployeeForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, dataDepartments, vendorLoading, singleData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
 
-  const [optionsDeps, setOptionsDeps] = useState<Option[]>([]);
+  // Built during render, not in the effect below: that effect's setValue must find the saved
+  // department's option already in the select, or Edit opens blank (2026-10-13).
+  const optionsDeps = useMemo<Option[]>(() => (dataDepartments && Array.isArray(dataDepartments) ? [
+    { value: '', label: 'Select a Department', hidden: true },
+    ...dataDepartments.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
+  ] : []), [dataDepartments]);
 
   useEffect(() => {
-    if (dataDepartments && Array.isArray(dataDepartments)) {
-      const dynaOpt: Option[] = dataDepartments?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsDeps([
-        { value: '', label: 'Select a Department', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-    }
     setValue('vendor_type_id', vendorTypeId);
     setValue('id', singleData?.id ?? '');
     setValue('name', singleData?.name ?? '');

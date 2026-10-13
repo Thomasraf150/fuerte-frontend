@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
 import FormInput from '@/components/FormInput';
@@ -24,7 +24,12 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanProducts>();
   const { onSubmitLoanProduct, loanProductLoading } = useLoanProducts();
   const { data: loanCodeData, loading: loanCodeLoading } = useLoanCodes();
-  const [optionsClient, setOptionsClient] = useState<OptionLoanCode[]>([]);
+  // Built during render, not in the prefill effect below: that effect's setValue must find the
+  // saved loan code's option already in the select, or the product opens blank (2026-10-13).
+  const optionsClient = useMemo<OptionLoanCode[]>(() => (loanCodeData && Array.isArray(loanCodeData) ? [
+    { value: '', label: 'Select a Loan Code', hidden: true },
+    ...loanCodeData.map(dLCodes => ({ value: String(dLCodes.id), label: dLCodes.code + ' - ' + dLCodes.description })),
+  ] : []), [loanCodeData]);
   const [selectedOptIsAuto, setSelectedOptIsAuto] = useState<string>();
   const [baseCompOptions, setBaseCompOptions] = useState<OptionLoanCode[]>([
     { value: '', label: 'Select Base Deduction', hidden: true },
@@ -67,16 +72,6 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   }
 
   useEffect(() => {
-    if (loanCodeData && Array.isArray(loanCodeData)) {
-      const dynaOpt: OptionLoanCode[] = loanCodeData?.map(dLCodes => ({
-        value: String(dLCodes.id),
-        label: dLCodes.code + ' - ' + dLCodes.description, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsClient([
-        { value: '', label: 'Select a Loan Code', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-    }
     if (singleData) {
       setValue('id', singleData.id);
       setValue('loan_code_id', singleData.loan_code_id);

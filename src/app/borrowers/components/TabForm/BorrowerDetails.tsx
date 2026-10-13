@@ -331,7 +331,9 @@ const BorrowerDetails: React.FC<BorrInfoProps> = ({ dataChief, dataArea, dataSub
         }
       }
     }
-  }, [dataArea])
+    // singleData too: the page opens this form as soon as either the areas or the borrower has
+    // loaded, and when the areas came first the saved Sub Area stayed blank (2026-10-13).
+  }, [dataArea, singleData])
 
   useEffect(() => {
     // Track previous value to detect EDIT→CREATE transitions

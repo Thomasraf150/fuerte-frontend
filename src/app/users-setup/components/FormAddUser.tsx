@@ -98,7 +98,11 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
         }, minLoadingDuration - elapsedTime);
       }
     }
-    
+  }, [dataSubBranch, loadingStartTime])
+
+  // Fill the form when it opens or another user is picked -- never when a list arrives, which
+  // used to wipe what the Owner had typed while the page was still loading (2026-10-13).
+  useEffect(() => {
     if (actionLbl === 'Create User') {
       reset({
         id: '',
@@ -122,7 +126,21 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
         );
       }
     }
-  }, [dataSubBranch, singleUserData, actionLbl, loadingStartTime])
+  }, [singleUserData, actionLbl, reset, setValue])
+
+  // Edit: each saved value goes in again as soon as its dropdown holds its real options. The effect
+  // above can set them before a dropdown has its options, and a select cannot take a value it has no
+  // option for, so it came up blank (Rafael, 2026-10-13). The length checks matter: the loading
+  // flags turn false before any data has arrived. One effect per field, so a value lands in the
+  // same commit its options appear, before the Owner can change it.
+  const branchReady = !localBranchLoading && options.length > 1;
+  const roleReady = !rolesLoading && optionsRole.length > 1;
+  useEffect(() => {
+    if (actionLbl === 'Update User' && singleUserData && branchReady) setValue('branch_sub_id', singleUserData.branch_sub_id);
+  }, [actionLbl, singleUserData, branchReady, setValue]);
+  useEffect(() => {
+    if (actionLbl === 'Update User' && singleUserData && roleReady) setValue('role_id', singleUserData.role_id);
+  }, [actionLbl, singleUserData, roleReady, setValue]);
 
   useEffect(() => {
     if (dataRole && Array.isArray(dataRole)) {
@@ -232,7 +250,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
 
           <FormInput
             label="Email"
-            id="name"
+            id="user_email"
             type="text"
             icon={Home}
             register={register('email', { required: true })}
@@ -242,7 +260,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
 
           <FormInput
             label="Name"
-            id="name"
+            id="user_name"
             type="text"
             icon={Home}
             register={register('name', { required: true })}
@@ -256,7 +274,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
         <>
           <FormInput
             label="Password"
-            id="name"
+            id="user_password"
             type="password"
             icon={Home}
             register={register('password', { required: true })}
@@ -265,7 +283,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
           />
           <FormInput
             label="Confirm Password"
-            id="name"
+            id="user_confirm_password"
             type="password"
             icon={Home}
             register={register('confirm_password', {

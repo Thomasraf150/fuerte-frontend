@@ -1,6 +1,6 @@
 "use client"
 import Button from '@/components/Button';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
@@ -29,19 +29,14 @@ interface Option {
 const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, dataSupplierCat, loading, vendorLoading, singleData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
 
-  const [optionsSubCat, setOptionsSubCat] = useState<Option[]>([]);
+  // Built during render, not in the effect below: that effect's setValue must find the saved
+  // category's option already in the select, or Edit opens blank (2026-10-13).
+  const optionsSubCat = useMemo<Option[]>(() => (dataSupplierCat && Array.isArray(dataSupplierCat) ? [
+    { value: '', label: 'Select a Category', hidden: true },
+    ...dataSupplierCat.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
+  ] : []), [dataSupplierCat]);
 
   useEffect(() => {
-    if (dataSupplierCat && Array.isArray(dataSupplierCat)) {
-      const dynaOpt: Option[] = dataSupplierCat?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsSubCat([
-        { value: '', label: 'Select a Category', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-    }
     setValue('vendor_type_id', vendorTypeId);
     setValue('id', singleData?.id ?? '');
     setValue('name', singleData?.name ?? '');

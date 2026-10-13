@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, MapPin, Archive, Mail, Globe, Phone, User, ChevronDown, Save, RotateCw, Check } from 'react-feather';
 import FormInput from '@/components/FormInput';
@@ -23,21 +23,15 @@ const BankForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBank, initialD
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataBank>();
   const { onSubmitBank, branchSubData, bankLoading } = useBank();
 
-  const [optionsSubBranch, setOptionsSubBranch] = useState<OptionSubBranch[]>([]);
+  // Built during render, not in the effect below: that effect's setValue must find the saved
+  // sub-branch's option already in the select, or Edit opens blank (2026-10-13).
+  const optionsSubBranch = useMemo<OptionSubBranch[]>(() => (branchSubData && Array.isArray(branchSubData) ? [
+    { value: '', label: 'Select a Sub Branch', hidden: true },
+    ...branchSubData.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
+  ] : []), [branchSubData]);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   useEffect(()=>{
-    if (branchSubData && Array.isArray(branchSubData)) {
-      const dynaOpt: OptionSubBranch[] = branchSubData?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsSubBranch([
-        { value: '', label: 'Select a Sub Branch', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-    }
-
     if (initialData) {
       if (actionLbl === 'Update Bank') {
         setValue('id', initialData.id ?? '')
