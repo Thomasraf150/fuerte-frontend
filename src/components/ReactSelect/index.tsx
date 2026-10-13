@@ -42,6 +42,12 @@ interface ReactSelectComponentProps {
   noOptionsMessage?: (obj: { inputValue: string }) => string | null;
   /** Accessible name for the underlying combobox input (react-select forwards it). */
   'aria-label'?: string;
+  /** Forwarded to react-select so an external <label htmlFor> can bind to it (as AsyncReactSelect). */
+  inputId?: string;
+  /** Marks the combobox input invalid, as FormInput does for its fields. */
+  'aria-invalid'?: boolean;
+  /** The id of the element holding this field's error message. */
+  'aria-errormessage'?: string;
 }
 
 /**
@@ -61,6 +67,9 @@ const ReactSelect = forwardRef<SelectInstance<SelectOption, false>, ReactSelectC
   loadingMessage = () => 'Loading options...',
   noOptionsMessage,
   'aria-label': ariaLabel,
+  inputId,
+  'aria-invalid': ariaInvalid,
+  'aria-errormessage': ariaErrorMessage,
 }, ref) => {
   // Get theme-aware styles and theme config
   const { styles: themeStyles, theme } = useSelectTheme<SelectOption>();
@@ -88,6 +97,9 @@ const ReactSelect = forwardRef<SelectInstance<SelectOption, false>, ReactSelectC
       loadingMessage={loadingMessage}
       noOptionsMessage={noOptionsMessage}
       aria-label={ariaLabel}
+      inputId={inputId}
+      aria-invalid={ariaInvalid}
+      aria-errormessage={ariaErrorMessage}
     />
   );
 });

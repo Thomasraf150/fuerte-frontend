@@ -29,13 +29,15 @@ interface Option {
 const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetchVendors, createVendor, dataSupplierCat, loading, vendorLoading, singleData }) => {
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
 
-  // Built during render, not in the effect below: that effect's setValue must find the saved
-  // category's option already in the select, or Edit opens blank (2026-10-13).
+  // Built during render, not in an effect: the saved category's option must already be in the
+  // select when its value goes in, or Edit opens blank (2026-10-13).
   const optionsSubCat = useMemo<Option[]>(() => (dataSupplierCat && Array.isArray(dataSupplierCat) ? [
     { value: '', label: 'Select a Category', hidden: true },
     ...dataSupplierCat.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
   ] : []), [dataSupplierCat]);
 
+  // Fill the form when it opens or another vendor is picked -- never when the category list
+  // arrives, which wiped (Create) or reverted (Edit) what was typed while it loaded (2026-10-13).
   useEffect(() => {
     setValue('vendor_type_id', vendorTypeId);
     setValue('id', singleData?.id ?? '');
@@ -45,7 +47,14 @@ const SupplierForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
     setValue('supplier_category_id', singleData?.supplier_category_id ?? '');
     setValue('tax_excempty_date', singleData?.tax_excempty_date ?? '');
     setValue('remarks', singleData?.remarks ?? '');
-  }, [dataSupplierCat, vendorTypeId, singleData]);
+  }, [vendorTypeId, singleData, setValue]);
+
+  // Edit: the saved category goes in again once its options are in the select (a select cannot
+  // take a value it has no option for).
+  const categoriesReady = optionsSubCat.length > 0;
+  useEffect(() => {
+    if (singleData && categoriesReady) setValue('supplier_category_id', singleData.supplier_category_id ?? '');
+  }, [singleData, categoriesReady, setValue]);
 
   const onSubmit: SubmitHandler<RowVendorsData> = async (data) => {
     console.log(data, ' data');

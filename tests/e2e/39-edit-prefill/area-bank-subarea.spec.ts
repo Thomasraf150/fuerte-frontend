@@ -5,7 +5,7 @@
  *   PWTEST_HEADLESS=1 npx playwright test tests/e2e/39-edit-prefill/area-bank-subarea.spec.ts --reporter=line --workers=1
  */
 import type { Page } from '@playwright/test';
-import { APP, Gate, ORDERS, expect, paginated, test } from './harness';
+import { APP, Gate, ORDERS, expect, paginated, served, test } from './harness';
 
 test.setTimeout(120_000);
 
@@ -75,4 +75,45 @@ for (const order of ORDERS) {
     await expect(select).toHaveValue('62');
     await expect(page.locator('input[name="name"]')).toHaveValue('E2E Sub Area Uno');
   });
+}
+
+/**
+ * A name typed while the form's own dropdown list loads must survive that list's arrival.
+ * Create is reached the way it can still hold an old record: Edit a row, Cancel, then Create,
+ * because these forms only fill (or clear) themselves when they hold one.
+ */
+const FORMS = [
+  { name: 'Area', path: '/area', row: 'E2E Area South', saved: 'E2E Area South', list: 'getAllBranch' },
+  { name: 'Bank', path: '/banks', row: 'E2E Bank Juan', saved: 'E2E Bank Juan', list: 'getAllBranch' },
+  { name: 'Sub Area', path: '/sub-area', row: 'E2E Sub Area Uno', saved: 'E2E Sub Area Uno', list: 'getAreas' },
+] as const;
+
+for (const form of FORMS) {
+  for (const mode of ['Create', 'Edit'] as const) {
+    test(`${form.name} ${mode}: a name typed while the list loads survives its arrival`, async ({ page, backend }) => {
+      // Re-armed below: each open of the form fetches the list again.
+      let gate = new Gate(mode === 'Create');
+      backend.answers.set('getAllBranch', async () => { await gate.opened; return SUB_BRANCHES; });
+      backend.answers.set('getBanks', () => ({ data: [BANK] }));
+      backend.answers.set('getSubAreas', () => paginated([SUB_AREA]));
+      backend.answers.set('getAreas', async () => {
+        if (form.name === 'Sub Area') await gate.opened;
+        return paginated(form.name === 'Sub Area' ? AREAS : [AREAS[1]]);
+      });
+      await editRow(page, form.path, form.row);
+      const name = page.locator('input[name="name"]');
+      await expect(name).toHaveValue(form.saved);
+      if (mode === 'Create') {
+        await page.getByRole('button', { name: 'Cancel' }).click();
+        gate = new Gate(false);
+        await page.getByRole('button', { name: 'Create', exact: true }).click();
+      }
+
+      await name.fill('Typed While Loading');
+      const arrived = served(page, form.list);
+      gate.open();
+      await arrived;
+      await expect(name).toHaveValue('Typed While Loading');
+    });
+  }
 }

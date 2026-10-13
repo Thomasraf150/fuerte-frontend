@@ -1,6 +1,6 @@
 "use client"
 import Button from '@/components/Button';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, Edit3, ChevronDown, Save, RotateCw } from 'react-feather';
 import ReactSelect from '@/components/ReactSelect';
@@ -29,19 +29,16 @@ const CustomerForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
   const { register, handleSubmit, setValue, reset, formState: { errors }, control } = useForm<RowVendorsData>();
   // const { createVendor, dataCustCat, loading } = useVendor();
 
-  const [optionsCustCat, setOptionsCustCat] = useState<Option[]>([]);
+  // Built during render, not in an effect: the saved category's option must already be in the
+  // select when its value goes in, or Edit opens blank (2026-10-13).
+  const optionsCustCat = useMemo<Option[]>(() => (dataCustCat && Array.isArray(dataCustCat) ? [
+    { value: '', label: 'Select a Category', hidden: true },
+    ...dataCustCat.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
+  ] : []), [dataCustCat]);
 
+  // Fill the form when it opens or another vendor is picked -- never when the category list
+  // arrives, which wiped (Create) or reverted (Edit) what was typed while it loaded (2026-10-13).
   useEffect(() => {
-    if (dataCustCat && Array.isArray(dataCustCat)) {
-      const dynaOpt: Option[] = dataCustCat?.map(bSub => ({
-        value: String(bSub.id),
-        label: bSub.name, // assuming `name` is the key you want to use as label
-      }));
-      setOptionsCustCat([
-        { value: '', label: 'Select a Category', hidden: true }, // retain the default "Select a branch" option
-        ...dynaOpt,
-      ]);
-    }
     setValue('vendor_type_id', vendorTypeId);
     setValue('id', singleData?.id ?? '');
     setValue('name', singleData?.name ?? '');
@@ -52,7 +49,14 @@ const CustomerForm: React.FC<ParentFormBr> = ({ setShowForm, vendorTypeId, fetch
     setValue('credit_limit', singleData?.credit_limit ?? '');
     setValue('is_allow_excess_limit', singleData?.is_allow_excess_limit ?? false);
     setValue('remarks', singleData?.remarks ?? '');
-  }, [dataCustCat, vendorTypeId, singleData]);
+  }, [vendorTypeId, singleData, setValue]);
+
+  // Edit: the saved category goes in again once its options are in the select (a select cannot
+  // take a value it has no option for).
+  const categoriesReady = optionsCustCat.length > 0;
+  useEffect(() => {
+    if (singleData && categoriesReady) setValue('customer_category_id', singleData.customer_category_id ?? '');
+  }, [singleData, categoriesReady, setValue]);
 
   const onSubmit: SubmitHandler<RowVendorsData> = async (data) => {
     console.log(data, ' data');

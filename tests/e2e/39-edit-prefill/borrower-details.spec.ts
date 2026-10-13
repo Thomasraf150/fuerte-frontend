@@ -2,14 +2,14 @@
  * Borrower page, Details tab: a saved borrower opens with every saved dropdown showing.
  *
  * The page loads the borrower and the form's picklists (chiefs, areas, companies) side by
- * side and opens the form as soon as EITHER finishes, so the form can open on the picklists
- * with the borrower still on its way, or the other way round. Both orders are tested.
+ * side and opens the form once BOTH have finished (borrower-page-waits.spec.ts); either can
+ * answer first. Both orders are tested.
  * Fictional people only. NO CREDENTIALS AND NO BACKEND: see ../26-new-application/borrowerFormHarness.ts.
  *
  *   PWTEST_HEADLESS=1 npx playwright test tests/e2e/39-edit-prefill/borrower-details.spec.ts --reporter=line --workers=1
  */
 import { expect, selectedText, signedInAs, test } from '../26-new-application/borrowerFormHarness';
-import { Gate } from './harness';
+import { Gate, sleep } from './harness';
 
 test.setTimeout(180_000);
 
@@ -42,7 +42,7 @@ for (const order of [
   { name: 'the picklists answer first', borrowerFirst: false },
 ]) {
   test(`a saved borrower opens with its saved dropdowns (${order.name})`, async ({ page, backend }) => {
-    // Whichever answers second waits until the form is on screen with the first.
+    // Whichever answers second waits until the first has been answered.
     const gate = new Gate(false);
     backend.extraGraphql.set('getBorrower', async () => {
       if (!order.borrowerFirst) await gate.opened;
@@ -64,9 +64,11 @@ for (const order of [
 
     await page.goto(`/borrowers/${BORROWER_ID}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
     const form = page.locator('form:has(input[name="firstname"])');
-    await expect(form.locator('input[name="firstname"]')).toBeVisible({ timeout: 120_000 });
+    const first = order.borrowerFirst ? 'getBorrower' : 'getAreas';
+    await expect.poll(() => backend.calls(first).length, { timeout: 120_000 }).toBeGreaterThan(0);
+    await sleep(1_000);
     gate.open();
-    await expect(form.locator('input[name="firstname"]')).toHaveValue('MARIA');
+    await expect(form.locator('input[name="firstname"]')).toHaveValue('MARIA', { timeout: 120_000 });
 
     // Native selects (fixed options).
     await expect(form.locator('select[name="gender"]')).toHaveValue('Female');

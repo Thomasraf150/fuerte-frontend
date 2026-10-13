@@ -24,13 +24,15 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData, a
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DataArea>();
   const { onSubmitArea, branchSubData, areaLoading } = useArea();
 
-  // Built during render, not in the effect below: that effect's setValue must find the saved
-  // sub-branch's option already in the select, or Edit opens blank (2026-10-13).
+  // Built during render, not in an effect: the saved sub-branch's option must already be in the
+  // select when its value goes in, or Edit opens blank (2026-10-13).
   const optionsSubBranch = useMemo<OptionSubBranch[]>(() => (branchSubData && Array.isArray(branchSubData) ? [
     { value: '', label: 'Select a Sub Branch', hidden: true },
     ...branchSubData.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
   ] : []), [branchSubData]);
 
+  // Fill (or clear) the form when it opens or another area is picked -- never when the branch
+  // list arrives, which wiped (Create) or reverted (Edit) what was typed while it loaded (2026-10-13).
   useEffect(()=>{
     if (initialData) {
       if (actionLbl === 'Update Area') {
@@ -47,7 +49,14 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData, a
         });
       }
     }
-  }, [initialData, setValue, actionLbl, branchSubData, reset])
+  }, [initialData, setValue, actionLbl, reset])
+
+  // Edit: the saved sub-branch goes in again once its options are in the select (a select cannot
+  // take a value it has no option for).
+  const branchesReady = optionsSubBranch.length > 0;
+  useEffect(() => {
+    if (initialData && actionLbl === 'Update Area' && branchesReady) setValue('branch_sub_id', initialData.branch_sub_id);
+  }, [initialData, actionLbl, branchesReady, setValue]);
 
   const onSubmit: SubmitHandler<DataArea> = async (data) => {
     const result = await onSubmitArea(data) as { success: boolean; error?: string; data?: any };

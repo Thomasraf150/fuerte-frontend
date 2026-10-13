@@ -10,6 +10,33 @@ import { graphqlFetch } from '@/utils/graphqlFetch';
 import { usePagination } from './usePagination';
 import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 
+/**
+ * Every live loan code, newest first, for a dropdown. The hook below pages them 20 at a time for
+ * the list; a dropdown that held only that page offered the newest 20 of 582 (2026-10-13), and
+ * getLoanCodes returns at most MAX_DROPDOWN_SIZE (200) a page, so this reads page 1 to learn how
+ * many pages there are, then the rest together. Throws if any page fails: a partial list would
+ * silently open a product whose code is missing as blank.
+ */
+export async function fetchAllLoanCodes(): Promise<DataRowLoanCodes[]> {
+  const fetchPage = async (page: number) => {
+    const result = await graphqlFetch(LoanCodeQueryMutations.GET_LOAN_CODE_QUERY, {
+      first: MAX_DROPDOWN_SIZE,
+      page,
+      orderBy: [{ column: 'id', order: 'DESC' }],
+    });
+    const codes = result.data?.getLoanCodes;
+    if (result.errors?.length || !codes) {
+      throw new Error(result.errors?.[0]?.message ?? `getLoanCodes page ${page} returned no data`);
+    }
+    return codes as { data: DataRowLoanCodes[]; paginatorInfo?: { lastPage?: number } };
+  };
+
+  const first = await fetchPage(1);
+  const lastPage = first.paginatorInfo?.lastPage ?? 1;
+  const rest = await Promise.all(Array.from({ length: Math.max(0, lastPage - 1) }, (_, i) => fetchPage(i + 2)));
+  return [first, ...rest].flatMap((page) => page.data);
+}
+
 const useLoanCodes = () => {
   const { GET_LOAN_CODE_QUERY, GET_LOAN_TYPE_QUERY, SAVE_LOAN_CODE_MUTATION, UPDATE_LOAN_CODE_MUTATION } = LoanCodeQueryMutations;
   const { GET_LOAN_CLIENT_QUERY } = LoanClientsQueryMutations;

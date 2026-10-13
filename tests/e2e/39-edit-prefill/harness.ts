@@ -10,7 +10,7 @@
  * a made-up Owner token in the persisted auth store, and every request to the backend
  * origin answered here, GraphQL by its root field. Nothing reaches the API.
  */
-import { test as base, expect, Route } from '@playwright/test';
+import { test as base, expect, Page, Route } from '@playwright/test';
 
 export const APP = 'http://localhost:3000';
 const BACKEND = 'http://localhost:8080';
@@ -100,6 +100,23 @@ export class Gate {
   readonly opened = new Promise<void>((resolve) => { this.release = resolve; });
   constructor(openAtOnce: boolean) { if (openAtOnce) this.open(); }
   open(): void { this.release(); }
+}
+
+/**
+ * Resolves once the page has received the answer for a GraphQL root field, plus a beat for the
+ * effects that answer sets off. "The list arrived and nothing was overwritten" is then checked
+ * after the overwrite would have happened, not before it had the chance.
+ */
+export async function served(page: Page, field: string): Promise<void> {
+  await page.waitForResponse((response) => {
+    try {
+      const query = response.request().postDataJSON()?.query;
+      return typeof query === 'string' && rootField(query) === field;
+    } catch {
+      return false; // a body that is not JSON is not a GraphQL request
+    }
+  });
+  await sleep(500);
 }
 
 /** The two orders worth testing: the dropdown's options already there, and arriving after the form opened. */

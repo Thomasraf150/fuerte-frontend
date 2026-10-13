@@ -1,11 +1,14 @@
 "use client"
 import React, { useEffect, useMemo, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { Home, ChevronDown, Save, RotateCw } from 'react-feather';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { Home, ChevronDown, Save, RotateCw, AlertCircle } from 'react-feather';
+import { toast } from 'react-toastify';
 import FormInput from '@/components/FormInput';
+import FormLabel from '@/components/FormLabel';
+import ReactSelect from '@/components/ReactSelect';
 import useUsers from '@/hooks/useUsers';
-import { DataBranches, DataFormUser, User, DataRowLoanProducts, DataFormLoanProducts } from '@/utils/DataTypes';
-import useLoanCodes from '@/hooks/useLoanCodes';
+import { DataBranches, DataFormUser, User, DataRowLoanProducts, DataFormLoanProducts, DataRowLoanCodes, SelectOption } from '@/utils/DataTypes';
+import { fetchAllLoanCodes } from '@/hooks/useLoanCodes';
 import useLoanProducts from '@/hooks/useLoanProducts';
 import Button from '@/components/Button';
 interface ParentFormBr {
@@ -21,15 +24,28 @@ interface OptionLoanCode {
 }
 
 const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProducts, actionLbl, singleData }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormLoanProducts>();
+  const { register, handleSubmit, setValue, reset, watch, control, formState: { errors } } = useForm<DataFormLoanProducts>();
   const { onSubmitLoanProduct, loanProductLoading } = useLoanProducts();
-  const { data: loanCodeData, loading: loanCodeLoading } = useLoanCodes();
-  // Built during render, not in the prefill effect below: that effect's setValue must find the
-  // saved loan code's option already in the select, or the product opens blank (2026-10-13).
-  const optionsClient = useMemo<OptionLoanCode[]>(() => (loanCodeData && Array.isArray(loanCodeData) ? [
-    { value: '', label: 'Select a Loan Code', hidden: true },
-    ...loanCodeData.map(dLCodes => ({ value: String(dLCodes.id), label: dLCodes.code + ' - ' + dLCodes.description })),
-  ] : []), [loanCodeData]);
+  // Every live loan code, not the list page's newest 20 (582 on 2026-10-13): a product with an
+  // older code opened blank, and most codes could not be picked at all.
+  const [loanCodeData, setLoanCodeData] = useState<DataRowLoanCodes[]>();
+  useEffect(() => {
+    let live = true;
+    fetchAllLoanCodes()
+      .then((codes) => { if (live) setLoanCodeData(codes); })
+      .catch((error) => {
+        console.error('Loan Product form: the loan codes did not load', error);
+        if (!live) return; // the form has closed: nobody to tell
+        toast.error("The loan codes didn't load. Reload the page to try again.");
+        setLoanCodeData([]);
+      });
+    return () => { live = false; };
+  }, []);
+  // The searchable select below reads its value from the form on every render, so the saved
+  // code shows as soon as its option exists, whichever of the two arrives first (2026-10-13).
+  const optionsClient = useMemo<SelectOption[]>(() => (loanCodeData ?? []).map(dLCodes => (
+    { value: String(dLCodes.id), label: dLCodes.code + ' - ' + dLCodes.description }
+  )), [loanCodeData]);
   const [selectedOptIsAuto, setSelectedOptIsAuto] = useState<string>();
   const [baseCompOptions, setBaseCompOptions] = useState<OptionLoanCode[]>([
     { value: '', label: 'Select Base Deduction', hidden: true },
@@ -71,6 +87,8 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
     }
   }
 
+  // Fill the form when it opens or another product is picked -- never when the loan codes
+  // arrive, which wiped (Create) or reverted (Edit) what was typed while they loaded (2026-10-13).
   useEffect(() => {
     if (singleData) {
       setValue('id', singleData.id);
@@ -108,7 +126,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         is_active: ''
       })
     }
-  }, [loanCodeData, singleData])
+  }, [singleData, setValue, reset])
 
   useEffect(() => {
   }, [selectedOptIsAuto])
@@ -130,17 +148,34 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
           />
         </div>
         <div className="col-span-1 md:col-span-2">
-           <FormInput
-            label="Loan Code"
-            id="loan_code_id"
-            type="select"
-            icon={ChevronDown}
-            register={register('loan_code_id', { required: 'Loan Code is required' })}
-            error={errors.loan_code_id?.message}
-            options={optionsClient}
-            isLoading={loanCodeLoading || !loanCodeData}
-            loadingMessage="Loading loan codes..."
+          {/* Searchable: there are hundreds of codes. The label and the error are tied to the
+              combobox input the way FormInput ties them to its fields. */}
+          <FormLabel title="Loan Code" htmlFor="loan_code_id" />
+          <Controller
+            name="loan_code_id"
+            control={control}
+            rules={{ required: 'Loan Code is required' }}
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={optionsClient}
+                placeholder={loanCodeData ? 'Select a Loan Code' : 'Loading loan codes...'}
+                onChange={(option) => field.onChange(option?.value ?? '')}
+                value={optionsClient.find((option) => option.value === String(field.value)) ?? null}
+                isLoading={!loanCodeData}
+                loadingMessage={() => 'Loading loan codes...'}
+                inputId="loan_code_id"
+                aria-invalid={errors.loan_code_id ? true : undefined}
+                aria-errormessage={errors.loan_code_id ? 'loan_code_id-error' : undefined}
+              />
+            )}
           />
+          {errors.loan_code_id?.message && (
+            <p id="loan_code_id-error" className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-danger">
+              <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+              {errors.loan_code_id.message}
+            </p>
+          )}
         </div>
         <div className="col-span-1 md:col-span-2">
           <FormInput

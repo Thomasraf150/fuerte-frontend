@@ -55,7 +55,12 @@ const BorrowerDetailPage: React.FC = () => {
     setDecision(singleData?.decision ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [singleData?.id]);
-  const [loading, setLoading] = useState(true);
+  // Two loads, two flags: the picklists and (on a saved borrower) the borrower itself. The form
+  // opens only when both have finished; one shared flag let the picklists open a saved borrower's
+  // form in Create shape before the borrower arrived, and typing then was overwritten (2026-10-13).
+  const [picklistsLoading, setPicklistsLoading] = useState(true);
+  const [recordLoading, setRecordLoading] = useState(borrowerId !== 'new');
+  const loading = picklistsLoading || recordLoading;
   const [error, setError] = useState<string | null>(null);
 
   // Create as borrower: /borrowers/new?application=<id> opens the form on that application.
@@ -68,7 +73,7 @@ const BorrowerDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchReferenceData = async () => {
       try {
-        setLoading(true);
+        setPicklistsLoading(true);
         await Promise.all([
           // Chiefs (9 live rows) and Areas (66) fit inside MAX_DROPDOWN_SIZE.
           // Companies do NOT — 891 live rows — and asking for 100 silently
@@ -80,11 +85,11 @@ const BorrowerDetailPage: React.FC = () => {
           // Call Center files a borrower under no branch of its own (the application's): no list to ask for.
           ...(isCallCenter ? [] : [fetchMyAccessibleBranchSubs()]),
         ]);
-        setLoading(false);
+        setPicklistsLoading(false);
       } catch (err: any) {
         console.error('Error fetching reference data:', err);
         setError('Failed to load reference data');
-        setLoading(false);
+        setPicklistsLoading(false);
       }
     };
 
@@ -127,20 +132,20 @@ const BorrowerDetailPage: React.FC = () => {
     const fetchBorrowerData = async () => {
       if (borrowerId === 'new') {
         // Create mode - no singleData needed
-        setLoading(false);
+        setRecordLoading(false);
         return;
       }
 
       try {
-        setLoading(true);
+        setRecordLoading(true);
         setError(null);
         const borrower = await fetchSingleBorrower(Number(borrowerId));
         setSingleData(borrower);
-        setLoading(false);
+        setRecordLoading(false);
       } catch (err: any) {
         console.error('Error fetching borrower:', err);
         setError(err.message || 'Failed to load borrower details');
-        setLoading(false);
+        setRecordLoading(false);
       }
     };
 

@@ -28,13 +28,15 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData
     subAreaLoading,
   } = useSubArea();
 
-  // Built during render, not in the effect below: that effect's setValue must find the saved
-  // area's option already in the select, or Edit opens blank (2026-10-13).
+  // Built during render, not in an effect: the saved area's option must already be in the
+  // select when its value goes in, or Edit opens blank (2026-10-13).
   const optionsArea = useMemo<OptionProps[]>(() => (dataArea && Array.isArray(dataArea) ? [
     { value: '', label: 'Select a Area', hidden: true },
     ...dataArea.map(bSub => ({ value: String(bSub.id), label: bSub.name })),
   ] : []), [dataArea]);
 
+  // Fill (or clear) the form when it opens or another sub area is picked -- never when the area
+  // list arrives, which wiped (Create) or reverted (Edit) what was typed while it loaded (2026-10-13).
   useEffect(()=>{
     if (initialData) {
       if (actionLbl === 'Update Sub Area') {
@@ -49,7 +51,14 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData
         });
       }
     }
-  }, [initialData, setValue, actionLbl, dataArea, reset])
+  }, [initialData, setValue, actionLbl, reset])
+
+  // Edit: the saved area goes in again once its options are in the select (a select cannot take
+  // a value it has no option for).
+  const areasReady = optionsArea.length > 0;
+  useEffect(() => {
+    if (initialData && actionLbl === 'Update Sub Area' && areasReady) setValue('area_id', String(initialData.area_id));
+  }, [initialData, actionLbl, areasReady, setValue]);
 
   const onSubmit: SubmitHandler<DataSubArea> = async (data) => {
     const result = await onSubmitSubArea(data) as { success: boolean; error?: string; data?: any };
