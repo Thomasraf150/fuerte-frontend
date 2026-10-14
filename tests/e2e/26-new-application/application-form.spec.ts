@@ -857,26 +857,23 @@ test('the date input\'s bounds are 2020-01-01 to today, widened to a day the app
   expect(dateAppliedBounds('2026-10-05', today)).toEqual({ min: '2020-01-01', max: '2026-10-05' });
 });
 
-test('who is offered the Date applied field: Owner, Admin and Call Center, for a Google Form row without an exact time that is not a borrower', () => {
-  const pasted = { channel: 'google_form', exact_time: false, status: 'for_interview', borrower_id: null, branch_sub_id: 9101 } as const;
+test('who is offered the Date applied field: everyone who may edit it, for any Google Form row that is not a borrower (2026-10-14)', () => {
+  const pasted = { channel: 'google_form', status: 'for_interview', borrower_id: null, branch_sub_id: 9101 } as const;
 
-  expect(canCorrectDateApplied(pasted, true)).toBe(true);
-  // Branch staff: never.
-  expect(canCorrectDateApplied(pasted, false)).toBe(false);
-  // Google gave the exact time, or the row did not come from the Google Form at all.
-  expect(canCorrectDateApplied({ ...pasted, exact_time: true }, true)).toBe(false);
+  // The form itself is only shown to those who may edit the application, so the field asks about the row alone.
+  expect(canCorrectDateApplied(pasted)).toBe(true);
+  // A row with Google's exact time too: a Sheet can have read its day wrongly (the time stays on the new day).
+  expect(canCorrectDateApplied({ ...pasted, exact_time: true } as typeof pasted)).toBe(true);
+  // Not from the Google Form: dated when staff typed it in.
   for (const channel of ['facebook', 'walk_in', 'phone', null] as const) {
-    expect(canCorrectDateApplied({ ...pasted, channel }, true), String(channel)).toBe(false);
+    expect(canCorrectDateApplied({ ...pasted, channel }), String(channel)).toBe(false);
   }
   // A borrower is a record: by its status, or by a borrower linked whatever the status says.
-  expect(canCorrectDateApplied({ ...pasted, status: 'borrower_created' }, true)).toBe(false);
-  expect(canCorrectDateApplied({ ...pasted, borrower_id: 77 }, true)).toBe(false);
+  expect(canCorrectDateApplied({ ...pasted, status: 'borrower_created' })).toBe(false);
+  expect(canCorrectDateApplied({ ...pasted, borrower_id: 77 })).toBe(false);
   // Interviewed, declined, with or without a branch: still offered (it has nothing to do with the interview).
-  expect(canCorrectDateApplied({ ...pasted, status: 'interviewed' }, true)).toBe(true);
-  expect(canCorrectDateApplied({ ...pasted, status: 'declined', branch_sub_id: null }, true)).toBe(true);
-  // An answer from a server that does not know the flag reads as exact: nothing is offered that it would refuse.
-  const { exact_time: _unknown, ...withoutFlag } = pasted;
-  expect(canCorrectDateApplied(withoutFlag as unknown as typeof pasted, true)).toBe(false);
+  expect(canCorrectDateApplied({ ...pasted, status: 'interviewed' })).toBe(true);
+  expect(canCorrectDateApplied({ ...pasted, status: 'declined', branch_sub_id: null })).toBe(true);
 });
 
 test("the preset Positions are the borrower form's own, in its order", () => {

@@ -1187,8 +1187,10 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
   /** Empty for an application typed in by staff. */
   form_answers: LoanApplicationAnswer[];
   /**
-   * True when Google's download gave the exact time of the response (the application has a key).
-   * False for a row from a Sheet paste or a PDF, whose date applied may be off: staff can correct the day.
+   * True when the application has Google's exact time of the response (it has a key: from the
+   * download, or a Sheet paste that showed the time). False for a date-only paste, a PDF or a typed-in
+   * one. Either way staff who may edit a Google Form application can correct its date (2026-10-14);
+   * a timed one keeps its time of day. The Date applied hint is worded by it.
    */
   exact_time: boolean;
   /** Whether the user may edit it now: false once it is a borrower, and for Marketing on another branch's application (view only). */
@@ -1197,6 +1199,31 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
   borrower_decision: BorrowerDecision | null;
   /** The decline (while declined) and the borrower's latest decision, for the Notes panel; in no set order. */
   notes: ApplicationNote[];
+  /** The History tab: who changed what, newest first (2026-10-14). The page reads a missing one as none. */
+  history?: ApplicationHistoryEntry[];
+}
+
+/** One field a History line changed: from / to as stored (a branch's name, a 'Y-m-d H:i:s' time, a status key), null when blank. */
+export interface ApplicationHistoryChange {
+  field: string;
+  from: string | null;
+  to: string | null;
+}
+
+/** One line of the application page's History tab. */
+export interface ApplicationHistoryEntry {
+  /** added | joined | edited | status | converted | system_fix (a string: a newer server may send another). */
+  kind: string;
+  /** Manila wall-clock 'Y-m-d H:i:s'. */
+  at: string;
+  /** The person's name and role ("Call Center"); both null for a system change. */
+  actor_name: string | null;
+  actor_role: string | null;
+  /** How it came in, on an added line: upload | paste | pdf | typed | google_form. */
+  via: string | null;
+  /** Why a system change was made. */
+  note: string | null;
+  changes: ApplicationHistoryChange[];
 }
 
 /**

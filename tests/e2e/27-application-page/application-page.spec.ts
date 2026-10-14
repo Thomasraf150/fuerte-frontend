@@ -84,9 +84,9 @@
  *      instead of the form (and never draws the form while the list loads). The Owner is never
  *      blocked and not asked; a list that does not load blocks nobody; plain New Borrower is
  *      unchanged. Create as borrower is clicked through to New Borrower: the banner, the names.
- *  18. Date applied: for Owner, Admin and Call Center, on a Google Form application whose
- *      time did not come from Google's download (exact_time false) and that is not a borrower
- *      yet, a labelled date input in the form (2020-01-01 to today in Manila, widened to a day
+ *  18. Date applied: for everyone who may edit it (2026-10-14), on a Google Form application
+ *      that is not a borrower yet -- with Google's exact time or without, a timed one's hint
+ *      saying its time stays -- a labelled date input in the form (2020-01-01 to today in Manila, widened to a day
  *      the application already holds). It starts on the day the application has; Save sends
  *      submitted_on only when the day differs from the day last loaded or saved; a changed
  *      day is unsaved (Print and Create wait); the header follows the server's reply; the
@@ -3031,12 +3031,15 @@ test.describe('18. Date applied', () => {
 
   // --- who sees it -----------------------------------------------------------
 
-  const CASES: { name: string; role: RoleCode; record: () => ReturnType<typeof application>; shown: boolean }[] = [
+  // Everyone who may edit it, on any Google Form row (2026-10-14); a timed row says its time stays.
+  const EXACT_HINT = "Google's time of the response. If the day is wrong, change it here: the time stays, and the change shows in History.";
+  const CASES: { name: string; role: RoleCode; record: () => ReturnType<typeof application>; shown: boolean; hint?: string }[] = [
     { name: 'Admin, a Google Form row from a paste or a PDF', role: 'ADM', record: () => pasted(), shown: true },
     { name: 'Owner, a Google Form row from a paste or a PDF', role: 'OWN', record: () => pasted(), shown: true },
     { name: 'Call Center, a Google Form row from a paste or a PDF', role: 'CALLCTR', record: () => pasted(), shown: true },
-    { name: 'branch staff (Processing), the same row', role: 'PROC', record: () => pasted(), shown: false },
-    { name: 'Admin, but Google gave the exact time', role: 'ADM', record: () => pasted({ exact_time: true }), shown: false },
+    { name: 'branch staff (Processing), the same row', role: 'PROC', record: () => pasted(), shown: true },
+    { name: 'Admin, Google gave the exact time', role: 'ADM', record: () => pasted({ exact_time: true }), shown: true, hint: EXACT_HINT },
+    { name: 'branch staff (Processing), Google gave the exact time', role: 'PROC', record: () => pasted({ exact_time: true }), shown: true, hint: EXACT_HINT },
     { name: 'Admin, a Facebook application', role: 'ADM', record: () => application({ channel: 'facebook', exact_time: false }), shown: false },
     { name: 'Admin, a walk-in application', role: 'ADM', record: () => application({ channel: 'walk_in', exact_time: false }), shown: false },
     { name: 'Admin, a phone application', role: 'ADM', record: () => application({ channel: 'phone', exact_time: false }), shown: false },
@@ -3044,7 +3047,7 @@ test.describe('18. Date applied', () => {
     { name: 'Admin, a borrower linked whatever the status says', role: 'ADM', record: () => pasted({ status: 'interviewed', borrower_id: 77 }), shown: false },
   ];
 
-  for (const { name, role, record, shown } of CASES) {
+  for (const { name, role, record, shown, hint = HINT } of CASES) {
     test(`${shown ? 'is offered' : 'is not offered'}: ${name}`, async ({ page, backend }) => {
       await open(page, backend, record(), role);
       // The header's date is everyone's; the form's field is for those who can correct it.
@@ -3060,7 +3063,7 @@ test.describe('18. Date applied', () => {
       await expect(page.getByLabel('Date applied')).toHaveAttribute('name', 'submitted_on');
       await expect(dateField(page)).toHaveAccessibleName('Date applied');
       await expect(dateField(page)).toHaveAttribute('type', 'date');
-      await expect(dateField(page)).toHaveAccessibleDescription(HINT);
+      await expect(dateField(page)).toHaveAccessibleDescription(hint);
       // Required like the form's other starred fields: the asterisk is drawn, and the input says so to assistive technology.
       await expect(dateField(page)).toHaveAttribute('aria-required', 'true');
       expect(await requiredMarks(page)).toEqual(['contact_no', 'firstname', 'lastname', 'submitted_on']);
@@ -3215,10 +3218,12 @@ test.describe('18. Date applied', () => {
 
   // --- the server says no ----------------------------------------------------
 
+  // The server's refusals as of 2026-10-14 (ApplicationDateCorrection).
   for (const message of [
-    'Only Call Center, Owner or Admin can change the date applied.',
-    'Only a Google Form application pasted from the Sheet, added from a PDF or typed in can have its date changed.',
+    'Only a Google Form application can have its date changed.',
     'Choose a date applied between Jan 1, 2020 and today.',
+    'Another application already has this Google Form response on that day (it may be a deleted one). Ask IT before changing the date.',
+    "This application's date can't be changed here: its Google Form response can't be matched. Ask IT.",
   ]) {
     test(`a refusal is shown as it was given, the day stays, and the next save sends it again: "${message.slice(0, 40)}…"`, async ({ page, backend }) => {
       await open(page, backend, pasted());

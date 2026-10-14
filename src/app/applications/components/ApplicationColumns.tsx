@@ -79,6 +79,9 @@ const CellText: React.FC<{ children: React.ReactNode; title?: string; className?
   </span>
 );
 
+/** The form's "Hindi ko po sure": the applicant doesn't know which branch yet (Rafael, 2026-10-14). */
+const UNSURE_LOCATION = /^(hindi ko|not sure)\b/i;
+
 /** The assigned branch. Until there is one, the form's answer, muted and slanted, so it never reads as an assignment. */
 const BranchCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   if (row.branch_sub) {
@@ -87,6 +90,14 @@ const BranchCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   const location = row.location?.trim();
   if (!location) {
     return <CellText className="italic text-body dark:text-bodydark2">Not set</CellText>;
+  }
+  if (UNSURE_LOCATION.test(location)) {
+    return (
+      <CellText title={`The applicant doesn't know which branch yet (the form's answer: ${location}). No branch assigned yet.`} className="italic text-body dark:text-bodydark2">
+        <span className="sr-only">Not assigned. </span>
+        Not sure yet
+      </CellText>
+    );
   }
   return (
     <CellText title={`${location} (the form's answer; no branch assigned yet)`} className="italic text-body dark:text-bodydark2">

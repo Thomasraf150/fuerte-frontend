@@ -14,6 +14,8 @@ import type { LoanApplicationRecord } from '@/utils/DataTypes';
 import { ApplicationForm } from './ApplicationForm';
 import { ApplicationHeader } from './ApplicationHeader';
 import ApplicationSummary from './ApplicationSummary';
+import { ApplicationTabs, type ApplicationTab } from './ApplicationTabs';
+import { HistoryPanel } from './HistoryPanel';
 import { ApplicationToolbar } from './ApplicationToolbar';
 import ConvertedApplication from './ConvertedApplication';
 import { GoogleFormPanel } from './GoogleFormPanel';
@@ -64,6 +66,8 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
   const isCallCenter = useStore(useAuthStore, (state) => state.user?.role?.code === 'CALLCTR');
   // Whether the form holds changes that are not saved. Print and Create as borrower use the saved application.
   const [dirty, setDirty] = useState(false);
+  // The open tab: the application (form or record, with its side panel) or its History (2026-10-14).
+  const [tab, setTab] = useState<ApplicationTab>('application');
   // The header's title: where the focus goes when a Retry of the repeat-applicant check finds nothing.
   const pageHeading = useRef<HTMLHeadingElement>(null);
   const flags = record.intake_flags ?? [];
@@ -110,11 +114,17 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
       {checksTheApplicant && (
         <RepeatApplicantCheck check={repeatApplicant} fallbackFocus={pageHeading} audience={isCallCenter ? 'call-center' : 'branch'} />
       )}
-      {/*
+      <ApplicationTabs
+        selected={tab}
+        onSelect={setTab}
+        historyCount={record.history?.length ?? 0}
+        history={<HistoryPanel history={record.history} />}
+        application={
+      /*
         grid-cols-1, not the implicit auto column: an auto track is as wide as its widest
         unbreakable word (a long Google Form answer, say), and the page scrolls sideways.
         grid-cols-1 is minmax(0, 1fr), so the column keeps to the screen and the words wrap.
-      */}
+      */
       <div className={hasPanel ? 'grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_21rem]' : undefined}>
         {hasPanel && (
           <div className="space-y-4 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-1 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto">
@@ -139,6 +149,8 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
           )}
         </div>
       </div>
+        }
+      />
     </div>
   );
 };

@@ -28,7 +28,7 @@ type SetRecord = Dispatch<SetStateAction<LoanApplicationRecord | null>>;
  */
 type StatusReply = Pick<
   LoanApplicationRecord,
-  'id' | 'status' | 'borrower_id' | 'outcome' | 'outcome_label' | 'decline_reason' | 'notes'
+  'id' | 'status' | 'borrower_id' | 'outcome' | 'outcome_label' | 'decline_reason' | 'notes' | 'history'
 >;
 
 /** The first GraphQL error's message. graphqlFetch has already put a failed @rules check's own reasons there. */
@@ -170,6 +170,7 @@ const mergeStatusReply = (current: LoanApplicationRecord, reply: StatusReply): L
   outcome_label: reply.outcome_label ?? current.outcome_label,
   decline_reason: reply.decline_reason === undefined ? current.decline_reason : reply.decline_reason,
   notes: reply.notes ?? current.notes,
+  history: reply.history ?? current.history,
 });
 
 /**

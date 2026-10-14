@@ -89,9 +89,10 @@ const CREATE_LOAN_APPLICATION_MUTATION: string = `
 `;
 
 /**
- * Where the application ended up and the Notes panel's lines (the decline and the borrower's latest
- * decision, each with the actor's role, never a name). Shared by the whole record and the status
- * change's reply, so a decline shows its note the moment it is saved.
+ * Where the application ended up, the Notes panel's lines (the decline and the borrower's latest
+ * decision, each with the actor's role, never a name) and the History tab's lines (who changed what,
+ * by name and role, 2026-10-14). Shared by the whole record and the status change's reply, so a
+ * decline shows its note, and every change its History line, the moment it is saved.
  */
 const OUTCOME_AND_NOTES_FIELDS: string = `
   outcome
@@ -102,6 +103,19 @@ const OUTCOME_AND_NOTES_FIELDS: string = `
     role_label
     at
     reason
+  }
+  history {
+    kind
+    at
+    actor_name
+    actor_role
+    via
+    note
+    changes {
+      field
+      from
+      to
+    }
   }
 `;
 

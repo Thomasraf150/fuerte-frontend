@@ -171,8 +171,8 @@ interface BodyProps extends FormProps {
  * starts on (the Y-m-d of submitted_at), and the bounds of the input (today is Manila's, and is
  * read once: a page left open past midnight keeps yesterday's until it is opened again).
  */
-function useDateApplied(record: LoanApplicationRecord, mayAssign: boolean) {
-  const shown = canCorrectDateApplied(record, mayAssign);
+function useDateApplied(record: LoanApplicationRecord) {
+  const shown = canCorrectDateApplied(record);
   const [loadedDay] = useState(() => (shown ? submittedDay(record.submitted_at) : ''));
   const [bounds] = useState(() => dateAppliedBounds(loadedDay, manilaToday()));
   return { shown, loadedDay, bounds };
@@ -199,7 +199,7 @@ const startingValues = (record: LoanApplicationRecord, day: string | null): Part
  */
 const ApplicationFormBody: React.FC<BodyProps> = ({ record, saving, save, branches, onDirtyChange }) => {
   const picklists = useApplicationPicklists();
-  const dateApplied = useDateApplied(record, branches !== null);
+  const dateApplied = useDateApplied(record);
   const [initialValues] = useState(() => startingValues(record, dateApplied.shown ? dateApplied.loadedDay : null));
   const [saved, setSaved] = useState<string | null>(null);
   // The picker starts on the application's own branch (fromApplicationRecord), as the text its options hold.
@@ -233,7 +233,7 @@ const ApplicationFormBody: React.FC<BodyProps> = ({ record, saving, save, branch
         renderExtraFields={({ control, register, errors }) => (
           <>
             <UnsavedChangesWatcher control={control} mayAssign={branches !== null} saved={saved} onBaseline={setSaved} onDirty={dirtyChanged} onEdit={edited} />
-            {dateApplied.shown && <DateAppliedField register={register} error={String(errors.submitted_on?.message ?? '') || undefined} {...dateApplied.bounds} />}
+            {dateApplied.shown && <DateAppliedField register={register} error={String(errors.submitted_on?.message ?? '') || undefined} exact={record.exact_time === true} {...dateApplied.bounds} />}
             {!branches && <ReadOnlyBranch name={record.branch_sub?.name ?? null} />}
           </>
         )}

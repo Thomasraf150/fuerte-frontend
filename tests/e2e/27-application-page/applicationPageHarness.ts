@@ -140,6 +140,8 @@ export function application(overrides: Partial<LoanApplicationRecord> = {}): Loa
     outcome_label: 'Waiting for interview',
     decline_reason: null,
     notes: [],
+    // The History tab's lines (2026-10-14): none for a fresh fictional application.
+    history: [],
     ...overrides,
   };
 }

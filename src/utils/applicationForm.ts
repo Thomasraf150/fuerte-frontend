@@ -321,17 +321,15 @@ export function dateAppliedBounds(loadedDay: string, today: string): { min: stri
 }
 
 /**
- * Whether the page offers the Date applied field. Only Owner, Admin and Call Center (`mayAssign`,
- * useCanUpload's answer) may correct it, and only for a Google Form application whose time did not
- * come from Google's download (`exact_time` is false): a Sheet paste or a PDF knows the day at best.
- * A borrower is a record, not a form. The server checks all of it again. An answer without
- * `exact_time` is read as exact, so nothing is offered that the server would not take.
+ * Whether the page offers the Date applied field: on every Google Form application the user may edit
+ * (Rafael 2026-10-14: everyone who may edit it, the History tab says who did; the form is only shown
+ * to them), with Google's exact time or without -- a timed one keeps its time of day on the new day.
+ * A walk-in, a Facebook message or a call is dated when it was typed in; a borrower is a record, not
+ * a form. The server checks all of it again.
  */
 export const canCorrectDateApplied = (
-  record: Pick<LoanApplicationRecord, 'channel' | 'exact_time' | 'status' | 'borrower_id' | 'branch_sub_id'>,
-  mayAssign: boolean,
-): boolean =>
-  mayAssign && record.channel === 'google_form' && record.exact_time === false && notConvertibleReason(record) !== 'converted';
+  record: Pick<LoanApplicationRecord, 'channel' | 'status' | 'borrower_id' | 'branch_sub_id'>,
+): boolean => record.channel === 'google_form' && notConvertibleReason(record) !== 'converted';
 
 /**
  * updateLoanApplication's input from the form's values: toApplicationInput's cleaning

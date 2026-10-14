@@ -7,6 +7,9 @@ import { Calendar, Info } from 'react-feather';
 /** Why the day is not final: it came from a Sheet paste or a PDF, which knows the day at best. */
 export const DATE_APPLIED_HINT = "From a Sheet paste or a PDF, so it may be off. Google's download will set the exact time.";
 
+/** On an application with Google's exact time: it can still be wrong (a Sheet read wrongly), and a new day keeps the time. */
+export const DATE_APPLIED_EXACT_HINT = "Google's time of the response. If the day is wrong, change it here: the time stays, and the change shows in History.";
+
 /** What a cleared field is stopped with: the form does not save an application with no day applied. */
 export const DATE_APPLIED_REQUIRED = 'Choose the date applied.';
 
@@ -26,11 +29,14 @@ interface DateAppliedFieldProps {
   /** Y-m-d: the earliest and the latest day the input takes (see dateAppliedBounds). */
   min: string;
   max: string;
+  /** Whether the application has Google's exact time (exact_time): its hint says the time is kept. */
+  exact?: boolean;
 }
 
 /**
  * "Date applied": a date input in the form, bound to submitted_on, for a Google Form
- * application whose date is only a guess (see canCorrectDateApplied). It starts on the day the
+ * application (see canCorrectDateApplied): one whose date is only a guess, or one with Google's
+ * exact time that a Sheet read wrongly (its hint says the time stays). It starts on the day the
  * application has; the page sends a day only when it was changed. It is REQUIRED, like the form's
  * other starred fields (react-hook-form's rule, not the browser's, so the words are the page's
  * own): a cleared field would otherwise save as "no change" and stay empty while the server kept
@@ -38,7 +44,7 @@ interface DateAppliedFieldProps {
  * native bounds are the server's (2020-01-01 to today in Manila): a day outside them is stopped
  * by the browser, and one the browser lets through is refused by the server with its own words.
  */
-export const DateAppliedField: React.FC<DateAppliedFieldProps> = ({ register, error, min, max }) => {
+export const DateAppliedField: React.FC<DateAppliedFieldProps> = ({ register, error, min, max, exact = false }) => {
   const hintId = useId();
   const errorId = useId();
   return (
@@ -72,7 +78,7 @@ export const DateAppliedField: React.FC<DateAppliedFieldProps> = ({ register, er
       )}
       <p id={hintId} className="mt-2 flex items-start gap-1.5 text-xs text-body dark:text-bodydark">
         <Info aria-hidden="true" size={14} className="mt-px shrink-0" />
-        <span className="min-w-0">{DATE_APPLIED_HINT}</span>
+        <span className="min-w-0">{exact ? DATE_APPLIED_EXACT_HINT : DATE_APPLIED_HINT}</span>
       </p>
     </div>
   );
