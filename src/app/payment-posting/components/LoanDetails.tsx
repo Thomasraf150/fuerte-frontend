@@ -126,14 +126,15 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                     {view && <ScheduleRowStatus view={view} />}
                   </div>
                   <div className="hidden sm:flex items-center justify-end">
-                    {/* A paid row shows what was paid, not the 0.00 left. */}
+                    {/* What is still due, as the server sends it: 0.00 once paid -- the zero staff check after
+                        posting (2026-10-14). What was paid is on the badge's line. */}
                     <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>
-                      {paid ? <><span className="sr-only">Paid </span>{formatNumberComma(view.paidCents / 100)}</> : formatNumberComma(Number(item?.amount))}
+                      {formatNumberComma(Number(item?.amount))}
                     </p>
                   </div>
                   <div className="flex items-center justify-end">
                     <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>
-                      {paid ? <span aria-label="settled">—</span> : formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
+                      {formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
                     </p>
                   </div>
 

@@ -147,6 +147,7 @@ const GET_LOAN_SCHEDULE: string = `
       amount
       loan_id
       due_date
+      paid_amount
       loan_payments {
         description
         amount

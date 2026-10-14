@@ -2,8 +2,10 @@ import type { DataRowLoanSchedules } from './DataTypes';
 
 /**
  * What one instalment on the Payment Posting schedule is, for its badge and row marker (2026-10-10).
- * The server sends each row's `amount` as what is STILL DUE (ScheduleSettlement::remaining), which is
- * why a paid row used to read 0.00 / 0.00 with a disabled "Paid" button. States:
+ * The server sends each row's `amount` as what is STILL DUE (ScheduleSettlement::remaining), so a paid
+ * row reads 0.00 / 0.00 -- the zero staff check after posting (2026-10-14) -- and `paid_amount` as what
+ * the payments settled of it: an Advanced Payment or Payment UA/SP that settles counts, which a
+ * Collection-only sum read as "₱0.00 paid" (FB BAL-00001343). States:
  *   paid      nothing left                                         olive ✓, quiet row
  *   overdue   something left and the due date is before today (Manila)   red bar + badge
  *   next      the first open row that is not overdue: where to post next  gold bar + badge
@@ -16,7 +18,7 @@ export type ScheduleRowState = 'paid' | 'overdue' | 'next' | 'upcoming';
 
 export interface ScheduleRowView {
   state: ScheduleRowState;
-  /** Centavos collected against this instalment ("Collection" lines). */
+  /** Centavos the payments settled of this instalment (the server's paid_amount). */
   paidCents: number;
   /** Centavos still due. */
   dueCents: number;
@@ -33,8 +35,9 @@ export function scheduleRowViews(rows: DataRowLoanSchedules[] | undefined, today
   let nextTaken = false;
   return (rows ?? []).map((row) => {
     const payments = row.loan_payments ?? [];
+    // Every posting writes a Collection line (0.00 when the money went in another box), so its date is the posting's.
     const collections = payments.filter((p) => p.description === 'Collection');
-    const paidCents = collections.reduce((sum, p) => sum + cents(p.amount), 0);
+    const paidCents = Math.max(0, cents(row.paid_amount));
     const dueCents = Math.max(0, cents(row.amount));
     const paidOn = collections.map((p) => String(p.trans_date ?? '').slice(0, 10)).filter(Boolean).sort().pop() ?? null;
 

@@ -573,6 +573,8 @@ export interface DataRowLoanSchedules {
   loan_id: string;
   amount: number;
   due_date: string;
+  /** What the payments settled of this instalment (Payment Posting's getLoanSchedule only); null elsewhere. */
+  paid_amount?: string | null;
   loan_payments: DataRowLoanPayments[];
   is_deleted: string;
 }
