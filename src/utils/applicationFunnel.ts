@@ -100,4 +100,5 @@ export const channelName = (channel: string): string =>
 
 /** Where a number links, for the days on screen; null when it is not a link. */
 export const funnelHref = (target: Target, range: DayRange): string | null =>
-  target ? listHref({ ...target, period: range }) : null;
+  // The funnel counts new applicants only (2026-10-21): so does the list it opens.
+  target ? listHref({ ...target, period: range, kind: 'new' }) : null;

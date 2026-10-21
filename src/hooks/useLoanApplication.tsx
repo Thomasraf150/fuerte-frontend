@@ -13,9 +13,12 @@ export const SAVED_MESSAGE = 'Saved.';
 const LOAD_FAILED = 'Could not load the application. Please try again.';
 const SAVE_FAILED = 'Could not save the application. Please try again.';
 const STATUS_FAILED = 'Could not change the status. Please try again.';
+const LINK_FAILED = 'Could not link the application. Please try again.';
+/** After Link to borrower: the branch has it now. */
+export const LINKED_MESSAGE = 'Linked to the borrower. Nasa branch na ito.';
 const BLANK_BASICS = 'The first name, last name and mobile number cannot be blank.';
-/** The statuses staff can choose. "Borrower created" is only ever set by Create as borrower. */
-export type PickableStatus = Exclude<LoanApplicationStatus, 'borrower_created'>;
+/** The statuses staff can choose. "Borrower created" and "Linked to borrower" are only ever set by Create as borrower and Link to borrower. */
+export type PickableStatus = Exclude<LoanApplicationStatus, 'borrower_created' | 'borrower_linked'>;
 
 /** What a save or a status change reports. A failure carries the message the user was shown. */
 export type ActionResult = { success: true } | { success: false; message: string };
@@ -76,6 +79,18 @@ async function postStatus(id: number, status: PickableStatus, reason?: string): 
   if (refused) throw new Error(refused);
   if (!result.data?.setLoanApplicationStatus) throw new Error(STATUS_FAILED);
   return result.data.setLoanApplicationStatus;
+}
+
+/** The linked application, whole, or an Error carrying the server's refusal (no such borrower, several, another branch). */
+async function postLink(id: number): Promise<LoanApplicationRecord> {
+  const result = await graphqlFetch<{ linkLoanApplicationBorrower: LoanApplicationRecord | null }>(
+    LoanApplicationQueries.LINK_LOAN_APPLICATION_BORROWER_MUTATION,
+    { id },
+  );
+  const refused = firstError(result.errors, LINK_FAILED);
+  if (refused) throw new Error(refused);
+  if (!result.data?.linkLoanApplicationBorrower) throw new Error(LINK_FAILED);
+  return result.data.linkLoanApplicationBorrower;
 }
 
 /** Spaces pass the form's `required`, and the server reads them as null: stop them here. */
@@ -201,6 +216,34 @@ const useApplicationStatus = (id: number | null, setRecord: SetRecord) => {
 };
 
 /**
+ * Link to borrower (a renewal or additional application): the reply is the whole record, linked and
+ * read-only, so it replaces the one on screen. The page allows it only with nothing unsaved, so no
+ * edit is lost. A refusal is a toast and the returned message, which the toolbar keeps on screen.
+ */
+const useLinkApplication = (id: number | null, setRecord: SetRecord) => {
+  const [linking, setLinking] = useState(false);
+
+  const link = useCallback(async (): Promise<ActionResult> => {
+    if (id === null) return { success: false, message: LINK_FAILED };
+    setLinking(true);
+    try {
+      setRecord(await postLink(id));
+      toast.success(LINKED_MESSAGE);
+      return { success: true };
+    } catch (failure) {
+      const message = errorText(failure, LINK_FAILED);
+      console.warn('[useLoanApplication] the application was not linked', { id, message });
+      toast.error(message);
+      return { success: false, message };
+    } finally {
+      setLinking(false);
+    }
+  }, [id, setRecord]);
+
+  return { linking, link };
+};
+
+/**
  * Printing: useDownloadPdf opens the window in the click that calls this (so popup
  * blockers allow it), shows its loader there, and sends it to the PDF. Call it straight
  * from the click handler, before any await.
@@ -233,6 +276,7 @@ const useLoanApplication = (id: string) => {
   const { record, setRecord, error, reload } = useApplicationRecord(applicationId);
   const { saving, save, saves } = useSaveApplication(applicationId, setRecord);
   const { setStatus } = useApplicationStatus(applicationId, setRecord);
+  const { linking, link } = useLinkApplication(applicationId, setRecord);
   const { printing, print } = usePrintApplication(applicationId);
 
   return {
@@ -244,6 +288,8 @@ const useLoanApplication = (id: string) => {
     save,
     saves,
     setStatus,
+    linking,
+    link,
     printing,
     print,
   };

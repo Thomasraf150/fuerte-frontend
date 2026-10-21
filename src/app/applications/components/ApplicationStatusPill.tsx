@@ -1,20 +1,22 @@
 import React from 'react';
 import { LoanApplicationStatus } from '@/utils/DataTypes';
 
-/** The four statuses in workflow order. The status filter and the row pill share these words. */
+/** The statuses in workflow order. The status filter and the row pill share these words. borrower_linked is a renewal or additional applicant's end, as borrower_created is a new one's. */
 export const APPLICATION_STATUS_LABEL: Record<LoanApplicationStatus, string> = {
   for_interview: 'For Interview',
   interviewed: 'Interviewed',
   declined: 'Declined',
   borrower_created: 'Borrower created',
+  borrower_linked: 'Linked to borrower',
 };
 
-/** One committed colour per status. The filter swatches reuse it so the two always agree. */
+/** One committed colour per status. The filter swatches reuse it so the two always agree. Both hand-overs are quiet: the work moved on. */
 export const APPLICATION_STATUS_DOT: Record<LoanApplicationStatus, string> = {
   for_interview: 'bg-warning',
   interviewed: 'bg-primary',
   declined: 'bg-danger',
   borrower_created: 'bg-body',
+  borrower_linked: 'bg-body',
 };
 
 /*
@@ -29,6 +31,7 @@ const TINT: Record<LoanApplicationStatus, string> = {
   interviewed: 'bg-primary/10 ring-primary/40',
   declined: 'bg-danger/10 ring-danger/40',
   borrower_created: 'bg-whiten ring-stroke dark:bg-meta-4 dark:ring-strokedark',
+  borrower_linked: 'bg-whiten ring-stroke dark:bg-meta-4 dark:ring-strokedark',
 };
 
 /*

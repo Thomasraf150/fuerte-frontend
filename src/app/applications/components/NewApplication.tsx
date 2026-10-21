@@ -10,7 +10,8 @@ import useNewApplication from '@/hooks/useNewApplication';
 import {
   APPLICATION_REQUIRED_FIELDS, hasBlankBasic, toApplicationInput, type ApplicationFormValues, type LoanApplicationInput,
 } from '@/utils/applicationForm';
-import type { LoanApplicationChannel } from '@/utils/DataTypes';
+import type { LoanApplicationChannel, LoanApplicationKind } from '@/utils/DataTypes';
+import KindField from './KindField';
 import LoadError from './LoadError';
 import { NAME_INPUTS_IN_CAPITALS } from './nameInputs';
 import SaanGalingField from './SaanGalingField';
@@ -57,7 +58,8 @@ const useSaveThenList = (createApplication: (input: LoanApplicationInput) => Pro
       return { success: false };
     }
     const channel = values.channel as LoanApplicationChannel; // its own required rule has run
-    const result = await createApplication(toApplicationInput(values, channel, String(values.branch_sub_id ?? '')));
+    const kind = (values.kind ?? 'new') as LoanApplicationKind; // starts on Bago
+    const result = await createApplication(toApplicationInput(values, channel, String(values.branch_sub_id ?? ''), kind));
     saved.current = result.success;
     return result;
   };
@@ -98,7 +100,10 @@ const NewApplication: React.FC = () => {
           loadingMyAccessibleBranches={branchChoices === undefined}
           preselectHomeBranch={canChooseAny === false}
           renderExtraFields={({ register, errors }) => (
-            <SaanGalingField register={register} errors={errors} canChooseGoogleForm={canChooseAny} />
+            <div className="space-y-5">
+              <KindField register={register} />
+              <SaanGalingField register={register} errors={errors} canChooseGoogleForm={canChooseAny} />
+            </div>
           )}
           onSubmitBorrower={submit}
           borrowerLoading={saving}

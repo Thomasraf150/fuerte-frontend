@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle, Clock, Slash } from 'react-feather';
+import { ArrowRight, CheckCircle, Clock, Link2, Slash } from 'react-feather';
 import { formatDecidedOn } from '@/components/DecisionPill';
 import type { BorrowerDecision, LoanApplicationRecord } from '@/utils/DataTypes';
 import ApplicationSummary from './ApplicationSummary';
@@ -106,14 +106,63 @@ const OutcomeCard: React.FC<{ record: LoanApplicationRecord; canOpenBorrower: bo
   );
 };
 
+/** What the branch does next on the borrower's Loans tab, by what was applied for. */
+const FILE_IT: Record<'renewal' | 'additional', string> = {
+  renewal: 'The branch files the renewal on the borrower\'s Loans tab: Renew Selected Loan.',
+  additional: 'The branch files the additional loan on the borrower\'s Loans tab: Add Loans.',
+};
+
 /**
- * An application that has become a borrower: its outcome first, then the application's basics for
- * Print and for reference. Call Center gets no pointer (`canOpenBorrower` false): the borrower's
- * page is not its to open, and the server refuses it.
+ * A renewal or additional application linked to its existing borrower (2026-10-21): handed over, so
+ * the same plain record as a converted one, with the brand's green edge (done, nothing wrong) and the
+ * one next step, which is the branch's. Call Center is told it is done; branch staff get the borrower.
+ */
+const LinkedCard: React.FC<{ record: LoanApplicationRecord; canOpenBorrower: boolean }> = ({ record, canOpenBorrower }) => {
+  const branch = record.branch_sub?.name;
+  const kind = record.kind === 'additional' ? 'additional' : 'renewal';
+  return (
+    <section
+      aria-label="Linked to borrower"
+      data-testid="linked-outcome"
+      className="flex flex-col gap-4 rounded-2xl border border-stroke border-l-4 border-l-primary bg-white px-5 py-4 shadow-default sm:flex-row sm:items-start sm:justify-between dark:border-strokedark dark:border-l-primary dark:bg-boxdark"
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        <Link2 aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-primary" />
+        <div className="min-w-0 space-y-1.5">
+          <h3 className="text-base font-semibold text-black dark:text-white">
+            {branch ? `Linked to the borrower at ${branch}` : 'Linked to the borrower'}
+          </h3>
+          <p className="text-sm text-body dark:text-bodydark">
+            {canOpenBorrower ? FILE_IT[kind] : 'Nasa branch na ito. Wala ka nang kailangang gawin.'}
+          </p>
+          <p className="pt-1 text-sm text-body dark:text-bodydark">This application is linked and can no longer be edited.</p>
+        </div>
+      </div>
+      {canOpenBorrower && record.linked_borrower_id && (
+        <Link
+          href={`/borrowers/${record.linked_borrower_id}`}
+          className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-boxdark md:min-h-10"
+        >
+          Open the borrower
+          <ArrowRight aria-hidden="true" size={16} className="shrink-0" />
+        </Link>
+      )}
+    </section>
+  );
+};
+
+/**
+ * An application that has become a borrower, or been linked to one: its outcome first, then the
+ * application's basics for Print and for reference. Call Center gets no pointer (`canOpenBorrower`
+ * false): the borrower's page is not its to open, and the server refuses it.
  */
 const ConvertedApplication: React.FC<{ record: LoanApplicationRecord; canOpenBorrower: boolean }> = ({ record, canOpenBorrower }) => (
   <div className="space-y-4">
-    <OutcomeCard record={record} canOpenBorrower={canOpenBorrower} />
+    {record.status === 'borrower_linked' ? (
+      <LinkedCard record={record} canOpenBorrower={canOpenBorrower} />
+    ) : (
+      <OutcomeCard record={record} canOpenBorrower={canOpenBorrower} />
+    )}
     <ApplicationSummary record={record} />
   </div>
 );

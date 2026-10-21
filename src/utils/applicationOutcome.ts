@@ -3,7 +3,7 @@
  * link-able filters: `?outcome=&status=&from=&to=`. Free of React and the network, so the
  * Playwright runner tests it directly (tests/e2e/30-applicant-funnel).
  */
-import type { ApplicationOutcome, LoanApplicationStatus } from './DataTypes';
+import type { ApplicationOutcome, LoanApplicationKind, LoanApplicationStatus } from './DataTypes';
 import type { DayRange } from './sourceTracker';
 
 /**
@@ -23,10 +23,11 @@ interface OutcomeInfo {
   tone: OutcomeTone;
 }
 
-/** The eleven outcomes, in the order an application moves through them; the filter lists them so. */
+/** The twelve outcomes, in the order an application moves through them; the filter lists them so. Linked to borrower is a renewal or additional applicant's hand-over to the branch (2026-10-21). */
 export const OUTCOMES: readonly OutcomeInfo[] = [
   { key: 'for_interview', label: 'Waiting for interview', tone: 'waiting' },
   { key: 'interviewed', label: 'Interviewed', tone: 'waiting' },
+  { key: 'borrower_linked', label: 'Linked to borrower', tone: 'progress' },
   { key: 'declined', label: 'Declined', tone: 'danger' },
   { key: 'borrower', label: 'Borrower, no decision yet', tone: 'waiting' },
   { key: 'approved', label: 'Approved, no loan yet', tone: 'progress' },
@@ -52,7 +53,7 @@ export const outcomeTone = (key: string): OutcomeTone => BY_KEY.get(key)?.tone ?
 // The list's link-able filters
 // ---------------------------------------------------------------------------
 
-const STATUSES: readonly LoanApplicationStatus[] = ['for_interview', 'interviewed', 'declined', 'borrower_created'];
+const STATUSES: readonly LoanApplicationStatus[] = ['for_interview', 'interviewed', 'declined', 'borrower_created', 'borrower_linked'];
 
 /** What a link may set on the Applications list. Anything missing or malformed is simply not set. */
 export interface ListParams {
@@ -60,7 +61,11 @@ export interface ListParams {
   status: LoanApplicationStatus | null;
   /** The days applied, both ends inclusive; null for any day. */
   period: DayRange | null;
+  /** New applicants, renewals or additional loans; null for every kind. The funnel links with new: it counts nothing else. */
+  kind?: LoanApplicationKind | null;
 }
+
+const KINDS: readonly LoanApplicationKind[] = ['new', 'renewal', 'additional'];
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -88,18 +93,21 @@ export function readListParams(raw: RawParams): ListParams {
   const status = first(raw, 'status');
   const from = first(raw, 'from');
   const to = first(raw, 'to');
+  const kind = first(raw, 'kind');
   return {
     outcome: isOutcome(outcome) ? outcome : null,
     status: STATUSES.includes(status as LoanApplicationStatus) ? (status as LoanApplicationStatus) : null,
     period: isDay(from) && isDay(to) && from <= to ? { from, to } : null,
+    kind: KINDS.includes(kind as LoanApplicationKind) ? (kind as LoanApplicationKind) : null,
   };
 }
 
-/** `/applications?outcome=…&status=…&from=…&to=…`, with only what is set. */
+/** `/applications?outcome=…&status=…&kind=…&from=…&to=…`, with only what is set. */
 export function listHref(params: Partial<ListParams>): string {
   const query = new URLSearchParams();
   if (params.outcome) query.set('outcome', params.outcome);
   if (params.status) query.set('status', params.status);
+  if (params.kind) query.set('kind', params.kind);
   if (params.period) {
     query.set('from', params.period.from);
     query.set('to', params.period.to);

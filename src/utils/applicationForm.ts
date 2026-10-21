@@ -16,9 +16,18 @@
  */
 import { notConvertibleReason } from './convertApplication';
 import type {
-  BorrowerInfo, LoanApplicationChannel, LoanApplicationInputGroup, LoanApplicationRecord,
+  BorrowerInfo, LoanApplicationChannel, LoanApplicationInputGroup, LoanApplicationKind, LoanApplicationRecord,
   LoanApplicationReference, LoanApplicationUpdateInput, Reference,
 } from '@/utils/DataTypes';
+
+/** What is applied for, in the order New application shows it (spec 2026-10-21). Keep in sync with LoanApplication::KINDS. */
+export const KINDS = ['new', 'renewal', 'additional'] as const satisfies readonly LoanApplicationKind[];
+
+export const KIND_LABELS: Readonly<Record<LoanApplicationKind, string>> = {
+  new: 'Bago',
+  renewal: 'Renewal',
+  additional: 'Additional',
+};
 
 /** Saan galing's four choices, in the order the form shows them. Keep in sync with LoanApplication::CHANNELS. */
 export const CHANNELS = ['google_form', 'facebook', 'walk_in', 'phone'] as const satisfies readonly LoanApplicationChannel[];
@@ -63,6 +72,7 @@ export type ApplicationInputGroup = LoanApplicationInputGroup;
 /** createLoanApplication's `input`. */
 export interface LoanApplicationInput {
   channel: LoanApplicationChannel;
+  kind: LoanApplicationKind;
   branch_sub_id: number;
   info: ApplicationInputGroup & { firstname: string; lastname: string; amount_applied: string; purpose: string };
   detail: ApplicationInputGroup & { contact_no: string };
@@ -246,7 +256,7 @@ export const hasBlankBasic = (values: ApplicationFormValues): boolean =>
   BASICS.some((field) => String(values[field] ?? '').trim() === '');
 
 /** What the create and the update input share: the groups, cleaned. */
-type ApplicationGroups = Omit<LoanApplicationInput, 'channel' | 'branch_sub_id'>;
+type ApplicationGroups = Omit<LoanApplicationInput, 'channel' | 'kind' | 'branch_sub_id'>;
 
 /**
  * The input's groups from the form's values. Whatever was not filled in is left out:
@@ -281,8 +291,9 @@ export function toApplicationInput(
   values: ApplicationFormValues,
   channel: LoanApplicationChannel,
   branchSubId: number | string,
+  kind: LoanApplicationKind = 'new',
 ): LoanApplicationInput {
-  return { channel, branch_sub_id: Number(branchSubId), ...applicationGroups(values) };
+  return { channel, kind, branch_sub_id: Number(branchSubId), ...applicationGroups(values) };
 }
 
 /**

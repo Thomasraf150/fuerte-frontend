@@ -415,7 +415,7 @@ export interface ApplicationNotification {
   borrower_id: number | null;
   full_name: string;
   branch_name: string | null;
-  /** kind status: for_interview | interviewed | declined | borrower_created. kind decision: approved | rejected. */
+  /** kind status: for_interview | interviewed | declined | borrower_created | borrower_linked. kind decision: approved | rejected. borrower_id is the linked borrower for borrower_linked. */
   status: string;
   /** kind decision only. */
   reason: string | null;
@@ -998,10 +998,14 @@ export interface LoanHistoryPaginator {
 // Loan applications (/applications) — Google Form intake and walk-ins.
 // ---------------------------------------------------------------------------
 
-export type LoanApplicationStatus = 'for_interview' | 'interviewed' | 'declined' | 'borrower_created';
+/** borrower_created: a new applicant made a borrower. borrower_linked: a renewal or additional applicant linked to their existing borrower. */
+export type LoanApplicationStatus = 'for_interview' | 'interviewed' | 'declined' | 'borrower_created' | 'borrower_linked';
 
 /** "Saan galing": where an application came from. Keep in sync with LoanApplication::CHANNELS (backend). */
 export type LoanApplicationChannel = 'google_form' | 'facebook' | 'walk_in' | 'phone';
+
+/** What is applied for (spec 2026-10-21). Keep in sync with LoanApplication::KINDS (backend). */
+export type LoanApplicationKind = 'new' | 'renewal' | 'additional';
 
 export interface LoanApplicationRow {
   id: string;
@@ -1009,6 +1013,8 @@ export interface LoanApplicationRow {
   source: 'google_form' | 'manual' | 'pdf';
   /** Saan galing. Uploads, pastes and PDFs are 'google_form'; a typed-in application has the one staff picked. */
   channel: LoanApplicationChannel | null;
+  /** New applicant, renewal or additional loan: which Google Form it came from, or what staff picked. */
+  kind: LoanApplicationKind;
   /** "Y-m-d H:i:s", Manila wall-clock with no zone: the form's timestamp, or when a typed-in or PDF application was saved (until a download or paste of the same response supplies the form's). Null only for a row inserted outside Eloquent. */
   submitted_at: string | null;
   /** The form's branch answer as typed — a location, not a Fuerte branch. */
@@ -1038,6 +1044,7 @@ export type ApplicationOutcome =
   | 'declined'
   | 'for_interview'
   | 'interviewed'
+  | 'borrower_linked'
   | 'borrower_deleted'
   | 'rejected'
   | 'rejected_with_loan'
@@ -1180,6 +1187,8 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
   branch_sub_id: number | null;
   /** Set once the application has become a borrower. */
   borrower_id: number | null;
+  /** A renewal or additional application's existing borrower, once linked (status borrower_linked). */
+  linked_borrower_id: number | null;
   /** When the row was saved. */
   created_at: string | null;
   /** Never null itself: an application with no stored form has an object whose groups are all null. */

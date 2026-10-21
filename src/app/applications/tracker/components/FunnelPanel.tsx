@@ -117,7 +117,7 @@ const FunnelPanel: React.FC<{ range: DayRange }> = ({ range }) => {
       <CardHeader
         id={headingId}
         title="From application to loan"
-        description={<>Applied {formatPeriod(range)}. Where each applicant is now. Tap a number to see them.</>}
+        description={<>New applicants (Bago) who applied {formatPeriod(range)}. Where each one is now. Tap a number to see them.</>}
       />
       <CardBody>
         <p role="status" className="sr-only">{status}</p>

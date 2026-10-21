@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, CheckCircle, UserPlus, XCircle, type Icon } from "react-feather";
+import { Activity, CheckCircle, Link2, UserPlus, XCircle, type Icon } from "react-feather";
 import type { ApplicationNotification } from "@/utils/DataTypes";
 
 /** What happened, in the words under the applicant's name. A decision's reason follows it: "Rejected: Kulang ang income". */
 const EVENT_TEXT: Record<string, string> = {
   borrower_created: "is now a borrower",
+  borrower_linked: "renewal or additional loan: linked to their borrower record",
   interviewed: "Interviewed",
   declined: "Declined",
   for_interview: "back to For Interview",
@@ -26,6 +27,7 @@ const eventText = ({ status, reason }: ApplicationNotification): string => {
  */
 const LOOKS: Record<string, { icon: Icon; bubble: string }> = {
   borrower_created: { icon: UserPlus, bubble: "bg-success/10 text-success dark:bg-success/20" },
+  borrower_linked: { icon: Link2, bubble: "bg-success/10 text-success dark:bg-success/20" },
   approved: { icon: CheckCircle, bubble: "bg-white text-success ring-1 ring-inset ring-stroke dark:bg-boxdark dark:ring-strokedark" },
   rejected: { icon: XCircle, bubble: "bg-danger text-white" },
 };

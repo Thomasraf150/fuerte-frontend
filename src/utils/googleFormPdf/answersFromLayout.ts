@@ -45,8 +45,11 @@ interface Block {
 const FOOTER = new Set(['This content is neither created nor endorsed by Google.', 'Forms']);
 /** What a dropdown shows when nothing was chosen. */
 const NO_CHOICE = 'Choose';
-/** The two answers every response has, once: they identify the applicant. */
-const IDENTITY = ['Buong pangalan', 'Mobile number'];
+/**
+ * The two answers every response has, once: they identify the applicant. Each under any of its
+ * titles: the Renewal and Additional Loan forms ask "Cellphone Number" (2026-10-21).
+ */
+const IDENTITY: readonly (readonly string[])[] = [['Buong pangalan'], ['Mobile number', 'Cellphone Number']];
 
 const between = (value: number, low: number, high: number): boolean => value >= low && value <= high;
 const near = (value: number, target: number): boolean => Math.abs(value - target) <= 0.25;
@@ -138,7 +141,7 @@ const normalized = (question: string): string => question.toLowerCase().replace(
 
 /** Throws unless the name and the mobile number are each answered exactly once. */
 function checkOneResponse(answers: FormAnswer[]): void {
-  const counts = IDENTITY.map((question) => answers.filter((entry) => normalized(entry.question) === normalized(question)).length);
+  const counts = IDENTITY.map((titles) => answers.filter((entry) => titles.some((title) => normalized(entry.question) === normalized(title))).length);
   if (counts.includes(0)) throw new Error(NOT_A_FORM_MESSAGE);
   // "Print all responses" puts several applicants in one PDF; they must never merge into one record.
   if (counts.some((count) => count > 1)) throw new Error(MANY_RESPONSES_MESSAGE);

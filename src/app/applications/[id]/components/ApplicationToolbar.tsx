@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Printer, RotateCw } from 'react-feather';
+import { ArrowLeft, ArrowRight, Link2, Printer, RotateCw } from 'react-feather';
 import type { ActionResult, PickableStatus } from '@/hooks/useLoanApplication';
 import { OTHER_BRANCH_REASON, notConvertibleReason, type BranchAccess, type ConversionBlock } from '@/utils/convertApplication';
 import type { LoanApplicationRecord } from '@/utils/DataTypes';
@@ -46,7 +46,8 @@ const WHAT_IS_MISSING: Record<Exclude<ConversionBlock, 'converted'>, string> = {
 const createReason = (record: LoanApplicationRecord, unsaved: boolean, statusPending: boolean, access: BranchAccess): string | null => {
   if (unsaved) return SAVE_FIRST;
   if (statusPending) return SAVE_STATUS_FIRST;
-  const block = notConvertibleReason(record, access);
+  // A renewal or additional one moves to its borrower's branch when linked: the server judges the branch.
+  const block = notConvertibleReason(record, record.kind === 'new' ? access : undefined);
   return block && block !== 'converted' ? WHAT_IS_MISSING[block] : null;
 };
 
@@ -119,6 +120,37 @@ const CreateAsBorrower: React.FC<{ id: string; reason: string | null; reasonId: 
     </Link>
   );
 
+/**
+ * Link to borrower, a renewal or additional application's one filled action in place of Create as
+ * borrower: the applicant is a borrower already. The server finds that borrower by name AND mobile and
+ * hands the application to the borrower's branch; nothing is filled in, so it is a button, not a link
+ * to a form. While it is out it reads "Linking…" and ignores clicks, keeping focus. Unavailable, it is
+ * the same dashed button as Create as borrower, pointing at the reason under it.
+ */
+const LinkToBorrower: React.FC<{ reason: string | null; reasonId: string; linking: boolean; onLink: () => void }> = ({ reason, reasonId, linking, onLink }) =>
+  reason ? (
+    <button type="button" aria-disabled="true" aria-describedby={reasonId} className={`${BUTTON} ${UNAVAILABLE}`}>
+      <Link2 aria-hidden="true" size={16} className="shrink-0" />
+      Link to borrower
+    </button>
+  ) : (
+    <button
+      type="button"
+      aria-disabled={linking}
+      onClick={() => {
+        if (!linking) onLink();
+      }}
+      className={`${BUTTON} bg-primary text-white hover:bg-opacity-90 ${linking ? 'cursor-progress' : ''}`}
+    >
+      {linking ? (
+        <RotateCw aria-hidden="true" size={16} className="shrink-0 motion-safe:animate-spin" />
+      ) : (
+        <Link2 aria-hidden="true" size={16} className="shrink-0" />
+      )}
+      {linking ? 'Linking…' : 'Link to borrower'}
+    </button>
+  );
+
 interface ApplicationToolbarProps {
   record: LoanApplicationRecord;
   /**
@@ -142,6 +174,9 @@ interface ApplicationToolbarProps {
   onStatus: (next: PickableStatus, reason?: string) => Promise<ActionResult>;
   printing: boolean;
   onPrint: () => void;
+  /** Link to borrower, for a renewal or additional application; resolves once the server has answered. */
+  onLink: () => Promise<ActionResult>;
+  linking: boolean;
 }
 
 /**
@@ -157,12 +192,19 @@ interface ApplicationToolbarProps {
  * The status choice lives here, not in the select (useStatusDraft), because Create as borrower
  * has to know about it: while the choice differs from the saved status it says to save it.
  */
-export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint }) => {
+export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint, onLink, linking }) => {
   const reasonId = useId();
   const statusErrorId = useId();
   const status = useStatusDraft(record.status, onStatus);
+  // The refusal Link to borrower last got (no such borrower, several, another branch), kept on screen after its toast.
+  const [linkError, setLinkError] = useState<string | null>(null);
   const showCreate = canCreateBorrower && !converted;
+  const returning = record.kind !== 'new';
   const reason = showCreate ? createReason(record, unsaved, status.pending, branchAccess) : unsaved ? SAVE_FIRST : null;
+  const link = async () => {
+    const result = await onLink();
+    setLinkError(result.success ? null : result.message);
+  };
 
   return (
     <div
@@ -177,12 +219,20 @@ export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, 
       <div className="flex flex-col gap-2 md:ml-auto md:items-end">
         <div className="flex flex-col gap-2 md:flex-row md:gap-3">
           <PrintButton printing={printing} blocked={unsaved} reasonId={reasonId} onPrint={onPrint} />
-          {showCreate && <CreateAsBorrower id={record.id} reason={reason} reasonId={reasonId} />}
+          {showCreate &&
+            (returning ? (
+              <LinkToBorrower reason={reason} reasonId={reasonId} linking={linking} onLink={link} />
+            ) : (
+              <CreateAsBorrower id={record.id} reason={reason} reasonId={reasonId} />
+            ))}
         </div>
         {reason && (
           <p id={reasonId} className="text-sm text-body dark:text-bodydark md:text-right">
             {reason}
           </p>
+        )}
+        {showCreate && returning && !reason && linkError && (
+          <p className="max-w-md text-sm text-danger md:text-right">{linkError}</p>
         )}
       </div>
       {/* The one live region of the status: always in the page, empty until it has something to say. */}

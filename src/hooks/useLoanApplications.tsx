@@ -6,7 +6,7 @@ import { graphqlFetch, handleSessionExpired } from '@/utils/graphqlFetch';
 import { useAuthStore } from '@/store/authStore';
 import type { ServerSidePaginationProps } from '@/components/CustomDatatable';
 import { usePagination } from './usePagination';
-import { ApplicationOutcome, ApplicationUploadResult, LoanApplicationRow, LoanApplicationStatus, NewApplicationRef } from '@/utils/DataTypes';
+import { ApplicationOutcome, ApplicationUploadResult, LoanApplicationKind, LoanApplicationRow, LoanApplicationStatus, NewApplicationRef } from '@/utils/DataTypes';
 import type { ListParams } from '@/utils/applicationOutcome';
 import type { DayRange } from '@/utils/sourceTracker';
 import { readGoogleFormPdf } from '@/utils/googleFormPdf/readGoogleFormPdf';
@@ -31,14 +31,17 @@ export interface LoadedApplications {
   search: string;
   outcome: ApplicationOutcome | null;
   period: DayRange | null;
+  /** Null: every kind. */
+  kind: LoanApplicationKind | null;
 }
 
-/** The outcome and the days applied, as getLoanApplications takes them: only what is set. */
-type OutcomeFilters = { outcome?: ApplicationOutcome; from?: string; to?: string };
+/** The outcome, the days applied and the kind, as getLoanApplications takes them: only what is set. */
+type OutcomeFilters = { outcome?: ApplicationOutcome; from?: string; to?: string; kind?: LoanApplicationKind };
 
-const toOutcomeFilters = (outcome: ApplicationOutcome | null, period: DayRange | null): OutcomeFilters => ({
+const toOutcomeFilters = (outcome: ApplicationOutcome | null, period: DayRange | null, kind: LoanApplicationKind | null = null): OutcomeFilters => ({
   ...(outcome ? { outcome } : {}),
   ...(period ? { from: period.from, to: period.to } : {}),
+  ...(kind ? { kind } : {}),
 });
 
 interface ApplicationsPage {
@@ -253,6 +256,7 @@ const useLoanApplications = (initial: ListParams = { outcome: null, status: null
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>(initial.status ?? 'all');
   const [outcome, setOutcome] = useState<ApplicationOutcome | null>(initial.outcome);
   const [period, setPeriod] = useState<DayRange | null>(initial.period);
+  const [kind, setKind] = useState<LoanApplicationKind | null>(initial.kind ?? null);
   const [loaded, setLoaded] = useState<LoadedApplications | null>(null);
   const intake = useIntake();
   // usePagination bumps its request id and calls this function in the same tick, once per
@@ -272,6 +276,7 @@ const useLoanApplications = (initial: ListParams = { outcome: null, status: null
           search: search ?? '',
           outcome: filters.outcome ?? null,
           period: filters.from && filters.to ? { from: filters.from, to: filters.to } : null,
+          kind: filters.kind ?? null,
         });
       }
       return found;
@@ -284,7 +289,7 @@ const useLoanApplications = (initial: ListParams = { outcome: null, status: null
       fetchFunction: fetchApplications,
       config: { initialPageSize: 20 },
       statusFilter,
-      extraFilters: toOutcomeFilters(outcome, period),
+      extraFilters: toOutcomeFilters(outcome, period, kind),
     });
 
   const serverSidePaginationProps: ServerSidePaginationProps = {
@@ -298,7 +303,7 @@ const useLoanApplications = (initial: ListParams = { outcome: null, status: null
 
   return {
     applications: data, loading, error, refresh, loaded,
-    statusFilter, setStatusFilter, outcome, setOutcome, period, setPeriod, serverSidePaginationProps, ...intake,
+    statusFilter, setStatusFilter, outcome, setOutcome, period, setPeriod, kind, setKind, serverSidePaginationProps, ...intake,
   };
 };
 

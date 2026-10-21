@@ -103,8 +103,8 @@ interface StatusPickerProps {
 const StatusPicker: React.FC<StatusPickerProps> = ({ status, draft, locked, errorId }) => {
   const id = useId();
   const { shown, pending, saving, justSaved, choose, save } = draft;
-  /** Only a status of Borrower created has an option of its own: the others are the three to choose from. */
-  const hasBorrowerOption = status === 'borrower_created';
+  /** Only a status of Borrower created or Linked to borrower has an option of its own: the others are the three to choose from. */
+  const handedOver = status === 'borrower_created' || status === 'borrower_linked' ? status : null;
 
   return (
     <>
@@ -126,7 +126,7 @@ const StatusPicker: React.FC<StatusPickerProps> = ({ status, draft, locked, erro
               pending ? 'border-warning ring-1 ring-warning/60 dark:border-warning' : 'border-stroke dark:border-strokedark'
             } ${locked ? 'pr-4' : 'pr-10'}`}
           >
-            {hasBorrowerOption && <option value="borrower_created">{APPLICATION_STATUS_LABEL.borrower_created}</option>}
+            {handedOver && <option value={handedOver}>{APPLICATION_STATUS_LABEL[handedOver]}</option>}
             {PICKABLE.map((option) => (
               <option key={option} value={option}>
                 {APPLICATION_STATUS_LABEL[option]}

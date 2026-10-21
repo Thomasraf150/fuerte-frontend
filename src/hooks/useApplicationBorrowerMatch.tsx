@@ -23,6 +23,8 @@ const UNKNOWN: Outcome = { kind: 'unknown' };
 export interface BorrowerMatchCheck {
   /** What matched, once the server has said; null while it has not, when nothing matched, and when no check is made. */
   match: LoanApplicationBorrowerMatch | null;
+  /** The server has answered (a match, or none): what a renewal's "no borrower found" waits for. */
+  answered: boolean;
   /** The check could not be made. That is not "no match": the page says so, and offers Retry. */
   failed: boolean;
   /**
@@ -110,6 +112,7 @@ const useApplicationBorrowerMatch = (applicationId: number | null, enabled: bool
 
   return {
     match: outcome.kind === 'answered' ? outcome.match : null,
+    answered: outcome.kind === 'answered',
     failed: outcome.kind === 'failed',
     viaRetry: outcome.kind === 'answered' && outcome.viaRetry,
     checking,

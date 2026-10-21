@@ -85,7 +85,8 @@ export function notConvertibleReason(
   application: Pick<LoanApplicationRecord, 'status' | 'branch_sub_id' | 'borrower_id'>,
   access?: BranchAccess,
 ): ConversionBlock | null {
-  if (application.status === 'borrower_created' || application.borrower_id != null) return 'converted';
+  // Linked to its existing borrower (a renewal or additional one): done, and read-only, the same way.
+  if (application.status === 'borrower_created' || application.status === 'borrower_linked' || application.borrower_id != null) return 'converted';
   if (application.branch_sub_id == null) return 'no-branch';
   if (application.status !== 'interviewed') return 'not-interviewed';
   if (access?.kind === 'some' && !access.branchSubIds.includes(application.branch_sub_id)) return 'other-branch';

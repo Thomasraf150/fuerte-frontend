@@ -6,22 +6,55 @@ import { CheckCircle, Inbox, Plus } from 'react-feather';
 import { Card, CardBody, Toolbar } from '@/components/Card';
 import CustomDatatable from '@/components/CustomDatatable';
 import useLoanApplications, { ApplicationStatusFilter, LoadedApplications } from '@/hooks/useLoanApplications';
-import type { ApplicationOutcome, LoanApplicationRow } from '@/utils/DataTypes';
+import type { ApplicationOutcome, LoanApplicationKind, LoanApplicationRow } from '@/utils/DataTypes';
+import { KINDS, KIND_LABELS } from '@/utils/applicationForm';
 import { listHref, outcomeLabel, type ListParams } from '@/utils/applicationOutcome';
 import { formatCount } from '@/utils/helper';
 import { formatPeriod, type DayRange } from '@/utils/sourceTracker';
 import { applicationColumns } from './ApplicationColumns';
 import { APPLICATION_STATUS_DOT, APPLICATION_STATUS_LABEL } from './ApplicationStatusPill';
+import { KIND_ICONS } from './KindBadge';
 import LoadError from './LoadError';
 import OutcomeFilters from './OutcomeFilters';
 import UploadResponses from './UploadResponses';
 import { useCanUpload } from './useCanUpload';
 
-const FILTERS: ApplicationStatusFilter[] = ['all', 'for_interview', 'interviewed', 'declined', 'borrower_created'];
+const FILTERS: ApplicationStatusFilter[] = ['all', 'for_interview', 'interviewed', 'declined', 'borrower_created', 'borrower_linked'];
 
 /** Nothing exists at all for this user: an unfiltered, unsearched fetch came back empty. */
 const isNothingYet = (loaded: LoadedApplications | null): boolean =>
-  !!loaded && loaded.total === 0 && loaded.status === 'all' && loaded.search === '' && !loaded.outcome && !loaded.period;
+  !!loaded && loaded.total === 0 && loaded.status === 'all' && loaded.search === '' && !loaded.outcome && !loaded.period && !loaded.kind;
+
+const KIND_FILTERS: readonly (LoanApplicationKind | null)[] = [null, ...KINDS];
+
+/*
+ * What was applied for: every kind, new applicants, renewals or additional loans. Squared chips,
+ * like the kind badge in the rows, so they never read as more statuses; the same 48px on phones.
+ */
+const KindFilter: React.FC<{ value: LoanApplicationKind | null; onChange: (value: LoanApplicationKind | null) => void }> = ({ value, onChange }) => (
+  <div role="group" aria-label="Filter applications by kind" className="flex flex-wrap items-center gap-2">
+    {KIND_FILTERS.map(option => {
+      const selected = value === option;
+      const KindIcon = option && option !== 'new' ? KIND_ICONS[option] : null;
+      return (
+        <button
+          key={option ?? 'all'}
+          type="button"
+          aria-pressed={selected}
+          onClick={() => onChange(option)}
+          className={`inline-flex min-h-12 min-w-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-sm border px-3 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 dark:focus-visible:ring-offset-boxdark sm:text-sm md:min-h-9 ${
+            selected
+              ? 'border-primary bg-primary text-white'
+              : 'border-stroke bg-white text-body hover:border-primary/50 hover:text-black dark:border-strokedark dark:bg-boxdark dark:text-bodydark1 dark:hover:text-white'
+          }`}
+        >
+          {KindIcon && <KindIcon aria-hidden="true" size={13} className="shrink-0" />}
+          {option ? KIND_LABELS[option] : 'Lahat ng uri'}
+        </button>
+      );
+    })}
+  </div>
+);
 
 /*
  * The same chips as the Borrowers Payer filter, so the control is familiar, plus
@@ -57,6 +90,7 @@ const ResultLine: React.FC<{ loaded: LoadedApplications }> = ({ loaded }) => {
   const noun = loaded.total === 1 ? 'application' : 'applications';
   const parts = [
     loaded.total === 0 ? `No ${noun}` : `${formatCount(loaded.total)} ${noun}`,
+    ...(loaded.kind ? [KIND_LABELS[loaded.kind]] : []),
     ...(loaded.status !== 'all' ? [APPLICATION_STATUS_LABEL[loaded.status]] : []),
     ...(loaded.outcome ? [outcomeLabel(loaded.outcome)] : []),
     ...(loaded.period ? [`Applied ${formatPeriod(loaded.period)}`] : []),
@@ -130,8 +164,8 @@ const useSavedNote = (): string => {
  * shared or reloaded as it is. replaceState, not a navigation: the page is already showing it.
  */
 const linkedFilterActions = (list: ReturnType<typeof useLoanApplications>) => {
-  const write = (status: ApplicationStatusFilter, outcome: ApplicationOutcome | null, period: DayRange | null) =>
-    window.history.replaceState(null, '', listHref({ status: status === 'all' ? null : status, outcome, period }));
+  const write = (status: ApplicationStatusFilter, outcome: ApplicationOutcome | null, period: DayRange | null, kind: LoanApplicationKind | null = list.kind) =>
+    window.history.replaceState(null, '', listHref({ status: status === 'all' ? null : status, outcome, period, kind }));
   return {
     changeStatus: (next: ApplicationStatusFilter) => {
       list.setStatusFilter(next);
@@ -145,6 +179,10 @@ const linkedFilterActions = (list: ReturnType<typeof useLoanApplications>) => {
       list.setPeriod(null);
       write(list.statusFilter, list.outcome, null);
     },
+    changeKind: (next: LoanApplicationKind | null) => {
+      list.setKind(next);
+      write(list.statusFilter, list.outcome, list.period, next);
+    },
   };
 };
 
@@ -152,10 +190,10 @@ const linkedFilterActions = (list: ReturnType<typeof useLoanApplications>) => {
 const ApplicationList: React.FC<{ initial?: ListParams }> = ({ initial }) => {
   const list = useLoanApplications(initial);
   const {
-    applications, loading, error, refresh, loaded, statusFilter, outcome, period,
+    applications, loading, error, refresh, loaded, statusFilter, outcome, period, kind,
     uploading, uploadResponses, pasting, pasteRows, serverSidePaginationProps,
   } = list;
-  const { changeStatus, changeOutcome, clearPeriod } = linkedFilterActions(list);
+  const { changeStatus, changeOutcome, clearPeriod, changeKind } = linkedFilterActions(list);
   const canUpload = useCanUpload(); // null until read: treated as "not an upload role" meanwhile
   const savedNote = useSavedNote();
   /*
@@ -185,6 +223,7 @@ const ApplicationList: React.FC<{ initial?: ListParams }> = ({ initial }) => {
           <UploadResponses uploading={uploading} pasting={pasting} onUpload={uploadResponses} onPaste={pasteRows} onUploaded={refresh} />
         )}
         <StatusFilter value={statusFilter} onChange={changeStatus} />
+        <KindFilter value={kind} onChange={changeKind} />
         <OutcomeFilters outcome={outcome} period={period} onOutcome={changeOutcome} onClearPeriod={clearPeriod} />
         {error && <LoadError message={error} onRetry={refresh} />}
         <div>

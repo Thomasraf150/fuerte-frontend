@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useId, useLayoutEffect, useRef } from 'react';
-import { AlertOctagon, AlertTriangle, HelpCircle } from 'react-feather';
+import { AlertOctagon, AlertTriangle, HelpCircle, UserCheck } from 'react-feather';
 import type { BorrowerMatchCheck } from '@/hooks/useApplicationBorrowerMatch';
 import useFocusOnMount from '@/hooks/useFocusOnMount';
 import type { LoanApplicationBorrowerMatch } from '@/utils/DataTypes';
@@ -27,6 +27,11 @@ const ELSEWHERE_LABEL: Record<CheckAudience, string> = {
   'call-center': 'Branches',
 };
 const CHECK_FAILED = 'Could not check whether this applicant is already a borrower.';
+/** A renewal or additional applicant: found is the expected answer (spec 2026-10-21). */
+const KNOWN_TITLE = 'Borrower na siya sa Fuerte';
+const KNOWN_BODY = 'Renewal o additional ito, kaya dapat may record na siya. Pagka-interview, i-Link to borrower: ipapasa ito sa branch niya.';
+const NO_BORROWER_TITLE = 'Walang borrower na may ganitong pangalan o mobile number';
+const NO_BORROWER_BODY = 'Renewal o additional ito, kaya dapat may record na siya. Itanong sa applicant ang pangalan at number na naka-file, at ayusin dito bago i-link.';
 /** What a screen reader hears, once, when the card appears. */
 const announcement = (audience: CheckAudience): string => `${TITLE}. ${NEXT_STEP[audience]}`;
 
@@ -171,6 +176,61 @@ const RepeatApplicantCard: React.FC<{ match: LoanApplicationBorrowerMatch; focus
 };
 
 /**
+ * A renewal or additional applicant (spec 2026-10-21) is SUPPOSED to be a borrower already: a match is
+ * the expected answer, so this card is the brand's calm green with a solid edge, never the hazard tape.
+ * It says where the borrower is, and a problem account still gets its red line: that is news either way.
+ * A labelled section with a real heading, announced once by RepeatApplicantCheck like the warning.
+ */
+const KnownBorrowerCard: React.FC<{ match: LoanApplicationBorrowerMatch; focusOnMount: boolean }> = ({ match, focusOnMount }) => {
+  const titleId = useId();
+  const heading = useFocusOnMount<HTMLHeadingElement>(focusOnMount, useRef<Animation | null>(null));
+  const problem = match.myBranchIsProblem || match.isProblem;
+  const names = [...(match.myBranches ?? []), ...(match.branches ?? [])];
+  return (
+    <section aria-labelledby={titleId} className="relative overflow-hidden rounded-sm border border-primary/40 bg-primary/5 shadow-default dark:bg-primary/10">
+      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
+      <div className="px-5 py-4 pl-7 sm:px-8">
+        <div className="flex items-start gap-3.5">
+          <span aria-hidden="true" className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+            <UserCheck size={18} />
+          </span>
+          <div className="min-w-0">
+            <h3 ref={heading} id={titleId} tabIndex={-1} className={`text-title-xsm font-semibold text-black dark:text-white ${FOCUS_RING}`}>
+              {KNOWN_TITLE}
+            </h3>
+            <p className="mt-1 text-sm text-black dark:text-bodydark">{KNOWN_BODY}</p>
+          </div>
+        </div>
+        {(names.length > 0 || problem) && (
+          <dl className="mt-4 space-y-3 border-t border-primary/20 pt-4">
+            {names.length > 0 && (
+              <Detail label="Nasa branch">
+                <BranchTags names={names} />
+              </Detail>
+            )}
+            {problem && <ProblemAccount worst={worstCutoffs(match)} />}
+          </dl>
+        )}
+      </div>
+    </section>
+  );
+};
+
+/**
+ * A renewal or additional applicant the check found NO borrower for: the one case worth a warning
+ * here, in the intake flags' amber, because Link to borrower will refuse it. Usually a misspelt name
+ * or another mobile number; sometimes a new applicant who used the wrong form.
+ */
+const NoBorrowerNote: React.FC = () => (
+  <p className="flex items-start gap-2.5 rounded-sm border border-warning/60 bg-warning/10 px-4 py-3 text-sm text-black dark:text-bodydark">
+    <AlertTriangle aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-warning" />
+    <span className="min-w-0 break-words">
+      <span className="font-semibold">{NO_BORROWER_TITLE}.</span> {NO_BORROWER_BODY}
+    </span>
+  </p>
+);
+
+/**
  * The check could not be made. A quiet note, in the page's neutral colours, never a statement
  * that the applicant is new: nothing is known. Retry keeps its place while the check is out
  * (aria-disabled, as Print does) so a keyboard user is not dropped.
@@ -223,19 +283,31 @@ const FocusAfterRetry: React.FC<{ target: React.RefObject<HTMLElement> }> = ({ t
  *
  * `audience` is who reads it: branch staff (the default), or Call Center, which is told to let
  * the branch know instead of to check a record it cannot open.
+ *
+ * `returning` (a renewal or additional application, 2026-10-21) turns it round: a match is the
+ * expected answer (KnownBorrowerCard, calm), and the warning is for NO match (NoBorrowerNote).
  */
 export const RepeatApplicantCheck: React.FC<{
   check: BorrowerMatchCheck;
   fallbackFocus: React.RefObject<HTMLElement>;
   audience?: CheckAudience;
-}> = ({ check, fallbackFocus, audience = 'branch' }) => {
+  returning?: boolean;
+}> = ({ check, fallbackFocus, audience = 'branch', returning = false }) => {
   const match = hasMatch(check.match) ? check.match : null;
+  const noneFound = returning && check.answered && !match && !check.checking;
+  const said = match ? (returning ? KNOWN_TITLE : announcement(audience)) : noneFound ? NO_BORROWER_TITLE : '';
   return (
     <>
       <div role="status" className="sr-only">
-        {match ? announcement(audience) : ''}
+        {said}
       </div>
-      {match && <RepeatApplicantCard match={match} focusOnMount={check.viaRetry} audience={audience} />}
+      {match &&
+        (returning ? (
+          <KnownBorrowerCard match={match} focusOnMount={check.viaRetry} />
+        ) : (
+          <RepeatApplicantCard match={match} focusOnMount={check.viaRetry} audience={audience} />
+        ))}
+      {noneFound && <NoBorrowerNote />}
       {check.failed && <CheckFailedNote checking={check.checking} onRetry={check.retry} />}
       {check.viaRetry && !match && <FocusAfterRetry target={fallbackFocus} />}
     </>

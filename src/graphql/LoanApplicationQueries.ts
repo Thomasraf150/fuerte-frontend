@@ -26,6 +26,7 @@ const GET_LOAN_APPLICATIONS_QUERY: string = `
     $outcome: String
     $from: String
     $to: String
+    $kind: String
   ) {
     getLoanApplications(
       first: $first
@@ -35,11 +36,13 @@ const GET_LOAN_APPLICATIONS_QUERY: string = `
       outcome: $outcome
       from: $from
       to: $to
+      kind: $kind
     ) {
       data {
         id
         source
         channel
+        kind
         submitted_at
         location
         branch_sub {
@@ -130,6 +133,7 @@ const LOAN_APPLICATION_RECORD_FIELDS: string = `
   id
   source
   channel
+  kind
   submitted_at
   location
   branch_sub_id
@@ -139,6 +143,7 @@ const LOAN_APPLICATION_RECORD_FIELDS: string = `
   }
   status
   borrower_id
+  linked_borrower_id
   full_name
   contact_no
   amount_applied
@@ -252,6 +257,20 @@ const SET_LOAN_APPLICATION_STATUS_MUTATION: string = `
   }
 `;
 
+/**
+ * Link to borrower: a renewal or additional application, once Interviewed and on a branch, is linked to
+ * the one borrower with its name AND mobile, and moves to that borrower's branch. Returns the whole
+ * record, now read-only. A refusal is a sentence that says what to do (no such borrower, several,
+ * another location).
+ */
+const LINK_LOAN_APPLICATION_BORROWER_MUTATION: string = `
+  mutation LinkLoanApplicationBorrower($id: Int!) {
+    linkLoanApplicationBorrower(id: $id) {
+      ${LOAN_APPLICATION_RECORD_FIELDS}
+    }
+  }
+`;
+
 /** Prints one application as a PDF; the result is the PDF's relative link. */
 const PRINT_LOAN_APPLICATION_MUTATION: string = `
   mutation PrintLoanApplication($application_id: Int!) { printLoanApplication(application_id: $application_id) }
@@ -280,10 +299,10 @@ const GET_LOAN_APPLICATION_BORROWER_MATCH_QUERY: string = `
   }
 `;
 
-/** How many applications came in by each channel between two days. `from` and `to` are Y-m-d. */
+/** How many applications of one kind (left out: new) came in by each channel between two days. `from` and `to` are Y-m-d. */
 const GET_APPLICATION_SOURCE_COUNTS_QUERY: string = `
-  query GetApplicationSourceCounts($from: String!, $to: String!) {
-    getApplicationSourceCounts(from: $from, to: $to) {
+  query GetApplicationSourceCounts($from: String!, $to: String!, $kind: String) {
+    getApplicationSourceCounts(from: $from, to: $to, kind: $kind) {
       channel
       count
     }
@@ -359,6 +378,7 @@ const LoanApplicationQueries = {
   GET_LOAN_APPLICATION_QUERY,
   UPDATE_LOAN_APPLICATION_MUTATION,
   SET_LOAN_APPLICATION_STATUS_MUTATION,
+  LINK_LOAN_APPLICATION_BORROWER_MUTATION,
   PRINT_LOAN_APPLICATION_MUTATION,
   GET_LOAN_APPLICATION_BORROWER_MATCH_QUERY,
   GET_APPLICATION_SOURCE_COUNTS_QUERY,

@@ -110,9 +110,16 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
         onStatus={app.setStatus}
         printing={app.printing}
         onPrint={app.print}
+        onLink={app.link}
+        linking={app.linking}
       />
       {checksTheApplicant && (
-        <RepeatApplicantCheck check={repeatApplicant} fallbackFocus={pageHeading} audience={isCallCenter ? 'call-center' : 'branch'} />
+        <RepeatApplicantCheck
+          check={repeatApplicant}
+          fallbackFocus={pageHeading}
+          audience={isCallCenter ? 'call-center' : 'branch'}
+          returning={record.kind !== 'new'}
+        />
       )}
       <ApplicationTabs
         selected={tab}

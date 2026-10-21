@@ -6,6 +6,7 @@ import { Card } from '@/components/Card';
 import { formatSubmitted } from '@/app/applications/components/ApplicationColumns';
 import ApplicationStatusPill, { APPLICATION_STATUS_DOT } from '@/app/applications/components/ApplicationStatusPill';
 import { CHANNEL_ICONS, TINTS } from '@/app/applications/components/channelIcons';
+import KindBadge from '@/app/applications/components/KindBadge';
 import OutcomePill from '@/app/applications/components/OutcomePill';
 import { CHANNEL_SHORT_LABELS } from '@/utils/applicationForm';
 import { applicationNumber } from '@/utils/convertApplication';
@@ -75,7 +76,11 @@ export const ApplicationHeader: React.FC<{ record: LoanApplicationRecord; headin
       <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1.5 ${APPLICATION_STATUS_DOT[record.status] ?? 'bg-body'}`} />
       <div className="px-5 py-4 pl-7 sm:px-8 sm:py-5">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <ApplicationNumber id={record.id} />
+          {/* What was applied for, on the file's cover beside its number: nothing for a new applicant. */}
+          <span className="flex flex-wrap items-center gap-2">
+            <ApplicationNumber id={record.id} />
+            <KindBadge kind={record.kind} />
+          </span>
           <span className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <ApplicationStatusPill status={record.status} />
             {/* Once it is a borrower, where it ended up. Before that the outcome is the status itself. */}

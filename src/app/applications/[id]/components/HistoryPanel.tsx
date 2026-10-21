@@ -25,6 +25,7 @@ const WHAT: Record<string, string> = {
   edited: 'Edited the application',
   status: 'Changed the status',
   converted: 'Created the borrower from it',
+  linked: 'Linked it to the borrower and handed it to the branch',
   system_fix: 'Corrected automatically',
 };
 

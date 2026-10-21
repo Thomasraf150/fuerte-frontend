@@ -8,6 +8,7 @@ import { CHANNEL_SHORT_LABELS } from '@/utils/applicationForm';
 import { formatMoneyOrBlank } from '@/utils/helper';
 import ApplicationStatusPill, { IntakeFlagMark } from './ApplicationStatusPill';
 import { CHANNEL_ICONS } from './channelIcons';
+import KindBadge from './KindBadge';
 import OutcomePill from './OutcomePill';
 
 /*
@@ -135,14 +136,20 @@ const NameCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
       <Link href={`/applications/${row.id}`} prefetch={false} title={row.full_name} className={NAME_LINK}>
         {row.full_name}
       </Link>
-      {channel && ChannelIcon && (
+      {(channel || row.kind !== 'new') && (
         <span data-tag="allowRowEvents" className="flex min-w-0 items-center gap-1 text-xs text-body dark:text-bodydark">
-          {/* A decoration: pointer-events-none lets a click on it reach the tagged line, so it opens the row too. */}
-          <ChannelIcon aria-hidden="true" size={12} className="pointer-events-none shrink-0" />
-          <CellText>
-            <span className="sr-only">Saan galing: </span>
-            {CHANNEL_SHORT_LABELS[channel]}
-          </CellText>
+          {channel && ChannelIcon && (
+            <>
+              {/* A decoration: pointer-events-none lets a click on it reach the tagged line, so it opens the row too. */}
+              <ChannelIcon aria-hidden="true" size={12} className="pointer-events-none shrink-0" />
+              <CellText>
+                <span className="sr-only">Saan galing: </span>
+                {CHANNEL_SHORT_LABELS[channel]}
+              </CellText>
+            </>
+          )}
+          {/* A renewal or additional applicant is a borrower already: said beside where it came from. */}
+          <KindBadge kind={row.kind} />
         </span>
       )}
     </span>
@@ -158,6 +165,7 @@ const NameCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
  */
 const StatusCell: React.FC<{ row: LoanApplicationRow }> = ({ row }) => {
   const flags = row.intake_flags ?? [];
+  // A linked renewal's outcome IS its status ("Linked to borrower"): said once.
   const showOutcome = row.status === 'borrower_created' && !!row.outcome;
   return (
     <span data-tag="allowRowEvents" className="flex min-w-0 flex-col items-start gap-1 py-1">
