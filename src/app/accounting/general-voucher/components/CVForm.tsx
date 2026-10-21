@@ -469,6 +469,9 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                                 }}
                                 value={field.value ? optionsCoaData.find(opt => opt.value === field.value) || null : null}
                                 placeholder="Select Account"
+                                // The table's overflow-x-auto wrapper clips an inline menu; portal it to the body.
+                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                menuPosition="fixed"
                                 isLoading={!coaDataAccount || optionsCoaData.length <= 1}
                                 loadingMessage={() => "Loading accounts..."}
                               />
