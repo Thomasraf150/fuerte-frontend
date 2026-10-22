@@ -1,29 +1,25 @@
 /**
- * Unit tests for Income Statement Calculations
+ * Unit tests for Income Statement Calculations — pure money math, no browser.
  *
- * NOTE: This file requires Jest to be configured in the project.
- * Currently the project uses Playwright for E2E testing only.
- *
- * To run these tests:
- * 1. Install Jest: npm install --save-dev jest @types/jest ts-jest
- * 2. Create jest.config.js
- * 3. Run: npm test
- *
- * For now, these calculations are tested via E2E tests in Playwright.
+ * These were written for Jest, which this project never installed, so they sat
+ * next to the code and never ran. They now run under Playwright, the runner the
+ * project has; no test here uses `page`, so no browser or server is needed:
+ *   npx playwright test tests/e2e/43-income-statement-calculations
  */
 
+import { test, expect } from '@playwright/test';
 import Decimal from 'decimal.js';
 import {
   calculateMonthlyTotals,
   calculateVarianceTotal,
   extractMonthKeys,
   formatAmount,
-} from './incomeStatementCalculations';
-import { IncomeStatementRow } from '@/hooks/useFinancialStatement';
+} from '../../../src/app/accounting/income-statement/utils/incomeStatementCalculations';
+import { IncomeStatementRow } from '../../../src/hooks/useFinancialStatement';
 
-describe('incomeStatementCalculations', () => {
-  describe('calculateMonthlyTotals', () => {
-    it('should calculate correct totals for each month', () => {
+test.describe('incomeStatementCalculations', () => {
+  test.describe('calculateMonthlyTotals', () => {
+    test('should calculate correct totals for each month', () => {
       const data: IncomeStatementRow[] = [
         { AccountName: 'Account 1', acctnumber: '1001', variance: '100', '2025-01': '1000.50', '2025-02': '2000.75' },
         { AccountName: 'Account 2', acctnumber: '1002', variance: '50', '2025-01': '500.25', '2025-02': '750.00' },
@@ -36,19 +32,19 @@ describe('incomeStatementCalculations', () => {
       expect(result['2025-02'].toString()).toBe('2750.75');
     });
 
-    it('should handle undefined data', () => {
+    test('should handle undefined data', () => {
       const result = calculateMonthlyTotals(undefined, ['2025-01']);
 
       expect(result['2025-01'].toString()).toBe('0');
     });
 
-    it('should handle empty array', () => {
+    test('should handle empty array', () => {
       const result = calculateMonthlyTotals([], ['2025-01']);
 
       expect(result['2025-01'].toString()).toBe('0');
     });
 
-    it('should handle null and missing values', () => {
+    test('should handle null and missing values', () => {
       const data: IncomeStatementRow[] = [
         { AccountName: 'Account 1', acctnumber: '1001', variance: null, '2025-01': null, '2025-02': '1000' },
         { AccountName: 'Account 2', acctnumber: '1002', variance: '50', '2025-01': '500' },
@@ -62,8 +58,8 @@ describe('incomeStatementCalculations', () => {
     });
   });
 
-  describe('calculateVarianceTotal', () => {
-    it('should calculate correct variance total', () => {
+  test.describe('calculateVarianceTotal', () => {
+    test('should calculate correct variance total', () => {
       const data: IncomeStatementRow[] = [
         { AccountName: 'Account 1', acctnumber: '1001', variance: '100.50' },
         { AccountName: 'Account 2', acctnumber: '1002', variance: '50.25' },
@@ -74,13 +70,13 @@ describe('incomeStatementCalculations', () => {
       expect(result.toString()).toBe('150.75');
     });
 
-    it('should handle undefined data', () => {
+    test('should handle undefined data', () => {
       const result = calculateVarianceTotal(undefined);
 
       expect(result.toString()).toBe('0');
     });
 
-    it('should handle null variances', () => {
+    test('should handle null variances', () => {
       const data: IncomeStatementRow[] = [
         { AccountName: 'Account 1', acctnumber: '1001', variance: null },
         { AccountName: 'Account 2', acctnumber: '1002', variance: '50' },
@@ -92,8 +88,8 @@ describe('incomeStatementCalculations', () => {
     });
   });
 
-  describe('extractMonthKeys', () => {
-    it('should extract only month keys from data', () => {
+  test.describe('extractMonthKeys', () => {
+    test('should extract only month keys from data', () => {
       const data: IncomeStatementRow[] = [
         {
           row_count: 1,
@@ -115,7 +111,7 @@ describe('incomeStatementCalculations', () => {
       expect(result).not.toContain('variance');
     });
 
-    it('should return sorted month keys', () => {
+    test('should return sorted month keys', () => {
       const data: IncomeStatementRow[] = [
         {
           AccountName: 'Account 1',
@@ -132,33 +128,33 @@ describe('incomeStatementCalculations', () => {
       expect(result).toEqual(['2025-01', '2025-02', '2025-03']);
     });
 
-    it('should handle undefined data', () => {
+    test('should handle undefined data', () => {
       const result = extractMonthKeys(undefined);
 
       expect(result).toEqual([]);
     });
   });
 
-  describe('formatAmount', () => {
-    it('should format Decimal values with commas', () => {
+  test.describe('formatAmount', () => {
+    test('should format Decimal values with commas', () => {
       const result = formatAmount(new Decimal('1234567.89'));
 
       expect(result).toBe('1,234,567.89');
     });
 
-    it('should return dash for zero values', () => {
+    test('should return dash for zero values', () => {
       const result = formatAmount(new Decimal(0));
 
       expect(result).toBe('-');
     });
 
-    it('should handle string input', () => {
+    test('should handle string input', () => {
       const result = formatAmount('1234.56');
 
       expect(result).toBe('1,234.56');
     });
 
-    it('should handle number input', () => {
+    test('should handle number input', () => {
       const result = formatAmount(1234.56);
 
       expect(result).toBe('1,234.56');

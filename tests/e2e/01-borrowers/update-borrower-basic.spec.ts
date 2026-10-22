@@ -52,7 +52,7 @@ test.describe('Update Borrower', () => {
     await searchInList(page, originalData.email);
 
     // Click edit button (could be icon or text)
-    await page.click('button:has-text("Edit"), button[aria-label="Edit"], svg[data-feather="edit"]').first();
+    await page.locator('button:has-text("Edit"), button[aria-label="Edit"], svg[data-feather="edit"]').first().click();
     await page.waitForSelector('form', { timeout: 5000 });
     console.log('✅ Edit form opened');
 

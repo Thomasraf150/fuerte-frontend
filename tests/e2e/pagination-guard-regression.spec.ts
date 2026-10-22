@@ -359,11 +359,11 @@ test.describe('usePagination consumers — smoke', () => {
       const list = listCalls(calls);
       const tally = new Map<string, number>();
       for (const c of list) tally.set(callKey(c), (tally.get(callKey(c)) ?? 0) + 1);
-      const duplicated = [...tally.entries()].filter(([, n]) => n > 1);
+      const duplicated = Array.from(tally.entries()).filter(([, n]) => n > 1);
 
       console.log(
         `${route}: ${list.length} query(ies) -> ` +
-          [...tally.entries()].map(([k, n]) => `${k} x${n}`).join(' | '),
+          Array.from(tally.entries()).map(([k, n]) => `${k} x${n}`).join(' | '),
       );
       if (consoleErrors.length) console.log(`${route} console errors:`, consoleErrors.slice(0, 3));
 

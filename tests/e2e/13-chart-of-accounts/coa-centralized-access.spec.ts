@@ -90,7 +90,7 @@ test.describe('Chart of Accounts — centralized, branch-agnostic access', () =>
     const marikina = await restLogin(request, MARIKINA_PROCESSING, PASSWORD);
     const fb = await restLogin(request, NON_MARIKINA_PROCESSING, PASSWORD);
 
-    const setOf = (list: any[]) => [...new Set(list.map((a) => String(a.number)))].sort();
+    const setOf = (list: any[]) => Array.from(new Set(list.map((a) => String(a.number)))).sort();
 
     const marikinaSet = setOf(parentAccounts(await gqlAs(request, marikina.token, COA_QUERY, { input: {} })));
     const fbSet = setOf(parentAccounts(await gqlAs(request, fb.token, COA_QUERY, { input: {} })));
