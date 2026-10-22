@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DataAccBalanceSheet } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import FinancialStatementQueryMutations from '@/graphql/FinancialStatementQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
 import moment from 'moment';

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { RowAcctgEntry, DataGLRow } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';

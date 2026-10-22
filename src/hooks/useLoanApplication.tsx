@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import LoanApplicationQueries from '@/graphql/LoanApplicationQueries';
 import { useDownloadPdf } from '@/hooks/useDownloadPdf';
 import { graphqlFetch } from '@/utils/graphqlFetch';

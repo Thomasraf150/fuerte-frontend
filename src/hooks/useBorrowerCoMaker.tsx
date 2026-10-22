@@ -6,7 +6,7 @@ import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { BorrCoMakerFormValues, BorrCoMakerRowData } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 const useBorrowerCoMaker = () => {
 
   const { GET_BORROWER_CO_MAKER,

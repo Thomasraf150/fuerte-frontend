@@ -17,7 +17,7 @@ import NetMovementsByBranch from './components/NetMovementsByBranch';
 import useSummaryTicket from '@/hooks/useSummaryTicket';
 // import useCoa from '@/hooks/useCoa';
 import useBranches from '@/hooks/useBranches';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import PeriodPresets from '@/components/PeriodPresets';
 import Worklist from '@/components/Worklist';
 import SkeletonBlock from '@/components/LoadingStates/SkeletonBlock';

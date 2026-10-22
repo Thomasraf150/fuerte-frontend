@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import VendorQueryMutations from '@/graphql/VendorQueryMutations';
 import { RowVendorTypeData, RowVendorsData, RowSupCatData, RowCustCatData, RowDepartmentsData } from '@/utils/DataTypes';
 import { graphqlFetch } from '@/utils/graphqlFetch';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 
 const useVendor = () => {

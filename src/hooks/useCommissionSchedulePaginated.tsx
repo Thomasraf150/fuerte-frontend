@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import CommissionScheduleQueryMutations from '@/graphql/CommissionScheduleQueryMutations';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

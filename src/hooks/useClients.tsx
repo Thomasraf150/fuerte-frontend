@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanClientsQueryMutations from '@/graphql/LoanClientsQueryMutations';
 import { DataRowClientList } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { usePagination } from './usePagination';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

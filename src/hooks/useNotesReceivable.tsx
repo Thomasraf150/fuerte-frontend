@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import NotesReceivableQueryMutation from '@/graphql/NotesReceivableQueryMutation';
 // import { SummaryTicketValues } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

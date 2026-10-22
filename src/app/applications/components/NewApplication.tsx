@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'nextjs-toploader/app';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { ArrowLeft } from 'react-feather';
 import BorrowerDetails from '@/app/borrowers/components/TabForm/BorrowerDetails';
 import useNewApplication from '@/hooks/useNewApplication';

@@ -7,6 +7,7 @@ import { useRouter } from 'nextjs-toploader/app';
 import NextTopLoader from 'nextjs-toploader';
 import { ToastContainer } from 'react-toastify';
 import CallCenterGuard from "@/components/Guards/CallCenterGuard";
+import NoticeDialog from "@/components/NoticeDialog";
 import useMaintenanceRedirect from '@/hooks/useMaintenanceRedirect';
 import { BRAND } from '@/utils/brandColors';
 
@@ -70,6 +71,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         toastClassName="font-satoshi"
         bodyClassName="font-satoshi"
         autoClose={3000}
+        limit={3}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -79,6 +81,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         pauseOnHover
         theme="light"
       />
+      {/* Errors and warnings: they stay until OK instead of fading with the toasts (utils/notify.ts). */}
+      <NoticeDialog />
     </>
   );
 }

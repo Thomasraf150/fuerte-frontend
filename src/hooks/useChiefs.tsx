@@ -6,7 +6,7 @@ import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataChief } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 const useChiefs = () => {
 
   const { GET_CHIEF_QUERY,

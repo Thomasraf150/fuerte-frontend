@@ -9,7 +9,7 @@ import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } fro
 import { checkBorrowerDuplicates, getAuthUserData } from '@/utils/borrowerDuplicateCheck';
 import { withApplication, type ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { useAuthStore } from "@/store/authStore";
 
 /**

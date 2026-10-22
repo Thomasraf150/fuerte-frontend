@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { DataChartOfAccountList, DataSubBranches } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import CoaQueryMutations from '@/graphql/CoaQueryMutations';
 import BranchQueryMutation from '@/graphql/BranchQueryMutation';
 import { graphqlFetch } from '@/utils/graphqlFetch';

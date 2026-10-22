@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import LoanApplicationQueries from '@/graphql/LoanApplicationQueries';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import type { LoanApplicationInput } from '@/utils/applicationForm';

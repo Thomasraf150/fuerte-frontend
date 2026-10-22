@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import DeletionRequestsQueryMutation from "@/graphql/DeletionRequestsQueryMutation";
 import { graphqlFetch } from "@/utils/graphqlFetch";
 import { DEFAULT_PAGE_SIZE } from "@/constants/pagination";

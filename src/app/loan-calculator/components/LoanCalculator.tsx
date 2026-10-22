@@ -21,7 +21,7 @@
 
 import { MIN_BUSINESS_DATE } from '@/constants/dateBounds';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 import Button from '@/components/Button';
 import AsyncReactSelect from '@/components/ReactSelect/AsyncReactSelect';

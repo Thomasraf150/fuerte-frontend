@@ -8,7 +8,7 @@ import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataArea, DataSubArea } from '@/utils/DataTypes';
 import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 
 const useSubArea = () => {
   const { GET_AREA_QUERY,

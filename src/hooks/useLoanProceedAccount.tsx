@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { DataLoanProceedList, DataLoanProceedAcctData } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import LoanProceedSettingQueryMutations from '@/graphql/LoanProceedSettingQueryMutations';
 import { fetchWithRecache } from '@/utils/helper';
 import { graphqlFetch } from '@/utils/graphqlFetch';

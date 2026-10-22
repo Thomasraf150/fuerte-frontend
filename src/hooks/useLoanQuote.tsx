@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useState, useRef } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { useAuthStore } from '@/store';
 import { fetchWithRecache } from '@/utils/helper';
 import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';

@@ -1,13 +1,14 @@
 import AsyncSelect from 'react-select/async';
-import { StylesConfig } from 'react-select';
+import { GroupBase, OptionsOrGroups, StylesConfig } from 'react-select';
 import { FC, useRef, useCallback, useEffect } from 'react';
 import { useSelectTheme } from '@/hooks/useSelectTheme';
 import { SelectOption } from '@/utils/DataTypes';
-import { composeStyles } from '@/components/ReactSelect';
+import { composeStyles, useMenuPlacement } from '@/components/ReactSelect';
 
 interface AsyncReactSelectProps {
   loadOptions: (inputValue: string) => Promise<SelectOption[]>;
-  defaultOptions?: SelectOption[] | boolean;
+  /** Options shown before typing; groups allowed (Create Loans heads its list with renewal suggestions). */
+  defaultOptions?: OptionsOrGroups<SelectOption, GroupBase<SelectOption>> | boolean;
   onChange: (selectedOption: SelectOption | null) => void;
   value: SelectOption | null;
   placeholder?: string;
@@ -54,6 +55,7 @@ const AsyncReactSelect: FC<AsyncReactSelectProps> = ({
   // Same per-key composition as ReactSelect, so a caller's `control` extends the
   // themed one instead of replacing it and losing dark mode.
   const mergedStyles = composeStyles(themeStyles, customStyles);
+  const placement = useMenuPlacement(menuPortalTarget, menuPosition);
 
   // Promise-based debounced load options (300ms delay)
   const debouncedLoadOptions = useCallback(
@@ -86,8 +88,10 @@ const AsyncReactSelect: FC<AsyncReactSelectProps> = ({
       classNamePrefix="react-select"
       styles={mergedStyles}
       theme={theme}
-      menuPortalTarget={menuPortalTarget}
-      menuPosition={menuPosition}
+      menuPortalTarget={placement.menuPortalTarget}
+      menuPosition={placement.menuPosition}
+      closeMenuOnScroll={placement.closeMenuOnScroll}
+      onMenuOpen={placement.onMenuOpen}
       isDisabled={isDisabled}
       isLoading={isLoading}
       loadingMessage={loadingMessage}

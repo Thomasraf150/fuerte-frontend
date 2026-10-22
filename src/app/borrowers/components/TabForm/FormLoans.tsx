@@ -6,15 +6,16 @@ import PesoSign from '@/components/PesoSign';
 import Button from '@/components/Button';
 import StickyActions from '@/components/StickyActions';
 import FormInput from '@/components/FormInput';
-import { BorrowerRowInfo, BorrLoanFormValues, DataSubBranches, DataRenewalData, SelectOption } from '@/utils/DataTypes';
+import { BorrowerRowInfo, BorrLoanFormValues, BorrLoanRowData, DataSubBranches, DataRenewalData, SelectOption } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';
 import AsyncReactSelect from '@/components/ReactSelect/AsyncReactSelect';
 import FormLoanComputation from './FormLoanComputation';
 import RenewalAmntForm from './RenewalAmntForm';
 import useLoans from '@/hooks/useLoans';
+import useRenewalProductSuggestions from '@/hooks/useRenewalProductSuggestions';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 
 interface ParentFormBr {
   createLoans: (value: boolean) => void;
@@ -24,9 +25,16 @@ interface ParentFormBr {
   loadingMyAccessibleBranches: boolean;
   dataLoanRenewal: string[] | [];
   dataComputedRenewal: DataRenewalData | undefined;
+  /** The old loans being renewed, as the Loans tab has them: their product, terms, PN and dates. */
+  renewalLoans?: BorrLoanRowData[];
 }
 
-const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub: _dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches, dataLoanRenewal, dataComputedRenewal }) => {
+/** How long typing in Outstanding Balance, Penalty or Rebates rests before it recomputes. */
+const RECOMPUTE_AFTER_MS = 600;
+
+const NO_LOANS: BorrLoanRowData[] = [];
+
+const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerData, dataBranchSub: _dataBranchSub, myAccessibleBranchSubs, loadingMyAccessibleBranches, dataLoanRenewal, dataComputedRenewal, renewalLoans = NO_LOANS }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors, isDirty }, control } = useForm<BorrLoanFormValues>();
   const { dataComputedLoans, onSubmitLoanComp, loanProduct, loading, searchLoanProducts } = useLoans();
 
@@ -35,6 +43,11 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
   // Compute only (useLoans' `loading` also covers Save): drives the receipt's skeleton figures.
   const [computing, setComputing] = useState<boolean>(false);
   const computesInFlight = useRef(0);
+  const recomputeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (recomputeTimer.current) clearTimeout(recomputeTimer.current);
+  }, []);
+  const renewalSuggestions = useRenewalProductSuggestions(renewalLoans);
 
 
   // Safety utility to ensure numeric values are clean (backup for edge cases)
@@ -46,6 +59,11 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
 
   // Standard React Hook Form pattern (following BorrowerDetails.tsx)
   const onSubmit = (data: BorrLoanFormValues, submitActionType?: 'compute' | 'save') => {
+    // Compute or Save pressed while an edit's recompute waits: this one already carries the edit.
+    if (recomputeTimer.current) {
+      clearTimeout(recomputeTimer.current);
+      recomputeTimer.current = null;
+    }
     // Basic validation for required fields
     if (!data.branch_sub_id || !data.loan_product_id) {
       toast.error("Please select branch and loan product");
@@ -120,10 +138,13 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
     // Value is already formatted to 2 decimals by FormInput currency formatType
     setValue(type, value);
 
-    // Defer submission to next event loop tick to allow React Hook Form state to update
-    setTimeout(() => {
+    // Recompute once typing rests, not per keystroke: each keystroke used to send a compute, and
+    // each refusal ("must equal the renewal total") stacked another error (2026-10-22).
+    if (recomputeTimer.current) clearTimeout(recomputeTimer.current);
+    recomputeTimer.current = setTimeout(() => {
+      recomputeTimer.current = null;
       handleSubmit((data) => onSubmit(data, 'compute'))();
-    }, 0);
+    }, RECOMPUTE_AFTER_MS);
   };
 
 
@@ -185,7 +206,7 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
         <div> {/* column 1 */}
           <form onSubmit={handleSubmit((data) => onSubmit(data))} >
             {/* Renewal Form */}
-            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={setRenewalDetails} />}
+            {dataLoanRenewal.length > 0 && <RenewalAmntForm renewalIDs={dataLoanRenewal} setValue={setValue} watch={watch} dataComputedRenewal={dataComputedRenewal} loading={loading} fnGetRenewalDetails={setRenewalDetails} oldLoans={renewalLoans} />}
             <div className="mb-3">
               <FormLabel title={`Branch`}/>
               <Controller
@@ -222,7 +243,12 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                 render={({ field }) => (
                   <AsyncReactSelect
                     loadOptions={searchLoanProducts}
-                    defaultOptions={loanProdOptions}
+                    defaultOptions={renewalSuggestions
+                      ? [
+                          { label: renewalSuggestions.label, options: renewalSuggestions.options },
+                          { label: 'All loan products', options: loanProdOptions.filter((option) => !option.hidden) },
+                        ]
+                      : loanProdOptions}
                     menuPortalTarget={document.body}
                     menuPosition="fixed"
                     placeholder="Type to search loan products..."

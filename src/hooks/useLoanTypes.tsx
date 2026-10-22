@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import LoanTypeQueryMutations from '@/graphql/LoanTypeQueryMutations';
 import { DataRowLoanTypeList, DataFormLoanType } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 

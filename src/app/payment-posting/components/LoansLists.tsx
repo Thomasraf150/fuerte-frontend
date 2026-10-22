@@ -9,7 +9,7 @@ import { Card, CardHeader, CardBody } from '@/components/Card';
 import loansListColumn from './LoansListColumn';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 
 const column = loansListColumn;
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import GeneralVoucherQueryMutations from '@/graphql/GeneralVoucherQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { fetchWithRecache } from '@/utils/helper';
 import { usePagination } from './usePagination';

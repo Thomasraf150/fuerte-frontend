@@ -3,10 +3,11 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Home, ChevronDown } from 'react-feather';
 import FormInput from '@/components/FormInput'
-import { DataRenewalData } from '@/utils/DataTypes';
+import { BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import { formatNumber } from '@/utils/formatNumber';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
+import { formatDate } from '@/utils/formatters';
 
 interface ParentFormBr {
   renewalIDs: string[] | [];
@@ -15,9 +16,40 @@ interface ParentFormBr {
   setValue: any;
   watch: any;
   loading?: boolean;
+  /** The old loans' own rows from the Loans tab, matched to the renewal rows by loan_ref. */
+  oldLoans?: BorrLoanRowData[];
 }
 
-const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenewal, setValue, watch, loading = false, fnGetRenewalDetails }) => {
+/**
+ * What the old loan was, under its ref (2026-10-22): staff pick the new product and amount from
+ * this, and before it they had to leave the form to look it up.
+ */
+function OldLoanFacts({ loan }: { loan: BorrLoanRowData }) {
+  const term = Number(loan.term);
+  const facts: Array<[string, string]> = [
+    ['Term', term ? `${term} ${term === 1 ? 'month' : 'months'}` : '-'],
+    ['PN', `₱${formatNumber(Number(loan.pn_amount))}`],
+    ['Monthly', `₱${formatNumber(Number(loan.monthly))}`],
+    ['Released', formatDate(loan.released_date)],
+  ];
+  return (
+    <div className="mt-1 min-w-0">
+      <div className="font-medium text-black dark:text-white break-words">
+        {loan.loan_product?.description ?? 'Product not recorded'}
+      </div>
+      <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs">
+        {facts.map(([label, value]) => (
+          <div key={label} className="flex gap-1">
+            <dt className="text-body dark:text-bodydark">{label}</dt>
+            <dd className="font-medium tabular-nums text-black dark:text-white">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenewal, setValue, watch, loading = false, fnGetRenewalDetails, oldLoans = [] }) => {
   // const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<BorrCoMakerFormValues>();
 
   const [openRows, setOpenRows] = useState<number[]>([]); // To hold multiple open row indexes
@@ -94,9 +126,6 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
     );
     setValue('ob', renewalTotal.toFixed(2));
 
-    // console.log(unifiedSelectedValues, ' unifiedSelectedValues');
-    console.log(dataComputedRenewal, ' dataComputedRenewal');
-    console.log(unifiedSelectedValues, ' unifiedSelectedValues');
     if (fnGetRenewalDetails) {
       fnGetRenewalDetails(unifiedSelectedValues);
     }
@@ -115,7 +144,7 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
           <table className="min-w-full text-sm">
             <thead className="bg-gray-2">
               <tr>
-                <th className="border px-4 py-2 text-left">Ref #</th>
+                <th className="border px-4 py-2 text-left">Old loan</th>
                 <th className="border px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
@@ -123,8 +152,14 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
               {dataComputedRenewal && dataComputedRenewal?.map((v: any, index: number) => (
               <React.Fragment key={index}>
                 <tr className="hover:bg-gray">
-                  <td className="border px-4 py-2">{v.loan_ref}</td>
-                  <td className="border px-4 py-2">
+                  <td className="border px-4 py-2 align-top">
+                    <div className="font-semibold">{v.loan_ref}</div>
+                    {(() => {
+                      const loan = oldLoans.find((row) => row.loan_ref === v.loan_ref);
+                      return loan ? <OldLoanFacts loan={loan} /> : null;
+                    })()}
+                  </td>
+                  <td className="border px-4 py-2 align-top">
                     <button
                       type="button"
                       onClick={() => toggleRow(index)}

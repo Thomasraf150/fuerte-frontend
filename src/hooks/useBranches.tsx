@@ -8,7 +8,7 @@ import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataBranches, DataBranchGroup, DataFormBranch, AuthStoreData, DataSubBranches, DataFormSubBranches } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 const useBranches = () => {
   const {
     SAVE_BRANCH_MUTATION,

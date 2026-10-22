@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthStore } from "@/store";
   

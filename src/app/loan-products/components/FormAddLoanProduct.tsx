@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { Home, ChevronDown, Save, RotateCw, AlertCircle } from 'react-feather';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import FormInput from '@/components/FormInput';
 import FormLabel from '@/components/FormLabel';
 import ReactSelect from '@/components/ReactSelect';

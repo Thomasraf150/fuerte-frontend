@@ -10,7 +10,7 @@ import Button from '@/components/Button';
 import { Card, CardBody } from '@/components/Card';
 import usePaymentPosting from '@/hooks/usePaymentPosting';
 import PaymentScheduleForm from '../components/PaymentScheduleForm';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { useDocumentTitle, loanTitle } from '@/hooks/useDocumentTitle';
 
 const PaymentPostingDetailPage: React.FC = () => {

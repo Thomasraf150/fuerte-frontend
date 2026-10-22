@@ -8,7 +8,7 @@ import ChartofAcctList from './components/ChartofAcctList';
 import CoaForm from './components/CoaForm';
 import { DataChartOfAccountList } from '@/utils/DataTypes';
 import useCoa from '@/hooks/useCoa';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 import SkeletonBlock from "@/components/LoadingStates/SkeletonBlock";
 

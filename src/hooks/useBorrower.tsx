@@ -9,7 +9,7 @@ import useBorrowerBase from './useBorrowerBase';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { BorrowerInfo, BorrowerRowInfo, PayerFilter } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 
 /**
  * Hook for borrower list page operations

@@ -8,7 +8,7 @@ import { usePagination } from './usePagination';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataArea, DataSubBranches } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 
 const useArea = () => {
   const { GET_AREA_QUERY,

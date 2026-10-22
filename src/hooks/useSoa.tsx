@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CustomerLedgerData } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import SoaQueryMutation from '@/graphql/SoaQueryMutation';
 import { fetchWithRecache } from '@/utils/helper';
 import { useDownloadPdf } from '@/hooks/useDownloadPdf';

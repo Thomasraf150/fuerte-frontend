@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import SummaryTicketReports from '@/graphql/SummaryTicketReportsQueryMutation';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

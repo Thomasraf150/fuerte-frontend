@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { DataColListRow } from '@/utils/DataTypes';
 import useCollectionList from '@/hooks/useCollectionList';
 import collectionListCol from './CollectionListCol';

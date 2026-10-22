@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import VendorQueryMutations from '@/graphql/VendorQueryMutations';
 import { graphqlFetch } from '@/utils/graphqlFetch';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 
 export interface PayeeOption {
   id: string;

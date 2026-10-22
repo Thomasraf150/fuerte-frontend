@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import LoansQueryMutation from '@/graphql/LoansQueryMutation';
 import { BorrLoanRowData, LoanBankFormValues, LoanReleaseFormValues, DataRenewalData } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { useAuthStore } from "@/store";
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { fetchWithRecache } from '@/utils/helper';

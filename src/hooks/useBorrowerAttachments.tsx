@@ -7,7 +7,7 @@ import { graphqlFetch } from '@/utils/graphqlFetch';
 import { useAuthStore } from '@/store';
 
 import { BorrAttachmentsFormValues, BorrAttachmentsRowData } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 const useBorrowerAttachments = () => {
 
   const { 

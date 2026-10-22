@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { showDeletionRequestPrompt, showProcessingModal } from "@/components/ConfirmationModal";
 import { graphqlFetch } from "@/utils/graphqlFetch";
 

@@ -6,7 +6,7 @@ import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMut
 import { usePagination } from './usePagination';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { DataBorrCompanies } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { ServerSidePaginationProps } from '@/components/CustomDatatable';
 
 const useBorrCompanies = () => {

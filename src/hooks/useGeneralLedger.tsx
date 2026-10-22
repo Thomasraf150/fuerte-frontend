@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import GeneralLedgerQueryMutations from '@/graphql/GeneralLedgerQueryMutations';
 import { RowAcctgEntry, DataGLRow } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

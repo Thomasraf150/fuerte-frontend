@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '@/utils/notify';
 import { MAX_COMPANY_DROPDOWN_SIZE, MAX_DROPDOWN_SIZE } from '@/constants/pagination';
 import useBorrowerBase from '@/hooks/useBorrowerBase';
 

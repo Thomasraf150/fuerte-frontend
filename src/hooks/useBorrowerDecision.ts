@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import BorrowerQueryMutations from "@/graphql/BorrowerQueryMutations";
 import type { BorrowerDecision } from "@/utils/DataTypes";
 import { GraphQLConnectionError, graphqlFetch } from "@/utils/graphqlFetch";

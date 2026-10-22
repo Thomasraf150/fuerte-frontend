@@ -4,7 +4,7 @@ import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { BorrowerInfo } from '@/utils/DataTypes';
 import type { ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import useBorrowerBase from './useBorrowerBase';
 
 /**

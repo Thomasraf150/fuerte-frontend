@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useRouter } from 'nextjs-toploader/app';
 import { Lock, XOctagon } from 'react-feather';
 import { BorrowerDecision, BorrowerRowInfo, BorrLoanRowData } from '@/utils/DataTypes';
@@ -62,6 +62,11 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData, decis
   const [btnRenewal, setBtnRenewal] = useState<boolean>(true);
   const [dataLoanComputed, setDataLoanComputed] = useState<BorrLoanRowData>();
   const [dataLoanRenewal, setDataLoanRenewal] = useState<string[]>([]);
+  // The ticked loans' own rows, so the renewal form can show what each old loan was.
+  const renewalLoans = useMemo(
+    () => (Array.isArray(loanData) ? loanData : []).filter((row: BorrLoanRowData) => dataLoanRenewal.includes(row.id)),
+    [loanData, dataLoanRenewal],
+  );
 
   const createLoans = (b: boolean) => {
     setShowForm(b);
@@ -175,7 +180,7 @@ const BorrowerLoans: React.FC<BorrAttProps> = ({ singleData: BorrowerData, decis
             />
           </div>
         ) : (
-          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} myAccessibleBranchSubs={myAccessibleBranchSubs} loadingMyAccessibleBranches={loadingMyAccessibleBranches} dataLoanRenewal={dataLoanRenewal} dataComputedRenewal={dataComputedRenewal}/>
+          <FormLoans singleData={BorrowerData} createLoans={createLoans} dataBranchSub={dataBranchSub} myAccessibleBranchSubs={myAccessibleBranchSubs} loadingMyAccessibleBranches={loadingMyAccessibleBranches} dataLoanRenewal={dataLoanRenewal} dataComputedRenewal={dataComputedRenewal} renewalLoans={renewalLoans}/>
         )}
       </div>
       {showDetails && (

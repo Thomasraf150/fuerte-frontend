@@ -4,7 +4,7 @@ import ErrorAlert from "@/components/ErrorAlert";
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "nextjs-toploader/app";
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import {
   useProblemAccountsPaginated,
   ProblemAccountRow,

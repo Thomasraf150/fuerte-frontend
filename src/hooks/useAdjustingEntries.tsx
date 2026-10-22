@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import AdjustingEntriesQueryMutations from '@/graphql/AdjustingEntriesQueryMutations';
 import { RowAcctgEntry } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { usePagination } from './usePagination';
 import { graphqlFetch } from '@/utils/graphqlFetch';

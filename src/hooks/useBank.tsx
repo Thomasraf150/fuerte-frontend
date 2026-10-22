@@ -7,7 +7,7 @@ import BranchQueryMutation from '@/graphql/BranchQueryMutation';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
 import { DataBank, DataSubBranches } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 const useBank = () => {
 
   const { GET_BANKS_QUERY, UPDATE_BANK_MUTATION, SAVE_BANK_MUTATION, DELETE_BANK_MUTATION } = BankQueryMutations;

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import TrialBalanceQueryMutations from '@/graphql/TrialBalanceQueryMutations';
 import { DataTbRow } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { manilaToday } from '@/utils/reportPeriod';
 

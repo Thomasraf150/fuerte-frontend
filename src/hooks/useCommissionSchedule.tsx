@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import CommissionScheduleQueryMutations from '@/graphql/CommissionScheduleQueryMutations';
 // import { SummaryTicketValues } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import moment from 'moment';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

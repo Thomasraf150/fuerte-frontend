@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import UserQueryMutations from '@/graphql/UserQueryMutation';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import { User, DataFormUser, DataSubBranches, DataRoles } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { usePagination } from './usePagination';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 

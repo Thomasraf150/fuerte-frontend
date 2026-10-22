@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { useDebounce } from "@/hooks/useDebounce";
 import useBranches from "@/hooks/useBranches";
 import {

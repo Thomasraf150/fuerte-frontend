@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import LoanCodeQueryMutations from '@/graphql/LoanCodeQueryMutations';
 import LoanClientsQueryMutations from '@/graphql/LoanClientsQueryMutations';
 import { DataRowLoanCodes, DataFormLoanCodes, DataRowClientList, DataRowLoanTypeList } from '@/utils/DataTypes';
-import { toast } from "react-toastify";
+import { toast } from '@/utils/notify';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { usePagination } from './usePagination';
 import { MAX_DROPDOWN_SIZE } from '@/constants/pagination';
