@@ -36,6 +36,8 @@ interface ReactSelectComponentProps {
   styles?: StylesConfig<SelectOption, false>;
   menuPortalTarget?: HTMLElement | null;
   menuPosition?: 'fixed' | 'absolute';
+  /** Below this much room under the field, the menu opens upward instead of shrinking. */
+  minMenuHeight?: number;
   isDisabled?: boolean;
   isLoading?: boolean;
   loadingMessage?: () => string;
@@ -62,6 +64,7 @@ const ReactSelect = forwardRef<SelectInstance<SelectOption, false>, ReactSelectC
   styles: customStyles,
   menuPortalTarget,
   menuPosition,
+  minMenuHeight,
   isDisabled,
   isLoading = false,
   loadingMessage = () => 'Loading options...',
@@ -92,6 +95,7 @@ const ReactSelect = forwardRef<SelectInstance<SelectOption, false>, ReactSelectC
       theme={theme}
       menuPortalTarget={menuPortalTarget}
       menuPosition={menuPosition}
+      minMenuHeight={minMenuHeight}
       isDisabled={isDisabled}
       isLoading={isLoading}
       loadingMessage={loadingMessage}

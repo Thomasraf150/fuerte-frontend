@@ -217,6 +217,8 @@ const CdjForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, l
                                 // The table's overflow-x-auto wrapper clips an inline menu; portal it to the body.
                                 menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                                 menuPosition="fixed"
+                                // With under 200px below the row, it opens upward rather than squeezing into a sliver.
+                                minMenuHeight={200}
                                 isLoading={!coaDataAccount || optionsCoaData.length <= 1}
                                 loadingMessage={() => "Loading accounts..."}
                               />
