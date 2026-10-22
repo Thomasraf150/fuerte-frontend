@@ -203,6 +203,11 @@ const FormLoans: React.FC<ParentFormBr> = ({ createLoans, singleData: BorrowerDa
                     value={branchOptions.find(option => String(option.value) === String(field.value)) || null}
                     isLoading={loadingMyAccessibleBranches}
                     loadingMessage={() => "Loading accessible branches..."}
+                    // BorrowerInfo's overflow-clip card would cut the menu off, and the save bar sits over it.
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    // With under 200px below the field, it opens upward rather than squeezing into a sliver.
+                    minMenuHeight={200}
                   />
                 )}
               />
