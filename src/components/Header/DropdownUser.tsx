@@ -3,6 +3,7 @@ import Link from "next/link";
 import { User } from "react-feather";
 import useLogin from '@/hooks/useLogin';
 import DarkModeSwitcher from "./DarkModeSwitcher";
+import { branchScopeOf, MoreBranchesChip, MyBranchesList, useMyBranches } from "./MyBranches";
 
 /** "Maria dela Cruz" -> "MC": first and last word, upper-cased; empty when there is no name. */
 const initialsOf = (name?: string | null): string => {
@@ -54,6 +55,9 @@ const DropdownUser = () => {
   });
 
   const initials = initialsOf(userData?.user?.name);
+  const user = userData?.user;
+  const { branches, failed } = useMyBranches(user, dropdownOpen);
+  const scope = branchScopeOf(user, branches?.length);
 
   const { logout } = useLogin();
 
@@ -73,7 +77,10 @@ const DropdownUser = () => {
           <span className="block text-sm font-medium text-black dark:text-white">
             {userData?.user?.name?.toUpperCase()}
           </span>
-          <span className="block text-xs">{userData?.user?.branch_sub?.name?.toUpperCase()}</span>
+          <span className="block text-xs">
+            {scope.all ? "ALL BRANCHES" : scope.home.toUpperCase()}{" "}
+            <MoreBranchesChip extra={scope.extra} />
+          </span>
         </span>
 
         <span
@@ -110,6 +117,8 @@ const DropdownUser = () => {
           dropdownOpen === true ? "block" : "hidden"
         }`}
       >
+        {/* Only while open: hidden, its branch names would still be in the page beside every branch picker's. */}
+        {dropdownOpen ? <MyBranchesList user={user} branches={branches} failed={failed} /> : null}
         <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
           {/* Phones: the dark-mode switch, which the top bar leaves out below sm to fit the worded Search. */}
           <li className="flex items-center justify-between gap-3 text-sm font-medium sm:hidden">
