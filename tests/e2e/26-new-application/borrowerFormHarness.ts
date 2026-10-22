@@ -171,6 +171,9 @@ export class FakeBackend {
         return { getBorrCompanies: { data: COMPANIES } };
       case 'getMyAccessibleBranchSubs':
         return { getMyAccessibleBranchSubs: BRANCH_SUBS };
+      // The header's branch list on every page: Call Center's comes from here (Header/MyBranches).
+      case 'getApplicationBranches':
+        return { getApplicationBranches: BRANCH_SUBS.map(({ id, name }) => ({ id, name })) };
       case 'checkBorrowerDuplicate':
         return { checkBorrowerDuplicate: { isDuplicate: false, duplicateType: null, duplicateBorrower: null, duplicateProblem: null } };
       // Not saved: the form stays open, so the test reads what was posted without leaving the page.
