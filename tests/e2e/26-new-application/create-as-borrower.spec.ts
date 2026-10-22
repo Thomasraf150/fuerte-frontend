@@ -260,7 +260,7 @@ const onBranch = (index: number) => ({
 });
 
 const application = (over: Partial<LoanApplicationRecord> = {}): LoanApplicationRecord => ({
-  id: String(ID), source: 'manual', channel: 'walk_in', submitted_at: '2026-09-30 10:15:00', location: null,
+  id: String(ID), source: 'manual', channel: 'walk_in', kind: 'new', linked_borrower_id: null, submitted_at: '2026-09-30 10:15:00', location: null,
   ...onBranch(0), status: 'interviewed', borrower_id: null, full_name: 'Maria Cruz Reyes', contact_no: '09170000041',
   amount_applied: '20000.00', purpose: 'Tuition', intake_flags: [], created_at: '2026-09-30 10:15:00',
   details: DETAILS, form_answers: [], exact_time: false, can_edit: true, borrower_decision: null,

@@ -25,7 +25,7 @@ import { expect, sidewaysScroll, signedInAs, test, type FakeBackend } from '../2
 test.setTimeout(180_000);
 
 const row = (over: Partial<LoanApplicationRow>): LoanApplicationRow => ({
-  id: '1', source: 'manual', channel: 'walk_in', submitted_at: '2026-10-02 09:15:00', location: null,
+  id: '1', source: 'manual', channel: 'walk_in', kind: 'new', submitted_at: '2026-10-02 09:15:00', location: null,
   branch_sub: { id: '9101', name: 'E2E Sub-branch A' }, status: 'interviewed', full_name: 'E2E Applicant One',
   contact_no: '09170000001', amount_applied: '15000.00', purpose: 'Store capital', intake_flags: [],
   outcome: 'interviewed', outcome_label: 'Interviewed', decline_reason: null,
@@ -61,11 +61,13 @@ async function openList(page: Page, backend: FakeBackend, query = ''): Promise<v
 test.describe('1. The address params, with no browser', () => {
   test('readListParams keeps only what is well formed', () => {
     expect(readListParams({ outcome: 'loan_released', from: '2026-10-01', to: '2026-10-31' })).toEqual({
-      outcome: 'loan_released', status: null, period: { from: '2026-10-01', to: '2026-10-31' },
+      outcome: 'loan_released', status: null, period: { from: '2026-10-01', to: '2026-10-31' }, kind: null,
     });
-    expect(readListParams({ status: 'borrower_created' })).toEqual({ outcome: null, status: 'borrower_created', period: null });
+    expect(readListParams({ status: 'borrower_created' })).toEqual({ outcome: null, status: 'borrower_created', period: null, kind: null });
     // Unknown words, a lone day, a backwards range and a day that does not exist are all ignored.
-    expect(readListParams({ outcome: 'won', status: 'deleted', from: '2026-10-01' })).toEqual({ outcome: null, status: null, period: null });
+    expect(readListParams({ outcome: 'won', status: 'deleted', from: '2026-10-01', kind: 'bonus' })).toEqual({ outcome: null, status: null, period: null, kind: null });
+    // The kind (2026-10-21): the funnel's links ask for new applicants.
+    expect(readListParams({ kind: 'renewal' }).kind).toBe('renewal');
     expect(readListParams({ from: '2026-10-31', to: '2026-10-01' }).period).toBeNull();
     expect(readListParams({ from: '2026-02-30', to: '2026-03-01' }).period).toBeNull();
     expect(readListParams({ outcome: ['declined', 'rejected'] }).outcome).toBe('declined');
@@ -77,6 +79,7 @@ test.describe('1. The address params, with no browser', () => {
       '/applications?outcome=approved&from=2026-10-01&to=2026-10-31',
     );
     expect(listHref({ status: 'borrower_created' })).toBe('/applications?status=borrower_created');
+    expect(listHref({ outcome: 'declined', kind: 'new' })).toBe('/applications?outcome=declined&kind=new');
   });
 });
 
@@ -98,7 +101,8 @@ test.describe('2-5. The list', () => {
     // The dev build's Strict Mode may fetch the first page twice; count from what is already there.
     await page.waitForTimeout(800);
     const before = listCalls(backend).length;
-    await expect(outcomeSelect(page).locator('option')).toHaveCount(12);
+    // Any outcome, then the twelve (Linked to borrower since 2026-10-21).
+    await expect(outcomeSelect(page).locator('option')).toHaveCount(13);
 
     await outcomeSelect(page).selectOption('loan_released');
 

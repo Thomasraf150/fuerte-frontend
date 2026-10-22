@@ -16,7 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import {
-  APPLICATION_REQUIRED_FIELDS, CHANNELS, CHANNEL_LABELS, DATE_APPLIED_FROM, REFERENCE_POSITIONS, canCorrectDateApplied,
+  APPLICATION_REQUIRED_FIELDS, CHANNELS, CHANNEL_LABELS, DATE_APPLIED_FROM, KINDS, KIND_LABELS, REFERENCE_POSITIONS, canCorrectDateApplied,
   dateAppliedBounds, fromApplicationRecord, hasBlankBasic, submittedDay, toApplicationInput, toApplicationUpdateInput,
 } from '../../../src/utils/applicationForm';
 import type { LoanApplicationDetails, LoanApplicationRecord, LoanApplicationReference } from '../../../src/utils/DataTypes';
@@ -49,6 +49,7 @@ const BASICS = {
 
 const BASICS_INPUT = {
   channel: 'facebook',
+  kind: 'new',
   branch_sub_id: 9102,
   info: { firstname: 'JUANA', lastname: 'DELA CRUZ', amount_applied: '15000', purpose: 'Store capital' },
   detail: { contact_no: '09170000011' },
@@ -121,6 +122,7 @@ test('the full form: every group, with the input names and Int fields as numbers
 
   expect(toApplicationInput(values, 'walk_in', '9101')).toEqual({
     channel: 'walk_in',
+    kind: 'new',
     branch_sub_id: 9101,
     info: {
       firstname: 'JUANA',
@@ -313,6 +315,7 @@ test('Type of Residency goes only beside an address, Own included', () => {
 test('a blank basic stays in the output, as the input type requires; the page stops it before posting', () => {
   expect(toApplicationInput({ contact_no: '' }, 'facebook', 9102)).toEqual({
     channel: 'facebook',
+    kind: 'new',
     branch_sub_id: 9102,
     info: { firstname: '', lastname: '', amount_applied: '', purpose: '' },
     detail: { contact_no: '' },
@@ -408,6 +411,8 @@ const FULL_RECORD: LoanApplicationRecord = {
   id: '9001',
   source: 'google_form',
   channel: 'google_form',
+  kind: 'new',
+  linked_borrower_id: null,
   submitted_at: '2026-09-30 10:15:00',
   location: 'Sample Town',
   branch_sub_id: 9101,
@@ -718,9 +723,10 @@ test('intake_flags and the Google Form answers never reach the form or the updat
 test('toApplicationUpdateInput cleans as toApplicationInput does (the sections aside), and has no channel', () => {
   // Every section filled and Married: the update has exactly the groups the create has.
   const form = fromApplicationRecord(FULL_RECORD);
-  const { channel, ...create } = toApplicationInput(form, 'walk_in', '9101');
+  const { channel, kind, ...create } = toApplicationInput(form, 'walk_in', '9101');
 
   expect(channel).toBe('walk_in');
+  expect(kind).toBe('new');
   const update = toApplicationUpdateInput(form, '9101');
   expect(update).not.toHaveProperty('channel');
   expect(update).toEqual(create);
@@ -741,6 +747,7 @@ test('toApplicationUpdateInput cleans as toApplicationInput does (the sections a
 test('create is unchanged: an empty section is left out, and a filled spouse is sent whatever the civil status', () => {
   expect(toApplicationInput({ ...FORM_DEFAULTS, ...BASICS }, 'walk_in', 9101)).toEqual({
     channel: 'walk_in',
+    kind: 'new',
     branch_sub_id: 9101,
     info: { firstname: 'JUANA', lastname: 'DELA CRUZ', amount_applied: '15000', purpose: 'Store capital' },
     detail: { contact_no: '09170000011' },
@@ -884,4 +891,11 @@ test("the preset Positions are the borrower form's own, in its order", () => {
   const at = REFERENCE_POSITIONS.map((position) => source.indexOf(`occupation: '${position}'`));
   expect(at.every((index) => index >= 0), 'a preset Position is missing from BorrowerDetails').toBe(true);
   expect(at, 'the presets are in another order in BorrowerDetails').toEqual([...at].sort((a, b) => a - b));
+});
+
+test('the kind (2026-10-21): Bago, Renewal and Additional, sent as picked, new when left out', () => {
+  expect(KINDS).toEqual(['new', 'renewal', 'additional']);
+  expect(KINDS.map((kind) => KIND_LABELS[kind])).toEqual(['Bago', 'Renewal', 'Additional']);
+  expect(toApplicationInput(BASICS, 'facebook', '9102', 'renewal')).toEqual({ ...BASICS_INPUT, kind: 'renewal' });
+  expect(toApplicationInput(BASICS, 'facebook', '9102').kind).toBe('new');
 });

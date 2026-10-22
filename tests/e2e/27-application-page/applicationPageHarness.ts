@@ -106,6 +106,8 @@ export function application(overrides: Partial<LoanApplicationRecord> = {}): Loa
   return {
     id: '2',
     source: 'manual',
+    kind: 'new',
+    linked_borrower_id: null,
     channel: 'facebook',
     submitted_at: '2026-09-21 20:05:31',
     location: null,
