@@ -254,22 +254,22 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
         <div>
           <FormInput
             label="Addon Terms."
-            id="terms"
+            id="addon_terms"
             type="text"
             icon={Home}
             register={register('addon_terms', { required: true })}
-            error={errors.terms && "This field is required"}
+            error={errors.addon_terms && "This field is required"}
             required={true}
           />
         </div>
         <div>
           <FormInput
             label="Addon UDI Rate (%)"
-            id="terms"
+            id="addon_udi_rate"
             type="text"
             icon={Home}
             register={register('addon_udi_rate', { required: true })}
-            error={errors.terms && "This field is required"}
+            error={errors.addon_udi_rate && "This field is required"}
             required={true}
           />
         </div>

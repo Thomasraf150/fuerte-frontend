@@ -133,6 +133,17 @@ const unformatCurrency = (value: string): string => {
   return cleanValue;
 };
 
+/**
+ * The loading option shows as the select's choice, as the `selected` prop on it used to do, without
+ * React's warning about that prop. Stable, so it runs once per option, when it is created, exactly
+ * like the prop: a value the form writes while the list loads is not chosen over again. One
+ * difference: a ref never runs in the server render, so before hydration a select that starts out
+ * loading shows blank rather than "Loading..." (it is disabled either way).
+ */
+const selectOnCreate = (option: HTMLOptionElement | null) => {
+  if (option) option.selected = true;
+};
+
 const FormInput: React.FC<FormInputProps> = ({
   label,
   id,
@@ -334,7 +345,7 @@ const FormInput: React.FC<FormInputProps> = ({
             disabled={disabled || isLoading}
           >
             {isLoading ? (
-              <option value="" disabled selected>
+              <option value="" disabled ref={selectOnCreate}>
                 {loadingMessage}
               </option>
             ) : (

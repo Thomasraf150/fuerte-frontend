@@ -57,8 +57,6 @@ const BankForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBank, initialD
         });
       }
     }
-
-    console.log(initialData, ' initialData');
   }, [initialData, setValue, actionLbl, reset])
 
   // Edit: the saved sub-branch goes in again once its options are in the select (a select cannot
