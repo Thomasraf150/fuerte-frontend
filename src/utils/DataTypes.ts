@@ -358,6 +358,20 @@ export type PayerStanding = 'GOOD' | 'PROBLEM' | 'NONE';
 /** Borrowers-list Payer filter: one standing, or 'all' for no filter. */
 export type PayerFilter = 'all' | PayerStanding;
 
+/** Borrowers-list Source filter; mirrors the GraphQL `BorrowerSource` enum, or 'all' for no filter. */
+export type BorrowerSourceFilter = 'all' | 'APPLICATION' | 'DIRECT';
+
+/**
+ * The application a borrower was made from (Create as borrower, or Link to borrower): Marketing's
+ * applicant, through Call Center. Null for a borrower created directly or imported -- those get no
+ * Approve / Reject (Rafael 2026-10-23), unless they already have a decision.
+ */
+export interface BorrowerOrigin {
+  application_id: number;
+  /** Saan galing; null on an old application without one. */
+  channel: LoanApplicationChannel | null;
+}
+
 export interface BorrowerRowInfo {
   id?: string;
   user_id: number;
@@ -388,6 +402,8 @@ export interface BorrowerRowInfo {
   payer_standing?: PayerStanding | null;
   /** The latest Approved / Rejected decision; null before the first one. Only getBorrower asks for it. */
   decision?: BorrowerDecision | null;
+  /** The application the borrower was made from; null when created directly. Only getBorrower asks for it. */
+  origin?: BorrowerOrigin | null;
 }
 
 /**
@@ -1210,6 +1226,11 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
   notes: ApplicationNote[];
   /** The History tab: who changed what, newest first (2026-10-14). The page reads a missing one as none. */
   history?: ApplicationHistoryEntry[];
+  /**
+   * A new applicant's application whose person the branch created directly meanwhile: Link to
+   * borrower would find the one borrower it may claim (2026-10-23). A missing one reads as no.
+   */
+  has_linkable_borrower?: boolean;
 }
 
 /** One field a History line changed: from / to as stored (a branch's name, a 'Y-m-d H:i:s' time, a status key), null when blank. */

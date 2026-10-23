@@ -1,6 +1,6 @@
 const GET_BORROWER_QUERY: string = `
-    query GetBorrowers($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String, $payer: PayerStanding){
-      getBorrowers(first: $first, page: $page, orderBy: $orderBy, search: $search, payer: $payer) {
+    query GetBorrowers($first: Int!, $page: Int!, $orderBy: [OrderByClause!], $search: String, $payer: PayerStanding, $source: BorrowerSource){
+      getBorrowers(first: $first, page: $page, orderBy: $orderBy, search: $search, payer: $payer, source: $source) {
         data {
           id
           payer_standing
@@ -116,6 +116,10 @@ const GET_SINGLE_BORROWER_QUERY: string = `
           status
           reason
           decided_at
+        }
+        origin {
+          application_id
+          channel
         }
         user_id
         chief_id

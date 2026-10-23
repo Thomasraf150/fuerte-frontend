@@ -112,6 +112,7 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
         onPrint={app.print}
         onLink={app.link}
         linking={app.linking}
+        knownBorrower={record.has_linkable_borrower === true}
       />
       {checksTheApplicant && (
         <RepeatApplicantCheck

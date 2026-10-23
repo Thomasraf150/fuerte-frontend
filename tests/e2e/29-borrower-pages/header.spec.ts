@@ -8,7 +8,8 @@
  *      48px or taller, and the breadcrumb's repeat of the name hidden.
  *   3. Approve posts `approved` (the reason optional) and the stamp reads Approved.
  *   4. Reject will not post without a reason; with one it posts `rejected` and the line shows it.
- *   5. A refused decision toasts the server's message and leaves the stamp as it was.
+ *   5. A refused decision toasts the server's message and leaves the stamp as it was. 5b-5d: Approve and
+ *      Reject only on a borrower made from an application (or already decided); "Created directly" otherwise.
  *   6. More, then Delete borrower, starts the deletion request (the Borrowers list's flow), and an
  *      already pending request opens the "Already in the queue" modal instead. Escape, a click
  *      outside and tabbing away close the menu; an immediate delete goes back to the list.
@@ -37,11 +38,17 @@ const TODAY = new Date('2026-10-05T10:00:00+08:00');
 
 type Details = Partial<{ dob: string; age: number; contact_no: string }>;
 
+type Origin = { application_id: number; channel: string | null };
+
+/** Made from Marketing's application, through Call Center: what Approve / Reject is for (2026-10-23). */
+const FROM_APPLICATION: Origin = { application_id: 412, channel: 'google_form' };
+
 /** getBorrower's answer: a fictional borrower on the user's own sub-branch. */
-const borrower = (decision: Decision | null = null, details: Details = {}) => ({
+const borrower = (decision: Decision | null = null, details: Details = {}, origin: Origin | null = FROM_APPLICATION) => ({
   id: String(BORROWER_ID),
   payer_standing: 'GOOD',
   decision,
+  origin,
   user_id: 90001,
   chief_id: 9201,
   amount_applied: '15000',
@@ -89,9 +96,10 @@ type Pending = { request_id: string; requested_by_name: string; reason: string |
 async function stubBorrowerPage(
   page: Page,
   backend: FakeBackend,
-  options: { decision?: Decision | null; pending?: Pending | null; details?: Details } = {},
+  options: { decision?: Decision | null; pending?: Pending | null; details?: Details; origin?: Origin | null } = {},
 ) {
-  backend.extraGraphql.set('getBorrower', () => ({ data: { getBorrower: borrower(options.decision ?? null, options.details) } }));
+  const origin = options.origin === undefined ? FROM_APPLICATION : options.origin;
+  backend.extraGraphql.set('getBorrower', () => ({ data: { getBorrower: borrower(options.decision ?? null, options.details, origin) } }));
   // The header bell may poll this for some roles; always answered here.
   backend.extraGraphql.set('getApplicationNotifications', () => ({ data: { getApplicationNotifications: [] } }));
   backend.extraGraphql.set('pendingDeletionsForEntities', () => ({
@@ -281,7 +289,8 @@ test('2. at 360px nothing scrolls sideways, the four tabs sit on one row uncut, 
     expect(await tab.evaluate((el) => el.scrollWidth <= el.clientWidth), `${label} is cut`).toBe(true);
   }
 
-  // Every control in the header: the back link, the tel link, Approve, Reject and More.
+  // Every control in the header: the back link, the link to the application it came from, the tel
+  // link, Approve, Reject and More.
   const controls = header(page).locator('a, button, summary').filter({ visible: true });
   const names: string[] = [];
   for (const control of await controls.all()) {
@@ -290,7 +299,7 @@ test('2. at 360px nothing scrolls sideways, the four tabs sit on one row uncut, 
     names.push(name);
     expect(box.height, `${name} is shorter than 48px`).toBeGreaterThanOrEqual(48);
   }
-  expect(names).toEqual(['Back to Borrowers', 'Call 09170000011', 'Approve', 'Reject', 'More actions']);
+  expect(names).toEqual(['Back to Borrowers', 'From application #000412 · Google Form', 'Call 09170000011', 'Approve', 'Reject', 'More actions']);
 });
 
 // ---------------------------------------------------------------------------
@@ -367,6 +376,52 @@ test('5. a refused decision toasts the server\'s message and leaves the stamp as
   // Nothing is stuck: Reject opens its prompt again.
   await header(page).getByRole('button', { name: 'Reject' }).click();
   await expect(page.getByRole('dialog', { name: 'Reject this borrower?' })).toBeVisible();
+});
+
+// ---------------------------------------------------------------------------
+// 5b–5d. Approve / Reject only for Marketing's applicants (Rafael 2026-10-23)
+// ---------------------------------------------------------------------------
+
+test('5b. a borrower made from an application says so, links to it, and has Approve and Reject', async ({ page, backend }) => {
+  await stubBorrowerPage(page, backend);
+  await openBorrower(page);
+  const top = header(page);
+
+  const origin = top.getByTestId('borrower-origin');
+  await expect(origin).toHaveText('From application #000412 · Google Form');
+  await expect(origin).toHaveAttribute('href', '/applications/412');
+  await expect(top.getByRole('button', { name: 'Approve' })).toBeVisible();
+  await expect(top.getByRole('button', { name: 'Reject' })).toBeVisible();
+});
+
+test('5c. a borrower created directly says so and has no Approve or Reject; More stays', async ({ page, backend }) => {
+  await stubBorrowerPage(page, backend, { origin: null });
+  await openBorrower(page);
+  const top = header(page);
+
+  await expect(top.getByTestId('borrower-origin')).toHaveText('Created directly');
+  await expect(top.getByRole('link', { name: /From application/ })).toHaveCount(0);
+  await expect(top.getByRole('button', { name: 'Approve' })).toHaveCount(0);
+  await expect(top.getByRole('button', { name: 'Reject' })).toHaveCount(0);
+  await expect(moreSummary(page)).toBeVisible();
+  expect(backend.calls('setBorrowerDecision')).toHaveLength(0);
+});
+
+test('5d. a borrower created directly but rejected before the change keeps its notice and both buttons, so it can be approved again', async ({ page, backend }) => {
+  await stubBorrowerPage(page, backend, {
+    origin: null,
+    decision: { status: 'rejected', reason: 'Kulang ang income', decided_at: '2026-10-04 09:15:00' },
+  });
+  await openBorrower(page);
+  const top = header(page);
+
+  await expect(top.getByTestId('borrower-origin')).toHaveText('Created directly');
+  await expectRejectedNotice(page, 'Oct 4, 2026', 'Kulang ang income');
+  await top.getByRole('button', { name: 'Approve' }).click();
+  await page.getByRole('dialog', { name: 'Approve this borrower?' }).getByRole('button', { name: 'Approve', exact: true }).click();
+
+  await expect.poll(() => backend.calls('setBorrowerDecision').length).toBe(1);
+  await expect(decisionStamp(page)).toHaveAttribute('data-decision', 'approved');
 });
 
 // ---------------------------------------------------------------------------

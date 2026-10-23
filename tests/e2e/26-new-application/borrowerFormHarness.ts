@@ -174,6 +174,9 @@ export class FakeBackend {
       // The header's branch list on every page: Call Center's comes from here (Header/MyBranches).
       case 'getApplicationBranches':
         return { getApplicationBranches: BRANCH_SUBS.map(({ id, name }) => ({ id, name })) };
+      // New Borrower's open-application check before a direct save (2026-10-23): no such applicant.
+      case 'findOpenApplicationForApplicant':
+        return { findOpenApplicationForApplicant: null };
       case 'checkBorrowerDuplicate':
         return { checkBorrowerDuplicate: { isDuplicate: false, duplicateType: null, duplicateBorrower: null, duplicateProblem: null } };
       // Not saved: the form stays open, so the test reads what was posted without leaving the page.

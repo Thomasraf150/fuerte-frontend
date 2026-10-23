@@ -23,6 +23,8 @@ const borrower = (decision: BorrowerDecision | null) => ({
   id: String(BORROWER_ID),
   payer_standing: 'NONE',
   decision,
+  // Made from an application: Approve / Reject is for these borrowers (2026-10-23).
+  origin: { application_id: 77, channel: 'google_form' },
   user_id: 90001,
   chief_id: 9201,
   amount_applied: '15000',

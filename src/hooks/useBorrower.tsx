@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { useDeleteWithApproval } from '@/hooks/useDeleteWithApproval';
 import { BORROWER_DELETE } from './borrowerDelete';
@@ -8,7 +8,7 @@ import { usePagination } from './usePagination';
 import useBorrowerBase from './useBorrowerBase';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 
-import { BorrowerInfo, BorrowerRowInfo, PayerFilter } from '@/utils/DataTypes';
+import { BorrowerInfo, BorrowerRowInfo, BorrowerSourceFilter, PayerFilter } from '@/utils/DataTypes';
 import { toast } from '@/utils/notify';
 
 /**
@@ -34,19 +34,24 @@ const useBorrower = () => {
   // The Payer filter rides on usePagination's statusFilter slot, so changing it
   // refetches page 1 exactly like a search does. 'all' sends no filter.
   const [payerFilter, setPayerFilter] = useState<PayerFilter>('all');
+  // The Source filter (made from an application, or created directly) rides on extraFilters. 'all' sends none.
+  const [sourceFilter, setSourceFilter] = useState<BorrowerSourceFilter>('all');
+  const extraFilters = useMemo(() => (sourceFilter === 'all' ? undefined : { source: sourceFilter }), [sourceFilter]);
 
   // Wrapper function to adapt existing API for usePagination hook
   const fetchBorrowersForPagination = useCallback(async (
     first: number,
     page: number,
     search?: string,
-    payer?: string
+    payer?: string,
+    extra?: Record<string, unknown>
   ) => {
     const result = await graphqlFetch(GET_BORROWER_QUERY, {
       first,
       page,
       ...(search && { search }),
       ...(payer && payer !== 'all' ? { payer } : {}),
+      ...(extra ?? {}),
       orderBy: [{ column: "id", order: 'DESC' }]
     });
 
@@ -91,6 +96,7 @@ const useBorrower = () => {
     fetchFunction: fetchBorrowersForPagination,
     config: { initialPageSize: 20 },
     statusFilter: payerFilter,
+    extraFilters,
   });
 
   // Legacy fetchDataBorrower function for backward compatibility
@@ -142,6 +148,8 @@ const useBorrower = () => {
     pagination,
     payerFilter,
     setPayerFilter,
+    sourceFilter,
+    setSourceFilter,
     searchQuery,
     goToPage,
     changePageSize,

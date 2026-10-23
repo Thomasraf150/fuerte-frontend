@@ -2,12 +2,14 @@
 
 import React, { useId, useState } from "react";
 import Link from "next/link";
-import { Calendar, Check, ChevronLeft, Home, Phone, Slash, X } from "react-feather";
+import { Calendar, Check, ChevronLeft, FileText, Home, Phone, Slash, UserPlus, X } from "react-feather";
 import BranchBadge, { branchLabel } from "@/components/BranchBadge";
 import PayerBadge from "@/components/PayerBadge";
 import { showDecisionNotePrompt, showProcessingModal } from "@/components/ConfirmationModal";
 import useBorrowerDecision from "@/hooks/useBorrowerDecision";
-import type { BorrowerDecision, BorrowerRowInfo } from "@/utils/DataTypes";
+import type { BorrowerDecision, BorrowerOrigin, BorrowerRowInfo } from "@/utils/DataTypes";
+import { CHANNEL_LABELS } from "@/utils/applicationForm";
+import { applicationNumber } from "@/utils/convertApplication";
 import { manilaToday } from "@/utils/sourceTracker";
 import BorrowerMoreMenu from "./BorrowerMoreMenu";
 import DecisionPill, { decisionLine, formatDecidedOn } from "@/components/DecisionPill";
@@ -183,6 +185,38 @@ const RejectedNotice: React.FC<{ decision: BorrowerDecision }> = ({ decision }) 
   );
 };
 
+/**
+ * Where the borrower came from (Rafael 2026-10-23): made from an application -- Marketing's
+ * applicant, through Call Center -- with the way to that application, or created directly. It is
+ * why Approve / Reject is there or not: those tell Call Center whether its applicant pushed through.
+ */
+const OriginTag: React.FC<{ origin: BorrowerOrigin | null | undefined }> = ({ origin }) => {
+  if (!origin) {
+    return (
+      <span data-testid="borrower-origin" className="inline-flex items-center gap-1.5 text-sm text-black/70 dark:text-bodydark">
+        <UserPlus aria-hidden="true" size={15} className="shrink-0" />
+        Created directly
+      </span>
+    );
+  }
+  const number = applicationNumber(origin.application_id);
+  const channel = origin.channel ? CHANNEL_LABELS[origin.channel] : undefined;
+  return (
+    <Link
+      data-testid="borrower-origin"
+      href={`/applications/${origin.application_id}`}
+      prefetch={false}
+      className={`${TARGET} ${LINK_FOCUS} inline-flex items-center gap-1.5 rounded text-sm font-medium text-primary hover:underline dark:text-white`}
+    >
+      <FileText aria-hidden="true" size={15} className="shrink-0" />
+      <span className="break-words">
+        From application <span className="tabular-nums">{number}</span>
+        {channel && <span className="font-normal text-black/70 dark:text-bodydark"> · {channel}</span>}
+      </span>
+    </Link>
+  );
+};
+
 /** The branch as its small chip plus its name in plain text, the Payer stamp, the decision stamp, and the decision's line. */
 const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecision | null }> = ({ borrower, decision }) => {
   const branchName = borrower.branch_sub?.branch?.name ?? "";
@@ -202,6 +236,7 @@ const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecisi
         )}
         <PayerBadge standing={borrower.payer_standing} borrowerId={borrower.id} size="lg" />
         <DecisionPill decision={decision} />
+        <OriginTag origin={borrower.origin} />
       </div>
       {decision?.status === "rejected" && <RejectedNotice decision={decision} />}
       {decision && decision.status !== "rejected" && (
@@ -293,8 +328,9 @@ const HeaderShell: React.FC<{ name: string; back: BackTo; children: React.ReactN
 
 /**
  * The borrower page's read-first header (spec 2026-10-05 B2): back link, the name once, the status
- * line (branch, Payer, decision), up to three facts, and the actions. Everything wraps and nothing
- * is cut at 360px. Approve / Reject record a decision. A rejected borrower cannot borrow: the server
+ * line (branch, Payer, decision, where the borrower came from), up to three facts, and the actions.
+ * Everything wraps and nothing is cut at 360px. Approve / Reject record a decision, on a borrower
+ * made from an application (or one already decided). A rejected borrower cannot borrow: the server
  * refuses every new loan, renewal, approval and release until they are approved again (spec E §1).
  * New Borrower (no borrower yet) gets the back link and its title only.
  */
@@ -314,6 +350,10 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
 }) => {
   const { decision, busy, record } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided);
   const name = borrowerDisplayName(borrower);
+  // Approve / Reject is for borrowers made from an application (Rafael 2026-10-23): a borrower created
+  // directly gets none, unless it already has a decision from before, which can still be changed (the
+  // server's BorrowerDecisionService::DIRECT says the same).
+  const mayDecide = Boolean(borrower.origin) || decision !== null;
 
   return (
     <HeaderShell name={name} back={back}>
@@ -328,14 +368,18 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
             while saving: the processing modal already blocks the page, and a disabled button would drop
             the focus the prompt hands back; `busy` stops a second click. */}
         <div className="relative flex flex-wrap items-center gap-2">
-          <button type="button" className={BUTTON} onClick={() => record("approved")} aria-busy={busy === "approved"}>
-            <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-success dark:text-meta-3" />
-            Approve
-          </button>
-          <button type="button" className={BUTTON} onClick={() => record("rejected")} aria-busy={busy === "rejected"}>
-            <X aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-danger" />
-            Reject
-          </button>
+          {mayDecide && (
+            <>
+              <button type="button" className={BUTTON} onClick={() => record("approved")} aria-busy={busy === "approved"}>
+                <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-success dark:text-meta-3" />
+                Approve
+              </button>
+              <button type="button" className={BUTTON} onClick={() => record("rejected")} aria-busy={busy === "rejected"}>
+                <X aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-danger" />
+                Reject
+              </button>
+            </>
+          )}
           <BorrowerMoreMenu borrower={borrower} summaryClassName={BUTTON} />
         </div>
       </div>

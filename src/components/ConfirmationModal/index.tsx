@@ -241,6 +241,67 @@ export const showDecisionNotePrompt = async (
   return typeof result.value === 'string' ? result.value : '';
 };
 
+/** What New Borrower's open-application warning knows: the application, never the applicant's details. */
+export type OpenApplicationInfo = {
+  number: string;
+  statusLabel: string;
+  branchName: string | null;
+  canOpen: boolean;
+};
+
+export type OpenApplicationAction = 'open' | 'direct' | 'back';
+
+/**
+ * New Borrower, before a direct save (2026-10-23): the person is Marketing's applicant, waiting at
+ * Call Center. Creating them from the application gives Call Center the Approve / Reject that says
+ * whether they pushed through; a direct borrower gets none. Staff who may work on the application
+ * (and so create the borrower from it) are offered it; everyone may still create directly (a real walk-in) or go back. JSX, so every value is
+ * escaped. Returns the choice.
+ */
+export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promise<OpenApplicationAction> => {
+  const where = info.branchName ? `${info.branchName}` : 'not placed on a branch yet';
+  const body = (
+    <div style={{ textAlign: 'left', padding: '4px 4px 2px', color: '#0f172a' }}>
+      <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#b45309', marginBottom: 10 }}>
+        <AlertCircle size={18} style={{ marginRight: 6 }} />
+        Marketing&apos;s applicant
+      </div>
+      <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: '0 0 6px' }}>This person already has an application</div>
+      <div data-testid="open-application-facts" style={{ fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
+        Application {info.number} · {info.statusLabel} · {where}
+      </div>
+      <p style={{ margin: '12px 0 0', fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
+        {info.canOpen
+          ? 'Create the borrower from the application, so Call Center hears whether they push through (Approve / Reject).'
+          : 'Ask Call Center to create the borrower from it, so they hear whether the applicant pushes through (Approve / Reject).'}
+      </p>
+      <p style={{ margin: '8px 0 0', fontSize: 12, color: '#64748b', lineHeight: 1.45 }}>
+        A borrower created directly gets no Approve / Reject. Create directly only if this is a different person.
+        {info.canOpen && ' Opening the application leaves this form: what you typed here is not kept.'}
+      </p>
+    </div>
+  );
+
+  const result = await MySwal.fire({
+    title: '',
+    html: body,
+    showConfirmButton: info.canOpen,
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Open the application →',
+    denyButtonText: 'Create directly anyway',
+    cancelButtonText: 'Back',
+    confirmButtonColor: CONFIRM_COLORS.confirm,
+    denyButtonColor: CONFIRM_COLORS.cancel,
+    cancelButtonColor: CONFIRM_COLORS.cancel,
+    background: '#ffffff',
+  });
+
+  if (result.isConfirmed) return 'open';
+  if (result.isDenied) return 'direct';
+  return 'back';
+};
+
 function formatAgo(iso: string): string {
   const t = new Date(iso.replace(' ', 'T')).getTime();
   if (Number.isNaN(t)) return iso;

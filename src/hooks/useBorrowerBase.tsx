@@ -1,12 +1,14 @@
 "use client"
 
 import { useState } from 'react';
+import { useRouter } from 'nextjs-toploader/app';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import ChiefQueryMutations from '@/graphql/ChiefQueryMutations';
 import AreaSubAreaQueryMutations from '@/graphql/AreaSubAreaQueryMutations';
 import BorrowerCompaniesQueryMutations from '@/graphql/BorrowerCompaniesQueryMutations';
 import { BorrowerInfo, DataChief, DataArea, DataSubArea, DataBorrCompanies } from '@/utils/DataTypes';
 import { checkBorrowerDuplicates, getAuthUserData } from '@/utils/borrowerDuplicateCheck';
+import { checkOpenApplication } from '@/utils/openApplicationCheck';
 import { withApplication, type ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { toast } from '@/utils/notify';
@@ -22,6 +24,7 @@ const useBorrowerBase = () => {
   const { GET_AREA_QUERY, GET_SINGLE_SUB_AREA_QUERY } = AreaSubAreaQueryMutations;
   const { GET_BORROWER_COMPANIES } = BorrowerCompaniesQueryMutations;
 
+  const router = useRouter();
   const [borrowerLoading, setBorrowerLoading] = useState<boolean>(false);
   const [dataChief, setDataChief] = useState<DataChief[] | undefined>(undefined);
   const [dataArea, setDataArea] = useState<DataArea[] | undefined>(undefined);
@@ -112,6 +115,18 @@ const useBorrowerBase = () => {
       // 2026-10-07): the same-branch check is closed to it, and saveBorrower checks duplicates itself.
       const isCallCenter = useAuthStore.getState().user?.role?.code === 'CALLCTR';
       if (!data.id && !isCallCenter) {
+        // A direct save (not Create as borrower): if Marketing's applicant waits at Call Center, offer
+        // their application first, so the borrower is made from it and gets Approve / Reject (2026-10-23).
+        if (!conversion) {
+          const open = await checkOpenApplication(data);
+          if (open.action === 'open') {
+            router.push(`/applications/${open.applicationId}`);
+            return { success: false, error: 'Went to the application instead' };
+          }
+          if (open.action === 'back') {
+            return { success: false, error: 'Cancelled: the applicant has an application' };
+          }
+        }
         const canProceed = await checkBorrowerDuplicates(data);
         if (!canProceed) {
           setBorrowerLoading(false);

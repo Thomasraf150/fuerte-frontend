@@ -5,6 +5,7 @@ import { useRouter } from 'nextjs-toploader/app';
 import { Card, CardBody, Toolbar } from '@/components/Card';
 import CustomDatatable from '@/components/CustomDatatable';
 import PayerFilterChips from '@/components/PayerFilterChips';
+import SourceFilterChips from '@/components/SourceFilterChips';
 import borrowerColumn from './BorrowerColumn';
 import { BorrowerRowInfo } from '@/utils/DataTypes';
 import useBorrower from '@/hooks/useBorrower';
@@ -32,6 +33,8 @@ const BorrowerList: React.FC = () => {
       borrowerError,
       payerFilter,
       setPayerFilter,
+      sourceFilter,
+      setSourceFilter,
       refresh } = useBorrower();
 
   const entityIds = useMemo(
@@ -87,6 +90,7 @@ const BorrowerList: React.FC = () => {
                   </div>
                 )}
                 <PayerFilterChips value={payerFilter} onChange={setPayerFilter} />
+                <SourceFilterChips value={sourceFilter} onChange={setSourceFilter} />
                 <CustomDatatable
                   apiLoading={paginationLoading || pendingLoading}
                   columns={borrowerColumn(handleRowClick, handleRowRmBorrClick, pendingByEntityId, handlePendingClick)}

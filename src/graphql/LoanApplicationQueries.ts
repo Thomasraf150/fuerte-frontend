@@ -131,6 +131,7 @@ const OUTCOME_AND_NOTES_FIELDS: string = `
  */
 const LOAN_APPLICATION_RECORD_FIELDS: string = `
   id
+  has_linkable_borrower
   source
   channel
   kind
@@ -371,6 +372,22 @@ const GET_APPLICATION_NOTIFICATIONS: string = `
   }
 `;
 
+/**
+ * New Borrower's warning before a direct save (2026-10-23): is this person Marketing's applicant,
+ * waiting at Call Center? The open new applicant's application with the same mobile, last name and
+ * first name, or null. Never the applicant's details.
+ */
+const FIND_OPEN_APPLICATION_FOR_APPLICANT_QUERY: string = `
+  query FindOpenApplicationForApplicant($firstname: String!, $lastname: String!, $contact_no: String!) {
+    findOpenApplicationForApplicant(firstname: $firstname, lastname: $lastname, contact_no: $contact_no) {
+      application_id
+      status
+      branch_name
+      can_open
+    }
+  }
+`;
+
 const LoanApplicationQueries = {
   GET_LOAN_APPLICATIONS_QUERY,
   GET_APPLICATION_BRANCHES_QUERY,
@@ -384,6 +401,7 @@ const LoanApplicationQueries = {
   GET_APPLICATION_SOURCE_COUNTS_QUERY,
   GET_APPLICATION_FUNNEL_QUERY,
   GET_APPLICATION_NOTIFICATIONS,
+  FIND_OPEN_APPLICATION_FOR_APPLICANT_QUERY,
 };
 
 export default LoanApplicationQueries;
