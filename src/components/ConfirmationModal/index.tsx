@@ -30,8 +30,9 @@ export const showConfirmationModal = async (
 /**
  * Confirmation modal that also captures an optional reason textarea.
  * Used for delete actions that route through the deletion-approval
- * workflow — ADMIN/OWNER bypass the queue (reason is ignored backend-side),
- * everyone else has the reason shown to the approver.
+ * workflow — the Owner bypasses the queue (the reason is still recorded on the
+ * auto-approved request), everyone else has the reason shown to the approver.
+ * At most 1000 characters: the server refuses a longer reason (2026-10-14).
  *
  * Returns the reason string on confirm (empty string allowed), or null on cancel.
  */
@@ -47,7 +48,7 @@ export const showDeletionRequestPrompt = async (
     input: 'textarea',
     inputLabel: 'Reason (optional — shown to the approver)',
     inputPlaceholder: 'e.g. duplicate entry, wrong borrower, encoded by mistake',
-    inputAttributes: { 'aria-label': 'Reason for deletion' },
+    inputAttributes: { 'aria-label': 'Reason for deletion', maxlength: '1000' },
     showCancelButton: true,
     confirmButtonColor: CONFIRM_COLORS.confirm,
     cancelButtonColor: CONFIRM_COLORS.reject,
