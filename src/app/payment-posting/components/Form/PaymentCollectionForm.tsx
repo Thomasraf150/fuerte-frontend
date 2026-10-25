@@ -31,27 +31,30 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     const remainingUdi = Number(selectedUdiSched?.amount) || 0;
     const collection = type === 'collection' ? incoming : num(watch('collection'));
     const bankCharge = type === 'bank_charge' ? incoming : num(watch('bank_charge'));
+    const penalty = type === 'penalty' ? incoming : num(watch('penalty'));
+    // R-PAYMENT-SPLIT (regress/RULES.md): the bank charge and the penalty come off the cash
+    // before the loan, so only the net pays the installment.
+    // Rounded to the centavo, so float noise (0.3 - 0.1 - 0.2) never reads as an overpayment.
+    const netCollection = Math.round((collection - bankCharge - penalty) * 100) / 100;
 
-    // AP Refund: only when collection exceeds remaining due.
-    if (collection > remainingDue) {
-      setValue('ap_refund', (collection - remainingDue - bankCharge).toFixed(2));
+    // AP Refund: only when the net exceeds remaining due.
+    if (netCollection > remainingDue) {
+      setValue('ap_refund', (netCollection - remainingDue).toFixed(2));
     } else {
       setValue('ap_refund', '0.00');
     }
 
-    // UA/SP: shortfall vs remaining due, after bank charge is taken out of collection.
-    if (collection <= remainingDue) {
-      const netCollection = collection - bankCharge;
+    // UA/SP: shortfall vs remaining due.
+    if (netCollection <= remainingDue) {
       setValue('ua_sp', Math.abs(remainingDue - netCollection).toFixed(2));
     } else {
       setValue('ua_sp', '0.00');
     }
 
     // Interest: capped at remaining UDI. Negative or non-finite results clamp to 0.
-    if (collection > remainingDue) {
+    if (netCollection > remainingDue) {
       setValue('interest', remainingUdi.toFixed(2));
     } else if (remainingDue > 0) {
-      const netCollection = collection - bankCharge;
       let computed = remainingUdi * (netCollection / remainingDue);
       if (!isFinite(computed) || isNaN(computed) || computed < 0) computed = 0;
       if (computed > remainingUdi) computed = remainingUdi;
