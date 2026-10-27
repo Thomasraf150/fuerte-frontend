@@ -16,6 +16,8 @@ interface ParentFormBr {
   lpsSingleData: DataLoanProceedAcctData[] | undefined;
   coaDataAccount: DataChartOfAccountList[];
   onSaveSuccess?: () => void;
+  /** The branch's saved mapping is still loading (Update Account). */
+  mappingLoading?: boolean;
 }
 
 interface Option {
@@ -24,7 +26,7 @@ interface Option {
   hidden?: boolean;
 }
 
-const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData, onSaveSuccess }) => {
+const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData, onSaveSuccess, mappingLoading }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
   const { onSubmitLoanProSettings, loanProcLoading } = useLoanProceedAccount();
   const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
@@ -34,9 +36,11 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
       reset();
     } else {
       setBranchSubIdDisabled(true);
+      // From any row, not only Notes Receivable: the branch box is locked here, so a branch
+      // without that row could never be saved ("Branch is required"). No branch = Global Default.
+      if (lpsSingleData?.length) setValue('branch_sub_id', lpsSingleData[0]?.branch_sub_id ?? 'global');
       lpsSingleData?.map(item => {
         if (item?.description === 'notes receivable') {
-          setValue('branch_sub_id', item?.branch_sub_id);
           setValue('nr_id', item?.account_id);
         }
         if (item?.description === 'outstanding balance') {
@@ -140,6 +144,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
   };
 
   const optionsCoaData = getAccountOptions(coaDataAccount);
+  // Editing: the form fills only once the branch's mapping arrives. A Save pressed before
+  // that failed on every field ("... is required") and left those errors showing.
+  const waitingForMapping = actionLbl !== 'Create Account' && (!!mappingLoading || !lpsSingleData);
 
   const onSubmit: SubmitHandler<DataLoanProceedList> = async (data) => {
     const result = await onSubmitLoanProSettings(data, () => {});
@@ -224,11 +231,11 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           </Button>
           <Button variant="primary"
             type="submit"
-            disabled={loanProcLoading}>
-            {loanProcLoading ? (
+            disabled={loanProcLoading || waitingForMapping}>
+            {loanProcLoading || waitingForMapping ? (
               <>
                 <RotateCw size={17} className="animate-spin mr-1" />
-                <span>Saving...</span>
+                <span>{loanProcLoading ? 'Saving...' : 'Loading...'}</span>
               </>
             ) : (
               <>

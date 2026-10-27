@@ -41,8 +41,11 @@ const useLoanProceedAccount = () => {
 
   const fetchLpsDataForm = async (row: any) => {
     setLoading(true);
+    // Drop the last branch's mapping, so the form never shows (or saves) it while this one loads.
+    setLpsSingleData(undefined);
 
-    const branchSubId = row?.branch_sub_id === 'global' ? 'global' : String(row?.branch_sub_id);
+    // A Global Default row has no branch: ask for 'global', not "null" (which the server reads as all rows).
+    const branchSubId = row?.branch_sub_id == null || row?.branch_sub_id === 'global' ? 'global' : String(row.branch_sub_id);
     let variables: { input: any } = {
       input : { branch_sub_id: branchSubId }
     };

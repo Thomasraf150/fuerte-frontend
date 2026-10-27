@@ -13,12 +13,14 @@ import { DataColListRow } from '@/utils/DataTypes';
 // Borrower comes first: the row's human-readable identifier, so staff find a collection by who
 // paid, not by a ref code (NN/g, "Data Tables: Four Major User Tasks"). "LASTNAME, FIRSTNAME" as
 // the Loans and Payment Posting lists show it.
+// data-tag="allowRowEvents" on a cell's own span lets a click on its text open the row: the
+// table library opens a row only when the clicked element itself carries it.
 const collectionListCol = (): TableColumn<DataColListRow>[] => [
   {
     name: 'Borrower',
     // Wraps instead of clipping: the name IS the identifier, so it is never cut off.
     cell: row => (
-      <span className="block whitespace-normal break-words py-2 font-semibold uppercase leading-snug text-black dark:text-white">
+      <span data-tag="allowRowEvents" className="block whitespace-normal break-words py-2 font-semibold uppercase leading-snug text-black dark:text-white">
         {row.borrower_name ?? '—'}
       </span>
     ),
@@ -28,7 +30,7 @@ const collectionListCol = (): TableColumn<DataColListRow>[] => [
   },
   {
     name: 'Loan Ref',
-    cell: row => <span className="tabular-nums">{row.loan_ref}</span>,
+    cell: row => <span data-tag="allowRowEvents" className="tabular-nums">{row.loan_ref}</span>,
     sortable: false,
     minWidth: '120px',
     maxWidth: '150px',
@@ -37,7 +39,7 @@ const collectionListCol = (): TableColumn<DataColListRow>[] => [
     // The loan PRODUCT's name (loan_products.description), which this column always showed
     // under the misleading header "Description". Full name on hover; ends in "…" when long.
     name: 'Loan Product',
-    cell: row => <span className="block truncate" title={row.description}>{row.description}</span>,
+    cell: row => <span data-tag="allowRowEvents" className="block truncate" title={row.description}>{row.description}</span>,
     sortable: false,
     grow: 2,
     minWidth: '180px',

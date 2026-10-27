@@ -27,7 +27,9 @@ const useGeneralVoucher = () => {
     const { from, to } = reportRange('last30');
     return { startDate: from, endDate: to, branch_id: '', branch_sub_id: '' };
   });
-  const storedAuthStore = localStorage.getItem('authStore') ?? '{}';
+  // Browser only: this hook also runs on the server when a voucher page is
+  // opened directly (a refresh or a pasted link), where localStorage is undefined.
+  const storedAuthStore = (typeof window !== 'undefined' && localStorage.getItem('authStore')) || '{}';
   const userData = JSON.parse(storedAuthStore)['state'];
 
   // Wrapper function to adapt existing API for usePagination hook

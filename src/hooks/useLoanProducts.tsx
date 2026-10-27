@@ -129,7 +129,9 @@ const useLoanProducts = () => {
           base_deduction: Number(data.base_deduction),
           addon_terms: Number(data.addon_terms),
           addon_udi_rate: Number(data.addon_udi_rate),
-          is_active: data.is_active,
+          // An Active box never touched holds '' (the form's reset), which the
+          // server refused as "required"; unticked means inactive.
+          is_active: Boolean(data.is_active),
           user_id: userData?.user?.id
         },
       };

@@ -90,6 +90,7 @@ const LoanProceedSettingsList: React.FC = () => {
                       setShowForm={setShowForm}
                       actionLbl={actionLbl}
                       lpsSingleData={lpsSingleData}
+                      mappingLoading={loading}
                       coaDataAccount={coaDataAccount || []}
                       branchSubData={branchSubData}
                       onSaveSuccess={fetchLpsDataTable} />
