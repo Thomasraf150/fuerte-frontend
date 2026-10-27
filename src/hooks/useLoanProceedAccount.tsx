@@ -50,19 +50,29 @@ const useLoanProceedAccount = () => {
       input : { branch_sub_id: branchSubId }
     };
 
-    const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_LOAN_PROCEED_SETTINGS,
-        variables
-      }),
-    });
-    // const result = await response.json();
-    setLpsSingleData(response.data.getLoanProceedSettings);
-    setLoading(false);
+    // Returns whether the mapping loaded: the form's Save waits for it, so a failure must end the wait.
+    try {
+      const response = await fetchWithRecache(`${process.env.NEXT_PUBLIC_API_GRAPHQL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_LOAN_PROCEED_SETTINGS,
+          variables
+        }),
+      });
+      const rows = response?.data?.getLoanProceedSettings;
+      if (!Array.isArray(rows)) throw new Error(response?.errors?.[0]?.message ?? 'No mapping in the answer');
+      setLpsSingleData(rows);
+      return true;
+    } catch (error) {
+      console.warn('Loan proceed mapping failed to load', { branch_sub_id: branchSubId, error });
+      toast.error('Could not load this mapping. Please try again.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchLpsWithFallback = async (branchSubId: number | string) => {

@@ -242,6 +242,9 @@ const useBranches = () => {
       if (data.id) {
         mutation = UPDATE_SUB_BRANCH_MUTATION;
         variables.input.id = data.id;
+        // Releases move the loan-number counter. Sending the value this screen
+        // loaded put it back whenever loans were released after the screen opened.
+        delete variables.input.ref_current_value;
       } else {
         mutation = SAVE_SUB_BRANCH_MUTATION;
       }

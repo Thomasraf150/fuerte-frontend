@@ -33,7 +33,8 @@ const LoanProceedSettingsList: React.FC = () => {
     console.log(row?.branch_sub_id, ' row');
     setShowForm(true);
     setActionLbl('Update Account');
-    fetchLpsDataForm(row)
+    // Back to the list when the mapping can't be loaded (the hook says why).
+    if (!(await fetchLpsDataForm(row))) setShowForm(false);
   }
 
   useEffect(() => {
