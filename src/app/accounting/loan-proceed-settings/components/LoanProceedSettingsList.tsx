@@ -1,58 +1,46 @@
 "use client";
 
 import Button from '@/components/Button';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
-import { DataChartOfAccountList } from '@/utils/DataTypes';
-import LoanProcSettingsForm from './LoanProcSettingsForm';
+import { DataLoanProceedAcctData } from '@/utils/DataTypes';
 import loanProcListCol from './LoanProcListCol';
 import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
-import useCoa from '@/hooks/useCoa';
-import { GitBranch, SkipBack } from 'react-feather';
-import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
+import { GitBranch } from 'react-feather';
+import { Card, CardBody, Toolbar } from '@/components/Card';
+import { LIST_PATH } from './LoanProcSettingsFormPage';
 
 const column = loanProcListCol;
 
+// The form has its own URLs (/new, /<branch_sub_id>, /global), so Back and refresh keep it open.
 const LoanProceedSettingsList: React.FC = () => {
-  const [actionLbl, setActionLbl] = useState<string>('');
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const { fetchLpsDataTable, lpsDataAccount, loading, onSubmitLoanProSettings, fetchLpsDataForm, lpsSingleData } = useLoanProceedAccount();
-  const { coaDataAccount, branchSubData, fetchCoaDataTable } = useCoa();
-
-  const handleShowForm = (lbl: string, showFrm: boolean) => {
-    setShowForm(showFrm);
-    setActionLbl(lbl);
-  }
+  const router = useRouter();
+  const { fetchLpsDataTable, lpsDataAccount, loading } = useLoanProceedAccount();
 
   const handleRowClick = async (row: any) => {
     console.log(row, ' row');
   }
 
-  const handleWholeRowClick = async (row: any) => {
-    console.log(row?.branch_sub_id, ' row');
-    setShowForm(true);
-    setActionLbl('Update Account');
-    // Back to the list when the mapping can't be loaded (the hook says why).
-    if (!(await fetchLpsDataForm(row))) setShowForm(false);
+  // A Global Default row has no branch.
+  const handleWholeRowClick = (row: DataLoanProceedAcctData) => {
+    router.push(`${LIST_PATH}/${row?.branch_sub_id ?? 'global'}`);
   }
 
   useEffect(() => {
     fetchLpsDataTable();
-    fetchCoaDataTable();
   }, [])
 
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          {!showForm && (
-            <div className={`${!showForm ? 'fade-in' : 'fade-out'} col-span-1 xl:col-span-3`}>
+            <div className="fade-in col-span-1 xl:col-span-3">
               <Card>
                 <CardBody>
                 <Toolbar>
-                  <Button variant="primary" onClick={() => handleShowForm('Create Account', true)}>
-                    <GitBranch  size={14} /> 
+                  <Button variant="primary" onClick={() => router.push(`${LIST_PATH}/new`)}>
+                    <GitBranch  size={14} />
                     <span>Create Account</span>
                   </Button>
                 </Toolbar>
@@ -81,25 +69,6 @@ const LoanProceedSettingsList: React.FC = () => {
                 </CardBody>
               </Card>
             </div>
-          )}
-          {showForm && (
-            <div className={`${showForm ? 'fade-in' : 'fade-out'} col-span-1 xl:col-span-3`}>
-              <Card>
-                <CardHeader title={actionLbl} />
-                <CardBody>
-                  <LoanProcSettingsForm
-                      setShowForm={setShowForm}
-                      actionLbl={actionLbl}
-                      lpsSingleData={lpsSingleData}
-                      mappingLoading={loading}
-                      coaDataAccount={coaDataAccount || []}
-                      branchSubData={branchSubData}
-                      onSaveSuccess={fetchLpsDataTable} />
-                </CardBody>
-              </Card>
-            </div>
-          )}
-
         </div>
       </div>
     </div>

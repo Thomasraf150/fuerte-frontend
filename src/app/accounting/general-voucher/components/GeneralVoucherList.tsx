@@ -2,15 +2,12 @@
 
 import Button from '@/components/Button';
 import ErrorAlert from '@/components/ErrorAlert';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
-import CVForm from './CVForm';
-import JVForm from './JVForm';
 import VoucherFilters from './VoucherFilters';
 import useGeneralVoucher from '@/hooks/useGeneralVoucher';
-import { Download, GitBranch, Plus } from 'react-feather';
-import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { Download, Plus } from 'react-feather';
 import gVTblColumn from './GVTblColumn';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
@@ -19,20 +16,9 @@ const column = gVTblColumn;
 
 const GeneralVoucherList: React.FC = () => {
   const router = useRouter();
-  const [actionLbl, setActionLbl] = useState<string>('');
-  const [showFormCv, setShowFormCv] = useState<boolean>(false);
-  const [showFormJv, setShowFormJv] = useState<boolean>(false);
-  const [singleData, setSingleData] = useState<RowAcctgEntry>();
   const {
     dataGV,
-    createGV,
-    updateGV,
-    fetchGV,
-    printSummaryTicketDetails,
-    printLoading,
-    generalVoucherLoading,
     paginationLoading,
-    pubSubBrId,
     serverSidePaginationProps,
     generalVoucherError,
     refresh,
@@ -44,20 +30,7 @@ const GeneralVoucherList: React.FC = () => {
 
   const exportDisabled = exportLoading || !filters?.startDate || !filters?.endDate;
 
-  const handleShowFormCv = (lbl: string, showFrm: boolean) => {
-    setShowFormCv(showFrm);
-    setActionLbl(lbl);
-    setSingleData(undefined);
-  }
-  const handleShowFormJv = (lbl: string, showFrm: boolean) => {
-    setShowFormJv(showFrm);
-    setActionLbl(lbl);
-    setSingleData(undefined);
-  }
-
-  useEffect(() => {
-  }, [dataGV])
-
+  // New CV / New JV open at /new?type=cv|jv, saved vouchers at /[voucherId]: Back and refresh keep the place.
   // Navigate to detail page on row click (URL-based routing)
   const handleWholeRowClick = (row: RowAcctgEntry) => {
     const type = row?.journal_name === 'Check Voucher' ? 'cv' : 'jv';
@@ -68,8 +41,7 @@ const GeneralVoucherList: React.FC = () => {
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-2 gap-4">
-          {!showFormCv && !showFormJv && (
-            <div className={`col-span-2 ${!showFormCv ?'fade-in' : 'fade-out'}`}>
+            <div className="col-span-2 fade-in">
               <VoucherFilters onChange={setFilters} />
 
               <Card>
@@ -78,13 +50,13 @@ const GeneralVoucherList: React.FC = () => {
                 <Toolbar>
                   <Button variant="primary"
                     type="button"
-                    onClick={ () => handleShowFormCv('Create Check Voucher', true) }>
+                    onClick={ () => router.push('/accounting/general-voucher/new?type=cv') }>
                       <Plus size={14} />
                       <span>New CV</span>
                   </Button>
                   <Button variant="secondary"
                     type="button"
-                    onClick={ () => handleShowFormJv('Create Journal Voucher', true) }>
+                    onClick={ () => router.push('/accounting/general-voucher/new?type=jv') }>
                       <Plus size={14} />
                       <span>New JV</span>
                   </Button>
@@ -120,44 +92,6 @@ const GeneralVoucherList: React.FC = () => {
                 </CardBody>
               </Card>
             </div>
-          )}
-          {showFormCv && (
-            <div className={`col-span-2 ${showFormCv ?'fade-in' : 'fade-out'}`}>
-              <Card>
-                <CVForm
-                  setShowForm={setShowFormCv}
-                  actionLbl={actionLbl}
-                  singleData={singleData}
-                  createGV={createGV}
-                  updateGV={updateGV}
-                  fetchGV={fetchGV}
-                  loading={paginationLoading}
-                  generalVoucherLoading={generalVoucherLoading}
-                  pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails}
-                  printLoading={printLoading} />
-              </Card>
-            </div>
-          )}
-          {showFormJv && (
-            <div className={`col-span-2 ${showFormJv ?'fade-in' : 'fade-out'}`}>
-              <Card>
-                <JVForm
-                  setShowForm={setShowFormJv}
-                  actionLbl={actionLbl}
-                  singleData={singleData}
-                  createGV={createGV}
-                  fetchGV={fetchGV}
-                  loading={paginationLoading}
-                  generalVoucherLoading={generalVoucherLoading}
-                  pubSubBrId={pubSubBrId}
-                  printSummaryTicketDetails={printSummaryTicketDetails}
-                  printLoading={printLoading} />
-              </Card>
-            </div>
-          )}
-
-
 </div>
       </div>
     </div>

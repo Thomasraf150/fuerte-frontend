@@ -37,6 +37,8 @@ const useLoanProceedAccount = () => {
     setLpsDataAccount(response.data.getLoanProceedSettings);
     setLpsSingleData(undefined);
     setLoading(false);
+    // The rows the caller may see (branch-scoped by the server): the form's URL opens only these.
+    return response.data.getLoanProceedSettings as DataLoanProceedAcctData[] | undefined;
   };
 
   const fetchLpsDataForm = async (row: any) => {

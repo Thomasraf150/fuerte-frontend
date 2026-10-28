@@ -9,13 +9,14 @@ export const metadata = {
   description: "",
 };
 
-const Vendor: React.FC = () => {
+// ?type=<vendor type id> keeps the chosen vendor type across Back and refresh.
+const Vendor = ({ searchParams }: { searchParams: { type?: string } }) => {
   return (
     <DefaultLayout>
       <div className="mx-auto">
         <Breadcrumb pageName="Vendors" />
       </div>
-      <VendorsList />
+      <VendorsList initialType={searchParams?.type ?? ''} />
     </DefaultLayout>
   );
 };

@@ -2,69 +2,44 @@
 
 import Button from '@/components/Button';
 import ErrorAlert from '@/components/ErrorAlert';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
-import AEForm from './AEForm';
 import useAdjustingEntries from '@/hooks/useAdjustingEntries';
-import { GitBranch, Plus } from 'react-feather';
-import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { DataLoanProceedList, DataAccBalanceSheet, RowAcctgEntry } from '@/utils/DataTypes';
+import { Plus } from 'react-feather';
+import { RowAcctgEntry } from '@/utils/DataTypes';
 import aETblColumn from './AETblColumn';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
 const column = aETblColumn;
 
+// New entries open at /new, saved ones at /<entry id>: Back and refresh keep the place.
 const AdjustingEntriesList: React.FC = () => {
-  const [actionLbl, setActionLbl] = useState<string>('');
-  const [showForm, setShowForm] = useState<boolean>(false);
+  const router = useRouter();
   const {
     dataAe,
-    createAe,
-    fetchAe,
-    adjustingEntriesLoading,
     paginationLoading,
     serverSidePaginationProps,
     adjustingEntriesError,
     refresh
   } = useAdjustingEntries();
-  const [singleData, setSingleData] = useState<RowAcctgEntry>();
-  const [showFormAe, setShowFormAe] = useState<boolean>(false);
-  
-  const handleShowForm = (lbl: string, showFrm: boolean) => {
-    setShowForm(showFrm);
-    setActionLbl(lbl);
-  }
-
-  const handleShowFormAe = (lbl: string, showFrm: boolean) => {
-    setShowFormAe(showFrm);
-    setActionLbl(lbl);
-    setSingleData(undefined);
-  }
 
   const handleWholeRowClick = (row: RowAcctgEntry) => {
-    console.log(row, ' row');
-    setSingleData(row);
-    setShowFormAe(true);
-    setActionLbl('View Adjusting Entries');
+    router.push(`/accounting/adjusting-entries/${row.id}`);
   }
-
-  useEffect(() => {
-
-  }, [])
 
   return (
     <div>
       <div className="max-w-12xl">
         <div className="grid grid-cols-2 gap-4">
-          {!showFormAe && (
-            <div className={`col-span-2 ${!showFormAe ?'fade-in' : 'fade-out'}`}>
+            <div className="col-span-2 fade-in">
               <Card>
                 <CardHeader title="Adjusting Entries" />
                 <CardBody>
                 <Toolbar>
                   <Button variant="primary"
                     type="button"
-                    onClick={ () => handleShowFormAe('Create Adjusting Entries', true) }>
+                    onClick={ () => router.push('/accounting/adjusting-entries/new') }>
                       <Plus size={14} />
                       <span>New Adjusting Entry</span>
                   </Button>
@@ -90,24 +65,6 @@ const AdjustingEntriesList: React.FC = () => {
                 </CardBody>
               </Card>
             </div>
-          )}
-          {showFormAe && (
-            <div className={`col-span-2 ${showFormAe ?'fade-in' : 'fade-out'}`}>
-              <Card>
-                <AEForm
-                  setShowForm={setShowFormAe}
-                  actionLbl={actionLbl}
-                  singleData={singleData}
-                  createAe={createAe}
-                  fetchAe={fetchAe}
-                  refresh={refresh}
-                  loading={adjustingEntriesLoading}
-                />
-              </Card>
-            </div>
-          )}
-
-          
         </div>
       </div>
     </div>
