@@ -26,6 +26,7 @@ export const ENTITY_LABEL: Record<string, string> = {
   branch: "Branch",
   branch_sub: "Sub-Branch",
   loan_type: "Loan Type",
+  loan_application: "Application",
 };
 
 export function parseSnapshotLabel(snapshotRaw: string | null, fallback: string): string {

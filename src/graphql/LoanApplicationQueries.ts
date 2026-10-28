@@ -388,6 +388,21 @@ const FIND_OPEN_APPLICATION_FOR_APPLICANT_QUERY: string = `
   }
 `;
 
+/**
+ * Delete an application (2026-10-28): the Owner's goes at once (immediate), anyone else's is a request
+ * for approval. The reason is required for everyone. Answers like every in-scope delete (DeletionResult).
+ */
+const DELETE_LOAN_APPLICATION_MUTATION: string = `
+  mutation DeleteLoanApplication($id: Int!, $reason: String!) {
+    deleteLoanApplication(id: $id, reason: $reason) {
+      status
+      immediate
+      message
+      request_id
+    }
+  }
+`;
+
 const LoanApplicationQueries = {
   GET_LOAN_APPLICATIONS_QUERY,
   GET_APPLICATION_BRANCHES_QUERY,
@@ -402,6 +417,7 @@ const LoanApplicationQueries = {
   GET_APPLICATION_FUNNEL_QUERY,
   GET_APPLICATION_NOTIFICATIONS,
   FIND_OPEN_APPLICATION_FOR_APPLICANT_QUERY,
+  DELETE_LOAN_APPLICATION_MUTATION,
 };
 
 export default LoanApplicationQueries;

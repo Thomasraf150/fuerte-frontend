@@ -27,6 +27,8 @@ export interface UseDeleteWithApprovalConfig<TArgs> {
   promptTitle: string;
   promptText: string;
   errorLabel?: string;
+  /** The prompt will not confirm without a reason (the server requires one). */
+  reasonRequired?: boolean;
 }
 
 /** Per-call callbacks; vary by row click so they're passed at invocation. */
@@ -62,7 +64,8 @@ export function useDeleteWithApproval<TArgs>(config: UseDeleteWithApprovalConfig
       const reason = await showDeletionRequestPrompt(
         config.promptTitle,
         config.promptText,
-        "Delete"
+        "Delete",
+        { required: config.reasonRequired }
       );
       if (reason === null) return; // user cancelled
 
@@ -116,7 +119,7 @@ export function useDeleteWithApproval<TArgs>(config: UseDeleteWithApprovalConfig
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config.mutation, config.responseKey, config.promptTitle, config.promptText, config.errorLabel]
+    [config.mutation, config.responseKey, config.promptTitle, config.promptText, config.errorLabel, config.reasonRequired]
   );
 }
 

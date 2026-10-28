@@ -2,7 +2,7 @@
 
 import React, { useId, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Link2, Printer, RotateCw } from 'react-feather';
+import { ArrowLeft, ArrowRight, Edit2, Link2, Printer, RotateCw } from 'react-feather';
 import type { ActionResult, PickableStatus } from '@/hooks/useLoanApplication';
 import { OTHER_BRANCH_REASON, notConvertibleReason, type BranchAccess, type ConversionBlock } from '@/utils/convertApplication';
 import type { LoanApplicationRecord } from '@/utils/DataTypes';
@@ -63,6 +63,22 @@ const BackLink: React.FC = () => (
   >
     <ArrowLeft aria-hidden="true" size={16} className="shrink-0" />
     <span className="hidden md:inline">Applications</span>
+  </Link>
+);
+
+/**
+ * Edit: the form has its own page since 2026-10-28 (/applications/[id]/edit), so it is a link, and
+ * Back on the edit page comes back here. Olive-outlined: a working action, but not the page's one
+ * filled button (Create as borrower is).
+ */
+const EditLink: React.FC<{ href: string }> = ({ href }) => (
+  <Link
+    href={href}
+    prefetch={false}
+    className={`${BUTTON} border border-primary bg-white text-primary hover:bg-primary hover:text-white dark:border-bodydark dark:bg-boxdark dark:text-white dark:hover:bg-primary`}
+  >
+    <Edit2 aria-hidden="true" size={16} className="shrink-0" />
+    Edit
   </Link>
 );
 
@@ -185,6 +201,8 @@ interface ApplicationToolbarProps {
    * that borrower this application's (2026-10-23).
    */
   knownBorrower?: boolean;
+  /** The edit page, for a user who may change the application now (can_edit); none otherwise. */
+  editHref?: string | null;
 }
 
 /**
@@ -200,7 +218,7 @@ interface ApplicationToolbarProps {
  * The status choice lives here, not in the select (useStatusDraft), because Create as borrower
  * has to know about it: while the choice differs from the saved status it says to save it.
  */
-export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint, onLink, linking, knownBorrower = false }) => {
+export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint, onLink, linking, knownBorrower = false, editHref = null }) => {
   const reasonId = useId();
   const statusErrorId = useId();
   const status = useStatusDraft(record.status, onStatus);
@@ -229,6 +247,7 @@ export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, 
       </div>
       <div className="flex flex-col gap-2 md:ml-auto md:items-end">
         <div className="flex flex-col gap-2 md:flex-row md:gap-3">
+          {editHref && <EditLink href={editHref} />}
           <PrintButton printing={printing} blocked={unsaved} reasonId={reasonId} onPrint={onPrint} />
           {showCreate &&
             (linkable ? (

@@ -3,7 +3,8 @@
 import React, { useMemo, useRef } from "react";
 import { closeDetails, useDismissDetails } from "@/components/MoreMenu/dismissDetails";
 import { useRouter } from "nextjs-toploader/app";
-import { ChevronDown, Trash2 } from "react-feather";
+import Link from "next/link";
+import { ChevronDown, CornerUpRight, Trash2 } from "react-feather";
 import { useDeleteWithApproval } from "@/hooks/useDeleteWithApproval";
 import useDeletionRequests from "@/hooks/useDeletionRequests";
 import { usePendingDeletions } from "@/hooks/usePendingDeletions";
@@ -45,7 +46,7 @@ const useDeleteBorrower = (borrower: BorrowerRowInfo) => {
   return { pending, startDelete };
 };
 
-/** "More ▾": the borrower actions that should not sit one tap away, today Delete borrower. A native <details>. */
+/** "More ▾": the borrower actions that should not sit one tap away: Move to another branch, Delete borrower. A native <details>. */
 const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryClassName }) => {
   const menu = useRef<HTMLDetailsElement>(null);
   useDismissDetails(menu);
@@ -79,6 +80,14 @@ const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryCl
       {/* Positioned against the header's actions row: right-aligned under it and never wider than it,
           so at 360px it can not run off the screen whichever line More wraps to. */}
       <div className="absolute right-0 top-full z-10 mt-1 w-64 max-w-full overflow-hidden rounded border border-stroke bg-white py-1 shadow-default dark:border-strokedark dark:bg-boxdark">
+        {/* Its own screen (/borrowers/[id]/move): it says whether this borrower can move, and why not. */}
+        <Link
+          href={`/borrowers/${borrower.id}/move`}
+          className="flex min-h-[48px] w-full items-center gap-2.5 px-4 py-2 text-left text-sm font-medium text-black hover:bg-whiten focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary dark:text-white dark:hover:bg-boxdark-2 lg:min-h-[40px]"
+        >
+          <CornerUpRight aria-hidden="true" size={16} className="shrink-0 text-primary dark:text-olive-300" />
+          <span className="min-w-0">Move to another branch</span>
+        </Link>
         <button
           type="button"
           onClick={handleDelete}

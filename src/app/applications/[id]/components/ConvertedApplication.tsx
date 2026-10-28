@@ -86,7 +86,10 @@ const OutcomeCard: React.FC<{ record: LoanApplicationRecord; canOpenBorrower: bo
               : NEXT_STEP[kind]}
           </p>
           {/* History, in plain ink: the earlier step carries no colour. */}
-          <p className="pt-1 text-sm text-body dark:text-bodydark">This application is now a borrower and can no longer be edited.</p>
+          <p className="pt-1 text-sm text-body dark:text-bodydark">
+            This application is now a borrower, so it can no longer be edited or deleted.
+            {canOpenBorrower && kind !== 'deleted' && ' Details may have changed since: the borrower\'s page has the latest.'}
+          </p>
         </div>
       </div>
       {kind === 'deleted' ? null : record.borrower_id ? (
@@ -135,7 +138,10 @@ const LinkedCard: React.FC<{ record: LoanApplicationRecord; canOpenBorrower: boo
           <p className="text-sm text-body dark:text-bodydark">
             {canOpenBorrower ? FILE_IT[kind] : 'Nasa branch na ito. Wala ka nang kailangang gawin.'}
           </p>
-          <p className="pt-1 text-sm text-body dark:text-bodydark">This application is linked and can no longer be edited.</p>
+          <p className="pt-1 text-sm text-body dark:text-bodydark">
+            This application is linked, so it can no longer be edited or deleted.
+            {canOpenBorrower && ' Details may have changed since: the borrower\'s page has the latest.'}
+          </p>
         </div>
       </div>
       {canOpenBorrower && record.linked_borrower_id && (

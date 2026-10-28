@@ -17,8 +17,6 @@ import type { BorrowerInfo, LoanApplicationRecord, LoanApplicationUpdateInput, S
 import { DateAppliedField } from './DateAppliedField';
 import { UnsavedChangesWatcher, formSnapshot, picksOf, saveInputFor, type SavedPicks } from './UnsavedChangesWatcher';
 
-const LIST = '/applications';
-
 /** The three this page requires. An imported application may lack an amount or a purpose, so those are not. */
 const REQUIRED_FIELDS: ReadonlySet<string> = new Set(['firstname', 'lastname', 'contact_no']);
 
@@ -58,14 +56,20 @@ interface FormProps {
   record: LoanApplicationRecord;
   saving: boolean;
   save: (input: LoanApplicationUpdateInput) => Promise<ActionResult>;
-  /** Whether the form holds changes that are not saved: the page keeps Print and Create as borrower off while it does. */
+  /** Whether the form holds changes that are not saved. */
   onDirtyChange: (dirty: boolean) => void;
+  /** The application's page: where the form's Back goes. */
+  returnTo: string;
 }
 
 /**
  * BorrowerDetails calls setShowForm(false) after a save that went through, and from its
- * Back button. This page stays open after a save, and Back leaves without asking: only the
- * second navigates. A save marks itself for one tick, which is when the first call arrives.
+ * Back button. Back leaves without asking: only the second navigates, to the application's page
+ * (`returnTo`). A save marks itself for one tick, which is when the first call arrives.
+ *
+ * The page stays open after a save that went through (2026-10-28, as in CHR): Call Center fills an
+ * application part-way over the phone and saves as it goes. "Back to the application" (the Edit page's
+ * own link, or this Back) returns to the application's page when the user is done.
  * The result of the save is kept for the note under the form, and a save that went through
  * makes what was posted the form's saved state (`markSaved`).
  *
@@ -84,6 +88,7 @@ const useSaveAndStay = (
   mayAssign: boolean,
   loaded: SavedPicks,
   markSaved: (snapshot: string) => void,
+  returnTo: string,
 ) => {
   const router = useRouter();
   const justSaved = useRef(false);
@@ -112,7 +117,7 @@ const useSaveAndStay = (
   };
 
   const close = (show: boolean): void => {
-    if (!show && !justSaved.current) router.push(LIST);
+    if (!show && !justSaved.current) router.push(returnTo);
   };
 
   // The note says how the last save went; once the form is edited again it no longer describes it.
@@ -197,14 +202,14 @@ const startingValues = (record: LoanApplicationRecord, day: string | null): Part
  * then what each Save posted. The watcher, rendered through renderExtraFields (the only way
  * into the form's `control` without editing BorrowerDetails), compares the form with it.
  */
-const ApplicationFormBody: React.FC<BodyProps> = ({ record, saving, save, branches, onDirtyChange }) => {
+const ApplicationFormBody: React.FC<BodyProps> = ({ record, saving, save, branches, onDirtyChange, returnTo }) => {
   const picklists = useApplicationPicklists();
   const dateApplied = useDateApplied(record);
   const [initialValues] = useState(() => startingValues(record, dateApplied.shown ? dateApplied.loadedDay : null));
   const [saved, setSaved] = useState<string | null>(null);
   // The picker starts on the application's own branch (fromApplicationRecord), as the text its options hold.
   const loaded = { branch: String(record.branch_sub_id ?? ''), day: dateApplied.loadedDay };
-  const { notice, submit, close, edited } = useSaveAndStay(save, branches !== null, loaded, setSaved);
+  const { notice, submit, close, edited } = useSaveAndStay(save, branches !== null, loaded, setSaved, returnTo);
   // The watcher's verdict also drives the save bar: it is reset by a save, isDirty is not.
   const [unsaved, setUnsaved] = useState(false);
   const dirtyChanged = useCallback((dirty: boolean): void => {

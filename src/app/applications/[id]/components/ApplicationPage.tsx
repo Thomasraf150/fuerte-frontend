@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useRef, useState } from 'react';
+import { useApplicationDeletion, DeleteApplicationSection, PendingDeletionNotice } from './ApplicationDeletion';
+import ApplicationRecordView from './ApplicationRecordView';
 import { Eye } from 'react-feather';
 import { useStore } from 'zustand';
 import LoadError from '@/app/applications/components/LoadError';
@@ -11,7 +13,6 @@ import useLoanApplication from '@/hooks/useLoanApplication';
 import { useAuthStore } from '@/store/authStore';
 import { notConvertibleReason, parseApplicationId } from '@/utils/convertApplication';
 import type { LoanApplicationRecord } from '@/utils/DataTypes';
-import { ApplicationForm } from './ApplicationForm';
 import { ApplicationHeader } from './ApplicationHeader';
 import ApplicationSummary from './ApplicationSummary';
 import { ApplicationTabs, type ApplicationTab } from './ApplicationTabs';
@@ -45,9 +46,11 @@ const ViewOnlyApplication: React.FC<{ record: LoanApplicationRecord }> = ({ reco
 );
 
 /**
- * A loaded application: the header, the actions, the repeat-applicant warning when there is
- * one, and under them the form (or the summary: once the application is a borrower, and for a
- * user who may only view it) with the Google Form's notes beside it.
+ * A loaded application: the header, the actions, a waiting deletion request, the repeat-applicant
+ * warning when there is one, and under them the application as filed (ApplicationRecordView; or the
+ * summary: once the application is a borrower, and for a user who may only view it) with the Google
+ * Form's notes beside it, then Delete at the foot. The form is the Edit page's (/applications/[id]/edit,
+ * since 2026-10-28: a separate screen has its own address), so nothing on this page is ever unsaved.
  *
  * The warning sits under the actions, not above them: it arrives a moment after the page, and
  * the buttons must not move under a finger when it does. It comes before the form and the notes
@@ -64,8 +67,8 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
   // borrower from an Interviewed application since 2026-10-07 (it never opens the borrower afterwards).
   const mayAssign = useCanUpload();
   const isCallCenter = useStore(useAuthStore, (state) => state.user?.role?.code === 'CALLCTR');
-  // Whether the form holds changes that are not saved. Print and Create as borrower use the saved application.
-  const [dirty, setDirty] = useState(false);
+  // A request to delete it, waiting for an approver, and Delete / Withdraw (2026-10-28).
+  const deletion = useApplicationDeletion(Number(record.id));
   // The open tab: the application (form or record, with its side panel) or its History (2026-10-14).
   const [tab, setTab] = useState<ApplicationTab>('application');
   // The header's title: where the focus goes when a Retry of the repeat-applicant check finds nothing.
@@ -82,6 +85,8 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
   // Not a borrower yet, but not the user's to change: Marketing on another branch's application. The
   // server says so (can_edit), and refuses an edit, a status or a borrower from it.
   const viewOnly = !converted && record.can_edit === false;
+  // Edit and Delete (2026-10-28): for whoever may change it now, never once it is a borrower.
+  const editable = !converted && !viewOnly;
   // Whether the applicant is a borrower already is a fraud signal, for everyone who has the application
   // open, Call Center and a view-only reader included (Call Center tells the branch). A borrower has
   // nothing to warn about, so it is not asked; and nothing is asked before the role is known (read a
@@ -106,14 +111,17 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
         viewOnly={viewOnly}
         canCreateBorrower={!viewOnly}
         branchAccess={branchAccess}
-        unsaved={!converted && (dirty || app.saving)}
+        // The form has its own page now, so nothing here is ever unsaved.
+        unsaved={false}
         onStatus={app.setStatus}
         printing={app.printing}
         onPrint={app.print}
         onLink={app.link}
         linking={app.linking}
         knownBorrower={record.has_linkable_borrower === true}
+        editHref={editable ? `/applications/${record.id}/edit` : null}
       />
+      {deletion.pending && <PendingDeletionNotice pending={deletion.pending} onWithdraw={deletion.withdraw} />}
       {checksTheApplicant && (
         <RepeatApplicantCheck
           check={repeatApplicant}
@@ -146,19 +154,13 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
           ) : viewOnly ? (
             <ViewOnlyApplication record={record} />
           ) : (
-            <ApplicationForm
-              key={record.id}
-              record={record}
-              mayAssign={mayAssign}
-              saving={app.saving}
-              save={app.save}
-              onDirtyChange={setDirty}
-            />
+            <ApplicationRecordView record={record} />
           )}
         </div>
       </div>
         }
       />
+      {editable && !deletion.pending && <DeleteApplicationSection onDelete={() => void deletion.startDelete()} />}
     </div>
   );
 };

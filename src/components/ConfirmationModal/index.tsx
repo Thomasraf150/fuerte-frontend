@@ -35,20 +35,27 @@ export const showConfirmationModal = async (
  * At most 1000 characters: the server refuses a longer reason (2026-10-14).
  *
  * Returns the reason string on confirm (empty string allowed), or null on cancel.
+ *
+ * `required` (loan applications, 2026-10-28: the server refuses a reason under 3 characters, the
+ * Owner's included): the label says so, and the prompt will not confirm until one is written.
  */
 export const showDeletionRequestPrompt = async (
   title: string,
   text: string,
-  confirmText: string = 'Submit'
+  confirmText: string = 'Submit',
+  options: { required?: boolean } = {}
 ): Promise<string | null> => {
   const result = await MySwal.fire({
     title,
     text,
     icon: 'warning',
     input: 'textarea',
-    inputLabel: 'Reason (optional — shown to the approver)',
+    inputLabel: options.required ? 'Reason (required, shown to the approver)' : 'Reason (optional — shown to the approver)',
     inputPlaceholder: 'e.g. duplicate entry, wrong borrower, encoded by mistake',
     inputAttributes: { 'aria-label': 'Reason for deletion', maxlength: '1000' },
+    ...(options.required && {
+      inputValidator: (value: string) => (value.trim().length < 3 ? 'Write why, in a few words.' : null),
+    }),
     showCancelButton: true,
     confirmButtonColor: CONFIRM_COLORS.confirm,
     cancelButtonColor: CONFIRM_COLORS.reject,
