@@ -85,13 +85,15 @@ const useBranches = () => {
   };
 
   const fetchSubDataList = async (orderBy = 'name_asc', branch_id: number) => {
+    // The branch being viewed is known now, not when its list arrives: Create Sub Branch takes it from
+    // here, and pressed before the list came back it saved branch 0 (2026-10-28).
+    setSelectedBranchID(branch_id);
     setLoadingSubBranches(true);
     try {
       const result = await graphqlFetch(GET_SUB_BRANCH_QUERY, { orderBy, branch_id });
       // Same guard as fetchDataList — see the note there.
       if (result.data?.getBranchSub) {
         setDataBranchSub(result.data.getBranchSub);
-        setSelectedBranchID(branch_id);
       } else {
         console.error('GraphQL errors fetching sub-branches:', result.errors);
         toast.error(`Could not load sub-branches: ${result.errors?.[0]?.message ?? 'unknown error'}`);

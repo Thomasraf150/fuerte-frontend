@@ -152,13 +152,15 @@ const BankForm: React.FC<ParentFormBr> = ({ setShowForm, fetchDataBank, initialD
           onClick={() => { setShowForm(false) }}>
           Cancel
         </Button>
+        {/* Waits for the branch list: Save pressed before it arrived was checked against the blank
+            loading select and stopped at "required" (2026-10-28). */}
         <Button variant="primary"
           type="submit"
-          disabled={bankLoading || isSuccess}>
-          {bankLoading ? (
+          disabled={bankLoading || isSuccess || !branchSubData}>
+          {bankLoading || (!branchSubData && !isSuccess) ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
-              <span>Saving...</span>
+              <span>{bankLoading ? 'Saving...' : 'Loading...'}</span>
             </>
           ) : isSuccess ? (
             <>

@@ -60,7 +60,24 @@ const useLogin = () => {
   };
   
   const logout = async () => {
-    const { CLEAR_AUTH_DATA } = useAuthStore.getState();
+    const { CLEAR_AUTH_DATA, GET_AUTH_TOKEN } = useAuthStore.getState();
+
+    // Revoke the token on the server first, so a copy of it stops working too. Best effort:
+    // an unreachable server (or one slower than 10 s) still signs this browser out.
+    const token = GET_AUTH_TOKEN();
+    if (token) {
+      try {
+        await fetch(process.env.NEXT_PUBLIC_API_URL + '/logout', {
+          method: 'POST',
+          // The token header only, no cookies: the API takes a `jwt` cookie over the header, so a
+          // stray cookie would be revoked instead of this browser's token.
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+          signal: AbortSignal.timeout(10_000),
+        });
+      } catch (error) {
+        console.error('Log out: the server could not revoke the token', error);
+      }
+    }
 
     CLEAR_AUTH_DATA();
     toast.info("You have successfully logged-out", {

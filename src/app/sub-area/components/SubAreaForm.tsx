@@ -98,13 +98,15 @@ const SubAreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData
           onClick={() => { setShowForm(false) }}>
           Cancel
         </Button>
+        {/* Waits for the area list: Save pressed before it arrived was checked against the blank
+            loading select and stopped at "Area is required" (2026-10-28). */}
         <Button variant="primary"
           type="submit"
-          disabled={subAreaLoading}>
-          {subAreaLoading ? (
+          disabled={subAreaLoading || !dataArea}>
+          {subAreaLoading || !dataArea ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
-              <span>Saving...</span>
+              <span>{subAreaLoading ? 'Saving...' : 'Loading...'}</span>
             </>
           ) : (
             <>

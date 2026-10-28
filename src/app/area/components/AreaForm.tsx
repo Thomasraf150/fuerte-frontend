@@ -105,13 +105,15 @@ const AreaForm: React.FC<ParentFormBr> = ({ setShowForm, refresh, initialData, a
           onClick={() => { setShowForm(false) }}>
           Cancel
         </Button>
+        {/* Waits for the branch list: Save pressed before it arrived was checked against the blank
+            loading select and stopped at "Branch Sub is required" (2026-10-28). */}
         <Button variant="primary"
           type="submit"
-          disabled={areaLoading}>
-          {areaLoading ? (
+          disabled={areaLoading || !branchSubData}>
+          {areaLoading || !branchSubData ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
-              <span>Saving...</span>
+              <span>{areaLoading ? 'Saving...' : 'Loading...'}</span>
             </>
           ) : (
             <>
