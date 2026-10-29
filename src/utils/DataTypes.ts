@@ -669,6 +669,8 @@ export interface BorrLoanRowData {
   previous_bank_details?: PreviousLoanBankDetails | null;
   borrower: BorrowerRowInfo;
   acctg_entry: AcctgEntryRowData;
+  /** Anything still booked under the loan_ref, payments too: the server then refuses Delete. */
+  booked_entries_exists?: boolean | null;
   branch_sub: DataSubBranches;
   user: User;
   custom_status: string;
@@ -1018,7 +1020,7 @@ export interface LoanHistoryPaginator {
 export type LoanApplicationStatus = 'for_interview' | 'interviewed' | 'declined' | 'borrower_created' | 'borrower_linked';
 
 /** "Saan galing": where an application came from. Keep in sync with LoanApplication::CHANNELS (backend). */
-export type LoanApplicationChannel = 'google_form' | 'facebook' | 'walk_in' | 'phone';
+export type LoanApplicationChannel = 'google_form' | 'facebook' | 'walk_in' | 'phone' | 'referral';
 
 /** What is applied for (spec 2026-10-21). Keep in sync with LoanApplication::KINDS (backend). */
 export type LoanApplicationKind = 'new' | 'renewal' | 'additional';

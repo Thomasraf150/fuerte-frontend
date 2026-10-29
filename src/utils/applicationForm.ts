@@ -29,14 +29,15 @@ export const KIND_LABELS: Readonly<Record<LoanApplicationKind, string>> = {
   additional: 'Additional',
 };
 
-/** Saan galing's four choices, in the order the form shows them. Keep in sync with LoanApplication::CHANNELS. */
-export const CHANNELS = ['google_form', 'facebook', 'walk_in', 'phone'] as const satisfies readonly LoanApplicationChannel[];
+/** Saan galing's choices, in the order the form shows them. Keep in sync with LoanApplication::CHANNELS. */
+export const CHANNELS = ['google_form', 'facebook', 'walk_in', 'phone', 'referral'] as const satisfies readonly LoanApplicationChannel[];
 
 export const CHANNEL_LABELS: Readonly<Record<LoanApplicationChannel, string>> = {
   google_form: 'Google Form',
   facebook: 'Facebook Messenger',
   walk_in: 'Walk-in',
   phone: 'Tawag o Text',
+  referral: 'Referral',
 };
 
 /** The same, short enough for the line under a name in the Applications list. */
@@ -45,6 +46,7 @@ export const CHANNEL_SHORT_LABELS: Readonly<Record<LoanApplicationChannel, strin
   facebook: 'Messenger',
   walk_in: 'Walk-in',
   phone: 'Tawag/Text',
+  referral: 'Referral',
 };
 
 /** The basics New application requires (BorrowerDetails' `requiredFields`). Saan galing is required by its own field. */

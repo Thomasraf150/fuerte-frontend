@@ -101,7 +101,7 @@ export interface SourceRow {
 export interface SourceSummary {
   /** Every application in the period, "Not recorded" included. */
   total: number;
-  /** The four sources in the form's order, zeros kept. */
+  /** Every source (CHANNELS) in the form's order, zeros kept. */
   rows: SourceRow[];
   /** Applications with no source saved: the server's `unknown`, and any channel this page has no card for. */
   notRecorded: number;
@@ -110,7 +110,7 @@ export interface SourceSummary {
 /** A server count as a whole number, never negative. */
 const wholeCount = (value: unknown): number => Math.max(0, Math.trunc(Number(value)) || 0);
 
-/** The server's per-channel counts as the four cards and the "Not recorded" remainder, so the total always adds up. */
+/** The server's per-channel counts as one card per source and the "Not recorded" remainder, so the total always adds up. */
 export function summarizeSources(counts: readonly ApplicationSourceCount[]): SourceSummary {
   const known = new Map<string, number>();
   let notRecorded = 0;

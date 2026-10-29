@@ -5,6 +5,7 @@ import { Check } from 'react-feather';
 import type { FieldErrors, UseFormRegister, UseFormRegisterReturn } from 'react-hook-form';
 import { CHANNELS, CHANNEL_LABELS } from '@/utils/applicationForm';
 import type { LoanApplicationChannel } from '@/utils/DataTypes';
+import { gridPlace } from './channelGrid';
 import { CHANNEL_ICONS, TINTS } from './channelIcons';
 
 export const CHANNEL_ERROR = 'Piliin kung saan galing ang application.';
@@ -14,6 +15,7 @@ const HINTS: Readonly<Record<LoanApplicationChannel, string>> = {
   facebook: 'Nag-message sa FB page',
   walk_in: 'Pumunta mismo sa branch',
   phone: 'Tumawag o nag-text',
+  referral: 'Ni-refer ng kakilala o kliyente',
 };
 
 /*
@@ -28,30 +30,55 @@ const TILE =
 
 /*
  * The icon beside the words needs a tile about 190px wide.
+ *   Five tiles (the Google Form roles), or any count but four: two columns on phones with
+ *   an odd last tile across the row, then a six-column grid from md (gridPlace): three
+ *   tiles on top, two wider ones below. Five in a row would leave tiles about 170px wide
+ *   beside the 290px sidebar even at xl.
  *   Four tiles: two columns on phones (124px each at 360px, so the icon sits above the
  *   words), and four in a row only from xl: beside the 290px sidebar, 1024-1279px
  *   would leave four tiles 133px wide.
- *   Three tiles: one column on phones, three in a row from md (180px or more each).
  */
-const FOUR = { grid: 'grid-cols-2 xl:grid-cols-4', tile: 'flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3' };
-const THREE = { grid: 'grid-cols-1 md:grid-cols-3', tile: 'flex-row items-center gap-3' };
+const STACKED = 'flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3';
+const SIDE_BY_SIDE = 'flex-row items-center gap-3';
+
+interface Layout {
+  grid: string;
+  /** The nth of `count` tiles' grid cell. */
+  cell: (index: number, count: number) => string;
+  /** How the nth tile's icon sits against its words. */
+  tile: (index: number, count: number) => string;
+}
+
+const SPAN_FROM_MD = { third: 'md:col-span-2', half: 'md:col-span-3', full: 'md:col-span-6' } as const;
+/** Any count but four (gridPlace): five gives three on top and two wider below. */
+const SIX_COLUMNS: Layout = {
+  grid: 'grid-cols-2 md:grid-cols-6',
+  cell: (index, count) => {
+    const place = gridPlace(index, count);
+    return `${place.odd ? 'col-span-2 ' : ''}${SPAN_FROM_MD[place.span]}`;
+  },
+  tile: (index, count) => (gridPlace(index, count).odd ? SIDE_BY_SIDE : STACKED),
+};
+const FOUR: Layout = { grid: 'grid-cols-2 xl:grid-cols-4', cell: () => '', tile: () => STACKED };
 
 interface ChannelTileProps {
   channel: LoanApplicationChannel;
   /** useId's prefix, for the label and hint ids. */
   idPrefix: string;
+  /** The grid cell's classes. */
+  cell: string;
   layout: string;
   field: UseFormRegisterReturn;
   /** The error's id, while the field shows one. */
   errorId?: string;
 }
 
-const ChannelTile: React.FC<ChannelTileProps> = ({ channel, idPrefix, layout, field, errorId }) => {
+const ChannelTile: React.FC<ChannelTileProps> = ({ channel, idPrefix, cell, layout, field, errorId }) => {
   const ChannelIcon = CHANNEL_ICONS[channel];
   const labelId = `${idPrefix}-${channel}-label`;
   const hintId = `${idPrefix}-${channel}-hint`;
   return (
-    <label className="relative block cursor-pointer">
+    <label className={`relative block cursor-pointer ${cell}`}>
       <input
         type="radio"
         value={channel}
@@ -94,7 +121,7 @@ interface SaanGalingFieldProps {
  * "Saan galing ang application?": where the application came from, as big tiles,
  * never a dropdown. Registered as `channel` on BorrowerDetails' own form (through
  * renderExtraFields), required. Google Form is offered only to the roles that upload
- * the Google Form responses; everyone else gets three tiles.
+ * the Google Form responses; everyone else gets four tiles.
  */
 const SaanGalingField: React.FC<SaanGalingFieldProps> = ({ register, errors, canChooseGoogleForm }) => {
   const id = useId();
@@ -102,7 +129,7 @@ const SaanGalingField: React.FC<SaanGalingFieldProps> = ({ register, errors, can
   const error = errors.channel?.message ? String(errors.channel.message) : '';
   const field = register('channel', { required: CHANNEL_ERROR });
   const channels = canChooseGoogleForm ? CHANNELS : CHANNELS.filter((channel) => channel !== 'google_form');
-  const layout = channels.length === 4 ? FOUR : THREE;
+  const layout = channels.length === 4 ? FOUR : SIX_COLUMNS;
 
   return (
     <fieldset>
@@ -115,8 +142,16 @@ const SaanGalingField: React.FC<SaanGalingFieldProps> = ({ register, errors, can
         <div aria-hidden="true" className="min-h-16" />
       ) : (
         <div className={`grid gap-3 ${layout.grid}`}>
-          {channels.map((channel) => (
-            <ChannelTile key={channel} channel={channel} idPrefix={id} layout={layout.tile} field={field} errorId={error ? errorId : undefined} />
+          {channels.map((channel, index) => (
+            <ChannelTile
+              key={channel}
+              channel={channel}
+              idPrefix={id}
+              cell={layout.cell(index, channels.length)}
+              layout={layout.tile(index, channels.length)}
+              field={field}
+              errorId={error ? errorId : undefined}
+            />
           ))}
         </div>
       )}

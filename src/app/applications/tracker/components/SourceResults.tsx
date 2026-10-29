@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { HelpCircle } from 'react-feather';
+import { gridPlace } from '@/app/applications/components/channelGrid';
 import { CHANNEL_ICONS, TINTS } from '@/app/applications/components/channelIcons';
-import { CHANNEL_LABELS } from '@/utils/applicationForm';
+import { CHANNELS, CHANNEL_LABELS } from '@/utils/applicationForm';
 import { formatCount } from '@/utils/helper';
 import { applicationsNoun, shareLabel, shareOf, type SourceRow, type SourceSummary } from '@/utils/sourceTracker';
 
@@ -84,11 +85,24 @@ const ShareBar: React.FC<{ row: SourceRow; total: number; grown: boolean }> = ({
   );
 };
 
+/*
+ * The cards on a six-column grid, so no row is left with a gap (gridPlace, the same rule
+ * as the Saan galing tiles): one per row on phones; two per row on tablets with an odd
+ * last card across; from lg, beside the 290px sidebar, rows of three, so five gives three
+ * on top and two wider below (five across would be about 170px each).
+ */
+const CARD_GRID = 'grid grid-cols-1 gap-3 sm:grid-cols-6 sm:gap-4';
+const SPAN_FROM_LG = { third: 'lg:col-span-2', half: 'lg:col-span-3', full: 'lg:col-span-6' } as const;
+const cardCell = (index: number, count: number): string => {
+  const place = gridPlace(index, count);
+  return `${place.odd ? 'sm:col-span-6' : 'sm:col-span-3'} ${SPAN_FROM_LG[place.span]}`;
+};
+
 /** One source: its icon and name, the count, and the share of the total. */
-const SourceCard: React.FC<{ row: SourceRow; total: number; grown: boolean }> = ({ row, total, grown }) => {
+const SourceCard: React.FC<{ row: SourceRow; total: number; grown: boolean; cell: string }> = ({ row, total, grown, cell }) => {
   const ChannelIcon = CHANNEL_ICONS[row.channel];
   return (
-    <li className="rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5">
+    <li className={`rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5 ${cell}`}>
       <div className="flex items-center gap-3">
         <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${TINTS[row.channel]}`}>
           <ChannelIcon size={18} />
@@ -135,10 +149,9 @@ const LoadedResults: React.FC<{ summary: SourceSummary }> = ({ summary }) => {
   return (
     <div className="space-y-4">
       <TotalBlock summary={summary} grown={grown} />
-      {/* Four across only from xl, beside the 290px sidebar; two on tablets, one on phones. */}
-      <ul role="list" className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-        {summary.rows.map((row) => (
-          <SourceCard key={row.channel} row={row} total={summary.total} grown={grown} />
+      <ul role="list" className={CARD_GRID}>
+        {summary.rows.map((row, index) => (
+          <SourceCard key={row.channel} row={row} total={summary.total} grown={grown} cell={cardCell(index, summary.rows.length)} />
         ))}
       </ul>
       {summary.notRecorded > 0 && <NotRecorded count={summary.notRecorded} total={summary.total} />}
@@ -154,9 +167,9 @@ const ResultsSkeleton: React.FC = () => (
       <div className="mt-3 h-9 w-24 rounded bg-stroke dark:bg-strokedark md:h-11" />
       <div className="mt-4 h-3 rounded-full bg-stroke dark:bg-strokedark" />
     </div>
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-      {[0, 1, 2, 3].map((slot) => (
-        <div key={slot} className="rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5">
+    <div className={CARD_GRID}>
+      {CHANNELS.map((channel, slot) => (
+        <div key={channel} className={`rounded-xl bg-whiten p-4 dark:bg-meta-4 sm:p-5 ${cardCell(slot, CHANNELS.length)}`}>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-whiten dark:bg-meta-4" />
             <div className="h-4 w-28 rounded bg-whiten dark:bg-meta-4" />
