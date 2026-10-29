@@ -6,6 +6,17 @@ import { CONFIRM_COLORS } from '@/utils/brandColors';
 
 const MySwal = withReactContent(Swal);
 
+/**
+ * Yes / no confirmation. Returns true when confirmed.
+ *
+ * `text` is shown as plain text (SweetAlert2's `text` option) unless `useHtml` is true. With
+ * `useHtml`, `text` goes into SweetAlert2's `html` option, which parses it into the live DOM, so
+ * event handlers in it run. An HTML body must therefore be built with the `html` tag or
+ * `escapeHtml` from '@/utils/html' for every value that is not a constant in the source:
+ * stored or server text (names, labels, reasons, account names, branch names, messages).
+ *
+ * `title` is always HTML in SweetAlert2. Pass a constant, or escape what goes into it the same way.
+ */
 export const showConfirmationModal = async (
   title: string,
   text: string,

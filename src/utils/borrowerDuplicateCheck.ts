@@ -2,6 +2,8 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { BorrowerInfo } from '@/utils/DataTypes';
 import { graphqlFetch } from '@/utils/graphqlFetch';
+// Names go into the dialog's HTML: escaped, whoever typed them.
+import { escapeHtml } from '@/utils/html';
 
 interface AuthData {
   authToken?: string;
@@ -43,10 +45,6 @@ interface MatchLocation {
   sub_branch: string;
 }
 
-/** Names go into the dialog's HTML: escaped, whoever typed them. */
-const escapeHtml = (text: string): string =>
-  text.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch] as string);
-
 /**
  * One line per place a match is (Rafael 2026-10-08): "Group FD · Branch FD · Sub-branch FD Main".
  * A part the server does not know (a branch outside any group) is left out.
@@ -87,7 +85,7 @@ const pesos = (raw: string | number | null | undefined): string => {
  */
 const problemBadgeHtml = (p: ProblemFlag | null | undefined): string => {
   if (!p || !p.isProblem) return '';
-  const since = p.oldestUnpaidDueDate ? ` · unpaid since ${p.oldestUnpaidDueDate}` : '';
+  const since = p.oldestUnpaidDueDate ? ` · unpaid since ${escapeHtml(String(p.oldestUnpaidDueDate))}` : '';
   return (
     `<div style="margin-top:10px;padding:10px 12px;border-radius:6px;background:#FEF2F2;border-left:4px solid #DC2626;">` +
       `<strong style="color:#DC2626;">⚠ PROBLEM ACCOUNT</strong><br/>` +
@@ -152,7 +150,10 @@ const crossBranchHtml = (c: CrossBranchResult | null | undefined): string => {
 
 const buildDuplicateBody = (duplicate: any): string => {
   const borrower = duplicate.duplicateBorrower;
-  const middlename = borrower.middlename ? ` ${borrower.middlename}` : '';
+  // Stored borrower fields are whatever was typed into the borrower form: escaped before they
+  // reach SweetAlert2's html option, or a name holding markup runs in the viewer's session.
+  const text = (value: unknown): string => escapeHtml(String(value ?? ''));
+  const middlename = borrower.middlename ? ` ${text(borrower.middlename)}` : '';
   const duplicateTypes = duplicate.duplicateType?.split(',') || [];
 
   let matched = '';
@@ -163,8 +164,8 @@ const buildDuplicateBody = (duplicate: any): string => {
   return (
     `<p>A borrower with the same ${matched} already exists in your branch:</p>` +
     `<br/>` +
-    `<p><strong>Full Name:</strong> ${borrower.firstname}${middlename} ${borrower.lastname}</p>` +
-    `<p><strong>Contact Number:</strong> ${borrower.borrower_details?.contact_no || 'N/A'}</p>` +
+    `<p><strong>Full Name:</strong> ${text(borrower.firstname)}${middlename} ${text(borrower.lastname)}</p>` +
+    `<p><strong>Contact Number:</strong> ${text(borrower.borrower_details?.contact_no || 'N/A')}</p>` +
     problemBadgeHtml(duplicate.duplicateProblem)
   );
 };

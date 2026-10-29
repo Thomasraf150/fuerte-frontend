@@ -284,8 +284,17 @@ const useGeneralVoucher = () => {
         return;
       }
 
+      // xlsxPath is a short-lived signed link (/api/exports/check-vouchers?...),
+      // not a file under /storage: the server builds the workbook when the link
+      // is opened and keeps nothing on disk. Open it straight away — it expires.
+      if (!xlsxPath.startsWith('/api/exports/')) {
+        toast.error('Excel export failed: invalid response from server.');
+        return;
+      }
+
       // Trigger download via hidden link — works in modern browsers without
-      // popup-blocker headaches and avoids leaving a stale tab open.
+      // popup-blocker headaches and avoids leaving a stale tab open. The server
+      // answers with Content-Disposition: attachment, so the page stays put.
       const fullUrl = process.env.NEXT_PUBLIC_BASE_URL + xlsxPath;
       const link = document.createElement('a');
       link.href = fullUrl;

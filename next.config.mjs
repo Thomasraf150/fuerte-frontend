@@ -6,8 +6,25 @@ const nextConfig = {
   images: {
     domains: ['localhost', '58.69.102.194'],
   },
+  // Anti-framing on every route: no other site may load Fuerte in a frame
+  // (clickjacking a signed-in user's clicks). X-Frame-Options for older
+  // browsers, CSP frame-ancestors for current ones. The CSP carries ONLY
+  // frame-ancestors on purpose: a fuller policy would need auditing every
+  // script, style and connect source first. The app frames none of its own
+  // pages (no <iframe> in src/), so 'none' costs nothing.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+        ],
+      },
+    ];
+  },
   // Proxy /storage/* to the Laravel backend so uploaded files (borrower
-  // attachments, photos, company logo) and xlsx exports are served correctly
+  // attachments, photos, company logo) are served correctly
   // regardless of how NEXT_PUBLIC_BASE_URL was baked in.
   //
   // BACKEND_URL must be set at BUILD time (docker build arg / env in dev server).
@@ -36,6 +53,13 @@ const nextConfig = {
       {
         source: '/api/pdf/:path*',
         destination: `${backendUrl}/api/pdf/:path*`,
+      },
+      // Signed check-voucher Excel export links, for the same reason. The
+      // workbook is no longer written under /storage/xlsx; it is built on
+      // demand at /api/exports/check-vouchers.
+      {
+        source: '/api/exports/:path*',
+        destination: `${backendUrl}/api/exports/:path*`,
       },
     ];
   },

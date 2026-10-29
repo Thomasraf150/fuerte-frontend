@@ -28,7 +28,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     const incoming = parseFloat(numericValue) || 0;
 
     const remainingDue = Number(selectedMoSched?.amount) || 0;
-    const remainingUdi = Number(selectedUdiSched?.amount) || 0;
+    // Never below zero: the server refuses a negative interest box (2026-10-29), and an
+    // over-collected UDI schedule would otherwise send one on an overpayment.
+    const remainingUdi = Math.max(0, Number(selectedUdiSched?.amount) || 0);
     const collection = type === 'collection' ? incoming : num(watch('collection'));
     const bankCharge = type === 'bank_charge' ? incoming : num(watch('bank_charge'));
     const penalty = type === 'penalty' ? incoming : num(watch('penalty'));

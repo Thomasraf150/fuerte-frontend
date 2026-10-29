@@ -13,6 +13,7 @@ import { showConfirmationModal } from '@/components/ConfirmationModal';
 import useDebounce from '@/hooks/useDebounce';
 import useCoaGroupView from '@/hooks/useCoaGroupView';
 import Swal from 'sweetalert2';
+import { html } from '@/utils/html';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardBody, CardHeader, Toolbar } from '@/components/Card';
 
@@ -319,7 +320,8 @@ const ChartofAcctList: React.FC<ChartofAcctListProps> = ({
       // Show custom modal with checkbox for cascade option
       const result = await Swal.fire({
         title: 'Reactivate Account',
-        html: `
+        // The `html` tag escapes the account name (stored text) and the count.
+        html: html`
           <p style="margin-bottom: 15px;">You are reactivating "<strong>${account.account_name}</strong>"</p>
           <div style="background-color: #e3f2fd; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
             <p style="margin: 0; color: #1976d2; font-size: 14px;">

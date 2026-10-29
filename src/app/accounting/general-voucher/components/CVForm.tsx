@@ -14,6 +14,7 @@ import usePayee from '@/hooks/usePayee';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { html } from '@/utils/html';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData, SelectOption } from '@/utils/DataTypes';
 import { toast } from '@/utils/notify';
@@ -263,6 +264,8 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       // Resolved from the account options, NOT from row.accountLabel: that field is
       // reassigned on every cell edit, so typing the amount after picking the account
       // blanks it and the warning would name a bare account number.
+      // Plain text here; the `html` tag below escapes it (account names are stored text and this
+      // dialog renders as HTML).
       const accountList = nrCreditRows
         .map((row) => {
           const option = optionsCoaData.find((opt) => opt.value === String(row.acctnumber));
@@ -272,7 +275,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
       const proceed = await showConfirmationModal(
         'Crediting Notes Receivable?',
-        `<p style="line-height:1.5;text-align:left">This voucher credits <b>${accountList}</b>.<br/><br/>` +
+        html`<p style="line-height:1.5;text-align:left">This voucher credits <b>${accountList}</b>.<br/><br/>` +
           'Payment posting already reduces Notes Receivable when a collection is posted. ' +
           'Crediting it here as well deducts the same amount twice.<br/><br/>' +
           'To record a deposit of collected cash, credit the branch\'s <b>Cash on Hand</b> account instead.</p>',
