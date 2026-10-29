@@ -34,7 +34,9 @@ const useLoanProceedAccount = () => {
       }),
     });
     // const result = await response.json();
-    setLpsDataAccount(response.data.getLoanProceedSettings);
+    // A failed read must say so, not look like a branch with no settings.
+    if (response?.errors?.length) toast.error(response.errors[0].message);
+    setLpsDataAccount(response?.data?.getLoanProceedSettings ?? undefined);
     setLpsSingleData(undefined);
     setLoading(false);
     // The rows the caller may see (branch-scoped by the server): the form's URL opens only these.
@@ -116,7 +118,8 @@ const useLoanProceedAccount = () => {
       let variables: { input: any } = {
         input: {
           user_id: String(userData?.user?.id),
-          branch_sub_id: data?.branch_sub_id === 'global' ? null : data?.branch_sub_id,
+          // 'global' by name: the server reads a blank branch as "choose a branch", never the Global Default.
+          branch_sub_id: data?.branch_sub_id,
           loan_ref: data?.loan_ref,
           description: data?.description,
           nr_id: data?.nr_id,
