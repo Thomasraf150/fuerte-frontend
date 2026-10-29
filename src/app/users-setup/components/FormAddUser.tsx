@@ -20,7 +20,7 @@ interface OptionProps {
 }
 const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, singleUserData }) => {
   const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<DataFormUser>();
-  const { onSubmitUser, userLoading, dataSubBranch, dataRole, rolesLoading, subBranchLoading } = useUsers();
+  const { onSubmitUser, userLoading, dataSubBranch, dataRole, rolesLoading, subBranchLoading, listsFailed } = useUsers();
   const [options, setOptions] = useState<OptionProps[]>([
     { value: '', label: 'Select a branch', hidden: true },
   ]);
@@ -135,12 +135,19 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
   // same commit its options appear, before the Owner can change it.
   const branchReady = !localBranchLoading && options.length > 1;
   const roleReady = !rolesLoading && optionsRole.length > 1;
+  // shouldValidate: a "... is required" left from a Save pressed while loading clears as the value lands.
   useEffect(() => {
-    if (actionLbl === 'Update User' && singleUserData && branchReady) setValue('branch_sub_id', singleUserData.branch_sub_id);
+    if (actionLbl === 'Update User' && singleUserData && branchReady) setValue('branch_sub_id', singleUserData.branch_sub_id, { shouldValidate: true });
   }, [actionLbl, singleUserData, branchReady, setValue]);
   useEffect(() => {
-    if (actionLbl === 'Update User' && singleUserData && roleReady) setValue('role_id', singleUserData.role_id);
+    if (actionLbl === 'Update User' && singleUserData && roleReady) setValue('role_id', singleUserData.role_id, { shouldValidate: true });
   }, [actionLbl, singleUserData, roleReady, setValue]);
+
+  // Save waits for both dropdowns' options (and, editing, the user's saved values). A Save pressed
+  // before the roles arrived failed with "Role is required" while the dropdown then showed the role.
+  // A list that failed to load ends the wait (the hook says so): Save then names the empty field.
+  const waitingForLists = (actionLbl === 'Create User' || actionLbl === 'Update User') && !listsFailed
+    && (!branchReady || !roleReady || (actionLbl === 'Update User' && !singleUserData));
 
   useEffect(() => {
     if (dataRole && Array.isArray(dataRole)) {
@@ -304,11 +311,11 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
         </Button>
         <Button variant="primary"
           type="submit"
-          disabled={userLoading}>
-          {userLoading ? (
+          disabled={userLoading || waitingForLists}>
+          {userLoading || waitingForLists ? (
             <>
               <RotateCw size={17} className="animate-spin mr-1" />
-              <span>Saving...</span>
+              <span>{userLoading ? 'Saving...' : 'Loading...'}</span>
             </>
           ) : (
             <>

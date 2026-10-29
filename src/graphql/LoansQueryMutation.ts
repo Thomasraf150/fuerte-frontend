@@ -109,6 +109,7 @@ const BORROWER_LOAN_QUERY: string = `
             created_at
             updated_at
           }
+          booked_entries_exists
           acctg_entry {
             journal_no
             journal_ref
@@ -206,6 +207,7 @@ const BORROWER_SINGLE_LOAN_QUERY: string = `
         surrendered_acct_no
         issued_acct_no
       }
+      booked_entries_exists
       acctg_entry {
         id
         reference_no

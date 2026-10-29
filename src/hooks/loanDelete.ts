@@ -20,14 +20,16 @@ export const LOAN_DELETE: UseDeleteWithApprovalConfig<{ loan_id: string }> = {
   errorLabel: 'Failed to delete loan',
 };
 
-type DeletableFields = Pick<BorrLoanRowData, 'acctg_entry' | 'is_closed' | 'status'>;
+type DeletableFields = Pick<BorrLoanRowData, 'acctg_entry' | 'booked_entries_exists' | 'is_closed' | 'status'>;
 
 /**
- * Whether a loan offers Delete: not posted to accounting (the server refuses those: "Loan is
- * already posted to accounting."), not closed, and For Approval through Released. The list's rule.
+ * Whether a loan offers Delete: nothing in the books under it, neither its voucher nor payments
+ * (the server refuses those: "Loan is already posted to accounting."), not closed, and For Approval
+ * through Released. The list's rule.
  */
 export const isLoanDeletable = (loan: DeletableFields | null | undefined): boolean =>
-  !!loan && loan.acctg_entry === null && String(loan.is_closed) !== '1' && Number(loan.status) <= 3;
+  !!loan && loan.acctg_entry === null && !loan.booked_entries_exists
+  && String(loan.is_closed) !== '1' && Number(loan.status) <= 3;
 
 /** "Loan MA-0512 — TESTPLAN, ANA", as the "Already in the queue" modal names it. */
 const loanLabel = (loan: Pick<BorrLoanRowData, 'id' | 'loan_ref' | 'borrower'>): string =>

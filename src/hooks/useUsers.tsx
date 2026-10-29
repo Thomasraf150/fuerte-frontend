@@ -73,13 +73,23 @@ const useUsers = () => {
     config: { initialPageSize: 20 },
   });
 
+  // A role or branch list that failed to load: the form's Save stops waiting for it (and says so)
+  // rather than spinning on "Loading..." for good.
+  const [listsFailed, setListsFailed] = useState<boolean>(false);
+  const listFailed = (which: string, error: unknown) => {
+    console.error(`Error fetching ${which}:`, error);
+    setListsFailed(true);
+    toast.error(`Could not load the ${which} list. Close the form and open it again.`);
+  };
+
   const fetchRoles = async () => {
     setRolesLoading(true);
     try {
       const result = await graphqlFetch(GET_ROLE_QUERY);
+      if (!Array.isArray(result?.data?.role)) throw new Error(result?.errors?.[0]?.message ?? 'No roles in the answer');
       setDataRole(result.data.role);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      listFailed('role', error);
     } finally {
       setRolesLoading(false);
     }
@@ -89,9 +99,10 @@ const useUsers = () => {
     setSubBranchLoading(true);
     try {
       const result = await graphqlFetch(GET_ALL_SUB_BRANCH_QUERY, { orderBy });
+      if (!Array.isArray(result?.data?.getAllBranch)) throw new Error(result?.errors?.[0]?.message ?? 'No branches in the answer');
       setDataSubBranch(result.data.getAllBranch);
     } catch (error) {
-      console.error('Error fetching sub branches:', error);
+      listFailed('branch', error);
     } finally {
       setSubBranchLoading(false);
     }
@@ -222,6 +233,7 @@ const useUsers = () => {
     dataRole,
     rolesLoading,
     subBranchLoading,
+    listsFailed,
 
     // Pagination state (mirrors useBorrower)
     pagination,
