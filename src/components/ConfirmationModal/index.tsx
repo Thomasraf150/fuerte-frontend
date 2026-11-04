@@ -278,6 +278,8 @@ export type OpenApplicationAction = 'open' | 'direct' | 'back';
  * (and so create the borrower from it) are offered it; everyone may still create directly (a real walk-in) or go back. JSX, so every value is
  * escaped. Returns the choice.
  */
+const OPEN_APPLICATION_TITLE = 'This person already has an application';
+
 export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promise<OpenApplicationAction> => {
   const where = info.branchName ? `${info.branchName}` : 'not placed on a branch yet';
   const body = (
@@ -286,6 +288,7 @@ export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promi
         <AlertCircle size={18} style={{ marginRight: 6 }} />
         Marketing&apos;s applicant
       </div>
+      <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: '0 0 6px' }}>{OPEN_APPLICATION_TITLE}</div>
       <div data-testid="open-application-facts" style={{ fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
         Application {info.number} · {info.statusLabel} · {where}
       </div>
@@ -302,9 +305,11 @@ export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promi
   );
 
   const result = await MySwal.fire({
-    // The dialog's name for a screen reader (aria-labelledby points at the title), as plain text.
-    titleText: 'This person already has an application',
+    title: '',
     html: body,
+    // The dialog's name for a screen reader, the heading under the eyebrow in the body (review
+    // 2026-11-03; a swal title would sit above the eyebrow, re-test 2026-11-04).
+    didOpen: (popup) => popup.setAttribute('aria-label', OPEN_APPLICATION_TITLE),
     // Enter and the first Tab land on Back, never on Create directly anyway (review 2026-11-03).
     focusCancel: true,
     showConfirmButton: info.canOpen,
