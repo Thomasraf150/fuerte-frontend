@@ -1233,6 +1233,11 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
    * borrower would find the one borrower it may claim (2026-10-23). A missing one reads as no.
    */
   has_linkable_borrower?: boolean;
+  /**
+   * Why Link to borrower would refuse the signed-in user that borrower (another branch they may not
+   * move it to, a pending deletion), or null when it would go through (review 2026-11-04).
+   */
+  link_refusal?: string | null;
 }
 
 /** One field a History line changed: from / to as stored (a branch's name, a 'Y-m-d H:i:s' time, a status key), null when blank. */

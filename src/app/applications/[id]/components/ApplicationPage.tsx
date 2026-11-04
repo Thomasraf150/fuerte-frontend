@@ -119,6 +119,7 @@ const ApplicationView: React.FC<{ app: Application; record: LoanApplicationRecor
         onLink={app.link}
         linking={app.linking}
         knownBorrower={record.has_linkable_borrower === true}
+        linkRefusal={record.link_refusal ?? null}
         editHref={editable ? `/applications/${record.id}/edit` : null}
       />
       {deletion.pending && <PendingDeletionNotice pending={deletion.pending} onWithdraw={deletion.withdraw} />}
