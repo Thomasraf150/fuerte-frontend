@@ -404,6 +404,8 @@ export interface BorrowerRowInfo {
   decision?: BorrowerDecision | null;
   /** The application the borrower was made from; null when created directly. Only getBorrower asks for it. */
   origin?: BorrowerOrigin | null;
+  /** The branches an Approve / Reject is written to: this record's first (2026-11-04). Null when not released. */
+  decision_branches?: string[] | null;
 }
 
 /**

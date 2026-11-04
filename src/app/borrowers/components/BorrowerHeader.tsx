@@ -94,12 +94,35 @@ const dialable = (contact: string): string => {
   return digits.length >= 7 ? digits : "";
 };
 
+/** "A", "A and B", "A, B and C". */
+const listBranches = (names: string[]): string =>
+  names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+
+/**
+ * When the person has records at other branches, a decision is written to all of them (2026-11-04):
+ * the prompt says where, and its button names the count. Null for one branch: today's prompt.
+ */
+const decisionReach = (status: BorrowerDecision["status"], name: string, branches: string[] | null | undefined) => {
+  if (!branches || branches.length < 2) return null;
+  const verb = status === "approved" ? "approves" : "rejects";
+  const count = branches.length === 2 ? "both" : `all ${branches.length}`;
+  return {
+    text: `This ${verb} ${name} at ${listBranches(branches)}.`,
+    confirm: `${PROMPT[status].confirm} at ${count} branches`,
+  };
+};
+
 /**
  * Approve / Reject through Fuerte's decision prompt. The decision is held here, not written into the
  * page's borrower: a new borrower object would re-run the Details form's load and overwrite edits
  * that have not been saved yet.
  */
-const useDecisionPrompt = (borrowerId: number, initial: BorrowerDecision | null, onDecided?: (decision: BorrowerDecision) => void) => {
+const useDecisionPrompt = (
+  borrowerId: number,
+  initial: BorrowerDecision | null,
+  onDecided?: (decision: BorrowerDecision) => void,
+  reach: { name: string; branches?: string[] | null } = { name: "" },
+) => {
   const { decide } = useBorrowerDecision();
   const [decision, setDecision] = useState<BorrowerDecision | null>(initial);
   const [busy, setBusy] = useState<BorrowerDecision["status"] | null>(null);
@@ -107,7 +130,13 @@ const useDecisionPrompt = (borrowerId: number, initial: BorrowerDecision | null,
   const record = async (status: BorrowerDecision["status"]) => {
     if (busy) return;
     const prompt = PROMPT[status];
-    const reason = await showDecisionNotePrompt(prompt.title, prompt.label, prompt.confirm, prompt.options);
+    const wide = decisionReach(status, reach.name, reach.branches);
+    const reason = await showDecisionNotePrompt(
+      prompt.title,
+      prompt.label,
+      wide?.confirm ?? prompt.confirm,
+      wide ? { ...prompt.options, text: wide.text, focusCancel: true } : prompt.options,
+    );
     if (reason === null) return;
     setBusy(status);
     const closeProcessing = showProcessingModal(prompt.working);
@@ -348,8 +377,11 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
   back,
   onDecided,
 }) => {
-  const { decision, busy, record } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided);
   const name = borrowerDisplayName(borrower);
+  const { decision, busy, record } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided, {
+    name,
+    branches: borrower.decision_branches,
+  });
   // Approve / Reject is for borrowers made from an application (Rafael 2026-10-23): a borrower created
   // directly gets none, unless it already has a decision from before, which can still be changed (the
   // server's BorrowerDecisionService::DIRECT says the same).

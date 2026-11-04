@@ -234,6 +234,8 @@ export const showDecisionNotePrompt = async (
     requiredMessage?: string;
     /** The most characters the note may hold (the textarea's maxlength). */
     maxLength?: number;
+    /** Start on Cancel, not in the note: for a decision that reaches more than this record. */
+    focusCancel?: boolean;
   } = {}
 ): Promise<string | null> => {
   const { requiredMessage, maxLength } = options;
@@ -251,6 +253,8 @@ export const showDecisionNotePrompt = async (
     showCancelButton: true,
     confirmButtonText: confirmText,
     cancelButtonText: 'Cancel',
+    // The note would take focus first (inputAutoFocus): off, so the prompt opens on Cancel.
+    ...(options.focusCancel ? { focusCancel: true, inputAutoFocus: false } : {}),
     confirmButtonColor: options.confirmColor ?? CONFIRM_COLORS.confirm,
     cancelButtonColor: CONFIRM_COLORS.cancel,
     background: '#ffffff',

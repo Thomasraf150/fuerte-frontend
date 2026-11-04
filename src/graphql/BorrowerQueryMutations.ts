@@ -121,6 +121,7 @@ const GET_SINGLE_BORROWER_QUERY: string = `
           application_id
           channel
         }
+        decision_branches
         user_id
         chief_id
         amount_applied
