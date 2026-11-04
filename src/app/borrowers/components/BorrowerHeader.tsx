@@ -188,7 +188,7 @@ const DesktopBreadcrumb: React.FC<{ name: string }> = ({ name }) => (
  * surface, the words carrying the meaning (WCAG 1.4.1). Present on page load, so a plain section
  * with a heading, not a live region. Approved stays the quiet line: it blocks nothing.
  */
-const RejectedNotice: React.FC<{ decision: BorrowerDecision; approvedElsewhere?: boolean }> = ({ decision, approvedElsewhere = false }) => {
+const RejectedNotice: React.FC<{ decision: BorrowerDecision; onlyRejectingBranchMayApprove?: boolean }> = ({ decision, onlyRejectingBranchMayApprove = false }) => {
   const titleId = useId();
   const reason = decision.reason?.trim();
   const day = formatDecidedOn(decision.decided_at);
@@ -211,7 +211,7 @@ const RejectedNotice: React.FC<{ decision: BorrowerDecision; approvedElsewhere?:
         <p className="text-sm text-body dark:text-bodydark">
           {day ? <>Rejected on <span className="whitespace-nowrap">{day}</span>. </> : null}
           {/* Staff who may not lift it are not told to approve: the branch that rejected must (2026-11-04). */}
-          {approvedElsewhere
+          {onlyRejectingBranchMayApprove
             ? "To give a loan, the branch that rejected this borrower, or the Owner, must approve them first."
             : "To give a loan, approve this borrower first."}
         </p>
@@ -254,7 +254,7 @@ const OriginTag: React.FC<{ origin: BorrowerOrigin | null | undefined }> = ({ or
 
 /** The branch as its small chip plus its name in plain text, the Payer stamp, the decision stamp, and the decision's line. */
 const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecision | null }> = ({ borrower, decision }) => {
-  const approvedElsewhere = Boolean(borrower.approve_refusal);
+  const onlyRejectingBranchMayApprove = Boolean(borrower.approve_refusal);
   const branchName = borrower.branch_sub?.branch?.name ?? "";
   const subBranch = (borrower.branch_sub?.name ?? "").trim();
   // BranchBadge's chip shows the code; the plain name drops it, as the badge's own label does.
@@ -274,7 +274,7 @@ const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecisi
         <DecisionPill decision={decision} />
         <OriginTag origin={borrower.origin} />
       </div>
-      {decision?.status === "rejected" && <RejectedNotice decision={decision} approvedElsewhere={approvedElsewhere} />}
+      {decision?.status === "rejected" && <RejectedNotice decision={decision} onlyRejectingBranchMayApprove={onlyRejectingBranchMayApprove} />}
       {decision && decision.status !== "rejected" && (
         <p data-testid="borrower-decision-line" className="mt-1.5 break-words text-sm text-black/70 dark:text-bodydark">
           {decisionLine(decision)}
