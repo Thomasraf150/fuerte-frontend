@@ -270,16 +270,16 @@ export type OpenApplicationInfo = {
 
 export type OpenApplicationAction = 'open' | 'direct' | 'back';
 
+const OPEN_APPLICATION_TITLE = 'This person already has an application';
+
 /**
  * New Borrower, before a direct save (2026-10-23): the person is Marketing's applicant, waiting at
  * Call Center. Creating them from the application gives Call Center the Approve / Reject that says
- * whether they pushed through; a direct borrower gets none. The dialog is named by its title, and
- * starts on Back, so a stray Enter never creates the borrower. Staff who may work on the application
+ * whether they pushed through; a direct borrower gets none. The dialog is named by the heading in its body
+ * (aria-label), and starts on Back, so a stray Enter never creates the borrower. Staff who may work on the application
  * (and so create the borrower from it) are offered it; everyone may still create directly (a real walk-in) or go back. JSX, so every value is
  * escaped. Returns the choice.
  */
-const OPEN_APPLICATION_TITLE = 'This person already has an application';
-
 export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promise<OpenApplicationAction> => {
   const where = info.branchName ? `${info.branchName}` : 'not placed on a branch yet';
   const body = (
@@ -288,7 +288,7 @@ export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promi
         <AlertCircle size={18} style={{ marginRight: 6 }} />
         Marketing&apos;s applicant
       </div>
-      <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: '0 0 6px' }}>{OPEN_APPLICATION_TITLE}</div>
+      <h2 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: '0 0 6px' }}>{OPEN_APPLICATION_TITLE}</h2>
       <div data-testid="open-application-facts" style={{ fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
         Application {info.number} · {info.statusLabel} · {where}
       </div>
@@ -309,7 +309,11 @@ export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promi
     html: body,
     // The dialog's name for a screen reader, the heading under the eyebrow in the body (review
     // 2026-11-03; a swal title would sit above the eyebrow, re-test 2026-11-04).
-    didOpen: (popup) => popup.setAttribute('aria-label', OPEN_APPLICATION_TITLE),
+    // swal still points aria-labelledby at its empty, hidden title: drop it so the label is the name.
+    didOpen: (popup) => {
+      popup.removeAttribute('aria-labelledby');
+      popup.setAttribute('aria-label', OPEN_APPLICATION_TITLE);
+    },
     // Enter and the first Tab land on Back, never on Create directly anyway (review 2026-11-03).
     focusCancel: true,
     showConfirmButton: info.canOpen,
