@@ -404,6 +404,10 @@ export interface BorrowerRowInfo {
   decision?: BorrowerDecision | null;
   /** The application the borrower was made from; null when created directly. Only getBorrower asks for it. */
   origin?: BorrowerOrigin | null;
+  /** The branches an Approve / Reject is written to: this record's first (2026-11-04). Null when not released. */
+  decision_branches?: string[] | null;
+  /** Why the signed-in user may not approve now (the server's rule: rejected at a branch they cannot work), or null. */
+  approve_refusal?: string | null;
 }
 
 /**
@@ -1233,6 +1237,11 @@ export interface LoanApplicationRecord extends LoanApplicationRow {
    * borrower would find the one borrower it may claim (2026-10-23). A missing one reads as no.
    */
   has_linkable_borrower?: boolean;
+  /**
+   * Why Link to borrower would refuse the signed-in user that borrower (another branch they may not
+   * move it to, a pending deletion), or null when it would go through (review 2026-11-04).
+   */
+  link_refusal?: string | null;
 }
 
 /** One field a History line changed: from / to as stored (a branch's name, a 'Y-m-d H:i:s' time, a status key), null when blank. */

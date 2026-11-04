@@ -132,6 +132,7 @@ const OUTCOME_AND_NOTES_FIELDS: string = `
 const LOAN_APPLICATION_RECORD_FIELDS: string = `
   id
   has_linkable_borrower
+  link_refusal
   source
   channel
   kind
@@ -253,6 +254,8 @@ const SET_LOAN_APPLICATION_STATUS_MUTATION: string = `
       id
       status
       borrower_id
+      has_linkable_borrower
+      link_refusal
       ${OUTCOME_AND_NOTES_FIELDS}
     }
   }

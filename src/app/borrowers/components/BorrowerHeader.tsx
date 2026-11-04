@@ -36,6 +36,9 @@ const BUTTON = `${TARGET} inline-flex items-center justify-center gap-2 rounded 
 
 const LINK_FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary";
 
+/** Approve when the server would refuse it: reachable by keyboard (aria-disabled), dashed and muted, as Link to borrower is. */
+const UNAVAILABLE = "cursor-not-allowed border-dashed text-black/50 hover:border-stroke hover:text-black/50 dark:text-white/50";
+
 const PROMPT = {
   approved: {
     title: "Approve this borrower?",
@@ -94,12 +97,35 @@ const dialable = (contact: string): string => {
   return digits.length >= 7 ? digits : "";
 };
 
+/** "A", "A and B", "A, B and C". */
+const listBranches = (names: string[]): string =>
+  names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+
+/**
+ * When the person has records at other branches, a decision is written to all of them (2026-11-04):
+ * the prompt says where, and its button names the count. Null for one branch: today's prompt.
+ */
+const decisionReach = (status: BorrowerDecision["status"], name: string, branches: string[] | null | undefined) => {
+  if (!branches || branches.length < 2) return null;
+  const verb = status === "approved" ? "approves" : "rejects";
+  const count = branches.length === 2 ? "both" : `all ${branches.length}`;
+  return {
+    text: `This ${verb} ${name} at ${listBranches(branches)}.`,
+    confirm: `${PROMPT[status].confirm} at ${count} branches`,
+  };
+};
+
 /**
  * Approve / Reject through Fuerte's decision prompt. The decision is held here, not written into the
  * page's borrower: a new borrower object would re-run the Details form's load and overwrite edits
  * that have not been saved yet.
  */
-const useDecisionPrompt = (borrowerId: number, initial: BorrowerDecision | null, onDecided?: (decision: BorrowerDecision) => void) => {
+const useDecisionPrompt = (
+  borrowerId: number,
+  initial: BorrowerDecision | null,
+  onDecided?: (decision: BorrowerDecision) => void,
+  reach: { name: string; branches?: string[] | null } = { name: "" },
+) => {
   const { decide } = useBorrowerDecision();
   const [decision, setDecision] = useState<BorrowerDecision | null>(initial);
   const [busy, setBusy] = useState<BorrowerDecision["status"] | null>(null);
@@ -107,7 +133,13 @@ const useDecisionPrompt = (borrowerId: number, initial: BorrowerDecision | null,
   const record = async (status: BorrowerDecision["status"]) => {
     if (busy) return;
     const prompt = PROMPT[status];
-    const reason = await showDecisionNotePrompt(prompt.title, prompt.label, prompt.confirm, prompt.options);
+    const wide = decisionReach(status, reach.name, reach.branches);
+    const reason = await showDecisionNotePrompt(
+      prompt.title,
+      prompt.label,
+      wide?.confirm ?? prompt.confirm,
+      wide ? { ...prompt.options, text: wide.text, focusCancel: true } : prompt.options,
+    );
     if (reason === null) return;
     setBusy(status);
     const closeProcessing = showProcessingModal(prompt.working);
@@ -156,7 +188,7 @@ const DesktopBreadcrumb: React.FC<{ name: string }> = ({ name }) => (
  * surface, the words carrying the meaning (WCAG 1.4.1). Present on page load, so a plain section
  * with a heading, not a live region. Approved stays the quiet line: it blocks nothing.
  */
-const RejectedNotice: React.FC<{ decision: BorrowerDecision }> = ({ decision }) => {
+const RejectedNotice: React.FC<{ decision: BorrowerDecision; onlyRejectingBranchMayApprove?: boolean }> = ({ decision, onlyRejectingBranchMayApprove = false }) => {
   const titleId = useId();
   const reason = decision.reason?.trim();
   const day = formatDecidedOn(decision.decided_at);
@@ -178,7 +210,10 @@ const RejectedNotice: React.FC<{ decision: BorrowerDecision }> = ({ decision }) 
         )}
         <p className="text-sm text-body dark:text-bodydark">
           {day ? <>Rejected on <span className="whitespace-nowrap">{day}</span>. </> : null}
-          To give a loan, approve this borrower first.
+          {/* Staff who may not lift it are not told to approve: the branch that rejected must (2026-11-04). */}
+          {onlyRejectingBranchMayApprove
+            ? "To give a loan, the branch that rejected this borrower, or the Owner, must approve them first."
+            : "To give a loan, approve this borrower first."}
         </p>
       </div>
     </section>
@@ -219,6 +254,7 @@ const OriginTag: React.FC<{ origin: BorrowerOrigin | null | undefined }> = ({ or
 
 /** The branch as its small chip plus its name in plain text, the Payer stamp, the decision stamp, and the decision's line. */
 const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecision | null }> = ({ borrower, decision }) => {
+  const onlyRejectingBranchMayApprove = Boolean(borrower.approve_refusal);
   const branchName = borrower.branch_sub?.branch?.name ?? "";
   const subBranch = (borrower.branch_sub?.name ?? "").trim();
   // BranchBadge's chip shows the code; the plain name drops it, as the badge's own label does.
@@ -238,7 +274,7 @@ const StatusLine: React.FC<{ borrower: BorrowerRowInfo; decision: BorrowerDecisi
         <DecisionPill decision={decision} />
         <OriginTag origin={borrower.origin} />
       </div>
-      {decision?.status === "rejected" && <RejectedNotice decision={decision} />}
+      {decision?.status === "rejected" && <RejectedNotice decision={decision} onlyRejectingBranchMayApprove={onlyRejectingBranchMayApprove} />}
       {decision && decision.status !== "rejected" && (
         <p data-testid="borrower-decision-line" className="mt-1.5 break-words text-sm text-black/70 dark:text-bodydark">
           {decisionLine(decision)}
@@ -348,12 +384,19 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
   back,
   onDecided,
 }) => {
-  const { decision, busy, record } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided);
   const name = borrowerDisplayName(borrower);
+  const { decision, busy, record } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided, {
+    name,
+    branches: borrower.decision_branches,
+  });
   // Approve / Reject is for borrowers made from an application (Rafael 2026-10-23): a borrower created
   // directly gets none, unless it already has a decision from before, which can still be changed (the
   // server's BorrowerDecisionService::DIRECT says the same).
   const mayDecide = Boolean(borrower.origin) || decision !== null;
+  // Rejected at a branch this user cannot work: the server would refuse Approve, so it is shown
+  // unavailable with the server's own sentence, before anyone confirms (Rafael 2026-11-04).
+  const approveRefusal = borrower.approve_refusal ?? null;
+  const refusalId = useId();
 
   return (
     <HeaderShell name={name} back={back}>
@@ -370,10 +413,17 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
         <div className="relative flex flex-wrap items-center gap-2">
           {mayDecide && (
             <>
-              <button type="button" className={BUTTON} onClick={() => record("approved")} aria-busy={busy === "approved"}>
-                <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-success dark:text-meta-3" />
-                Approve
-              </button>
+              {approveRefusal ? (
+                <button type="button" aria-disabled="true" aria-describedby={refusalId} className={`${BUTTON} ${UNAVAILABLE}`}>
+                  <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0" />
+                  Approve
+                </button>
+              ) : (
+                <button type="button" className={BUTTON} onClick={() => record("approved")} aria-busy={busy === "approved"}>
+                  <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-success dark:text-meta-3" />
+                  Approve
+                </button>
+              )}
               <button type="button" className={BUTTON} onClick={() => record("rejected")} aria-busy={busy === "rejected"}>
                 <X aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-danger" />
                 Reject
@@ -381,6 +431,11 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
             </>
           )}
           <BorrowerMoreMenu borrower={borrower} summaryClassName={BUTTON} />
+          {mayDecide && approveRefusal && (
+            <p id={refusalId} data-testid="approve-refusal" className="w-full max-w-sm text-sm text-body dark:text-bodydark">
+              {approveRefusal}
+            </p>
+          )}
         </div>
       </div>
     </HeaderShell>

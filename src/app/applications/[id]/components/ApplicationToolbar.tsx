@@ -201,6 +201,11 @@ interface ApplicationToolbarProps {
    * that borrower this application's (2026-10-23).
    */
   knownBorrower?: boolean;
+  /**
+   * Why the link would refuse this user that borrower (link_refusal), shown as Link's reason: the
+   * borrower exists, so Create as borrower stays hidden -- it could only make a duplicate (2026-11-04).
+   */
+  linkRefusal?: string | null;
   /** The edit page, for a user who may change the application now (can_edit); none otherwise. */
   editHref?: string | null;
 }
@@ -218,7 +223,7 @@ interface ApplicationToolbarProps {
  * The status choice lives here, not in the select (useStatusDraft), because Create as borrower
  * has to know about it: while the choice differs from the saved status it says to save it.
  */
-export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint, onLink, linking, knownBorrower = false, editHref = null }) => {
+export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, converted, viewOnly, canCreateBorrower, branchAccess, unsaved, onStatus, printing, onPrint, onLink, linking, knownBorrower = false, linkRefusal = null, editHref = null }) => {
   const reasonId = useId();
   const statusErrorId = useId();
   const status = useStatusDraft(record.status, onStatus);
@@ -229,7 +234,11 @@ export const ApplicationToolbar: React.FC<ApplicationToolbarProps> = ({ record, 
   const linkable = returning || knownBorrower;
   // Linkable (a renewal or additional one, or a new applicant the branch created directly): Link is the
   // one action, and Create as borrower is not offered -- it could only make a duplicate (2026-10-23).
-  const reason = showCreate ? createReason(record, unsaved, status.pending, linkable ? undefined : branchAccess) : unsaved ? SAVE_FIRST : null;
+  const reason = showCreate
+    ? createReason(record, unsaved, status.pending, linkable ? undefined : branchAccess) ?? (knownBorrower ? linkRefusal : null)
+    : unsaved
+      ? SAVE_FIRST
+      : null;
   const link = async () => {
     const result = await onLink();
     setLinkError(result.success ? null : result.message);
