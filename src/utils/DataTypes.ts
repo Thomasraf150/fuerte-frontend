@@ -406,6 +406,8 @@ export interface BorrowerRowInfo {
   origin?: BorrowerOrigin | null;
   /** The branches an Approve / Reject is written to: this record's first (2026-11-04). Null when not released. */
   decision_branches?: string[] | null;
+  /** Why the signed-in user may not approve now (the server's rule: rejected at a branch they cannot work), or null. */
+  approve_refusal?: string | null;
 }
 
 /**

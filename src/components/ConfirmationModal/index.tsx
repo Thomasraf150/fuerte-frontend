@@ -276,6 +276,8 @@ export type OpenApplicationAction = 'open' | 'direct' | 'back';
 
 const OPEN_APPLICATION_TITLE = 'This person already has an application';
 const OPEN_APPLICATION_TITLE_ID = 'open-application-title';
+const OPEN_APPLICATION_BODY_ID = 'open-application-body';
+const OPEN_APPLICATION_EYEBROW_ID = 'open-application-eyebrow';
 
 /**
  * New Borrower, before a direct save (2026-10-23): the person is Marketing's applicant, waiting at
@@ -289,23 +291,25 @@ export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promi
   const where = info.branchName ? `${info.branchName}` : 'not placed on a branch yet';
   const body = (
     <div style={{ textAlign: 'left', padding: '4px 4px 2px', color: '#0f172a' }}>
-      <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#b45309', marginBottom: 10 }}>
+      <div id={OPEN_APPLICATION_EYEBROW_ID} style={{ display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#b45309', marginBottom: 10 }}>
         <AlertCircle size={18} style={{ marginRight: 6 }} />
         Marketing&apos;s applicant
       </div>
       <h2 id={OPEN_APPLICATION_TITLE_ID} style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: '0 0 6px' }}>{OPEN_APPLICATION_TITLE}</h2>
-      <div data-testid="open-application-facts" style={{ fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
-        Application {info.number} · {info.statusLabel} · {where}
+      <div id={OPEN_APPLICATION_BODY_ID}>
+        <div data-testid="open-application-facts" style={{ fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
+          Application {info.number} · {info.statusLabel} · {where}
+        </div>
+        <p style={{ margin: '12px 0 0', fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
+          {info.canOpen
+            ? 'Create the borrower from the application, so Call Center hears whether they push through (Approve / Reject).'
+            : 'Ask Call Center to create the borrower from it, so they hear whether the applicant pushes through (Approve / Reject).'}
+        </p>
+        <p style={{ margin: '8px 0 0', fontSize: 12, color: '#64748b', lineHeight: 1.45 }}>
+          A borrower created directly gets no Approve / Reject. Create directly only if this is a different person.
+          {info.canOpen && ' Opening the application leaves this form: what you typed here is not kept.'}
+        </p>
       </div>
-      <p style={{ margin: '12px 0 0', fontSize: 14, color: '#334155', lineHeight: 1.45 }}>
-        {info.canOpen
-          ? 'Create the borrower from the application, so Call Center hears whether they push through (Approve / Reject).'
-          : 'Ask Call Center to create the borrower from it, so they hear whether the applicant pushes through (Approve / Reject).'}
-      </p>
-      <p style={{ margin: '8px 0 0', fontSize: 12, color: '#64748b', lineHeight: 1.45 }}>
-        A borrower created directly gets no Approve / Reject. Create directly only if this is a different person.
-        {info.canOpen && ' Opening the application leaves this form: what you typed here is not kept.'}
-      </p>
     </div>
   );
 
@@ -314,9 +318,13 @@ export const showOpenApplicationModal = async (info: OpenApplicationInfo): Promi
     html: body,
     // The dialog's name for a screen reader, the heading under the eyebrow in the body (review
     // 2026-11-03; a swal title would sit above the eyebrow, re-test 2026-11-04).
-    // swal points aria-labelledby at its own empty title: point it at the heading in the body instead
-    // (named once; an aria-label would repeat the heading the description already reads).
-    didOpen: (popup) => popup.setAttribute('aria-labelledby', OPEN_APPLICATION_TITLE_ID),
+    // swal points aria-labelledby at its own empty title: point it at the heading in the body instead,
+    // and the description at the eyebrow ("Marketing's applicant") and the text under the heading,
+    // so the heading is not read twice and the eyebrow is not lost.
+    didOpen: (popup) => {
+      popup.setAttribute('aria-labelledby', OPEN_APPLICATION_TITLE_ID);
+      popup.setAttribute('aria-describedby', `${OPEN_APPLICATION_EYEBROW_ID} ${OPEN_APPLICATION_BODY_ID}`);
+    },
     // Enter and the first Tab land on Back, never on Create directly anyway (review 2026-11-03).
     focusCancel: true,
     showConfirmButton: info.canOpen,

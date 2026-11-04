@@ -122,6 +122,7 @@ const GET_SINGLE_BORROWER_QUERY: string = `
           channel
         }
         decision_branches
+        approve_refusal
         user_id
         chief_id
         amount_applied
