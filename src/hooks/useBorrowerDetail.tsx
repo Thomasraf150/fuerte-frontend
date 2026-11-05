@@ -4,7 +4,6 @@ import BorrowerQueryMutations from '@/graphql/BorrowerQueryMutations';
 import { BorrowerInfo } from '@/utils/DataTypes';
 import type { ApplicationConversion } from '@/utils/convertApplication';
 import { graphqlFetch } from '@/utils/graphqlFetch';
-import { toast } from '@/utils/notify';
 import useBorrowerBase from './useBorrowerBase';
 
 /**
@@ -64,7 +63,8 @@ const useBorrowerDetail = () => {
       return borrower;
     } catch (error) {
       console.error('Error fetching single borrower:', error);
-      toast.error('Failed to load borrower details');
+      // No toast: the borrower page (the one caller) shows the message in its error card, and a
+      // second "That didn't go through" over it said less than the card does (2026-11-05).
       setBorrowerLoading(false);
       throw error;
     }
