@@ -2,8 +2,7 @@ import React from "react";
 import { Copy, Info } from "react-feather";
 import type { MoveSummary } from "@/hooks/useBorrowerMove";
 import { formatMoneyOrBlank } from "@/utils/helper";
-
-const SECTION_LABEL = "text-[11px] font-semibold uppercase tracking-[0.14em] text-body dark:text-bodydark";
+import { COPY_ACCENT_TEXT, SECTION_LABEL } from "../../../components/styles";
 
 /**
  * A buyout: the borrower is already in the old branch's books, so they are copied to the new branch
@@ -16,7 +15,7 @@ const CopyNotice: React.FC<{ summary: MoveSummary }> = ({ summary }) => {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex gap-3 rounded-xl border border-accent/60 bg-accent/10 p-4">
-        <Copy aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-[#8A6312] dark:text-accent" />
+        <Copy aria-hidden="true" size={20} className={`mt-0.5 shrink-0 ${COPY_ACCENT_TEXT}`} />
         <div className="min-w-0 text-sm text-black dark:text-bodydark1">
           <p className="font-semibold">This borrower can&apos;t be moved, but can be copied as a new borrower</p>
           <p className="mt-1">

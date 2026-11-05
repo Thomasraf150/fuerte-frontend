@@ -6,12 +6,14 @@ import { Calendar, Check, ChevronLeft, FileText, Home, Phone, Slash, UserPlus, X
 import BranchBadge, { branchLabel } from "@/components/BranchBadge";
 import PayerBadge from "@/components/PayerBadge";
 import { showDecisionNotePrompt, showProcessingModal } from "@/components/ConfirmationModal";
-import useBorrowerDecision from "@/hooks/useBorrowerDecision";
+import useBorrowerDecision, { ALREADY_APPROVED } from "@/hooks/useBorrowerDecision";
 import type { BorrowerDecision, BorrowerOrigin, BorrowerRowInfo } from "@/utils/DataTypes";
 import { CHANNEL_LABELS } from "@/utils/applicationForm";
 import { applicationNumber } from "@/utils/convertApplication";
 import { manilaToday } from "@/utils/sourceTracker";
 import BorrowerMoreMenu from "./BorrowerMoreMenu";
+import BranchRecords from "./BranchRecords";
+import { LINK_FOCUS, SECTION_LABEL } from "./styles";
 import DecisionPill, { decisionLine, formatDecidedOn } from "@/components/DecisionPill";
 import { CONFIRM_COLORS } from "@/utils/brandColors";
 
@@ -34,7 +36,6 @@ const TARGET = "min-h-[48px] lg:min-h-[40px]";
 /** Approve, Reject and More: one quiet button, white on a stroke outline; the icon carries the colour. */
 const BUTTON = `${TARGET} inline-flex items-center justify-center gap-2 rounded border border-stroke bg-white px-3 text-sm font-medium text-black shadow-1 transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-strokedark dark:bg-boxdark dark:text-white sm:px-4`;
 
-const LINK_FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary";
 
 /** Approve when the server would refuse it: reachable by keyboard (aria-disabled), dashed and muted, as Link to borrower is. */
 const UNAVAILABLE = "cursor-not-allowed border-dashed text-black/50 hover:border-stroke hover:text-black/50 dark:text-white/50";
@@ -53,6 +54,14 @@ const PROMPT = {
     label: "Why?",
     confirm: "Reject",
     working: "Rejecting…",
+    options: { confirmColor: CONFIRM_COLORS.reject, requiredMessage: "Write why the borrower is rejected.", maxLength: 500 },
+  },
+  // Reject on a borrower already rejected (2026-11-05): the same decision with a new reason.
+  reason: {
+    title: "Change the rejection reason?",
+    label: "New reason",
+    confirm: "Save reason",
+    working: "Saving…",
     options: { confirmColor: CONFIRM_COLORS.reject, requiredMessage: "Write why the borrower is rejected.", maxLength: 500 },
   },
 } as const;
@@ -102,6 +111,23 @@ const listBranches = (names: string[]): string =>
   names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
 /**
+ * What Approve / Reject does, said right under the buttons (Rafael 2026-11-04: "the Reject here is for
+ * the Call Center right?"). Research: name the outcome before the click (NN/g, GNOME HIG), and keep
+ * information about the task in the page itself, not a banner (GOV.UK notification banner guidance).
+ * Who hears about it, where the decision lands, and what Reject stops. Read for both buttons.
+ */
+const decisionEffect = (origin: BorrowerOrigin | null | undefined, branches: string[] | null | undefined): string => {
+  const where = branches && branches.length > 1 ? ` at ${listBranches(branches)}` : "";
+  return origin
+    ? `Tells Call Center whether this application went through, and allows or stops new loans${where}. A rejection stays until they are approved again.`
+    : `Allows or stops new loans${where}. A rejection stays until they are approved again.`;
+};
+
+/** What the decision group is about, said above its buttons: the Call Center application, or the borrower. */
+const decisionLabel = (origin: BorrowerOrigin | null | undefined): string =>
+  origin ? `Call Center application ${applicationNumber(origin.application_id)}` : "Borrower decision";
+
+/**
  * When the person has records at other branches, a decision is written to all of them (2026-11-04):
  * the prompt says where, and its button names the count. Null for one branch: today's prompt.
  */
@@ -129,11 +155,13 @@ const useDecisionPrompt = (
   const { decide } = useBorrowerDecision();
   const [decision, setDecision] = useState<BorrowerDecision | null>(initial);
   const [busy, setBusy] = useState<BorrowerDecision["status"] | null>(null);
+  const [staleApproved, setStaleApproved] = useState(false);
 
   const record = async (status: BorrowerDecision["status"]) => {
     if (busy) return;
-    const prompt = PROMPT[status];
-    const wide = decisionReach(status, reach.name, reach.branches);
+    const changingReason = status === "rejected" && decision?.status === "rejected";
+    const prompt = changingReason ? PROMPT.reason : PROMPT[status];
+    const wide = changingReason ? null : decisionReach(status, reach.name, reach.branches);
     const reason = await showDecisionNotePrompt(
       prompt.title,
       prompt.label,
@@ -145,7 +173,10 @@ const useDecisionPrompt = (
     const closeProcessing = showProcessingModal(prompt.working);
     try {
       const saved = await decide(borrowerId, status, reason);
-      if (saved) {
+      if (saved === ALREADY_APPROVED) {
+        // Approved meanwhile (another tab or user): say so here, instead of leaving Approve on a stale page.
+        setStaleApproved(true);
+      } else if (saved) {
         setDecision(saved);
         onDecided?.(saved);
       }
@@ -155,7 +186,7 @@ const useDecisionPrompt = (
     }
   };
 
-  return { decision, busy, record };
+  return { decision, busy, record, staleApproved };
 };
 
 /**
@@ -385,7 +416,7 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
   onDecided,
 }) => {
   const name = borrowerDisplayName(borrower);
-  const { decision, busy, record } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided, {
+  const { decision, busy, record, staleApproved } = useDecisionPrompt(Number(borrower.id), borrower.decision ?? null, onDecided, {
     name,
     branches: borrower.decision_branches,
   });
@@ -397,6 +428,8 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
   // unavailable with the server's own sentence, before anyone confirms (Rafael 2026-11-04).
   const approveRefusal = borrower.approve_refusal ?? null;
   const refusalId = useId();
+  const effectId = useId();
+  const labelId = useId();
 
   return (
     <HeaderShell name={name} back={back}>
@@ -405,34 +438,61 @@ const SavedBorrowerHeader: React.FC<{ borrower: BorrowerRowInfo; back: BackTo; o
           <h2 className={TITLE}>{name}</h2>
           <StatusLine borrower={borrower} decision={decision} />
           <Facts borrower={borrower} />
+          <BranchRecords records={borrower.branch_records} person={borrower} />
         </div>
 
         {/* `relative`: the More menu opens against this row, so it never leaves the screen. No `disabled`
             while saving: the processing modal already blocks the page, and a disabled button would drop
-            the focus the prompt hands back; `busy` stops a second click. */}
+            the focus the prompt hands back; `busy` stops a second click. Two groups of actions, each
+            named for what it acts on (Rafael 2026-11-04): this one decides the borrower; the branch
+            records box under the name has its own (Open, Remove copy). */}
         <div className="relative flex flex-wrap items-center gap-2">
           {mayDecide && (
-            <>
-              {approveRefusal ? (
-                <button type="button" aria-disabled="true" aria-describedby={refusalId} className={`${BUTTON} ${UNAVAILABLE}`}>
+            // `contents`: the group names only the decision (label and buttons), not More, while its
+            // children still lay out in this row.
+            <div role="group" aria-labelledby={labelId} className="contents">
+              <p id={labelId} data-testid="decision-label" className={`w-0 min-w-full ${SECTION_LABEL}`}>
+                {decisionLabel(borrower.origin)}
+              </p>
+              {/* Already approved: no Approve. The pill beside the name says so; the server refuses a second. */}
+              {decision?.status === "approved" || staleApproved ? null : approveRefusal ? (
+                <button type="button" aria-disabled="true" aria-describedby={`${refusalId} ${effectId}`} className={`${BUTTON} ${UNAVAILABLE}`}>
                   <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0" />
-                  Approve
+                  Approve borrower
                 </button>
               ) : (
-                <button type="button" className={BUTTON} onClick={() => record("approved")} aria-busy={busy === "approved"}>
+                <button type="button" className={BUTTON} onClick={() => record("approved")} aria-busy={busy === "approved"} aria-describedby={effectId}>
                   <Check aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-success dark:text-meta-3" />
-                  Approve
+                  Approve borrower
                 </button>
               )}
-              <button type="button" className={BUTTON} onClick={() => record("rejected")} aria-busy={busy === "rejected"}>
+              {/* Already rejected: rejecting again is how the reason is changed, so the button says that. */}
+              <button type="button" className={BUTTON} onClick={() => record("rejected")} aria-busy={busy === "rejected"} aria-describedby={effectId}>
                 <X aria-hidden="true" size={16} strokeWidth={2.75} className="shrink-0 text-danger" />
-                Reject
+                {decision?.status === "rejected" ? "Change reason" : "Reject borrower"}
               </button>
-            </>
+            </div>
           )}
-          <BorrowerMoreMenu borrower={borrower} summaryClassName={BUTTON} />
+          {/* On a copy, its delete lives in the branch records box as "Remove this copy": one button, not two. */}
+          <BorrowerMoreMenu
+            borrower={borrower}
+            summaryClassName={BUTTON}
+            showDelete={!borrower.branch_records?.some((r) => r.is_this && !r.is_original)}
+          />
+          {mayDecide && (
+            // `w-0 min-w-full`: the sentence wraps to the buttons' width instead of widening the column,
+            // which would push the whole action group under the name (review 2026-11-04).
+            <p id={effectId} data-testid="decision-effect" className="w-0 min-w-full text-sm text-body dark:text-bodydark">
+              {decisionEffect(borrower.origin, borrower.decision_branches)}
+            </p>
+          )}
+          {staleApproved && (
+            <p role="status" data-testid="decision-stale" className="w-0 min-w-full text-sm font-medium text-black dark:text-white">
+              Someone approved this person meanwhile. Reload the page to see it.
+            </p>
+          )}
           {mayDecide && approveRefusal && (
-            <p id={refusalId} data-testid="approve-refusal" className="w-full max-w-sm text-sm text-body dark:text-bodydark">
+            <p id={refusalId} data-testid="approve-refusal" className="w-0 min-w-full text-sm text-body dark:text-bodydark">
               {approveRefusal}
             </p>
           )}

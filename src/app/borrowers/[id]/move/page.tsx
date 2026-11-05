@@ -16,8 +16,7 @@ import MoveSlip from "./components/MoveSlip";
 import MoveForm from "./components/MoveForm";
 import MoveHistory from "./components/MoveHistory";
 import CopyNotice from "./components/CopyNotice";
-
-const SECTION_LABEL = "text-[11px] font-semibold uppercase tracking-[0.14em] text-body dark:text-bodydark";
+import { SECTION_LABEL } from "../../components/styles";
 
 const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`;
 

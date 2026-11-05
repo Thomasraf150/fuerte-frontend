@@ -6,6 +6,11 @@ import BorrowerQueryMutations from "@/graphql/BorrowerQueryMutations";
 import type { BorrowerDecision } from "@/utils/DataTypes";
 import { GraphQLConnectionError, graphqlFetch } from "@/utils/graphqlFetch";
 
+/** decide()'s answer when the server says the person is already approved (another tab or user). */
+export const ALREADY_APPROVED = "already-approved" as const;
+/** The server's sentence for it (BorrowerDecisionService::ALREADY_APPROVED). */
+const ALREADY_APPROVED_MESSAGE = "This person is already approved.";
+
 const SAVE_FAILED = "Could not save the decision. Please try again.";
 
 const SAVED: Record<BorrowerDecision["status"], string> = {
@@ -34,13 +39,17 @@ export const useBorrowerDecision = () => {
       borrowerId: number,
       status: BorrowerDecision["status"],
       reason: string | null,
-    ): Promise<BorrowerDecision | null> => {
+    ): Promise<BorrowerDecision | typeof ALREADY_APPROVED | null> => {
       try {
         const r = await graphqlFetch<{ setBorrowerDecision: BorrowerDecision | null }>(
           BorrowerQueryMutations.SET_BORROWER_DECISION_MUTATION,
           // Blank is no reason: the server treats it the same, and it is optional for approved.
           { borrower_id: borrowerId, status, reason: reason?.trim() || null },
         );
+        if (r.errors?.[0]?.message === ALREADY_APPROVED_MESSAGE) {
+          toast.info(ALREADY_APPROVED_MESSAGE);
+          return ALREADY_APPROVED;
+        }
         if (reportGqlError(r)) return null;
         const decision = r.data?.setBorrowerDecision ?? null;
         if (!decision) {

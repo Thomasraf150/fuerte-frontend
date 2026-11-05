@@ -123,6 +123,13 @@ const GET_SINGLE_BORROWER_QUERY: string = `
         }
         decision_branches
         approve_refusal
+        branch_records {
+          id
+          branch_name
+          is_this
+          is_original
+          can_open
+        }
         user_id
         chief_id
         amount_applied

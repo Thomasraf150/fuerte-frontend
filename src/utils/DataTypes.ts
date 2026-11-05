@@ -408,6 +408,17 @@ export interface BorrowerRowInfo {
   decision_branches?: string[] | null;
   /** Why the signed-in user may not approve now (the server's rule: rejected at a branch they cannot work), or null. */
   approve_refusal?: string | null;
+  /** Every live record of this person (the original and its branch copies), this one first. Only getBorrower asks for it. */
+  branch_records?: BorrowerBranchRecord[] | null;
+}
+
+/** One of a person's branch records. id is null when the signed-in user cannot open that branch. */
+export interface BorrowerBranchRecord {
+  id: number | null;
+  branch_name: string;
+  is_this: boolean;
+  is_original: boolean;
+  can_open: boolean;
 }
 
 /**

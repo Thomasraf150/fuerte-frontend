@@ -15,6 +15,8 @@ interface BorrowerMoreMenuProps {
   borrower: BorrowerRowInfo;
   /** The header's button look, for the "More" summary. */
   summaryClassName: string;
+  /** False on a branch copy: the branch records box offers "Remove this copy" instead. */
+  showDelete?: boolean;
 }
 
 /**
@@ -47,7 +49,7 @@ const useDeleteBorrower = (borrower: BorrowerRowInfo) => {
 };
 
 /** "More ▾": the borrower actions that should not sit one tap away: Move to another branch, Delete borrower. A native <details>. */
-const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryClassName }) => {
+const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryClassName, showDelete = true }) => {
   const menu = useRef<HTMLDetailsElement>(null);
   useDismissDetails(menu);
   const { pending, startDelete } = useDeleteBorrower(borrower);
@@ -88,7 +90,7 @@ const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryCl
           <CornerUpRight aria-hidden="true" size={16} className="shrink-0 text-primary dark:text-olive-300" />
           <span className="min-w-0">Move to another branch</span>
         </Link>
-        <button
+        {showDelete && <button
           type="button"
           onClick={handleDelete}
           className="flex min-h-[48px] w-full items-center gap-2.5 px-4 py-2 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-danger lg:min-h-[40px]"
@@ -98,7 +100,7 @@ const BorrowerMoreMenu: React.FC<BorrowerMoreMenuProps> = ({ borrower, summaryCl
             Delete borrower
             {pending && <span className="block text-xs font-normal text-black/70 dark:text-bodydark">Already in the deletion queue</span>}
           </span>
-        </button>
+        </button>}
       </div>
     </details>
   );
