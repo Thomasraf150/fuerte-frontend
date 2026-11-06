@@ -238,7 +238,8 @@ const DropdownNotification = () => {
   const roleCode: string = typeof authUser?.role?.code === "string" ? authUser.role.code : "";
   const applicationItems = useApplicationNotifications(!!authToken && APPLICATION_ROLE_CODES.has(roleCode), authUser?.id);
   // Collections notices (ATM refunds, FP, branch Red, funds request, OPEX approvals): every signed-in user.
-  const appNotices = useAppNotices(!!authToken, authUser?.id);
+  // Collections notices: never for Call Center, whose API answers only the applications fields.
+  const appNotices = useAppNotices(!!authToken && roleCode !== "CALLCTR", authUser?.id);
   useDismiss(dropdownOpen, close, trigger, dropdown);
 
   // Everything on the bell now, by id: the deletion ids and the Applications keys (prefixed by the
