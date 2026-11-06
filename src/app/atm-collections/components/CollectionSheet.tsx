@@ -90,7 +90,7 @@ const CollectionSheet: React.FC<{ id: string }> = ({ id }) => {
         <PaperSheet sheet={sheet} selectedId={selected} onSelect={setSelected} />
         <div className="2xl:sticky 2xl:top-24 2xl:self-start">
           {row
-            ? <SwipePanel batchId={id} row={row} editable={draft} onChanged={reload} />
+            ? <SwipePanel batchId={id} listBranchSubId={String(batch.branch_sub_id)} row={row} editable={draft} onChanged={reload} />
             : <p className="atm-noprint rounded-xl border border-dashed border-stroke p-5 text-sm text-body">Choose a borrower on the list to enter their ATM swipes.</p>}
         </div>
       </div>

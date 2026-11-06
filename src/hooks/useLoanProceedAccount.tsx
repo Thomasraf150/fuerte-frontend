@@ -138,7 +138,9 @@ const useLoanProceedAccount = () => {
           addon_total_id: data?.addon_total_id,
           cib_id: data?.cib_id,
           coh_id: data?.coh_id,
-          rp_id: data?.rp_id
+          rp_id: data?.rp_id,
+          igr_id: data?.igr_id,
+          igp_id: data?.igp_id
         },
       };
 

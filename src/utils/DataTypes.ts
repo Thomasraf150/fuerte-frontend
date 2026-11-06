@@ -892,6 +892,8 @@ export interface DataLoanProceedList {
   cib_id: string;
   coh_id: string;
   rp_id?: string;
+  igr_id?: string;
+  igp_id?: string;
 }
 export interface RowAcctgDetails {
   acctg_entries_id: string;

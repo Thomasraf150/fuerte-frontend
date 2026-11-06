@@ -18,9 +18,9 @@ export const ATM_SHEET = `
       batch { ${BATCH_FIELDS} }
       rows {
         borrower_id borrower_name loan_refs amort_due ua_open penalty_open
-        swipes { id seq amount balance_inquiry pos_charge gprs_charge amort ua_payment penalty refund }
+        swipes { id seq amount balance_inquiry pos_charge gprs_charge amort ua_payment penalty refund swiped_at_branch_sub_id swiped_at_name swiped_at_group_code cross_group }
         atm_collection amort_paid ua_sp ua_payment penalty pos_charge gprs_charge refund
-        fully_paid refund_method refund_account_no posted journal_refs refund_status status
+        fully_paid refund_method refund_account_no posted journal_refs intergroup_refs refund_status status
       }
       totals { amort_due atm_collection amort_paid ua_sp ua_payment penalty pos_charge gprs_charge refund }
       rate { ${RATE_FIELDS} }
@@ -78,7 +78,9 @@ export const OPEX_PENDING = `
 const RESULT = `{ status message id }`;
 
 export const CREATE_ATM_BATCH = `mutation ($branch_sub_id: ID!, $collection_date: String!) { createAtmCollectionBatch(branch_sub_id: $branch_sub_id, collection_date: $collection_date) ${RESULT} }`;
-export const ADD_ATM_SWIPE = `mutation ($batch_id: ID!, $borrower_id: ID!, $amount: String!, $balance_inquiry: String) { addAtmSwipe(batch_id: $batch_id, borrower_id: $borrower_id, amount: $amount, balance_inquiry: $balance_inquiry) ${RESULT} }`;
+export const ADD_ATM_SWIPE = `mutation ($batch_id: ID!, $borrower_id: ID!, $amount: String!, $balance_inquiry: String, $swiped_at_branch_sub_id: ID) { addAtmSwipe(batch_id: $batch_id, borrower_id: $borrower_id, amount: $amount, balance_inquiry: $balance_inquiry, swiped_at_branch_sub_id: $swiped_at_branch_sub_id) ${RESULT} }`;
+/** Every sub-branch an ATM can be swiped at, with its group (FA-FD). */
+export const ATM_SWIPE_LOCATIONS = `query { atmSwipeLocations { id name group_code } }`;
 export const REMOVE_ATM_SWIPE = `mutation ($batch_id: ID!, $swipe_id: ID!) { removeAtmSwipe(batch_id: $batch_id, swipe_id: $swipe_id) ${RESULT} }`;
 export const SET_ATM_REFUND_METHOD = `mutation ($batch_id: ID!, $borrower_id: ID!, $method: String!, $account_no: String) { setAtmRefundMethod(batch_id: $batch_id, borrower_id: $borrower_id, method: $method, account_no: $account_no) ${RESULT} }`;
 export const SIGN_ATM_BATCH = `mutation ($batch_id: ID!, $as: String!) { signAtmCollectionBatch(batch_id: $batch_id, as: $as) ${RESULT} }`;
@@ -99,12 +101,16 @@ export interface AtmRate { due: string; collected: string; percent: string; is_g
 export interface AtmSwipe {
   id: string; seq: number; amount: string; balance_inquiry: string | null; pos_charge: string | null; gprs_charge: string | null;
   amort: string | null; ua_payment: string | null; penalty: string | null; refund: string | null;
+  swiped_at_branch_sub_id: string | null; swiped_at_name: string | null; swiped_at_group_code: string | null;
+  /** Swiped on another group's POS: that group books the cash and an Inter-group Payable. */
+  cross_group: boolean;
 }
+export interface AtmSwipeLocation { id: string; name: string; group_code: string | null }
 export interface AtmRow {
   borrower_id: string; borrower_name: string; loan_refs: string[]; amort_due: string; ua_open: string; penalty_open: string;
   swipes: AtmSwipe[]; atm_collection: string; amort_paid: string; ua_sp: string; ua_payment: string; penalty: string;
   pos_charge: string; gprs_charge: string; refund: string; fully_paid: boolean; refund_method: 'TOF' | 'ACCOUNT' | 'CASH';
-  refund_account_no: string | null; posted: boolean; journal_refs: string[]; refund_status: string; status: 'not_swiped' | 'short' | 'paid' | 'nothing_due';
+  refund_account_no: string | null; posted: boolean; journal_refs: string[]; intergroup_refs: string[]; refund_status: string; status: 'not_swiped' | 'short' | 'paid' | 'nothing_due';
 }
 export type AtmTotals = Record<'amort_due' | 'atm_collection' | 'amort_paid' | 'ua_sp' | 'ua_payment' | 'penalty' | 'pos_charge' | 'gprs_charge' | 'refund', string>;
 export interface AtmSheet { batch: AtmBatch; rows: AtmRow[]; totals: AtmTotals; rate: AtmRate }

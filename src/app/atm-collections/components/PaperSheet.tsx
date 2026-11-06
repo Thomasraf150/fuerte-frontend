@@ -88,7 +88,14 @@ const PaperSheet: React.FC<Props> = ({ sheet, selectedId, onSelect }) => {
                 <td className="text-right font-semibold">
                   <Stack values={row.posted || !row.swipes.length ? [positive(row.refund) ? amt(row.refund) : (row.swipes.length ? '-' : '')] : swipeCol(row, (s) => s.refund)} />
                 </td>
-                <td className="text-center">{row.fully_paid && <span className="atm-red font-bold" title="Fully paid">FP</span>}</td>
+                <td className="text-center">
+                  {row.fully_paid && <span className="atm-red font-bold" title="Fully paid">FP</span>}
+                  {row.swipes.filter((s) => s.cross_group).map((s) => (
+                    <span key={s.id} className="atm-ap-mark ml-1" title={`Swipe ${s.seq} was made at ${s.swiped_at_name}: recorded as Accounts Payable between the groups`}>
+                      A/P · {s.swiped_at_group_code}
+                    </span>
+                  ))}
+                </td>
                 <td className="text-center text-xs">{account(row)}</td>
                 <td className="text-right"><Stack values={row.swipes.map((s) => amt(s.balance_inquiry))} className="text-body" /></td>
               </tr>

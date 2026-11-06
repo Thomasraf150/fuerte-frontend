@@ -1,38 +1,75 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from '@/utils/notify';
 import {
-  ADD_ATM_SWIPE, REMOVE_ATM_SWIPE, SET_ATM_REFUND_METHOD,
-  AtmResult, AtmRow,
+  ADD_ATM_SWIPE, ATM_SWIPE_LOCATIONS, REMOVE_ATM_SWIPE, SET_ATM_REFUND_METHOD,
+  AtmResult, AtmRow, AtmSwipeLocation,
 } from '@/graphql/AtmCollectionQueries';
 import { amt, cleanAmount, gql, positive } from '../lib';
 
 interface Props {
   batchId: string;
+  /** The list's own sub-branch: where a swipe is assumed to be made unless someone says otherwise. */
+  listBranchSubId: string;
   row: AtmRow;
   editable: boolean;
   onChanged: () => void;
 }
 
+/** Sub-branches change rarely: fetched once per page load, shared by every borrower's panel. */
+let locationsCache: Promise<AtmSwipeLocation[]> | null = null;
+const loadLocations = () => {
+  locationsCache ??= gql<{ atmSwipeLocations: AtmSwipeLocation[] }>(ATM_SWIPE_LOCATIONS)
+    .then((d) => d.atmSwipeLocations)
+    .catch((e) => { locationsCache = null; throw e; });
+  return locationsCache;
+};
+
+const groupLabel = (code: string | null) => (code ? `Group ${code}` : 'No group');
+
+/** A swipe made in another group: that group holds the cash, so the books carry an A/P and an A/R. */
+const CrossGroupMark: React.FC<{ code: string | null }> = ({ code }) => (
+  <span className="atm-ap-mark" title="Swiped in another group: that group books the cash and an Inter-group Payable">A/P · {code ?? '—'}</span>
+);
+
 /**
  * Swipe entry for one borrower: what they owe this cut-off, each swipe with how it splits, the
  * refund method, and the form to add a swipe. Everything shown is what posting will book.
  */
-const SwipePanel: React.FC<Props> = ({ batchId, row, editable, onChanged }) => {
+const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, onChanged }) => {
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState('');
+  const [swipedAt, setSwipedAt] = useState(listBranchSubId);
+  const [locations, setLocations] = useState<AtmSwipeLocation[]>([]);
   const [method, setMethod] = useState(row.refund_method);
   const [accountNo, setAccountNo] = useState(row.refund_account_no ?? '');
   const [busy, setBusy] = useState(false);
   const canSwipe = editable && !row.posted;
 
   useEffect(() => {
+    if (!canSwipe) return;
+    let live = true;
+    loadLocations().then((l) => live && setLocations(l)).catch(() => live && toast.error('Could not load the branch list for "Swiped at".'));
+    return () => { live = false; };
+  }, [canSwipe]);
+
+  const groups = useMemo(() => {
+    const byGroup = new Map<string, AtmSwipeLocation[]>();
+    locations.forEach((l) => byGroup.set(groupLabel(l.group_code), [...(byGroup.get(groupLabel(l.group_code)) ?? []), l]));
+    return Array.from(byGroup.entries());
+  }, [locations]);
+  const ownGroup = locations.find((l) => l.id === listBranchSubId)?.group_code ?? null;
+  const chosen = locations.find((l) => l.id === swipedAt);
+  const chosenIsCross = !!chosen && chosen.id !== listBranchSubId && chosen.group_code !== ownGroup;
+
+  useEffect(() => {
+    setSwipedAt(listBranchSubId);
     setMethod(row.refund_method);
     setAccountNo(row.refund_account_no ?? '');
     setAmount('');
     setBalance('');
-  }, [row.borrower_id, row.refund_method, row.refund_account_no]);
+  }, [row.borrower_id, row.refund_method, row.refund_account_no, listBranchSubId]);
 
   const run = async (mutation: string, vars: Record<string, unknown>, field: string) => {
     setBusy(true);
@@ -56,9 +93,10 @@ const SwipePanel: React.FC<Props> = ({ batchId, row, editable, onChanged }) => {
     const cleanBal = balance.trim() === '' ? null : cleanAmount(balance);
     if (!clean || clean === '0' || Number(clean) <= 0) { toast.error('Enter the amount swiped, e.g. 10018.00.'); return; }
     if (balance.trim() !== '' && !cleanBal) { toast.error('Enter the balance inquiry in pesos, or leave it empty.'); return; }
-    if (await run(ADD_ATM_SWIPE, { batch_id: batchId, borrower_id: row.borrower_id, amount: clean, balance_inquiry: cleanBal }, 'addAtmSwipe')) {
+    if (await run(ADD_ATM_SWIPE, { batch_id: batchId, borrower_id: row.borrower_id, amount: clean, balance_inquiry: cleanBal, swiped_at_branch_sub_id: swipedAt || null }, 'addAtmSwipe')) {
       setAmount('');
       setBalance('');
+      setSwipedAt(listBranchSubId); // the next swipe starts back at this branch: a cross-group swipe is always a choice
     }
   };
 
@@ -88,6 +126,12 @@ const SwipePanel: React.FC<Props> = ({ batchId, row, editable, onChanged }) => {
                   className="text-xs font-semibold text-danger hover:underline" aria-label={`Remove swipe ${s.seq}`}>Remove</button>
               )}
             </div>
+            {s.swiped_at_name && (
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-body">
+                at {s.swiped_at_name}{s.swiped_at_group_code ? ` · ${s.swiped_at_group_code}` : ''}
+                {s.cross_group && <CrossGroupMark code={s.swiped_at_group_code} />}
+              </p>
+            )}
             {s.refund !== null && (
               <p className="mt-1 text-xs text-body atm-num">
                 charges {amt(s.pos_charge)} + {amt(s.gprs_charge)} · amort {amt(s.amort)}
@@ -112,12 +156,29 @@ const SwipePanel: React.FC<Props> = ({ batchId, row, editable, onChanged }) => {
             <input id="atm-swipe-balance" inputMode="decimal" autoComplete="off" value={balance} onChange={(e) => setBalance(e.target.value)}
               placeholder="optional" className="atm-num w-full rounded-lg border border-stroke bg-transparent px-3 py-2 text-right dark:border-strokedark" />
           </div>
+          <div className="col-span-2">
+            <label htmlFor="atm-swipe-at" className="mb-1 block text-sm font-semibold">Swiped at</label>
+            <select id="atm-swipe-at" value={swipedAt} onChange={(e) => setSwipedAt(e.target.value)} aria-describedby="atm-swipe-at-note"
+              className="w-full rounded-lg border border-stroke bg-transparent px-3 py-2 dark:border-strokedark dark:bg-boxdark">
+              {locations.length === 0 && <option value={listBranchSubId}>This branch</option>}
+              {groups.map(([label, subs]) => (
+                <optgroup key={label} label={label}>
+                  {subs.map((l) => <option key={l.id} value={l.id}>{l.name}{l.id === listBranchSubId ? ' (this list)' : ''}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <p id="atm-swipe-at-note" className={`mt-1.5 text-xs ${chosenIsCross ? 'atm-cross-note' : 'text-body'}`} aria-live="polite">
+              {chosenIsCross
+                ? <>Another group. {chosen?.name} ({chosen?.group_code}) books the cash and an A/P due to this group; this branch books an A/R in place of cash.</>
+                : 'The branch whose POS the ATM was swiped on.'}
+            </p>
+          </div>
           <button type="submit" disabled={busy} className="col-span-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-opacity-90 disabled:opacity-60">
             {busy ? 'Saving…' : 'Add swipe'}
           </button>
         </form>
       )}
-      {row.posted && <p className="mt-4 rounded-lg bg-success/10 p-3 text-sm text-success">Posted ({row.journal_refs.join(', ')}). To correct it, reverse the payment in Payment Posting.</p>}
+      {row.posted && <p className="mt-4 rounded-lg bg-success/10 p-3 text-sm text-success">Posted ({row.journal_refs.join(', ')}).{row.intergroup_refs.length > 0 && <> Receiving group: {row.intergroup_refs.join(', ')}.</>} To correct it, reverse the payment in Payment Posting.</p>}
 
       <fieldset className="mt-5 border-t border-stroke pt-4 dark:border-strokedark" disabled={busy || row.refund_status === 'released'}>
         <legend className="text-xs font-semibold uppercase tracking-wide text-body">Refund goes by</legend>
