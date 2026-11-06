@@ -150,7 +150,7 @@ const BranchCard: React.FC<{ status: AtmBranchStatus; delay: number }> = ({ stat
           <p className="mt-3 text-sm text-black dark:text-white">
             {rate.is_green
               ? 'Loan releases allowed.'
-              : <>No loan release. <strong className="atm-num">₱{amt(rate.amount_to_green)}</strong> more must be collected to turn Green.</>}
+              : <>No loan release until <strong className="atm-num">₱{amt(rate.amount_to_green)}</strong> more is collected this cut-off.</>}
           </p>
           <dl className="mt-3 grid grid-cols-2 gap-1 text-sm">
             <dt className="text-body">Amort due</dt><dd className="atm-num text-right">₱{amt(rate.due)}</dd>
