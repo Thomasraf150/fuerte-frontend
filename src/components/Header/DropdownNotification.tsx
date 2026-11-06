@@ -2,9 +2,10 @@
 
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, CheckSquare } from "react-feather";
+import { Bell, CheckSquare, DollarSign } from "react-feather";
 import useApplicationNotifications, { POLL_MS } from "@/hooks/useApplicationNotifications";
 import useSeenNotificationIds from "@/hooks/useSeenNotificationIds";
+import useAppNotices from "@/hooks/useAppNotices";
 import { useAuthStore } from "@/store";
 import { useDeletionRequestsStore } from "@/store/deletionRequestsStore";
 import type { ApplicationNotification } from "@/utils/DataTypes";
@@ -236,13 +237,24 @@ const DropdownNotification = () => {
   useDeletionPoll(!!authToken && IS_APPROVER_ROLE(ROLE_NAME(authUser)), authToken);
   const roleCode: string = typeof authUser?.role?.code === "string" ? authUser.role.code : "";
   const applicationItems = useApplicationNotifications(!!authToken && APPLICATION_ROLE_CODES.has(roleCode), authUser?.id);
+  // Collections notices (ATM refunds, FP, branch Red, funds request, OPEX approvals): every signed-in user.
+  const appNotices = useAppNotices(!!authToken, authUser?.id);
   useDismiss(dropdownOpen, close, trigger, dropdown);
 
   // Everything on the bell now, by id: the deletion ids and the Applications keys (prefixed by the
   // server, "status:…" and "decision:…", so they never collide with a deletion id).
-  const currentIds = useMemo(() => [...pendingIds, ...applicationItems.map((item) => item.key)], [pendingIds, applicationItems]);
+  const currentIds = useMemo(
+    () => [...pendingIds, ...applicationItems.map((item) => item.key), ...appNotices.map((n) => `app:${n.id}`)],
+    [pendingIds, applicationItems, appNotices],
+  );
   const { unseenCount, markAllSeen } = useSeenNotificationIds(currentIds, authUser?.id);
-  const notifications = useMemo(() => deletionNotifications(pendingCount), [pendingCount]);
+  const notifications = useMemo(
+    () => [
+      ...deletionNotifications(pendingCount),
+      ...appNotices.map((n): Notification => ({ id: `app:${n.id}`, title: n.title, body: n.body, href: n.link ?? '/', icon: <DollarSign size={16} /> })),
+    ],
+    [pendingCount, appNotices],
+  );
 
   // Open the dropdown AND mark everything on it as seen; ids polled afterwards bring the badge back.
   const handleBellClick = (e: React.MouseEvent) => {

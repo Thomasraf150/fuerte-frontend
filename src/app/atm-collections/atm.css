@@ -1,0 +1,120 @@
+/*
+ * ATM collection screens. The Collection List is drawn as the office's own paper/Excel list:
+ * Cambria-like serif heading, the branch in teal ink, ruled cells, a single rule over the totals
+ * and a double rule under them, red pen for refunds and checks, and a rubber-stamp Green/Red mark.
+ * Colours come from the brand (utils/brandColors.ts) plus two inks the paper uses.
+ */
+.atm-root {
+  --atm-ink: #28261a;
+  --atm-paper: #fffdf7;
+  --atm-rule: #c9c2ad;
+  --atm-rule-strong: #28261a;
+  --atm-teal: #2c6e86;   /* the branch name and "TOF FR. TREASURY" on the paper */
+  --atm-red: #b5372f;    /* red pen: refunds owed, FP, accounting's checks */
+  --atm-green: #2b7344;
+  --atm-gold: #e3a92e;
+}
+
+.atm-paper {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)) top / 100% 140px no-repeat,
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(201, 194, 173, 0.18) 31px 32px),
+    var(--atm-paper);
+  color: var(--atm-ink);
+  border: 1px solid var(--atm-rule);
+  box-shadow: 0 1px 0 rgba(40, 38, 26, 0.04), 0 18px 40px -24px rgba(40, 38, 26, 0.35);
+}
+
+.atm-sheet-title {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: 0.06em;
+  font-variant: small-caps;
+}
+
+.atm-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  white-space: nowrap;
+}
+
+.atm-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+.atm-table thead th {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-top: 2px solid var(--atm-rule-strong);
+  border-bottom: 2px solid var(--atm-rule-strong);
+  border-right: 1px solid var(--atm-rule);
+  padding: 0.45rem 0.6rem;
+  background: rgba(244, 239, 225, 0.85);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.atm-table thead th:first-child { border-left: 2px solid var(--atm-rule-strong); }
+.atm-table thead th:last-child { border-right: 2px solid var(--atm-rule-strong); }
+.atm-table tbody td {
+  border-bottom: 1px solid rgba(201, 194, 173, 0.55);
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+.atm-table tbody tr { transition: background-color 120ms ease; cursor: pointer; }
+.atm-table tbody tr:hover { background: rgba(227, 169, 46, 0.08); }
+.atm-table tbody tr[aria-selected="true"] { background: rgba(90, 107, 44, 0.1); box-shadow: inset 3px 0 0 #5a6b2c; }
+.atm-table tbody tr:focus-visible { outline: 2px solid #5a6b2c; outline-offset: -2px; }
+
+.atm-total td {
+  font-weight: 700;
+  border-top: 1px solid var(--atm-rule-strong);
+  border-bottom: 3px double var(--atm-rule-strong) !important;
+  padding-top: 0.55rem !important;
+}
+
+.atm-teal { color: var(--atm-teal); }
+.atm-red { color: var(--atm-red); }
+
+/* Accounting's red check, drawn like a pen tick on the paper. */
+.atm-tick { display: inline-block; width: 0.9em; height: 0.9em; margin-left: 0.2em; vertical-align: -0.1em; color: var(--atm-red); }
+
+/* Rubber stamp: GREEN / RED for the branch's collection rate. */
+.atm-stamp {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.35rem 0.9rem 0.3rem;
+  border: 3px double currentColor;
+  border-radius: 6px;
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+  opacity: 0.92;
+  mix-blend-mode: multiply;
+  animation: atm-stamp-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.atm-stamp--green { color: var(--atm-green); }
+.atm-stamp--red { color: var(--atm-red); }
+@keyframes atm-stamp-in {
+  from { transform: rotate(-4deg) scale(1.6); opacity: 0; }
+  to { transform: rotate(-4deg) scale(1); opacity: 0.92; }
+}
+
+/* Rate meter with the release line at the threshold. */
+.atm-meter { position: relative; height: 10px; border-radius: 999px; background: #ece6d6; overflow: visible; }
+.atm-meter > span { position: absolute; inset: 0 auto 0 0; border-radius: 999px; transition: width 600ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.atm-meter > i { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--atm-ink); }
+
+.atm-card { animation: atm-rise 380ms ease both; }
+@keyframes atm-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .atm-stamp, .atm-card { animation: none; }
+  .atm-meter > span { transition: none; }
+}
+
+@media print {
+  .atm-noprint { display: none !important; }
+  .atm-paper { box-shadow: none; border: none; background: #fff; }
+  .atm-table thead th { position: static; background: #fff; }
+}

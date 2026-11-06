@@ -207,7 +207,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </SidebarLinkGroup>
 
               {/* Payments */}
-              <SidebarLinkGroup activeCondition={pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
+              <SidebarLinkGroup activeCondition={pathname.startsWith("/atm-collections") || pathname === "/opex" || pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
                 {(handleClick, open) => (
                   <React.Fragment>
                     <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
@@ -224,6 +224,9 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/statement-of-account" className={subLinkClass()}>Statement of Account</Link></li>
                         <li><Link href="/problem-accounts" className={subLinkClass()}>Problem Accounts</Link></li>
                         <li><Link href="/renewable-borrowers" className={subLinkClass()}>Renewable Borrowers</Link></li>
+                        <li><Link href="/atm-collections" className={subLinkClass()}>ATM Collections</Link></li>
+                        <li><Link href="/atm-collections/refunds" className={subLinkClass()}>Refunds &amp; Funds</Link></li>
+                        <li><Link href="/opex" className={subLinkClass()}>OPEX Fund</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>

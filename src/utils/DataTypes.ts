@@ -891,6 +891,7 @@ export interface DataLoanProceedList {
   addon_total_id: string;
   cib_id: string;
   coh_id: string;
+  rp_id?: string;
 }
 export interface RowAcctgDetails {
   acctg_entries_id: string;
