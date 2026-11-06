@@ -12,7 +12,7 @@ export const RateStatus: React.FC<{ green: boolean; size?: 'sm' | 'md' }> = ({ g
   return (
     <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-semibold ${size === 'md' ? 'px-3 py-1 text-sm' : 'px-2.5 py-0.5 text-xs'} ${green ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
       <Icon size={size === 'md' ? 16 : 14} aria-hidden="true" strokeWidth={2.4} />
-      {green ? 'Green' : 'Red'}
+      {green ? 'Green' : 'Red'}{' '}
       <span className="font-normal opacity-80">· {green ? 'Releases allowed' : 'Releases on hold'}</span>
     </span>
   );

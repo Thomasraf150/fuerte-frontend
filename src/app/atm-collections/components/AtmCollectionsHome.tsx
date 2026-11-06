@@ -138,16 +138,14 @@ const BranchCard: React.FC<{ status: AtmBranchStatus; delay: number }> = ({ stat
   return (
     <article className="atm-card relative overflow-hidden rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark"
       style={{ animationDelay: `${delay}ms` }}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-display text-lg text-black dark:text-white">{status.branch_sub_name}</h3>
-          <p className="text-xs uppercase tracking-wide text-body">{rate ? `Batch ${rate.batch_no} · cut-off from ${paperDate(rate.cutoff_start)}` : 'No posted list yet'}</p>
-        </div>
-        {rate && <RateStatus green={rate.is_green} size="sm" />}
-      </div>
+      <h3 className="font-display text-lg text-black dark:text-white">{status.branch_sub_name}</h3>
+      <p className="text-xs uppercase tracking-wide text-body">{rate ? `Batch ${rate.batch_no} · cut-off from ${paperDate(rate.cutoff_start)}` : 'No posted list yet'}</p>
       {rate ? (
         <>
-          <p className={`mt-3 font-display text-4xl ${rate.is_green ? 'text-success' : 'text-danger'}`}>{rate.percent}%</p>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <p className={`font-display text-4xl ${rate.is_green ? 'text-success' : 'text-danger'}`}>{rate.percent}%</p>
+            <RateStatus green={rate.is_green} size="sm" />
+          </div>
           <RateMeter percent={rate.percent} threshold={rate.threshold} green={rate.is_green} />
           <p className="mt-3 text-sm text-black dark:text-white">
             {rate.is_green
