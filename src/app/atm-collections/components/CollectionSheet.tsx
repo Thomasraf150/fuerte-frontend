@@ -9,7 +9,7 @@ import { ATM_SHEET, POST_ATM_BATCH, SIGN_ATM_BATCH, AtmResult, AtmSheet } from '
 import { amt, gql, useGql } from '../lib';
 import PaperSheet from './PaperSheet';
 import SwipePanel from './SwipePanel';
-import { RateMeter, RateStamp } from './RateBits';
+import { RateMeter, RateStatus } from './RateBits';
 import '../atm.css';
 
 interface PostResult { status: boolean; message: string; posted: number; failed: { borrower: string; message: string }[] }
@@ -75,14 +75,16 @@ const CollectionSheet: React.FC<{ id: string }> = ({ id }) => {
       </div>
 
       <section className="atm-noprint flex flex-wrap items-center gap-6 rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark" aria-label="Collection rate">
-        <RateStamp green={rate.is_green} />
         <div className="min-w-64 flex-1">
-          <p className="text-sm text-body">{draft ? 'If posted as entered now' : 'Collected this cut-off'}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <RateStatus green={rate.is_green} />
+            <p className="text-sm text-body">{draft ? 'If posted as entered now' : 'Collected this cut-off'}</p>
+          </div>
           <p className="font-display text-3xl text-black dark:text-white">{rate.percent}% <span className="text-base text-body">of ₱{amt(rate.due)} amort due</span></p>
           <RateMeter percent={rate.percent} threshold={rate.threshold} green={rate.is_green} />
         </div>
         <p className="max-w-xs text-sm">
-          {rate.is_green ? 'Green: this branch may release loans.' : <>Red: no loan release. <strong className="atm-num">₱{amt(rate.amount_to_green)}</strong> more must be collected to turn Green.</>}
+          {rate.is_green ? 'This branch may release loans.' : <>No loan release until <strong className="atm-num">₱{amt(rate.amount_to_green)}</strong> more is collected this cut-off.</>}
         </p>
       </section>
 

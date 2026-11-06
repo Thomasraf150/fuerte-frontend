@@ -91,7 +91,7 @@ const PaperSheet: React.FC<Props> = ({ sheet, selectedId, onSelect }) => {
                 <td className="text-center">
                   {row.fully_paid && <span className="atm-red font-bold" title="Fully paid">FP</span>}
                   {row.swipes.filter((s) => s.cross_group).map((s) => (
-                    <span key={s.id} className="atm-ap-mark ml-1" title={`Swipe ${s.seq} was made at ${s.swiped_at_name}: recorded as Accounts Payable between the groups`}>
+                    <span key={s.id} className="atm-ap-mark ml-1 block" title={`Swipe ${s.seq} was made at ${s.swiped_at_name}: recorded as Accounts Payable between the groups`}>
                       A/P · {s.swiped_at_group_code}
                     </span>
                   ))}

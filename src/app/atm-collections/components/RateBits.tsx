@@ -1,14 +1,22 @@
 "use client";
 
 import React from 'react';
+import { CheckCircle, PauseCircle } from 'react-feather';
 
-/** The rubber stamp on a list or a branch card: GREEN (can release) or RED (release on hold). */
-export const RateStamp: React.FC<{ green: boolean }> = ({ green }) => (
-  <span className={`atm-stamp ${green ? 'atm-stamp--green' : 'atm-stamp--red'}`} role="img" aria-label={green ? 'Green: loan releases allowed' : 'Red: loan releases on hold'}>
-    <span className="text-base font-semibold leading-none">{green ? 'Green' : 'Red'}</span>
-    <span className="mt-0.5 text-[0.55rem] leading-none">{green ? 'Can release' : 'Release on hold'}</span>
-  </span>
-);
+/**
+ * A branch's release status: Green (may release loans) or Red (releases on hold). Same pill as the
+ * app's other statuses, carrying icon + word + colour, so it never relies on colour alone.
+ */
+export const RateStatus: React.FC<{ green: boolean; size?: 'sm' | 'md' }> = ({ green, size = 'md' }) => {
+  const Icon = green ? CheckCircle : PauseCircle;
+  return (
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-semibold ${size === 'md' ? 'px-3 py-1 text-sm' : 'px-2.5 py-0.5 text-xs'} ${green ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
+      <Icon size={size === 'md' ? 16 : 14} aria-hidden="true" strokeWidth={2.4} />
+      {green ? 'Green' : 'Red'}
+      <span className="font-normal opacity-80">· {green ? 'Releases allowed' : 'Releases on hold'}</span>
+    </span>
+  );
+};
 
 /** Collection rate bar with the release line drawn at the threshold. */
 export const RateMeter: React.FC<{ percent: string; threshold: string; green: boolean }> = ({ percent, threshold, green }) => {

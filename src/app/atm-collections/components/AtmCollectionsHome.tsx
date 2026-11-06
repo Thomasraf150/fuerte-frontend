@@ -10,7 +10,7 @@ import {
   AtmBatch, AtmBranchStatus, AtmResult,
 } from '@/graphql/AtmCollectionQueries';
 import { amt, gql, paperDate, useGql } from '../lib';
-import { RateStamp, RateMeter } from './RateBits';
+import { RateStatus, RateMeter } from './RateBits';
 import '../atm.css';
 
 interface BranchSub { id: string; name: string }
@@ -143,7 +143,7 @@ const BranchCard: React.FC<{ status: AtmBranchStatus; delay: number }> = ({ stat
           <h3 className="font-display text-lg text-black dark:text-white">{status.branch_sub_name}</h3>
           <p className="text-xs uppercase tracking-wide text-body">{rate ? `Batch ${rate.batch_no} · cut-off from ${paperDate(rate.cutoff_start)}` : 'No posted list yet'}</p>
         </div>
-        {rate && <RateStamp green={rate.is_green} />}
+        {rate && <RateStatus green={rate.is_green} size="sm" />}
       </div>
       {rate ? (
         <>

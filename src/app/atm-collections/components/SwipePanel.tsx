@@ -30,7 +30,7 @@ const groupLabel = (code: string | null) => (code ? `Group ${code}` : 'No group'
 
 /** A swipe made in another group: that group holds the cash, so the books carry an A/P and an A/R. */
 const CrossGroupMark: React.FC<{ code: string | null }> = ({ code }) => (
-  <span className="atm-ap-mark" title="Swiped in another group: that group books the cash and an Inter-group Payable">A/P · {code ?? '—'}</span>
+  <span className="inline-flex items-center rounded-full bg-[#2c6e86]/10 px-2 py-0.5 text-xs font-semibold text-[#2c6e86]" title="Swiped in another group: that group books the cash and an Inter-group Payable">A/P · {code ?? '—'}</span>
 );
 
 /**
