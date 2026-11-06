@@ -117,7 +117,9 @@ const RefundRow: React.FC<{ r: AtmRefund; onChanged: () => void }> = ({ r, onCha
       <td className="atm-num pr-4 text-right font-semibold">{positive(r.refund) ? amt(r.refund) : '-'}</td>
       <td className={`pr-4 text-xs font-semibold ${r.refund_method === 'TOF' ? 'atm-teal' : 'atm-red'}`}>{positive(r.refund) ? methodLabel(r) : ''}</td>
       <td className="pr-4">
-        {r.refund_status === 'released'
+        {r.refund_status === 'review'
+          ? <span className="rounded-full bg-danger/10 px-2.5 py-0.5 text-xs font-semibold text-danger" title="Part of this posting was reversed in Payment Posting">Accounting review</span>
+          : r.refund_status === 'released'
           ? <span className="rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success">Received by client</span>
           : r.refund_status === 'pending'
             ? <span className="rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-semibold text-[#8A6312]">To release</span>
