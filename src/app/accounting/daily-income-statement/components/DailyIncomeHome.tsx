@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { DAILY_INCOME_STATEMENT, type DailyIncomeSection, type DailyIncomeSectionKey, type DailyIncomeStatement } from '@/graphql/CollectionReportsQueries';
 import { amt, useGql } from '@/app/atm-collections/lib';
+import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import '@/app/atm-collections/atm.css';
 
 const manilaToday = () => new Date(Date.now() + 8 * 3600_000).toISOString().slice(0, 10);
@@ -30,9 +31,11 @@ const DailyIncomeHome: React.FC = () => {
   const today = manilaToday();
   const asked = params.get('date') ?? '';
   const date = /^\d{4}-\d{2}-\d{2}$/.test(asked) && asked <= today ? asked : today;
-  const { data, error, loading } = useGql<{ dailyIncomeStatement: DailyIncomeStatement }>(DAILY_INCOME_STATEMENT, { date });
+  const branch = /^\d+$/.test(params.get('branch') ?? '') ? String(params.get('branch')) : '';
+  const { data, error, loading } = useGql<{ dailyIncomeStatement: DailyIncomeStatement }>(DAILY_INCOME_STATEMENT, { date, branch_sub_id: branch || null });
+  const branches = useGql<{ getMyAccessibleBranchSubs: { id: string; name: string }[] }>(BranchQueryMutations.GET_MY_ACCESSIBLE_BRANCH_SUBS_QUERY, {});
   const r = data?.dailyIncomeStatement;
-  const go = (d: string) => router.replace(`${pathname}?date=${d}`);
+  const go = (d: string, b: string = branch) => router.replace(`${pathname}?date=${d}${b ? `&branch=${b}` : ''}`);
 
   return (
     <div className="atm-root flex flex-col gap-6">
@@ -43,6 +46,13 @@ const DailyIncomeHome: React.FC = () => {
           className="rounded-lg border border-stroke bg-transparent px-3 py-1.5 text-sm dark:border-strokedark" />
         <button type="button" onClick={() => go(shift(date, 1))} disabled={date >= today} className="rounded-lg border border-stroke bg-white px-3 py-1.5 text-sm font-semibold disabled:opacity-40 dark:border-strokedark dark:bg-boxdark" aria-label="Next day">Next day →</button>
         {date !== today && <button type="button" onClick={() => go(today)} className="text-sm font-semibold text-primary hover:underline">Today</button>}
+        <label htmlFor="dis-branch" className="ml-auto text-sm font-semibold text-black dark:text-white">Branch
+          <select id="dis-branch" value={branch} onChange={(e) => go(date, e.target.value)}
+            className="ml-2 rounded-lg border border-stroke bg-transparent px-3 py-1.5 font-normal dark:border-strokedark dark:bg-boxdark">
+            <option value="">All my branches</option>
+            {(branches.data?.getMyAccessibleBranchSubs ?? []).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </select>
+        </label>
       </nav>
 
       {error && <p role="alert" className="rounded-lg bg-danger/10 p-4 text-danger">{error}</p>}
@@ -118,7 +128,7 @@ const TicketPanel: React.FC<{ r: DailyIncomeStatement }> = ({ r }) => {
   return (
     <aside aria-labelledby="dis-ticket" className="self-start rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark">
       <h2 id="dis-ticket" className="font-display text-lg text-black dark:text-white">Summary ticket, same day</h2>
-      {!t && <p className="mt-2 text-sm text-body">Open this for all branches (or one branch) to see the summary ticket beside it.</p>}
+      {!t && <p className="mt-2 text-sm text-body">The summary ticket covers one branch or the whole company. Pick a branch above to see it beside the statement.</p>}
       {t && (
         <>
           <p className="text-sm text-body">{t.loans_released} loan{t.loans_released === 1 ? '' : 's'} released · ₱{amt(t.collection)} collected</p>

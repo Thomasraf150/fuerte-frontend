@@ -17,6 +17,7 @@ export const RELEASE_STATUS = `
   query ReleaseStatus {
     releaseStatus {
       cutoff_label threshold
+      pending_truncated
       pending { loan_id loan_ref borrower_name branch_sub_name loan_proceeds person_status company_name company_status may_release reason }
       companies { company_id company_name cutoff_label threshold due paid percent status borrowers }
     }
@@ -27,8 +28,8 @@ const SECTION = `lines { number account_name day month_to_date } day month_to_da
 const TOTALS = `total_income net_before_other net_before_tax net_income`;
 
 export const DAILY_INCOME_STATEMENT = `
-  query DailyIncomeStatement($date: String!) {
-    dailyIncomeStatement(date: $date) {
+  query DailyIncomeStatement($date: String!, $branch_sub_id: ID) {
+    dailyIncomeStatement(date: $date, branch_sub_id: $branch_sub_id) {
       day label month_label
       sections {
         interest_income { ${SECTION} } other_revenues { ${SECTION} } direct_financing { ${SECTION} }
@@ -60,7 +61,7 @@ export interface CompanyStanding {
   company_id: string; company_name: string; cutoff_label: string; threshold: string; due: string; paid: string;
   percent: string; status: Standing; borrowers: number;
 }
-export interface ReleaseStatus { cutoff_label: string; threshold: string; pending: PendingRelease[]; companies: CompanyStanding[] }
+export interface ReleaseStatus { cutoff_label: string; threshold: string; pending: PendingRelease[]; pending_truncated: boolean; companies: CompanyStanding[] }
 
 export interface DailyIncomeLine { number: string; account_name: string; day: string; month_to_date: string }
 export interface DailyIncomeSection { lines: DailyIncomeLine[]; day: string; month_to_date: string }

@@ -57,6 +57,7 @@ const Pending: React.FC<{ r: ReleaseStatus }> = ({ r }) => {
         {r.pending.length} loan{r.pending.length === 1 ? '' : 's'} for releasing
         {r.pending.length > 0 && <> · <strong className="text-success">{r.pending.length - held.length} may go out</strong> · <strong className="text-danger">{held.length} on hold</strong></>}
       </p>
+      {r.pending_truncated && <p role="status" className="mt-1 text-sm font-semibold text-[#8A6312]">More loans are waiting than this list shows (the first {r.pending.length}, by branch). Release some, or open a branch&apos;s loans list.</p>}
       <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[900px] text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-body">
