@@ -5,7 +5,7 @@ import CollectionList from './components/CollectionList';
 import './styles.css';
 
 export const metadata = {
-  title: "Collection List",
+  title: "Posted Payments",
   description: "",
 };
 
@@ -13,7 +13,7 @@ const CollectionsList: React.FC = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName="Collection List" />
+        <Breadcrumb pageName="Posted Payments" />
       </div>
       <CollectionList />
     </DefaultLayout>

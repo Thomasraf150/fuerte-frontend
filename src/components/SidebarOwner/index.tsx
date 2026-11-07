@@ -8,7 +8,7 @@ import SidebarLinkGroup from "@/components/Sidebar/SidebarLinkGroup";
 import { NAV_CURRENT, NAV_GROUP_HAS, NavCurrentContext, useCurrentNav } from "@/components/Sidebar/currentNav";
 import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
 import ApprovalsNavBadge from "@/components/Sidebar/ApprovalsNavBadge";
-import { Server } from 'react-feather';
+import { Briefcase, CheckSquare, Server, TrendingUp } from 'react-feather';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -206,29 +206,95 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 )}
               </SidebarLinkGroup>
 
-              {/* Payments */}
-              <SidebarLinkGroup activeCondition={pathname.startsWith("/atm-collections") || pathname === "/opex" || pathname === "/collection-efficiency" || pathname === "/release-status" || pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
+              {/* Collections: the daily work of taking payments in */}
+              <SidebarLinkGroup activeCondition={pathname.startsWith("/atm-collections") && !pathname.startsWith("/atm-collections/refunds") || pathname === "/payment-posting" || pathname === "/collection-list" || pathname === "/statement-of-account"}>
                 {(handleClick, open) => (
                   <React.Fragment>
                     <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
                       <svg className="fill-current" width="18" height="18" viewBox="2 3 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
                       </svg>
-                      Payments
+                      Collections
                       <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                        <li><Link href="/collection-list" className={subLinkClass()}>Collection Lists</Link></li>
-                        <li><Link href="/payment-posting" className={subLinkClass()}>Payment Posting</Link></li>
-                        <li><Link href="/statement-of-account" className={subLinkClass()}>Statement of Account</Link></li>
-                        <li><Link href="/problem-accounts" className={subLinkClass()}>Problem Accounts</Link></li>
-                        <li><Link href="/renewable-borrowers" className={subLinkClass()}>Renewable Borrowers</Link></li>
                         <li><Link href="/atm-collections" className={subLinkClass()}>ATM Collections</Link></li>
+                        <li><Link href="/payment-posting" className={subLinkClass()}>Payment Posting</Link></li>
+                        <li><Link href="/collection-list" className={subLinkClass()}>Posted Payments</Link></li>
+                        <li><Link href="/statement-of-account" className={subLinkClass()}>Statement of Account</Link></li>
+                      </ul>
+                    </div>
+                  </React.Fragment>
+                )}
+              </SidebarLinkGroup>
+
+              {/* Treasury: what goes out, and whether it may */}
+              <SidebarLinkGroup activeCondition={pathname.startsWith("/atm-collections/refunds") || pathname === "/release-status" || pathname === "/opex"}>
+                {(handleClick, open) => (
+                  <React.Fragment>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
+                      <Briefcase size={16} aria-hidden="true" />
+                      Treasury
+                      <ChevronIcon open={open} />
+                    </Link>
+                    <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
+                        <li><Link href="/release-status" className={subLinkClass()}>Release Status</Link></li>
                         <li><Link href="/atm-collections/refunds" className={subLinkClass()}>Refunds &amp; Funds</Link></li>
                         <li><Link href="/opex" className={subLinkClass()}>OPEX Fund</Link></li>
+                      </ul>
+                    </div>
+                  </React.Fragment>
+                )}
+              </SidebarLinkGroup>
+            </ul>
+
+            {/* ===== REPORTS ===== */}
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">REPORTS</h3>
+            <ul className="mb-6 flex flex-col gap-1.5">
+              {/* Collection reports */}
+              <SidebarLinkGroup activeCondition={pathname === "/collection-efficiency" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
+                {(handleClick, open) => (
+                  <React.Fragment>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
+                      <TrendingUp size={16} aria-hidden="true" />
+                      Collection Reports
+                      <ChevronIcon open={open} />
+                    </Link>
+                    <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/collection-efficiency" className={subLinkClass()}>Collection Efficiency</Link></li>
-                        <li><Link href="/release-status" className={subLinkClass()}>Release Status</Link></li>
+                        <li><Link href="/problem-accounts" className={subLinkClass()}>Problem Accounts</Link></li>
+                        <li><Link href="/renewable-borrowers" className={subLinkClass()}>Renewable Borrowers</Link></li>
+                      </ul>
+                    </div>
+                  </React.Fragment>
+                )}
+              </SidebarLinkGroup>
+
+              {/* Financial reports: statements, then schedules */}
+              <SidebarLinkGroup activeCondition={pathname === "/accounting/balance-sheet" || pathname === "/accounting/income-statement" || pathname === "/accounting/daily-income-statement" || pathname === "/accounting/cash-flow" || pathname === "/accounting/cash-position" || pathname === "/accounting/aging" || pathname === "/accounting/refund-schedule" || pathname === "/accounting/udi-schedule" || pathname === "/accounting/commission-schedule"}>
+                {(handleClick, open) => (
+                  <React.Fragment>
+                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
+                      <Server size={14} aria-hidden="true" />
+                      Financial Reports
+                      <ChevronIcon open={open} />
+                    </Link>
+                    <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
+                        <li role="presentation" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Statements</li>
+                        <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
+                        <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
+                        <li><Link href="/accounting/daily-income-statement" className={subLinkSmClass()}>Daily Income Statement</Link></li>
+                        <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
+                        <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
+                        <li role="presentation" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Schedules</li>
+                        <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>
+                        <li><Link href="/accounting/refund-schedule" className={subLinkSmClass()}>Refund Schedule</Link></li>
+                        <li><Link href="/accounting/udi-schedule" className={subLinkSmClass()}>UDI Schedule</Link></li>
+                        <li><Link href="/accounting/commission-schedule" className={subLinkSmClass()}>Commission Schedule</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>
@@ -239,46 +305,21 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             {/* ===== ACCOUNTING ===== */}
             <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">ACCOUNTING</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
-              {/* Accounting Reports */}
-              <SidebarLinkGroup
-                activeCondition={
-                  pathname === "/accounting/unadjusted-trial-balance" ||
-                  pathname === "/accounting/adjusting-entries" ||
-                  pathname === "/accounting/adjusted-trial-balance" ||
-                  pathname === "/accounting/balance-sheet" ||
-                  pathname === "/accounting/income-statement" ||
-                  pathname === "/accounting/daily-income-statement" ||
-                  pathname === "/accounting/cash-flow" ||
-                  pathname === "/accounting/cash-position" ||
-                  pathname === "/accounting/aging" ||
-                  pathname === "/accounting/closing-entries" ||
-                  pathname === "/accounting/refund-schedule" ||
-                  pathname === "/accounting/udi-schedule" ||
-                  pathname === "/accounting/commission-schedule"
-                }
-              >
+              {/* Period close, in the order it is done */}
+              <SidebarLinkGroup activeCondition={pathname === "/accounting/unadjusted-trial-balance" || pathname === "/accounting/adjusting-entries" || pathname === "/accounting/adjusted-trial-balance" || pathname === "/accounting/closing-entries"}>
                 {(handleClick, open) => (
                   <React.Fragment>
                     <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
-                      <Server size={14} />
-                      Reports
+                      <CheckSquare size={14} aria-hidden="true" />
+                      Period Close
                       <ChevronIcon open={open} />
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
+                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
                         <li><Link href="/accounting/unadjusted-trial-balance" className={subLinkSmClass()}>Unadjusted Trial Balance</Link></li>
                         <li><Link href="/accounting/adjusting-entries" className={subLinkSmClass()}>Adjusting Entries</Link></li>
                         <li><Link href="/accounting/adjusted-trial-balance" className={subLinkSmClass()}>Adjusted Trial Balance</Link></li>
-                        <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
-                        <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
-                        <li><Link href="/accounting/daily-income-statement" className={subLinkSmClass()}>Daily Income Statement</Link></li>
-                        <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
-                        <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
-                        <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>
                         <li><Link href="/accounting/closing-entries" className={subLinkSmClass()}>Closing Entries</Link></li>
-                        <li><Link href="/accounting/refund-schedule" className={subLinkSmClass()}>Refund Schedule</Link></li>
-                        <li><Link href="/accounting/udi-schedule" className={subLinkSmClass()}>UDI Schedule</Link></li>
-                        <li><Link href="/accounting/commission-schedule" className={subLinkSmClass()}>Commission Schedule</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>
