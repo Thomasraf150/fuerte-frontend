@@ -3,12 +3,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { NavGroup, FINANCIAL_REPORTS, PERIOD_CLOSE, TREASURY } from "@/components/Sidebar/NavGroups";
 import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import { NAV_CURRENT, NAV_GROUP_HAS, NavCurrentContext, useCurrentNav } from "@/components/Sidebar/currentNav";
 import ApplicationsMenuItem from "@/components/Sidebar/ApplicationsMenuItem";
 import ApprovalsNavBadge from "@/components/Sidebar/ApprovalsNavBadge";
-import { Briefcase, CheckSquare, Server, TrendingUp } from 'react-feather';
+import { Server, TrendingUp } from 'react-feather';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -214,47 +215,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
 
-              {/* Treasury: what goes out, and whether it may */}
-              <SidebarLinkGroup activeCondition={pathname === "/release-status" || pathname === "/opex" || pathname.startsWith("/atm-collections/refunds")}>
-                {(handleClick, open) => (
-                    <React.Fragment>
-                      <Link
-                        href="#"
-                        aria-expanded={open}
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
-                        onClick={(e) => { e.preventDefault(); sidebarExpanded ? handleClick() : setSidebarExpanded(true); }}
-                      >
-                        <Briefcase size={16} aria-hidden="true" />
-                        Treasury
-                        <svg
-                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && "rotate-180"}`}
-                          width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-                        >
-                          <path fillRule="evenodd" clipRule="evenodd" d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z" fill="" />
-                        </svg>
-                      </Link>
-                      <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                          <li>
-                            <Link href="/release-status" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Release Status
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/atm-collections/refunds" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Refunds &amp; Funds
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/opex" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              OPEX Fund
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-                    </React.Fragment>
-                )}
-              </SidebarLinkGroup>
+              <NavGroup group={TREASURY} role={"ACCTG"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
 
               {/* Loan Calculator — quote-only, available to every role */}
               <li>
@@ -282,129 +243,9 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
 
-              {/* Financial reports: statements, then schedules */}
-              <SidebarLinkGroup activeCondition={pathname === "/accounting/balance-sheet" || pathname === "/accounting/daily-income-statement" || pathname === "/accounting/cash-flow" || pathname === "/accounting/cash-position" || pathname === "/accounting/aging" || pathname === "/accounting/refund-schedule" || pathname === "/accounting/udi-schedule" || pathname === "/accounting/commission-schedule"}>
-                {(handleClick, open) => (
-                    <React.Fragment>
-                      <Link
-                        href="#"
-                        aria-expanded={open}
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
-                        onClick={(e) => { e.preventDefault(); sidebarExpanded ? handleClick() : setSidebarExpanded(true); }}
-                      >
-                        <Server size={14} aria-hidden="true" />
-                        Financial Reports
-                        <svg
-                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && "rotate-180"}`}
-                          width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-                        >
-                          <path fillRule="evenodd" clipRule="evenodd" d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z" fill="" />
-                        </svg>
-                      </Link>
-                      <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                          <li>
-                            <p id="nav-sub-statements" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Statements</p>
-                            <ul aria-labelledby="nav-sub-statements" className="flex flex-col gap-0.5">
-                            <li>
-                              <Link href="/accounting/balance-sheet" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Balance Sheet
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/accounting/daily-income-statement" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Daily Income Statement
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/accounting/cash-flow" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Cash Flow
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/accounting/cash-position" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Cash Position
-                              </Link>
-                            </li>
-                            </ul>
-                          </li>
-                          <li>
-                            <p id="nav-sub-schedules" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Schedules</p>
-                            <ul aria-labelledby="nav-sub-schedules" className="flex flex-col gap-0.5">
-                            <li>
-                              <Link href="/accounting/aging" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Aging
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/accounting/refund-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Refund Schedule
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/accounting/udi-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                UDI Schedule
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/accounting/commission-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                                Commission Schedule
-                              </Link>
-                            </li>
-                            </ul>
-                          </li>
-                        </ul>
-                      </div>
-                    </React.Fragment>
-                )}
-              </SidebarLinkGroup>
+              <NavGroup group={FINANCIAL_REPORTS} role={"ACCTG"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
 
-              {/* Period close, in the order it is done */}
-              <SidebarLinkGroup activeCondition={pathname === "/accounting/unadjusted-trial-balance" || pathname === "/accounting/adjusting-entries" || pathname === "/accounting/adjusted-trial-balance" || pathname === "/accounting/closing-entries"}>
-                {(handleClick, open) => (
-                    <React.Fragment>
-                      <Link
-                        href="#"
-                        aria-expanded={open}
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
-                        onClick={(e) => { e.preventDefault(); sidebarExpanded ? handleClick() : setSidebarExpanded(true); }}
-                      >
-                        <CheckSquare size={14} aria-hidden="true" />
-                        Period Close
-                        <svg
-                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && "rotate-180"}`}
-                          width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-                        >
-                          <path fillRule="evenodd" clipRule="evenodd" d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z" fill="" />
-                        </svg>
-                      </Link>
-                      <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                          <li>
-                            <Link href="/accounting/unadjusted-trial-balance" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Unadjusted Trial Balance
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/adjusting-entries" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Adjusting Entries
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/adjusted-trial-balance" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Adjusted Trial Balance
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/closing-entries" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Closing Entries
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-                    </React.Fragment>
-                )}
-              </SidebarLinkGroup>
+              <NavGroup group={PERIOD_CLOSE} role={"ACCTG"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
 
               {/* <!-- Voucher Item Settings --> */}
               <SidebarLinkGroup
