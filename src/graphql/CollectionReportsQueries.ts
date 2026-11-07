@@ -29,7 +29,7 @@ const TOTALS = `total_income net_before_other net_before_tax net_income`;
 export const DAILY_INCOME_STATEMENT = `
   query DailyIncomeStatement($date: String!) {
     dailyIncomeStatement(date: $date) {
-      date label month_label
+      day label month_label
       sections {
         interest_income { ${SECTION} } other_revenues { ${SECTION} } direct_financing { ${SECTION} }
         other_income_expense { ${SECTION} } expenses { ${SECTION} } income_tax { ${SECTION} }
@@ -67,7 +67,7 @@ export interface DailyIncomeSection { lines: DailyIncomeLine[]; day: string; mon
 export type DailyIncomeSectionKey = 'interest_income' | 'other_revenues' | 'direct_financing' | 'other_income_expense' | 'expenses' | 'income_tax';
 export interface DailyIncomeTotalsCol { total_income: string; net_before_other: string; net_before_tax: string; net_income: string }
 export interface DailyIncomeStatement {
-  date: string; label: string; month_label: string;
+  day: string; label: string; month_label: string;
   sections: Record<DailyIncomeSectionKey, DailyIncomeSection>;
   totals: { day: DailyIncomeTotalsCol; month_to_date: DailyIncomeTotalsCol };
   ticket: { loans_released: number; release_income: { description: string; amount: string }[]; release_income_total: string; earned_interest: string; interest_difference: string; collection: string } | null;
