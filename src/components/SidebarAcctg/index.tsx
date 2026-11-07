@@ -226,6 +226,39 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   OPEX Fund
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/collection-efficiency"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
+                >
+                  <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.5 18.5l6-6 4 4L22 6.9 20.6 5.5l-7.1 8-4-4L2 17z" fill="" />
+                  </svg>
+                  Collection Efficiency
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/release-status"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
+                >
+                  <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 15l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8z" fill="" />
+                  </svg>
+                  Release Status
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/accounting/daily-income-statement"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
+                >
+                  <svg className="fill-current" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="" />
+                  </svg>
+                  Daily Income Statement
+                </Link>
+              </li>
 
               {/* Loan Calculator — quote-only, available to every role */}
               <li>

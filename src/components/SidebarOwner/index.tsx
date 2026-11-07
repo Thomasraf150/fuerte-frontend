@@ -207,7 +207,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </SidebarLinkGroup>
 
               {/* Payments */}
-              <SidebarLinkGroup activeCondition={pathname.startsWith("/atm-collections") || pathname === "/opex" || pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
+              <SidebarLinkGroup activeCondition={pathname.startsWith("/atm-collections") || pathname === "/opex" || pathname === "/collection-efficiency" || pathname === "/release-status" || pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
                 {(handleClick, open) => (
                   <React.Fragment>
                     <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
@@ -227,6 +227,8 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/atm-collections" className={subLinkClass()}>ATM Collections</Link></li>
                         <li><Link href="/atm-collections/refunds" className={subLinkClass()}>Refunds &amp; Funds</Link></li>
                         <li><Link href="/opex" className={subLinkClass()}>OPEX Fund</Link></li>
+                        <li><Link href="/collection-efficiency" className={subLinkClass()}>Collection Efficiency</Link></li>
+                        <li><Link href="/release-status" className={subLinkClass()}>Release Status</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>
@@ -245,6 +247,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   pathname === "/accounting/adjusted-trial-balance" ||
                   pathname === "/accounting/balance-sheet" ||
                   pathname === "/accounting/income-statement" ||
+                  pathname === "/accounting/daily-income-statement" ||
                   pathname === "/accounting/cash-flow" ||
                   pathname === "/accounting/cash-position" ||
                   pathname === "/accounting/aging" ||
@@ -268,6 +271,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/accounting/adjusted-trial-balance" className={subLinkSmClass()}>Adjusted Trial Balance</Link></li>
                         <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
                         <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
+                        <li><Link href="/accounting/daily-income-statement" className={subLinkSmClass()}>Daily Income Statement</Link></li>
                         <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
                         <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
                         <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>

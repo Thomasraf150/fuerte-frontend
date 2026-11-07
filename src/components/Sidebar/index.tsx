@@ -405,7 +405,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Transactions --> */}
               <SidebarLinkGroup
                   activeCondition={
-                    pathname === "/loans" || pathname.includes("loans") || pathname.startsWith("/atm-collections") || pathname === "/opex"
+                    pathname === "/loans" || pathname.includes("loans") || pathname.startsWith("/atm-collections") || pathname === "/opex" || pathname === "/collection-efficiency" || pathname === "/release-status"
                   }
                 >
                 {(handleClick, open) => {
@@ -511,6 +511,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               OPEX Fund
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/collection-efficiency"
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
+                            >
+                              Collection Efficiency
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/release-status"
+                              className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
+                            >
+                              Release Status
                             </Link>
                           </li>
                           <li>
