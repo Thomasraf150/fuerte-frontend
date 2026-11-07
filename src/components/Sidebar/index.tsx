@@ -32,6 +32,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   // UI only. Safe during render: persist rehydrates synchronously, and DefaultLayout renders this after mount.
   const isCallCenter = useStore(useAuthStore, (s) => s.user?.role?.code === "CALLCTR");
+  // Release Status is Treasury's screen (ReleaseStandingService::VIEW_ROLES): not Collection or Processing staff.
+  const roleCode = useStore(useAuthStore, (s) => s.user?.role?.code ?? "");
+  const seesReleaseStatus = roleCode !== "COL" && roleCode !== "PROC";
 
   // close on click outside
   useEffect(() => {
@@ -472,11 +475,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       </Link>
                       <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                         <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
+                          {seesReleaseStatus && (
                           <li>
                             <Link href="/release-status" className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
                               Release Status
                             </Link>
                           </li>
+                          )}
                           <li>
                             <Link href="/atm-collections/refunds" className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
                               Refunds &amp; Funds
@@ -492,7 +497,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     </React.Fragment>
                 )}
               </SidebarLinkGroup>
-              {/* Reports */}
+              {/* Collection reports */}
               <SidebarLinkGroup activeCondition={pathname === "/collection-efficiency" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
                 {(handleClick, open) => (
                     <React.Fragment>
@@ -503,7 +508,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         onClick={(e) => { e.preventDefault(); sidebarExpanded ? handleClick() : setSidebarExpanded(true); }}
                       >
                         <TrendingUp size={16} aria-hidden="true" />
-                        Reports
+                        Collection Reports
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && "rotate-180"}`}
                           width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"

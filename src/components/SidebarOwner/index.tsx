@@ -140,7 +140,6 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/" className={subLinkClass()}>Summary</Link></li>
                         <li><Link href="/accounting-dashboard" className={subLinkClass()}>Accounting Dashboard</Link></li>
                         <li><Link href="/notes-receivable" className={subLinkClass()}>Notes Receivable</Link></li>
-                        <li><Link href="/commission-schedule" className={subLinkClass()}>Commission Schedule</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>
@@ -274,7 +273,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </SidebarLinkGroup>
 
               {/* Financial reports: statements, then schedules */}
-              <SidebarLinkGroup activeCondition={pathname === "/accounting/balance-sheet" || pathname === "/accounting/income-statement" || pathname === "/accounting/daily-income-statement" || pathname === "/accounting/cash-flow" || pathname === "/accounting/cash-position" || pathname === "/accounting/aging" || pathname === "/accounting/refund-schedule" || pathname === "/accounting/udi-schedule" || pathname === "/accounting/commission-schedule"}>
+              <SidebarLinkGroup activeCondition={pathname === "/accounting/balance-sheet" || pathname === "/accounting/income-statement" || pathname === "/accounting/daily-income-statement" || pathname === "/accounting/cash-flow" || pathname === "/accounting/cash-position" || pathname === "/accounting/aging" || pathname === "/accounting/refund-schedule" || pathname === "/accounting/udi-schedule" || pathname === "/commission-schedule"}>
                 {(handleClick, open) => (
                   <React.Fragment>
                     <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
@@ -284,17 +283,25 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     </Link>
                     <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                       <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                        <li role="presentation" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Statements</li>
-                        <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
-                        <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
-                        <li><Link href="/accounting/daily-income-statement" className={subLinkSmClass()}>Daily Income Statement</Link></li>
-                        <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
-                        <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
-                        <li role="presentation" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Schedules</li>
-                        <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>
-                        <li><Link href="/accounting/refund-schedule" className={subLinkSmClass()}>Refund Schedule</Link></li>
-                        <li><Link href="/accounting/udi-schedule" className={subLinkSmClass()}>UDI Schedule</Link></li>
-                        <li><Link href="/accounting/commission-schedule" className={subLinkSmClass()}>Commission Schedule</Link></li>
+                        <li>
+                          <p id="nav-sub-statements" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Statements</p>
+                          <ul aria-labelledby="nav-sub-statements" className="flex flex-col gap-0.5">
+                          <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
+                          <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
+                          <li><Link href="/accounting/daily-income-statement" className={subLinkSmClass()}>Daily Income Statement</Link></li>
+                          <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
+                          <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
+                          </ul>
+                        </li>
+                        <li>
+                          <p id="nav-sub-schedules" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Schedules</p>
+                          <ul aria-labelledby="nav-sub-schedules" className="flex flex-col gap-0.5">
+                          <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>
+                          <li><Link href="/accounting/refund-schedule" className={subLinkSmClass()}>Refund Schedule</Link></li>
+                          <li><Link href="/accounting/udi-schedule" className={subLinkSmClass()}>UDI Schedule</Link></li>
+                          <li><Link href="/commission-schedule" className={subLinkSmClass()}>Commission Schedule</Link></li>
+                          </ul>
+                        </li>
                       </ul>
                     </div>
                   </React.Fragment>

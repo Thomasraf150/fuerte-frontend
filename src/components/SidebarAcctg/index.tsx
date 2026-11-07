@@ -192,42 +192,27 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
 
-              {/* Collections: ATM collection lists and how well they collect */}
-              <SidebarLinkGroup activeCondition={pathname === "/collection-efficiency" || (pathname.startsWith("/atm-collections") && !pathname.startsWith("/atm-collections/refunds"))}>
-                {(handleClick, open) => (
-                    <React.Fragment>
-                      <Link
-                        href="#"
-                        aria-expanded={open}
-                        className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_GROUP_HAS}`}
-                        onClick={(e) => { e.preventDefault(); sidebarExpanded ? handleClick() : setSidebarExpanded(true); }}
-                      >
-                        <TrendingUp size={16} aria-hidden="true" />
-                        Collections
-                        <svg
-                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && "rotate-180"}`}
-                          width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-                        >
-                          <path fillRule="evenodd" clipRule="evenodd" d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z" fill="" />
-                        </svg>
-                      </Link>
-                      <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                        <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                          <li>
-                            <Link href="/atm-collections" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              ATM Collections
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/collection-efficiency" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Collection Efficiency
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-                    </React.Fragment>
-                )}
-              </SidebarLinkGroup>
+              {/* Collections: Accounting has no Payment Posting here, so these two stand alone (no one-item group). */}
+              <li>
+                <Link
+                  href="/atm-collections"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
+                >
+                  <svg className="fill-current" width="18" height="18" viewBox="2 3 17 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                  </svg>
+                  ATM Collections
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/collection-efficiency"
+                  className={`group relative flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-white/5 dark:hover:bg-white/5 ${NAV_CURRENT}`}
+                >
+                  <TrendingUp size={16} aria-hidden="true" />
+                  Collection Efficiency
+                </Link>
+              </li>
 
               {/* Treasury: what goes out, and whether it may */}
               <SidebarLinkGroup activeCondition={pathname === "/release-status" || pathname === "/opex" || pathname.startsWith("/atm-collections/refunds")}>
@@ -318,47 +303,55 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       </Link>
                       <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
                         <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                          <li role="presentation" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Statements</li>
                           <li>
-                            <Link href="/accounting/balance-sheet" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Balance Sheet
-                            </Link>
+                            <p id="nav-sub-statements" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Statements</p>
+                            <ul aria-labelledby="nav-sub-statements" className="flex flex-col gap-0.5">
+                            <li>
+                              <Link href="/accounting/balance-sheet" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Balance Sheet
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/accounting/daily-income-statement" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Daily Income Statement
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/accounting/cash-flow" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Cash Flow
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/accounting/cash-position" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Cash Position
+                              </Link>
+                            </li>
+                            </ul>
                           </li>
                           <li>
-                            <Link href="/accounting/daily-income-statement" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Daily Income Statement
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/cash-flow" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Cash Flow
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/cash-position" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Cash Position
-                            </Link>
-                          </li>
-                          <li role="presentation" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Schedules</li>
-                          <li>
-                            <Link href="/accounting/aging" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Aging
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/refund-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Refund Schedule
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/udi-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              UDI Schedule
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/accounting/commission-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
-                              Commission Schedule
-                            </Link>
+                            <p id="nav-sub-schedules" className="px-4 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bodydark2/70">Schedules</p>
+                            <ul aria-labelledby="nav-sub-schedules" className="flex flex-col gap-0.5">
+                            <li>
+                              <Link href="/accounting/aging" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Aging
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/accounting/refund-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Refund Schedule
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/accounting/udi-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                UDI Schedule
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/accounting/commission-schedule" className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}>
+                                Commission Schedule
+                              </Link>
+                            </li>
+                            </ul>
                           </li>
                         </ul>
                       </div>
