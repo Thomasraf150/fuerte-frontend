@@ -72,20 +72,21 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
     // Form stays open on errors for user to fix and retry
   };
 
-  const handleComputeUdi = () => {
-    const interest_rate = String(watch('interest_rate')).replace(/,/g, '');
-    const terms = String(watch('terms')).replace(/,/g, '');
-    const processing = String(watch('processing')).replace(/,/g, '');
-    const agent_fee = String(watch('agent_fee')).replace(/,/g, '');
-    const collection = String(watch('collection')).replace(/,/g, '');
-    const udi = (((Number(interest_rate) / 100) * Number(terms)) - ((Number(processing) / 100) + (Number(collection) / 100) + (Number(agent_fee) / 100))) * 100;
-
-    if (!isNaN(udi)) {
-      setValue('udi', parseFloat(udi.toFixed(2)));
-    } else {
-      setValue('udi', ''); // or handle the invalid number case as needed
-    }
-  }
+  // Loans deduct only UDI (%); Interest Rate is never read by the computation. A product saved with
+  // Interest 10% and UDI 0% released loans with no UDI taken (YEB, 2026-11-09). So the form shows the
+  // UDI the interest implies -- interest x terms less processing, collection and agent fee, the
+  // formula of the old "Compute UDI" button -- and warns when UDI differs, without forcing it.
+  const pct = (name: keyof DataFormLoanProducts): number => {
+    const raw = String(watch(name) ?? '').replace(/,/g, '').trim();
+    return raw === '' ? 0 : Number(raw);
+  };
+  const impliedUdi = (() => {
+    const v = pct('interest_rate') * pct('terms') - (pct('processing') + pct('collection') + pct('agent_fee'));
+    return Number.isFinite(v) && pct('interest_rate') > 0 && v > 0 ? Number(v.toFixed(2)) : null;
+  })();
+  const udiMismatch = impliedUdi !== null && Number.isFinite(pct('udi')) && Math.abs(pct('udi') - impliedUdi) >= 0.005;
+  // Addon UDI Rate applies only to Addon Terms (addon amount = addon terms x monthly amort).
+  const addonRateIgnored = pct('addon_udi_rate') > 0 && pct('addon_terms') === 0;
 
   // Fill the form when it opens or another product is picked -- never when the loan codes
   // arrive, which wiped (Create) or reverted (Edit) what was typed while they loaded (2026-10-13).
@@ -250,6 +251,21 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             error={errors.udi && "This field is required"}
             required={true}
           />
+          {udiMismatch && (
+            <div id="udi-implied" role="status" className="mt-1.5 flex items-start gap-1.5 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-2 text-sm text-black dark:text-white">
+              <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-warning" />
+              <div>
+                <p>
+                  Interest {pct('interest_rate')}% &times; {pct('terms')} mo. less fees {pct('processing') + pct('collection') + pct('agent_fee')}% is{' '}
+                  <strong>{impliedUdi}%</strong>. Loans deduct only UDI (%), now {pct('udi')}%.
+                </p>
+                <button type="button" className="mt-1 font-medium text-primary underline underline-offset-2 hover:no-underline"
+                  onClick={() => setValue('udi', impliedUdi as number, { shouldDirty: true, shouldValidate: true })}>
+                  Use {impliedUdi}%
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <FormInput
@@ -272,6 +288,12 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             error={errors.addon_udi_rate && "This field is required"}
             required={true}
           />
+          {addonRateIgnored && (
+            <p id="addon-udi-ignored" role="status" className="mt-1.5 flex items-start gap-1.5 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-2 text-sm text-black dark:text-white">
+              <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-warning" />
+              <span>Addon UDI Rate counts only with Addon Terms. With 0 Addon Terms nothing is deducted. The loan&apos;s own UDI goes in UDI (%).</span>
+            </p>
+          )}
         </div>
         <div>
           <FormInput
