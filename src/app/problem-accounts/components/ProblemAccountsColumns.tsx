@@ -36,7 +36,12 @@ export const METRIC_HELP = {
   sp: "Cut-offs that were paid, but less than the scheduled amount.",
   shortfall: "Everything still owed on this loan: Uncollected (UA) plus Shorts (SP).",
   oldest: "Due date of the earliest cut-off that is still unpaid or short.",
+  penalty:
+    "4% of each unpaid amortization for every cut-off it has stayed unpaid, less penalty already collected. Owed on top of the shortfall.",
 } as const;
+
+/** The penalty line under a shortfall, or nothing when none is owed (or it could not be worked out). */
+export const penaltyOf = (row: ProblemAccountRow): number => (row.penalty_owed === null ? 0 : num(row.penalty_owed));
 
 /**
  * Viewport widths (px) below which a column drops out.
@@ -264,8 +269,15 @@ const baseColumns: TableColumn<ProblemAccountRow>[] = [
     sortable: false,
     right: true,
     cell: (row) => (
-      <span className="tabular-nums" style={{ color: RED, fontWeight: 800 }} title={METRIC_HELP.shortfall}>
-        {fmt(row.shortfall)}
+      <span className="flex flex-col items-end py-1">
+        <span className="tabular-nums" style={{ color: RED, fontWeight: 800 }} title={METRIC_HELP.shortfall}>
+          {fmt(row.shortfall)}
+        </span>
+        {penaltyOf(row) > 0 && (
+          <span className="whitespace-nowrap text-xs tabular-nums text-body dark:text-bodydark" title={METRIC_HELP.penalty}>
+            + {fmt(row.penalty_owed as string)} penalty
+          </span>
+        )}
       </span>
     ),
   },

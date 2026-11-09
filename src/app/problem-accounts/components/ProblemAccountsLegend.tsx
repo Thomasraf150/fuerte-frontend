@@ -42,6 +42,12 @@ const ProblemAccountsLegend: React.FC = () => (
         </dt>{" "}
         <dd className="inline">{METRIC_HELP.sp}</dd>
       </div>
+      <div>
+        <dt className="inline font-semibold text-black dark:text-white">
+          Penalty:
+        </dt>{" "}
+        <dd className="inline">{METRIC_HELP.penalty}</dd>
+      </div>
     </dl>
   </div>
 );
