@@ -23,6 +23,20 @@ interface OptionLoanCode {
   hidden?: boolean;
 }
 
+/**
+ * A non-blocking warning under a field. Only the fixed headline is a live region, so typing in the
+ * fields the details quote does not make screen readers repeat it on every keystroke.
+ */
+const Warn: React.FC<{ id: string; headline: string; children?: React.ReactNode }> = ({ id, headline, children }) => (
+  <div id={id} className="mt-1.5 flex items-start gap-1.5 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-2 text-sm text-black dark:text-white">
+    <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-warning" />
+    <div>
+      <p role="status">{headline}</p>
+      {children}
+    </div>
+  </div>
+);
+
 const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProducts, actionLbl, singleData }) => {
   const { register, handleSubmit, setValue, reset, watch, control, formState: { errors } } = useForm<DataFormLoanProducts>();
   const { onSubmitLoanProduct, loanProductLoading } = useLoanProducts();
@@ -75,18 +89,18 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
   // Loans deduct only UDI (%); Interest Rate is never read by the computation. A product saved with
   // Interest 10% and UDI 0% released loans with no UDI taken (YEB, 2026-11-09). So the form shows the
   // UDI the interest implies -- interest x terms less processing, collection and agent fee, the
-  // formula of the old "Compute UDI" button -- and warns when UDI differs, without forcing it.
-  const pct = (name: keyof DataFormLoanProducts): number => {
-    const raw = String(watch(name) ?? '').replace(/,/g, '').trim();
-    return raw === '' ? 0 : Number(raw);
-  };
-  const impliedUdi = (() => {
-    const v = pct('interest_rate') * pct('terms') - (pct('processing') + pct('collection') + pct('agent_fee'));
-    return Number.isFinite(v) && pct('interest_rate') > 0 && v > 0 ? Number(v.toFixed(2)) : null;
-  })();
-  const udiMismatch = impliedUdi !== null && Number.isFinite(pct('udi')) && Math.abs(pct('udi') - impliedUdi) >= 0.005;
+  // formula of the old "Compute UDI" button -- and warns when UDI differs. Only a UDI left at 0 is
+  // offered the one-click fill: a product whose Interest Rate means something else keeps its own UDI.
+  const [interestRate, terms, processing, collection, agentFee, udi, addonTerms, addonUdiRate] =
+    watch(['interest_rate', 'terms', 'processing', 'collection', 'agent_fee', 'udi', 'addon_terms', 'addon_udi_rate'])
+      .map((v) => { const raw = String(v ?? '').replace(/,/g, '').trim(); return raw === '' ? 0 : Number(raw); });
+  const round2 = (n: number) => Number(n.toFixed(2));
+  const fees = round2(processing + collection + agentFee);
+  const implied = round2(interestRate * terms - fees);
+  const impliedUdi = Number.isFinite(implied) && interestRate > 0 && implied > 0 ? implied : null;
+  const udiMismatch = impliedUdi !== null && Number.isFinite(udi) && Math.abs(udi - impliedUdi) >= 0.005;
   // Addon UDI Rate applies only to Addon Terms (addon amount = addon terms x monthly amort).
-  const addonRateIgnored = pct('addon_udi_rate') > 0 && pct('addon_terms') === 0;
+  const addonRateIgnored = addonUdiRate > 0 && addonTerms === 0;
 
   // Fill the form when it opens or another product is picked -- never when the loan codes
   // arrive, which wiped (Create) or reverted (Edit) what was typed while they loaded (2026-10-13).
@@ -252,19 +266,15 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             required={true}
           />
           {udiMismatch && (
-            <div id="udi-implied" role="status" className="mt-1.5 flex items-start gap-1.5 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-2 text-sm text-black dark:text-white">
-              <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-warning" />
-              <div>
-                <p>
-                  Interest {pct('interest_rate')}% &times; {pct('terms')} mo. less fees {pct('processing') + pct('collection') + pct('agent_fee')}% is{' '}
-                  <strong>{impliedUdi}%</strong>. Loans deduct only UDI (%), now {pct('udi')}%.
-                </p>
+            <Warn id="udi-implied" headline="UDI (%) differs from what the interest gives. Loans deduct only UDI (%).">
+              <p>Interest {round2(interestRate)}% &times; {round2(terms)} mo. less fees {fees}% is <strong>{impliedUdi}%</strong>; UDI is {round2(udi)}%.</p>
+              {udi === 0 && (
                 <button type="button" className="mt-1 font-medium text-primary underline underline-offset-2 hover:no-underline"
                   onClick={() => setValue('udi', impliedUdi as number, { shouldDirty: true, shouldValidate: true })}>
                   Use {impliedUdi}%
                 </button>
-              </div>
-            </div>
+              )}
+            </Warn>
           )}
         </div>
         <div>
@@ -289,10 +299,7 @@ const FormAddLoanProduct: React.FC<ParentFormBr> = ({ setShowForm, fetchLoanProd
             required={true}
           />
           {addonRateIgnored && (
-            <p id="addon-udi-ignored" role="status" className="mt-1.5 flex items-start gap-1.5 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-2 text-sm text-black dark:text-white">
-              <AlertCircle size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-warning" />
-              <span>Addon UDI Rate counts only with Addon Terms. With 0 Addon Terms nothing is deducted. The loan&apos;s own UDI goes in UDI (%).</span>
-            </p>
+            <Warn id="addon-udi-ignored" headline="Addon UDI Rate counts only with Addon Terms. With 0 Addon Terms nothing is deducted. The loan's own UDI goes in UDI (%)." />
           )}
         </div>
         <div>
