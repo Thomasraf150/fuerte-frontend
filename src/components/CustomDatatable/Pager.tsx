@@ -21,6 +21,7 @@ const IDLE = 'border-stroke bg-white text-black hover:border-primary hover:text-
 const CURRENT = 'border-primary bg-primary font-semibold text-white';
 
 interface NavProps {
+  label: string;
   current: number;
   total: number;
   hasPrevious: boolean;
@@ -29,10 +30,10 @@ interface NavProps {
 }
 
 /** First, Previous, the page window (from `sm`; "N of M" below it), Next and Last. */
-const PageNav: React.FC<NavProps> = ({ current, total, hasPrevious, hasNext, onPageChange }) => {
+const PageNav: React.FC<NavProps> = ({ label, current, total, hasPrevious, hasNext, onPageChange }) => {
   const go = (page: number) => () => onPageChange(page);
   return (
-    <nav aria-label="Pages" className="flex w-full flex-wrap items-center justify-between gap-1 sm:w-auto sm:justify-start sm:gap-1.5">
+    <nav aria-label={label} className="flex w-full flex-wrap items-center justify-between gap-1 sm:w-auto sm:justify-start sm:gap-1.5">
       <button type="button" className={`${TARGET} ${IDLE}`} onClick={go(1)} disabled={!hasPrevious} aria-label="First page"><ChevronsLeft size={18} aria-hidden="true" /></button>
       <button type="button" className={`${TARGET} ${IDLE}`} onClick={go(current - 1)} disabled={!hasPrevious} aria-label="Previous page"><ChevronLeft size={18} aria-hidden="true" /></button>
       {pageWindow(current, total).map((slot, i) => slot === 'gap'
@@ -56,7 +57,8 @@ const PageNav: React.FC<NavProps> = ({ current, total, hasPrevious, hasNext, onP
   );
 };
 
-const Pager: React.FC<{ pagination: ServerSidePaginationProps }> = ({ pagination }) => {
+/** `label` names the pager's navigation: give one when a page has two pagers ("Pages" otherwise). */
+const Pager: React.FC<{ pagination: ServerSidePaginationProps; label?: string }> = ({ pagination, label = 'Pages' }) => {
   const { totalRecords, currentPage, pageSize, totalPages, hasNextPage, hasPreviousPage, onPageChange, onPageSizeChange, pageSizeOptions = [10, 20, 50, 100] } = pagination;
   const singular = pagination.recordType || 'record';
   const plural = pagination.recordTypePlural || 'records';
@@ -82,7 +84,7 @@ const Pager: React.FC<{ pagination: ServerSidePaginationProps }> = ({ pagination
             {pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
           </select>
         </label>
-        {totalPages > 1 && <PageNav current={currentPage} total={totalPages} hasPrevious={hasPreviousPage} hasNext={hasNextPage} onPageChange={onPageChange} />}
+        {totalPages > 1 && <PageNav label={label} current={currentPage} total={totalPages} hasPrevious={hasPreviousPage} hasNext={hasNextPage} onPageChange={onPageChange} />}
       </div>
     </div>
   );
