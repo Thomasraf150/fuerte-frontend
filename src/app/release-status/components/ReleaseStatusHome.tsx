@@ -184,9 +184,45 @@ const Count: React.FC<{ n: number; label: string; tone: 'text-success' | 'text-d
   <strong className={n > 0 ? tone : 'font-semibold text-body'}>{n} {label}</strong>
 );
 
+type Loan = ReleaseStatus['pending'][number];
+
+/** The held loan's reason in a few words; the release's own sentence stays one click away. */
+function shortReason(p: Loan): string {
+  switch (p.hold) {
+    case 'borrower': return 'Borrower overdue';
+    case 'employer': return `${p.company_name ?? 'Employer'} in the red`;
+    case 'branch': return `${p.branch_sub_name} is in the red`;
+    case 'eligibility': return 'Not cleared to borrow';
+    default: return 'Held';
+  }
+}
+
+/** May go out, or On hold with the short reason and a "Why?" that opens the full sentence. */
+const Verdict: React.FC<{ p: Loan }> = ({ p }) => p.may_release
+  ? <span className="inline-flex items-center gap-1.5 font-semibold text-success"><CheckCircle size={15} aria-hidden="true" strokeWidth={2.4} />May go out</span>
+  : (
+    <div>
+      <span className="inline-flex items-center gap-1.5 font-semibold text-danger"><PauseCircle size={15} aria-hidden="true" strokeWidth={2.4} />On hold</span>
+      <span className="block text-sm text-black dark:text-white">{shortReason(p)}</span>
+      {p.reason && (
+        <details className="mt-0.5 max-w-xs text-xs text-body">
+          <summary className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline">Why?<span className="sr-only"> {p.borrower_name} is on hold</span></summary>
+          <p className="mt-1">{p.reason}</p>
+        </details>
+      )}
+    </div>
+  );
+
+const EmployerOf: React.FC<{ p: Loan }> = ({ p }) => p.company_name
+  ? <><span className="block">{p.company_name}</span>{p.company_status && <StandingPill status={p.company_status} companyMeaning={p.company_status === 'red' ? 'below the line' : p.company_status === 'green' ? 'above the line' : undefined} />}</>
+  : <span className="italic text-body">No employer on file</span>;
+
 const Pending: React.FC<{ r: ReleaseStatus; held: number }> = ({ r, held }) => {
   const [show, setShow] = useState<Show>('all');
-  const rows = useMemo(() => show === 'all' ? r.pending : r.pending.filter((p) => (show === 'held') !== p.may_release), [r.pending, show]);
+  // Held loans first (each group keeps the server's branch order): they are the ones to act on.
+  const rows = useMemo(() => (show === 'all' ? r.pending : r.pending.filter((p) => (show === 'held') !== p.may_release))
+    .slice().sort((a, b) => Number(a.may_release) - Number(b.may_release)), [r.pending, show]);
+  const empty = r.pending.length === 0 ? 'No loan is waiting for release.' : show === 'held' ? 'No loan is on hold.' : 'No loan may go out yet.';
   const { slice, pager, reset } = usePage(rows, ['loan', 'loans'], 'waiting');
   return (
     <section id="waiting" aria-labelledby="rs-pending" className="scroll-mt-24 rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark">
@@ -206,7 +242,22 @@ const Pending: React.FC<{ r: ReleaseStatus; held: number }> = ({ r, held }) => {
         </div>
       )}
       {r.pending_truncated && <p role="status" className="mt-1 text-sm font-semibold text-[#8A6312]">More loans are waiting than this list shows (the first {r.pending.length}, by branch). Release some, or open a branch&apos;s loans list.</p>}
-      <div className="mt-3 overflow-x-auto">
+      {/* Phones: one card a loan, the verdict first. The table needs 900px. */}
+      <ul role="list" className="mt-3 space-y-3 md:hidden" aria-label="Loans waiting for release">
+        {slice.map((p) => (
+          <li key={p.loan_id} className="rounded-lg border border-stroke p-3 dark:border-strokedark">
+            <Verdict p={p} />
+            <p className="mt-2 font-semibold text-black dark:text-white">{p.borrower_name}</p>
+            <p className="text-xs text-body">{p.loan_ref ?? `Loan #${p.loan_id}`} · {p.branch_sub_name} · <span className="atm-num">₱{amt(p.loan_proceeds)}</span></p>
+            <div className="mt-2 flex flex-wrap items-start gap-x-4 gap-y-2 text-sm">
+              <div><span className="block text-[11px] font-bold uppercase tracking-wide text-body">Borrower</span><StandingPill status={p.person_status} /></div>
+              <div><span className="block text-[11px] font-bold uppercase tracking-wide text-body">Employer</span><EmployerOf p={p} /></div>
+            </div>
+          </li>
+        ))}
+        {rows.length === 0 && <li className="py-6 text-center text-body">{empty}</li>}
+      </ul>
+      <div className="mt-3 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[900px] text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-body">
             <tr><th className="py-2 pr-4">Borrower</th><th className="py-2 pr-4">Branch</th><th className="py-2 pr-4 text-right">Proceeds</th><th className="py-2 pr-4">Borrower standing</th><th className="py-2 pr-4">Employer</th><th className="py-2">Release</th></tr>
@@ -218,15 +269,11 @@ const Pending: React.FC<{ r: ReleaseStatus; held: number }> = ({ r, held }) => {
                 <td className="py-2 pr-4">{p.branch_sub_name}</td>
                 <td className="atm-num py-2 pr-4 text-right">₱{amt(p.loan_proceeds)}</td>
                 <td className="py-2 pr-4"><StandingPill status={p.person_status} /></td>
-                <td className="py-2 pr-4">{p.company_name ? <><span className="block">{p.company_name}</span>{p.company_status && <StandingPill status={p.company_status} companyMeaning={p.company_status === 'red' ? 'below the line' : p.company_status === 'green' ? 'above the line' : undefined} />}</> : <span className="italic text-body">None on file</span>}</td>
-                <td className="py-2">
-                  {p.may_release
-                    ? <span className="inline-flex items-center gap-1.5 font-semibold text-success"><CheckCircle size={15} aria-hidden="true" strokeWidth={2.4} />May go out</span>
-                    : <><span className="inline-flex items-center gap-1.5 font-semibold text-danger"><PauseCircle size={15} aria-hidden="true" strokeWidth={2.4} />On hold</span><span className="block max-w-xs text-xs text-body">{p.reason}</span></>}
-                </td>
+                <td className="py-2 pr-4"><EmployerOf p={p} /></td>
+                <td className="py-2"><Verdict p={p} /></td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-body">{r.pending.length === 0 ? 'No loan is waiting for release.' : show === 'held' ? 'No loan is on hold.' : 'No loan may go out yet.'}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-body">{empty}</td></tr>}
           </tbody>
         </table>
       </div>
@@ -243,6 +290,7 @@ const Companies: React.FC<{ r: ReleaseStatus; reds: number }> = ({ r, reds }) =>
     return r.companies.filter((c) => (!redOnly || c.status === 'red') && (!q || c.company_name.toLowerCase().includes(q)));
   }, [r.companies, search, redOnly]);
   const { slice, pager, reset } = usePage(rows, ['employer', 'employers'], 'employers');
+  const empty = redOnly ? 'No employer is in the red.' : 'No employer matches.';
   return (
     <section id="employers" aria-labelledby="rs-companies" className="scroll-mt-24 rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -260,7 +308,20 @@ const Companies: React.FC<{ r: ReleaseStatus; reds: number }> = ({ r, reds }) =>
           </label>
         </div>}
       </div>
-      {r.companies.length > 0 && <div className="mt-3 overflow-x-auto">
+      {r.companies.length > 0 && <ul role="list" className="mt-3 space-y-3 md:hidden" aria-label="Employers">
+        {slice.map((c) => (
+          <li key={c.company_id} className="rounded-lg border border-stroke p-3 dark:border-strokedark">
+            <div className="flex items-start justify-between gap-3">
+              <span className="font-semibold text-black dark:text-white">{c.company_name}</span>
+              <span className={`atm-num font-semibold ${c.status === 'red' ? 'text-danger' : 'text-success'}`}>{c.percent}%</span>
+            </div>
+            <p className="text-xs text-body">{c.borrowers} borrower{c.borrowers === 1 ? '' : 's'} · paid <span className="atm-num">{amt(c.paid)}</span> of <span className="atm-num">{amt(c.due)}</span></p>
+            <div className="mt-2"><StandingPill status={c.status} companyMeaning={c.status === 'red' ? 'only on-time payers released' : c.status === 'green' ? 'releases allowed' : undefined} /></div>
+          </li>
+        ))}
+        {rows.length === 0 && <li className="py-6 text-center text-body">{empty}</li>}
+      </ul>}
+      {r.companies.length > 0 && <div className="mt-3 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[720px] text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-body">
             <tr><th className="py-2 pr-4">Employer</th><th className="py-2 pr-4 text-right">Due</th><th className="py-2 pr-4 text-right">Paid</th><th className="py-2 pr-4 text-right">Collected</th><th className="py-2">Status</th></tr>
@@ -275,7 +336,7 @@ const Companies: React.FC<{ r: ReleaseStatus; reds: number }> = ({ r, reds }) =>
                 <td className="py-2"><StandingPill status={c.status} companyMeaning={c.status === 'red' ? 'only on-time payers released' : c.status === 'green' ? 'releases allowed' : undefined} /></td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-body">{redOnly ? 'No employer is in the red.' : 'No employer matches.'}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-body">{empty}</td></tr>}
           </tbody>
         </table>
       </div>}

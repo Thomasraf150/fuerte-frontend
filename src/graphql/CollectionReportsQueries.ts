@@ -18,7 +18,7 @@ export const RELEASE_STATUS = `
     releaseStatus {
       cutoff_label threshold
       pending_truncated
-      pending { loan_id loan_ref borrower_name branch_sub_name loan_proceeds person_status company_name company_status may_release reason }
+      pending { loan_id loan_ref borrower_name branch_sub_name loan_proceeds person_status company_name company_status may_release reason hold }
       companies { company_id company_name cutoff_label threshold due paid percent status borrowers }
     }
   }
@@ -56,6 +56,8 @@ export type Standing = 'red' | 'green' | 'new' | 'none';
 export interface PendingRelease {
   loan_id: string; loan_ref: string | null; borrower_name: string; branch_sub_name: string; loan_proceeds: string;
   person_status: Standing; company_name: string | null; company_status: Standing | null; may_release: boolean; reason: string | null;
+  /** Which check holds it, for the short reason: null when it may go out. */
+  hold: 'eligibility' | 'branch' | 'borrower' | 'employer' | null;
 }
 export interface CompanyStanding {
   company_id: string; company_name: string; cutoff_label: string; threshold: string; due: string; paid: string;
