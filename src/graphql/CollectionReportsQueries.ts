@@ -13,13 +13,29 @@ export const COLLECTION_EFFICIENCY = `
   }
 `;
 
+const PENDING = `loan_id loan_ref borrower_id branch_sub_id borrower_name branch_sub_name loan_proceeds person_status
+  company_id company_name company_status overdue_loan_id may_release reason hold`;
+const COMPANY = `company_id company_name cutoff_label threshold due paid percent status borrowers`;
+
 export const RELEASE_STATUS = `
   query ReleaseStatus {
     releaseStatus {
       cutoff_label threshold
       pending_truncated
-      pending { loan_id loan_ref borrower_name branch_sub_name loan_proceeds person_status company_name company_status may_release reason hold }
-      companies { company_id company_name cutoff_label threshold due paid percent status borrowers }
+      pending { ${PENDING} }
+      companies { ${COMPANY} }
+    }
+  }
+`;
+
+export const EMPLOYER_STANDING = `
+  query EmployerStanding($company_id: ID!) {
+    employerStanding(company_id: $company_id) {
+      company { ${COMPANY} }
+      amount_to_green
+      borrowers { borrower_id borrower_name loan_id branch_sub_name due paid short }
+      borrowers_elsewhere
+      pending { ${PENDING} }
     }
   }
 `;
@@ -58,10 +74,17 @@ export interface PendingRelease {
   person_status: Standing; company_name: string | null; company_status: Standing | null; may_release: boolean; reason: string | null;
   /** Which check holds it, for the short reason: null when it may go out. */
   hold: 'eligibility' | 'branch' | 'borrower' | 'employer' | null;
+  borrower_id: string; branch_sub_id: string; company_id: string | null;
+  /** For a borrower in the red: the loan whose overdue amortization a payment goes to. */
+  overdue_loan_id: string | null;
 }
 export interface CompanyStanding {
   company_id: string; company_name: string; cutoff_label: string; threshold: string; due: string; paid: string;
   percent: string; status: Standing; borrowers: number;
+}
+export interface EmployerBorrower { borrower_id: string; borrower_name: string; loan_id: string; branch_sub_name: string; due: string; paid: string; short: string }
+export interface EmployerStanding {
+  company: CompanyStanding; amount_to_green: string; borrowers: EmployerBorrower[]; borrowers_elsewhere: number; pending: PendingRelease[];
 }
 export interface ReleaseStatus { cutoff_label: string; threshold: string; pending: PendingRelease[]; pending_truncated: boolean; companies: CompanyStanding[] }
 
