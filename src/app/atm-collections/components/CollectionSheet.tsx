@@ -11,6 +11,7 @@ import PaperSheet from './PaperSheet';
 import SwipePanel from './SwipePanel';
 import { RateMeter, RateStatus } from './RateBits';
 import '../atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 interface PostResult { status: boolean; message: string; posted: number; failed: { borrower: string; message: string }[] }
 
@@ -23,7 +24,7 @@ const CollectionSheet: React.FC<{ id: string }> = ({ id }) => {
   useDocumentTitle(sheet ? `Batch ${sheet.batch.batch_no}` : null, sheet?.batch.branch_sub_name);
 
   if (error) return <p role="alert" className="text-danger">{error}</p>;
-  if (!sheet) return <p className="text-body">{loading ? 'Loading the collection list…' : 'Collection list not found.'}</p>;
+  if (!sheet) return loading ? <SkeletonBlock rows={8} label="Loading the collection list…" /> : <p className="text-body">Collection list not found.</p>;
 
   const { batch, rate } = sheet;
   const draft = batch.status === 'draft';

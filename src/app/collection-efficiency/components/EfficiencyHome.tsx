@@ -6,6 +6,7 @@ import { COLLECTION_EFFICIENCY, type CollectionEfficiency, type EfficiencyFigure
 import { amt, useGql } from '@/app/atm-collections/lib';
 import { RateMeter } from '@/app/atm-collections/components/RateBits';
 import '@/app/atm-collections/atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 /** "YYYY-MM" of the month before today's (Manila), the default: the last month that has ended. */
 function lastMonth(): string {
@@ -53,7 +54,7 @@ const EfficiencyHome: React.FC = () => {
       </nav>
 
       {error && <p role="alert" className="rounded-lg bg-danger/10 p-4 text-danger">{error}</p>}
-      {loading && !r && <p className="text-body">Working out {monthName(month)}…</p>}
+      {loading && !r && <div className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark"><SkeletonBlock rows={6} label={`Working out ${monthName(month)}…`} /></div>}
       {r && <Headline r={r} />}
       {r && <BranchTable r={r} />}
       {r && <CompanyTable r={r} />}

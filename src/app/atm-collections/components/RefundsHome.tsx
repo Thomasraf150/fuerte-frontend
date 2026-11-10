@@ -11,6 +11,7 @@ import {
 } from '@/graphql/AtmCollectionQueries';
 import { amt, gql, paperDate, positive, readAsDataUri, useGql } from '../lib';
 import '../atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 type View = 'refunds' | 'fp' | 'funds';
 const VIEWS: { id: View; label: string }[] = [
@@ -56,7 +57,7 @@ const RefundList: React.FC<{ fullyPaid: boolean }> = ({ fullyPaid }) => {
           ? 'These clients are fully paid (FP). Marketing may request the ATM pull-out and the client may pick up the ATM.'
           : 'Release each refund to the client and attach proof (a photo of the signed receipt, or a PDF). Releasing books Refund Payable against cash.'}
       </p>
-      {loading && !data && <p className="text-body">Loading…</p>}
+      {loading && !data && <SkeletonBlock rows={5} label="Loading…" />}
       {!fullyPaid && pending.length > 0 && (
         <p className="mb-3 text-sm font-semibold">{pending.length} to release · ₱<span className="atm-num">{amt(sumStrings(pending.map((p) => p.refund)))}</span></p>
       )}
@@ -159,7 +160,7 @@ const FundsRequest: React.FC = () => {
     <section className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark">
       <h2 className="font-display text-lg text-black dark:text-white">Release funds request</h2>
       <p className="mb-4 text-sm text-body">How much each branch needs: refunds still to hand out, plus loans waiting for release. A Red branch&apos;s loan releases are on hold and not counted.</p>
-      {loading && !data && <p className="text-body">Loading…</p>}
+      {loading && !data && <SkeletonBlock rows={5} label="Loading…" />}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-xs uppercase tracking-wide text-body">

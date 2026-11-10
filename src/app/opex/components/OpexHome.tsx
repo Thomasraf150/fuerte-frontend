@@ -12,6 +12,7 @@ import {
 } from '@/graphql/AtmCollectionQueries';
 import { amt, cleanAmount, gql, useGql } from '@/app/atm-collections/lib';
 import '@/app/atm-collections/atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 interface BranchSub { id: string; name: string }
 
@@ -73,7 +74,7 @@ const Ledger: React.FC = () => {
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <section className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark">
           <h2 className="font-display text-lg text-black dark:text-white">OPEX ledger</h2>
-          {loading && !data && <p className="text-body">Loading…</p>}
+          {loading && !data && <SkeletonBlock rows={5} label="Loading…" />}
           <div className="overflow-x-auto">
             <table className="atm-table mt-3 text-sm">
               <thead><tr><th className="text-left">Date</th><th className="text-left">Particulars</th><th>In</th><th>Out</th><th>Balance</th></tr></thead>
@@ -212,7 +213,7 @@ const Approvals: React.FC = () => {
     <section className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark">
       <h2 className="font-display text-lg text-black dark:text-white">Replenishments to approve</h2>
       <p className="mb-4 text-sm text-body">Only the owners can approve. An approved replenishment adds to the branch&apos;s OPEX fund.</p>
-      {loading && !data && <p className="text-body">Loading…</p>}
+      {loading && !data && <SkeletonBlock rows={5} label="Loading…" />}
       <ul className="flex flex-col gap-3">
         {rows.map((p) => (
           <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-stroke p-4 dark:border-strokedark">

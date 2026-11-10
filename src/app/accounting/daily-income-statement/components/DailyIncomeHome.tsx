@@ -6,6 +6,7 @@ import { DAILY_INCOME_STATEMENT, type DailyIncomeSection, type DailyIncomeSectio
 import { amt, useGql } from '@/app/atm-collections/lib';
 import BranchQueryMutations from '@/graphql/BranchQueryMutation';
 import '@/app/atm-collections/atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 const manilaToday = () => new Date(Date.now() + 8 * 3600_000).toISOString().slice(0, 10);
 const shift = (iso: string, days: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + days * 86400_000).toISOString().slice(0, 10);
@@ -56,7 +57,7 @@ const DailyIncomeHome: React.FC = () => {
       </nav>
 
       {error && <p role="alert" className="rounded-lg bg-danger/10 p-4 text-danger">{error}</p>}
-      {loading && !r && <p className="text-body">Reading the books…</p>}
+      {loading && !r && <div className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark"><SkeletonBlock rows={8} label="Reading the books…" /></div>}
       {r && (
         <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_24rem]">
           <Statement r={r} />

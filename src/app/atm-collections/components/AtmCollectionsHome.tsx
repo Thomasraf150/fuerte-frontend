@@ -12,6 +12,7 @@ import {
 import { amt, gql, paperDate, useGql } from '../lib';
 import { RateStatus, RateMeter } from './RateBits';
 import '../atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 interface BranchSub { id: string; name: string }
 
@@ -61,6 +62,15 @@ const AtmCollectionsHome: React.FC = () => {
           <p className="text-sm text-body">Green at 80% or more of the cut-off&apos;s amortization collected. Red: no loan releases.</p>
         </div>
         {statuses.error && <p role="alert" className="text-danger">{statuses.error}</p>}
+        {statuses.loading && !statuses.data && (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark" aria-hidden={i > 0 ? true : undefined}>
+                <SkeletonBlock rows={3} label={i === 0 ? 'Loading branch status…' : ''} />
+              </div>
+            ))}
+          </div>
+        )}
         {!statuses.loading && statuses.data?.atmBranchStatuses.length === 0 && (
           <p className="rounded-lg border border-dashed border-stroke p-6 text-center text-body">No branch has a collection list yet. Start one below.</p>
         )}

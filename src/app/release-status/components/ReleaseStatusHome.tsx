@@ -6,6 +6,7 @@ import Pager from '@/components/CustomDatatable/Pager';
 import { RELEASE_STATUS, type ReleaseStatus, type Standing } from '@/graphql/CollectionReportsQueries';
 import { amt, useGql } from '@/app/atm-collections/lib';
 import '@/app/atm-collections/atm.css';
+import { SkeletonBlock } from '@/components/LoadingStates';
 
 const STANDING: Record<Standing, { word: string; meaning: string; cls: string }> = {
   green: { word: 'Green', meaning: 'paying on time', cls: 'bg-success/10 text-success' },
@@ -168,7 +169,15 @@ const ReleaseStatusHome: React.FC = () => {
         <li>Branch in the red: no release at all.</li>
       </ul>
       {error && <p role="alert" className="rounded-lg bg-danger/10 p-4 text-danger">{error}</p>}
-      {loading && !r && <p className="text-body">Checking every loan waiting for release…</p>}
+      {loading && !r && (
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark"><SkeletonBlock rows={3} label="Checking every loan waiting for release…" /></div>
+            <div className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark" aria-hidden="true"><SkeletonBlock rows={3} label="" /></div>
+          </div>
+          <div className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark" aria-hidden="true"><SkeletonBlock rows={6} label="" /></div>
+        </div>
+      )}
       {r && counts && <OnThisPage r={r} counts={counts} />}
       {r && counts && <Pending r={r} held={counts.held} />}
       {r && counts && <Companies r={r} reds={counts.reds} />}
