@@ -23,6 +23,8 @@ export interface ProblemAccountRow {
   oldest_unpaid_due_date: string | null;
   oldest_unpaid_schedule_id: string | null;
   cutoffs_missed: number;
+  /** Penalty owed today (4% per ended cut-off unpaid); not part of shortfall. Null when it could not be worked out. */
+  penalty_owed: string | null;
 }
 
 export interface ProblemAccountSummary {

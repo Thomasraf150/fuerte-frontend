@@ -7,7 +7,7 @@ import { ProblemAccountRow } from "@/hooks/useProblemAccountsPaginated";
 import { formatNumber } from "@/utils/formatNumber";
 import { formatCount } from "@/utils/helper";
 import StatusBadge from "@/components/StatusBadge";
-import { METRIC_HELP, RED, GRAY, RowGroupInfo } from "./ProblemAccountsColumns";
+import { METRIC_HELP, RED, GRAY, RowGroupInfo, penaltyOf } from "./ProblemAccountsColumns";
 
 const num = (raw: string) => parseFloat(raw) || 0;
 const fmt = (raw: string) => formatNumber(num(raw));
@@ -162,6 +162,11 @@ const ProblemAccountsCards: React.FC<Props> = ({
                 <span className="sr-only"> pesos</span>
               </span>
             </div>
+            {penaltyOf(row) > 0 && (
+              <p className="mt-1 text-right text-xs tabular-nums text-body dark:text-bodydark" title={METRIC_HELP.penalty}>
+                Plus {fmt(row.penalty_owed as string)} penalty
+              </p>
+            )}
 
             <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-stroke pt-3 dark:border-strokedark">
               <Stat

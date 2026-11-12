@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { NavGroup, COLLECTIONS, COLLECTION_REPORTS, FINANCIAL_REPORTS, PERIOD_CLOSE, TREASURY } from "@/components/Sidebar/NavGroups";
 import BrandLockup from "@/components/Brand/BrandLockup";
 import SidebarLinkGroup from "@/components/Sidebar/SidebarLinkGroup";
 import { NAV_CURRENT, NAV_GROUP_HAS, NavCurrentContext, useCurrentNav } from "@/components/Sidebar/currentNav";
@@ -140,7 +141,6 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/" className={subLinkClass()}>Summary</Link></li>
                         <li><Link href="/accounting-dashboard" className={subLinkClass()}>Accounting Dashboard</Link></li>
                         <li><Link href="/notes-receivable" className={subLinkClass()}>Notes Receivable</Link></li>
-                        <li><Link href="/commission-schedule" className={subLinkClass()}>Commission Schedule</Link></li>
                       </ul>
                     </div>
                   </React.Fragment>
@@ -206,79 +206,23 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 )}
               </SidebarLinkGroup>
 
-              {/* Payments */}
-              <SidebarLinkGroup activeCondition={pathname === "/collection-list" || pathname === "/payment-posting" || pathname === "/statement-of-account" || pathname === "/problem-accounts" || pathname === "/renewable-borrowers"}>
-                {(handleClick, open) => (
-                  <React.Fragment>
-                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
-                      <svg className="fill-current" width="18" height="18" viewBox="2 3 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
-                      </svg>
-                      Payments
-                      <ChevronIcon open={open} />
-                    </Link>
-                    <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-3 ml-6 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                        <li><Link href="/collection-list" className={subLinkClass()}>Collection Lists</Link></li>
-                        <li><Link href="/payment-posting" className={subLinkClass()}>Payment Posting</Link></li>
-                        <li><Link href="/statement-of-account" className={subLinkClass()}>Statement of Account</Link></li>
-                        <li><Link href="/problem-accounts" className={subLinkClass()}>Problem Accounts</Link></li>
-                        <li><Link href="/renewable-borrowers" className={subLinkClass()}>Renewable Borrowers</Link></li>
-                      </ul>
-                    </div>
-                  </React.Fragment>
-                )}
-              </SidebarLinkGroup>
+              <NavGroup group={COLLECTIONS} role={"OWN"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
+
+              <NavGroup group={TREASURY} role={"OWN"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
+            </ul>
+
+            {/* ===== REPORTS ===== */}
+            <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">REPORTS</h3>
+            <ul className="mb-6 flex flex-col gap-1.5">
+              <NavGroup group={COLLECTION_REPORTS} role={"OWN"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
+
+              <NavGroup group={FINANCIAL_REPORTS} role={"OWN"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
             </ul>
 
             {/* ===== ACCOUNTING ===== */}
             <h3 className="mb-2 ml-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bodydark2">ACCOUNTING</h3>
             <ul className="mb-6 flex flex-col gap-1.5">
-              {/* Accounting Reports */}
-              <SidebarLinkGroup
-                activeCondition={
-                  pathname === "/accounting/unadjusted-trial-balance" ||
-                  pathname === "/accounting/adjusting-entries" ||
-                  pathname === "/accounting/adjusted-trial-balance" ||
-                  pathname === "/accounting/balance-sheet" ||
-                  pathname === "/accounting/income-statement" ||
-                  pathname === "/accounting/cash-flow" ||
-                  pathname === "/accounting/treasury-cash" ||
-                  pathname === "/accounting/cash-position" ||
-                  pathname === "/accounting/aging" ||
-                  pathname === "/accounting/closing-entries" ||
-                  pathname === "/accounting/refund-schedule" ||
-                  pathname === "/accounting/udi-schedule" ||
-                  pathname === "/accounting/commission-schedule"
-                }
-              >
-                {(handleClick, open) => (
-                  <React.Fragment>
-                    <Link href="#" className={groupHeadClass} aria-expanded={open} onClick={groupClick(handleClick)}>
-                      <Server size={14} />
-                      Reports
-                      <ChevronIcon open={open} />
-                    </Link>
-                    <div className={`translate transform overflow-hidden ${!open && "hidden"}`}>
-                      <ul className="mb-3 ml-4 mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                        <li><Link href="/accounting/unadjusted-trial-balance" className={subLinkSmClass()}>Unadjusted Trial Balance</Link></li>
-                        <li><Link href="/accounting/adjusting-entries" className={subLinkSmClass()}>Adjusting Entries</Link></li>
-                        <li><Link href="/accounting/adjusted-trial-balance" className={subLinkSmClass()}>Adjusted Trial Balance</Link></li>
-                        <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
-                        <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
-                        <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
-                        <li><Link href="/accounting/treasury-cash" className={subLinkSmClass()}>Treasury Cash Report</Link></li>
-                        <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
-                        <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>
-                        <li><Link href="/accounting/closing-entries" className={subLinkSmClass()}>Closing Entries</Link></li>
-                        <li><Link href="/accounting/refund-schedule" className={subLinkSmClass()}>Refund Schedule</Link></li>
-                        <li><Link href="/accounting/udi-schedule" className={subLinkSmClass()}>UDI Schedule</Link></li>
-                        <li><Link href="/accounting/commission-schedule" className={subLinkSmClass()}>Commission Schedule</Link></li>
-                      </ul>
-                    </div>
-                  </React.Fragment>
-                )}
-              </SidebarLinkGroup>
+              <NavGroup group={PERIOD_CLOSE} role={"OWN"} pathname={pathname} sidebarExpanded={sidebarExpanded} setSidebarExpanded={setSidebarExpanded} />
 
               {/* Vouchers */}
               <SidebarLinkGroup

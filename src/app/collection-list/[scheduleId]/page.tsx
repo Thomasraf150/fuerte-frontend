@@ -86,7 +86,7 @@ const CollectionDetailPage: React.FC = () => {
           <div>
             <h3 className="text-xl font-semibold text-danger mb-4">{error}</h3>
             <Button variant="primary" onClick={handleBack}>
-              Back to Collection List
+              Back to Posted Payments
             </Button>
           </div>
           </CardBody>
@@ -107,7 +107,7 @@ const CollectionDetailPage: React.FC = () => {
           pageName={pageTitle}
           items={[
             { label: 'Dashboard', href: '/' },
-            { label: 'Collection List', href: '/collection-list' },
+            { label: 'Posted Payments', href: '/collection-list' },
             { label: pageTitle }
           ]}
         />
@@ -214,7 +214,7 @@ const CollectionDetailPage: React.FC = () => {
 
             <div className="flex justify-start">
               <Button variant="primary" onClick={handleBack}>
-                Back to Collection List
+                Back to Posted Payments
               </Button>
             </div>
           </CardBody>

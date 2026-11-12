@@ -88,6 +88,15 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         if (item?.description === 'cash on hand') {
           setValue('coh_id', item?.account_id);
         }
+        if (item?.description === 'refund payable') {
+          setValue('rp_id', item?.account_id);
+        }
+        if (item?.description === 'inter group receivable') {
+          setValue('igr_id', item?.account_id);
+        }
+        if (item?.description === 'inter group payable') {
+          setValue('igp_id', item?.account_id);
+        }
       });
     }
   }, [lpsSingleData, actionLbl])
@@ -199,13 +208,19 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'addon_udi_id' as const, label: 'Addon UDI' },
           { name: 'cib_id' as const, label: 'Cash in Bank' },
           { name: 'coh_id' as const, label: 'Cash on Hand' },
-        ].map(({ name, label }) => (
+          // Optional: only branches that post ATM collection lists need it.
+          { name: 'rp_id' as const, label: 'Refund Payable (ATM collections)', optional: true },
+          // Optional: only ATM swipes made at another group's POS use them (A/R on the loan's side,
+          // A/P on the side that received the cash).
+          { name: 'igr_id' as const, label: 'Inter-group Receivable (ATM)', optional: true },
+          { name: 'igp_id' as const, label: 'Inter-group Payable (ATM)', optional: true },
+        ].map(({ name, label, optional }: { name: keyof DataLoanProceedList; label: string; optional?: boolean }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">
-            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">{label} <span className="text-danger">*</span></label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">{label} {!optional && <span className="text-danger">*</span>}</label>
             <Controller
               name={name}
               control={control}
-              rules={{ required: `${label} is required` }}
+              rules={optional ? {} : { required: `${label} is required` }}
               render={({ field }) => (
                 <ReactSelect
                   {...field}

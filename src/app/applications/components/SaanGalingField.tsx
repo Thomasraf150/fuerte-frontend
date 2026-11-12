@@ -13,6 +13,7 @@ export const CHANNEL_ERROR = 'Piliin kung saan galing ang application.';
 const HINTS: Readonly<Record<LoanApplicationChannel, string>> = {
   google_form: 'Sumagot sa form online',
   facebook: 'Nag-message sa FB page',
+  tiktok: 'Nag-message sa TikTok',
   walk_in: 'Pumunta mismo sa branch',
   phone: 'Tumawag o nag-text',
   referral: 'Ni-refer ng kakilala o kliyente',
@@ -30,13 +31,10 @@ const TILE =
 
 /*
  * The icon beside the words needs a tile about 190px wide.
- *   Five tiles (the Google Form roles), or any count but four: two columns on phones with
- *   an odd last tile across the row, then a six-column grid from md (gridPlace): three
- *   tiles on top, two wider ones below. Five in a row would leave tiles about 170px wide
- *   beside the 290px sidebar even at xl.
- *   Four tiles: two columns on phones (124px each at 360px, so the icon sits above the
- *   words), and four in a row only from xl: beside the 290px sidebar, 1024-1279px
- *   would leave four tiles 133px wide.
+ *   The Google Form roles get six tiles and everyone else five (since TikTok, 2026-11-12):
+ *   two columns on phones with an odd last tile across the row, then a six-column grid
+ *   from md (gridPlace): rows of three, a remainder of two wider below. Five in a row
+ *   would leave tiles about 170px wide beside the 290px sidebar even at xl.
  */
 const STACKED = 'flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3';
 const SIDE_BY_SIDE = 'flex-row items-center gap-3';
@@ -50,7 +48,7 @@ interface Layout {
 }
 
 const SPAN_FROM_MD = { third: 'md:col-span-2', half: 'md:col-span-3', full: 'md:col-span-6' } as const;
-/** Any count but four (gridPlace): five gives three on top and two wider below. */
+/** gridPlace's six-column grid: five gives three on top and two wider below, six two rows of three. */
 const SIX_COLUMNS: Layout = {
   grid: 'grid-cols-2 md:grid-cols-6',
   cell: (index, count) => {
@@ -59,7 +57,6 @@ const SIX_COLUMNS: Layout = {
   },
   tile: (index, count) => (gridPlace(index, count).odd ? SIDE_BY_SIDE : STACKED),
 };
-const FOUR: Layout = { grid: 'grid-cols-2 xl:grid-cols-4', cell: () => '', tile: () => STACKED };
 
 interface ChannelTileProps {
   channel: LoanApplicationChannel;
@@ -121,7 +118,7 @@ interface SaanGalingFieldProps {
  * "Saan galing ang application?": where the application came from, as big tiles,
  * never a dropdown. Registered as `channel` on BorrowerDetails' own form (through
  * renderExtraFields), required. Google Form is offered only to the roles that upload
- * the Google Form responses; everyone else gets four tiles.
+ * the Google Form responses; everyone else gets the other five.
  */
 const SaanGalingField: React.FC<SaanGalingFieldProps> = ({ register, errors, canChooseGoogleForm }) => {
   const id = useId();
@@ -129,7 +126,7 @@ const SaanGalingField: React.FC<SaanGalingFieldProps> = ({ register, errors, can
   const error = errors.channel?.message ? String(errors.channel.message) : '';
   const field = register('channel', { required: CHANNEL_ERROR });
   const channels = canChooseGoogleForm ? CHANNELS : CHANNELS.filter((channel) => channel !== 'google_form');
-  const layout = channels.length === 4 ? FOUR : SIX_COLUMNS;
+  const layout = SIX_COLUMNS;
 
   return (
     <fieldset>
