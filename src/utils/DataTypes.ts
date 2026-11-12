@@ -1027,7 +1027,7 @@ export interface LoanHistoryPaginator {
 export type LoanApplicationStatus = 'for_interview' | 'interviewed' | 'declined' | 'borrower_created' | 'borrower_linked';
 
 /** "Saan galing": where an application came from. Keep in sync with LoanApplication::CHANNELS (backend). */
-export type LoanApplicationChannel = 'google_form' | 'facebook' | 'walk_in' | 'phone' | 'referral';
+export type LoanApplicationChannel = 'google_form' | 'facebook' | 'tiktok' | 'walk_in' | 'phone' | 'referral';
 
 /** What is applied for (spec 2026-10-21). Keep in sync with LoanApplication::KINDS (backend). */
 export type LoanApplicationKind = 'new' | 'renewal' | 'additional';

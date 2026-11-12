@@ -30,11 +30,12 @@ export const KIND_LABELS: Readonly<Record<LoanApplicationKind, string>> = {
 };
 
 /** Saan galing's choices, in the order the form shows them. Keep in sync with LoanApplication::CHANNELS. */
-export const CHANNELS = ['google_form', 'facebook', 'walk_in', 'phone', 'referral'] as const satisfies readonly LoanApplicationChannel[];
+export const CHANNELS = ['google_form', 'facebook', 'tiktok', 'walk_in', 'phone', 'referral'] as const satisfies readonly LoanApplicationChannel[];
 
 export const CHANNEL_LABELS: Readonly<Record<LoanApplicationChannel, string>> = {
   google_form: 'Google Form',
   facebook: 'Facebook Messenger',
+  tiktok: 'TikTok',
   walk_in: 'Walk-in',
   phone: 'Tawag o Text',
   referral: 'Referral',
@@ -44,6 +45,7 @@ export const CHANNEL_LABELS: Readonly<Record<LoanApplicationChannel, string>> = 
 export const CHANNEL_SHORT_LABELS: Readonly<Record<LoanApplicationChannel, string>> = {
   google_form: 'Google Form',
   facebook: 'Messenger',
+  tiktok: 'TikTok',
   walk_in: 'Walk-in',
   phone: 'Tawag/Text',
   referral: 'Referral',
