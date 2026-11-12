@@ -243,6 +243,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   pathname === "/accounting/balance-sheet" ||
                   pathname === "/accounting/income-statement" ||
                   pathname === "/accounting/cash-flow" ||
+                  pathname === "/accounting/treasury-cash" ||
                   pathname === "/accounting/cash-position" ||
                   pathname === "/accounting/aging" ||
                   pathname === "/accounting/closing-entries" ||
@@ -266,6 +267,7 @@ const SidebarOwner = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <li><Link href="/accounting/balance-sheet" className={subLinkSmClass()}>Balance Sheet</Link></li>
                         <li><Link href="/accounting/income-statement" className={subLinkSmClass()}>Income Statement</Link></li>
                         <li><Link href="/accounting/cash-flow" className={subLinkSmClass()}>Cash Flow</Link></li>
+                        <li><Link href="/accounting/treasury-cash" className={subLinkSmClass()}>Treasury Cash Report</Link></li>
                         <li><Link href="/accounting/cash-position" className={subLinkSmClass()}>Cash Position</Link></li>
                         <li><Link href="/accounting/aging" className={subLinkSmClass()}>Aging</Link></li>
                         <li><Link href="/accounting/closing-entries" className={subLinkSmClass()}>Closing Entries</Link></li>

@@ -226,6 +226,7 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     pathname === "/accounting/adjusted-trial-balance" ||
                     pathname === "/accounting/balance-sheet" ||
                     pathname === "/accounting/cash-flow" ||
+                    pathname === "/accounting/treasury-cash" ||
                     pathname === "/accounting/cash-position" ||
                     pathname === "/accounting/aging" ||
                     pathname === "/accounting/closing-entries" ||
@@ -313,6 +314,14 @@ const SidebarAcctg = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
                             >
                               Cash Flow
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/accounting/treasury-cash"
+                              className={`group relative text-sm flex items-center gap-2.5 min-h-12 lg:min-h-10 rounded-lg px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${NAV_CURRENT}`}
+                            >
+                              Treasury Cash Report
                             </Link>
                           </li>
                           <li>
