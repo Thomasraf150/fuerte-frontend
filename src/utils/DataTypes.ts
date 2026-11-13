@@ -905,6 +905,7 @@ export interface DataLoanProceedList {
   rp_id?: string;
   igr_id?: string;
   igp_id?: string;
+  atmb_id?: string;
 }
 export interface RowAcctgDetails {
   acctg_entries_id: string;

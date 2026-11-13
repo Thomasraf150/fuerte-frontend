@@ -2,8 +2,9 @@
 
 import { TableColumn } from 'react-data-table-component';
 import { DataBank } from '@/utils/DataTypes';
-import { Edit3, Trash2 } from 'react-feather';
+import { Edit3 } from 'react-feather';
 import Button from '@/components/Button';
+import MasterDataRemoveButton from '@/components/MasterDataRemoveButton';
 
 const bankListCol = (handleUpdateRowClick: (row: DataBank) => void, handleDeleteRow: (row: DataBank) => void): TableColumn<DataBank>[] => [
   {
@@ -52,7 +53,7 @@ const bankListCol = (handleUpdateRowClick: (row: DataBank) => void, handleDelete
       return (
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" onClick={() => handleUpdateRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
-          <Button variant="danger" size="sm" onClick={() => handleDeleteRow(row)}><Trash2 size={16} aria-hidden="true" />Remove</Button>
+          <MasterDataRemoveButton onClick={() => handleDeleteRow(row)} />
         </div>
       );
     },

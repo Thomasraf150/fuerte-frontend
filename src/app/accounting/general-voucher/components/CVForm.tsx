@@ -18,6 +18,7 @@ import { html } from '@/utils/html';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData, SelectOption } from '@/utils/DataTypes';
 import { toast } from '@/utils/notify';
+import { useCanEditVouchers } from '@/hooks/useRoleGates';
 import {
   parseFinancialAmount,
   addAmounts,
@@ -49,6 +50,8 @@ interface ParentFormBr {
 }
 
 const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, printLoading, loading, generalVoucherLoading, pubSubBrId }) => {
+  // Cancel Entry and Update Date are for Accounting, Admin and Owner (Q40(a), 2026-11-13).
+  const canEditVouchers = useCanEditVouchers();
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<RowAcctgEntry>();
   const [rows, setRows] = useState<RowAcctgDetails[]>([{ acctg_entries_id: "", accountLabel: "", acctnumber: "", debit: "", credit: "" }]);
   const { coaDataAccount, fetchCoaDataTable } = useCoa();
@@ -542,14 +545,14 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
               onClick={() => setShowForm(false)}>
               Back
             </Button>
-            {singleData !== undefined && singleData?.is_cancelled === false && (
+            {canEditVouchers === true && singleData !== undefined && singleData?.is_cancelled === false && (
               <Button variant="danger"
                 type="button"
                 onClick={() => { return handleCancelEntry(singleData); }}>
                  Cancel Entry
               </Button>
             )}
-            {singleData !== undefined && (
+            {canEditVouchers === true && singleData !== undefined && (
               <Button variant="secondary"
                 type="button"
                 onClick={() => { return handleUpdateJournalDate(singleData); }}>
