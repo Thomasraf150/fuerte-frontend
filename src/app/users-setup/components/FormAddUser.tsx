@@ -6,6 +6,7 @@ import FormInput from '@/components/FormInput';
 import useUsers from '@/hooks/useUsers';
 import { DataBranches, DataFormUser, User } from '@/utils/DataTypes';
 import Button from '@/components/Button';
+import AccountAccessSwitch from './AccountAccessSwitch';
 
 interface ParentFormBr {
   setShowForm: (value: boolean) => void;
@@ -34,6 +35,9 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
   // hide the section entirely for non-Owner editors.
   const [additionalIds, setAdditionalIds] = useState<number[]>([]);
   const [callerIsOwner, setCallerIsOwner] = useState<boolean>(false);
+  // Offboarding: the edited account's Active switch (sent only by Update User).
+  const [isActive, setIsActive] = useState<boolean>(true);
+  const [callerId, setCallerId] = useState<string>('');
   const homeBranchId = Number(watch('branch_sub_id'));
 
   // Watch the password field
@@ -46,6 +50,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
       const state = JSON.parse(raw)?.state ?? {};
       const code = state?.user?.role?.code;
       setCallerIsOwner(code === 'OWN');
+      setCallerId(String(state?.user?.id ?? ''));
     } catch {
       setCallerIsOwner(false);
     }
@@ -61,8 +66,8 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
     // the "Create User" flow and non-Owner Update flow exactly as before.
     // The hook will only call setUserBranchAccess if this field is defined.
     const payload: DataFormUser =
-      actionLbl === 'Update User' && callerIsOwner
-        ? { ...data, additional_branch_sub_ids: additionalIds }
+      actionLbl === 'Update User'
+        ? { ...data, is_active: isActive, ...(callerIsOwner ? { additional_branch_sub_ids: additionalIds } : {}) }
         : data;
 
     const result = await onSubmitUser(payload) as { success: boolean; error?: string; data?: any };
@@ -118,6 +123,7 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
         setValue('email', singleUserData.email);
         setValue('branch_sub_id', singleUserData.branch_sub_id);
         setValue('role_id', singleUserData.role_id);
+        setIsActive((singleUserData as any)?.is_active !== false);
         const existing = (singleUserData as any)?.additionalBranchSubs ?? [];
         setAdditionalIds(
           Array.isArray(existing)
@@ -241,6 +247,16 @@ const FormAddUser: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, onSaved, 
                 </p>
               )}
             </div>
+          )}
+
+          {actionLbl === 'Update User' && singleUserData && (
+            <AccountAccessSwitch
+              active={isActive}
+              wasActive={(singleUserData as any)?.is_active !== false}
+              onChange={setIsActive}
+              isOwnAccount={String(singleUserData.id) === callerId}
+              userName={singleUserData.name}
+            />
           )}
 
           <FormInput
