@@ -5,6 +5,15 @@ import { User } from '@/utils/DataTypes';
 import { Key, Edit3, Trash2 } from 'react-feather';
 import Tooltip from '@/components/Tooltip';
 import Button from '@/components/Button';
+import { StatusBadge } from '@/components/StatusBadge';
+
+/** A deactivated account (offboarding, 2026-11-13) says so beside its name; active ones show nothing. */
+export const renderUserName = (row: User) => (
+  <span className="inline-flex flex-wrap items-center gap-2">
+    <span>{row.name}</span>
+    {row.is_active === false && <StatusBadge tone="closed">Deactivated</StatusBadge>}
+  </span>
+);
 
 /** The row's buttons: the table's Action cell and the phone card both draw these. */
 export const renderUserActions = (row: User, handleRowClick: (row: User) => void, handlePwUpdate: (row: User) => void) => (
@@ -20,7 +29,7 @@ export const renderUserActions = (row: User, handleRowClick: (row: User) => void
 const userListCol = (handleRowClick: (row: User) => void, handlePwUpdate: (row: User) => void): TableColumn<User>[] => [
   {
     name: 'Name',
-    cell: row => row.name,
+    cell: row => renderUserName(row),
     sortable: true,
   },
   {

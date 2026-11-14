@@ -7,6 +7,7 @@ const GET_USER_QUERY: string = `
           email
           branch_sub_id
           role_id
+          is_active
           role {
             id
             name
@@ -50,6 +51,7 @@ const GET_SINGLE_USER_QUERY: string = `
         email
         branch_sub_id
         role_id
+        is_active
         branchSub {
           id
           name

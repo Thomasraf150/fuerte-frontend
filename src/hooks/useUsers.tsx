@@ -153,6 +153,7 @@ const useUsers = () => {
     if (data.id) {
       const input: any = { ...baseInput, id: Number(data.id) };
       if (data.password) input.password = data.password;
+      if (typeof data.is_active === "boolean") input.is_active = data.is_active;
       return { mutation: UPDATE_USER_MUTATION, variables: { input } };
     }
     return {

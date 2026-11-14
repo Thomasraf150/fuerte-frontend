@@ -114,6 +114,8 @@ export interface User {
   email: string;
   branch_sub_id: number;
   role_id: number;
+  /** false = deactivated (cannot sign in). null/absent = active. */
+  is_active?: boolean | null;
   branchSub: DataSubBranches
   role: Role;
 }
@@ -198,6 +200,8 @@ export interface DataFormUser {
   confirm_password: string;
   /** Extra sub-branches granted on top of branch_sub_id. Multi-branch users only. */
   additional_branch_sub_ids?: number[];
+  /** Update User only: switching it off deactivates the account. */
+  is_active?: boolean;
 }
 export interface AuthStoreData {
   token: string;

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
-import userListCol, { renderUserActions } from './UsersListColumn';
+import userListCol, { renderUserActions, renderUserName } from './UsersListColumn';
 import FormAddUser from './FormAddUser';
 import { User, DataFormUser } from '@/utils/DataTypes';
 import useUsers from '@/hooks/useUsers';
@@ -92,7 +92,7 @@ const UserLists: React.FC = () => {
                   apiLoading={loading}
                   title={''}
                   columns={column(handleRowUpdate, handlePwUpdate)}
-                  mobileRow={(row) => <PhoneRowText title={row.name} sub={`${row.role.name} · ${row.email}`} />}
+                  mobileRow={(row) => <PhoneRowText title={renderUserName(row)} sub={`${row.role.name} · ${row.email}`} />}
                   mobileActions={(row) => renderUserActions(row, handleRowUpdate, handlePwUpdate)}
                   data={data}
                   enableCustomHeader={true}

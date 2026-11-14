@@ -75,6 +75,9 @@ const useLogin = () => {
           } else {
             errorMessage = `Too many login attempts. Please wait ${retryAfter} seconds and try again.`;
           }
+        } else if (response.status === 403) {
+          // A deactivated account (offboarding, 2026-11-13): the password was right, so say why.
+          errorMessage = 'This account has been deactivated. Ask the Owner or your Admin.';
         } else if (response.status >= 500) {
           errorMessage = 'The server could not be reached. Please try again in a moment.';
         }
