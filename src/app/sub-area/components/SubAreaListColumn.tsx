@@ -2,14 +2,15 @@
 
 import { TableColumn } from 'react-data-table-component';
 import { DataSubArea } from '@/utils/DataTypes';
-import { Edit3, Trash2 } from 'react-feather';
+import { Edit3 } from 'react-feather';
 import Button from '@/components/Button';
+import MasterDataRemoveButton from '@/components/MasterDataRemoveButton';
 
 /** The row's buttons: the table's Action cell and the phone card both draw these. */
 export const renderSubAreaActions = (row: DataSubArea, handleUpdateRowClick: (row: DataSubArea) => void, handleDeleteRow: (row: DataSubArea) => void) => (
   <div className="flex items-center gap-2">
       <Button variant="secondary" size="sm" onClick={() => handleUpdateRowClick(row)}><Edit3 size={16} aria-hidden="true" />Edit</Button>
-      <Button variant="danger" size="sm" onClick={() => handleDeleteRow(row)}><Trash2 size={16} aria-hidden="true" />Remove</Button>
+      <MasterDataRemoveButton onClick={() => handleDeleteRow(row)} />
   </div>
 );
 

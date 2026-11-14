@@ -97,6 +97,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
         if (item?.description === 'inter group payable') {
           setValue('igp_id', item?.account_id);
         }
+        if (item?.description === 'atm settlement bank') {
+          setValue('atmb_id', item?.account_id);
+        }
       });
     }
   }, [lpsSingleData, actionLbl])
@@ -214,6 +217,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           // A/P on the side that received the cash).
           { name: 'igr_id' as const, label: 'Inter-group Receivable (ATM)', optional: true },
           { name: 'igp_id' as const, label: 'Inter-group Payable (ATM)', optional: true },
+          // Optional: the Cash in Bank account this branch's ATM swipes settle to (Q41(c), 2026-11-13).
+          // Unset, ATM collections post to Cash on Hand as before. The server accepts Cash in Bank only.
+          { name: 'atmb_id' as const, label: 'ATM Settlement Bank (Cash in Bank)', optional: true },
         ].map(({ name, label, optional }: { name: keyof DataLoanProceedList; label: string; optional?: boolean }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">
             <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">{label} {!optional && <span className="text-danger">*</span>}</label>
