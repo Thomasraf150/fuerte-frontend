@@ -43,20 +43,55 @@ interface MatchLocation {
   group: string | null;
   branch: string | null;
   sub_branch: string;
+  /** The sub-branch office's own number (2026-11-14), never a borrower's. */
+  contact_no?: string | null;
 }
 
 /**
- * One line per place a match is (Rafael 2026-10-08): "Group FD · Branch FD · Sub-branch FD Main".
+ * One place, by name (Rafael 2026-10-08): "Group FD · Branch FD · Sub-branch FD Main".
  * A part the server does not know (a branch outside any group) is left out.
  */
+const placeLine = (place: MatchLocation): string =>
+  [
+    place.group ? `Group <strong>${escapeHtml(place.group)}</strong>` : '',
+    place.branch ? `Branch <strong>${escapeHtml(place.branch)}</strong>` : '',
+    // Non-breaking hyphen (U+2011): a phone-width line otherwise breaks it as "Sub- / branch".
+    `Sub‑branch <strong>${escapeHtml(place.sub_branch)}</strong>`,
+  ].filter(Boolean).join(' · ');
+
 const placesHtml = (places: MatchLocation[] | undefined): string =>
-  (places ?? [])
-    .map((place) => [
-      place.group ? `Group <strong>${escapeHtml(place.group)}</strong>` : '',
-      place.branch ? `Branch <strong>${escapeHtml(place.branch)}</strong>` : '',
-      `Sub-branch <strong>${escapeHtml(place.sub_branch)}</strong>`,
-    ].filter(Boolean).join(' · '))
-    .join('<br/>');
+  (places ?? []).map(placeLine).join('<br/>');
+
+/**
+ * The branch office's number as a tap-to-call pill (48px tall: budget Android, thumbs). The tel:
+ * target keeps only digits and a leading +, so a stored "0917-123-4567" still dials.
+ */
+const callBranchHtml = (place: MatchLocation): string => {
+  const shown = (place.contact_no ?? '').trim();
+  const dial = shown.replace(/(?!^\+)[^\d]/g, '');
+  if (!dial) {
+    return `<span style="font-size:0.85em;color:#6B7280;">No office number on record for this branch.</span>`;
+  }
+  const label = `Call ${place.sub_branch} at ${shown}`;
+  return (
+    `<a href="tel:${escapeHtml(dial)}" aria-label="${escapeHtml(label)}" ` +
+    `style="display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 16px;margin-top:6px;` +
+    `border-radius:999px;background:#FFFFFF;border:1.5px solid #D97706;color:#92400E;font-weight:600;` +
+    `text-decoration:none;font-variant-numeric:tabular-nums;">` +
+      `<span aria-hidden="true">☎</span>${escapeHtml(shown)}` +
+    `</a>`
+  );
+};
+
+/** Each place on its own row with its office number underneath, divided by a hairline. */
+const placesToCallHtml = (places: MatchLocation[]): string =>
+  places
+    .map((place, i) =>
+      `<div style="padding:8px 0;${i > 0 ? 'border-top:1px solid #FDE68A;' : ''}">` +
+        `<div>${placeLine(place)}</div>` +
+        callBranchHtml(place) +
+      `</div>`)
+    .join('');
 
 /**
  * Safely parse auth store from localStorage with error handling
@@ -134,16 +169,26 @@ const crossBranchHtml = (c: CrossBranchResult | null | undefined): string => {
   const problemLine = c.isProblem
     ? `<span style="color:#DC2626;font-weight:600;">⚠ Problem account: YES (${c.worstCutoffsMissed} cut-offs)</span>`
     : `Problem account: No`;
+  // Each place by group, branch and sub-branch with its office number (2026-11-14). The bare branch
+  // list only when no place came back; when nothing names a branch (a borrower saved without one and
+  // never lent to), say so instead of a vague "another branch" nobody can call.
+  const places = c.locations ?? [];
+  let where: string;
+  if (places.length) {
+    where =
+      `<div style="margin-top:6px;font-weight:600;color:#92400E;">Call this branch to verify identity:</div>` +
+      placesToCallHtml(places);
+  } else if (c.branches.length) {
+    where = `<div style="margin-top:6px;">Call branch <strong>${escapeHtml(c.branches.join(', '))}</strong> to verify identity.</div>`;
+  } else {
+    where = `<div style="margin-top:6px;">This borrower's branch is not on record. Ask Head Office to look them up before creating.</div>`;
+  }
   return (
     `<div style="margin-top:10px;padding:10px 12px;border-radius:6px;background:#FFFBEB;border-left:4px solid #D97706;">` +
-      `<strong style="color:#B45309;">⚠ Also found in another branch</strong><br/>` +
-      // Each place by group, branch and sub-branch (2026-10-08); the bare branch list only when no
-      // place came back (matches on a sub-branch without a name). Backend and frontend deploy together.
-      (c.locations?.length
-        ? `${placesHtml(c.locations)}<br/>`
-        : `Branch(es): <strong>${escapeHtml(c.branches.join(', ')) || 'another branch'}</strong><br/>`) +
-      `${problemLine}<br/>` +
-      `<em style="font-size:0.85em;color:#6B7280;">Name / contact match only — verify identity with that branch.</em>` +
+      `<strong style="color:#B45309;">⚠ Also found in another branch</strong>` +
+      where +
+      `<div style="margin-top:6px;">${problemLine}</div>` +
+      `<em style="font-size:0.85em;color:#6B7280;">Name / contact match only. Nothing about the borrower is shown here.</em>` +
     `</div>`
   );
 };

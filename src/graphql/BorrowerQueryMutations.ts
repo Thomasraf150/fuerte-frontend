@@ -484,7 +484,7 @@ const CHECK_BORROWER_CROSS_BRANCH: string = `
       myBranchIsProblem
       myBranchWorstCutoffs
       myBranchMatchCount
-      locations { group branch sub_branch }
+      locations { group branch sub_branch contact_no }
       myLocations { group branch sub_branch }
     }
   }
