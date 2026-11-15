@@ -2,7 +2,8 @@ import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CollectionFormValues } from '@/utils/DataTypes';
-import { formatToTwoDecimalPlaces, parseNumericInput as num, formatNumberComma } from '@/utils/helper';
+import { formatToTwoDecimalPlaces, formatNumberComma } from '@/utils/helper';
+import { collectionSplit } from '@/utils/paymentSplit';
 import { Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import moment from 'moment';
@@ -25,45 +26,20 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     const { value } = event.target;
     const numericValue = value.replace(/,/g, '');
     const formattedValue = formatToTwoDecimalPlaces(numericValue);
-    const incoming = parseFloat(numericValue) || 0;
 
-    const remainingDue = Number(selectedMoSched?.amount) || 0;
-    // Never below zero: the server refuses a negative interest box (2026-10-29), and an
-    // over-collected UDI schedule would otherwise send one on an overpayment.
-    const remainingUdi = Math.max(0, Number(selectedUdiSched?.amount) || 0);
-    const collection = type === 'collection' ? incoming : num(watch('collection'));
-    const bankCharge = type === 'bank_charge' ? incoming : num(watch('bank_charge'));
-    const penalty = type === 'penalty' ? incoming : num(watch('penalty'));
-    // R-PAYMENT-SPLIT (regress/RULES.md): the bank charge and the penalty come off the cash
-    // before the loan, so only the net pays the installment.
-    // Rounded to the centavo, so float noise (0.3 - 0.1 - 0.2) never reads as an overpayment.
-    const netCollection = Math.round((collection - bankCharge - penalty) * 100) / 100;
-
-    // AP Refund: only when the net exceeds remaining due.
-    if (netCollection > remainingDue) {
-      setValue('ap_refund', (netCollection - remainingDue).toFixed(2));
-    } else {
-      setValue('ap_refund', '0.00');
-    }
-
-    // UA/SP: shortfall vs remaining due.
-    if (netCollection <= remainingDue) {
-      setValue('ua_sp', Math.abs(remainingDue - netCollection).toFixed(2));
-    } else {
-      setValue('ua_sp', '0.00');
-    }
-
-    // Interest: capped at remaining UDI. Negative or non-finite results clamp to 0.
-    if (netCollection > remainingDue) {
-      setValue('interest', remainingUdi.toFixed(2));
-    } else if (remainingDue > 0) {
-      let computed = remainingUdi * (netCollection / remainingDue);
-      if (!isFinite(computed) || isNaN(computed) || computed < 0) computed = 0;
-      if (computed > remainingUdi) computed = remainingUdi;
-      setValue('interest', computed.toFixed(2));
-    } else {
-      setValue('interest', '0.00');
-    }
+    // AP Refund (net above the remaining due), UA/SP (shortfall) and pro-rata Interest, in exact
+    // decimals (utils/paymentSplit): the server books these as sent. The remaining UDI is
+    // floored at zero there, because the server refuses a negative interest box (2026-10-29).
+    const split = collectionSplit({
+      collection: type === 'collection' ? numericValue : watch('collection'),
+      bankCharge: type === 'bank_charge' ? numericValue : watch('bank_charge'),
+      penalty: type === 'penalty' ? numericValue : watch('penalty'),
+      remainingDue: selectedMoSched?.amount,
+      remainingUdi: selectedUdiSched?.amount,
+    });
+    setValue('ap_refund', split.ap_refund);
+    setValue('ua_sp', split.ua_sp);
+    setValue('interest', split.interest);
 
     setValue(type, formattedValue);
   };
