@@ -6,6 +6,8 @@
  * which numeric fields each row contributes to the totals.
  */
 
+import { addAmounts } from '@/utils/financial';
+
 export const UNGROUPED_MAIN_BRANCH_KEY = -1;
 export const UNGROUPED_MAIN_BRANCH_LABEL = 'Unassigned Main Branch';
 
@@ -76,8 +78,8 @@ export function groupBreakdownByMainBranch<T extends BranchHierarchyItem>(
     sub.details.push(item);
     const rowTotals = extractTotals(item);
     for (const k of totalKeys) {
-      sub.totals[k] += rowTotals[k];
-      main.totals[k] += rowTotals[k];
+      sub.totals[k] = addAmounts(sub.totals[k], rowTotals[k]).toNumber();
+      main.totals[k] = addAmounts(main.totals[k], rowTotals[k]).toNumber();
     }
   }
 

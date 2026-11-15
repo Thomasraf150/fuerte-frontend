@@ -1,4 +1,5 @@
 "use client"
+import { sumAmounts } from '@/utils/financial';
 import Button from '@/components/Button';
 import { CardBody, CardHeader } from '@/components/Card';
 import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
@@ -104,7 +105,7 @@ const CrjForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, l
   };
 
   const calculateTotal = (field: "debit" | "credit") =>
-    rows.reduce((sum, row) => sum + (parseFloat(row[field]) || 0), 0).toFixed(2);
+    sumAmounts(rows.map((row) => parseFloat(row[field]) || 0)).toFixed(2);
 
 
   useEffect(() => {

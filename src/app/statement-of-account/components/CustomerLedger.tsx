@@ -5,6 +5,7 @@
 import React, { useEffect } from 'react';
 import { CustomerLedgerData, BorrLoanRowData } from '@/utils/DataTypes';
 import { formatMoneyOrBlank, formatNumberComma } from '@/utils/helper';
+import { sumAmounts } from '@/utils/financial';
 import { rt } from '@/components/ReportTable';
 
 // The first column stays put while the other 14 scroll sideways, on every screen width.
@@ -21,15 +22,15 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
     console.log(custLedgerData, 'custLedgerData')
   }, [custLedgerData])
 
-  const totalPenalty = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.penalty || 0)), 0) : 0;
-  const totalPrincipal = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.running_balance || 0)), 0) : 0;
-  const totalCollection = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.collection || 0)), 0) : 0;
-  const totalBankCharge = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.bank_charge || 0)), 0) : 0;
-  const totalApRefund = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.ap_refund || 0)), 0) : 0;
-  const totalPaymentUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.payment_ua_sp || 0)), 0) : 0;
-  const totalPenaltyUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.penalty_ua_sp || 0)), 0) : 0;
-  const totalUaSp = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.ua_sp || 0)), 0) : 0;
-  const totalAdvancePayment = custLedgerData ? custLedgerData.reduce((acc, item) => acc + parseFloat(String(item.advance_payment || 0)), 0) : 0;
+  const totalPenalty = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.penalty || 0))).toNumber() : 0;
+  const totalPrincipal = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.running_balance || 0))).toNumber() : 0;
+  const totalCollection = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.collection || 0))).toNumber() : 0;
+  const totalBankCharge = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.bank_charge || 0))).toNumber() : 0;
+  const totalApRefund = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.ap_refund || 0))).toNumber() : 0;
+  const totalPaymentUaSp = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.payment_ua_sp || 0))).toNumber() : 0;
+  const totalPenaltyUaSp = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.penalty_ua_sp || 0))).toNumber() : 0;
+  const totalUaSp = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.ua_sp || 0))).toNumber() : 0;
+  const totalAdvancePayment = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.advance_payment || 0))).toNumber() : 0;
 
   return (
       <>

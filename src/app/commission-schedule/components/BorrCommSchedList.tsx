@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts } from '@/utils/financial';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
 import CommissionScheduleSkeleton from '@/components/LoadingStates/CommissionScheduleSkeleton';
@@ -202,10 +203,7 @@ const SoaList: React.FC = () => {
                     </div>
                   ) : (
                     dataCommissionSched.map((item: any, index: number) => {
-                      const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                        const collection = parseFloat(value.commission_collected) || 0;
-                        return sum + collection;
-                      }, 0);
+                      const totalCollected = sumAmounts(item.trans_per_month.map((value: any) => parseFloat(value.commission_collected) || 0)).toNumber();
 
                       return (
                         <div
@@ -297,10 +295,7 @@ const SoaList: React.FC = () => {
                         ) : (
                           dataCommissionSched.map((item: any, index: number) => {
                             // Calculate Total Collected
-                            const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                              const collection = parseFloat(value.commission_collected) || 0;
-                              return sum + collection;
-                            }, 0);
+                            const totalCollected = sumAmounts(item.trans_per_month.map((value: any) => parseFloat(value.commission_collected) || 0)).toNumber();
 
                             return (
                               <tr key={`${item.loan_ref}-${index}`} className="hover:bg-whiten dark:hover:bg-meta-4">

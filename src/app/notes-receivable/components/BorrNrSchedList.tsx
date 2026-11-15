@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts, subtractAmounts } from '@/utils/financial';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import ReactSelect from '@/components/ReactSelect';
@@ -504,16 +505,13 @@ const BorrNrSchedList: React.FC = () => {
                   {/* Mobile Card View */}
                   <div className="block md:hidden space-y-4 max-h-[600px] overflow-y-auto">
                     {allLoadedData?.map((item: any, index: number) => {
-                      const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                        const collection = parseFloat(value.actual_collection) || 0;
-                        return sum + collection;
-                      }, 0);
+                      const totalCollected = sumAmounts(item.trans_per_month.map((value: any) => parseFloat(value.actual_collection) || 0)).toNumber();
 
                       // Schedule-derived, not the static loans.pn_amount header.
                       const pnAmount = parseFloat(item.pn_scheduled) || 0;
                       const udiAmount = parseFloat(item.udi_scheduled) || 0;
                       const netReceivable = parseFloat(item.net_receivable) || 0;
-                      const balance = pnAmount - totalCollected;
+                      const balance = subtractAmounts(pnAmount, totalCollected).toNumber();
                       const isSelected = selectedRow === index;
 
                       return (
@@ -604,16 +602,13 @@ const BorrNrSchedList: React.FC = () => {
                             {allLoadedData?.map((item: any, index: number) => {
                               const isSelected = selectedRow === index;
 
-                              const totalCollected = item.trans_per_month.reduce((sum: number, value: any) => {
-                                const collection = parseFloat(value.actual_collection) || 0;
-                                return sum + collection;
-                              }, 0);
+                              const totalCollected = sumAmounts(item.trans_per_month.map((value: any) => parseFloat(value.actual_collection) || 0)).toNumber();
 
                               // Schedule-derived, not the static loans.pn_amount header.
                               const pnAmount = parseFloat(item.pn_scheduled) || 0;
                               const udiAmount = parseFloat(item.udi_scheduled) || 0;
                               const netReceivable = parseFloat(item.net_receivable) || 0;
-                              const balance = pnAmount - totalCollected;
+                              const balance = subtractAmounts(pnAmount, totalCollected).toNumber();
 
                               return (
                                 <tr

@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts, subtractAmounts } from '@/utils/financial';
 import { Card, CardBody } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import useTrialBalance from '@/hooks/useTrialBalance';
@@ -19,7 +20,7 @@ const TB_SECTIONS: ReadonlyArray<readonly [string, keyof DataTbRow, string]> = [
 
 // Same rounding as before: sum, then toFixed(2).
 const sumOf = (rows: any[], pick: (item: any) => number): number =>
-  parseFloat(rows.reduce((acc: number, item: any) => acc + pick(item), 0).toFixed(2));
+  parseFloat(sumAmounts(rows.map(pick)).toFixed(2));
 
 const AdjustedTrialBalanceList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');
@@ -97,8 +98,8 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                   <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.total_credit || 0)))}</td>
                                   <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.adj_debit || 0)))}</td>
                                   <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.adj_credit || 0)))}</td>
-                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => ((item?.total_debit || 0) - (item?.adj_debit || 0))))}</td>
-                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => ((item?.total_credit || 0) - (item?.adj_credit || 0))))}</td>
+                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => subtractAmounts(item?.total_debit || 0, item?.adj_debit || 0).toNumber()))}</td>
+                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => subtractAmounts(item?.total_credit || 0, item?.adj_credit || 0).toNumber()))}</td>
                                 </tr>
                               </React.Fragment>
                             );

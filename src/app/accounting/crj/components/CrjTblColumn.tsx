@@ -1,12 +1,13 @@
 "use client";
 
+import { sumAmounts } from '@/utils/financial';
 import { TableColumn } from 'react-data-table-component';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 
 const formatAmount = (row: RowAcctgEntry): string => {
-  const total = row?.acctg_details?.reduce(
-    (sum: number, d: any) => sum + parseFloat(d.debit || '0'), 0
-  ) || 0;
+  const total = sumAmounts(
+    (row?.acctg_details ?? []).map((d: any) => parseFloat(d.debit || '0') || 0)
+  ).toNumber();
   return total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 

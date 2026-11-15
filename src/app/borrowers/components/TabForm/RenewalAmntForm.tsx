@@ -6,6 +6,7 @@ import FormInput from '@/components/FormInput'
 import { BorrLoanRowData, DataRenewalData } from '@/utils/DataTypes';
 import FormLabel from '@/components/FormLabel';
 import { formatNumber } from '@/utils/formatNumber';
+import { sumAmounts } from '@/utils/financial';
 import LoadingSpinner from '@/components/LoadingStates/LoadingSpinner';
 import { formatDate } from '@/utils/formatters';
 
@@ -120,9 +121,8 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
     setValue('renewal_details', unifiedSelectedValues);
 
     // Auto-populate OB field with total from selected renewal items
-    const renewalTotal = unifiedSelectedValues.reduce(
-      (total: number, row: any) => (row?.amount > 0 ? total + parseFloat(row?.amount) : total),
-      0
+    const renewalTotal = sumAmounts(
+      unifiedSelectedValues.map((row: any) => (row?.amount > 0 ? parseFloat(row?.amount) : 0))
     );
     setValue('ob', renewalTotal.toFixed(2));
 
@@ -208,16 +208,16 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
                           {/* OB Total Row */}
                           {(() => {
                             const obSchedules = v?.loan_schedules?.ob || [];
-                            const obTotal = obSchedules.reduce(
-                              (total: number, row: any) => (row?.amount > 0 ? total + parseFloat(row?.amount) : total),
-                              0
+                            const obSum = sumAmounts(
+                              obSchedules.map((row: any) => (row?.amount > 0 ? parseFloat(row?.amount) : 0))
                             );
+                            const obTotal = obSum.toNumber();
 
                             if (obSchedules.length === 0) {
                               console.warn("No OB schedules found");
                             }
 
-                            let fOb = ((obTotal * 100) / 100);
+                            let fOb = obSum.toNumber();
 
                             return obTotal > 0 ? (
                               <tr key="ob-total" className="hover:bg-gray-2">
@@ -262,11 +262,10 @@ const RenewalAmntForm: React.FC<ParentFormBr> = ({ renewalIDs, dataComputedRenew
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {(() => {
-                const renewalTotal = unifiedSelectedValues.reduce(
-                  (total: number, row: any) => (row?.amount > 0 ? total + parseFloat(row?.amount) : total),
-                  0
+                const renewalTotal = sumAmounts(
+                  unifiedSelectedValues.map((row: any) => (row?.amount > 0 ? parseFloat(row?.amount) : 0))
                 );
-                return formatNumber(renewalTotal);
+                return formatNumber(renewalTotal.toNumber());
               })()}
             </div>
             <button

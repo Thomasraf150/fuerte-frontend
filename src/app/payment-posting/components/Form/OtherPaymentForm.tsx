@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatToTwoDecimalPlaces, parseNumericInput as num, formatNumberComma } from '@/utils/helper';
+import { otherPaymentRefund, suggestInterest } from '@/utils/paymentSplit';
 import { Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import moment from 'moment';
@@ -17,29 +18,6 @@ interface OMProps {
   paymentLoading: boolean;
 }
 
-/**
- * Suggested interest for a period: proportional to the principal applied to it,
- * capped at the remaining UDI. A cash Collection is taken net of bank charge
- * (matches the Process Payment form); Advanced Payment / Payment UA/SP are gross.
- * Overpaying via Collection earns the full remaining UDI. Returns 0 for a
- * fully-paid period or any non-finite result. Pure — easy to reason about/test.
- */
-function suggestInterest(
-  collection: number,
-  advanced: number,
-  paymentUaSp: number,
-  bankCharge: number,
-  remainingDue: number,
-  remainingUdi: number,
-): number {
-  if (remainingDue <= 0) return 0;
-  if (collection > remainingDue) return remainingUdi;
-  const principalNet = collection > 0 ? Math.max(0, collection - bankCharge) : advanced + paymentUaSp;
-  let interest = remainingUdi * (principalNet / remainingDue);
-  if (!isFinite(interest) || isNaN(interest) || interest < 0) interest = 0;
-  if (interest > remainingUdi) interest = remainingUdi;
-  return interest;
-}
 
 const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSelectedMoSchedOthPay, selectedUdiSched, onSubmitOthCollectionPayment, paymentLoading }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<OtherCollectionFormValues>();
@@ -78,23 +56,22 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
 
     // Pull live values for every field the cascade depends on — preferring the
     // field being typed over react-hook-form's (possibly stale) watch().
-    const remainingDue = Number(selectedMoSchedOthPay?.amount) || 0;
-    const remainingUdi = Number(selectedUdiSched?.amount) || 0;
-    const collection = type === 'collection' ? incoming : num(watch('collection'));
-    const bankCharge = type === 'bank_charge' ? incoming : num(watch('bank_charge'));
-    const paymentUaSp = type === 'payment_ua_sp' ? incoming : num(watch('payment_ua_sp'));
-    const advanced = type === 'advanced_payment' ? incoming : num(watch('advanced_payment'));
+    // Exact decimals (utils/paymentSplit): the server books the AP Refund and Interest as sent.
+    const live = (field: keyof OtherCollectionFormValues) => (type === field ? numericValue : watch(field));
+    const amounts = {
+      collection: live('collection'),
+      bankCharge: live('bank_charge'),
+      paymentUaSp: live('payment_ua_sp'),
+      advanced: live('advanced_payment'),
+      remainingDue: selectedMoSchedOthPay?.amount,
+      remainingUdi: selectedUdiSched?.amount,
+    };
 
     // AP Refund: the CHANGE returned when a cash Collection exceeds the remaining
     // due — only the EXCESS over the due (matches the Process Payment form), net of
     // any bank charge, never negative. (Previously refunded the whole collection,
     // which cancelled the credit and over-stated the OB.)
-    if (collection > remainingDue) {
-      const refund = collection - remainingDue - bankCharge;
-      setValue('ap_refund', (isFinite(refund) && refund > 0 ? refund : 0).toFixed(2));
-    } else {
-      setValue('ap_refund', '0.00');
-    }
+    setValue('ap_refund', otherPaymentRefund(amounts));
 
     // One-box rule: when one of the three payment boxes is filled, clear the
     // other two so the same money can never be booked twice (the fields are also
@@ -114,7 +91,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // operator hand-edits Interest (interestTouched); only the payment boxes /
     // bank charge drive it. The field stays editable (office decision 2026-06-26).
     if (INTEREST_DRIVERS.includes(type) && !interestTouched.current) {
-      setValue('interest', suggestInterest(collection, advanced, paymentUaSp, bankCharge, remainingDue, remainingUdi).toFixed(2));
+      setValue('interest', suggestInterest(amounts));
     }
 
     setValue(type, formattedValue);

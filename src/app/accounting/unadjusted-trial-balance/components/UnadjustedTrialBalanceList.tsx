@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts } from '@/utils/financial';
 import { Card, CardBody } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
@@ -24,7 +25,7 @@ const TB_SECTIONS: ReadonlyArray<readonly [string, keyof DataTbRow, string]> = [
 
 // Same rounding as before: sum, then toFixed(2).
 const sumOf = (rows: any[], pick: (item: any) => number): number =>
-  parseFloat(rows.reduce((acc: number, item: any) => acc + pick(item), 0).toFixed(2));
+  parseFloat(sumAmounts(rows.map(pick)).toFixed(2));
 
 const UnadjustedTrialBalanceList: React.FC = () => {
   const [actionLbl, setActionLbl] = useState<string>('');

@@ -1,5 +1,6 @@
 "use client";
 
+import { addAmounts } from '@/utils/financial';
 import React from "react";
 import { SubBranchBreakdown } from "@/types/dashboard";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -52,9 +53,9 @@ const SubBranchBreakdownTable: React.FC<SubBranchBreakdownTableProps> = ({
   const totals = breakdown.reduce(
     (acc, item) => ({
       loan_count: acc.loan_count + item.loan_count,
-      nr_balance: acc.nr_balance + parseFloat(item.nr_balance),
-      udi_balance: acc.udi_balance + parseFloat(item.udi_balance),
-      cash_out: acc.cash_out + parseFloat(item.cash_out || "0"),
+      nr_balance: addAmounts(acc.nr_balance, parseFloat(item.nr_balance)).toNumber(),
+      udi_balance: addAmounts(acc.udi_balance, parseFloat(item.udi_balance)).toNumber(),
+      cash_out: addAmounts(acc.cash_out, parseFloat(item.cash_out || "0")).toNumber(),
     }),
     { loan_count: 0, nr_balance: 0, udi_balance: 0, cash_out: 0 }
   );

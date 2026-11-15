@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts } from '@/utils/financial';
 import React from 'react';
 import { formatNumberComma, formatDateRange, toCamelCase } from '@/utils/helper';
 import {
@@ -35,8 +36,8 @@ const SummaryTicketByBranch: React.FC<BranchBreakdownProps> = ({ data, startDate
     credit: parseFloat(item.credit || '0'),
   }));
 
-  const grandTotalDebit  = mainBranches.reduce((s, m) => s + m.totals.debit,  0);
-  const grandTotalCredit = mainBranches.reduce((s, m) => s + m.totals.credit, 0);
+  const grandTotalDebit  = sumAmounts(mainBranches.map((m) => m.totals.debit)).toNumber();
+  const grandTotalCredit = sumAmounts(mainBranches.map((m) => m.totals.credit)).toNumber();
   const grandBorrowers   = mainBranches.reduce(
     (s, m) => s + m.subBranches.reduce((ss, sub) => ss + borrowersOf(sub.details), 0),
     0,

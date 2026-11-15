@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts } from '@/utils/financial';
 import React from 'react';
 import { formatNumberComma, formatDateRange } from '@/utils/helper';
 import {
@@ -24,7 +25,7 @@ const NetMovementsByBranch: React.FC<NetMovementBranchProps> = ({ data, startDat
     amount: parseFloat(item.amount || '0'),
   }));
 
-  const grandTotal = mainBranches.reduce((s, m) => s + m.totals.amount, 0);
+  const grandTotal = sumAmounts(mainBranches.map((m) => m.totals.amount)).toNumber();
 
   return (
     <div className="mt-6">
