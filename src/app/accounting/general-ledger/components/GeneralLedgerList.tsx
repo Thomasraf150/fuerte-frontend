@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts } from '@/utils/financial';
 import { Card, CardBody } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import CustomDatatable from '@/components/CustomDatatable';
@@ -153,10 +154,10 @@ const GeneralLedgerList: React.FC = () => {
                           {/* While loading these would read 0.00 off an empty array, a real-looking
                               figure for a total nobody has computed yet. An em dash says "not known". */}
                           <td className={rt.tdNum}>
-                            {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.debit) || 0), 0) || 0)}
+                            {loading ? '—' : formatNumberComma(sumAmounts((filteredData ?? []).map((item) => Number(item?.debit) || 0)).toNumber())}
                           </td>
                           <td className={rt.tdNum}>
-                            {loading ? '—' : formatNumberComma(filteredData?.reduce((acc, item) => acc + (Number(item?.credit) || 0), 0) || 0)}
+                            {loading ? '—' : formatNumberComma(sumAmounts((filteredData ?? []).map((item) => Number(item?.credit) || 0)).toNumber())}
                           </td>
                         </tr>
                       </tfoot>

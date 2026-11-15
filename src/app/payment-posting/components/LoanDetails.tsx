@@ -4,6 +4,7 @@ import { scheduleRowViews } from '@/utils/scheduleRowState';
 import { ROW_MARKER, ScheduleRowStatus, ScheduleSummary } from './ScheduleRowStatus';
 import { BorrLoanRowData, CollectionFormValues, OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
+import { addAmounts } from '@/utils/financial';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus, formatNumberComma } from '@/utils/helper';
 import { CreditCard, RefreshCcw, Save, RotateCw } from 'react-feather';
@@ -34,11 +35,11 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
   // PARKED: this sum is missing a `+` before loan_details[5] and [6], so those two lines are
   // statements of their own and never reach the total (it shows 1,200 less than the loan page).
   // Left as is on purpose until Rafael decides; do not add the `+` here without his say.
-  const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[4]?.credit ?? 0)
-                        Number(loanSingleData?.loan_details[5]?.credit ?? 0)
-                        Number(loanSingleData?.loan_details[6]?.credit ?? 0);
+  const totalDeduction = addAmounts(
+    loanSingleData?.loan_details[2]?.credit ?? 0,
+    loanSingleData?.loan_details[3]?.credit ?? 0,
+    loanSingleData?.loan_details[4]?.credit ?? 0,
+  ).toNumber();
 
   const handleProceedToPay = (amortData: any, udiData: any) => {
     setSelectedMoSchedOthPay(undefined);

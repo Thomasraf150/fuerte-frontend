@@ -1,5 +1,6 @@
 "use client";
 
+import { sumAmounts, addAmounts, subtractAmounts } from '@/utils/financial';
 import React, { useEffect, useState } from 'react';
 import CardDataStats from "@/components/CardDataStats";
 import { FileText } from "react-feather";
@@ -27,7 +28,7 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
     setReleasingIncome(newIncome);
 
     // Sum the values
-    const total = newIncome.reduce((acc: any, value: any) => acc + value, 0);
+    const total = sumAmounts(newIncome).toNumber();
     setTotalReleasingIncome(total);
   }, [sumTixData]);
 
@@ -45,7 +46,7 @@ const NetMovements: React.FC<SumProps> = ({sumTixData, startDate, endDate}) => {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-2 lg:gap-2 md:gap-2">
         
         <div>
-          <CardDataStats title="On Record Financed" total={`₱ ${formatNumberComma((sumTixData?.summary_tix_net_movement[1]?.amount || 0) - (sumTixData?.summary_tix_net_movement[5]?.amount || 0) - (sumTixData?.summary_tix_net_movement[6]?.amount || 0) + totalReleasingIncome)}`} rate="" levelUp>
+          <CardDataStats title="On Record Financed" total={`₱ ${formatNumberComma(addAmounts(subtractAmounts(sumTixData?.summary_tix_net_movement[1]?.amount || 0, sumTixData?.summary_tix_net_movement[5]?.amount || 0, sumTixData?.summary_tix_net_movement[6]?.amount || 0), totalReleasingIncome).toNumber())}`} rate="" levelUp>
             <FileText />
           </CardDataStats>
         </div>

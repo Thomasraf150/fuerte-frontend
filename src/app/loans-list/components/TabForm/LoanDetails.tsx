@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
+import { addAmounts } from '@/utils/financial';
 import { formatDate } from '@/utils/formatDate';
 import { loanStatus } from '@/utils/helper';
 import { Printer } from 'react-feather';
@@ -26,11 +27,13 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
     }
   };
 
-  const totalDeduction = Number(loanSingleData?.loan_details[2]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[3]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[4]?.credit ?? 0) + 
-                        Number(loanSingleData?.loan_details[5]?.credit ?? 0) +
-                        Number(loanSingleData?.loan_details[6]?.credit ?? 0);
+  const totalDeduction = addAmounts(
+    loanSingleData?.loan_details[2]?.credit ?? 0,
+    loanSingleData?.loan_details[3]?.credit ?? 0,
+    loanSingleData?.loan_details[4]?.credit ?? 0,
+    loanSingleData?.loan_details[5]?.credit ?? 0,
+    loanSingleData?.loan_details[6]?.credit ?? 0,
+  ).toNumber();
 
   return (
       <div className="grid grid-cols-1 gap-4">

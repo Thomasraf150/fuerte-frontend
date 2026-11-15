@@ -1,5 +1,6 @@
 "use client";
 
+import { addAmounts } from '@/utils/financial';
 import React, { useEffect, useState } from 'react';
 import { formatToTwoDecimalPlaces, formatDateRange, formatCount } from '@/utils/helper';
 import { toCamelCase, formatNumberComma } from '@/utils/helper';
@@ -40,9 +41,9 @@ const SummaryTicket: React.FC<SumProps> = ({sumTixData, startDate, endDate, isOw
             const desc = item.description?.trim().toLowerCase();
             const credit = parseFloat(item.credit || 0);
             return {
-              totalDebit: acc.totalDebit + parseFloat(item.debit || 0),
-              totalCredit: acc.totalCredit + credit,
-              totalIncome: acc.totalIncome + (INCOME_DESCRIPTIONS.includes(desc) ? credit : 0),
+              totalDebit: addAmounts(acc.totalDebit, parseFloat(item.debit || 0)).toNumber(),
+              totalCredit: addAmounts(acc.totalCredit, credit).toNumber(),
+              totalIncome: addAmounts(acc.totalIncome, INCOME_DESCRIPTIONS.includes(desc) ? credit : 0).toNumber(),
             };
           },
           { totalDebit: 0, totalCredit: 0, totalIncome: 0 }

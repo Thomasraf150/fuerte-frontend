@@ -99,6 +99,16 @@ export function addAmounts(...amounts: (DecimalType | string | number)[]): Decim
 }
 
 /**
+ * Add an array of financial amounts with precision (array form of addAmounts)
+ *
+ * @param values - Amounts to add (empty array gives Decimal(0))
+ * @returns Decimal sum of all amounts
+ */
+export function sumAmounts(values: (DecimalType | string | number | null | undefined)[]): DecimalType {
+  return addAmounts(...values.map((v) => (v instanceof Decimal ? v : parseFinancialAmount(v))));
+}
+
+/**
  * Subtract financial amounts with precision
  *
  * @param minuend - The amount to subtract from

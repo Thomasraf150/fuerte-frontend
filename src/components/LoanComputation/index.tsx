@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BorrLoanRowData } from '@/utils/DataTypes';
 import { formatNumber } from '@/utils/formatNumber';
+import { addAmounts } from '@/utils/financial';
 
 interface ParentFormBr {
   dataComputedLoans: BorrLoanRowData | undefined
@@ -16,41 +17,20 @@ const LoanComputation: React.FC<ParentFormBr> = ({ dataComputedLoans }) => {
   //   )
   // )}
 
-  const totalDeduction = Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('udi')
-                            )?.credit || 0 // <-- access credit here
-                          ) + 
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('insurance')
-                            )?.credit || 0 // <-- access credit here
-                          ) + 
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('agent fee')
-                            )?.credit || 0 // <-- access credit here
-                          ) + 
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('processing')
-                            )?.credit || 0 // <-- access credit here
-                          ) + 
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('collection')
-                            )?.credit || 0 // <-- access credit here
-                          ) + 
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('notarial')
-                            )?.credit || 0 // <-- access credit here
-                          ) + 
-                          Number(
-                            dataComputedLoans?.loan_details?.find((entry) =>
-                              entry.description.toLowerCase().includes('penalty')
-                            )?.credit || 0 // <-- access credit here
-                          );
+  const creditOf = (key: string) =>
+    dataComputedLoans?.loan_details?.find((entry) =>
+      entry.description.toLowerCase().includes(key)
+    )?.credit || 0;
+
+  const totalDeduction = addAmounts(
+    creditOf('udi'),
+    creditOf('insurance'),
+    creditOf('agent fee'),
+    creditOf('processing'),
+    creditOf('collection'),
+    creditOf('notarial'),
+    creditOf('penalty'),
+  ).toNumber();
 
   useEffect(() => {
     console.log(dataComputedLoans?.loan_details, 'dataComputedLoans?.loan_details');
