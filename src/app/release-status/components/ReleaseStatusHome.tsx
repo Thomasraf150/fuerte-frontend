@@ -121,7 +121,7 @@ const ReleaseStatusHome: React.FC = () => {
     <div className="atm-root flex flex-col gap-6">
       <ul aria-label="Release rules" className="max-w-3xl list-disc space-y-0.5 pl-5 text-sm text-black/80 dark:text-white/80">
         <li>Borrower overdue on amortization: no release.</li>
-        <li>Employer in the red (below {r?.threshold ?? '80'}% collected on {r ? r.cutoff_label : 'the last cut-off'}): only its borrowers paying on time are released.</li>
+        <li>Employer in the red (below {r?.threshold ?? '80'}% collected on {r ? r.cutoff_label : 'the last cut-off'}): shown for follow-up only. It holds no release; its overdue borrowers are held by the rule above.</li>
         <li>Branch in the red: no release at all.</li>
       </ul>
       {error && <p role="alert" className="rounded-lg bg-danger/10 p-4 text-danger">{error}</p>}
