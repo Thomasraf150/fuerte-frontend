@@ -73,7 +73,7 @@ export interface PendingRelease {
   loan_id: string; loan_ref: string | null; borrower_name: string; branch_sub_name: string; loan_proceeds: string;
   person_status: Standing; company_name: string | null; company_status: Standing | null; may_release: boolean; reason: string | null;
   /** Which check holds it, for the short reason: null when it may go out. */
-  hold: 'eligibility' | 'branch' | 'borrower' | 'employer' | null;
+  hold: 'eligibility' | 'branch' | 'borrower' | null;
   borrower_id: string; branch_sub_id: string; company_id: string | null;
   /** For a borrower in the red: the loan whose overdue amortization a payment goes to. */
   overdue_loan_id: string | null;

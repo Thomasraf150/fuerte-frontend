@@ -73,7 +73,6 @@ const LINK = 'font-semibold text-primary underline-offset-2 hover:underline focu
 function shortReason(p: PendingRelease): string {
   switch (p.hold) {
     case 'borrower': return 'Borrower overdue';
-    case 'employer': return `${p.company_name ?? 'Employer'} in the red`;
     case 'branch': return `${p.branch_sub_name} is in the red`;
     case 'eligibility': return 'Not cleared to borrow';
     default: return 'Held';
@@ -82,14 +81,13 @@ function shortReason(p: PendingRelease): string {
 
 /**
  * The one thing that moves this loan on: release it (the loan page opens on its Release step), post
- * the overdue payment, see the employer who is in the red, the branch's collection status, or the
- * borrower whose own record stops the loan.
+ * the overdue payment, the branch's collection status, or the borrower whose own record stops the
+ * loan. An employer in the red holds no loan (since 2026-11-18).
  */
 function nextAction(p: PendingRelease): { href: string; label: string } {
   if (p.may_release) return { href: `/loans-list/${p.loan_id}`, label: 'Release' };
   switch (p.hold) {
     case 'borrower': return p.overdue_loan_id ? { href: `/payment-posting/${p.overdue_loan_id}`, label: 'Post payment' } : { href: `/borrowers/${p.borrower_id}`, label: 'Open borrower' };
-    case 'employer': return p.company_id ? { href: employerHref(p.company_id), label: `See ${p.company_name ?? 'employer'}` } : { href: `/borrowers/${p.borrower_id}`, label: 'Open borrower' };
     case 'branch': return { href: '/atm-collections', label: 'Branch status' };
     default: return { href: `/borrowers/${p.borrower_id}`, label: 'Open borrower' };
   }
