@@ -938,6 +938,8 @@ export interface RowAcctgEntry {
   loan: BorrLoanRowData
   borrower_full_name: string;
   vendor_full_name: string;
+  /** The branch the voucher is filed under: a new voucher's choice, or a saved voucher's own. */
+  branch_sub_id?: string;
   branch_sub_name: string;
 }
 export interface RowVendorTypeData {

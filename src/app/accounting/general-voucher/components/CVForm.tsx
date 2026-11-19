@@ -14,11 +14,12 @@ import usePayee from '@/hooks/usePayee';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
-import { html } from '@/utils/html';
+import { escapeHtml, html } from '@/utils/html';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData, SelectOption } from '@/utils/DataTypes';
 import { toast } from '@/utils/notify';
 import { useCanEditVouchers } from '@/hooks/useRoleGates';
+import VoucherBranchField, { VoucherBranch, rememberVoucherBranch } from '@/components/VoucherBranchField';
 import {
   parseFinancialAmount,
   addAmounts,
@@ -47,9 +48,11 @@ interface ParentFormBr {
   loading: boolean;
   generalVoucherLoading: boolean;
   pubSubBrId: string;
+  /** A saved voucher's Branch block (MoveVoucherBranch), shown where a new voucher shows its picker. */
+  branchSlot?: React.ReactNode;
 }
 
-const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, printLoading, loading, generalVoucherLoading, pubSubBrId }) => {
+const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, createGV, updateGV, fetchGV, printSummaryTicketDetails, printLoading, loading, generalVoucherLoading, pubSubBrId, branchSlot }) => {
   // Cancel Entry and Update Date are for Accounting, Admin and Owner (Q40(a), 2026-11-13).
   const canEditVouchers = useCanEditVouchers();
   const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<RowAcctgEntry>();
@@ -66,6 +69,8 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
   // whole payee list would be a wasted round-trip on every voucher merely opened.
   const { payees, createPayee, loading: payeeLoading, creating: payeeCreating, loadFailed: payeeLoadFailed } = usePayee(!isSavedVoucher);
   const [activeInput, setActiveInput] = useState<{ index: number; field: 'debit' | 'credit' } | null>(null);
+  // The branch a new voucher is filed under; named on the Save button so it is seen before saving.
+  const [branch, setBranch] = useState<VoucherBranch | null>(null);
 
   useEffect(() => {
     fetchCoaDataTable();
@@ -292,13 +297,14 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     }
 
     const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
+      branch ? `Save this voucher to ${escapeHtml(branch.name)}?` : 'Are you sure?',
       'You won\'t be able to revert this!',
       'Yes, save it',
     );
     if (isConfirmed) {
       const result = await createGV(data);
       if (result.success) {
+        if (data.branch_sub_id) rememberVoucherBranch(String(data.branch_sub_id));
         fetchGV(pubSubBrId, "", "");
         setShowForm(false);
       }
@@ -364,6 +370,24 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
           <></>
         )}
         <form onSubmit={handleSubmit(onSubmit)}>
+          {isSavedVoucher && branchSlot && <div className="mb-5">{branchSlot}</div>}
+          {!isSavedVoucher && (
+            <div className="mb-5">
+              <Controller
+                control={control}
+                name="branch_sub_id"
+                rules={{ required: 'Choose the branch this voucher belongs to.' }}
+                render={({ field, fieldState }) => (
+                  <VoucherBranchField
+                    value={field.value ?? ''}
+                    prefix="CHKV"
+                    error={fieldState.error?.message}
+                    onChange={(b) => { setBranch(b); field.onChange(b?.id ?? ''); }}
+                  />
+                )}
+              />
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-5">
             <div className='mt-2'>
               <FormInput
@@ -571,7 +595,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
                 ) : (
                   <>
                     <Save size={17} className="mr-1" />
-                    <span>Save</span>
+                    <span>{branch ? `Save to ${branch.name}` : 'Save'}</span>
                   </>
                 )}
               </Button>

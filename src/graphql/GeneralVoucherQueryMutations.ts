@@ -133,11 +133,24 @@ const GET_VOUCHER_BY_ID: string = `
       }
       borrower_full_name
       vendor_full_name
+      branch_sub_id
+      branch_sub_name
+    }
+  }
+`;
+
+/** Move one hand-entered voucher to another branch; it takes that branch's next number. */
+const RETAG_VOUCHER_MUTATION: string = `
+  mutation RetagVoucher($input: RetagVoucherInp!) {
+    retagVoucher(input: $input) {
+      status
+      message
     }
   }
 `;
 
 const GeneralVoucherQueryMutations = {
+  RETAG_VOUCHER_MUTATION,
   CREATE_GV_MUTATION,
   UPDATE_GV_MUTATION,
   GET_GV_QUERY,

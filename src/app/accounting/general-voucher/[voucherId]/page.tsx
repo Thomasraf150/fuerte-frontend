@@ -16,6 +16,8 @@ import JVForm from '../components/JVForm';
 import { RowAcctgEntry } from '@/utils/DataTypes';
 import { graphqlFetch } from '@/utils/graphqlFetch';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCanEditVouchers } from '@/hooks/useRoleGates';
+import MoveVoucherBranch from '../components/MoveVoucherBranch';
 
 const GeneralVoucherDetailPage: React.FC = () => {
   const params = useParams();
@@ -38,6 +40,9 @@ const GeneralVoucherDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [singleData, setSingleData] = useState<RowAcctgEntry | undefined>(undefined);
+  // Bumped after a move to another branch: the voucher's number and branch changed.
+  const [reloadKey, setReloadKey] = useState(0);
+  const canEditVouchers = useCanEditVouchers();
   useDocumentTitle(singleData?.journal_ref, singleData?.journal_name); // tab: "{journal ref} · {journal name} · Fuerte Lending"
 
   // Fetch voucher directly by ID (fixes pagination bug where voucher was on page 53 but only page 1 was fetched)
@@ -78,7 +83,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
     };
 
     fetchVoucher();
-  }, [voucherId]);
+  }, [voucherId, reloadKey]);
 
   // Back button handler
   const handleBack = () => {
@@ -140,6 +145,15 @@ const GeneralVoucherDetailPage: React.FC = () => {
     ? `Reference #: ${singleData.journal_ref}`
     : isCheckVoucher ? 'Check Voucher' : 'Journal Voucher';
   const actionLbl = isCheckVoucher ? 'Update Check Voucher' : 'Update Journal Voucher';
+  // Shown inside the form card, where a new voucher shows its branch picker, so both look alike.
+  const branchSlot = (
+    <MoveVoucherBranch
+      voucher={singleData}
+      // Hidden for a loan's voucher (the server refuses it); a free-text reference may still move.
+      canMove={canEditVouchers === true && !singleData.is_cancelled && !singleData.loan}
+      onMoved={() => setReloadKey((k) => k + 1)}
+    />
+  );
 
   return (
     <DefaultLayout>
@@ -169,6 +183,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
               pubSubBrId={pubSubBrId}
               printSummaryTicketDetails={printSummaryTicketDetails}
               printLoading={printLoading}
+              branchSlot={branchSlot}
             />
           ) : (
             <JVForm
@@ -182,6 +197,7 @@ const GeneralVoucherDetailPage: React.FC = () => {
               pubSubBrId={pubSubBrId}
               printSummaryTicketDetails={printSummaryTicketDetails}
               printLoading={printLoading}
+              branchSlot={branchSlot}
             />
           )}
         </Card>

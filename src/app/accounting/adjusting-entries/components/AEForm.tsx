@@ -13,6 +13,8 @@ import PayeeView from './PayeeView';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { escapeHtml } from '@/utils/html';
+import VoucherBranchField, { VoucherBranch, rememberVoucherBranch } from '@/components/VoucherBranchField';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData } from '@/utils/DataTypes';
 import { formatNumberComma } from '@/utils/helper';
@@ -41,6 +43,8 @@ const AEForm: React.FC<ParentFormBr> = ({
   // const { createGV, fetchGV, loading } = useGeneralVoucher();
   const [ showPayee, setShowPayee ] = useState<boolean>(false);
   const [ dataPayee, setDataPayee ] = useState<RowVendorsData>();
+  // The branch a new entry is filed under; named on the Save button so it is seen before saving.
+  const [branch, setBranch] = useState<VoucherBranch | null>(null);
 
   useEffect(() => {
     fetchCoaDataTable();
@@ -125,13 +129,14 @@ const AEForm: React.FC<ParentFormBr> = ({
 
   const onSubmit: SubmitHandler<RowAcctgEntry> = async (data) => {
     const isConfirmed = await showConfirmationModal(
-      'Are you sure?',
+      branch ? `Save this entry to ${escapeHtml(branch.name)}?` : 'Are you sure?',
       'You won\'t be able to revert this!',
       'Yes, save it',
     );
     if (isConfirmed) {
       const result = await createAe(data);
       if (result.success) {
+        if (data.branch_sub_id) rememberVoucherBranch(String(data.branch_sub_id));
         await refresh(); // Use refresh instead of fetchAe
         setShowForm(false);
       }
@@ -162,6 +167,23 @@ const AEForm: React.FC<ParentFormBr> = ({
         <CardHeader title={<>{actionLbl} {singleData && (<>- <span className="font-bold text-orange-500"> {singleData?.journal_ref}</span></>)}</>} />
         <CardBody>
         <form onSubmit={handleSubmit(onSubmit)}>
+          {singleData === undefined && (
+            <div className="mb-5">
+              <Controller
+                control={control}
+                name="branch_sub_id"
+                rules={{ required: 'Choose the branch this entry belongs to.' }}
+                render={({ field, fieldState }) => (
+                  <VoucherBranchField
+                    value={field.value ?? ''}
+                    prefix="JV"
+                    error={fieldState.error?.message}
+                    onChange={(b) => { setBranch(b); field.onChange(b?.id ?? ''); }}
+                  />
+                )}
+              />
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-5">
             <div className='mt-2'>
               <FormInput
@@ -362,7 +384,7 @@ const AEForm: React.FC<ParentFormBr> = ({
                 ) : (
                   <>
                     <Save size={17} className="mr-1" />
-                    <span>Save</span>
+                    <span>{branch ? `Save to ${branch.name}` : 'Save'}</span>
                   </>
                 )}
               </Button>

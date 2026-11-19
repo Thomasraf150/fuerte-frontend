@@ -91,7 +91,8 @@ const useAdjustingEntries = () => {
         input: {
           id: row?.id,
           user_id: String(userData?.user?.id),
-          ...(isCancelling ? {} : { journal_date: row?.journal_date }),
+          // Only a new entry carries the branch the user chose (VoucherBranchField).
+          ...(isCancelling ? {} : { journal_date: row?.journal_date, branch_sub_id: row?.branch_sub_id }),
           vendor_id: row?.vendor_id,
           journal_name: row?.journal_name,
           reference_no: row?.reference_no,

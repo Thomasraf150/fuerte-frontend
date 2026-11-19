@@ -165,7 +165,9 @@ const useGeneralVoucher = () => {
         input: {
           id: row?.id,
           user_id: String(userData?.user?.id),
-          ...(isCancelling ? {} : { journal_date: row?.journal_date }),
+          // A cancel's reversal follows the original's branch on the server; only a new voucher
+          // carries the branch the user chose (VoucherBranchField).
+          ...(isCancelling ? {} : { journal_date: row?.journal_date, branch_sub_id: row?.branch_sub_id }),
           vendor_id: row?.vendor_id,
           journal_name: row?.journal_name,
           check_no: row?.check_no,
