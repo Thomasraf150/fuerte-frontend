@@ -22,13 +22,21 @@ export const showConfirmationModal = async (
   text: string,
   confText: string,
   showCancel: boolean = true,
-  useHtml: boolean = false
+  useHtml: boolean = false,
+  /**
+   * focusCancel: open on Back, so an Enter typed out of habit goes back instead of confirming.
+   * returnFocus: false when the caller moves focus itself after the dialog (SweetAlert2 otherwise
+   * puts it back on the button that opened it, after the caller's own focus call).
+   */
+  options: { focusCancel?: boolean; returnFocus?: boolean } = {}
 ): Promise<boolean> => {
   const result = await MySwal.fire({
     title: title,
     ...(useHtml ? { html: text } : { text: text }),
     icon: 'warning',
     showCancelButton: showCancel,
+    ...(options.focusCancel ? { focusCancel: true } : {}),
+    ...(options.returnFocus === false ? { returnFocus: false } : {}),
     confirmButtonColor: CONFIRM_COLORS.confirm,
     cancelButtonColor: CONFIRM_COLORS.reject,
     confirmButtonText: confText,

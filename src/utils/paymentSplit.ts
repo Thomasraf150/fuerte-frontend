@@ -100,6 +100,25 @@ export function suggestInterest(input: OtherPaymentInput): string {
   return toCentavo(proRataInterest(applied, due, udi));
 }
 
+/**
+ * Other Payment form, before posting: true when the Interest typed (empty counts as 0) is below
+ * the suggestion. A full ₱2,190 payment was booked with its Interest box emptied, so ₱0 instead of
+ * ₱140 (CRJ-FBBAT-0005960-26, 2026-10-26); the form now asks first. Exact decimals, no floats.
+ */
+export function interestBelowSuggestion(typed: Amount, suggested: Amount): boolean {
+  return new Decimal(interestAsPosted(typed)).lessThan(amount(suggested));
+}
+
+/**
+ * The Interest box as the server will book it: PaymentPostingService::normalizeAmount keeps a plain
+ * number and books anything else as 0. parseFloat would read "140..00" as 140 while the server books
+ * 0, so the check and the dialog read the box this way instead. Unrounded, as typed.
+ */
+export function interestAsPosted(typed: Amount): string {
+  const text = String(typed ?? '').replace(/,/g, '').trim();
+  return /^(\d+\.?\d*|\.\d+)$/.test(text) ? new Decimal(text).toString() : '0';
+}
+
 /** Other Payment form: the change returned when a cash Collection exceeds the due, net of bank charge. */
 export function otherPaymentRefund(input: Pick<OtherPaymentInput, 'collection' | 'bankCharge' | 'remainingDue'>): string {
   const collection = amount(input.collection);

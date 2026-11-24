@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatToTwoDecimalPlaces, parseNumericInput as num, formatNumberComma } from '@/utils/helper';
-import { otherPaymentRefund, suggestInterest } from '@/utils/paymentSplit';
+import { interestAsPosted, interestBelowSuggestion, otherPaymentRefund, suggestInterest } from '@/utils/paymentSplit';
+import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import moment from 'moment';
@@ -110,6 +111,30 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
       return;
     }
     setPrincipalError('');
+
+    // Interest below the suggestion (empty counts as 0): ask before posting. The box stays
+    // editable, but a full payment was once booked with it emptied, ₱0 instead of ₱140
+    // (CRJ-FBBAT-0005960-26). Opens on Back, so Enter, Enter during fast entry posts nothing.
+    const suggested = suggestInterest({
+      collection: data.collection, advanced: data.advanced_payment, paymentUaSp: data.payment_ua_sp,
+      bankCharge: data.bank_charge, remainingDue: selectedMoSchedOthPay?.amount, remainingUdi: selectedUdiSched?.amount,
+    });
+    if (interestBelowSuggestion(data.interest, suggested)) {
+      const typed = formatNumberComma(num(interestAsPosted(data.interest)));
+      const confirmed = await showConfirmationModal(
+        'Interest below what is due',
+        `Interest ₱${typed} is below the ₱${formatNumberComma(num(suggested))} due for this payment.`,
+        `Post ₱${typed} interest`,
+        true,
+        false,
+        { focusCancel: true, returnFocus: false },
+      );
+      if (!confirmed) {
+        document.getElementById('udi')?.focus();
+        return;
+      }
+      console.info('[OtherPayment] interest below the suggestion, confirmed', { loan_schedule_id: data.loan_schedule_id, suggested, typed: data.interest ?? '' });
+    }
 
     const result = await onSubmitOthCollectionPayment(data, selectedMoSchedOthPay?.loan_id) as { success: boolean; error?: string; data?: any };
 
@@ -302,9 +327,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 decision 2026-06-26): entering Advanced Payment / Payment UA/SP
                 (Collection 0) still fills it. */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
-              <div className="2xl:w-2/5 px-2 py-1 sm:px-4 text-sm font-semibold text-black dark:text-white">
+              <label htmlFor="udi" className="2xl:w-2/5 px-2 py-1 sm:px-4 text-sm font-semibold text-black dark:text-white">
                 Interest
-              </div>
+              </label>
               <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <input
                   // Worked out by the system: no click, no tab stop, no caret (Raf 2026-11-24).
@@ -312,7 +337,6 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                   tabIndex={-1}
                   type="text"
                   id="udi"
-                  aria-label="Interest"
                   placeholder="0.00"
                   readOnly={true}
                   value={watch('interest') ?? ''}
