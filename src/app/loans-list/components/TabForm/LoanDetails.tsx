@@ -35,6 +35,14 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
     loanSingleData?.loan_details[6]?.credit ?? 0,
   ).toNumber();
 
+  // What a renewal took out of the proceeds besides the deductions: the old loan's balance and the
+  // penalty (incl. the one carried from the old loan, 2026-11-23). Shown only when not zero, so the
+  // proceeds add up on screen as on the printout (Raf 2026-11-24). By description, not position.
+  const creditOf = (description: string) =>
+    Number(loanSingleData?.loan_details?.find((d) => d?.description === description)?.credit ?? 0);
+  const outstandingBalance = creditOf('outstanding balance');
+  const penalty = creditOf('penalty');
+
   return (
       <div className="grid grid-cols-1 gap-4">
         <KeyValueColumns>
@@ -48,6 +56,8 @@ const LoanDetails: React.FC<OMProps> = ({ loanSingleData, printLoanDetails }) =>
           <KeyValueRow label="Term">{loanSingleData?.term} Mo/s.</KeyValueRow>
           <KeyValueRow label="Total Deduction">{formatNumber(totalDeduction)}</KeyValueRow>
           <KeyValueRow label="Total Interest">{formatNumber(Number(loanSingleData?.loan_details[2]?.credit ?? 0))}</KeyValueRow>
+          {outstandingBalance > 0 && <KeyValueRow label="Outstanding Balance">{formatNumber(outstandingBalance)}</KeyValueRow>}
+          {penalty > 0 && <KeyValueRow label="Penalty" alert>{formatNumber(penalty)}</KeyValueRow>}
           <KeyValueRow label="Loan Proceeds" total>{formatNumber(Number(loanSingleData?.loan_proceeds))}</KeyValueRow>
         </KeyValueList>
         <KeyValueList>

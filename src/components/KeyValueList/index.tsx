@@ -32,15 +32,17 @@ export const KeyValueRow: React.FC<{
   children: React.ReactNode;
   total?: boolean;
   valueClass?: string;
-}> = ({ label, children, total = false, valueClass = '' }) => (
+  /** A figure staff must not miss (a penalty carried from an old loan): label and value bold red. */
+  alert?: boolean;
+}> = ({ label, children, total = false, valueClass = '', alert = false }) => (
   <div
     className={`flex items-baseline justify-between gap-4 py-1.5 ${
       total ? 'mt-1 border-t border-stroke pt-3 dark:border-strokedark' : 'text-sm'
     }`}
   >
-    <dt className={total ? 'text-sm font-semibold text-black dark:text-white' : 'text-sm text-body dark:text-bodydark'}>{label}</dt>
+    <dt className={alert ? 'text-sm font-bold text-danger' : total ? 'text-sm font-semibold text-black dark:text-white' : 'text-sm text-body dark:text-bodydark'}>{label}</dt>
     <dd
-      className={`min-w-0 break-words text-right tabular-nums text-black dark:text-white ${
+      className={`min-w-0 break-words text-right tabular-nums ${alert ? 'font-bold text-danger' : 'text-black dark:text-white'} ${
         total ? 'text-xl font-bold' : ''
       } ${valueClass}`}
     >

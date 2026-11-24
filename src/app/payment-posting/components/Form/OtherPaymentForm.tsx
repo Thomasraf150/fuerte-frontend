@@ -266,7 +266,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
               <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <input
-                  className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-center text-sm text-black placeholder:text-body read-only:bg-whiten focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white dark:read-only:bg-meta-4"
+                  // Filled by the system: styled like Interest (claude-docs/form-standardization.md).
+                  className="pointer-events-none h-12 md:h-11 w-full cursor-default select-none rounded-lg border border-dashed border-field bg-whiten px-4 text-center text-sm font-semibold text-black focus:outline-none dark:border-field-dark dark:bg-meta-4 dark:text-white"
+                  tabIndex={-1}
                   type="text"
                   id="ap_refund"
                   placeholder="0.00"
@@ -305,7 +307,9 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
               <div className="2xl:w-3/5 px-2 py-1 sm:px-4 sm:py-2 text-black dark:text-white">
                 <input
-                  className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-center text-sm text-black placeholder:text-body read-only:bg-whiten focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white dark:read-only:bg-meta-4"
+                  // Worked out by the system: no click, no tab stop, no caret (Raf 2026-11-24).
+                  className="pointer-events-none h-12 md:h-11 w-full cursor-default select-none rounded-lg border border-dashed border-field bg-whiten px-4 text-center text-sm font-semibold text-black focus:outline-none dark:border-field-dark dark:bg-meta-4 dark:text-white"
+                  tabIndex={-1}
                   type="text"
                   id="udi"
                   aria-label="Interest"

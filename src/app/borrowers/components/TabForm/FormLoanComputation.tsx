@@ -39,10 +39,11 @@ const Group: React.FC<{ title: string; children: React.ReactNode }> = ({ title, 
 );
 
 /** One label and its figure, the figure right-aligned in tabular numerals so the columns line up. */
-const Row: React.FC<{ label: React.ReactNode; value: React.ReactNode; total?: boolean }> = ({ label, value, total = false }) => (
-  <div className={`flex items-baseline justify-between gap-4 py-1 text-sm ${total ? 'mt-1 border-t border-stroke pt-2 font-bold dark:border-strokedark' : ''}`}>
-    <dt className={total ? 'text-black dark:text-white' : 'text-body dark:text-bodydark'}>{label}</dt>
-    <dd className="tabular-nums text-black dark:text-white">{value}</dd>
+// alert: a figure the processor must not miss (the penalty carried from the old loan), bold and red.
+const Row: React.FC<{ label: React.ReactNode; value: React.ReactNode; total?: boolean; alert?: boolean }> = ({ label, value, total = false, alert = false }) => (
+  <div className={`flex items-baseline justify-between gap-4 py-1 text-sm ${total ? 'mt-1 border-t border-stroke pt-2 font-bold dark:border-strokedark' : ''} ${alert ? 'font-bold' : ''}`}>
+    <dt className={alert ? 'text-danger' : total ? 'text-black dark:text-white' : 'text-body dark:text-bodydark'}>{label}</dt>
+    <dd className={`tabular-nums ${alert ? 'text-danger' : 'text-black dark:text-white'}`}>{value}</dd>
   </div>
 );
 
@@ -109,12 +110,13 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ handleCompTblDecimal, reg
           <Row label="Loan Proceeds" value={fig(money(c?.loan_proceeds))} total />
         </Group>
         <Group title="Less">
-          <AmountRow name="ob" label="Outstanding Balance" {...editable} />
           {/* The renewed loans' penalty charged at the last due: the server's figure, read-only
-              (option B, 2026-11-23). The typed box below is for any other penalty only. */}
+              (option B, 2026-11-23), first in the group so it is read first (Raf 2026-11-24).
+              The typed box below is for any other penalty only. */}
           {Number(c?.carried_penalty ?? 0) > 0 && (
-            <Row label="Penalty carried from old loan" value={fig(money(c?.carried_penalty))} />
+            <Row label="Penalty carried from old loan" value={fig(money(c?.carried_penalty))} alert />
           )}
+          <AmountRow name="ob" label="Outstanding Balance" {...editable} />
           <AmountRow name="penalty" label={Number(c?.carried_penalty ?? 0) > 0 ? 'Other penalty' : 'Penalty'} {...editable} />
         </Group>
         <Group title="Add-On">
