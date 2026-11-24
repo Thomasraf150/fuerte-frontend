@@ -1,6 +1,6 @@
 "use client";
 
-import { sumAmounts, subtractAmounts } from '@/utils/financial';
+import { sumAmounts, addAmounts } from '@/utils/financial';
 import { Card, CardBody } from '@/components/Card';
 import React, { useEffect, useState } from 'react';
 import useTrialBalance from '@/hooks/useTrialBalance';
@@ -83,8 +83,10 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                     <td className={rt.tdNum}>{formatNumberComma(item?.total_credit)}</td>
                                     <td className={rt.tdNum}>{formatNumberComma(item?.adj_debit)}</td>
                                     <td className={rt.tdNum}>{formatNumberComma(item?.adj_credit)}</td>
-                                    <td className={rt.tdNum}>{formatNumberComma(item?.total_debit - item?.adj_debit)}</td>
-                                    <td className={rt.tdNum}>{formatNumberComma(item?.total_credit - item?.adj_credit)}</td>
+                                    {/* total_* already EXCLUDES adjusting (jv_entry) postings (UnadjustedTrialBalance),
+                                        so Adjusted = Unadjusted + Adjustments; subtracting took the JVs out twice. */}
+                                    <td className={rt.tdNum}>{formatNumberComma(addAmounts(item?.total_debit || 0, item?.adj_debit || 0).toNumber())}</td>
+                                    <td className={rt.tdNum}>{formatNumberComma(addAmounts(item?.total_credit || 0, item?.adj_credit || 0).toNumber())}</td>
                                   </tr>
                                 )) : (
                                   <tr>
@@ -98,8 +100,8 @@ const AdjustedTrialBalanceList: React.FC = () => {
                                   <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.total_credit || 0)))}</td>
                                   <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.adj_debit || 0)))}</td>
                                   <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => (item?.adj_credit || 0)))}</td>
-                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => subtractAmounts(item?.total_debit || 0, item?.adj_debit || 0).toNumber()))}</td>
-                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => subtractAmounts(item?.total_credit || 0, item?.adj_credit || 0).toNumber()))}</td>
+                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => addAmounts(item?.total_debit || 0, item?.adj_debit || 0).toNumber()))}</td>
+                                  <td className={rt.tdNum}>{formatNumberComma(sumOf(rows, (item: any) => addAmounts(item?.total_credit || 0, item?.adj_credit || 0).toNumber()))}</td>
                                 </tr>
                               </React.Fragment>
                             );
