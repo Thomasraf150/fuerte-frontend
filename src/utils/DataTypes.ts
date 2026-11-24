@@ -610,6 +610,8 @@ export interface DataRowLoanSchedules {
   due_date: string;
   /** What the payments settled of this instalment (Payment Posting's getLoanSchedule only); null elsewhere. */
   paid_amount?: string | null;
+  /** Penalty on this paid installment charged at the loan's last due (option B, 2026-11-23); getLoanSchedule only. */
+  carried_penalty?: string | null;
   loan_payments: DataRowLoanPayments[];
   is_deleted: string;
 }
@@ -752,6 +754,8 @@ export interface BorrLoanComputationRes {
   ob: string;
   rebates: string;
   penalty: string;
+  /** Renewed loans' penalty charged at the last due, taken from the proceeds (server's figure, option B). */
+  carried_penalty?: string | null;
   new_loan_proceeds: string;
 }
 export interface LoanReleaseFormValues {
@@ -805,6 +809,8 @@ export interface CustomerLedgerData {
   payment_ua_sp: string;
   penalty_ua_sp: string;
   advance_payment: string;
+  /** Penalty on this paid installment charged at the loan's last due (option B, 2026-11-23); not in running_balance. */
+  carried_penalty?: string | null;
 }
 export interface DataRowCollectionList {
   date_paid: string;

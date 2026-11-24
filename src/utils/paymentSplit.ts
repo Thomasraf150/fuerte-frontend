@@ -54,6 +54,23 @@ export function collectionSplit(input: CollectionSplitInput): { ap_refund: strin
   return { ap_refund: '0.00', ua_sp: toCentavo(due.minus(net).abs()), interest: toCentavo(interest) };
 }
 
+/**
+ * Process Payment form (Heidi 2026-11-23, option B): the cash pays the installment first; a penalty
+ * can be taken now only from the cash left after the bank charge and the remaining due. The rest of
+ * the penalty is charged at the loan's last due. The server refuses a larger penalty
+ * (PaymentPostingService::penaltyRefusal).
+ */
+export function penaltyAllowedNow(input: Pick<CollectionSplitInput, 'collection' | 'bankCharge' | 'remainingDue'>): string {
+  const due = Decimal.max(ZERO, amount(input.remainingDue));
+  const left = amount(input.collection).minus(amount(input.bankCharge)).minus(due);
+  return toCentavo(Decimal.max(ZERO, left));
+}
+
+/** True when the typed penalty is more than penaltyAllowedNow() (exact decimals). */
+export function penaltyAboveAllowed(penalty: Amount, allowed: Amount): boolean {
+  return amount(penalty).greaterThan(amount(allowed));
+}
+
 export interface OtherPaymentInput {
   collection: Amount;
   advanced: Amount;
@@ -64,20 +81,23 @@ export interface OtherPaymentInput {
 }
 
 /**
- * Other Payment form. Suggested interest: proportional to the principal applied, capped at the
- * remaining UDI. A cash Collection counts net of bank charge; Advanced Payment / Payment UA/SP
- * count gross. Overpaying via Collection earns the full remaining UDI. 0.00 for a paid period.
+ * Other Payment form. Interest (not editable, Heidi 2026-11-21/23): what the payment applies to the
+ * installment (the payment box less the bank charge and the change returned) as a share of the
+ * remaining due, times the remaining UDI; all of it once the installment is covered; 0.00 for a
+ * paid period. The server requires exactly this figure (PaymentPostingService::interestFor).
  */
 export function suggestInterest(input: OtherPaymentInput): string {
   const due = amount(input.remainingDue);
-  const udi = amount(input.remainingUdi);
-  const collection = amount(input.collection);
+  const udi = Decimal.max(ZERO, amount(input.remainingUdi));
   if (!due.greaterThan(0)) return '0.00';
-  if (collection.greaterThan(due)) return toCentavo(udi);
-  const principal = collection.greaterThan(0)
-    ? Decimal.max(ZERO, collection.minus(amount(input.bankCharge)))
-    : amount(input.advanced).plus(amount(input.paymentUaSp));
-  return toCentavo(proRataInterest(principal, due, udi));
+  const applied = amount(input.collection)
+    .plus(amount(input.advanced))
+    .plus(amount(input.paymentUaSp))
+    .minus(amount(input.bankCharge))
+    .minus(amount(otherPaymentRefund(input)));
+  if (!applied.greaterThan(0)) return '0.00';
+  if (!applied.lessThan(due)) return toCentavo(udi);
+  return toCentavo(proRataInterest(applied, due, udi));
 }
 
 /** Other Payment form: the change returned when a cash Collection exceeds the due, net of bank charge. */

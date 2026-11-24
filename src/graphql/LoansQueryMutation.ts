@@ -258,6 +258,7 @@ const PROCESS_BORROWER_LOAN_MUTATION: string = `
       ob
       rebates
       penalty
+      carried_penalty
       addon_terms
       addon_udi_rate
       addon_amount

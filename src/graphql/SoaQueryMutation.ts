@@ -20,6 +20,7 @@ const GET_CUSTOMER_LEDGER: string = `
         payment_ua_sp
         penalty_ua_sp
         advance_payment
+        carried_penalty
     }
   }
 `;

@@ -31,6 +31,7 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
   const totalPenaltyUaSp = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.penalty_ua_sp || 0))).toNumber() : 0;
   const totalUaSp = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.ua_sp || 0))).toNumber() : 0;
   const totalAdvancePayment = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.advance_payment || 0))).toNumber() : 0;
+  const totalCarriedPenalty = custLedgerData ? sumAmounts(custLedgerData.map((item) => String(item.carried_penalty || 0))).toNumber() : 0;
 
   return (
       <>
@@ -69,7 +70,14 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
                   <th scope="row" className={`${rt.tdNum} ${PIN} font-normal`}>{formatMoneyOrBlank(item.debit)}</th>
                   <td className={rt.tdNum}>{formatMoneyOrBlank(item.credit)}</td>
                   <td className={rt.tdNum}>{formatMoneyOrBlank(item.running_balance)}</td>
-                  <td className={rt.td}>{item.due_date}</td>
+                  <td className={rt.td}>
+                    {item.due_date}
+                    {Number(item.carried_penalty ?? 0) > 0 && (
+                      <span className="block text-xs font-medium text-[#8A5A00] dark:text-warning">
+                        Penalty due ₱{formatNumberComma(Number(item.carried_penalty))}
+                      </span>
+                    )}
+                  </td>
                   <td className={rt.td}>{item.date_paid}</td>
                   <td className={rt.tdNum}>{formatMoneyOrBlank(item.collection)}</td>
                   <td className={rt.tdNum}>{formatMoneyOrBlank(item.penalty)}</td>
@@ -106,6 +114,12 @@ const CustomerLedger: React.FC<OMProps> = ({ custLedgerData, loading }) => {
             </tfoot>
           </table>
         </div>
+        {totalCarriedPenalty > 0 && (
+          <p className="mt-3 pl-3 text-sm text-black dark:text-white">
+            <span className="font-semibold text-[#8A5A00] dark:text-warning">Penalty charged at last due: ₱{formatNumberComma(totalCarriedPenalty)}</span>
+            <span className="text-body dark:text-bodydark"> · not in the running balance; collected with the last payment, or taken at renewal.</span>
+          </p>
+        )}
       </>
   );
 };

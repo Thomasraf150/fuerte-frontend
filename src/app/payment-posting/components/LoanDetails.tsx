@@ -31,6 +31,22 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
   const [selectedMoSchedOthPay, setSelectedMoSchedOthPay] = useState<BorrLoanRowData>();
   const [selectedUdiSched, setSelectedUdiSched] = useState<BorrLoanRowData>();
   const rowViews = useMemo(() => scheduleRowViews(loanSingleData?.loan_schedules, manilaToday()), [loanSingleData]);
+  // Each installment's UDI schedule, matched by due date (2026-11-21). Matching by position went
+  // wrong on a loan with more installments than UDI schedules: every later installment sent the
+  // next date's UDI, and the server now refuses a full payment that names another date's UDI.
+  // Installments sharing a due date take that date's UDI schedules in order; a date with a single
+  // UDI schedule serves every installment on it.
+  const udiByInstallment = useMemo(() => {
+    const udis = loanSingleData?.loan_udi_schedules ?? [];
+    const taken: Record<string, number> = {};
+    return (loanSingleData?.loan_schedules ?? []).map((schedule) => {
+      const day = String(schedule?.due_date ?? '').slice(0, 10);
+      const sameDay = udis.filter((udi) => String(udi?.due_date ?? '').slice(0, 10) === day);
+      const nth = taken[day] ?? 0;
+      taken[day] = nth + 1;
+      return sameDay[nth] ?? sameDay[0];
+    });
+  }, [loanSingleData]);
 
   // PARKED: this sum is missing a `+` before loan_details[5] and [6], so those two lines are
   // statements of their own and never reach the total (it shows 1,200 less than the loan page).
@@ -41,7 +57,19 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
     loanSingleData?.loan_details[4]?.credit ?? 0,
   ).toNumber();
 
+  // A paid installment's penalty charged at the last due (option B, 2026-11-23) is collected through
+  // Process Payment as Collection X + Penalty X: the installment stays paid and X books penalty income.
+  const [prefillPenalty, setPrefillPenalty] = useState<string>();
+
   const handleProceedToPay = (amortData: any, udiData: any) => {
+    setPrefillPenalty(undefined);
+    setSelectedMoSchedOthPay(undefined);
+    setSelectedMoSched(amortData);
+    setSelectedUdiSched(udiData);
+  }
+
+  const handleCollectPenalty = (amortData: any, udiData: any, penalty: string) => {
+    setPrefillPenalty(penalty);
     setSelectedMoSchedOthPay(undefined);
     setSelectedMoSched(amortData);
     setSelectedUdiSched(udiData);
@@ -117,6 +145,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
               {loanSingleData?.loan_schedules?.map((item, i) => {
                 const view = rowViews[i];
                 const paid = view?.state === 'paid';
+                const carried = Number(item?.carried_penalty ?? 0) > 0 ? String(item?.carried_penalty) : null;
                 return (
                 <div
                   className={`relative grid grid-cols-2 sm:grid-cols-[minmax(100px,auto)_minmax(100px,auto)_minmax(80px,auto)_1fr] gap-2 sm:gap-4 border-t border-stroke px-2 sm:px-4 py-2 dark:border-strokedark md:px-6 ${ROW_MARKER[view?.state ?? 'upcoming']}`}
@@ -125,6 +154,12 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                   <div className="flex flex-col justify-center gap-1">
                     <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>{item?.due_date}</p>
                     {view && <ScheduleRowStatus view={view} />}
+                    {carried && (
+                      <p className="text-xs font-medium text-[#8A5A00] dark:text-warning tabular-nums">
+                        Penalty due ₱{formatNumberComma(Number(carried))}
+                        <span className="font-normal text-body dark:text-bodydark"> · charged at last due</span>
+                      </p>
+                    )}
                   </div>
                   <div className="hidden sm:flex items-center justify-end">
                     {/* What is still due, as the server sends it: 0.00 once paid -- the zero staff check after
@@ -135,7 +170,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                   </div>
                   <div className="flex items-center justify-end">
                     <p className={`text-xs sm:text-sm tabular-nums ${paid ? 'text-body dark:text-bodydark' : 'text-black dark:text-white'}`}>
-                      {formatNumberComma(Number(loanSingleData?.loan_udi_schedules[i]?.amount))}
+                      {formatNumberComma(Number(udiByInstallment[i]?.amount ?? 0))}
                     </p>
                   </div>
 
@@ -144,7 +179,7 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                     <Button
                       variant="secondary"
                       className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
-                      onClick={() => handleProceedToOtherPay(item, loanSingleData?.loan_udi_schedules[i])}
+                      onClick={() => handleProceedToOtherPay(item, udiByInstallment[i])}
                     >
                       <CreditCard size={15} />
                       <span className="hidden md:inline">Other Payments</span>
@@ -156,11 +191,24 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
                       <Button
                         variant="secondary"
                         className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm"
-                        onClick={() => handleProceedToPay(item, loanSingleData?.loan_udi_schedules[i])}
+                        onClick={() => handleProceedToPay(item, udiByInstallment[i])}
                       >
                         <CreditCard size={15} />
                         <span className="hidden lg:inline">Proceed to Pay</span>
                         <span className="lg:hidden">Pay</span>
+                      </Button>
+                    )}
+
+                    {paid && carried && (
+                      <Button
+                        variant="secondary"
+                        className="flex-1 sm:flex-none whitespace-nowrap px-2 sm:px-3 text-xs sm:text-sm border-warning text-[#8A5A00] dark:text-warning"
+                        aria-label={`Collect the ₱${formatNumberComma(Number(carried))} penalty on the installment due ${item?.due_date}`}
+                        onClick={() => handleCollectPenalty(item, udiByInstallment[i], carried)}
+                      >
+                        <CreditCard size={15} />
+                        <span className="hidden lg:inline">Collect penalty</span>
+                        <span className="lg:hidden">Penalty</span>
                       </Button>
                     )}
 
@@ -198,12 +246,14 @@ const LoanDetails: React.FC<OMProps> = ({ header, loanSingleData, onSubmitCollec
         <div>
           {selectedMoSched && (
             <div className={`${selectedMoSched ? 'fade-in' : 'fade-out'}`}>
-              <PaymentCollectionForm selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment} paymentLoading={paymentLoading}/>
+              {/* key: a fresh form per installment, so no box or computed Interest carries over
+                  from the row clicked before (the Interest box is read-only). */}
+              <PaymentCollectionForm key={`${selectedMoSched?.id}-${prefillPenalty ?? ''}`} prefillPenalty={prefillPenalty} selectedMoSched={selectedMoSched} setSelectedMoSched={setSelectedMoSched} selectedUdiSched={selectedUdiSched} onSubmitCollectionPayment={onSubmitCollectionPayment} paymentLoading={paymentLoading}/>
             </div>
           )}
           {selectedMoSchedOthPay && (
             <div className={`${selectedMoSchedOthPay ? 'fade-in' : 'fade-out'}`}>
-              <OtherPaymentForm selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading}/>
+              <OtherPaymentForm key={selectedMoSchedOthPay?.id} selectedMoSchedOthPay={selectedMoSchedOthPay} setSelectedMoSchedOthPay={setSelectedMoSchedOthPay} selectedUdiSched={selectedUdiSched} onSubmitOthCollectionPayment={onSubmitOthCollectionPayment} paymentLoading={paymentLoading}/>
             </div>
           )}
         </div>

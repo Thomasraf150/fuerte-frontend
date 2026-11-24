@@ -110,7 +110,12 @@ const FormLoanComputation: React.FC<ParentFormBr> = ({ handleCompTblDecimal, reg
         </Group>
         <Group title="Less">
           <AmountRow name="ob" label="Outstanding Balance" {...editable} />
-          <AmountRow name="penalty" label="Penalty" {...editable} />
+          {/* The renewed loans' penalty charged at the last due: the server's figure, read-only
+              (option B, 2026-11-23). The typed box below is for any other penalty only. */}
+          {Number(c?.carried_penalty ?? 0) > 0 && (
+            <Row label="Penalty carried from old loan" value={fig(money(c?.carried_penalty))} />
+          )}
+          <AmountRow name="penalty" label={Number(c?.carried_penalty ?? 0) > 0 ? 'Other penalty' : 'Penalty'} {...editable} />
         </Group>
         <Group title="Add-On">
           <AmountRow name="rebates" label="Rebates" {...editable} />

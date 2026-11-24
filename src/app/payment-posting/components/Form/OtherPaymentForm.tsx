@@ -1,5 +1,5 @@
 import { MIN_BUSINESS_DATE, maxBusinessDate } from '@/constants/dateBounds';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { OtherCollectionFormValues } from '@/utils/DataTypes';
 import { formatToTwoDecimalPlaces, parseNumericInput as num, formatNumberComma } from '@/utils/helper';
@@ -44,10 +44,6 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
   // Shown under the Pay Now button if the operator tries to save with none of the
   // three payment boxes filled.
   const [principalError, setPrincipalError] = useState<string>('');
-  // True once the operator hand-edits the Interest field — stops the auto-suggestion
-  // from clobbering their value (reset when a payment box or the schedule changes).
-  const interestTouched = useRef(false);
-
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
     const { value } = event.target;
     const numericValue = value.replace(/,/g, '');
@@ -76,9 +72,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
     // One-box rule: when one of the three payment boxes is filled, clear the
     // other two so the same money can never be booked twice (the fields are also
     // disabled in the UI — this is the belt-and-suspenders for the value).
-    // Editing a payment box also re-engages the interest auto-suggestion.
     if ((PRINCIPAL_FIELDS as readonly string[]).includes(type)) {
-      interestTouched.current = false;
       if (incoming > 0) {
         (PRINCIPAL_FIELDS as readonly string[])
           .filter((f) => f !== type)
@@ -86,11 +80,11 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
       }
     }
 
-    // Interest suggestion (see suggestInterest): computes for a plain Collection
-    // AND for an advance-only entry (Collection 0). NOT recomputed once the
-    // operator hand-edits Interest (interestTouched); only the payment boxes /
-    // bank charge drive it. The field stays editable (office decision 2026-06-26).
-    if (INTEREST_DRIVERS.includes(type) && !interestTouched.current) {
+    // Interest (see suggestInterest): computed for a plain Collection AND for an
+    // advance-only entry (Collection 0); only the payment boxes / bank charge drive it.
+    // Not editable (Heidi, 2026-11-21): staff enter only what the client paid, and the
+    // server refuses a posting that clears the installment without its full interest.
+    if (INTEREST_DRIVERS.includes(type)) {
       setValue('interest', suggestInterest(amounts));
     }
 
@@ -129,8 +123,6 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
   useEffect(() => {
     setValue('loan_schedule_id', selectedMoSchedOthPay?.id);
     setValue('loan_udi_schedule_id', selectedUdiSched?.id);
-    // New schedule/payment entry — re-enable the interest auto-suggestion.
-    interestTouched.current = false;
   }, [selectedMoSchedOthPay, selectedUdiSched]);
 
   return (
@@ -303,11 +295,10 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
               </div>
             </div>
 
-            {/* Interest — auto-calculated from the payment box above, but editable.
-                Placed at the bottom (office decision 2026-06-26) so operators never
-                need to enter a Collection just to make interest appear: entering
-                Advanced Payment / Payment UA/SP (Collection 0) still fills it, and it
-                can be typed over by hand. */}
+            {/* Interest — calculated from the payment box above and read-only (Heidi,
+                2026-11-21), like the Process Payment form. Placed at the bottom (office
+                decision 2026-06-26): entering Advanced Payment / Payment UA/SP
+                (Collection 0) still fills it. */}
             <div className="flex flex-col 2xl:flex-row 2xl:items-center">
               <div className="2xl:w-2/5 px-2 py-1 sm:px-4 text-sm font-semibold text-black dark:text-white">
                 Interest
@@ -316,11 +307,11 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSchedOthPay, setSe
                 <input
                   className="h-12 md:h-11 w-full rounded-lg border border-field bg-white px-4 text-center text-sm text-black placeholder:text-body read-only:bg-whiten focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-field-dark dark:bg-form-input dark:text-white dark:read-only:bg-meta-4"
                   type="text"
-                  inputMode="decimal"
                   id="udi"
+                  aria-label="Interest"
                   placeholder="0.00"
+                  readOnly={true}
                   value={watch('interest') ?? ''}
-                  onChange={(e) => { interestTouched.current = true; setValue('interest', e.target.value.replace(/[^0-9.]/g, '')); }}
                 />
               </div>
             </div>

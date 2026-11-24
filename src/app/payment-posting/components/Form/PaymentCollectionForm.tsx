@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CollectionFormValues } from '@/utils/DataTypes';
 import { formatToTwoDecimalPlaces, formatNumberComma } from '@/utils/helper';
-import { collectionSplit } from '@/utils/paymentSplit';
+import { collectionSplit, penaltyAllowedNow, penaltyAboveAllowed } from '@/utils/paymentSplit';
 import { Save, RotateCw } from 'react-feather';
 import PesoSign from '@/components/PesoSign';
 import moment from 'moment';
@@ -17,9 +17,11 @@ interface OMProps {
   setSelectedMoSched: (data: any) => void;
   onSubmitCollectionPayment: (d: CollectionFormValues, l: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   paymentLoading: boolean;
+  /** Collect a paid installment's penalty charged at the last due: Collection = Penalty = this amount. */
+  prefillPenalty?: string;
 }
 
-const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelectedMoSched, selectedUdiSched, onSubmitCollectionPayment, paymentLoading }) => {
+const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelectedMoSched, selectedUdiSched, onSubmitCollectionPayment, paymentLoading, prefillPenalty }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CollectionFormValues>();
 
   const handleDecimal = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, type: any) => {
@@ -49,8 +51,19 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     setValue(type, value);
   };
 
+  // The cash pays the installment first (Heidi 2026-11-23): only what is left of it can be penalty
+  // now; the rest of the penalty is charged at the loan's last due.
+  const penaltyMax = penaltyAllowedNow({
+    collection: watch('collection'),
+    bankCharge: watch('bank_charge'),
+    remainingDue: selectedMoSched?.amount,
+  });
+  const penaltyTooBig = penaltyAboveAllowed(watch('penalty'), penaltyMax);
+
   const onSubmit = async (data: CollectionFormValues) => {
-    console.log(data, ' data');
+    if (penaltyTooBig) {
+      return;
+    }
 
     const result = await onSubmitCollectionPayment(data, selectedMoSched?.loan_id) as { success: boolean; error?: string; data?: any };
 
@@ -65,6 +78,24 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
     setValue('loan_schedule_id', selectedMoSched?.id);
     setValue('loan_udi_schedule_id', selectedUdiSched?.id);
   }, [selectedMoSched, selectedUdiSched]);
+
+  // "Collect penalty" on a paid installment: the cash is the penalty and all of it is penalty, so the
+  // installment stays paid (interest 0.00, no UA/SP) and the server books it as penalty income.
+  useEffect(() => {
+    if (!prefillPenalty) {
+      return;
+    }
+    const split = collectionSplit({
+      collection: prefillPenalty, bankCharge: '0', penalty: prefillPenalty,
+      remainingDue: selectedMoSched?.amount, remainingUdi: selectedUdiSched?.amount,
+    });
+    setValue('bank_charge', '0.00');
+    setValue('collection', prefillPenalty);
+    setValue('penalty', prefillPenalty);
+    setValue('ap_refund', split.ap_refund);
+    setValue('ua_sp', split.ua_sp);
+    setValue('interest', split.interest);
+  }, [prefillPenalty, selectedMoSched, selectedUdiSched, setValue]);
 
   return (
     <>
@@ -165,6 +196,7 @@ const PaymentCollectionForm: React.FC<OMProps> = ({ selectedMoSched, setSelected
                   type="text"
                   icon={PesoSign}
                   register={register('penalty')}
+                  error={penaltyTooBig ? `The cash pays the installment first: at most ₱${formatNumberComma(Number(penaltyMax))} can be penalty now. The rest is charged at the last due.` : undefined}
                   placeholder="0.00"
                   formatType="number"
                   className="text-center"
