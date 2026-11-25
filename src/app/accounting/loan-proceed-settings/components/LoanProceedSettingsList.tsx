@@ -7,7 +7,7 @@ import CustomDatatable from '@/components/CustomDatatable';
 import { DataLoanProceedAcctData } from '@/utils/DataTypes';
 import loanProcListCol from './LoanProcListCol';
 import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
-import { GitBranch } from 'react-feather';
+import { GitBranch, Globe } from 'react-feather';
 import { Card, CardBody, Toolbar } from '@/components/Card';
 import { LIST_PATH } from './LoanProcSettingsFormPage';
 
@@ -42,6 +42,11 @@ const LoanProceedSettingsList: React.FC = () => {
                   <Button variant="primary" onClick={() => router.push(`${LIST_PATH}/new`)}>
                     <GitBranch  size={14} />
                     <span>Create Account</span>
+                  </Button>
+                  {/* The defaults every branch falls back to had no way in but typing the URL. */}
+                  <Button variant="secondary" onClick={() => router.push(`${LIST_PATH}/global`)}>
+                    <Globe size={14} />
+                    <span>Global Defaults</span>
                   </Button>
                 </Toolbar>
                 <div className="overflow-x-auto overflow-y-auto">

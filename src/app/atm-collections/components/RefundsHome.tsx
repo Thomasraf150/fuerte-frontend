@@ -138,7 +138,9 @@ const RefundRow: React.FC<{ r: AtmRefund; canResolve: boolean; onChanged: () => 
     }
   };
 
+  const [opening, setOpening] = useState(false);
   const viewProof = async () => {
+    setOpening(true);
     try {
       const { atmRefundProof } = await gql<{ atmRefundProof: string | null }>(ATM_REFUND_PROOF, { id: r.id });
       if (!atmRefundProof) { toast.error('No proof on file.'); return; }
@@ -148,6 +150,7 @@ const RefundRow: React.FC<{ r: AtmRefund; canResolve: boolean; onChanged: () => 
       window.open(url, '_blank', 'noopener');
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Proof not loaded.'); }
+    finally { setOpening(false); }
   };
 
   return (
@@ -182,7 +185,13 @@ const RefundRow: React.FC<{ r: AtmRefund; canResolve: boolean; onChanged: () => 
             {busy ? 'Resolving…' : 'Resolve review (Accounting)'}
           </button>
         )}
-        {r.has_proof && <button type="button" onClick={viewProof} className="text-xs font-semibold text-primary hover:underline">View proof</button>}
+        {r.has_proof && (
+          <button type="button" onClick={viewProof} disabled={opening} aria-busy={opening}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline disabled:cursor-wait disabled:opacity-70">
+            {opening && <span aria-hidden="true" className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />}
+            {opening ? 'Opening proof…' : 'View proof'}
+          </button>
+        )}
       </td>
     </tr>
   );
