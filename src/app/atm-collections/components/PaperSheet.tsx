@@ -53,7 +53,7 @@ const PaperSheet: React.FC<Props> = ({ sheet, selectedId, onSelect }) => {
       <p className="mb-4 text-sm font-semibold">NOTE: USING BANCNET GPRS PAYMENT SYSTEM.</p>
 
       <div className="overflow-x-auto">
-        <table className="atm-table min-w-[1100px] text-sm" aria-label={`Collection list, batch ${batch.batch_no}`}>
+        <table className="atm-table min-w-[860px] text-sm" aria-label={`Collection list, batch ${batch.batch_no}`}>
           {/* Fixed column widths (table-layout: fixed): the columns no longer jump as swipes and amounts fill in. */}
           <colgroup>
             {COLUMN_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
