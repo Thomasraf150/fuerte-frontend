@@ -3,29 +3,16 @@
 import Button from '@/components/Button';
 import React, { useEffect } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
-import CustomDatatable from '@/components/CustomDatatable';
-import { DataLoanProceedAcctData } from '@/utils/DataTypes';
-import loanProcListCol from './LoanProcListCol';
+import LoanProcBranchList from './LoanProcBranchList';
 import useLoanProceedAccount from '@/hooks/useLoanProceedAccount';
 import { GitBranch, Globe } from 'react-feather';
 import { Card, CardBody, Toolbar } from '@/components/Card';
 import { LIST_PATH } from './LoanProcSettingsFormPage';
 
-const column = loanProcListCol;
-
 // The form has its own URLs (/new, /<branch_sub_id>, /global), so Back and refresh keep it open.
 const LoanProceedSettingsList: React.FC = () => {
   const router = useRouter();
   const { fetchLpsDataTable, lpsDataAccount, loading } = useLoanProceedAccount();
-
-  const handleRowClick = async (row: any) => {
-    console.log(row, ' row');
-  }
-
-  // A Global Default row has no branch.
-  const handleWholeRowClick = (row: DataLoanProceedAcctData) => {
-    router.push(`${LIST_PATH}/${row?.branch_sub_id ?? 'global'}`);
-  }
 
   useEffect(() => {
     fetchLpsDataTable();
@@ -50,14 +37,8 @@ const LoanProceedSettingsList: React.FC = () => {
                   </Button>
                 </Toolbar>
                 <div className="overflow-x-auto overflow-y-auto">
-                  <CustomDatatable
-                    apiLoading={loading}
-                    columns={column(handleRowClick)}
-                    data={[...(lpsDataAccount || [])].sort((a: any, b: any) => (b.id ?? 0) - (a.id ?? 0))}
-                    onRowClicked={handleWholeRowClick}
-                    enableCustomHeader={true}
-                    title={''}
-                  />
+                  <LoanProcBranchList rows={lpsDataAccount} loading={loading}
+                    onOpen={(key) => router.push(`${LIST_PATH}/${key}`)} />
                   {/* <table className="w-full text-sm text-left text-black">
                     <thead className="text-xs text-black uppercase bg-gray-3">
                       <tr>
