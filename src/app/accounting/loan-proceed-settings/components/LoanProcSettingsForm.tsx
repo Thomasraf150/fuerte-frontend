@@ -27,7 +27,7 @@ interface Option {
 }
 
 const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, coaDataAccount, branchSubData, lpsSingleData, onSaveSuccess, mappingLoading }) => {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, control } = useForm<DataLoanProceedList>();
+  const { register, handleSubmit, setValue, reset, watch, getValues, formState: { errors }, control } = useForm<DataLoanProceedList>();
   const { onSubmitLoanProSettings, loanProcLoading } = useLoanProceedAccount();
   const [branchSubIdDisabled, setBranchSubIdDisabled] = useState<boolean>(false);
 
@@ -230,7 +230,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
             <Controller
               name={name}
               control={control}
-              rules={optional || isGlobal ? {} : { required: `${label} is required` }}
+              // Decided when Save is pressed, not at first render: a Controller keeps the rules it first
+              // registered, and the branch (Global or not) is only known once the mapping has loaded.
+              rules={{ validate: (v) => optional || getValues('branch_sub_id') === 'global' || !!v || `${label} is required` }}
               render={({ field }) => (
                 <ReactSelect
                   {...field}
