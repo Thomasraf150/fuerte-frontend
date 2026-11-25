@@ -108,4 +108,5 @@
   .atm-noprint { display: none !important; }
   .atm-paper { box-shadow: none; border: none; background: #fff; }
   .atm-table thead th { position: static; background: #fff; }
+  .atm-scroll { max-height: none; overflow: visible; }
 }

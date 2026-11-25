@@ -6,7 +6,7 @@ import {
   ADD_ATM_SWIPE, ATM_SWIPE_LOCATIONS, REMOVE_ATM_SWIPE, SET_ATM_REFUND_METHOD,
   AtmResult, AtmRow, AtmSwipeLocation,
 } from '@/graphql/AtmCollectionQueries';
-import { amt, cleanAmount, gql, positive } from '../lib';
+import { amt, cleanAmount, gql, positive, typedAmount } from '../lib';
 
 interface Props {
   batchId: string;
@@ -138,7 +138,7 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
               </p>
             )}
             {s.refund !== null && (
-              <p className="mt-1 text-xs text-body atm-num">
+              <p className="mt-1 break-words text-xs tabular-nums text-body">
                 charges {amt(s.pos_charge)} + {amt(s.gprs_charge)} · amort {amt(s.amort)}
                 {positive(s.ua_payment) && <> · UA {amt(s.ua_payment)}</>}
                 {positive(s.penalty) && <> · penalty {amt(s.penalty)}</>}
@@ -153,12 +153,12 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
         <form onSubmit={addSwipe} className="mt-4 grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="atm-swipe-amount" className="mb-1 block text-sm font-semibold">Amount swiped</label>
-            <input id="atm-swipe-amount" inputMode="decimal" autoComplete="off" value={amount} onChange={(e) => setAmount(e.target.value)}
+            <input id="atm-swipe-amount" inputMode="decimal" autoComplete="off" value={amount} onChange={(e) => setAmount(typedAmount(e.target.value))}
               placeholder="10,018.00" className="atm-num w-full rounded-lg border border-stroke bg-transparent px-3 py-2 text-right dark:border-strokedark" />
           </div>
           <div>
             <label htmlFor="atm-swipe-balance" className="mb-1 block text-sm font-semibold">Balance inquiry</label>
-            <input id="atm-swipe-balance" inputMode="decimal" autoComplete="off" value={balance} onChange={(e) => setBalance(e.target.value)}
+            <input id="atm-swipe-balance" inputMode="decimal" autoComplete="off" value={balance} onChange={(e) => setBalance(typedAmount(e.target.value))}
               placeholder="optional" className="atm-num w-full rounded-lg border border-stroke bg-transparent px-3 py-2 text-right dark:border-strokedark" />
           </div>
           <div className="col-span-2">

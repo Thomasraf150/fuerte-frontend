@@ -37,6 +37,16 @@ export function cleanAmount(input: string): string | null {
   return /^\d{1,10}(\.\d{1,2})?$/.test(s) ? s : null;
 }
 
+/**
+ * What the person typed, with thousands commas (as the other money fields): "11488.5" -> "11,488.5".
+ * Text only, no float: cleanAmount() strips the commas again before it is sent.
+ */
+export function typedAmount(input: string): string {
+  const [whole, ...rest] = input.replace(/[^\d.]/g, '').split('.');
+  const grouped = whole.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return rest.length ? `${grouped}.${rest.join('').slice(0, 2)}` : grouped;
+}
+
 /** "2026-10-30" -> "OCTOBER 30, 2026", the paper list's date. */
 export function paperDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);

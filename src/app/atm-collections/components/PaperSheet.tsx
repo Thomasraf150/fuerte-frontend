@@ -52,7 +52,8 @@ const PaperSheet: React.FC<Props> = ({ sheet, selectedId, onSelect }) => {
       <p className="text-sm font-semibold">Below is the schedule of deductions for payroll date {batch.cutoff_label.toUpperCase()}.</p>
       <p className="mb-4 text-sm font-semibold">NOTE: USING BANCNET GPRS PAYMENT SYSTEM.</p>
 
-      <div className="overflow-x-auto">
+      {/* Scrolls inside its own box so the header row stays in view while scrolling down the names. */}
+      <div className="atm-scroll max-h-[75vh] overflow-auto">
         <table className="atm-table min-w-[860px] text-sm" aria-label={`Collection list, batch ${batch.batch_no}`}>
           {/* Fixed column widths (table-layout: fixed): the columns no longer jump as swipes and amounts fill in. */}
           <colgroup>
