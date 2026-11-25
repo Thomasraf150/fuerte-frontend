@@ -159,6 +159,9 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
   // Editing: the form fills only once the branch's mapping arrives. A Save pressed before
   // that failed on every field ("... is required") and left those errors showing.
   const waitingForMapping = actionLbl !== 'Create Account' && (!!mappingLoading || !lpsSingleData);
+  // Global Defaults only fills the gaps a branch leaves, so any field may stay empty there: the server
+  // saves only the accounts sent and keeps the rest. A branch still has to set every required account.
+  const isGlobal = watch('branch_sub_id') === 'global';
 
   const onSubmit: SubmitHandler<DataLoanProceedList> = async (data) => {
     const result = await onSubmitLoanProSettings(data, () => {});
@@ -193,6 +196,7 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
             )}
           />
           {errors.branch_sub_id && <p className="mt-2 text-sm text-danger">{errors.branch_sub_id.message}</p>}
+          {isGlobal && <p className="mt-2 text-sm text-body">Fill only what every branch should fall back to. Empty fields are left as they are.</p>}
         </div>
         
         {[
@@ -222,11 +226,11 @@ const LoanProcSettingsForm: React.FC<ParentFormBr> = ({ setShowForm, actionLbl, 
           { name: 'atmb_id' as const, label: 'ATM Settlement Bank (Cash in Bank)', optional: true },
         ].map(({ name, label, optional }: { name: keyof DataLoanProceedList; label: string; optional?: boolean }) => (
           <div key={name} className="col-span-1 mb-4 mt-4">
-            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">{label} {!optional && <span className="text-danger">*</span>}</label>
+            <label className="mb-1.5 block text-sm font-semibold text-black dark:text-white">{label} {!optional && !isGlobal && <span className="text-danger">*</span>}</label>
             <Controller
               name={name}
               control={control}
-              rules={optional ? {} : { required: `${label} is required` }}
+              rules={optional || isGlobal ? {} : { required: `${label} is required` }}
               render={({ field }) => (
                 <ReactSelect
                   {...field}
