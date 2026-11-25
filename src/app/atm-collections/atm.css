@@ -48,11 +48,10 @@
   border-bottom: 2px solid var(--atm-rule-strong);
   border-right: 1px solid var(--atm-rule);
   padding: 0.45rem 0.6rem;
-  background: rgba(244, 239, 225, 0.85);
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  background: #f4efe1; /* opaque: rows scrolling under the header must not show through */
 }
+/* The whole header sticks as one block: sticky cells made the GPRS/POS row stick on its own. */
+.atm-table thead { position: sticky; top: 0; z-index: 1; }
 .atm-table thead th:first-child { border-left: 2px solid var(--atm-rule-strong); }
 .atm-table thead th:last-child { border-right: 2px solid var(--atm-rule-strong); }
 .atm-table tbody td {
@@ -107,6 +106,7 @@
 @media print {
   .atm-noprint { display: none !important; }
   .atm-paper { box-shadow: none; border: none; background: #fff; }
-  .atm-table thead th { position: static; background: #fff; }
+  .atm-table thead { position: static; }
+  .atm-table thead th { background: #fff; }
   .atm-scroll { max-height: none; overflow: visible; }
 }
