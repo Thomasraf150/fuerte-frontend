@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useAuthStore } from '@/store';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from '@/utils/notify';
-import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { showConfirmationModal, showDecisionNotePrompt } from '@/components/ConfirmationModal';
 import {
-  ATM_FUNDS_REQUEST, ATM_REFUNDS, ATM_REFUND_PROOF, NOTIFY_OWNERS_FUNDS, RELEASE_ATM_REFUND,
+  ATM_FUNDS_REQUEST, ATM_REFUNDS, ATM_REFUND_PROOF, NOTIFY_OWNERS_FUNDS, RELEASE_ATM_REFUND, RESOLVE_ATM_REFUND_REVIEW,
   AtmFundsRow, AtmRefund, AtmResult,
 } from '@/graphql/AtmCollectionQueries';
 import { amt, gql, paperDate, positive, readAsDataUri, useGql } from '../lib';
@@ -19,6 +20,23 @@ const VIEWS: { id: View; label: string }[] = [
   { id: 'fp', label: 'Fully paid (ATM pull-out)' },
   { id: 'funds', label: 'Release funds request' },
 ];
+
+/** Who may resolve an Accounting review (backend AtmRefundService::REVIEW_ROLES): Admin, Accounting, Owner. */
+const REVIEW_ROLES = [1, 4, 5];
+
+/** The signed-in user's role id, read after mount (the store is persisted in the browser). */
+const useRoleId = (): number | null => {
+  const [roleId, setRoleId] = useState<number | null>(null);
+  useEffect(() => {
+    const read = (u: unknown) => {
+      const user = u as { role_id?: number; role?: { id?: number } } | null | undefined;
+      setRoleId(Number(user?.role_id ?? user?.role?.id) || null);
+    };
+    read(useAuthStore.getState().user);
+    return useAuthStore.subscribe((s) => read(s.user));
+  }, []);
+  return roleId;
+};
 
 const methodLabel = (r: AtmRefund) => r.refund_method === 'ACCOUNT' ? `Account ${r.refund_account_no ?? ''}` : r.refund_method === 'CASH' ? 'Cash refund' : 'TOF fr. Treasury';
 
@@ -44,7 +62,9 @@ const RefundsHome: React.FC = () => {
 
 const RefundList: React.FC<{ fullyPaid: boolean }> = ({ fullyPaid }) => {
   const { data, error, loading, reload } = useGql<{ atmRefunds: AtmRefund[] }>(ATM_REFUNDS, { status: null });
-  const rows = (data?.atmRefunds ?? []).filter((r) => (fullyPaid ? r.fully_paid : positive(r.refund)));
+  const roleId = useRoleId();
+  const canResolve = roleId !== null && REVIEW_ROLES.includes(roleId);
+  const rows = (data?.atmRefunds ?? []).filter((r) => (fullyPaid ? r.fully_paid : positive(r.refund) || r.refund_status === 'review'));
   const pending = rows.filter((r) => r.refund_status === 'pending');
   const done = rows.filter((r) => r.refund_status !== 'pending');
 
@@ -67,7 +87,7 @@ const RefundList: React.FC<{ fullyPaid: boolean }> = ({ fullyPaid }) => {
             <tr><th className="py-2 pr-4">Client</th><th className="pr-4">Branch · list</th><th className="pr-4 text-right">Refund</th><th className="pr-4">Goes by</th><th className="pr-4">Status</th><th /></tr>
           </thead>
           <tbody>
-            {[...pending, ...done].map((r) => <RefundRow key={r.id} r={r} onChanged={reload} />)}
+            {[...pending, ...done].map((r) => <RefundRow key={r.id} r={r} canResolve={canResolve} onChanged={reload} />)}
             {rows.length === 0 && !loading && <tr><td colSpan={6} className="py-6 text-center text-body">{fullyPaid ? 'No fully paid clients yet.' : 'No refunds owed.'}</td></tr>}
           </tbody>
         </table>
@@ -76,7 +96,7 @@ const RefundList: React.FC<{ fullyPaid: boolean }> = ({ fullyPaid }) => {
   );
 };
 
-const RefundRow: React.FC<{ r: AtmRefund; onChanged: () => void }> = ({ r, onChanged }) => {
+const RefundRow: React.FC<{ r: AtmRefund; canResolve: boolean; onChanged: () => void }> = ({ r, canResolve, onChanged }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const inputId = `proof-${r.id}`;
@@ -96,6 +116,25 @@ const RefundRow: React.FC<{ r: AtmRefund; onChanged: () => void }> = ({ r, onCha
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const resolveReview = async () => {
+    const note = await showDecisionNotePrompt('Resolve Accounting review', 'What was checked or corrected', 'Resolve review', {
+      text: `${r.borrower_name}: the Refund Payable still booked goes back to release; if it was reversed, the line closes with no refund.`,
+      requiredMessage: 'Say what was checked or corrected (at least 5 characters).', maxLength: 255, focusCancel: true,
+    });
+    if (note === null) return;
+    if (note.trim().length < 5) { toast.error('Say what was checked or corrected (at least 5 characters).'); return; }
+    setBusy(true);
+    try {
+      const { resolveAtmRefundReview: res } = await gql<{ resolveAtmRefundReview: AtmResult }>(RESOLVE_ATM_REFUND_REVIEW, { line_id: r.id, note: note.trim() });
+      res.status ? toast.success(res.message) : toast.error(res.message);
+      if (res.status) onChanged();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Not resolved.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -135,6 +174,13 @@ const RefundRow: React.FC<{ r: AtmRefund; onChanged: () => void }> = ({ r, onCha
             <input id={inputId} ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="sr-only"
               onChange={(e) => release(e.target.files?.[0])} />
           </>
+        )}
+        {r.refund_status === 'review' && canResolve && (
+          <button type="button" onClick={resolveReview} disabled={busy}
+            aria-label={`Resolve Accounting review for ${r.borrower_name}`}
+            className="rounded-lg border border-primary px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60">
+            {busy ? 'Resolving…' : 'Resolve review (Accounting)'}
+          </button>
         )}
         {r.has_proof && <button type="button" onClick={viewProof} className="text-xs font-semibold text-primary hover:underline">View proof</button>}
       </td>

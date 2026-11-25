@@ -86,6 +86,7 @@ export const SET_ATM_REFUND_METHOD = `mutation ($batch_id: ID!, $borrower_id: ID
 export const SIGN_ATM_BATCH = `mutation ($batch_id: ID!, $as: String!) { signAtmCollectionBatch(batch_id: $batch_id, as: $as) ${RESULT} }`;
 export const POST_ATM_BATCH = `mutation ($batch_id: ID!) { postAtmCollectionBatch(batch_id: $batch_id) { status message posted failed { borrower message } } }`;
 export const RELEASE_ATM_REFUND = `mutation ($line_id: ID!, $proof: String!) { releaseAtmRefund(line_id: $line_id, proof: $proof) ${RESULT} }`;
+export const RESOLVE_ATM_REFUND_REVIEW = `mutation ($line_id: ID!, $note: String!) { resolveAtmRefundReview(line_id: $line_id, note: $note) ${RESULT} }`;
 export const NOTIFY_OWNERS_FUNDS = `mutation ($branch_sub_id: ID!, $amount: String!) { notifyOwnersOfFundsRelease(branch_sub_id: $branch_sub_id, amount: $amount) ${RESULT} }`;
 export const MARK_NOTICES_READ = `mutation ($id: ID) { markAppNotificationsRead(id: $id) ${RESULT} }`;
 export const ADD_OPEX_EXPENSE = `mutation ($input: OpexExpenseInput!) { addOpexExpense(input: $input) ${RESULT} }`;
