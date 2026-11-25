@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { toast } from '@/utils/notify';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
@@ -20,8 +20,17 @@ const CollectionSheet: React.FC<{ id: string }> = ({ id }) => {
   const { data, error, loading, reload } = useGql<{ atmCollectionSheet: AtmSheet | null }>(ATM_SHEET, { id });
   const [selected, setSelected] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const sheet = data?.atmCollectionSheet ?? null;
   useDocumentTitle(sheet ? `Batch ${sheet.batch.batch_no}` : null, sheet?.batch.branch_sub_name);
+
+  // Below 2xl the swipe panel sits under the long list: bring it into view when a borrower is picked,
+  // or people who never scroll down think nothing happened.
+  useEffect(() => {
+    if (!selected || !panelRef.current || window.matchMedia('(min-width: 1536px)').matches) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    panelRef.current.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }, [selected]);
 
   if (error) return <p role="alert" className="text-danger">{error}</p>;
   if (!sheet) return loading ? <SkeletonBlock rows={8} label="Loading the collection list…" /> : <p className="text-body">Collection list not found.</p>;
@@ -91,9 +100,9 @@ const CollectionSheet: React.FC<{ id: string }> = ({ id }) => {
 
       <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_22rem]">
         <PaperSheet sheet={sheet} selectedId={selected} onSelect={setSelected} />
-        <div className="2xl:sticky 2xl:top-24 2xl:self-start">
+        <div ref={panelRef} className="scroll-mt-24 2xl:sticky 2xl:top-24 2xl:self-start">
           {row
-            ? <SwipePanel batchId={id} listBranchSubId={String(batch.branch_sub_id)} row={row} editable={draft} onChanged={reload} />
+            ? <SwipePanel batchId={id} listBranchSubId={String(batch.branch_sub_id)} row={row} editable={draft} refreshing={loading} onChanged={reload} />
             : <p className="atm-noprint rounded-xl border border-dashed border-stroke p-5 text-sm text-body">Choose a borrower on the list to enter their ATM swipes.</p>}
         </div>
       </div>

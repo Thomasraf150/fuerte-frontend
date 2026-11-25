@@ -30,6 +30,9 @@ const account = (row: AtmRow): React.ReactNode => {
  * a double rule, Prepared / Checked / Noted by). Each row is a borrower; click or press Enter on a
  * row to enter swipes for them.
  */
+/** Name, ATM collection, semi amort., UA/SP, UA payment, penalty, GPRS, POS, A/P or refund, remarks, account, balance. */
+const COLUMN_WIDTHS = ['19%', '8.5%', '8.5%', '7.5%', '7.5%', '7%', '5%', '5%', '8%', '7%', '9%', '8%'];
+
 const PaperSheet: React.FC<Props> = ({ sheet, selectedId, onSelect }) => {
   const { batch, rows, totals } = sheet;
   const swipeCol = (row: AtmRow, pick: (s: AtmRow['swipes'][number]) => string | null) =>
@@ -51,6 +54,10 @@ const PaperSheet: React.FC<Props> = ({ sheet, selectedId, onSelect }) => {
 
       <div className="overflow-x-auto">
         <table className="atm-table min-w-[1100px] text-sm" aria-label={`Collection list, batch ${batch.batch_no}`}>
+          {/* Fixed column widths (table-layout: fixed): the columns no longer jump as swipes and amounts fill in. */}
+          <colgroup>
+            {COLUMN_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
+          </colgroup>
           <thead>
             <tr>
               <th rowSpan={2} className="text-left">Name</th>

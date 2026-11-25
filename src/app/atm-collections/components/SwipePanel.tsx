@@ -14,6 +14,8 @@ interface Props {
   listBranchSubId: string;
   row: AtmRow;
   editable: boolean;
+  /** The sheet is reloading after a change: keep the buttons busy until it is back. */
+  refreshing?: boolean;
   onChanged: () => void;
 }
 
@@ -37,14 +39,16 @@ const CrossGroupMark: React.FC<{ code: string | null }> = ({ code }) => (
  * Swipe entry for one borrower: what they owe this cut-off, each swipe with how it splits, the
  * refund method, and the form to add a swipe. Everything shown is what posting will book.
  */
-const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, onChanged }) => {
+const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, refreshing = false, onChanged }) => {
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState('');
   const [swipedAt, setSwipedAt] = useState(listBranchSubId);
   const [locations, setLocations] = useState<AtmSwipeLocation[]>([]);
   const [method, setMethod] = useState(row.refund_method);
   const [accountNo, setAccountNo] = useState(row.refund_account_no ?? '');
-  const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
+  // Busy until the list has reloaded too: the new swipe only shows once the sheet is back.
+  const busy = saving || refreshing;
   const canSwipe = editable && !row.posted;
 
   useEffect(() => {
@@ -72,7 +76,7 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
   }, [row.borrower_id, row.refund_method, row.refund_account_no, listBranchSubId]);
 
   const run = async (mutation: string, vars: Record<string, unknown>, field: string) => {
-    setBusy(true);
+    setSaving(true);
     try {
       const data = await gql<Record<string, AtmResult>>(mutation, vars);
       const res = data[field];
@@ -83,7 +87,7 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
       toast.error(e instanceof Error ? e.message : 'Not saved.');
       return false;
     } finally {
-      setBusy(false);
+      setSaving(false);
     }
   };
 
@@ -97,6 +101,7 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
       setAmount('');
       setBalance('');
       setSwipedAt(listBranchSubId); // the next swipe starts back at this branch: a cross-group swipe is always a choice
+      toast.success(`Swipe of ₱${amt(clean)} added. Updating the list…`);
     }
   };
 
@@ -122,7 +127,7 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
             <div className="flex items-center justify-between">
               <span className="font-semibold">Swipe {s.seq}: <span className="atm-num">₱{amt(s.amount)}</span></span>
               {canSwipe && (
-                <button type="button" disabled={busy} onClick={() => run(REMOVE_ATM_SWIPE, { batch_id: batchId, swipe_id: s.id }, 'removeAtmSwipe')}
+                <button type="button" disabled={busy} onClick={() => run(REMOVE_ATM_SWIPE, { batch_id: batchId, swipe_id: s.id }, 'removeAtmSwipe').then((ok) => ok && toast.success(`Swipe ${s.seq} removed.`))}
                   className="text-xs font-semibold text-danger hover:underline" aria-label={`Remove swipe ${s.seq}`}>Remove</button>
               )}
             </div>
@@ -174,7 +179,7 @@ const SwipePanel: React.FC<Props> = ({ batchId, listBranchSubId, row, editable, 
             </p>
           </div>
           <button type="submit" disabled={busy} className="col-span-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-opacity-90 disabled:opacity-60">
-            {busy ? 'Saving…' : 'Add swipe'}
+            {saving ? 'Saving…' : refreshing ? 'Updating the list…' : 'Add swipe'}
           </button>
         </form>
       )}

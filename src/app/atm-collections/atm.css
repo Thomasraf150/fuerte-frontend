@@ -38,7 +38,7 @@
   white-space: nowrap;
 }
 
-.atm-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+.atm-table { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; }
 .atm-table thead th {
   font-family: var(--font-display), Georgia, serif;
   font-size: 0.7rem;

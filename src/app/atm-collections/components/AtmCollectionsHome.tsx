@@ -13,6 +13,7 @@ import { amt, gql, paperDate, useGql } from '../lib';
 import { RateStatus, RateMeter } from './RateBits';
 import '../atm.css';
 import { SkeletonBlock } from '@/components/LoadingStates';
+import ReactSelect from '@/components/ReactSelect';
 
 interface BranchSub { id: string; name: string }
 
@@ -53,6 +54,7 @@ const AtmCollectionsHome: React.FC = () => {
   };
 
   const list = batches.data?.atmCollectionBatches;
+  const branchOptions = branches.map((b) => ({ value: String(b.id), label: b.name }));
 
   return (
     <div className="atm-root flex flex-col gap-6">
@@ -87,11 +89,11 @@ const AtmCollectionsHome: React.FC = () => {
         <form onSubmit={createList} className="flex flex-wrap items-end gap-4">
           <div className="min-w-56">
             <label htmlFor="atm-new-branch" className="mb-1 block text-sm font-semibold text-black dark:text-white">Branch</label>
-            <select id="atm-new-branch" value={branchId} onChange={(e) => setBranchId(e.target.value)}
-              className="w-full rounded-lg border border-stroke bg-transparent px-3 py-2 dark:border-strokedark">
-              <option value="">Choose a branch…</option>
-              {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
+            {/* Searchable, like the other branch pickers: type part of the name to narrow the list. */}
+            <ReactSelect inputId="atm-new-branch" options={branchOptions}
+              value={branchOptions.find((o) => o.value === branchId) ?? null}
+              onChange={(o) => setBranchId(o?.value ?? '')}
+              placeholder="Choose a branch…" noOptionsMessage={() => 'No branch matches.'} />
           </div>
           <div>
             <label htmlFor="atm-new-date" className="mb-1 block text-sm font-semibold text-black dark:text-white">Collection date</label>
