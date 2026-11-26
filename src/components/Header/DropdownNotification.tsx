@@ -2,17 +2,18 @@
 
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, CheckSquare, DollarSign } from "react-feather";
+import { Bell, CheckSquare } from "react-feather";
 import useApplicationNotifications, { POLL_MS } from "@/hooks/useApplicationNotifications";
 import useSeenNotificationIds from "@/hooks/useSeenNotificationIds";
 import useAppNotices from "@/hooks/useAppNotices";
 import { graphqlFetch } from "@/utils/graphqlFetch";
-import { MARK_NOTICES_READ } from "@/graphql/AtmCollectionQueries";
+import { MARK_NOTICES_READ, type AppNotice } from "@/graphql/AtmCollectionQueries";
 import { useAuthStore } from "@/store";
 import { useDeletionRequestsStore } from "@/store/deletionRequestsStore";
 import type { ApplicationNotification } from "@/utils/DataTypes";
 import { manilaToday } from "@/utils/sourceTracker";
 import ApplicationNotificationRow, { hrefFor } from "./ApplicationNotificationRow";
+import { collectionNoticeLook, type NoticeTone } from "./collectionNoticeLook";
 
 const ROLE_NAME = (user: any): string => {
   if (!user) return "";
@@ -49,7 +50,21 @@ interface Notification {
   body: string;
   href: string;
   icon: React.ReactNode;
+  /** The bubble's colours; the default is the olive tint. */
+  bubble?: string;
+  /** A Collections notice about a branch's Red or Green: a coloured rule and the word beside the title. */
+  tone?: NoticeTone;
 }
+
+const DEFAULT_BUBBLE = "bg-primary/10 text-primary dark:bg-primary/20";
+
+/** The word beside a Red or Green notice's title, so the state never rests on colour alone (WCAG 1.4.1). */
+const ToneTag: React.FC<{ tone: NoticeTone; spoken: boolean }> = ({ tone, spoken }) => (
+  // Silent to screen readers when the title already says the word, so "Red" is not read twice.
+  <span aria-hidden={!spoken || undefined} className={`shrink-0 rounded px-1.5 py-px text-[10px] font-bold uppercase leading-4 tracking-[0.12em] ${tone === "red" ? "bg-danger/10 text-danger" : "bg-success/10 text-success"}`}>
+    {tone === "red" ? "Red" : "Green"}
+  </span>
+);
 
 /** The deletion approvals' one row (its count of pending requests), as it has always looked. */
 const deletionNotifications = (pendingCount: number): Notification[] =>
@@ -132,18 +147,36 @@ const useDismiss = (
   }, [open, close, trigger, dropdown]);
 };
 
-/** A generic row (the deletion approvals' today). */
+/**
+ * A generic row (the deletion approvals and the Collections notices). A Red or Green notice adds a
+ * rule down its left edge in that colour and the word beside its title. The spaces between the
+ * blocks are for the link's name as read ("St. John is Red: 62.00% Red …").
+ */
 const NotificationRow: React.FC<{ n: Notification; onOpen: () => void }> = ({ n, onOpen }) => (
   <li>
-    <Link href={n.href} onClick={onOpen} className="flex items-start gap-3 px-4.5 py-3 transition-colors hover:bg-gray-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-meta-4">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">{n.icon}</span>
+    <Link href={n.href} onClick={onOpen} className="relative flex min-h-12 items-start gap-3 px-4.5 py-3 transition-colors hover:bg-gray-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-meta-4">
+      {n.tone && <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-[3px] ${n.tone === "red" ? "bg-danger" : "bg-success"}`} />}
+      <span aria-hidden="true" className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${n.bubble ?? DEFAULT_BUBBLE}`}>{n.icon}</span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-black dark:text-white">{n.title}</span>
+        <span className="flex items-start justify-between gap-2">
+          <span className="text-sm font-medium text-black dark:text-white">{n.title}</span>{" "}
+          {n.tone && <ToneTag tone={n.tone} spoken={!new RegExp(`\\b${n.tone}\\b`, "i").test(n.title)} />}
+        </span>{" "}
         <span className="mt-0.5 block text-xs text-body dark:text-bodydark2">{n.body}</span>
       </span>
     </Link>
   </li>
 );
+
+/** A Collections notice as a bell row: its type picks the icon, the colours and any Red / Green. */
+const noticeRow = (n: AppNotice): Notification => {
+  const look = collectionNoticeLook(n.type);
+  const NoticeIcon = look.icon;
+  return {
+    id: `app:${n.id}`, title: n.title, body: n.body, href: n.link ?? "/",
+    icon: <NoticeIcon size={16} strokeWidth={2.2} />, bubble: look.bubble, tone: look.tone,
+  };
+};
 
 /** The bell itself: the unseen count as its badge and in its name, and whether the dropdown is open. */
 const BellTrigger = forwardRef<HTMLAnchorElement, { badgeCount: number; open: boolean; onClick: (e: React.MouseEvent) => void }>(
@@ -254,7 +287,7 @@ const DropdownNotification = () => {
   const notifications = useMemo(
     () => [
       ...deletionNotifications(pendingCount),
-      ...appNotices.map((n): Notification => ({ id: `app:${n.id}`, title: n.title, body: n.body, href: n.link ?? '/', icon: <DollarSign size={16} /> })),
+      ...appNotices.map(noticeRow),
     ],
     [pendingCount, appNotices],
   );
