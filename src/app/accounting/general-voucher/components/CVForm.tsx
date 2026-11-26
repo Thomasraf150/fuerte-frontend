@@ -14,6 +14,7 @@ import usePayee from '@/hooks/usePayee';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { confirmJournalDate } from './confirmJournalDate';
 import { escapeHtml, html } from '@/utils/html';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData, SelectOption } from '@/utils/DataTypes';
@@ -296,6 +297,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       if (!proceed) return;
     }
 
+    if (!(await confirmJournalDate(data.journal_date))) return;
     const isConfirmed = await showConfirmationModal(
       branch ? `Save this voucher to ${escapeHtml(branch.name)}?` : 'Are you sure?',
       'You won\'t be able to revert this!',
@@ -331,6 +333,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
 
   const handleUpdateJournalDate = async (data: RowAcctgEntry) => {
     const journal_date = watch('journal_date');
+    if (!(await confirmJournalDate(journal_date))) return;
     const isConfirmed = await showConfirmationModal(
       '<p style="line-height: 1.4"> Are you sure you want to update date? </p>',
       'You won\'t be able to revert this!',

@@ -53,6 +53,22 @@ export function waitedFor(timestamp: string | null, today: string = manilaToday(
   return days === 0 ? 'today' : days === 1 ? '1 day' : `${days} days`;
 }
 
+/**
+ * Why a voucher's journal date would keep it off the voucher list's opening view (the last 30
+ * days), or null when it is inside it. Accounting, 2026-11-26: a voucher saved with a mistyped
+ * date vanished from the list straight after Save, so the forms ask before saving one.
+ */
+export function journalDateWarning(journalDate: string | null | undefined, today: string = manilaToday()): string | null {
+  const ymd = String(journalDate ?? '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+  const { from, to } = reportRange('last30', today);
+  if (ymd >= from && ymd <= to) return null;
+  const day = (d: string) => Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
+  const days = Math.round(Math.abs(day(today) - day(ymd)) / 86_400_000);
+  const plural = days === 1 ? 'day' : 'days';
+  return `The journal date is ${ymd}, ${days} ${plural} ${ymd > to ? 'after' : 'before'} today (${today}).`;
+}
+
 /** `Y-m-d` → a local-midnight Date, which is what react-datepicker shows and moment formats back. */
 export const dateOf = (ymd: string): Date => {
   const [year, month, day] = ymd.split('-').map(Number);

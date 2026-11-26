@@ -14,6 +14,7 @@ import usePayee from '@/hooks/usePayee';
 import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
+import { confirmJournalDate } from './confirmJournalDate';
 import { escapeHtml } from '@/utils/html';
 import { toast } from '@/utils/notify';
 import { useCanEditVouchers } from '@/hooks/useRoleGates';
@@ -204,6 +205,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       );
       return;
     }
+    if (!(await confirmJournalDate(data.journal_date))) return;
     const isConfirmed = await showConfirmationModal(
       branch ? `Save this voucher to ${escapeHtml(branch.name)}?` : 'Are you sure?',
       'You won\'t be able to revert this!',

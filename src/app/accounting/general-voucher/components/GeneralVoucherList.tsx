@@ -85,6 +85,9 @@ const GeneralVoucherList: React.FC = () => {
                     title=""
                     onRowClicked={handleWholeRowClick}
                     enableCustomHeader={true}
+                    // An amount is searched across every date (not just the filter's range), so a
+                    // voucher saved with a mistyped date can still be found; text stays in range.
+                    searchPlaceholder="Ref, payee, check # or amount (amounts: all dates)"
                     columns={column()}
                     data={dataGV || []}
                     serverSidePagination={serverSidePaginationProps}
