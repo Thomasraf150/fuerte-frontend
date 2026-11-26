@@ -11,7 +11,8 @@ import useBranches from '@/hooks/useBranches';
 import { buildSelectOptions } from '@/utils/buildSelectOptions';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 import PeriodPresets from '@/components/PeriodPresets';
-import { presetDates } from '@/utils/reportPeriod';
+import { dateOf, presetDates } from '@/utils/reportPeriod';
+import { takeSavedJournalRange } from './justSavedVoucher';
 
 export interface VoucherFiltersValue {
   startDate: string;
@@ -72,8 +73,19 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
     [dataBranchSub]
   );
 
-  // The four groups are static — fetch once per screen.
+  /** Journal date of a voucher just saved outside the last 30 days, which the dates were widened to take in. */
+  const [widenedFor, setWidenedFor] = useState<string | null>(null);
+
+  // The four groups are static — fetch once per screen. Also, back from saving a voucher dated
+  // outside the last 30 days: widen the dates so it is listed (newest-made first, so at the top).
+  // Read after mount, never during render, so the server and browser first renders match.
   useEffect(() => {
+    const widened = takeSavedJournalRange();
+    if (widened) {
+      setStartDate(dateOf(widened.from));
+      setEndDate(dateOf(widened.to));
+      setWidenedFor(widened.saved);
+    }
     fetchBranchGroupList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -91,6 +103,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
   }, [startDate, endDate, branchId, branchSubId, onChange]);
 
   const handleStartDateChange = (date: Date | null) => {
+    setWidenedFor(null);
     if (date) {
       setStartDate(date);
       if (endDate && date > endDate) setEndDate(undefined);
@@ -100,6 +113,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
   };
 
   const handleEndDateChange = (date: Date | null) => {
+    setWidenedFor(null);
     setEndDate(date || undefined);
   };
 
@@ -140,6 +154,7 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
   // Clear goes back to the opening period, not to all-time.
   const handleClear = () => {
     const { start, end } = presetDates('last30');
+    setWidenedFor(null);
     setStartDate(start);
     setEndDate(end);
     setBranchId('');
@@ -287,9 +302,14 @@ const VoucherFilters: React.FC<VoucherFiltersProps> = ({ onChange }) => {
           presets={['last30', 'thisMonth', 'lastMonth']}
           start={startDate}
           end={endDate}
-          onPick={(start, end) => { setStartDate(start); setEndDate(end); }}
+          onPick={(start, end) => { setWidenedFor(null); setStartDate(start); setEndDate(end); }}
           className="mt-4 border-t border-stroke pt-4 dark:border-strokedark"
         />
+        {widenedFor && (
+          <p role="status" className="mt-3 text-sm text-body dark:text-bodydark">
+            Dates widened to show the voucher you just saved, dated <strong className="text-black dark:text-white">{widenedFor}</strong>. The list is newest first.
+          </p>
+        )}
       </CardBody>
     </Card>
   );

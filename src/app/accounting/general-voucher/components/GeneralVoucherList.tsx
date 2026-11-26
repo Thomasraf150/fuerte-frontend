@@ -2,7 +2,8 @@
 
 import Button from '@/components/Button';
 import ErrorAlert from '@/components/ErrorAlert';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { takeSavedVoucherRef } from './justSavedVoucher';
 import { useRouter } from 'nextjs-toploader/app';
 import CustomDatatable from '@/components/CustomDatatable';
 import VoucherFilters from './VoucherFilters';
@@ -26,7 +27,16 @@ const GeneralVoucherList: React.FC = () => {
     filters,
     exportCheckVouchersToExcel,
     exportLoading,
+    setSearchQuery,
   } = useGeneralVoucher();
+
+  // Back from changing a voucher's date: it keeps its old place in the newest-first list, so
+  // search for its ref (VoucherFilters has widened the dates to take its new date in).
+  useEffect(() => {
+    const ref = takeSavedVoucherRef();
+    if (ref) setSearchQuery(ref);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const exportDisabled = exportLoading || !filters?.startDate || !filters?.endDate;
 

@@ -15,6 +15,7 @@ import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { confirmJournalDate } from './confirmJournalDate';
+import { rememberSavedJournalDate } from './justSavedVoucher';
 import { escapeHtml } from '@/utils/html';
 import { toast } from '@/utils/notify';
 import { useCanEditVouchers } from '@/hooks/useRoleGates';
@@ -215,6 +216,7 @@ const JVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       const result = await createGV(data);
       if (result.success) {
         if (data.branch_sub_id) rememberVoucherBranch(String(data.branch_sub_id));
+        rememberSavedJournalDate(data.journal_date);
         fetchGV(pubSubBrId,"","");
         setShowForm(false);
       }

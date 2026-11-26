@@ -15,6 +15,7 @@ import useCoa from '@/hooks/useCoa';
 import moment from 'moment';
 import { showConfirmationModal } from '@/components/ConfirmationModal';
 import { confirmJournalDate } from './confirmJournalDate';
+import { rememberSavedJournalDate } from './justSavedVoucher';
 import { escapeHtml, html } from '@/utils/html';
 // import useGeneralVoucher from '@/hooks/useGeneralVoucher';
 import { RowAcctgEntry, DataSubBranches, RowAcctgDetails, DataChartOfAccountList, RowVendorsData, SelectOption } from '@/utils/DataTypes';
@@ -307,6 +308,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
       const result = await createGV(data);
       if (result.success) {
         if (data.branch_sub_id) rememberVoucherBranch(String(data.branch_sub_id));
+        rememberSavedJournalDate(data.journal_date);
         fetchGV(pubSubBrId, "", "");
         setShowForm(false);
       }
@@ -342,6 +344,7 @@ const CVForm: React.FC<ParentFormBr> = ({ setShowForm, singleData, actionLbl, cr
     if (isConfirmed) {
       const result = await updateGV(data, journal_date);
       if (result.success) {
+        rememberSavedJournalDate(journal_date, data.journal_ref);
         fetchGV(pubSubBrId, "", "");
         setShowForm(false);
       }
