@@ -5,7 +5,7 @@ import SearchResults from './SearchResults';
 
 export const metadata = {
   title: 'Search',
-  description: 'Search borrowers, loans and vouchers',
+  description: 'Search borrowers, loans, payments, vouchers and every other record',
 };
 
 /** The universal search's results (the top bar's search box lands here with ?q=). */

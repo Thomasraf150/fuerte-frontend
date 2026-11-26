@@ -32,7 +32,7 @@ export const GlobalSearchBox: React.FC = () => {
 
   return (
     <form role="search" onSubmit={submit} className="hidden items-center gap-2 lg:flex">
-      <label htmlFor="global-search" className="sr-only">Search borrowers, loans and vouchers</label>
+      <label htmlFor="global-search" className="sr-only">Search everything</label>
       <div className="relative">
         <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-body dark:text-bodydark" />
         <input
@@ -40,7 +40,7 @@ export const GlobalSearchBox: React.FC = () => {
           type="search"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          placeholder="Search borrowers, loans, vouchers"
+          placeholder="Search names, mobile, refs, amounts"
           className="h-10 w-64 rounded-lg border border-field bg-white pl-9 pr-3 text-sm text-black placeholder:text-body focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 xl:w-96 dark:border-field-dark dark:bg-form-input dark:text-white"
         />
       </div>
